@@ -2433,6 +2433,7 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             title: const Text('PopupMenu Test'),
+<<<<<<< HEAD
             actions: <Widget>[
               PopupMenuButton<int>(
                 child: SizedBox(
@@ -2459,6 +2460,32 @@ void main() {
                 },
               ),
             ],
+=======
+            actions: <Widget>[PopupMenuButton<int>(
+              child: SizedBox(
+                key: buttonKey,
+                height: height,
+                width: width,
+                child: const ColoredBox(
+                  color: Colors.pink,
+                ),
+              ),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<int>>[
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        mediaQueryPadding = MediaQuery.of(context).padding;
+                        return Text('-1-' * 500); // A long long text string.
+                      },
+                    ),
+                  ),
+                  const PopupMenuItem<int>(value: 2, child: Text('-2-')),
+                ];
+              },
+            )],
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
           ),
           body: const SizedBox.shrink(),
         ),

@@ -211,6 +211,7 @@ class _DefaultPub implements Pub {
          logger: logger,
          processManager: processManager,
        ),
+<<<<<<< HEAD
        _processManager = processManager,
        _stdio = null;
 
@@ -234,6 +235,9 @@ class _DefaultPub implements Pub {
        ),
        _processManager = processManager,
        _stdio = stdio;
+=======
+       _processManager = processManager;
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -242,7 +246,10 @@ class _DefaultPub implements Pub {
   final BotDetector _botDetector;
   final Usage _usage;
   final ProcessManager _processManager;
+<<<<<<< HEAD
   final Stdio? _stdio;
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   Future<void> get({
@@ -550,7 +557,11 @@ class _DefaultPub implements Pub {
       'cache',
       'dart-sdk',
       'bin',
+<<<<<<< HEAD
       'dart',
+=======
+      'pub',
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
     ]);
     if (!_processManager.canRun(sdkPath)) {
       throwToolExit(
@@ -559,7 +570,11 @@ class _DefaultPub implements Pub {
         'permissions for the current user.'
       );
     }
+<<<<<<< HEAD
     return <String>[sdkPath, 'pub', '--suppress-analytics'];
+=======
+    return <String>[sdkPath, ...arguments];
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   }
 
   // Returns the environment value that should be used when running pub.

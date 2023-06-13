@@ -375,7 +375,11 @@ Could not build the precompiled application for the device.''',
   });
 
   group('remove Finder extended attributes', () {
+<<<<<<< HEAD
     late Directory projectDirectory;
+=======
+    Directory projectDirectory;
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
     setUp(() {
       final MemoryFileSystem fs = MemoryFileSystem.test();
       projectDirectory = fs.directory('flutter_project');
@@ -389,7 +393,11 @@ Could not build the precompiled application for the device.''',
           '-d',
           'com.apple.FinderInfo',
           projectDirectory.path,
+<<<<<<< HEAD
         ]),
+=======
+        ])
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
       ]);
 
       await removeFinderExtendedAttributes(projectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
@@ -398,6 +406,7 @@ Could not build the precompiled application for the device.''',
 
     testWithoutContext('ignores errors', () async {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+<<<<<<< HEAD
         FakeCommand(
           command: <String>[
             'xattr',
@@ -408,6 +417,16 @@ Could not build the precompiled application for the device.''',
           ],
           exitCode: 1,
         ),
+=======
+        FakeCommand(command: <String>[
+          'xattr',
+          '-r',
+          '-d',
+          'com.apple.FinderInfo',
+          projectDirectory.path,
+        ], exitCode: 1,
+        )
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
       ]);
 
       await removeFinderExtendedAttributes(projectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);

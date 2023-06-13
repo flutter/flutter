@@ -114,7 +114,11 @@
   "previousPageTooltip": "Página anterior",
   "firstPageTooltip": "Primera página",
   "lastPageTooltip": "Última página",
+<<<<<<< HEAD
   "cancelButtonLabel": "Cancelar",
+=======
+  "cancelButtonLabel": "CANCELAR",
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   "pageRowsInfoTitle": "$firstRow–$lastRow de $rowCount",
   "selectedRowCountTitleOne": "Se seleccionó 1 elemento",
   "selectedRowCountTitleOther": "Se seleccionaron $selectedRowCount elementos",

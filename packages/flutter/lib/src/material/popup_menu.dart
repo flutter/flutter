@@ -651,7 +651,10 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     this.selectedItemIndex,
     this.textDirection,
     this.padding,
+<<<<<<< HEAD
     this.avoidBounds,
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   );
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
@@ -670,9 +673,12 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
   // The padding of unsafe area.
   EdgeInsets padding;
+<<<<<<< HEAD
 
   // List of rectangles that we should avoid overlapping. Unusable screen area.
   final Set<Rect> avoidBounds;
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   // We put the child wherever position specifies, so long as it will fit within
   // the specified parent size padded (inset) by 8. If necessary, we adjust the
@@ -744,6 +750,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     double y = wantedPosition.dy;
     // Avoid going outside an area defined as the rectangle 8.0 pixels from the
     // edge of the screen in every direction.
+<<<<<<< HEAD
     if (x < screen.left + _kMenuScreenPadding + padding.left) {
       x = screen.left + _kMenuScreenPadding + padding.left;
     } else if (x + childSize.width > screen.right - _kMenuScreenPadding - padding.right) {
@@ -756,6 +763,18 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     }
 
     return Offset(x,y);
+=======
+    if (x < _kMenuScreenPadding + padding.left)
+      x = _kMenuScreenPadding + padding.left;
+    else if (x + childSize.width > size.width - _kMenuScreenPadding - padding.right)
+      x = size.width - childSize.width - _kMenuScreenPadding - padding.right  ;
+    if (y < _kMenuScreenPadding + padding.top)
+      y = _kMenuScreenPadding + padding.top;
+    else if (y + childSize.height > size.height - _kMenuScreenPadding - padding.bottom)
+      y = size.height - padding.bottom - _kMenuScreenPadding - childSize.height ;
+
+    return Offset(x, y);
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   }
 
   @override
@@ -769,8 +788,12 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       || selectedItemIndex != oldDelegate.selectedItemIndex
       || textDirection != oldDelegate.textDirection
       || !listEquals(itemSizes, oldDelegate.itemSizes)
+<<<<<<< HEAD
       || padding != oldDelegate.padding
       || !setEquals(avoidBounds, oldDelegate.avoidBounds);
+=======
+      || padding != oldDelegate.padding;
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   }
 }
 
@@ -841,11 +864,36 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       }
     }
 
+<<<<<<< HEAD
     final Widget menu = _PopupMenu<T>(
       route: this,
       semanticLabel: semanticLabel,
       constraints: constraints,
       clipBehavior: clipBehavior,
+=======
+    final Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      removeBottom: true,
+      removeLeft: true,
+      removeRight: true,
+      child: Builder(
+        builder: (BuildContext context) {
+          return CustomSingleChildLayout(
+            delegate: _PopupMenuRouteLayout(
+              position,
+              itemSizes,
+              selectedItemIndex,
+              Directionality.of(context),
+              mediaQuery.padding,
+            ),
+            child: capturedThemes.wrap(menu),
+          );
+        },
+      ),
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
     );
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     return MediaQuery.removePadding(

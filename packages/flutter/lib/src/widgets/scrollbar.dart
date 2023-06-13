@@ -497,14 +497,15 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   // - Updating
 
-  /// Update with new [ScrollMetrics]. If the metrics change, the scrollbar will
-  /// show and redraw itself based on these new metrics.
+  /// Update with new [ScrollMetrics]. The scrollbar will show and redraw itself
+  /// based on these new metrics.
   ///
   /// The scrollbar will remain on screen.
   void update(
     ScrollMetrics metrics,
     AxisDirection axisDirection,
   ) {
+<<<<<<< HEAD
     if (_lastMetrics != null &&
         _lastMetrics!.extentBefore == metrics.extentBefore &&
         _lastMetrics!.extentInside == metrics.extentInside &&
@@ -514,6 +515,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     }
 
     final ScrollMetrics? oldMetrics = _lastMetrics;
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
     _lastMetrics = metrics;
     _lastAxisDirection = axisDirection;
 
@@ -1510,6 +1513,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+<<<<<<< HEAD
     assert(_debugScheduleCheckHasValidScrollPosition());
   }
 
@@ -1519,6 +1523,92 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
       assert(_debugCheckHasValidScrollPosition());
+=======
+    _maybeTriggerScrollbar();
+  }
+
+  // Waits one frame and cause an empty scroll event (zero delta pixels).
+  //
+  // This allows the thumb to show immediately when isAlwaysShown is true.
+  // A scroll event is required in order to paint the thumb.
+  void _maybeTriggerScrollbar() {
+    WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
+      if (showScrollbar) {
+        _fadeoutTimer?.cancel();
+        // Wait one frame and cause an empty scroll event.  This allows the
+        // thumb to show immediately when isAlwaysShown is true. A scroll
+        // event is required in order to paint the thumb.
+        final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
+        final bool tryPrimary = widget.controller == null;
+        final String controllerForError = tryPrimary
+          ? 'provided ScrollController'
+          : 'PrimaryScrollController';
+        assert(
+          scrollController != null,
+          'A ScrollController is required when Scrollbar.isAlwaysShown is true. '
+          '${tryPrimary ? 'The Scrollbar was not provided a ScrollController, '
+          'and attempted to use the PrimaryScrollController, but none was found.' :''}',
+        );
+        assert (() {
+          if (!scrollController!.hasClients) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary(
+                'The Scrollbar\'s ScrollController has no ScrollPosition attached.',
+              ),
+              ErrorDescription(
+                'A Scrollbar cannot be painted without a ScrollPosition. ',
+              ),
+              ErrorHint(
+                'The Scrollbar attempted to use the $controllerForError. This '
+                'ScrollController should be associated with the ScrollView that '
+                'the Scrollbar is being applied to. '
+                '${tryPrimary
+                  ? 'A ScrollView with an Axis.vertical '
+                    'ScrollDirection will automatically use the '
+                    'PrimaryScrollController if the user has not provided a '
+                    'ScrollController, but a ScrollDirection of Axis.horizontal will '
+                    'not. To use the PrimaryScrollController explicitly, set ScrollView.primary '
+                    'to true for the Scrollable widget.'
+                  : 'When providing your own ScrollController, ensure both the '
+                    'Scrollbar and the Scrollable widget use the same one.'
+                }',
+              ),
+            ]);
+          }
+          return true;
+        }());
+        assert (() {
+          try {
+            scrollController!.position;
+          } catch (_) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary(
+                'The $controllerForError is currently attached to more than one '
+                'ScrollPosition.',
+              ),
+              ErrorDescription(
+                'The Scrollbar requires a single ScrollPosition in order to be painted.',
+              ),
+              ErrorHint(
+                'When Scrollbar.isAlwaysShown is true, the associated Scrollable '
+                'widgets must have unique ScrollControllers. '
+                '${tryPrimary
+                  ? 'The PrimaryScrollController is used by default for '
+                    'ScrollViews with an Axis.vertical ScrollDirection, '
+                    'unless the ScrollView has been provided its own '
+                    'ScrollController. More than one Scrollable may have tried '
+                    'to use the PrimaryScrollController of the current context.'
+                  : 'The provided ScrollController must be unique to a '
+                    'Scrollable widget.'
+                }',
+              ),
+            ]);
+          }
+          return true;
+        }());
+        scrollController!.position.didUpdateScrollPositionBy(0);
+      }
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
     });
     return true;
   }
@@ -1658,11 +1748,17 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
+<<<<<<< HEAD
     if (widget.isAlwaysShown != oldWidget.isAlwaysShown
         || widget.thumbVisibility != oldWidget.thumbVisibility) {
       if ((widget.isAlwaysShown ?? false) || (widget.thumbVisibility ?? false)) {
         assert(_debugScheduleCheckHasValidScrollPosition());
         _fadeoutTimer?.cancel();
+=======
+    if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
+      if (widget.isAlwaysShown == true) {
+        _maybeTriggerScrollbar();
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
         _fadeoutAnimationController.animateTo(1.0);
       } else {
         _fadeoutAnimationController.reverse();
@@ -1914,6 +2010,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
 
     final ScrollMetrics metrics = notification.metrics;
+<<<<<<< HEAD
     if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
       // Hide the bar when the Scrollable widget has no space to scroll.
       if (_fadeoutAnimationController.status != AnimationStatus.dismissed
@@ -1924,14 +2021,20 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       if (_shouldUpdatePainter(metrics.axis)) {
         scrollbarPainter.update(metrics, metrics.axisDirection);
       }
+=======
+    if (metrics.maxScrollExtent <= metrics.minScrollExtent)
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
       return false;
-    }
 
     if (notification is ScrollUpdateNotification ||
       notification is OverscrollNotification) {
       // Any movements always makes the scrollbar start showing up.
+<<<<<<< HEAD
       if (_fadeoutAnimationController.status != AnimationStatus.forward
           && _fadeoutAnimationController.status != AnimationStatus.completed) {
+=======
+      if (_fadeoutAnimationController.status != AnimationStatus.forward)
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
         _fadeoutAnimationController.forward();
       }
 

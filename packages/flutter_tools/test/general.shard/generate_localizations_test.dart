@@ -1777,7 +1777,47 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('DateTime tests', () {
+<<<<<<< HEAD
       testWithoutContext('imports package:intl', () {
+=======
+      testUsingContext('imports package:intl', () {
+        const String singleDateMessageArbFileString = '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+      "description": "The first day of spring",
+      "placeholders": {
+          "springStartDate": {
+              "type": "DateTime",
+              "format": "yMd"
+          }
+      }
+  }
+}''';
+        fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+          ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleDateMessageArbFileString);
+
+        LocalizationsGenerator(
+          fs,
+        )
+          ..initialize(
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString)
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
+
+        final String localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        expect(localizationsFile, contains(intlImportDartCode));
+      });
+
+      testUsingContext('throws an exception when improperly formatted date is passed in', () {
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
         const String singleDateMessageArbFileString = '''
 {
   "@@locale": "en",
@@ -2006,6 +2046,45 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         )
           ..loadResources()
           ..writeOutputFiles();
+
+        final String localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        expect(localizationsFile, contains(intlImportDartCode));
+      });
+    });
+
+    group('NumberFormat tests', () {
+      testUsingContext('imports package:intl', () {
+        const String singleDateMessageArbFileString = '''
+{
+  "courseCompletion": "You have completed {progress} of the course.",
+  "@courseCompletion": {
+    "description": "The amount of progress the student has made in their class.",
+    "placeholders": {
+      "progress": {
+        "type": "double",
+        "format": "percentPattern"
+      }
+    }
+  }
+}''';
+        fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true)
+          ..childFile(defaultTemplateArbFileName).writeAsStringSync(
+              singleDateMessageArbFileString);
+
+        LocalizationsGenerator(
+          fs,
+        )
+          ..initialize(
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString)
+          ..loadResources()
+          ..writeOutputFiles(BufferLogger.test());
 
         final String localizationsFile = fs.file(
           fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),

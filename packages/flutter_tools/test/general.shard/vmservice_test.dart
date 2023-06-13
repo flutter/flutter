@@ -769,7 +769,11 @@ void main() {
 
     testWithoutContext('does not rethrow a sentinel exception if the initially queried flutter view disappears', () async {
       const String otherExtensionName = 'ext.flutter.test.otherExtension';
+<<<<<<< HEAD
       final vm_service.Isolate? isolate2 = vm_service.Isolate.parse(
+=======
+      final vm_service.Isolate isolate2 = vm_service.Isolate.parse(
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
         isolate.toJson()
           ..['id'] = '2'
           ..['extensionRPCs'] = <String>[otherExtensionName],

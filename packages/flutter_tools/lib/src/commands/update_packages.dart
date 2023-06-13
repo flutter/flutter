@@ -96,6 +96,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       ..addFlag(
         'crash',
         help: 'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
+<<<<<<< HEAD
         negatable: false,
       )
       ..addOption(
@@ -111,6 +112,10 @@ class UpdatePackagesCommand extends FlutterCommand {
               'directory that is deleted before the command exits. By '
               'providing this path, a Flutter maintainer can inspect further '
               'exactly how version solving was achieved.',
+=======
+        defaultsTo: false,
+        negatable: false,
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
       );
   }
 
@@ -185,9 +190,15 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isVerifyOnly = boolArg('verify-only');
     final bool isConsumerOnly = boolArg('consumer-only');
     final bool offline = boolArg('offline');
+<<<<<<< HEAD
     final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
 
     if (boolArg('crash')) {
+=======
+    final bool crash = boolArg('crash');
+
+    if (crash) {
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
       throw StateError('test crash please ignore.');
     }
 

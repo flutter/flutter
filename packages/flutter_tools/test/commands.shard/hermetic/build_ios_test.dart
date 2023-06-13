@@ -91,7 +91,11 @@ void main() {
   }
 
   const FakeCommand xattrCommand = FakeCommand(command: <String>[
+<<<<<<< HEAD
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
+=======
+    'xattr', '-r', '-d', 'com.apple.FinderInfo', '/'
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   ]);
 
   FakeCommand setUpRsyncCommand({void Function()? onRun}) {

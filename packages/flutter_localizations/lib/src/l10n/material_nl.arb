@@ -11,7 +11,11 @@
   "previousPageTooltip": "Vorige pagina",
   "firstPageTooltip": "Eerste pagina",
   "lastPageTooltip": "Laatste pagina",
+<<<<<<< HEAD
   "showMenuTooltip": "Menu tonen",
+=======
+  "showMenuTooltip": "Menu weergeven",
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   "aboutListTileTitle": "Over $applicationName",
   "licensesPageTitle": "Licenties",
   "pageRowsInfoTitle": "$firstRow-$lastRow van $rowCount",

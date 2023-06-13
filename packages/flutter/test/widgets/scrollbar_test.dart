@@ -1680,6 +1680,7 @@ void main() {
         ),
     );
   });
+<<<<<<< HEAD
 
   testWidgets('Scrollbar thumb can be dragged in reverse', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
@@ -2898,4 +2899,6 @@ void main() {
 
     expect(scrollController.offset, 100.0);
   }, variant: TargetPlatformVariant.all());
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 }

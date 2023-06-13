@@ -44,17 +44,27 @@ import '../web/file_generators/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
+<<<<<<< HEAD
   required AssetReader assetReader,
   required Stream<BuildResult> buildResults,
   required ConnectionProvider chromeConnection,
   required LoadStrategy loadStrategy,
   required bool enableDebugging,
   ExpressionCompiler? expressionCompiler,
+=======
+  @required AssetReader assetReader,
+  @required Stream<BuildResult> buildResults,
+  @required ConnectionProvider chromeConnection,
+  @required LoadStrategy loadStrategy,
+  @required bool enableDebugging,
+  ExpressionCompiler expressionCompiler,
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   bool enableDebugExtension,
   String hostname,
   bool useSseForDebugProxy,
   bool useSseForDebugBackend,
   bool useSseForInjectedClient,
+<<<<<<< HEAD
   UrlEncoder? urlEncoder,
   bool spawnDds,
   bool enableDevtoolsLaunch,
@@ -65,6 +75,13 @@ typedef DwdsLauncher = Future<Dwds> Function({
   Future<bool> Function()? isFlutterApp,
 });
 
+=======
+  UrlEncoder urlEncoder,
+  bool spawnDds,
+  bool enableDevtoolsLaunch,
+  DevtoolsLauncher devtoolsLauncher,
+});
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 // A minimal index for projects that do not yet support web.
 const String _kDefaultIndex = '''
 <html>

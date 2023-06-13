@@ -233,6 +233,10 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+<<<<<<< HEAD
+=======
+      ...getLocalEngineArguments(),
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
       'update-packages',
       '--crash',
     ], environment: <String, String>{
@@ -245,6 +249,7 @@ void main() {
       'A crash report has been written to',
     ));
   });
+<<<<<<< HEAD
 
   testWithoutContext('flutter supports trailing args', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -260,4 +265,6 @@ void main() {
     expect(result.exitCode, 0);
     expect(result.stderr, isEmpty);
   });
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 }

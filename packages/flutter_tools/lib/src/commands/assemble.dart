@@ -286,7 +286,11 @@ class AssembleCommand extends FlutterCommand {
         nonDeferredTargets.add(target);
       }
     }
+<<<<<<< HEAD
     Target? target;
+=======
+    Target target;
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
     List<String> decodedDefines;
     try {
       decodedDefines = decodeDartDefines(environment.defines, kDartDefines);

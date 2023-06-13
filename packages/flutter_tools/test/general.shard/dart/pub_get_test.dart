@@ -26,6 +26,7 @@ void main() {
   });
 
   testWithoutContext('Throws a tool exit if pub cannot be run', () async {
+<<<<<<< HEAD
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -34,10 +35,21 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
 
     final Pub pub = Pub.test(
+=======
+    final FakeProcessManager processManager = FakeProcessManager.any();
+    final BufferLogger logger = BufferLogger.test();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/pub');
+
+    fileSystem.file('pubspec.yaml').createSync();
+
+    final Pub pub = Pub(
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
+<<<<<<< HEAD
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
       stdio: FakeStdio(),
@@ -258,6 +270,23 @@ void main() {
       'and the current framework version is the same as the last version',
       () async {
     final FakeProcessManager processManager = FakeProcessManager.empty();
+=======
+      platform: FakePlatform(
+        environment: const <String, String>{},
+      ),
+      botDetector: const BotDetectorAlwaysNo(),
+    );
+
+    await expectLater(() => pub.get(
+      context: PubContext.pubGet,
+      checkUpToDate: true,
+    ), throwsToolExit(message: 'Your Flutter SDK download may be corrupt or missing permissions to run'));
+  });
+
+  testWithoutContext('checkUpToDate skips pub get if the package config is newer than the pubspec '
+    'and the current framework version is the same as the last version', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
 
@@ -1247,3 +1276,46 @@ class BotDetectorAlwaysNo implements BotDetector {
   @override
   Future<bool> get isRunningOnBot async => false;
 }
+<<<<<<< HEAD
+=======
+
+typedef StartCallback = void Function(List<dynamic> command);
+
+class MockProcessManager implements ProcessManager {
+  MockProcessManager(this.fakeExitCode, {
+    this.stdout = '',
+    this.stderr = '',
+  });
+
+  final int fakeExitCode;
+  final String stdout;
+  final String stderr;
+
+  String lastPubEnvironment;
+  String lastPubCache;
+
+  @override
+  Future<Process> start(
+    List<dynamic> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    ProcessStartMode mode = ProcessStartMode.normal,
+  }) {
+    lastPubEnvironment = environment['PUB_ENVIRONMENT'];
+    lastPubCache = environment['PUB_CACHE'];
+    return Future<Process>.value(mocks.createMockProcess(
+      exitCode: fakeExitCode,
+      stdout: stdout,
+      stderr: stderr,
+    ));
+  }
+
+  @override
+  bool canRun(dynamic executable, {String workingDirectory}) => true;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c

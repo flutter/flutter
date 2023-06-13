@@ -147,6 +147,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => "Voer 'n geldige tyd in";
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -288,6 +289,8 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Spasie';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'Laaste bladsy';
 
   @override
@@ -604,6 +607,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'የሚሠራ ሰዓት ያስገቡ';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -745,6 +749,8 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'ክፍተት';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'የመጨረሻው ገጽ';
 
   @override
@@ -1061,7 +1067,11 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'يُرجى إدخال وقت صالح.';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
+=======
+  String get lastPageTooltip => 'الصفحة الأخيرة';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyAltGraph => 'AltGr';
@@ -1518,6 +1528,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'এটা মান্য সময় দিয়ক';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -1659,6 +1670,8 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'স্পেচ';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'অন্তিম পৃষ্ঠা';
 
   @override
@@ -1975,7 +1988,11 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Düzgün vaxt daxil edin';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
+=======
+  String get lastPageTooltip => 'Son səhifə';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyAltGraph => 'AltGr';
@@ -2432,6 +2449,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Увядзіце дапушчальны час';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -2573,6 +2591,8 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Прабел';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'На апошнюю старонку';
 
   @override
@@ -2889,7 +2909,11 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Въведете валиден час';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
+=======
+  String get lastPageTooltip => 'Последна страница';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyAltGraph => 'AltGr';
@@ -3346,6 +3370,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'সঠিক সময় লিখুন';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -3487,6 +3512,8 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'শেষ পৃষ্ঠা';
 
   @override
@@ -3803,7 +3830,11 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Unesite ispravno vrijeme';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
+=======
+  String get lastPageTooltip => 'Posljednja stranica';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyAltGraph => 'Alt Gr';
@@ -4260,6 +4291,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Introdueix una hora vàlida';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -4401,6 +4433,8 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Espai';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'Darrera pàgina';
 
   @override
@@ -4717,7 +4751,11 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Zadejte platný čas';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
+=======
+  String get lastPageTooltip => 'Poslední stránka';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyAltGraph => 'AltGr';
@@ -4978,7 +5016,11 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
+<<<<<<< HEAD
   String get searchFieldLabel => 'Hledat';
+=======
+  String get firstPageTooltip => 'Første side';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get selectAllButtonLabel => 'Vybrat vše';
@@ -4999,7 +5041,11 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get selectedRowCountTitleOther => r'Je vybráno $selectedRowCount položek';
 
   @override
+<<<<<<< HEAD
   String? get selectedRowCountTitleTwo => null;
+=======
+  String get lastPageTooltip => 'Sidste side';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get selectedRowCountTitleZero => null;
@@ -5282,7 +5328,11 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadParenLeft => 'Num (';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyNumpadParenRight => 'Num )';
+=======
+  String get firstPageTooltip => 'Erste Seite';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyNumpadSubtract => 'Num -';
@@ -5300,10 +5350,17 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get keyboardKeyPowerOff => 'Power Off';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
+=======
+  String get invalidTimeLabel => 'Geben Sie eine gültige Uhrzeit ein';
+
+  @override
+  String get lastPageTooltip => 'Letzte Seite';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeySelect => 'Select';
@@ -5486,12 +5543,20 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Dewis oriau';
 
   @override
+<<<<<<< HEAD
   String get timePickerInputHelpText => 'Rhowch amser';
+=======
+  String get invalidTimeLabel => 'Gib eine gültige Uhrzeit ein';
+
+  @override
+  String get dateOutOfRangeLabel => 'Ausserhalb des Zeitraums.';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get timePickerMinuteLabel => 'Munud';
 
   @override
+<<<<<<< HEAD
   String get timePickerMinuteModeAnnouncement => 'Dewis munudau';
 
   @override
@@ -5502,6 +5567,15 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => 'Gweld trwyddedau';
+=======
+  String get firstPageTooltip => 'First page';
+
+  @override
+  String get lastPageTooltip => 'Last page';
+
+  @override
+  String get modalBarrierDismissLabel => 'Schliessen';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 }
 
 /// The translations for Danish (`da`).
@@ -5604,7 +5678,11 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get dialogLabel => 'Dialogboks';
 
   @override
+<<<<<<< HEAD
   String get drawerLabel => 'Navigationsmenu';
+=======
+  String get firstPageTooltip => 'Πρώτη σελίδα';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get expandedIconTapHint => 'Skjul';
@@ -5625,7 +5703,11 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get invalidDateFormatLabel => 'Ugyldigt format.';
 
   @override
+<<<<<<< HEAD
   String get invalidDateRangeLabel => 'Ugyldigt interval.';
+=======
+  String get lastPageTooltip => 'Τελευταία σελίδα';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get invalidTimeLabel => 'Angiv et gyldigt tidspunkt';
@@ -16162,7 +16244,11 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get selectAllButtonLabel => 'બધા પસંદ કરો';
 
   @override
+<<<<<<< HEAD
   String get selectYearSemanticsLabel => 'વર્ષ પસંદ કરો';
+=======
+  String get firstPageTooltip => 'Primera página';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -16183,7 +16269,11 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+<<<<<<< HEAD
   String get showAccountsLabel => 'એકાઉન્ટ બતાવો';
+=======
+  String get lastPageTooltip => 'Última página';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get showMenuTooltip => 'મેનૂ બતાવો';
@@ -18592,7 +18682,11 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Pilih rentang';
 
   @override
+<<<<<<< HEAD
   String get dateRangeStartDateSemanticLabelRaw => r'Tanggal mulai $fullDate';
+=======
+  String get firstPageTooltip => 'Esimene leht';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get dateRangeStartLabel => 'Tanggal Mulai';
@@ -18613,7 +18707,11 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get drawerLabel => 'Menu navigasi';
 
   @override
+<<<<<<< HEAD
   String get expandedIconTapHint => 'Ciutkan';
+=======
+  String get lastPageTooltip => 'Viimane leht';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get firstPageTooltip => 'Halaman pertama';
@@ -18877,7 +18975,11 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get reorderItemToEnd => 'Pindahkan ke akhir';
 
   @override
+<<<<<<< HEAD
   String get reorderItemToStart => 'Pindahkan ke awal';
+=======
+  String get firstPageTooltip => 'Lehenengo orria';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get reorderItemUp => 'Naikkan';
@@ -18898,7 +19000,11 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
+<<<<<<< HEAD
   String get searchFieldLabel => 'Telusuri';
+=======
+  String get lastPageTooltip => 'Azken orria';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get selectAllButtonLabel => 'Pilih semua';
@@ -19181,7 +19287,11 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadAdd => 'Num +';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyNumpadComma => 'Num ,';
+=======
+  String get firstPageTooltip => 'صفحه اول';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyNumpadDecimal => 'Num .';
@@ -19202,7 +19312,11 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadParenLeft => 'Num (';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyNumpadParenRight => 'Num )';
+=======
+  String get lastPageTooltip => 'صفحه آخر';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyNumpadSubtract => 'Num -';
@@ -19485,7 +19599,11 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Taglia';
 
   @override
+<<<<<<< HEAD
   String get dateHelpText => 'mm/gg/aaaa';
+=======
+  String get firstPageTooltip => 'Ensimmäinen sivu';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get dateInputLabel => 'Inserisci data';
@@ -19506,7 +19624,11 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Seleziona intervallo';
 
   @override
+<<<<<<< HEAD
   String get dateRangeStartDateSemanticLabelRaw => r'Data di inizio $fullDate';
+=======
+  String get lastPageTooltip => 'Viimeinen sivu';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get dateRangeStartLabel => 'Data di inizio';
@@ -19770,7 +19892,11 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 carattere rimanente';
 
   @override
+<<<<<<< HEAD
   String get remainingTextFieldCharacterCountOther => r'$remainingCount caratteri rimanenti';
+=======
+  String get firstPageTooltip => 'Unang page';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -19791,7 +19917,11 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get reorderItemToEnd => 'Sposta alla fine';
 
   @override
+<<<<<<< HEAD
   String get reorderItemToStart => "Sposta all'inizio";
+=======
+  String get lastPageTooltip => 'Huling page';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get reorderItemUp => 'Sposta su';
@@ -20074,7 +20204,11 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpad3 => 'テンキー 3';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyNumpad4 => 'テンキー 4';
+=======
+  String get firstPageTooltip => 'Première page';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyNumpad5 => 'テンキー 5';
@@ -20095,7 +20229,11 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeyNumpadAdd => 'テンキー +';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyNumpadComma => 'テンキー ,';
+=======
+  String get lastPageTooltip => 'Dernière page';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyNumpadDecimal => 'テンキー .';
@@ -20453,7 +20591,11 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'შეყვანაზე გადართვა';
 
   @override
+<<<<<<< HEAD
   String get inputTimeModeButtonLabel => 'ტექსტის შეყვანის რეჟიმზე გადართვა';
+=======
+  String get firstPageTooltip => 'Primeira páxina';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get invalidDateFormatLabel => 'ფორმატი არასწორია.';
@@ -20474,7 +20616,11 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get keyboardKeyBackspace => 'Backspace';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyCapsLock => 'Caps Lock';
+=======
+  String get lastPageTooltip => 'Última páxina';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyChannelDown => 'Channel Down';
@@ -20738,7 +20884,11 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => null;
 
   @override
+<<<<<<< HEAD
   String? get selectedRowCountTitleMany => null;
+=======
+  String get firstPageTooltip => 'Erste Seite';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get selectedRowCountTitleOne => 'არჩეულია 1 ერთეული';
@@ -20756,10 +20906,17 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get showAccountsLabel => 'ანგარიშების ჩვენება';
 
   @override
+<<<<<<< HEAD
   String get showMenuTooltip => 'მენიუს ჩვენება';
 
   @override
   String get signedInLabel => 'შესული';
+=======
+  String get invalidTimeLabel => 'Geben Sie eine gültige Uhrzeit ein';
+
+  @override
+  String get lastPageTooltip => 'Letzte Seite';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get tabLabelRaw => r'ჩანართი $tabIndex / $tabCount-დან';
@@ -21042,7 +21199,11 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Қуат';
+=======
+  String get firstPageTooltip => 'પહેલું પેજ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Қуатты өшіру';
@@ -21063,7 +21224,11 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Бос орын';
 
   @override
+<<<<<<< HEAD
   String get lastPageTooltip => 'Соңғы бет';
+=======
+  String get lastPageTooltip => 'છેલ્લું પેજ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -21367,7 +21532,11 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'ប្ដូរទៅ​ការបញ្ចូល';
 
   @override
+<<<<<<< HEAD
   String get inputTimeModeButtonLabel => 'ប្ដូរទៅ​មុខងារ​បញ្ចូល​អក្សរ';
+=======
+  String get firstPageTooltip => 'לדף הראשון';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get invalidDateFormatLabel => 'ទម្រង់មិន​ត្រឹមត្រូវទេ។';
@@ -21388,7 +21557,11 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get keyboardKeyBackspace => 'Backspace';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyCapsLock => 'Caps Lock';
+=======
+  String get lastPageTooltip => 'לדף האחרון';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyChannelDown => 'Channel Down';
@@ -21652,7 +21825,11 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => null;
 
   @override
+<<<<<<< HEAD
   String? get selectedRowCountTitleMany => null;
+=======
+  String get firstPageTooltip => 'पहला पेज';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get selectedRowCountTitleOne => 'បាន​ជ្រើស​រើស​ធាតុ 1';
@@ -21673,7 +21850,11 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get showMenuTooltip => 'បង្ហាញ​ម៉ឺនុយ';
 
   @override
+<<<<<<< HEAD
   String get signedInLabel => 'បានចូល​គណនី';
+=======
+  String get lastPageTooltip => 'आखिरी पेज';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get tabLabelRaw => r'ផ្ទាំង $tabIndex ក្នុង​ចំណោម​ $tabCount';
@@ -21956,7 +22137,11 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Power';
+=======
+  String get firstPageTooltip => 'Prva stranica';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Power Off';
@@ -21977,7 +22162,11 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
+<<<<<<< HEAD
   String get lastPageTooltip => '\u{c95}\u{cca}\u{ca8}\u{cc6}\u{caf}\u{20}\u{caa}\u{cc1}\u{c9f}';
+=======
+  String get lastPageTooltip => 'Posljednja stranica';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -22287,7 +22476,11 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get invalidDateFormatLabel => '형식이 잘못되었습니다.';
 
   @override
+<<<<<<< HEAD
   String get invalidDateRangeLabel => '날짜 범위가 잘못되었습니다.';
+=======
+  String get firstPageTooltip => 'Első oldal';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get invalidTimeLabel => '유효한 시간을 입력하세요.';
@@ -22308,7 +22501,11 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get keyboardKeyChannelDown => '채널 아래로';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyChannelUp => '채널 위로';
+=======
+  String get lastPageTooltip => 'Utolsó oldal';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -22569,7 +22766,11 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleMany => null;
 
   @override
+<<<<<<< HEAD
   String? get selectedRowCountTitleOne => '항목 1개 선택됨';
+=======
+  String get firstPageTooltip => 'Առաջին էջ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get selectedRowCountTitleOther => r'항목 $selectedRowCount개 선택됨';
@@ -22590,7 +22791,11 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get signedInLabel => '로그인됨';
 
   @override
+<<<<<<< HEAD
   String get tabLabelRaw => r'탭 $tabCount개 중 $tabIndex번째';
+=======
+  String get lastPageTooltip => 'Վերջին էջ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
@@ -22870,7 +23075,11 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Power';
+=======
+  String get firstPageTooltip => 'Halaman pertama';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Power Off';
@@ -22891,7 +23100,11 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Боштук';
 
   @override
+<<<<<<< HEAD
   String get lastPageTooltip => 'Акыркы бет';
+=======
+  String get lastPageTooltip => 'Halaman terakhir';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -23186,7 +23399,11 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ຫຍໍ້ເຂົ້າ';
 
   @override
+<<<<<<< HEAD
   String get firstPageTooltip => 'ໜ້າທຳອິດ';
+=======
+  String get firstPageTooltip => 'Fyrsta síða';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get hideAccountsLabel => 'ເຊື່ອງບັນຊີ';
@@ -23207,7 +23424,11 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'ລະບຸເວລາທີ່ຖືກຕ້ອງ';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
+=======
+  String get lastPageTooltip => 'Síðasta síða';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyAltGraph => 'AltGr';
@@ -23480,7 +23701,11 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => null;
 
   @override
+<<<<<<< HEAD
   String? get selectedRowCountTitleMany => null;
+=======
+  String get firstPageTooltip => 'Prima pagina';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get selectedRowCountTitleOne => 'ເລືອກ 1 ລາຍການແລ້ວ';
@@ -23501,7 +23726,11 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get showMenuTooltip => 'ສະແດງເມນູ';
 
   @override
+<<<<<<< HEAD
   String get signedInLabel => 'ເຂົ້າສູ່ລະບົບແລ້ວ';
+=======
+  String get lastPageTooltip => 'Ultima pagina';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get tabLabelRaw => r'ແຖບທີ $tabIndex ຈາກທັງໝົດ $tabCount';
@@ -23784,7 +24013,11 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Maitinimas';
+=======
+  String get firstPageTooltip => '最初のページ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Išjungti';
@@ -23805,7 +24038,11 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Tarpas';
 
   @override
+<<<<<<< HEAD
   String get lastPageTooltip => 'Paskutinis puslapis';
+=======
+  String get lastPageTooltip => '最後のページ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount licencijos';
@@ -24100,7 +24337,11 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Sakļaut';
 
   @override
+<<<<<<< HEAD
   String get firstPageTooltip => 'Pirmā lapa';
+=======
+  String get firstPageTooltip => 'პირველი გვერდი';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get hideAccountsLabel => 'Slēpt kontus';
@@ -24121,7 +24362,11 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Ievadiet derīgu laiku.';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
+=======
+  String get lastPageTooltip => 'ბოლო გვერდი';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyAltGraph => 'AltGr';
@@ -24394,7 +24639,11 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => null;
 
   @override
+<<<<<<< HEAD
   String? get selectedRowCountTitleMany => null;
+=======
+  String get firstPageTooltip => 'Бірінші бет';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get selectedRowCountTitleOne => 'Atlasīts 1 vienums';
@@ -24415,7 +24664,11 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get showMenuTooltip => 'Rādīt izvēlni';
 
   @override
+<<<<<<< HEAD
   String get signedInLabel => 'Esat pierakstījies';
+=======
+  String get lastPageTooltip => 'Соңғы бет';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get tabLabelRaw => r'$tabIndex. cilne no $tabCount';
@@ -24698,7 +24951,11 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Power';
+=======
+  String get firstPageTooltip => 'ទំព័រ​ដំបូង';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Power Off';
@@ -24719,7 +24976,11 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
+<<<<<<< HEAD
   String get lastPageTooltip => 'Последна страница';
+=======
+  String get lastPageTooltip => 'ទំព័រ​ចុង​ក្រោយ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -25014,7 +25275,11 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ചുരുക്കുക';
 
   @override
+<<<<<<< HEAD
   String get firstPageTooltip => 'ആദ്യ പേജ്';
+=======
+  String get firstPageTooltip => '\u{cae}\u{cca}\u{ca6}\u{cb2}\u{20}\u{caa}\u{cc1}\u{c9f}';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get hideAccountsLabel => 'അക്കൗണ്ടുകൾ മറയ്‌ക്കുക';
@@ -25035,7 +25300,11 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'സാധുവായ സമയം നൽകുക';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
+=======
+  String get lastPageTooltip => '\u{c95}\u{cca}\u{ca8}\u{cc6}\u{caf}\u{20}\u{caa}\u{cc1}\u{c9f}';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyAltGraph => 'AltGr';
@@ -25308,7 +25577,11 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => null;
 
   @override
+<<<<<<< HEAD
   String? get selectedRowCountTitleMany => null;
+=======
+  String get firstPageTooltip => '첫 페이지';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get selectedRowCountTitleOne => 'ഒരു ഇനം തിരഞ്ഞെടുത്തു';
@@ -25329,7 +25602,11 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get showMenuTooltip => 'മെനു കാണിക്കുക';
 
   @override
+<<<<<<< HEAD
   String get signedInLabel => 'സൈൻ ഇൻ ചെയ്‌തു';
+=======
+  String get lastPageTooltip => '마지막 페이지';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get tabLabelRaw => r'$tabCount-ൽ $tabIndex';
@@ -25612,7 +25889,11 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Асаах/унтраах товч';
+=======
+  String get firstPageTooltip => 'Биринчи бет';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Унтраах';
@@ -25633,7 +25914,11 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
+<<<<<<< HEAD
   String get lastPageTooltip => 'Сүүлийн хуудас';
+=======
+  String get lastPageTooltip => 'Акыркы бет';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -25940,7 +26225,11 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get inputTimeModeButtonLabel => 'मजकूर इनपुट मोडवर स्विच करा';
 
   @override
+<<<<<<< HEAD
   String get invalidDateFormatLabel => 'फॉरमॅट चुकीचा आहे.';
+=======
+  String get firstPageTooltip => 'ໜ້າທຳອິດ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get invalidDateRangeLabel => 'श्रेणी चुकीची आहे.';
@@ -25961,7 +26250,11 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'कॅप्स लॉक';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyChannelDown => 'चॅनल डाउन';
+=======
+  String get lastPageTooltip => 'ໜ້າສຸດທ້າຍ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyChannelUp => 'चॅनल अप';
@@ -26225,7 +26518,11 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleMany => null;
 
   @override
+<<<<<<< HEAD
   String? get selectedRowCountTitleOne => 'एक आयटम निवडला';
+=======
+  String get firstPageTooltip => 'Pirmas puslapis';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get selectedRowCountTitleOther => r'$selectedRowCount आयटम निवडले';
@@ -26246,7 +26543,11 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'साइन इन केले आहे';
 
   @override
+<<<<<<< HEAD
   String get tabLabelRaw => r'$tabCount पैकी $tabIndex टॅब';
+=======
+  String get lastPageTooltip => 'Paskutinis puslapis';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -26526,7 +26827,11 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Kuasa';
+=======
+  String get firstPageTooltip => 'Pirmā lapa';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Matikan';
@@ -26547,7 +26852,11 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Ruang';
 
   @override
+<<<<<<< HEAD
   String get lastPageTooltip => 'Halaman terakhir';
+=======
+  String get lastPageTooltip => 'Pēdējā lapa';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -26854,7 +27163,11 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get inputTimeModeButtonLabel => 'စာသား ထည့်သွင်းမှုမုဒ်သို့ ပြောင်းရန်';
 
   @override
+<<<<<<< HEAD
   String get invalidDateFormatLabel => 'ဖော်မက် မမှန်ကန်ပါ။';
+=======
+  String get firstPageTooltip => 'Прва страница';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get invalidDateRangeLabel => 'အပိုင်းအခြား မမှန်ပါ။';
@@ -26875,7 +27188,11 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'စားလုံးကြီးလော့ခ်';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyChannelDown => 'ချန်နယ်အောက်';
+=======
+  String get lastPageTooltip => 'Последна страница';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyChannelUp => 'ချန်နယ်အပေါ်';
@@ -27139,7 +27456,11 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleMany => null;
 
   @override
+<<<<<<< HEAD
   String? get selectedRowCountTitleOne => '၁ ခု ရွေးထားသည်';
+=======
+  String get firstPageTooltip => 'ആദ്യ പേജ്';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get selectedRowCountTitleOther => r'$selectedRowCount ခု ရွေးထားသည်';
@@ -27160,7 +27481,11 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get signedInLabel => 'လက်မှတ်ထိုး ဝင်ထားသည်';
 
   @override
+<<<<<<< HEAD
   String get tabLabelRaw => r'တဘ် $tabCount အနက် $tabIndex ခု';
+=======
+  String get lastPageTooltip => 'അവസാന പേജ്';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -27440,7 +27765,11 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Av/på';
+=======
+  String get firstPageTooltip => 'Эхний хуудас';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Slå av';
@@ -27461,7 +27790,11 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Mellomrom';
 
   @override
+<<<<<<< HEAD
   String get lastPageTooltip => 'Siste side';
+=======
+  String get lastPageTooltip => 'Сүүлийн хуудас';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -27750,7 +28083,11 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get dialogLabel => 'संवाद';
 
   @override
+<<<<<<< HEAD
   String get drawerLabel => 'नेभिगेसन मेनु';
+=======
+  String get firstPageTooltip => 'पहिले पेज';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get expandedIconTapHint => 'संक्षिप्त गर्नुहोस्';
@@ -27771,7 +28108,11 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get invalidDateFormatLabel => 'अवैध ढाँचा।';
 
   @override
+<<<<<<< HEAD
   String get invalidDateRangeLabel => 'अवैध दायरा।';
+=======
+  String get lastPageTooltip => 'शेवटचे पेज';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get invalidTimeLabel => 'वैध समय प्रविष्टि गर्नुहोस्';
@@ -28050,7 +28391,11 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => null;
 
   @override
+<<<<<<< HEAD
   String? get selectedRowCountTitleMany => null;
+=======
+  String get firstPageTooltip => 'Halaman pertama';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get selectedRowCountTitleOne => '१ वस्तु चयन गरियो';
@@ -28071,7 +28416,11 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get showMenuTooltip => 'मेनु देखाउनुहोस्';
 
   @override
+<<<<<<< HEAD
   String get signedInLabel => 'साइन इन गरियो';
+=======
+  String get lastPageTooltip => 'Halaman terakhir';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get tabLabelRaw => r'$tabCount मध्ये $tabIndex ट्याब';
@@ -28354,7 +28703,11 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Aan/uit';
+=======
+  String get firstPageTooltip => 'ပထမ စာမျက်နှာ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Uit';
@@ -28375,7 +28728,11 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Spatie';
 
   @override
+<<<<<<< HEAD
   String get lastPageTooltip => 'Laatste pagina';
+=======
+  String get lastPageTooltip => 'နောက်ဆုံး စာမျက်နှာ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -28691,7 +29048,11 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Angi et gyldig klokkeslett';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
+=======
+  String get lastPageTooltip => 'Siste side';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyAltGraph => 'Alt Gr';
@@ -28964,7 +29325,11 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => null;
 
   @override
+<<<<<<< HEAD
   String? get selectedRowCountTitleMany => null;
+=======
+  String get firstPageTooltip => 'प्रथम पेज';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get selectedRowCountTitleOne => '1 element er valgt';
@@ -28985,7 +29350,11 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get showMenuTooltip => 'Vis meny';
 
   @override
+<<<<<<< HEAD
   String get signedInLabel => 'Pålogget';
+=======
+  String get lastPageTooltip => 'अन्तिम पेज';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get tabLabelRaw => r'Fane $tabIndex av $tabCount';
@@ -29109,7 +29478,11 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get dateRangeStartLabel => 'ଆରମ୍ଭ ତାରିଖ';
 
   @override
+<<<<<<< HEAD
   String get dateSeparator => '/';
+=======
+  String get saveButtonLabel => 'सेभ गर्नुहोस्';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get deleteButtonTooltip => 'ଡିଲିଟ୍ କରନ୍ତୁ';
@@ -29268,7 +29641,11 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Power';
+=======
+  String get firstPageTooltip => 'Eerste pagina';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Power Off';
@@ -29289,7 +29666,11 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
+<<<<<<< HEAD
   String get lastPageTooltip => 'ଶେଷ ପୃଷ୍ଠା';
+=======
+  String get lastPageTooltip => 'Laatste pagina';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -29596,7 +29977,11 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get inputTimeModeButtonLabel => "ਲਿਖਤ ਇਨਪੁੱਟ ਮੋਡ 'ਤੇ ਜਾਓ";
 
   @override
+<<<<<<< HEAD
   String get invalidDateFormatLabel => 'ਅਵੈਧ ਫਾਰਮੈਟ।';
+=======
+  String get firstPageTooltip => 'Første side';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get invalidDateRangeLabel => 'ਅਵੈਧ ਰੇਂਜ।';
@@ -29617,7 +30002,11 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyChannelDown => 'Channel Down';
+=======
+  String get lastPageTooltip => 'Siste side';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyChannelUp => 'Channel Up';
@@ -29878,7 +30267,11 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => null;
 
   @override
+<<<<<<< HEAD
   String? get selectedRowCountTitleMany => null;
+=======
+  String get firstPageTooltip => 'ପ୍ରଥମ ପୃଷ୍ଠା';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get selectedRowCountTitleOne => '1 ਆਈਟਮ ਚੁਣੀ ਗਈ';
@@ -29899,7 +30292,11 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get showMenuTooltip => 'ਮੀਨੂ ਦਿਖਾਓ';
 
   @override
+<<<<<<< HEAD
   String get signedInLabel => 'ਸਾਈਨ-ਇਨ ਕੀਤਾ ਗਿਆ';
+=======
+  String get lastPageTooltip => 'ଶେଷ ପୃଷ୍ଠା';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get tabLabelRaw => r'$tabCount ਵਿੱਚੋਂ $tabIndex ਟੈਬ';
@@ -30182,7 +30579,11 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Zasilanie';
+=======
+  String get firstPageTooltip => 'ਪਹਿਲਾ ਪੰਨਾ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Wyłącz zasilanie';
@@ -30203,7 +30604,11 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Spacja';
 
   @override
+<<<<<<< HEAD
   String get lastPageTooltip => 'Ostatnia strona';
+=======
+  String get lastPageTooltip => 'ਆਖਰੀ ਪੰਨਾ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String? get licensesPackageDetailTextFew => r'$licenseCount licencje';
@@ -30504,7 +30909,11 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get hideAccountsLabel => 'حسابونه پټ کړئ';
 
   @override
+<<<<<<< HEAD
   String get inputDateModeButtonLabel => 'Switch to input';
+=======
+  String get firstPageTooltip => 'Pierwsza strona';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get inputTimeModeButtonLabel => 'Switch to text input mode';
@@ -30525,7 +30934,11 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyBackspace => 'Backspace';
+=======
+  String get lastPageTooltip => 'Ostatnia strona';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyCapsLock => 'Caps Lock';
@@ -31096,7 +31509,11 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Liga/desliga';
+=======
+  String get firstPageTooltip => 'Primeira página';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Desligar';
@@ -31704,7 +32121,11 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Power';
+=======
+  String get firstPageTooltip => 'Prima pagină';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Power Off';
@@ -32041,6 +32462,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Указано недопустимое время.';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -32182,6 +32604,8 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Пробел';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'Последняя страница';
 
   @override
@@ -32618,7 +33042,11 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Power';
+=======
+  String get firstPageTooltip => 'පළමු පිටුව';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Power Off';
@@ -32955,6 +33383,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Zadajte platný čas';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -33096,6 +33525,8 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Medzerník';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'Posledná strana';
 
   @override
@@ -33529,7 +33960,11 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get keyboardKeyPageDown => 'Stran dol';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPageUp => 'Stran gor';
+=======
+  String get firstPageTooltip => 'Prva stran';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPower => 'Vklop';
@@ -33550,9 +33985,12 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get keyboardKeyShift => 'Shift';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeySpace => 'Preslednica';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'Zadnja stran';
 
   @override
@@ -33869,6 +34307,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Fut një kohë të vlefshme';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -34010,6 +34449,8 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'Faqja e fundit';
 
   @override
@@ -34446,7 +34887,11 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Дугме за укључивање';
+=======
+  String get firstPageTooltip => 'Прва страница';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Дугме за искључивање';
@@ -34799,6 +35244,7 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get invalidTimeLabel => 'Unesite važeće vreme';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyChannelDown => 'Prethodni kanal';
 
   @override
@@ -34814,6 +35260,8 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get keyboardKeySpace => 'Taster za razmak';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'Poslednja stranica';
 
   @override
@@ -35097,6 +35545,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Ange en giltig tid';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -35238,6 +35687,8 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Blanksteg';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'Sista sidan';
 
   @override
@@ -35534,6 +35985,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get firstPageTooltip => 'Ukurasa wa kwanza';
+<<<<<<< HEAD
 
   @override
   String get hideAccountsLabel => 'Ficha akaunti';
@@ -35675,6 +36127,8 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeyPower => 'Power';
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Power Off';
@@ -36011,6 +36465,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'சரியான நேரத்தை உள்ளிடவும்';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -36152,6 +36607,8 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'கடைசிப் பக்கத்திற்குச் செல்லும்';
 
   @override
@@ -36588,7 +37045,11 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Power';
+=======
+  String get firstPageTooltip => 'మొదటి పేజీ';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Power Off';
@@ -36925,6 +37386,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'ป้อนเวลาที่ถูกต้อง';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -37066,6 +37528,8 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'หน้าสุดท้าย';
 
   @override
@@ -37362,6 +37826,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get firstPageTooltip => 'Unang page';
+<<<<<<< HEAD
 
   @override
   String get hideAccountsLabel => 'Itago ang mga account';
@@ -37503,6 +37968,8 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeyPower => 'Power';
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'I-off';
@@ -37839,6 +38306,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Geçerli bir saat girin';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -37980,6 +38448,8 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Boşluk';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'Son sayfa';
 
   @override
@@ -38416,7 +38886,11 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => 'Кнопка живлення';
+=======
+  String get firstPageTooltip => 'Перша сторінка';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => 'Вимкнути живлення';
@@ -38753,6 +39227,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'درست وقت درج کریں';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -38894,6 +39369,8 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'آخری صفحہ';
 
   @override
@@ -39210,6 +39687,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Vaqt xato kiritildi';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -39351,6 +39829,8 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Boʻsh joy';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'Oxirgi sahifa';
 
   @override
@@ -39667,6 +40147,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Nhập thời gian hợp lệ';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -39808,6 +40289,8 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Phím cách';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'Trang cuối';
 
   @override
@@ -40244,7 +40727,11 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyPower => '电源';
+=======
+  String get firstPageTooltip => '第一页';
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
 
   @override
   String get keyboardKeyPowerOff => '关机';
@@ -40585,6 +41072,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get invalidTimeLabel => '請輸入有效的時間';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyBackspace => 'Backspace';
 
   @override
@@ -40675,6 +41163,8 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get keyboardKeySpace => '空格';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => '最後一頁';
 
   @override
@@ -41074,6 +41564,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get invalidTimeLabel => 'Faka igama elivumelekile';
 
   @override
+<<<<<<< HEAD
   String get keyboardKeyAlt => 'Alt';
 
   @override
@@ -41215,6 +41706,8 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
+=======
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   String get lastPageTooltip => 'Ikhasi lokugcina';
 
   @override

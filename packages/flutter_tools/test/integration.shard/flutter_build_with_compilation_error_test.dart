@@ -69,6 +69,13 @@ int x = 'String';
       );
       expect(result.stderr, isNot(contains("Warning: The 'dart2js' entrypoint script is deprecated")));
       expect(result.exitCode, 1);
+<<<<<<< HEAD
     });
+=======
+    },
+    timeout: const Timeout(Duration(minutes: 3)),
+    // framework vms no longer have Visual Studio
+    skip: platform.isWindows);
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   }
 }

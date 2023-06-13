@@ -12,7 +12,11 @@
   "previousPageTooltip": "گزشتہ صفحہ",
   "firstPageTooltip": "پہلا صفحہ",
   "lastPageTooltip": "آخری صفحہ",
+<<<<<<< HEAD
   "showMenuTooltip": "مینیو دکھائیں",
+=======
+  "showMenuTooltip": "مینو دکھائیں",
+>>>>>>> 2c7cd72aa8478533ef8c16563443e53a267b2e6c
   "aboutListTileTitle": "$applicationName کے بارے میں",
   "licensesPageTitle": "لائسنسز",
   "pageRowsInfoTitle": "$firstRow–$lastRow از $rowCount",
