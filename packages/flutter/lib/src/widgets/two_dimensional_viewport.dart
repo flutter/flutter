@@ -960,13 +960,6 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         targetMainAxisExtent = rectLocal.width;
     }
 
-    // So far leadingScrollOffset is the scroll offset of `rect` in the `child`
-    // sliver's sliver coordinate system. The sign of this value indicates
-    // whether the `rect` protrudes the leading edge of the `child` sliver. When
-    // this value is non-negative and `child`'s `maxScrollObstructionExtent` is
-    // greater than 0, we assume `rect` can't be obstructed by the leading edge
-    // of the viewport (i.e. its pinned to the leading edge).
-
     // The scroll offset in the viewport to `rect`.
     final TwoDimensionalViewportParentData childParentData = parentDataOf(box);
     leadingScrollOffset += switch(axisDirection) {
