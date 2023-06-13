@@ -1762,6 +1762,7 @@ mixin WidgetInspectorService {
     final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, summaryTree: true, service: this);
 
     // TODO(polina-c): remove this, when DevTools stops sending DiagnosticsNode.
+    // https://github.com/flutter/devtools/issues/3951
     if (theObject is DiagnosticsNode) {
       return _nodesToJson(_getChildrenFiltered(theObject, delegate), delegate, parent: theObject);
     }
