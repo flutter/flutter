@@ -590,6 +590,7 @@ class SelectionGeometry {
   const SelectionGeometry({
     this.startSelectionPoint,
     this.endSelectionPoint,
+    this.selectionRects,
     required this.status,
     required this.hasContent,
   }) : assert((startSelectionPoint == null && endSelectionPoint == null) || status != SelectionStatus.none);
@@ -626,6 +627,9 @@ class SelectionGeometry {
 
   /// The status of ongoing selection in the [Selectable] or [SelectionHandler].
   final SelectionStatus status;
+
+  /// The rects that represent the selection if there is any.
+  final List<Rect>? selectionRects;
 
   /// Whether there is any selectable content in the [Selectable] or
   /// [SelectionHandler].

@@ -501,39 +501,35 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         if (_selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed) {
           // If lastSecondaryTapDownPosition is within the current selection then keep the current selection, else collapse it.
           bool lastSecondaryTapDownPositionWasOnActiveSelection = false;
-          for (final Selectable selectable in _selectionDelegate.selectables) {
-            if (selectable.value.hasSelection && selectable.value.status == SelectionStatus.uncollapsed) {
-              final Rect localRect = Rect.fromLTWH(0, 0, selectable.size.width, selectable.size.height);
-              final Matrix4 transform = selectable.getTransformTo(null);
-              final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
-              if (globalRect.contains(details.globalPosition)) {
-                lastSecondaryTapDownPositionWasOnActiveSelection = true;
-                break;
-              }
+          for (final Rect selectionRect in _selectionDelegate.value.selectionRects!) {
+            final Matrix4 transform = _selectionDelegate.getTransformTo(null);
+            final Rect globalRect = MatrixUtils.transformRect(transform, selectionRect);
+            if (globalRect.contains(details.globalPosition)) {
+              lastSecondaryTapDownPositionWasOnActiveSelection = true;
             }
           }
           if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-            _selectStartTo(offset: lastSecondaryTapDownPosition);
-            _selectEndTo(offset: lastSecondaryTapDownPosition);
+            _selectStartTo(offset: lastSecondaryTapDownPosition!);
+            _selectEndTo(offset: lastSecondaryTapDownPosition!);
           }
         } else {
-          _selectStartTo(offset: lastSecondaryTapDownPosition);
-          _selectEndTo(offset: lastSecondaryTapDownPosition);
+          _selectStartTo(offset: lastSecondaryTapDownPosition!);
+          _selectEndTo(offset: lastSecondaryTapDownPosition!);
         }
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
+        _showToolbar(location: lastSecondaryTapDownPosition!);
       case TargetPlatform.iOS:
-        _selectWordAt(offset: lastSecondaryTapDownPosition);
+        _selectWordAt(offset: lastSecondaryTapDownPosition!);
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
+        _showToolbar(location: lastSecondaryTapDownPosition!);
       case TargetPlatform.macOS:
-        if (previousSecondaryTapDownPosition == lastSecondaryTapDownPosition && toolbarIsVisible) {
-          hideToolbar();
-          return;
-        }
-        _selectWordAt(offset: lastSecondaryTapDownPosition);
-        _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
+        // if (previousSecondaryTapDownPosition == lastSecondaryTapDownPosition && toolbarIsVisible) {
+        //   hideToolbar();
+        //   return;
+        // }
+        // _selectWordAt(offset: lastSecondaryTapDownPosition!);
+        // _showHandles();
+        // _showToolbar(location: lastSecondaryTapDownPosition!);
       case TargetPlatform.linux:
         if (toolbarIsVisible) {
           hideToolbar();
@@ -541,12 +537,24 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         }
         if (_selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed) {
           // If lastSecondaryTapDownPosition is within the current selection then keep the current selection, else collapse it.
+          bool lastSecondaryTapDownPositionWasOnActiveSelection = false;
+          for (final Rect selectionRect in _selectionDelegate.value.selectionRects!) {
+            final Matrix4 transform = _selectionDelegate.getTransformTo(null);
+            final Rect globalRect = MatrixUtils.transformRect(transform, selectionRect);
+            if (globalRect.contains(details.globalPosition)) {
+              lastSecondaryTapDownPositionWasOnActiveSelection = true;
+            }
+          }
+          if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
+            _selectStartTo(offset: lastSecondaryTapDownPosition!);
+            _selectEndTo(offset: lastSecondaryTapDownPosition!);
+          }
         } else {
-          _selectStartTo(offset: lastSecondaryTapDownPosition);
-          _selectEndTo(offset: lastSecondaryTapDownPosition);
+          _selectStartTo(offset: lastSecondaryTapDownPosition!);
+          _selectEndTo(offset: lastSecondaryTapDownPosition!);
         }
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
+        _showToolbar(location: lastSecondaryTapDownPosition!);
     }
     _updateSelectedContentIfNeeded();
   }
@@ -1823,9 +1831,20 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       }
     }
 
+    // Need to collect selection rects from selectables ranging from the
+    // currentSelectionStartIndex to the currentSelectionEndIndex.
+    List<Rect> selectionRects = <Rect>[];
+    for (int index = currentSelectionStartIndex; index <= currentSelectionEndIndex; index++) {
+      List<Rect>? currSelectableSelectionRects = selectables[index].value.selectionRects;
+      if (currSelectableSelectionRects != null) {
+        selectionRects.addAll(currSelectableSelectionRects);
+      }
+    }
+
     return SelectionGeometry(
       startSelectionPoint: startPoint,
       endSelectionPoint: endPoint,
+      selectionRects: selectionRects,
       status: startGeometry != endGeometry
         ? SelectionStatus.uncollapsed
         : startGeometry.status,
