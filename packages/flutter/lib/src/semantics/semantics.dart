@@ -1646,7 +1646,7 @@ void debugResetSemanticsIdCounter() {
 /// (i.e., during [PipelineOwner.flushSemantics]), which happens after
 /// compositing. The semantics tree is then uploaded into the engine for use
 /// by assistive technology.
-class SemanticsNode with DiagnosticableTreeMixin, DepthNode {
+class SemanticsNode with DiagnosticableTreeMixin {
   /// Creates a semantic node.
   ///
   /// Each semantic node has a unique identifier that is assigned when the node
@@ -2015,11 +2015,23 @@ class SemanticsNode with DiagnosticableTreeMixin, DepthNode {
   SemanticsNode? get parent => _parent;
   SemanticsNode? _parent;
 
-  // TREE MANAGEMENT
+  /// The depth of this node in the tree.
+  ///
+  /// The depth of nodes in a tree monotonically increases as you traverse down
+  /// the tree.
+  int get depth => _depth;
+  int _depth = 0;
 
-  @override
-  void redepthChildren() {
-    _children?.forEach(redepthChild);
+  void _redepthChild(SemanticsNode child) {
+    assert(child.owner == owner);
+    if (child._depth <= _depth) {
+      child._depth = _depth + 1;
+      child._redepthChildren();
+    }
+  }
+
+  void _redepthChildren() {
+    _children?.forEach(_redepthChild);
   }
 
   void _adoptChild(SemanticsNode child) {
@@ -2036,7 +2048,7 @@ class SemanticsNode with DiagnosticableTreeMixin, DepthNode {
     if (attached) {
       child.attach(_owner!);
     }
-    redepthChild(child);
+    _redepthChild(child);
   }
 
   void _dropChild(SemanticsNode child) {

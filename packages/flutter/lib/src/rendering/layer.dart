@@ -136,7 +136,7 @@ const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 ///
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the display.
-abstract class Layer with DiagnosticableTreeMixin, DepthNode {
+abstract class Layer with DiagnosticableTreeMixin {
   /// Creates an instance of Layer.
   Layer() {
     if (kFlutterMemoryAllocationsEnabled) {
@@ -542,7 +542,18 @@ abstract class Layer with DiagnosticableTreeMixin, DepthNode {
     assert(parent == null || attached == parent!.attached);
   }
 
-  @override
+  /// The depth of this node in the tree.
+  ///
+  /// The depth of nodes in a tree monotonically increases as you traverse down
+  /// the tree.
+  int get depth => _depth;
+  int _depth = 0;
+
+  /// Adjust the [depth] of this node's children, if any.
+  ///
+  /// Override this method in subclasses with child nodes to call [redepthChild]
+  /// for each child. Do not call this method directly.
+  @protected
   void redepthChildren() {
     // ContainerLayer provides an implementation since its the only one that
     // can actually have children.
@@ -1268,6 +1279,19 @@ class ContainerLayer extends Layer {
     while (child != null) {
       redepthChild(child);
       child = child.nextSibling;
+    }
+  }
+
+  /// Adjust the [depth] of the given [child] to be greater than this node's own
+  /// [depth].
+  ///
+  /// Only call this method from overrides of [redepthChildren].
+  @protected
+  void redepthChild(Layer child) {
+    assert(child.owner == owner);
+    if (child._depth <= _depth) {
+      child._depth = _depth + 1;
+      child.redepthChildren();
     }
   }
 
