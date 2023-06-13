@@ -39,32 +39,11 @@ import 'package:meta/meta.dart';
 /// moved to be a child of A, sibling of B, then the numbers won't change. C's
 /// [depth] will still be 2. The [depth] is automatically maintained by the
 /// [adoptChild] and [dropChild] methods.
-class AbstractNode {
-  /// The depth of this node in the tree.
-  ///
-  /// The depth of nodes in a tree monotonically increases as you traverse down
-  /// the tree.
-  int get depth => _depth;
-  int _depth = 0;
-
-  /// Adjust the [depth] of the given [child] to be greater than this node's own
-  /// [depth].
-  ///
-  /// Only call this method from overrides of [redepthChildren].
-  @protected
-  void redepthChild(AbstractNode child) {
-    assert(child.owner == owner);
-    if (child._depth <= _depth) {
-      child._depth = _depth + 1;
-      child.redepthChildren();
-    }
+class AbstractNode with DepthNode {
+  @override
+  void redepthChildren() {
+    // Left empty for backwards-compatibility.
   }
-
-  /// Adjust the [depth] of this node's children, if any.
-  ///
-  /// Override this method in subclasses with child nodes to call [redepthChild]
-  /// for each child. Do not call this method directly.
-  void redepthChildren() { }
 
   /// The owner for this node (null if unattached).
   ///
@@ -152,4 +131,45 @@ class AbstractNode {
       child.detach();
     }
   }
+}
+
+/// Mixin for tree nodes, where each node maintains a record of its [depth]
+/// in the tree.
+///
+/// Nodes always have a [depth] greater than their ancestors'. There's no
+/// guarantee regarding depth between siblings. The depth of a node is used to
+/// ensure that nodes are processed in depth order. The [depth] of a child can
+/// be more than one greater than the [depth] of the parent, because the [depth]
+/// values are never decreased: all that matters is that it's greater than the
+/// parent. Consider a tree with a root node A, a child B, and a grandchild C.
+/// Initially, A will have [depth] 0, B [depth] 1, and C [depth] 2. If C is
+/// moved to be a child of A, sibling of B, then the numbers won't change. C's
+/// [depth] will still be 2. Whenever a new node is added to the tree or a node
+/// is moved around in the tree, [redepthChild] must be called to re-calculate
+/// the [depth] of the child and its children.
+mixin DepthNode {
+  /// The depth of this node in the tree.
+  ///
+  /// The depth of nodes in a tree monotonically increases as you traverse down
+  /// the tree.
+  int get depth => _depth;
+  int _depth = 0;
+
+  /// Adjust the [depth] of the given [child] to be greater than this node's own
+  /// [depth].
+  ///
+  /// Only call this method from overrides of [redepthChildren].
+  @protected
+  void redepthChild(DepthNode child) {
+    if (child._depth <= _depth) {
+      child._depth = _depth + 1;
+      child.redepthChildren();
+    }
+  }
+
+  /// Adjust the [depth] of this node's children, if any.
+  ///
+  /// Override this method in subclasses with child nodes to call [redepthChild]
+  /// for each child. Do not call this method directly.
+  void redepthChildren();
 }
