@@ -2342,8 +2342,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         );
       await tester.pumpWidget(theWidget);
 
-      final Element element = find.byWidget(theWidget).evaluate().first;
-      final children = element.debugDescribeChildren();
+      //final Element element = find.byWidget(theWidget).evaluate().first;
+      //final children = element.debugDescribeChildren();
 
 
 
