@@ -1,4 +1,4 @@
-Signature: ee985970394ca970212aee101982c67c
+Signature: e6242049d0d3e7f71e4f88cac92087bf
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -8,7 +8,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
@@ -18,7 +17,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsyslog.so
@@ -185,7 +183,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
@@ -195,7 +192,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsyslog.so
@@ -363,7 +359,6 @@ FILE: ../../../fuchsia/sdk/linux/data/config/symbol-index/config.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
-FILE: ../../../fuchsia/sdk/linux/pkg/memfs/memfs.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.ifs
@@ -918,7 +913,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/s
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/vector_view.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/function.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/memfs/include/lib/memfs/memfs.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/commands.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/commands.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/resources.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -1037,7 +1031,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/str
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/vector_view.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/function.h
-FILE: ../../../fuchsia/sdk/linux/pkg/memfs/include/lib/memfs/memfs.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/commands.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/commands.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/resources.h
@@ -1701,7 +1694,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
@@ -1711,7 +1703,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsyslog.so
@@ -1878,7 +1869,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
@@ -1888,7 +1878,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsyslog.so
@@ -2056,7 +2045,6 @@ FILE: ../../../fuchsia/sdk/linux/data/config/symbol-index/config.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
-FILE: ../../../fuchsia/sdk/linux/pkg/memfs/memfs.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.ifs
@@ -4048,7 +4036,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
@@ -4058,7 +4045,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsyslog.so
@@ -4225,7 +4211,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
@@ -4235,7 +4220,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmagma_client.a
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsyslog.so
@@ -4403,7 +4387,6 @@ FILE: ../../../fuchsia/sdk/linux/data/config/symbol-index/config.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
-FILE: ../../../fuchsia/sdk/linux/pkg/memfs/memfs.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/syslog.ifs
