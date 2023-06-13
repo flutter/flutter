@@ -135,7 +135,7 @@ SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
     return;
   }
 
-  const auto& vk_context = ContextVK::Cast(*context);
+  auto& vk_context = ContextVK::Cast(*context);
 
   auto [caps_result, caps] =
       vk_context.GetPhysicalDevice().getSurfaceCapabilitiesKHR(*surface);
@@ -159,6 +159,7 @@ SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
     VALIDATION_LOG << "Swapchain has no supported formats.";
     return;
   }
+  vk_context.SetOffscreenFormat(ToPixelFormat(format.value().format));
 
   const auto composite =
       ChooseAlphaCompositionMode(caps.supportedCompositeAlpha);

@@ -278,13 +278,11 @@ bool CapabilitiesVK::HasExtension(const std::string& ext) const {
   return false;
 }
 
-bool CapabilitiesVK::SetDevice(const vk::PhysicalDevice& device) {
-  if (HasSuitableColorFormat(device, vk::Format::eB8G8R8A8Unorm)) {
-    color_format_ = PixelFormat::kB8G8R8A8UNormInt;
-  } else {
-    return false;
-  }
+void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
+  color_format_ = pixel_format;
+}
 
+bool CapabilitiesVK::SetDevice(const vk::PhysicalDevice& device) {
   if (HasSuitableDepthStencilFormat(device, vk::Format::eS8Uint)) {
     depth_stencil_format_ = PixelFormat::kS8UInt;
   } else if (HasSuitableDepthStencilFormat(device,

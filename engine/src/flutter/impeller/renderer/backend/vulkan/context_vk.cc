@@ -408,6 +408,10 @@ void ContextVK::Setup(Settings settings) {
   SetDebugName(GetDevice(), device_holder_->device.get(), "ImpellerDevice");
 }
 
+void ContextVK::SetOffscreenFormat(PixelFormat pixel_format) {
+  CapabilitiesVK::Cast(*device_capabilities_).SetOffscreenFormat(pixel_format);
+}
+
 // |Context|
 std::string ContextVK::DescribeGpuModel() const {
   return device_name_;
