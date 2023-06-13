@@ -802,6 +802,39 @@ void main() {
         await tester.pump();
         expect(paragraph.selections.isEmpty, true);
         expect(find.byKey(toolbarKey), findsNothing);
+
+        // Create an uncollapsed selection by dragging.
+        final TestGesture dragGesture = await tester.startGesture(textOffsetToPosition(paragraph, 0), kind: PointerDeviceKind.mouse);
+        addTearDown(dragGesture.removePointer);
+        await tester.pump();
+        await dragGesture.moveTo(textOffsetToPosition(paragraph, 5));
+        await tester.pump();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+        await dragGesture.up();
+        await tester.pump();
+
+        // Right click on previous selection should not collapse the selection.
+        await gesture.down(textOffsetToPosition(paragraph, 2));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        // Right click anywhere outside previous selection should collapse the
+        // selection.
+        await gesture.down(textOffsetToPosition(paragraph, 7));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        // Clear selection.
+        await tester.tapAt(textOffsetToPosition(paragraph, 1));
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }),
       skip: kIsWeb, // [intended] Web uses its native context menu.
@@ -871,6 +904,47 @@ void main() {
         // Context menu toggled on.
         expect(buttonTypes.length, 1);
         expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        // Clear selection.
+        await tester.tapAt(textOffsetToPosition(paragraph, 1));
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
+
+        final TestGesture dragGesture = await tester.startGesture(textOffsetToPosition(paragraph, 0), kind: PointerDeviceKind.mouse);
+        addTearDown(dragGesture.removePointer);
+        await tester.pump();
+        await dragGesture.moveTo(textOffsetToPosition(paragraph, 5));
+        await tester.pump();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+        await dragGesture.up();
+        await tester.pump();
+
+        // Right click on previous selection should not collapse the selection.
+        await gesture.down(textOffsetToPosition(paragraph, 2));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        // Right click anywhere outside previous selection should first toggle the context
+        // menu off.
+        await gesture.down(textOffsetToPosition(paragraph, 7));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+        expect(find.byKey(toolbarKey), findsNothing);
+
+        // Right click again should collapse the selection and toggle the context
+        // menu on.
+        await gesture.down(textOffsetToPosition(paragraph, 7));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
         expect(find.byKey(toolbarKey), findsOneWidget);
 
         // Clear selection.
