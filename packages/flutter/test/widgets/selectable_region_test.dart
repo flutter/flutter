@@ -1131,6 +1131,7 @@ void main() {
       // Should select "Hello".
       expect(paragraph.selections[0], const TextSelection(baseOffset: 124, extentOffset: 129));
     },
+      variant: TargetPlatformVariant.only(TargetPlatform.macOS),
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
