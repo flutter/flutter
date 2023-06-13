@@ -119,9 +119,9 @@ class ImeSyncDeferringInsetsCallback {
 
     @Override
     public void onPrepare(WindowInsetsAnimation animation) {
+      needsSave = true;
       if ((animation.getTypeMask() & deferredInsetTypes) != 0) {
         animating = true;
-        needsSave = true;
       }
     }
 
