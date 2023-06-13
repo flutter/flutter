@@ -1761,6 +1761,7 @@ mixin WidgetInspectorService {
     final Object? theObject = toObject(diagnosticsNodeId);
     final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, summaryTree: true, service: this);
 
+    // TODO(polina-c): remove this, when DevTools stops sending DiagnosticsNode.
     if (theObject is DiagnosticsNode) {
       return _nodesToJson(_getChildrenFiltered(theObject, delegate), delegate, parent: theObject);
     }
