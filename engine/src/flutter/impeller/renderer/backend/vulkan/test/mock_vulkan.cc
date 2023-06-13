@@ -9,9 +9,24 @@ namespace testing {
 
 namespace {
 
+struct MockCommandBuffer {
+  explicit MockCommandBuffer(
+      std::shared_ptr<std::vector<std::string>> called_functions)
+      : called_functions_(std::move(called_functions)) {}
+  std::shared_ptr<std::vector<std::string>> called_functions_;
+};
+
 struct MockDevice {
   MockDevice() : called_functions_(new std::vector<std::string>()) {}
+  MockCommandBuffer* NewCommandBuffer() {
+    std::unique_ptr<MockCommandBuffer> buffer =
+        std::make_unique<MockCommandBuffer>(called_functions_);
+    MockCommandBuffer* result = buffer.get();
+    command_buffers_.emplace_back(std::move(buffer));
+    return result;
+  }
   std::shared_ptr<std::vector<std::string>> called_functions_;
+  std::vector<std::unique_ptr<MockCommandBuffer>> command_buffers_;
 };
 
 void noop() {}
@@ -149,7 +164,9 @@ VkResult vkAllocateCommandBuffers(
     VkDevice device,
     const VkCommandBufferAllocateInfo* pAllocateInfo,
     VkCommandBuffer* pCommandBuffers) {
-  *pCommandBuffers = reinterpret_cast<VkCommandBuffer>(0x0b0ffe12);
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  *pCommandBuffers =
+      reinterpret_cast<VkCommandBuffer>(mock_device->NewCommandBuffer());
   return VK_SUCCESS;
 }
 
@@ -295,6 +312,40 @@ void vkDestroyPipelineCache(VkDevice device,
   mock_device->called_functions_->push_back("vkDestroyPipelineCache");
 }
 
+void vkCmdBindPipeline(VkCommandBuffer commandBuffer,
+                       VkPipelineBindPoint pipelineBindPoint,
+                       VkPipeline pipeline) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(commandBuffer);
+  mock_command_buffer->called_functions_->push_back("vkCmdBindPipeline");
+}
+
+void vkCmdSetStencilReference(VkCommandBuffer commandBuffer,
+                              VkStencilFaceFlags faceMask,
+                              uint32_t reference) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(commandBuffer);
+  mock_command_buffer->called_functions_->push_back("vkCmdSetStencilReference");
+}
+
+void vkCmdSetScissor(VkCommandBuffer commandBuffer,
+                     uint32_t firstScissor,
+                     uint32_t scissorCount,
+                     const VkRect2D* pScissors) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(commandBuffer);
+  mock_command_buffer->called_functions_->push_back("vkCmdSetScissor");
+}
+
+void vkCmdSetViewport(VkCommandBuffer commandBuffer,
+                      uint32_t firstViewport,
+                      uint32_t viewportCount,
+                      const VkViewport* pViewports) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(commandBuffer);
+  mock_command_buffer->called_functions_->push_back("vkCmdSetViewport");
+}
+
 PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
                                             const char* pName) {
   if (strcmp("vkEnumerateInstanceExtensionProperties", pName) == 0) {
@@ -365,6 +416,14 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return (PFN_vkVoidFunction)vkDestroyShaderModule;
   } else if (strcmp("vkDestroyPipelineCache", pName) == 0) {
     return (PFN_vkVoidFunction)vkDestroyPipelineCache;
+  } else if (strcmp("vkCmdBindPipeline", pName) == 0) {
+    return (PFN_vkVoidFunction)vkCmdBindPipeline;
+  } else if (strcmp("vkCmdSetStencilReference", pName) == 0) {
+    return (PFN_vkVoidFunction)vkCmdSetStencilReference;
+  } else if (strcmp("vkCmdSetScissor", pName) == 0) {
+    return (PFN_vkVoidFunction)vkCmdSetScissor;
+  } else if (strcmp("vkCmdSetViewport", pName) == 0) {
+    return (PFN_vkVoidFunction)vkCmdSetViewport;
   }
   return noop;
 }

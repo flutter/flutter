@@ -18,13 +18,6 @@
 
 namespace impeller {
 
-namespace testing {
-class BlitCommandVkTest_BlitCopyTextureToTextureCommandVK_Test;
-class BlitCommandVkTest_BlitCopyTextureToBufferCommandVK_Test;
-class BlitCommandVkTest_BlitCopyBufferToTextureCommandVK_Test;
-class BlitCommandVkTest_BlitGenerateMipmapCommandVK_Test;
-}  // namespace testing
-
 class ContextVK;
 class DeviceBuffer;
 class Buffer;
@@ -36,6 +29,12 @@ class FenceWaiterVK;
 class CommandEncoderVK {
  public:
   using SubmitCallback = std::function<void(bool)>;
+
+  // Visible for testing.
+  CommandEncoderVK(const std::weak_ptr<const DeviceHolder>& device_holder,
+                   const std::shared_ptr<QueueVK>& queue,
+                   const std::shared_ptr<CommandPoolVK>& pool,
+                   std::shared_ptr<FenceWaiterVK> fence_waiter);
 
   ~CommandEncoderVK();
 
@@ -68,25 +67,12 @@ class CommandEncoderVK {
 
  private:
   friend class ContextVK;
-  friend class ::impeller::testing::
-      BlitCommandVkTest_BlitCopyTextureToTextureCommandVK_Test;
-  friend class ::impeller::testing::
-      BlitCommandVkTest_BlitCopyTextureToBufferCommandVK_Test;
-  friend class ::impeller::testing::
-      BlitCommandVkTest_BlitGenerateMipmapCommandVK_Test;
-  friend class ::impeller::testing::
-      BlitCommandVkTest_BlitCopyBufferToTextureCommandVK_Test;
 
   std::weak_ptr<const DeviceHolder> device_holder_;
   std::shared_ptr<QueueVK> queue_;
   std::shared_ptr<FenceWaiterVK> fence_waiter_;
   std::shared_ptr<TrackedObjectsVK> tracked_objects_;
   bool is_valid_ = false;
-
-  CommandEncoderVK(const std::weak_ptr<const DeviceHolder>& device_holder,
-                   const std::shared_ptr<QueueVK>& queue,
-                   const std::shared_ptr<CommandPoolVK>& pool,
-                   std::shared_ptr<FenceWaiterVK> fence_waiter);
 
   void Reset();
 

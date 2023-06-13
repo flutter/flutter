@@ -10,6 +10,7 @@ impeller_component("vulkan_unittests") {
   sources = [
     "blit_command_vk_unittests.cc",
     "context_vk_unittests.cc",
+    "pass_bindings_cache_unittests.cc",
     "test/mock_vulkan.cc",
     "test/mock_vulkan.h",
   ]
@@ -51,6 +52,8 @@ impeller_component("vulkan") {
     "fence_waiter_vk.h",
     "formats_vk.cc",
     "formats_vk.h",
+    "pass_bindings_cache.cc",
+    "pass_bindings_cache.h",
     "pipeline_cache_vk.cc",
     "pipeline_cache_vk.h",
     "pipeline_library_vk.cc",
