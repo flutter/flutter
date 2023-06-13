@@ -23,5 +23,5 @@
   "modalBarrierDismissLabel": "关闭",
   "searchTextFieldPlaceholderLabel": "搜索",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

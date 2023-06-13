@@ -23,5 +23,5 @@
   "modalBarrierDismissLabel": "Bỏ qua",
   "searchTextFieldPlaceholderLabel": "Tìm kiếm",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

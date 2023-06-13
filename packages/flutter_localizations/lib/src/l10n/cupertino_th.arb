@@ -23,5 +23,5 @@
   "modalBarrierDismissLabel": "ปิด",
   "searchTextFieldPlaceholderLabel": "ค้นหา",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

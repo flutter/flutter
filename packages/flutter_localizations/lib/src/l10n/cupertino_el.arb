@@ -23,5 +23,5 @@
   "modalBarrierDismissLabel": "Παράβλεψη",
   "searchTextFieldPlaceholderLabel": "Αναζήτηση",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

@@ -28,5 +28,5 @@
   "modalBarrierDismissLabel": "Nerādīt",
   "searchTextFieldPlaceholderLabel": "Meklēšana",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

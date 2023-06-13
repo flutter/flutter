@@ -258,7 +258,7 @@ abstract class CupertinoLocalizations {
 
   /// Label read out by accessibility tools (VoiceOver) for a context menu to
   /// indicate that a tap outside dismisses the context menu.
-  String get contextMenuDismissLabel;
+  String get menuDismissLabel;
 
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -462,7 +462,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Dismiss';
 
   @override
-  String get contextMenuDismissLabel => 'Dismiss context menu';
+  String get menuDismissLabel => 'Dismiss menu';
 
   /// Creates an object that provides US English resource values for the
   /// cupertino library widgets.

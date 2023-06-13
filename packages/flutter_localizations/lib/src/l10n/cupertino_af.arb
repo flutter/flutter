@@ -23,5 +23,5 @@
   "modalBarrierDismissLabel": "Maak toe",
   "searchTextFieldPlaceholderLabel": "Soek",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

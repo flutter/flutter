@@ -23,5 +23,5 @@
   "modalBarrierDismissLabel": "നിരസിക്കുക",
   "searchTextFieldPlaceholderLabel": "തിരയുക",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

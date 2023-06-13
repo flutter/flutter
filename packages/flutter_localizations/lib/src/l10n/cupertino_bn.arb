@@ -23,5 +23,5 @@
   "modalBarrierDismissLabel": "খারিজ করুন",
   "searchTextFieldPlaceholderLabel": "সার্চ করুন",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

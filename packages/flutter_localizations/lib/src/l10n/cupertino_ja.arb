@@ -23,5 +23,5 @@
   "modalBarrierDismissLabel": "閉じる",
   "searchTextFieldPlaceholderLabel": "検索",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

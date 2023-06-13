@@ -152,5 +152,5 @@
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
   "collapsedHint": "Expanded",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

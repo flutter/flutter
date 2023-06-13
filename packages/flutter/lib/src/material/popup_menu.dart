@@ -976,7 +976,7 @@ Future<T?> showMenu<T>({
     shadowColor: shadowColor,
     surfaceTintColor: surfaceTintColor,
     semanticLabel: semanticLabel,
-    barrierLabel: MaterialLocalizations.of(context).contextMenuDismissLabel,
+    barrierLabel: MaterialLocalizations.of(context).menuDismissLabel,
     shape: shape,
     color: color,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),

@@ -141,7 +141,7 @@ abstract class MaterialLocalizations {
 
   /// Label read out by accessibility tools (TalkBack or VoiceOver) for a
   /// context menu to indicate that a tap dismisses the context menu.
-  String get contextMenuDismissLabel;
+  String get menuDismissLabel;
 
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// drawer widget is opened.
@@ -1197,7 +1197,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get modalBarrierDismissLabel => 'Dismiss';
 
   @override
-  String get contextMenuDismissLabel => 'Dismiss context menu';
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;

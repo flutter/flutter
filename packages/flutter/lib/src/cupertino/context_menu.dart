@@ -536,7 +536,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
     _route = _ContextMenuRoute<void>(
       actions: widget.actions,
-      barrierLabel: CupertinoLocalizations.of(context).contextMenuDismissLabel,
+      barrierLabel: CupertinoLocalizations.of(context).menuDismissLabel,
       filter: ui.ImageFilter.blur(
         sigmaX: 5.0,
         sigmaY: 5.0,

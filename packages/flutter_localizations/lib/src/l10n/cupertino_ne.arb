@@ -23,5 +23,5 @@
   "modalBarrierDismissLabel": "खारेज गर्नुहोस्",
   "searchTextFieldPlaceholderLabel": "खोज्नुहोस्",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

@@ -151,6 +151,5 @@
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
   "collapsedHint": "Expanded",
-  "contextMenuDismissLabel": "Dismiss context menu",
   "scanTextButtonLabel": "Scan text"
 }

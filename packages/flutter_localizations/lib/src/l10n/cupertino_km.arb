@@ -23,5 +23,5 @@
   "modalBarrierDismissLabel": "ច្រាន​ចោល",
   "searchTextFieldPlaceholderLabel": "ស្វែងរក",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

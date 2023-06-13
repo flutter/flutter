@@ -33,5 +33,5 @@
   "modalBarrierDismissLabel": "Zamknij",
   "searchTextFieldPlaceholderLabel": "Szukaj",
   "noSpellCheckReplacementsLabel": "Nie znaleziono zastąpień",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

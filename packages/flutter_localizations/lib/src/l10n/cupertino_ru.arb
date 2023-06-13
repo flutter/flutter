@@ -33,5 +33,5 @@
   "modalBarrierDismissLabel": "Закрыть",
   "searchTextFieldPlaceholderLabel": "Поиск",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

@@ -23,5 +23,5 @@
   "modalBarrierDismissLabel": "ଖାରଜ କରନ୍ତୁ",
   "searchTextFieldPlaceholderLabel": "ସନ୍ଧାନ କରନ୍ତୁ",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "contextMenuDismissLabel": "Dismiss context menu"
+  "menuDismissLabel": "Dismiss menu"
 }

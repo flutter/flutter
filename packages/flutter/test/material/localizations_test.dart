@@ -38,7 +38,7 @@ void main() {
     expect(localizations.timePickerHourModeAnnouncement, isNotNull);
     expect(localizations.timePickerMinuteModeAnnouncement, isNotNull);
     expect(localizations.modalBarrierDismissLabel, isNotNull);
-    expect(localizations.contextMenuDismissLabel, isNotNull);
+    expect(localizations.menuDismissLabel, isNotNull);
     expect(localizations.drawerLabel, isNotNull);
     expect(localizations.menuBarMenuLabel, isNotNull);
     expect(localizations.popupMenuLabel, isNotNull);
