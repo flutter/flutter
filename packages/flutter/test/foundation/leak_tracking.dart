@@ -157,8 +157,8 @@ class LeakCleaner {
 
   /// Returns true if [leak] should be reported as failure.
   ///
-  /// Also adds [leak] to [leaksByClass] to track the number of leaks by class.
-  bool _shouldReportLeak(LeakType leakType, LeakReport leak, Map<(String, LeakType), int> leaksByClass) {
+  /// Also adds [leak] to [leaksByClassAndType] to track the number of leaks by class.
+  bool _shouldReportLeak(LeakType leakType, LeakReport leak, Map<(String, LeakType), int> leaksByClassAndType) {
     // Tracking for non-GCed is temporarily disabled.
     // TODO(polina-c): turn on tracking for non-GCed after investigating existing leaks.
     if (leakType != LeakType.notDisposed) {
@@ -166,25 +166,26 @@ class LeakCleaner {
     }
 
     final String leakingClass = leak.type;
-    final (String, LeakType) key = (leakingClass, leakType);
-    leaksByClass[key] = leaksByClass[key] ?? 0 + 1;
+    final (String, LeakType) classAndType = (leakingClass, leakType);
+    leaksByClassAndType[classAndType] = leaksByClassAndType[classAndType] ?? 0 + 1;
 
     bool _isAllowedForClass(Map<String, int?> allowList) {
-      return allowedForClass < leaksByClass[leakingClass]!;
+      if (!allowList.containsKey(leakingClass)) {
+        return false;
+      }
+      final int? allowedCount = allowList[leakingClass];
+      if (allowedCount == null) {
+        return true;
+      }
+      return allowedCount >= leaksByClassAndType[classAndType]!;
     }
-
-
-    final allowedForClass = config.notDisposedAllowList[leakingClass];
-
 
     switch (leakType) {
       case LeakType.notDisposed:
-        return !config.notDisposedAllowList.containsKey(leakingClass)
-        || (allowedForClass == ) < leaksByClass[leakingClass]!;
+        return !_isAllowedForClass(config.notDisposedAllowList);
       case LeakType.notGCed:
       case LeakType.gcedLate:
-        return !config.notGCedAllowList.containsKey(leakingClass)
-        || (config.notGCedAllowList[leakingClass]!) < leaksByClass[leakingClass]!;
+        return !_isAllowedForClass(config.notGCedAllowList);
     }
   }
 }
