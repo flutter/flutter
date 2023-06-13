@@ -3411,12 +3411,15 @@ void main() {
     );
 
     await tester.pumpWidget(
-      overlay(
-        child: TextField(
-          dragStartBehavior: DragStartBehavior.down,
-          controller: controller,
-          maxLines: 3,
-          minLines: 3,
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: overlay(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            maxLines: 3,
+            minLines: 3,
+          ),
         ),
       ),
     );
