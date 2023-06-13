@@ -800,6 +800,7 @@ void main() {
       ),
       FileSystem: () => fs,
       FlutterVersion: () => initialVersion,
+      Platform: () => FakePlatform(),
       ProcessManager: () => fakeProcessManager,
     });
   });
