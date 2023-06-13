@@ -514,15 +514,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.windows:
-        if (_selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed) {
-          // If lastSecondaryTapDownPosition is within the current selection then
-          // keep the current selection, if not then collapse it.
-          final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
-          if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-            _selectStartTo(offset: lastSecondaryTapDownPosition!);
-            _selectEndTo(offset: lastSecondaryTapDownPosition!);
-          }
-        } else {
+        // If lastSecondaryTapDownPosition is within the current selection then
+        // keep the current selection, if not then collapse it.
+        final bool uncollapsedSelectionExists = _selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed;
+        final bool lastSecondaryTapDownPositionWasOnActiveSelection = uncollapsedSelectionExists && _positionIsOnActiveSelection(globalPosition: details.globalPosition);
+        if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
           _selectStartTo(offset: lastSecondaryTapDownPosition!);
           _selectEndTo(offset: lastSecondaryTapDownPosition!);
         }
@@ -545,15 +541,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           hideToolbar();
           return;
         }
-        if (_selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed) {
-          // If lastSecondaryTapDownPosition is within the current selection then
-          // keep the current selection, if not then collapse it.
-          final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
-          if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-            _selectStartTo(offset: lastSecondaryTapDownPosition!);
-            _selectEndTo(offset: lastSecondaryTapDownPosition!);
-          }
-        } else {
+        // If lastSecondaryTapDownPosition is within the current selection then
+        // keep the current selection, if not then collapse it.
+        final bool uncollapsedSelectionExists = _selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed;
+        final bool lastSecondaryTapDownPositionWasOnActiveSelection = uncollapsedSelectionExists && _positionIsOnActiveSelection(globalPosition: details.globalPosition);
+        if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
           _selectStartTo(offset: lastSecondaryTapDownPosition!);
           _selectEndTo(offset: lastSecondaryTapDownPosition!);
         }
