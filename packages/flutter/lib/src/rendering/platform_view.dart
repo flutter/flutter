@@ -269,7 +269,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
   }
 }
 
-/// Superclass for common functionality of platform view RenderBoxes.
+/// Common render-layer functionality for iOS and macOS platform views.
+///
 /// Provides the basic rendering logic for iOS and macOS platformviews.
 /// Subclasses shall override handleEvent in order to execute custom event logic.
 /// T represents the class of the view controller for the corresponding widget.
@@ -397,7 +398,11 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
   /// Creates a render object for an iOS UIView.
   ///
   /// The `viewId`, `hitTestBehavior`, and `gestureRecognizers` parameters must not be null.
-  RenderUiKitView({required super.viewController, required super.hitTestBehavior, required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers}) {
+  RenderUiKitView({
+      required super.viewController,
+      required super.hitTestBehavior,
+      required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers
+    }) {
     updateGestureRecognizers(gestureRecognizers);
   }
 
