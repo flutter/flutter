@@ -72,10 +72,8 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     return std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
   }
   if (enable_impeller) {
-    // TODO(gaaclarke): We need to devise a more complete heuristic about what
-    //                  backend to use by default.
-    // Default value is OpenGLES.
-    AndroidRenderingAPI backend = AndroidRenderingAPI::kOpenGLES;
+    // Default value is Vulkan with GLES fallback.
+    AndroidRenderingAPI backend = AndroidRenderingAPI::kAutoselect;
     if (impeller_backend.has_value()) {
       if (impeller_backend.value() == "opengles") {
         backend = AndroidRenderingAPI::kOpenGLES;
@@ -93,6 +91,15 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
       case AndroidRenderingAPI::kVulkan:
         return std::make_unique<AndroidContextVulkanImpeller>(
             enable_vulkan_validation, worker_task_runner);
+      case AndroidRenderingAPI::kAutoselect: {
+        auto vulkan_backend = std::make_unique<AndroidContextVulkanImpeller>(
+            enable_vulkan_validation, worker_task_runner);
+        if (!vulkan_backend->IsValid()) {
+          return std::make_unique<AndroidContextGLImpeller>(
+              std::make_unique<impeller::egl::Display>());
+        }
+        return vulkan_backend;
+      }
       default:
         FML_UNREACHABLE();
     }
