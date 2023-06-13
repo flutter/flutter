@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
 
@@ -108,7 +109,11 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   /// when the offset of the viewport is changed by x then `target` also moves
   /// by x within the viewport.
   ///
-  /// TODO(Piinks): Add docs on new axis param
+  /// The optional [axisDirection] is used by [RenderTwoDimensionalViewport] to
+  /// determine which [Axis] of the two should reveal. One dimensional
+  /// subclasses like [RenderViewportBase and [RenderListWheelViewport] will
+  /// assert that if an [axisDirection] is provided, that it matches the
+  /// [axisDirection] the viewport has been configured for.
   ///
   /// See also:
   ///
