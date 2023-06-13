@@ -499,7 +499,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.fuchsia:
       case TargetPlatform.windows:
         if (_selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed) {
-          // If lastSecondaryTapDownPosition is within the current selection then keep the current selection, else collapse it.
+          // If lastSecondaryTapDownPosition is within the current selection then
+          // keep the current selection, if not then collapse it.
           bool lastSecondaryTapDownPositionWasOnActiveSelection = false;
           for (final Rect selectionRect in _selectionDelegate.value.selectionRects!) {
             final Matrix4 transform = _selectionDelegate.getTransformTo(null);
@@ -536,7 +537,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           return;
         }
         if (_selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed) {
-          // If lastSecondaryTapDownPosition is within the current selection then keep the current selection, else collapse it.
+          // If lastSecondaryTapDownPosition is within the current selection then
+          // keep the current selection, if not then collapse it.
           bool lastSecondaryTapDownPositionWasOnActiveSelection = false;
           for (final Rect selectionRect in _selectionDelegate.value.selectionRects!) {
             final Matrix4 transform = _selectionDelegate.getTransformTo(null);

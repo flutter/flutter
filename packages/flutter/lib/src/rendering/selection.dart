@@ -576,8 +576,8 @@ enum SelectionStatus {
 /// The geometry of the current selection.
 ///
 /// This includes details such as the locations of the selection start and end,
-/// line height, etc. This information is used for drawing selection controls
-/// for mobile platforms.
+/// line height, the rects that encompass the selection, etc. This information
+/// is used for drawing selection controls for mobile platforms.
 ///
 /// The positions in geometry are in local coordinates of the [SelectionHandler]
 /// or [Selectable].
