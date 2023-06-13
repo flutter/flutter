@@ -103,9 +103,82 @@ abstract class OperatingSystemUtils {
   /// Return the File representing a new pipe.
   File makePipe(String path);
 
-  void unzip(File file, Directory targetDirectory);
+  void unzip(File file, Directory targetDirectory) {
+    final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
+    _unpackArchive(archive, targetDirectory);
+  }
 
-  void unpack(File gzippedTarFile, Directory targetDirectory);
+  void unpack(File gzippedTarFile, Directory targetDirectory) {
+    final Archive archive = TarDecoder().decodeBytes(
+      GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
+    );
+    _unpackArchive(archive, targetDirectory);
+  }
+
+  bool _isFile(ArchiveFile archiveFile) {
+    // The archive package doesn't correctly set isFile.
+    return archiveFile.isFile && !archiveFile.name.endsWith('/');
+  }
+
+  void _unpackArchive(Archive archive, Directory targetDirectory) {
+    // Remove all top-level directories in the archive from the filesystem before extracting.
+    //
+    // This is a separate pass to avoid depending on the order of the files in the archive.
+    for (final ArchiveFile archiveFile in archive.files) {
+      if (!_isFile(archiveFile) &&
+          _fileSystem.path.split(archiveFile.name).length == 1) {
+        final Directory dest = _fileSystem.directory(
+          _fileSystem.path.canonicalize(
+            _fileSystem.path.join(
+              targetDirectory.path,
+              archiveFile.name,
+            ),
+          ),
+        );
+        if (dest.existsSync()) {
+          dest.deleteSync(recursive: true);
+        }
+      }
+    }
+
+    for (final ArchiveFile archiveFile in archive.files) {
+      if (!_isFile(archiveFile)) {
+        continue;
+      }
+
+      final File destFile = _fileSystem.file(
+        _fileSystem.path.canonicalize(
+          _fileSystem.path.join(
+            targetDirectory.path,
+            archiveFile.name,
+          ),
+        ),
+      );
+
+      // Validate that the destFile is within the targetDirectory we want to
+      // extract to.
+      //
+      // See https://snyk.io/research/zip-slip-vulnerability for more context.
+      final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(
+        destFile.path,
+      );
+      final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(
+        targetDirectory.path,
+      );
+      if (!destinationFileCanonicalPath
+          .startsWith(targetDirectoryCanonicalPath)) {
+        throw StateError(
+          'Tried to extract the file $destinationFileCanonicalPath outside of the '
+          'target directory $targetDirectoryCanonicalPath',
+        );
+      }
+
+      if (!destFile.parent.existsSync()) {
+        destFile.parent.createSync(recursive: true);
+      }
+      destFile.writeAsBytesSync(archiveFile.content as List<int>);
+    }
+  }
 
   /// Compresses a stream using gzip level 1 (faster but larger).
   Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) {
@@ -214,38 +287,6 @@ class _PosixUtils extends OperatingSystemUtils {
     return stdout.trim().split('\n').map<File>(
       (String path) => _fileSystem.file(path.trim()),
     ).toList();
-  }
-
-  // unzip -o -q zipfile -d dest
-  @override
-  void unzip(File file, Directory targetDirectory) {
-    if (!_processManager.canRun('unzip')) {
-      // unzip is not available. this error message is modeled after the download
-      // error in bin/internal/update_dart_sdk.sh
-      String message = 'Please install unzip.';
-      if (_platform.isMacOS) {
-        message = 'Consider running "brew install unzip".';
-      } else if (_platform.isLinux) {
-        message = 'Consider running "sudo apt-get install unzip".';
-      }
-      throwToolExit(
-        'Missing "unzip" tool. Unable to extract ${file.path}.\n$message'
-      );
-    }
-    _processUtils.runSync(
-      <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
-      throwOnError: true,
-      verboseExceptions: true,
-    );
-  }
-
-  // tar -xzf tarball -C dest
-  @override
-  void unpack(File gzippedTarFile, Directory targetDirectory) {
-    _processUtils.runSync(
-      <String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path],
-      throwOnError: true,
-    );
   }
 
   @override
@@ -422,46 +463,6 @@ class _MacOSUtils extends _PosixUtils {
     }
     return _hostPlatform!;
   }
-
-  // unzip, then rsync
-  @override
-  void unzip(File file, Directory targetDirectory) {
-    if (!_processManager.canRun('unzip')) {
-      // unzip is not available. this error message is modeled after the download
-      // error in bin/internal/update_dart_sdk.sh
-      throwToolExit('Missing "unzip" tool. Unable to extract ${file.path}.\nConsider running "brew install unzip".');
-    }
-    if (_processManager.canRun('rsync')) {
-      final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('flutter_${file.basename}.');
-      try {
-        // Unzip to a temporary directory.
-        _processUtils.runSync(
-          <String>['unzip', '-o', '-q', file.path, '-d', tempDirectory.path],
-          throwOnError: true,
-          verboseExceptions: true,
-        );
-        for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
-          // rsync --delete the unzipped files so files removed from the archive are also removed from the target.
-          // Add the '-8' parameter to avoid mangling filenames with encodings that do not match the current locale.
-          _processUtils.runSync(
-            <String>['rsync', '-8', '-av', '--delete', unzippedFile.path, targetDirectory.path],
-            throwOnError: true,
-            verboseExceptions: true,
-          );
-        }
-      } finally {
-        tempDirectory.deleteSync(recursive: true);
-      }
-    } else {
-      // Fall back to just unzipping.
-      _logger.printTrace('Unable to find rsync, falling back to direct unzipping.');
-      _processUtils.runSync(
-        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
-        throwOnError: true,
-        verboseExceptions: true,
-      );
-    }
-  }
 }
 
 class _WindowsUtils extends OperatingSystemUtils {
@@ -502,60 +503,6 @@ class _WindowsUtils extends OperatingSystemUtils {
       return lines.map<File>((String path) => _fileSystem.file(path.trim())).toList();
     }
     return <File>[_fileSystem.file(lines.first.trim())];
-  }
-
-  @override
-  void unzip(File file, Directory targetDirectory) {
-    final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
-    _unpackArchive(archive, targetDirectory);
-  }
-
-  @override
-  void unpack(File gzippedTarFile, Directory targetDirectory) {
-    final Archive archive = TarDecoder().decodeBytes(
-      GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
-    );
-    _unpackArchive(archive, targetDirectory);
-  }
-
-  void _unpackArchive(Archive archive, Directory targetDirectory) {
-    for (final ArchiveFile archiveFile in archive.files) {
-      // The archive package doesn't correctly set isFile.
-      if (!archiveFile.isFile || archiveFile.name.endsWith('/')) {
-        continue;
-      }
-
-      final File destFile = _fileSystem.file(
-        _fileSystem.path.canonicalize(
-          _fileSystem.path.join(
-            targetDirectory.path,
-            archiveFile.name,
-          ),
-        ),
-      );
-
-      // Validate that the destFile is within the targetDirectory we want to
-      // extract to.
-      //
-      // See https://snyk.io/research/zip-slip-vulnerability for more context.
-      final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(
-        destFile.path,
-      );
-      final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(
-        targetDirectory.path,
-      );
-      if (!destinationFileCanonicalPath.startsWith(targetDirectoryCanonicalPath)) {
-        throw StateError(
-          'Tried to extract the file $destinationFileCanonicalPath outside of the '
-          'target directory $targetDirectoryCanonicalPath',
-        );
-      }
-
-      if (!destFile.parent.existsSync()) {
-        destFile.parent.createSync(recursive: true);
-      }
-      destFile.writeAsBytesSync(archiveFile.content as List<int>);
-    }
   }
 
   @override

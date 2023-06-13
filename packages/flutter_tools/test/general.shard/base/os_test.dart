@@ -5,7 +5,6 @@
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -564,8 +563,6 @@ void main() {
 
     // See https://snyk.io/research/zip-slip-vulnerability for more context
     testWithoutContext('Windows validates paths when unzipping', () {
-      // on POSIX systems we use the `unzip` binary, which will fail to extract
-      // files with paths outside the target directory
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
       final MemoryFileSystem fs = MemoryFileSystem.test();
       final File fakeZipFile = fs.file('archive.zip');
@@ -586,175 +583,6 @@ void main() {
             contains('Tried to extract the file '),
           ),
         ),
-      );
-    });
-  });
-
-  testWithoutContext('If unzip fails, include stderr in exception text', () {
-    const String exceptionMessage = 'Something really bad happened.';
-    final FileExceptionHandler handler = FileExceptionHandler();
-    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-
-    fakeProcessManager.addCommand(
-      const FakeCommand(command: <String>[
-        'unzip',
-        '-o',
-        '-q',
-        'bar.zip',
-        '-d',
-        'foo',
-      ], exitCode: 1, stderr: exceptionMessage),
-    );
-
-    final Directory foo = fileSystem.directory('foo')
-      ..createSync();
-    final File bar = fileSystem.file('bar.zip')
-      ..createSync();
-    handler.addError(bar, FileSystemOp.read, const FileSystemException(exceptionMessage));
-
-    final OperatingSystemUtils osUtils = OperatingSystemUtils(
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      platform: FakePlatform(),
-      processManager: fakeProcessManager,
-    );
-
-    expect(
-      () => osUtils.unzip(bar, foo),
-      throwsProcessException(message: exceptionMessage),
-    );
-  });
-
-  group('unzip on macOS', () {
-    testWithoutContext('falls back to unzip when rsync cannot run', () {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.excludedExecutables.add('rsync');
-
-      final BufferLogger logger = BufferLogger.test();
-      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: FakePlatform(operatingSystem: 'macos'),
-        processManager: fakeProcessManager,
-      );
-
-      final Directory targetDirectory = fileSystem.currentDirectory;
-      fakeProcessManager.addCommand(FakeCommand(
-        command: <String>['unzip', '-o', '-q', 'foo.zip', '-d', targetDirectory.path],
-      ));
-
-      macOSUtils.unzip(fileSystem.file('foo.zip'), targetDirectory);
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-      expect(logger.traceText, contains('Unable to find rsync'));
-    });
-
-    testWithoutContext('unzip and rsyncs', () {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-
-      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'macos'),
-        processManager: fakeProcessManager,
-      );
-
-      final Directory targetDirectory = fileSystem.currentDirectory;
-      final Directory tempDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_foo.zip.rand0');
-      fakeProcessManager.addCommands(<FakeCommand>[
-        FakeCommand(
-          command: <String>[
-            'unzip',
-            '-o',
-            '-q',
-            'foo.zip',
-            '-d',
-            tempDirectory.path,
-          ],
-          onRun: () {
-            expect(tempDirectory, exists);
-            tempDirectory.childDirectory('dirA').childFile('fileA').createSync(recursive: true);
-            tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);
-          },
-        ),
-        FakeCommand(command: <String>[
-          'rsync',
-          '-8',
-          '-av',
-          '--delete',
-          tempDirectory.childDirectory('dirA').path,
-          targetDirectory.path,
-        ]),
-        FakeCommand(command: <String>[
-          'rsync',
-          '-8',
-          '-av',
-          '--delete',
-          tempDirectory.childDirectory('dirB').path,
-          targetDirectory.path,
-        ]),
-      ]);
-
-      macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory);
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-      expect(tempDirectory, isNot(exists));
-    });
-  });
-
-  group('display an install message when unzip cannot be run', () {
-    testWithoutContext('Linux', () {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.excludedExecutables.add('unzip');
-
-      final OperatingSystemUtils linuxOsUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processManager: fakeProcessManager,
-      );
-
-      expect(
-        () => linuxOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
-        throwsToolExit(
-          message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
-          'Consider running "sudo apt-get install unzip".'),
-      );
-    });
-
-    testWithoutContext('macOS', () {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.excludedExecutables.add('unzip');
-
-      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'macos'),
-        processManager: fakeProcessManager,
-      );
-
-      expect(
-        () => macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
-        throwsToolExit
-          (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
-            'Consider running "brew install unzip".'),
-      );
-    });
-
-    testWithoutContext('unknown OS', () {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.excludedExecutables.add('unzip');
-
-      final OperatingSystemUtils unknownOsUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'fuchsia'),
-        processManager: fakeProcessManager,
-      );
-
-      expect(
-            () => unknownOsUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
-        throwsToolExit
-          (message: 'Missing "unzip" tool. Unable to extract foo.zip.\n'
-            'Please install unzip.'),
       );
     });
   });
