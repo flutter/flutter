@@ -517,19 +517,19 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           _selectEndTo(offset: lastSecondaryTapDownPosition!);
         }
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition!);
+        _showToolbar(location: lastSecondaryTapDownPosition);
       case TargetPlatform.iOS:
         _selectWordAt(offset: lastSecondaryTapDownPosition!);
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition!);
+        _showToolbar(location: lastSecondaryTapDownPosition);
       case TargetPlatform.macOS:
-        // if (previousSecondaryTapDownPosition == lastSecondaryTapDownPosition && toolbarIsVisible) {
-        //   hideToolbar();
-        //   return;
-        // }
-        // _selectWordAt(offset: lastSecondaryTapDownPosition!);
-        // _showHandles();
-        // _showToolbar(location: lastSecondaryTapDownPosition!);
+        if (previousSecondaryTapDownPosition == lastSecondaryTapDownPosition && toolbarIsVisible) {
+          hideToolbar();
+          return;
+        }
+        _selectWordAt(offset: lastSecondaryTapDownPosition!);
+        _showHandles();
+        _showToolbar(location: lastSecondaryTapDownPosition);
       case TargetPlatform.linux:
         if (toolbarIsVisible) {
           hideToolbar();
@@ -554,7 +554,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           _selectEndTo(offset: lastSecondaryTapDownPosition!);
         }
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition!);
+        _showToolbar(location: lastSecondaryTapDownPosition);
     }
     _updateSelectedContentIfNeeded();
   }
@@ -1833,9 +1833,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
     // Need to collect selection rects from selectables ranging from the
     // currentSelectionStartIndex to the currentSelectionEndIndex.
-    List<Rect> selectionRects = <Rect>[];
+    final List<Rect> selectionRects = <Rect>[];
     for (int index = currentSelectionStartIndex; index <= currentSelectionEndIndex; index++) {
-      List<Rect>? currSelectableSelectionRects = selectables[index].value.selectionRects;
+      final List<Rect>? currSelectableSelectionRects = selectables[index].value.selectionRects;
       if (currSelectableSelectionRects != null) {
         selectionRects.addAll(currSelectableSelectionRects);
       }
