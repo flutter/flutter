@@ -78,6 +78,8 @@ class ContextVK final : public Context,
   // |Context|
   const std::shared_ptr<const Capabilities>& GetCapabilities() const override;
 
+  void SetOffscreenFormat(PixelFormat pixel_format);
+
   template <typename T>
   bool SetDebugName(T handle, std::string_view label) const {
     return SetDebugName(GetDevice(), handle, label);
