@@ -7,8 +7,11 @@
 #include <fcntl.h>
 #include <fuchsia/mem/cpp/fidl.h>
 #include <lib/async/cpp/task.h>
+#include <lib/async/default.h>
 #include <lib/inspect/cpp/inspect.h>
+#include <lib/sys/cpp/component_context.h>
 #include <lib/trace-engine/instrumentation.h>
+#include <lib/vfs/cpp/pseudo_dir.h>
 #include <zircon/status.h>
 #include <zircon/types.h>
 
@@ -19,8 +22,6 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/runtime/dart_vm.h"
-#include "lib/async/default.h"
-#include "lib/sys/cpp/component_context.h"
 #include "runtime/dart/utils/files.h"
 #include "runtime/dart/utils/root_inspect_node.h"
 #include "runtime/dart/utils/vmo.h"
