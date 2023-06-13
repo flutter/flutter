@@ -158,7 +158,8 @@ mixin DepthNode {
   /// Adjust the [depth] of the given [child] to be greater than this node's own
   /// [depth].
   ///
-  /// Only call this method from overrides of [redepthChildren].
+  /// Call this when a child is added to the tree, a child is moved to a new
+  /// position in the tree, or from overrides of [redepthChildren].
   @protected
   void redepthChild(DepthNode child) {
     if (child._depth <= _depth) {
