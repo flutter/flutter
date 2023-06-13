@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:core';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
@@ -144,27 +146,45 @@ class LeakCleaner {
   final LeakTrackingTestConfig config;
 
   Leaks clean(Leaks leaks) {
+    final Map<(String, LeakType), int> leaksByClassAndType = <(String, LeakType), int>{};
+
     final Leaks result =  Leaks(<LeakType, List<LeakReport>>{
       for (final LeakType leakType in leaks.byType.keys)
-        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak)).toList()
+        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak, leaksByClassAndType)).toList()
     });
     return result;
   }
 
   /// Returns true if [leak] should be reported as failure.
-  bool _shouldReportLeak(LeakType leakType, LeakReport leak) {
+  ///
+  /// Also adds [leak] to [leaksByClass] to track the number of leaks by class.
+  bool _shouldReportLeak(LeakType leakType, LeakReport leak, Map<(String, LeakType), int> leaksByClass) {
     // Tracking for non-GCed is temporarily disabled.
     // TODO(polina-c): turn on tracking for non-GCed after investigating existing leaks.
     if (leakType != LeakType.notDisposed) {
       return false;
     }
 
+    final String leakingClass = leak.type;
+    final (String, LeakType) key = (leakingClass, leakType);
+    leaksByClass[key] = leaksByClass[key] ?? 0 + 1;
+
+    bool _isAllowedForClass(Map<String, int?> allowList) {
+      return allowedForClass < leaksByClass[leakingClass]!;
+    }
+
+
+    final allowedForClass = config.notDisposedAllowList[leakingClass];
+
+
     switch (leakType) {
       case LeakType.notDisposed:
-        return !config.notDisposedAllowList.containsKey(leak.type);
+        return !config.notDisposedAllowList.containsKey(leakingClass)
+        || (allowedForClass == ) < leaksByClass[leakingClass]!;
       case LeakType.notGCed:
       case LeakType.gcedLate:
-        return !config.notGCedAllowList.containsKey(leak.type);
+        return !config.notGCedAllowList.containsKey(leakingClass)
+        || (config.notGCedAllowList[leakingClass]!) < leaksByClass[leakingClass]!;
     }
   }
 }
