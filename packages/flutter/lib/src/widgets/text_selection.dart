@@ -1823,9 +1823,6 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
                   },
                 ),
                 (PanGestureRecognizer instance) {
-                  if (_opacity.value == 0.0) {
-                    return;
-                  }
                   instance
                     ..dragStartBehavior = widget.dragStartBehavior
                     ..onStart = widget.onSelectionHandleDragStart
