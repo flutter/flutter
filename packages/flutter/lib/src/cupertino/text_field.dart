@@ -125,6 +125,14 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
     _state._requestKeyboard();
     super.onDragSelectionEnd(details);
   }
+
+  @override
+  void onDragSelectionUpdate(TapDragUpdateDetails details) {
+    if (!_state._effectiveFocusNode.hasFocus) {
+      return;
+    }
+    super.onDragSelectionUpdate(details);
+  }
 }
 
 /// An iOS-style text field.

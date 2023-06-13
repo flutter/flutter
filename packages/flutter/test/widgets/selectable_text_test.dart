@@ -885,7 +885,7 @@ void main() {
     final TextEditingController controller = editableTextWidget.controller;
 
     final Offset ePos = textOffsetToPosition(tester, 5);
-    final Offset gPos = textOffsetToPosition(tester,8);
+    final Offset gPos = textOffsetToPosition(tester, 8);
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
     await tester.pump(const Duration(seconds: 2));
@@ -894,7 +894,7 @@ void main() {
     await gesture.up();
 
     expect(controller.selection.baseOffset, 5);
-    expect(controller.selection.extentOffset,8);
+    expect(controller.selection.extentOffset, 8);
   });
 
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {

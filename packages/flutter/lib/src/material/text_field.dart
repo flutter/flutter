@@ -88,6 +88,14 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
       }
     }
   }
+
+  @override
+  void onDragSelectionUpdate(TapDragUpdateDetails details) {
+    if (!_state._effectiveFocusNode.hasFocus) {
+      return;
+    }
+    super.onDragSelectionUpdate(details);
+  }
 }
 
 /// A Material Design text field.
