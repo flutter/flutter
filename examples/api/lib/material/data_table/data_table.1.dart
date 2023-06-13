@@ -2,37 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [DataTable].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [DataTable].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const DataTableExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class DataTableExampleApp extends StatelessWidget {
+  const DataTableExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('DataTable Sample')),
+        body: const DataTableExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class DataTableExample extends StatefulWidget {
+  const DataTableExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<DataTableExample> createState() => _DataTableExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _DataTableExampleState extends State<DataTableExample> {
   static const int numItems = 10;
   List<bool> selected = List<bool>.generate(numItems, (int index) => false);
 
@@ -49,8 +46,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         rows: List<DataRow>.generate(
           numItems,
           (int index) => DataRow(
-            color: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) {
+            color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
               // All rows will have the same selected color.
               if (states.contains(MaterialState.selected)) {
                 return Theme.of(context).colorScheme.primary.withOpacity(0.08);

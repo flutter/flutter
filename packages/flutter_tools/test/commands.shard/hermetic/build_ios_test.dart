@@ -5,7 +5,9 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
+import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
@@ -128,6 +131,7 @@ void main() {
   FakeCommand setUpFakeXcodeBuildHandler({
     bool verbose = false,
     bool simulator = false,
+    bool customNaming = false,
     String? deviceId,
     int exitCode = 0,
     String? stdout,
@@ -146,7 +150,11 @@ void main() {
           'VERBOSE_SCRIPT_LOGGING=YES'
         else
           '-quiet',
-        '-workspace', 'Runner.xcworkspace',
+        '-workspace',
+        if (customNaming)
+          'RenamedWorkspace.xcworkspace'
+        else
+          'Runner.xcworkspace',
         '-scheme', 'Runner',
         'BUILD_DIR=/build/ios',
         '-sdk',
@@ -185,6 +193,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createCoreMockProjectFiles();
@@ -204,6 +213,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createCoreMockProjectFiles();
@@ -223,6 +233,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
@@ -230,7 +241,7 @@ void main() {
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
-    final bool supported = BuildIOSCommand(verboseHelp: false).supported;
+    final bool supported = BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'ios', '--no-pub']
     ), supported ? throwsToolExit() : throwsA(isA<UsageException>()));
@@ -246,6 +257,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -267,11 +279,43 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
+  testUsingContext('ios build invokes xcode build with renamed xcodeproj and xcworkspace', () async {
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+
+    fileSystem.directory(fileSystem.path.join('ios', 'RenamedProj.xcodeproj')).createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.join('ios', 'RenamedWorkspace.xcworkspace')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('ios', 'RenamedProj.xcodeproj', 'project.pbxproj')).createSync();
+    createCoreMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ios', '--no-pub']
+    );
+    expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(customNaming: true, onRun: () {
+        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+      }),
+      setUpRsyncCommand(),
+    ]),
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
   testUsingContext('ios build invokes xcode build with device ID', () async {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -298,6 +342,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -323,6 +368,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -348,6 +394,7 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -397,6 +444,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -427,6 +475,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -461,6 +510,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -494,6 +544,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -522,6 +573,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -556,6 +608,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -585,11 +638,56 @@ void main() {
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
+    testUsingContext('Delete xcresult bundle before each xcodebuild command.', () async {
+      final BuildCommand command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        osUtils: FakeOperatingSystemUtils(),
+      );
+
+      createMinimalMockProjectFiles();
+
+      await createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']);
+
+      expect(testLogger.statusText, contains('Xcode build done.'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        xattrCommand,
+        // Intentionally fail the first xcodebuild command with concurrent run failure message.
+        setUpFakeXcodeBuildHandler(
+          exitCode: 1,
+          stdout: '$kConcurrentRunFailureMessage1 $kConcurrentRunFailureMessage2',
+          onRun: () {
+            fileSystem.systemTempDirectory.childFile(_xcBundleFilePath).createSync();
+          }
+        ),
+        // The second xcodebuild is triggered due to above concurrent run failure message.
+        setUpFakeXcodeBuildHandler(
+          onRun: () {
+            // If the file is not cleaned, throw an error, test failure.
+            if (fileSystem.systemTempDirectory.childFile(_xcBundleFilePath).existsSync()) {
+              throwToolExit('xcresult bundle file existed.', exitCode: 2);
+            }
+            fileSystem.systemTempDirectory.childFile(_xcBundleFilePath).createSync();
+          }
+        ),
+        setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
+        setUpRsyncCommand(),
+      ],
+      ),
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    });
+
     testUsingContext('Failed to parse xcresult but display missing provisioning profile issue from stdout.', () async {
       final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -626,6 +724,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -659,6 +758,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -696,6 +796,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -729,6 +830,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -763,6 +865,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -799,6 +902,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -833,6 +937,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -868,6 +973,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 
@@ -905,6 +1011,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
 

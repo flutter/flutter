@@ -23,7 +23,7 @@ void main() {
 
   test('Defaults to the default typography for the platform', () {
     for (final TargetPlatform platform in TargetPlatform.values) {
-      final ThemeData theme = ThemeData(platform: platform);
+      final ThemeData theme = ThemeData(platform: platform, useMaterial3: false);
       final Typography typography = Typography.material2018(platform: platform);
       expect(
         theme.textTheme,
@@ -34,8 +34,8 @@ void main() {
   });
 
   test('Default text theme contrasts with brightness', () {
-    final ThemeData lightTheme = ThemeData(brightness: Brightness.light);
-    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark);
+    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, useMaterial3: false);
+    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, useMaterial3: false);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.textTheme.titleLarge!.color, typography.black.titleLarge!.color);
@@ -43,8 +43,8 @@ void main() {
   });
 
   test('Default primary text theme contrasts with primary brightness', () {
-    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
-    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black);
+    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white, useMaterial3: false);
+    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black, useMaterial3: false);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.primaryTextTheme.titleLarge!.color, typography.black.titleLarge!.color);
@@ -52,8 +52,8 @@ void main() {
   });
 
   test('Default icon theme contrasts with brightness', () {
-    final ThemeData lightTheme = ThemeData(brightness: Brightness.light);
-    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark);
+    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, useMaterial3: false);
+    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, useMaterial3: false);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.textTheme.titleLarge!.color, typography.black.titleLarge!.color);
@@ -61,8 +61,8 @@ void main() {
   });
 
   test('Default primary icon theme contrasts with primary brightness', () {
-    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
-    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black);
+    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white, useMaterial3: false);
+    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black, useMaterial3: false);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.primaryTextTheme.titleLarge!.color, typography.black.titleLarge!.color);
@@ -90,12 +90,10 @@ void main() {
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(themeData.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
-        break;
     }
   }, variant: TargetPlatformVariant.all());
 
@@ -125,19 +123,6 @@ void main() {
     expect(ThemeData.estimateBrightnessForColor(Colors.grey), equals(Brightness.light));
     expect(ThemeData.estimateBrightnessForColor(Colors.teal), equals(Brightness.dark));
     expect(ThemeData.estimateBrightnessForColor(Colors.indigo), equals(Brightness.dark));
-  });
-
-  test('Can estimate brightness - indirectly', () {
-    expect(ThemeData(primaryColor: Colors.white).primaryColorBrightness, equals(Brightness.light));
-    expect(ThemeData(primaryColor: Colors.black).primaryColorBrightness, equals(Brightness.dark));
-    expect(ThemeData(primaryColor: Colors.blue).primaryColorBrightness, equals(Brightness.dark));
-    expect(ThemeData(primaryColor: Colors.yellow).primaryColorBrightness, equals(Brightness.light));
-    expect(ThemeData(primaryColor: Colors.deepOrange).primaryColorBrightness, equals(Brightness.dark));
-    expect(ThemeData(primaryColor: Colors.orange).primaryColorBrightness, equals(Brightness.light));
-    expect(ThemeData(primaryColor: Colors.lime).primaryColorBrightness, equals(Brightness.light));
-    expect(ThemeData(primaryColor: Colors.grey).primaryColorBrightness, equals(Brightness.light));
-    expect(ThemeData(primaryColor: Colors.teal).primaryColorBrightness, equals(Brightness.dark));
-    expect(ThemeData(primaryColor: Colors.indigo).primaryColorBrightness, equals(Brightness.dark));
   });
 
   test('cursorColor', () {
@@ -184,7 +169,6 @@ void main() {
     expect(theme.colorScheme.brightness, Brightness.light);
 
     expect(theme.primaryColor, theme.colorScheme.primary);
-    expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
@@ -234,7 +218,6 @@ void main() {
     expect(theme.colorScheme.brightness, Brightness.dark);
 
     expect(theme.primaryColor, theme.colorScheme.surface);
-    expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
@@ -281,7 +264,6 @@ void main() {
     expect(theme.colorScheme.brightness, Brightness.light);
 
     expect(theme.primaryColor, theme.colorScheme.primary);
-    expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
@@ -329,7 +311,6 @@ void main() {
     expect(theme.colorScheme.brightness, Brightness.light);
 
     expect(theme.primaryColor, theme.colorScheme.primary);
-    expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
@@ -377,7 +358,6 @@ void main() {
     expect(theme.colorScheme.brightness, Brightness.dark);
 
     expect(theme.primaryColor, theme.colorScheme.surface);
-    expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
@@ -434,7 +414,6 @@ void main() {
         } else {
           expect(theme.splashFactory, equals(InkSparkle.splashFactory));
         }
-        break;
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -464,11 +443,23 @@ void main() {
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(VisualDensity.adaptivePlatformDensity, equals(VisualDensity.standard));
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(VisualDensity.adaptivePlatformDensity, equals(VisualDensity.compact));
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('VisualDensity.getDensityForPlatform returns adaptive values', (WidgetTester tester) async {
+    switch (debugDefaultTargetPlatformOverride!) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        expect(VisualDensity.defaultDensityForPlatform(debugDefaultTargetPlatformOverride!), equals(VisualDensity.standard));
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(VisualDensity.defaultDensityForPlatform(debugDefaultTargetPlatformOverride!), equals(VisualDensity.compact));
     }
   }, variant: TargetPlatformVariant.all());
 
@@ -479,10 +470,23 @@ void main() {
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(themeData.visualDensity, equals(VisualDensity.standard));
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
+        expect(themeData.visualDensity, equals(VisualDensity.compact));
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('VisualDensity in ThemeData defaults to the right thing when a platform is supplied to it', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(platform: debugDefaultTargetPlatformOverride! == TargetPlatform.android ? TargetPlatform.linux : TargetPlatform.android);
+    switch (debugDefaultTargetPlatformOverride!) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(themeData.visualDensity, equals(VisualDensity.standard));
+      case TargetPlatform.android:
         expect(themeData.visualDensity, equals(VisualDensity.compact));
     }
   }, variant: TargetPlatformVariant.all());
@@ -792,6 +796,7 @@ void main() {
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
       searchBarTheme: const SearchBarThemeData(),
+      searchViewTheme: const SearchViewThemeData(),
       segmentedButtonTheme: const SegmentedButtonThemeData(),
       sliderTheme: sliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
@@ -803,8 +808,6 @@ void main() {
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
       // DEPRECATED (newest deprecations at the bottom)
-      fixTextFieldOutlineLabel: false,
-      primaryColorBrightness: Brightness.dark,
       androidOverscrollIndicator: AndroidOverscrollIndicator.glow,
       toggleableActiveColor: Colors.black,
       selectedRowColor: Colors.black,
@@ -911,6 +914,7 @@ void main() {
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
       searchBarTheme: const SearchBarThemeData(),
+      searchViewTheme: const SearchViewThemeData(),
       segmentedButtonTheme: const SegmentedButtonThemeData(),
       sliderTheme: otherSliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.white),
@@ -923,8 +927,6 @@ void main() {
       tooltipTheme: const TooltipThemeData(height: 100),
 
       // DEPRECATED (newest deprecations at the bottom)
-      fixTextFieldOutlineLabel: true,
-      primaryColorBrightness: Brightness.light,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
       toggleableActiveColor: Colors.white,
       selectedRowColor: Colors.white,
@@ -1015,6 +1017,7 @@ void main() {
       progressIndicatorTheme: otherTheme.progressIndicatorTheme,
       radioTheme: otherTheme.radioTheme,
       searchBarTheme: otherTheme.searchBarTheme,
+      searchViewTheme: otherTheme.searchViewTheme,
       sliderTheme: otherTheme.sliderTheme,
       snackBarTheme: otherTheme.snackBarTheme,
       switchTheme: otherTheme.switchTheme,
@@ -1026,8 +1029,6 @@ void main() {
       tooltipTheme: otherTheme.tooltipTheme,
 
       // DEPRECATED (newest deprecations at the bottom)
-      fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
-      primaryColorBrightness: otherTheme.primaryColorBrightness,
       androidOverscrollIndicator: otherTheme.androidOverscrollIndicator,
       toggleableActiveColor: otherTheme.toggleableActiveColor,
       selectedRowColor: otherTheme.selectedRowColor,
@@ -1116,6 +1117,7 @@ void main() {
     expect(themeDataCopy.progressIndicatorTheme, equals(otherTheme.progressIndicatorTheme));
     expect(themeDataCopy.radioTheme, equals(otherTheme.radioTheme));
     expect(themeDataCopy.searchBarTheme, equals(otherTheme.searchBarTheme));
+    expect(themeDataCopy.searchViewTheme, equals(otherTheme.searchViewTheme));
     expect(themeDataCopy.sliderTheme, equals(otherTheme.sliderTheme));
     expect(themeDataCopy.snackBarTheme, equals(otherTheme.snackBarTheme));
     expect(themeDataCopy.switchTheme, equals(otherTheme.switchTheme));
@@ -1130,8 +1132,6 @@ void main() {
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
 
     // DEPRECATED (newest deprecations at the bottom)
-    expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
-    expect(themeDataCopy.primaryColorBrightness, equals(otherTheme.primaryColorBrightness));
     expect(themeDataCopy.androidOverscrollIndicator, equals(otherTheme.androidOverscrollIndicator));
     expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.toggleableActiveColor));
     expect(themeDataCopy.selectedRowColor, equals(otherTheme.selectedRowColor));
@@ -1254,6 +1254,7 @@ void main() {
       'progressIndicatorTheme',
       'radioTheme',
       'searchBarTheme',
+      'searchViewTheme',
       'segmentedButtonTheme',
       'sliderTheme',
       'snackBarTheme',
@@ -1265,8 +1266,6 @@ void main() {
       'toggleButtonsTheme',
       'tooltipTheme',
       // DEPRECATED (newest deprecations at the bottom)
-      'fixTextFieldOutlineLabel',
-      'primaryColorBrightness',
       'androidOverscrollIndicator',
       'toggleableActiveColor',
       'selectedRowColor',

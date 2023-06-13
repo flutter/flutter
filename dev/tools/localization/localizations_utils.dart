@@ -71,12 +71,10 @@ class LocaleInfo implements Comparable<LocaleInfo> {
             case 'CN':
             case 'SG':
               scriptCode = 'Hans';
-              break;
             case 'TW':
             case 'HK':
             case 'MO':
               scriptCode = 'Hant';
-              break;
           }
           break;
         }
@@ -242,6 +240,10 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
       help: 'Remove any localizations that are not defined in the canonical locale.',
     )
     ..addFlag(
+      'widgets',
+      help: 'Whether to print the generated classes for the Widgets package only. Ignored when --overwrite is passed.',
+    )
+    ..addFlag(
       'material',
       help: 'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
     )
@@ -256,6 +258,7 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
   }
   final bool writeToFile = args['overwrite'] as bool;
   final bool removeUndefined = args['remove-undefined'] as bool;
+  final bool widgetsOnly = args['widgets'] as bool;
   final bool materialOnly = args['material'] as bool;
   final bool cupertinoOnly = args['cupertino'] as bool;
 
@@ -263,6 +266,7 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
     writeToFile: writeToFile,
     materialOnly: materialOnly,
     cupertinoOnly: cupertinoOnly,
+    widgetsOnly: widgetsOnly,
     removeUndefined: removeUndefined,
   );
 }
@@ -273,12 +277,14 @@ class GeneratorOptions {
     required this.removeUndefined,
     required this.materialOnly,
     required this.cupertinoOnly,
+    required this.widgetsOnly,
   });
 
   final bool writeToFile;
   final bool removeUndefined;
   final bool materialOnly;
   final bool cupertinoOnly;
+  final bool widgetsOnly;
 }
 
 // See also //master/tools/gen_locale.dart in the engine repo.
@@ -339,13 +345,10 @@ void precacheLanguageAndRegionTags() {
       switch (type) {
         case 'language':
           _languages[subtag] = description;
-          break;
         case 'region':
           _regions[subtag] = description;
-          break;
         case 'script':
           _scripts[subtag] = description;
-          break;
       }
     }
   }

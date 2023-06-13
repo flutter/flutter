@@ -94,19 +94,15 @@ class StockHomeState extends State<StockHome> {
         setState(() {
           _autorefresh = !_autorefresh;
         });
-        break;
       case _StockMenuItem.refresh:
         showDialog<void>(
           context: context,
           builder: (BuildContext context) => const _NotImplementedDialog(),
         );
-        break;
       case _StockMenuItem.speedUp:
         timeDilation /= 5.0;
-        break;
       case _StockMenuItem.speedDown:
         timeDilation *= 5.0;
-        break;
     }
   }
 

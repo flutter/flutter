@@ -170,18 +170,12 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class FakeLinuxApp extends Fake implements LinuxApp {
   @override
-  String executable(BuildMode buildMode) {
-    switch (buildMode) {
-      case BuildMode.debug:
-        return 'debug/executable';
-      case BuildMode.profile:
-        return 'profile/executable';
-      case BuildMode.release:
-        return 'release/executable';
-      default:
-        throw StateError('Invalid mode: $buildMode');
-    }
-  }
+  String executable(BuildMode buildMode) => switch (buildMode) {
+        BuildMode.debug => 'debug/executable',
+        BuildMode.profile => 'profile/executable',
+        BuildMode.release => 'release/executable',
+        _ => throw StateError('Invalid mode: $buildMode'),
+      };
 }
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   FakeOperatingSystemUtils({

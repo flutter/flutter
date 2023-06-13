@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "ជ្រើសរើស​ទាំងអស់",
   "tabSemanticsLabel": "ផ្ទាំងទី $tabIndex នៃ $tabCount",
   "modalBarrierDismissLabel": "ច្រាន​ចោល",
-  "searchTextFieldPlaceholderLabel": "ស្វែងរក"
+  "searchTextFieldPlaceholderLabel": "ស្វែងរក",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

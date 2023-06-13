@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ExpansionTile].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ExpansionTile].
 
 void main() => runApp(const ExpansionTileApp());
 
@@ -48,9 +48,7 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
           title: const Text('ExpansionTile 2'),
           subtitle: const Text('Custom expansion arrow icon'),
           trailing: Icon(
-            _customTileExpanded
-              ? Icons.arrow_drop_down_circle
-              : Icons.arrow_drop_down,
+            _customTileExpanded ? Icons.arrow_drop_down_circle : Icons.arrow_drop_down,
           ),
           children: const <Widget>[
             ListTile(title: Text('This is tile number 2')),

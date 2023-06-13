@@ -20,7 +20,6 @@ import '../globals.dart' as globals;
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
   AnalyzeBase(this.argResults, {
-    required this.repoRoots,
     required this.repoPackages,
     required this.fileSystem,
     required this.logger,
@@ -28,12 +27,11 @@ abstract class AnalyzeBase {
     required this.processManager,
     required this.terminal,
     required this.artifacts,
+    required this.suppressAnalytics,
   });
 
   /// The parsed argument results for execution.
   final ArgResults argResults;
-  @protected
-  final List<String> repoRoots;
   @protected
   final List<Directory> repoPackages;
   @protected
@@ -48,6 +46,11 @@ abstract class AnalyzeBase {
   final Terminal terminal;
   @protected
   final Artifacts artifacts;
+  @protected
+  final bool suppressAnalytics;
+
+  @protected
+  String get flutterRoot => globals.fs.path.absolute(Cache.flutterRoot!);
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();

@@ -133,6 +133,7 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
+    this._nullSafetyMode,
   ) : basePath = _getIndexHtml().getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
@@ -178,7 +179,7 @@ class WebAssetServer implements AssetReader {
   static Future<WebAssetServer> start(
     ChromiumLauncher? chromiumLauncher,
     String hostname,
-    int? port,
+    int port,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
@@ -187,7 +188,8 @@ class WebAssetServer implements AssetReader {
     bool enableDwds,
     bool enableDds,
     Uri entrypoint,
-    ExpressionCompiler? expressionCompiler, {
+    ExpressionCompiler? expressionCompiler,
+    NullSafetyMode nullSafetyMode, {
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
@@ -201,7 +203,7 @@ class WebAssetServer implements AssetReader {
     const int kMaxRetries = 4;
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
-        httpServer = await HttpServer.bind(address, port ?? await globals.os.findFreePort());
+        httpServer = await HttpServer.bind(address, port);
         break;
       } on SocketException catch (e, s) {
         if (i >= kMaxRetries) {
@@ -224,6 +226,7 @@ class WebAssetServer implements AssetReader {
       address,
       modules,
       digests,
+      nullSafetyMode,
     );
     if (testMode) {
       return server;
@@ -293,6 +296,9 @@ class WebAssetServer implements AssetReader {
         PackageUriMapper(packageConfig),
         digestProvider,
         server.basePath,
+        packageConfig.toPackageUri(
+          globals.fs.file(entrypoint).absolute.uri,
+        ),
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,
@@ -316,6 +322,7 @@ class WebAssetServer implements AssetReader {
     return server;
   }
 
+  final NullSafetyMode _nullSafetyMode;
   final HttpServer _httpServer;
   final WebMemoryFS _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -413,12 +420,13 @@ class WebAssetServer implements AssetReader {
     File file = _resolveDartFile(requestPath);
 
     if (!file.existsSync() && requestPath.startsWith('canvaskit/')) {
-      final String canvasKitPath = globals.artifacts!.getArtifactPath(
-        Artifact.canvasKitPath,
-        platform: TargetPlatform.web_javascript,
+      final Directory canvasKitDirectory = globals.fs.directory(
+        globals.fs.path.join(
+          globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
+          'canvaskit',
+        )
       );
-      final Uri potential = globals.fs
-          .directory(canvasKitPath)
+      final Uri potential = canvasKitDirectory
           .uri
           .resolve(requestPath.replaceFirst('canvaskit/', ''));
       file = globals.fs.file(potential);
@@ -572,12 +580,12 @@ class WebAssetServer implements AssetReader {
 
   File get _resolveDartSdkJsFile =>
       globals.fs.file(globals.artifacts!.getHostArtifact(
-          kDartSdkJsArtifactMap[webRenderer]!
+          kDartSdkJsArtifactMap[webRenderer]![_nullSafetyMode]!
       ));
 
   File get _resolveDartSdkJsMapFile =>
     globals.fs.file(globals.artifacts!.getHostArtifact(
-        kDartSdkJsMapArtifactMap[webRenderer]!
+        kDartSdkJsMapArtifactMap[webRenderer]![_nullSafetyMode]!
     ));
 
   @override
@@ -634,7 +642,7 @@ class WebDevFS implements DevFS {
   /// server.
   WebDevFS({
     required this.hostname,
-    required int? port,
+    required int port,
     required this.packagesFilePath,
     required this.urlTunneller,
     required this.useSseForDebugProxy,
@@ -646,7 +654,9 @@ class WebDevFS implements DevFS {
     required this.entrypoint,
     required this.expressionCompiler,
     required this.chromiumLauncher,
+    required this.nullAssertions,
     required this.nativeNullAssertions,
+    required this.nullSafetyMode,
     this.testMode = false,
   }) : _port = port;
 
@@ -663,8 +673,10 @@ class WebDevFS implements DevFS {
   final bool testMode;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
+  final bool nullAssertions;
   final bool nativeNullAssertions;
-  final int? _port;
+  final int _port;
+  final NullSafetyMode nullSafetyMode;
 
   late WebAssetServer webAssetServer;
 
@@ -760,12 +772,13 @@ class WebDevFS implements DevFS {
       enableDds,
       entrypoint,
       expressionCompiler,
+      nullSafetyMode,
       testMode: testMode,
     );
 
     final int selectedPort = webAssetServer.selectedPort;
     if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
-      webAssetServer.webRenderer = WebRendererMode.autoDetect;
+      webAssetServer.webRenderer = WebRendererMode.auto;
     } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
       webAssetServer.webRenderer = WebRendererMode.canvaskit;
     }
@@ -848,6 +861,7 @@ class WebDevFS implements DevFS {
         'main_module.bootstrap.js',
         generateMainModule(
           entrypoint: entrypoint,
+          nullAssertions: nullAssertions,
           nativeNullAssertions: nativeNullAssertions,
         ),
       );

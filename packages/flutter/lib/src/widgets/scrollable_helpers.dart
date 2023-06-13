@@ -22,10 +22,8 @@ import 'scrollable.dart';
 export 'package:flutter/physics.dart' show Tolerance;
 
 /// Describes the aspects of a Scrollable widget to inform inherited widgets
-/// like [ScrollBehavior] for decorating.
-// TODO(Piinks): Fix doc with 2DScrollable change.
-// or enumerate the properties of combined
-// Scrollables, such as [TwoDimensionalScrollable].
+/// like [ScrollBehavior] for decorating or enumerate the properties of combined
+/// Scrollables, such as [TwoDimensionalScrollable].
 ///
 /// Decorations like [GlowingOverscrollIndicator]s and [Scrollbar]s require
 /// information about the Scrollable in order to be initialized.
@@ -160,11 +158,8 @@ class EdgeDraggingAutoScroller {
   EdgeDraggingAutoScroller(
     this.scrollable, {
     this.onScrollViewScrolled,
-    this.velocityScalar = _kDefaultAutoScrollVelocityScalar,
+    required this.velocityScalar,
   });
-
-  // An eyeballed value for a smooth scrolling experience.
-  static const double _kDefaultAutoScrollVelocityScalar = 7;
 
   /// The [Scrollable] this auto scroller is scrolling.
   final ScrollableState scrollable;
@@ -176,10 +171,12 @@ class EdgeDraggingAutoScroller {
   /// in between each scroll.
   final VoidCallback? onScrollViewScrolled;
 
+  /// {@template flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
   /// The velocity scalar per pixel over scroll.
   ///
   /// It represents how the velocity scale with the over scroll distance. The
   /// auto-scroll velocity = <distance of overscroll> * velocityScalar.
+  /// {@endtemplate}
   final double velocityScalar;
 
   late Rect _dragTargetRelatedToScrollOrigin;
@@ -264,7 +261,6 @@ class EdgeDraggingAutoScroller {
           final double overDrag = math.min(viewportStart - proxyStart, overDragMax);
           newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
         }
-        break;
       case AxisDirection.right:
       case AxisDirection.down:
         if (proxyStart < viewportStart && scrollable.position.pixels > scrollable.position.minScrollExtent) {
@@ -274,7 +270,6 @@ class EdgeDraggingAutoScroller {
           final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
           newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
         }
-        break;
     }
 
     if (newOffset == null || (newOffset - scrollable.position.pixels).abs() < 1.0) {

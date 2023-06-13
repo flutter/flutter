@@ -280,6 +280,7 @@ class Icon extends StatelessWidget {
           fontSize: iconSize,
           fontFamily: icon!.fontFamily,
           package: icon!.fontPackage,
+          fontFamilyFallback: icon!.fontFamilyFallback,
           shadows: iconShadows,
         ),
       ),
@@ -294,7 +295,6 @@ class Icon extends StatelessWidget {
             transformHitTests: false,
             child: iconWidget,
           );
-          break;
         case TextDirection.ltr:
           break;
       }

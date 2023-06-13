@@ -47,7 +47,7 @@ class ContextMenuButtonItem {
   });
 
   /// The callback to be called when the button is pressed.
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   /// The type of button this represents.
   final ContextMenuButtonType type;

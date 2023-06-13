@@ -193,13 +193,11 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
 
   @override
   void handlePlatformUndo(UndoDirection direction) {
-    switch(direction) {
+    switch (direction) {
       case UndoDirection.undo:
         undo();
-        break;
       case UndoDirection.redo:
         redo();
-        break;
     }
   }
 

@@ -2,34 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [GestureDetector].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [GestureDetector].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const GestureDetectorExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class GestureDetectorExampleApp extends StatelessWidget {
+  const GestureDetectorExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: GestureDetectorExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class GestureDetectorExample extends StatefulWidget {
+  const GestureDetectorExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<GestureDetectorExample> createState() => _GestureDetectorExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _GestureDetectorExampleState extends State<GestureDetectorExample> {
   Color _color = Colors.white;
 
   @override
@@ -41,9 +38,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       child: GestureDetector(
         onTap: () {
           setState(() {
-            _color == Colors.yellow
-                ? _color = Colors.white
-                : _color = Colors.yellow;
+            _color == Colors.yellow ? _color = Colors.white : _color = Colors.yellow;
           });
         },
       ),

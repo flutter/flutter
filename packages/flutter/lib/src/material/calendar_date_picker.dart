@@ -201,7 +201,6 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         HapticFeedback.vibrate();
-        break;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         break;

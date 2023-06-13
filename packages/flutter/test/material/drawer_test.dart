@@ -14,6 +14,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           drawer: Drawer(
             child: ListView(
@@ -688,9 +689,61 @@ void main() {
     );
   });
 
+  testWidgets('Drawer clip behavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Scaffold(
+          drawer: Drawer(),
+        ),
+      ),
+    );
+
+    final Finder drawerMaterial = find.descendant(
+      of: find.byType(Drawer),
+      matching: find.byType(Material),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+    // Open the drawer.
+    state.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test default clip behavior.
+    Material material = tester.widget<Material>(drawerMaterial);
+    expect(material.clipBehavior, Clip.hardEdge);
+
+    state.closeDrawer();
+    await tester.pumpAndSettle();
+
+    // Provide a custom clip behavior.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Scaffold(
+          drawer: Drawer(
+            clipBehavior: Clip.antiAlias,
+          ),
+        ),
+      ),
+    );
+
+    // Open the drawer again.
+    state.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Clip behavior is now updated.
+    material = tester.widget<Material>(drawerMaterial);
+    expect(material.clipBehavior, Clip.antiAlias);
+  });
+
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Drawer default shape', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -731,6 +784,58 @@ void main() {
       // Test the end drawer shape.
       material = tester.widget<Material>(drawerMaterial);
       expect(material.shape, null);
+    });
+
+    testWidgets('Drawer clip behavior', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
+            drawer: Drawer(),
+          ),
+        ),
+      );
+
+      final Finder drawerMaterial = find.descendant(
+        of: find.byType(Drawer),
+        matching: find.byType(Material),
+      );
+
+      final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+      // Open the drawer.
+      state.openDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Test default clip behavior.
+      Material material = tester.widget<Material>(drawerMaterial);
+      expect(material.clipBehavior, Clip.none);
+
+      state.closeDrawer();
+      await tester.pumpAndSettle();
+
+      // Provide a shape and custom clip behavior.
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
+            drawer: Drawer(
+              clipBehavior: Clip.hardEdge,
+              shape: RoundedRectangleBorder(),
+            ),
+          ),
+        ),
+      );
+
+      // Open the drawer again.
+      state.openDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Clip behavior is now updated.
+      material = tester.widget<Material>(drawerMaterial);
+      expect(material.clipBehavior, Clip.hardEdge);
     });
   });
 }

@@ -70,8 +70,9 @@ class IndexHtml {
     if (serviceWorkerVersion != null) {
       _content = _content
           .replaceFirst(
-            'var serviceWorkerVersion = null',
-            'var serviceWorkerVersion = "$serviceWorkerVersion"',
+            // Support older `var` syntax as well as new `const` syntax
+            RegExp('(const|var) serviceWorkerVersion = null'),
+            'const serviceWorkerVersion = "$serviceWorkerVersion"',
           )
           // This is for legacy index.html that still uses the old service
           // worker loading mechanism.

@@ -261,7 +261,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   OutlinedBorder? _shape;
   set shape(OutlinedBorder? value){
     assert(radius == null || value == null);
-    if(shape == value) {
+    if (shape == value) {
       return;
     }
 
@@ -384,7 +384,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // The track is offset by only padding.
   double get _totalTrackMainAxisOffsets => _isVertical ? padding.vertical : padding.horizontal;
   double get _leadingTrackMainAxisOffset {
-    switch(_resolvedOrientation) {
+    switch (_resolvedOrientation) {
       case ScrollbarOrientation.left:
       case ScrollbarOrientation.right:
         return padding.top;
@@ -402,7 +402,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Thumb Offsets
   // The thumb is offset by padding and margins.
   double get _leadingThumbMainAxisOffset {
-    switch(_resolvedOrientation) {
+    switch (_resolvedOrientation) {
       case ScrollbarOrientation.left:
       case ScrollbarOrientation.right:
         return padding.top + mainAxisMargin;
@@ -558,7 +558,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final Size thumbSize, trackSize;
     final Offset trackOffset, borderStart, borderEnd;
     _debugAssertIsValidOrientation(_resolvedOrientation);
-    switch(_resolvedOrientation) {
+    switch (_resolvedOrientation) {
       case ScrollbarOrientation.left:
         thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
@@ -567,7 +567,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackOffset = Offset(x - crossAxisMargin, _leadingTrackMainAxisOffset);
         borderStart = trackOffset + Offset(trackSize.width, 0.0);
         borderEnd = Offset(trackOffset.dx + trackSize.width, trackOffset.dy + _trackExtent);
-        break;
       case ScrollbarOrientation.right:
         thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
@@ -576,7 +575,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackOffset = Offset(x - crossAxisMargin, _leadingTrackMainAxisOffset);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx, trackOffset.dy + _trackExtent);
-        break;
       case ScrollbarOrientation.top:
         thumbSize = Size(_thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
@@ -585,7 +583,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackOffset = Offset(_leadingTrackMainAxisOffset, y - crossAxisMargin);
         borderStart = trackOffset + Offset(0.0, trackSize.height);
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
-        break;
       case ScrollbarOrientation.bottom:
         thumbSize = Size(_thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
@@ -594,7 +591,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackOffset = Offset(_leadingTrackMainAxisOffset, y - crossAxisMargin);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy);
-        break;
     }
 
     // Whether we paint or not, calculating these rects allows us to hit test
@@ -988,19 +984,9 @@ class RawScrollbar extends StatefulWidget {
     this.mainAxisMargin = 0.0,
     this.crossAxisMargin = 0.0,
     this.padding,
-    @Deprecated(
-      'Use thumbVisibility instead. '
-      'This feature was deprecated after v2.9.0-1.0.pre.',
-    )
-    this.isAlwaysShown,
   }) : assert(
-         thumbVisibility == null || isAlwaysShown == null,
-         'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
-         'isAlwaysShown is deprecated.'
-       ),
-       assert(
-         !((thumbVisibility == false || isAlwaysShown == false) && (trackVisibility ?? false)),
-         'A scrollbar track cannot be drawn without a scrollbar thumb.'
+         !(thumbVisibility == false && (trackVisibility ?? false)),
+         'A scrollbar track cannot be drawn without a scrollbar thumb.',
        ),
        assert(minThumbLength >= 0),
        assert(minOverscrollLength == null || minOverscrollLength <= minThumbLength),
@@ -1091,9 +1077,9 @@ class RawScrollbar extends StatefulWidget {
   ///   * When providing a controller, the same ScrollController must also be
   ///     provided to the associated Scrollable widget.
   ///   * The [PrimaryScrollController] is used by default for a [ScrollView]
-  ///     that has not been provided a [ScrollController] and that has an
-  ///     [Axis.vertical] [ScrollDirection]. This automatic behavior does not
-  ///     apply to those with a ScrollDirection of Axis.horizontal. To explicitly
+  ///     that has not been provided a [ScrollController] and that has a
+  ///     [ScrollView.scrollDirection] of [Axis.vertical]. This automatic
+  ///     behavior does not apply to those with [Axis.horizontal]. To explicitly
   ///     use the PrimaryScrollController, set [ScrollView.primary] to true.
   ///
   /// Defaults to false when null.
@@ -1153,99 +1139,11 @@ class RawScrollbar extends StatefulWidget {
   ///     scroll view associated with the parent [PrimaryScrollController].
   ///   * [PrimaryScrollController], which associates a [ScrollController] with
   ///     a subtree.
-  ///
-  /// Replaces deprecated [isAlwaysShown].
   /// {@endtemplate}
   ///
   /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
   /// [MaterialState]s by using [ScrollbarThemeData.thumbVisibility].
   final bool? thumbVisibility;
-
-  /// {@template flutter.widgets.Scrollbar.isAlwaysShown}
-  /// Indicates that the scrollbar thumb should be visible, even when a scroll
-  /// is not underway.
-  ///
-  /// When false, the scrollbar will be shown during scrolling
-  /// and will fade out otherwise.
-  ///
-  /// When true, the scrollbar will always be visible and never fade out. This
-  /// requires that the Scrollbar can access the [ScrollController] of the
-  /// associated Scrollable widget. This can either be the provided [controller],
-  /// or the [PrimaryScrollController] of the current context.
-  ///
-  ///   * When providing a controller, the same ScrollController must also be
-  ///     provided to the associated Scrollable widget.
-  ///   * The [PrimaryScrollController] is used by default for a [ScrollView]
-  ///     that has not been provided a [ScrollController] and that has an
-  ///     [Axis.vertical] [ScrollDirection]. This automatic behavior does not
-  ///     apply to those with a ScrollDirection of Axis.horizontal. To explicitly
-  ///     use the PrimaryScrollController, set [ScrollView.primary] to true.
-  ///
-  /// Defaults to false when null.
-  ///
-  /// {@tool snippet}
-  ///
-  /// ```dart
-  /// // (e.g. in a stateful widget)
-  ///
-  /// final ScrollController controllerOne = ScrollController();
-  /// final ScrollController controllerTwo = ScrollController();
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  /// return Column(
-  ///   children: <Widget>[
-  ///     SizedBox(
-  ///        height: 200,
-  ///        child: Scrollbar(
-  ///          thumbVisibility: true,
-  ///          controller: controllerOne,
-  ///          child: ListView.builder(
-  ///            controller: controllerOne,
-  ///            itemCount: 120,
-  ///            itemBuilder: (BuildContext context, int index) {
-  ///              return Text('item $index');
-  ///            },
-  ///          ),
-  ///        ),
-  ///      ),
-  ///      SizedBox(
-  ///        height: 200,
-  ///        child: CupertinoScrollbar(
-  ///          thumbVisibility: true,
-  ///          controller: controllerTwo,
-  ///          child: SingleChildScrollView(
-  ///            controller: controllerTwo,
-  ///            child: const SizedBox(
-  ///              height: 2000,
-  ///              width: 500,
-  ///              child: Placeholder(),
-  ///            ),
-  ///          ),
-  ///        ),
-  ///      ),
-  ///    ],
-  ///   );
-  /// }
-  /// ```
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///   * [RawScrollbarState.showScrollbar], an overridable getter which uses
-  ///     this value to override the default behavior.
-  ///   * [ScrollView.primary], which indicates whether the ScrollView is the primary
-  ///     scroll view associated with the parent [PrimaryScrollController].
-  ///   * [PrimaryScrollController], which associates a [ScrollController] with
-  ///     a subtree.
-  ///
-  /// This is deprecated, [thumbVisibility] should be used instead.
-  /// {@endtemplate}
-  @Deprecated(
-    'Use thumbVisibility instead. '
-    'This feature was deprecated after v2.9.0-1.0.pre.',
-  )
-  final bool? isAlwaysShown;
 
   /// The [OutlinedBorder] of the scrollbar's thumb.
   ///
@@ -1457,14 +1355,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Subclasses can override this getter to make its value depend on an inherited
   /// theme.
   ///
-  /// Defaults to false when [RawScrollbar.isAlwaysShown] or
-  /// [RawScrollbar.thumbVisibility] is null.
-  ///
-  /// See also:
-  ///
-  ///   * [RawScrollbar.isAlwaysShown], which overrides the default behavior.
+  /// Defaults to false when [RawScrollbar.thumbVisibility] is null.
   @protected
-  bool get showScrollbar => widget.isAlwaysShown ?? widget.thumbVisibility ?? false;
+  bool get showScrollbar => widget.thumbVisibility ?? false;
 
   bool get _showTrack => showScrollbar && (widget.trackVisibility ?? false);
 
@@ -1550,9 +1443,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       : 'provided ScrollController';
 
     String when = '';
-    if (widget.isAlwaysShown ?? false) {
-      when = 'Scrollbar.isAlwaysShown is true';
-    } else if (widget.thumbVisibility ?? false) {
+    if (widget.thumbVisibility ?? false) {
       when = 'Scrollbar.thumbVisibility is true';
     } else if (enableGestures) {
       when = 'the scrollbar is interactive';
@@ -1580,7 +1471,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             'ScrollController should be associated with the ScrollView that '
             'the Scrollbar is being applied to.'
             '${tryPrimary
-              ? 'A ScrollView with an Axis.vertical ScrollDirection on mobile '
+              ? 'When ScrollView.scrollDirection is Axis.vertical on mobile '
                 'platforms will automatically use the '
                 'PrimaryScrollController if the user has not provided a '
                 'ScrollController. To use the PrimaryScrollController '
@@ -1662,9 +1553,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isAlwaysShown != oldWidget.isAlwaysShown
-        || widget.thumbVisibility != oldWidget.thumbVisibility) {
-      if ((widget.isAlwaysShown ?? false) || (widget.thumbVisibility ?? false)) {
+    if (widget.thumbVisibility != oldWidget.thumbVisibility) {
+      if (widget.thumbVisibility ?? false) {
         assert(_debugScheduleCheckHasValidScrollPosition());
         _fadeoutTimer?.cancel();
         _fadeoutAnimationController.animateTo(1.0);
@@ -1687,19 +1577,15 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       case AxisDirection.up:
         primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dy - updatedOffset.dy;
         primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dy - updatedOffset.dy;
-        break;
       case AxisDirection.right:
         primaryDeltaFromDragStart = updatedOffset.dx -_startDragScrollbarAxisOffset!.dx;
         primaryDeltaFromLastDragUpdate = updatedOffset.dx -_lastDragUpdateOffset!.dx;
-        break;
       case AxisDirection.down:
         primaryDeltaFromDragStart = updatedOffset.dy -_startDragScrollbarAxisOffset!.dy;
         primaryDeltaFromLastDragUpdate = updatedOffset.dy -_lastDragUpdateOffset!.dy;
-        break;
       case AxisDirection.left:
         primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dx - updatedOffset.dx;
         primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dx - updatedOffset.dx;
-        break;
     }
 
     // Convert primaryDelta, the amount that the scrollbar moved since the last
@@ -1719,13 +1605,12 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
       // The physics may allow overscroll when actually *scrolling*, but
       // dragging on the scrollbar does not always allow us to enter overscroll.
-      switch(ScrollConfiguration.of(context).getPlatform(context)) {
+      switch (ScrollConfiguration.of(context).getPlatform(context)) {
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
           newPosition = clampDouble(newPosition, position.minScrollExtent, position.maxScrollExtent);
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.android:
           // We can only drag the scrollbar into overscroll on mobile
@@ -1850,7 +1735,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         } else {
           scrollDirection = AxisDirection.up;
         }
-        break;
       case AxisDirection.left:
       case AxisDirection.right:
         if (details.localPosition.dx > scrollbarPainter._thumbOffset) {
@@ -1896,17 +1780,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
-    if (!widget.notificationPredicate(ScrollUpdateNotification(
-          metrics: notification.metrics,
-          context: notification.context,
-          depth: notification.depth,
-        ))) {
+    if (!widget.notificationPredicate(notification.asScrollUpdate())) {
       return false;
     }
 
     if (showScrollbar) {
-      if (_fadeoutAnimationController.status != AnimationStatus.forward
-          && _fadeoutAnimationController.status != AnimationStatus.completed) {
+      if (_fadeoutAnimationController.status != AnimationStatus.forward &&
+          _fadeoutAnimationController.status != AnimationStatus.completed) {
         _fadeoutAnimationController.forward();
       }
     }
@@ -1926,8 +1806,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final ScrollMetrics metrics = notification.metrics;
     if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
       // Hide the bar when the Scrollable widget has no space to scroll.
-      if (_fadeoutAnimationController.status != AnimationStatus.dismissed
-          && _fadeoutAnimationController.status != AnimationStatus.reverse) {
+      if (_fadeoutAnimationController.status != AnimationStatus.dismissed &&
+          _fadeoutAnimationController.status != AnimationStatus.reverse) {
         _fadeoutAnimationController.reverse();
       }
 
@@ -1940,8 +1820,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (notification is ScrollUpdateNotification ||
       notification is OverscrollNotification) {
       // Any movements always makes the scrollbar start showing up.
-      if (_fadeoutAnimationController.status != AnimationStatus.forward
-          && _fadeoutAnimationController.status != AnimationStatus.completed) {
+      if (_fadeoutAnimationController.status != AnimationStatus.forward &&
+          _fadeoutAnimationController.status != AnimationStatus.completed) {
         _fadeoutAnimationController.forward();
       }
 
@@ -2003,7 +1883,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
     return scrollbarPainter.hitTestInteractive(localOffset, kind)
-      && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
+       && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
   }
   /// Returns true if the provided [Offset] is located over the thumb of the
   /// [RawScrollbar].
@@ -2147,13 +2027,12 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
               gestures: _gestures,
               child: MouseRegion(
                 onExit: (PointerExitEvent event) {
-                  switch(event.kind) {
+                  switch (event.kind) {
                     case PointerDeviceKind.mouse:
                     case PointerDeviceKind.trackpad:
                       if (enableGestures) {
                         handleHoverExit(event);
                       }
-                      break;
                     case PointerDeviceKind.stylus:
                     case PointerDeviceKind.invertedStylus:
                     case PointerDeviceKind.unknown:
@@ -2162,13 +2041,12 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   }
                 },
                 onHover: (PointerHoverEvent event) {
-                  switch(event.kind) {
+                  switch (event.kind) {
                     case PointerDeviceKind.mouse:
                     case PointerDeviceKind.trackpad:
                       if (enableGestures) {
                         handleHover(event);
                       }
-                      break;
                     case PointerDeviceKind.stylus:
                     case PointerDeviceKind.invertedStylus:
                     case PointerDeviceKind.unknown:

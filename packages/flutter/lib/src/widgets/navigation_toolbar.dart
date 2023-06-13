@@ -113,10 +113,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       switch (textDirection) {
         case TextDirection.rtl:
           leadingX = size.width - leadingWidth;
-          break;
         case TextDirection.ltr:
           leadingX = 0.0;
-          break;
       }
       positionChild(_ToolbarSlot.leading, Offset(leadingX, 0.0));
     }
@@ -128,10 +126,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       switch (textDirection) {
         case TextDirection.rtl:
           trailingX = 0.0;
-          break;
         case TextDirection.ltr:
           trailingX = size.width - trailingSize.width;
-          break;
       }
       final double trailingY = (size.height - trailingSize.height) / 2.0;
       trailingWidth = trailingSize.width;
@@ -161,10 +157,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       switch (textDirection) {
         case TextDirection.rtl:
           middleX = size.width - middleSize.width - middleStart;
-          break;
         case TextDirection.ltr:
           middleX = middleStart;
-          break;
       }
 
       positionChild(_ToolbarSlot.middle, Offset(middleX, middleY));

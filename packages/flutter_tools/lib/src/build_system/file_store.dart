@@ -191,12 +191,10 @@ class FileStore {
         for (final File file in files) {
           _hashFile(file, dirty);
         }
-        break;
       case FileStoreStrategy.timestamp:
         for (final File file in files) {
           _checkModification(file, dirty);
         }
-        break;
     }
     return dirty;
   }

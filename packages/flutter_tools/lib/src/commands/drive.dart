@@ -17,10 +17,12 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/signals.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
+import '../drive/web_driver_service.dart' show Browser;
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../resident_runner.dart';
@@ -111,25 +113,12 @@ class DriveCommand extends RunCommandBase {
         defaultsTo: true,
         help: 'Whether the driver browser is going to be launched in headless mode.',
       )
-      ..addOption('browser-name',
-        defaultsTo: 'chrome',
+      ..addOption(
+        'browser-name',
+        defaultsTo: Browser.chrome.cliName,
         help: 'Name of the browser where tests will be executed.',
-        allowed: <String>[
-          'android-chrome',
-          'chrome',
-          'edge',
-          'firefox',
-          'ios-safari',
-          'safari',
-        ],
-        allowedHelp: <String, String>{
-          'android-chrome': 'Chrome on Android (see also "--android-emulator").',
-          'chrome': 'Google Chrome on this computer (see also "--chrome-binary").',
-          'edge': 'Microsoft Edge on this computer (Windows only).',
-          'firefox': 'Mozilla Firefox on this computer.',
-          'ios-safari': 'Apple Safari on an iOS device.',
-          'safari': 'Apple Safari on this computer (macOS only).',
-        },
+        allowed: Browser.values.map((Browser e) => e.cliName),
+        allowedHelp: CliEnum.allowedHelp(Browser.values),
       )
       ..addOption('browser-dimension',
         defaultsTo: '1600,1024',
@@ -212,16 +201,16 @@ class DriveCommand extends RunCommandBase {
     );
   }
 
-  // Network devices need `publish-port` to be enabled because it requires mDNS.
-  // If the flag wasn't provided as an actual argument and it's a network device,
+  // Wireless iOS devices need `publish-port` to be enabled because it requires mDNS.
+  // If the flag wasn't provided as an actual argument and it's a wireless device,
   // change it to be enabled.
   @override
   Future<bool> get disablePortPublication async {
     final ArgResults? localArgResults = argResults;
     final Device? device = await targetedDevice;
-    final bool isNetworkDevice = device is IOSDevice && device.isWirelesslyConnected;
-    if (isNetworkDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
-      _logger.printTrace('Network device is being used. Changing `publish-port` to be enabled.');
+    final bool isWirelessIOSDevice = device is IOSDevice && device.isWirelesslyConnected;
+    if (isWirelessIOSDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
+      _logger.printTrace('A wireless iOS device is being used. Changing `publish-port` to be enabled.');
       return false;
     }
     return !boolArg('publish-port');
@@ -326,8 +315,10 @@ class DriveCommand extends RunCommandBase {
         profileMemory: stringArg('profile-memory'),
       );
 
-      // If the test is sent a signal or times out, take a screenshot
-      _registerScreenshotCallbacks(device);
+      if (screenshot != null) {
+        // If the test is sent a signal or times out, take a screenshot
+        _registerScreenshotCallbacks(device, _fileSystem.directory(screenshot));
+      }
 
       final int testResult = await testResultFuture;
 
@@ -338,7 +329,7 @@ class DriveCommand extends RunCommandBase {
 
       if (testResult != 0 && screenshot != null) {
         // Take a screenshot while the app is still running.
-        await _takeScreenshot(device);
+        await _takeScreenshot(device, _fileSystem.directory(screenshot));
         screenshotTaken = true;
       }
 
@@ -353,11 +344,11 @@ class DriveCommand extends RunCommandBase {
       if (testResult != 0) {
         throwToolExit(null);
       }
-    } on Exception catch(_) {
+    } on Exception catch (_) {
       // On exceptions, including ToolExit, take a screenshot on the device
       // unless a screenshot was already taken on test failure.
       if (!screenshotTaken && screenshot != null) {
-        await _takeScreenshot(device);
+        await _takeScreenshot(device, _fileSystem.directory(screenshot));
       }
       rethrow;
     }
@@ -380,7 +371,7 @@ class DriveCommand extends RunCommandBase {
     return timeoutSeconds;
   }
 
-  void _registerScreenshotCallbacks(Device device) {
+  void _registerScreenshotCallbacks(Device device, Directory screenshotDir) {
     _logger.printTrace('Registering signal handlers...');
     final Map<ProcessSignal, Object> tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
@@ -389,7 +380,7 @@ class DriveCommand extends RunCommandBase {
         (ProcessSignal signal) {
           _unregisterScreenshotCallbacks();
           _logger.printError('Caught $signal');
-          return _takeScreenshot(device);
+          return _takeScreenshot(device, screenshotDir);
         },
       );
     }
@@ -401,7 +392,7 @@ class DriveCommand extends RunCommandBase {
         Duration(seconds: timeoutSeconds),
         () {
           _unregisterScreenshotCallbacks();
-          _takeScreenshot(device);
+          _takeScreenshot(device, screenshotDir);
           throwToolExit('Timed out after $timeoutSeconds seconds');
         }
       );
@@ -461,13 +452,12 @@ class DriveCommand extends RunCommandBase {
     return '${pathWithNoExtension}_test${_fileSystem.path.extension(appFile)}';
   }
 
-  Future<void> _takeScreenshot(Device device) async {
+  Future<void> _takeScreenshot(Device device, Directory outputDirectory) async {
     if (!device.supportsScreenshot) {
       return;
     }
     try {
-      final Directory outputDirectory = _fileSystem.directory(screenshot)
-        ..createSync(recursive: true);
+      outputDirectory.createSync(recursive: true);
       final File outputFile = _fsUtils.getUniqueFile(
         outputDirectory,
         'drive',

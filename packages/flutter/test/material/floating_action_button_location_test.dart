@@ -693,6 +693,7 @@ void main() {
       bool resizeToAvoidBottomInset = true,
     }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: MediaQuery(
           data: data,
           child: Scaffold(
@@ -1640,15 +1641,14 @@ const double _dockedOffsetY = 544.0;
 const double _containedOffsetY = 544.0 + 56.0 / 2;
 const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
 
-Widget _singleFabScaffold(
-  FloatingActionButtonLocation location,
-  {
-    FloatingActionButtonAnimator? animator,
-    bool mini = false,
-    TextDirection textDirection = TextDirection.ltr,
-  }
-) {
+Widget _singleFabScaffold(FloatingActionButtonLocation location, {
+  bool useMaterial3 = false,
+  FloatingActionButtonAnimator? animator,
+  bool mini = false,
+  TextDirection textDirection = TextDirection.ltr,
+}) {
   return MaterialApp(
+    theme: ThemeData(useMaterial3: useMaterial3),
     home: Directionality(
       textDirection: textDirection,
       child: Scaffold(
@@ -1742,11 +1742,9 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
       case TextDirection.rtl:
         final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.right;
         fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - startPadding;
-        break;
       case TextDirection.ltr:
         final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.left;
         fabX = startPadding;
-        break;
     }
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
     return Offset(fabX, fabY);

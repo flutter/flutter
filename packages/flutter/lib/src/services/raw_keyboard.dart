@@ -330,7 +330,6 @@ abstract class RawKeyEvent with Diagnosticable {
           if (message.containsKey('character')) {
             character = message['character'] as String?;
           }
-          break;
         case 'fuchsia':
           final int codePoint = message['codePoint'] as int? ?? 0;
           data = RawKeyEventDataFuchsia(
@@ -341,7 +340,6 @@ abstract class RawKeyEvent with Diagnosticable {
           if (codePoint != 0) {
             character = String.fromCharCode(codePoint);
           }
-          break;
         case 'macos':
           data = RawKeyEventDataMacOs(
             characters: message['characters'] as String? ?? '',
@@ -351,7 +349,6 @@ abstract class RawKeyEvent with Diagnosticable {
             specifiedLogicalKey: message['specifiedLogicalKey'] as int?,
           );
           character = message['characters'] as String?;
-          break;
         case 'ios':
           data = RawKeyEventDataIos(
             characters: message['characters'] as String? ?? '',
@@ -359,7 +356,6 @@ abstract class RawKeyEvent with Diagnosticable {
             keyCode: message['keyCode'] as int? ?? 0,
             modifiers: message['modifiers'] as int? ?? 0,
           );
-          break;
         case 'linux':
           final int unicodeScalarValues = message['unicodeScalarValues'] as int? ?? 0;
           data = RawKeyEventDataLinux(
@@ -374,7 +370,6 @@ abstract class RawKeyEvent with Diagnosticable {
           if (unicodeScalarValues != 0) {
             character = String.fromCharCode(unicodeScalarValues);
           }
-          break;
         case 'windows':
           final int characterCodePoint = message['characterCodePoint'] as int? ?? 0;
           data = RawKeyEventDataWindows(
@@ -386,10 +381,8 @@ abstract class RawKeyEvent with Diagnosticable {
           if (characterCodePoint != 0) {
             character = String.fromCharCode(characterCodePoint);
           }
-          break;
         case 'web':
           data = dataFromWeb();
-          break;
         default:
           /// This exception would only be hit on platforms that haven't yet
           /// implemented raw key events, but will only be triggered if the

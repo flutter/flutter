@@ -94,13 +94,18 @@ Future<void> runProcessWithValidations(
   List<String> command,
   String workingDirectory, {
   @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
+  bool verbose = true,
 }) async {
   final ProcessResult result =
       processManager.runSync(command, stdoutEncoding: utf8, workingDirectory: workingDirectory);
   if (result.exitCode == 0) {
-    print('Stdout: ${result.stdout}');
+    if (verbose) {
+      print('stdout: ${result.stdout}');
+    }
   } else {
-    print('StdErr: ${result.stderr}');
+    if (verbose) {
+      print('stderr: ${result.stderr}');
+    }
     throw CommandException();
   }
 }

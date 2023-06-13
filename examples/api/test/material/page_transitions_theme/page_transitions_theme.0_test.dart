@@ -23,18 +23,14 @@ void main() {
       switch (platform) {
         case TargetPlatform.iOS:
           expect(theme.builders[platform], isA<CupertinoPageTransitionsBuilder>());
-          break;
         case TargetPlatform.linux:
           expect(theme.builders[platform], isA<OpenUpwardsPageTransitionsBuilder>());
-          break;
         case TargetPlatform.macOS:
           expect(theme.builders[platform], isA<FadeUpwardsPageTransitionsBuilder>());
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
           expect(theme.builders[platform], isNull);
-          break;
       }
     }
 

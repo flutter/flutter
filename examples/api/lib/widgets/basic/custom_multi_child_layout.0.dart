@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CustomMultiChildLayout].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const ExampleApp());
+/// Flutter code sample for [CustomMultiChildLayout].
 
-class ExampleApp extends StatelessWidget {
-  const ExampleApp({super.key});
+void main() => runApp(const CustomMultiChildLayoutApp());
+
+class CustomMultiChildLayoutApp extends StatelessWidget {
+  const CustomMultiChildLayoutApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class ExampleApp extends StatelessWidget {
         // see the layout change.
         textDirection: TextDirection.ltr,
         child: Scaffold(
-          body: ExampleWidget(),
+          body: CustomMultiChildLayoutExample(),
         ),
       ),
     );
@@ -49,7 +49,6 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
     switch (textDirection) {
       case TextDirection.rtl:
         childPosition += Offset(size.width, 0);
-        break;
       case TextDirection.ltr:
         break;
     }
@@ -66,11 +65,9 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
         case TextDirection.rtl:
           positionChild(color, childPosition - Offset(currentSize.width, 0));
           childPosition += Offset(-currentSize.width, currentSize.height - overlap);
-          break;
         case TextDirection.ltr:
           positionChild(color, childPosition);
           childPosition += Offset(currentSize.width, currentSize.height - overlap);
-          break;
       }
     }
   }
@@ -81,13 +78,12 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
   // automatically cause a relayout, like any other widget.
   @override
   bool shouldRelayout(_CascadeLayoutDelegate oldDelegate) {
-    return oldDelegate.textDirection != textDirection
-        || oldDelegate.overlap != overlap;
+    return oldDelegate.textDirection != textDirection || oldDelegate.overlap != overlap;
   }
 }
 
-class ExampleWidget extends StatelessWidget {
-  const ExampleWidget({super.key});
+class CustomMultiChildLayoutExample extends StatelessWidget {
+  const CustomMultiChildLayoutExample({super.key});
 
   static const Map<String, Color> _colors = <String, Color>{
     'Red': Colors.red,
@@ -106,7 +102,7 @@ class ExampleWidget extends StatelessWidget {
       ),
       children: <Widget>[
         // Create all of the colored boxes in the colors map.
-        for (MapEntry<String, Color> entry in _colors.entries)
+        for (final MapEntry<String, Color> entry in _colors.entries)
           // The "id" can be any Object, not just a String.
           LayoutId(
             id: entry.key,

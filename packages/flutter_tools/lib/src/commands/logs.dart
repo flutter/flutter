@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../device.dart';
@@ -18,6 +19,7 @@ class LogsCommand extends FlutterCommand {
       help: 'Clear log history before reading from logs.',
     );
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
   }
 
   @override
@@ -28,6 +30,9 @@ class LogsCommand extends FlutterCommand {
 
   @override
   final String category = FlutterCommandCategory.tools;
+
+  @override
+  bool get refreshWirelessDevices => true;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
@@ -50,7 +55,11 @@ class LogsCommand extends FlutterCommand {
       cachedDevice.clearLogs();
     }
 
-    final DeviceLogReader logReader = await cachedDevice.getLogReader();
+    final ApplicationPackage? app = await applicationPackages?.getPackageForPlatform(
+      await cachedDevice.targetPlatform,
+    );
+
+    final DeviceLogReader logReader = await cachedDevice.getLogReader(app: app);
 
     globals.printStatus('Showing $logReader logs:');
 

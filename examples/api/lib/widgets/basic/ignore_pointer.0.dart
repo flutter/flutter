@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [IgnorePointer].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [IgnorePointer].
 
 void main() => runApp(const IgnorePointerApp());
 
@@ -13,7 +13,7 @@ class IgnorePointerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
+    return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           centerTitle: true,

@@ -98,7 +98,10 @@ void main() {
 
   testWidgets('Passing no SnackBarThemeData returns defaults', (WidgetTester tester) async {
     const String text = 'I am a snack bar.';
+    final ThemeData theme = ThemeData();
+    final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(MaterialApp(
+      theme: theme,
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
@@ -118,14 +121,15 @@ void main() {
     ));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pumpAndSettle();
 
     final Material material = _getSnackBarMaterial(tester);
     final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
 
-    expect(content.text.style, Typography.material2018().white.titleMedium);
-    expect(material.color, const Color(0xFF333333));
+    expect(content.text.style, material3
+      ? Typography.material2021().englishLike.bodyMedium?.merge(Typography.material2021().black.bodyMedium).copyWith(color: theme.colorScheme.onInverseSurface, decorationColor: theme.colorScheme.onSurface)
+      : Typography.material2018().white.titleMedium);
+    expect(material.color, material3 ? theme.colorScheme.inverseSurface : const Color(0xFF333333));
     expect(material.elevation, 6.0);
     expect(material.shape, null);
   });
@@ -156,8 +160,7 @@ void main() {
     ));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pumpAndSettle();
 
     final Material material = _getSnackBarMaterial(tester);
     final RenderParagraph button = _getSnackBarActionTextRenderObject(tester, action);
@@ -213,8 +216,7 @@ void main() {
     ));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pumpAndSettle();
 
     final Finder materialFinder = _getSnackBarMaterialFinder(tester);
     final Material material = _getSnackBarMaterial(tester);
@@ -231,6 +233,148 @@ void main() {
     final Offset snackBarBottomRight = tester.getBottomRight(materialFinder.first);
     expect(snackBarBottomLeft.dx, (800 - snackBarWidth) / 2); // Device width is 800.
     expect(snackBarBottomRight.dx, (800 + snackBarWidth) / 2); // Device width is 800.
+  });
+
+  testWidgets('SnackBarAction uses actionBackgroundColor', (WidgetTester tester) async {
+    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return Colors.blue;
+      }
+      return Colors.purple;
+    });
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(snackBarTheme: _createSnackBarTheme(actionBackgroundColor: actionBackgroundColor)),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text('I am a snack bar.'),
+                  action: SnackBarAction(
+                    label: 'ACTION',
+                    onPressed: () {},
+                  ),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialBeforeDismissed = tester.widget<Material>(find.descendant(
+      of: find.widgetWithText(TextButton, 'ACTION'),
+      matching: find.byType(Material),
+    ));
+    expect(materialBeforeDismissed.color, Colors.purple);
+
+    await tester.tap(find.text('ACTION'));
+    await tester.pump();
+
+    final Material materialAfterDismissed = tester.widget<Material>(find.descendant(
+      of: find.widgetWithText(TextButton, 'ACTION'),
+      matching: find.byType(Material),
+    ));
+    expect(materialAfterDismissed.color, Colors.blue);
+  });
+
+  testWidgets('SnackBarAction backgroundColor overrides SnackBarThemeData actionBackgroundColor', (WidgetTester tester) async {
+    final MaterialStateColor snackBarActionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return Colors.amber;
+      }
+      return Colors.cyan;
+    });
+
+    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return Colors.blue;
+      }
+      return Colors.purple;
+    });
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(snackBarTheme: _createSnackBarTheme(actionBackgroundColor: actionBackgroundColor)),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text('I am a snack bar.'),
+                  action: SnackBarAction(
+                    label: 'ACTION',
+                    backgroundColor: snackBarActionBackgroundColor,
+                    onPressed: () {},
+                  ),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialBeforeDismissed = tester.widget<Material>(find.descendant(
+      of: find.widgetWithText(TextButton, 'ACTION'),
+      matching: find.byType(Material),
+    ));
+    expect(materialBeforeDismissed.color, Colors.cyan);
+
+    await tester.tap(find.text('ACTION'));
+    await tester.pump();
+
+    final Material materialAfterDismissed = tester.widget<Material>(find.descendant(
+      of: find.widgetWithText(TextButton, 'ACTION'),
+      matching: find.byType(Material),
+    ));
+    expect(materialAfterDismissed.color, Colors.amber);
+  });
+
+  testWidgets('SnackBarThemeData asserts when actionBackgroundColor is a MaterialStateColor and disabledActionBackgroundColor is also provided', (WidgetTester tester) async {
+    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return Colors.blue;
+      }
+      return Colors.purple;
+    });
+
+    expect(() => tester.pumpWidget(MaterialApp(
+      theme: ThemeData(snackBarTheme: _createSnackBarTheme(actionBackgroundColor: actionBackgroundColor, disabledActionBackgroundColor: Colors.amber)),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text('I am a snack bar.'),
+                  action: SnackBarAction(
+                    label: 'ACTION',
+                    onPressed: () {},
+                  ),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    )), throwsA(isA<AssertionError>().having(
+        (AssertionError e) => e.toString(),
+        'description',
+        contains('disabledBackgroundColor must not be provided when background color is a MaterialStateColor'))
+      )
+    );
   });
 
   testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
@@ -260,8 +404,7 @@ void main() {
     ));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pumpAndSettle();
 
     final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
     final RenderBox floatingActionButtonBox = tester.firstRenderObject(find.byType(FloatingActionButton));
@@ -305,8 +448,7 @@ void main() {
     final Offset floatingActionButtonOriginBottomCenter = floatingActionButtonOriginBox.localToGlobal(floatingActionButtonOriginBox.size.bottomCenter(Offset.zero));
 
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pumpAndSettle();
 
     final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
     final RenderBox floatingActionButtonBox = tester.firstRenderObject(find.byType(FloatingActionButton));
@@ -432,6 +574,30 @@ SnackBarThemeData _snackBarTheme({bool? showCloseIcon}) {
     elevation: 12.0,
     showCloseIcon: showCloseIcon,
     shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+  );
+}
+
+SnackBarThemeData _createSnackBarTheme({
+  Color? backgroundColor,
+  Color? actionTextColor,
+  Color? disabledActionTextColor,
+  TextStyle? contentTextStyle,
+  double? elevation,
+  ShapeBorder? shape,
+  SnackBarBehavior? behavior,
+  Color? actionBackgroundColor,
+  Color? disabledActionBackgroundColor
+}) {
+  return SnackBarThemeData(
+    backgroundColor: backgroundColor,
+    actionTextColor: actionTextColor,
+    disabledActionTextColor: disabledActionTextColor,
+    contentTextStyle: contentTextStyle,
+    elevation: elevation,
+    shape: shape,
+    behavior: behavior,
+    actionBackgroundColor: actionBackgroundColor,
+    disabledActionBackgroundColor: disabledActionBackgroundColor
   );
 }
 

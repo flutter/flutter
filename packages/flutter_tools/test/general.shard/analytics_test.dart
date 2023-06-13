@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -113,7 +114,7 @@ void main() {
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
-      final String featuresKey = cdKey(CustomDimensionsEnum.enabledFlutterFeatures);
+      final String featuresKey = CustomDimensionsEnum.enabledFlutterFeatures.cdKey;
 
       expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
@@ -133,7 +134,7 @@ void main() {
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
-      final String featuresKey = cdKey(CustomDimensionsEnum.enabledFlutterFeatures);
+      final String featuresKey = CustomDimensionsEnum.enabledFlutterFeatures.cdKey;
 
       expect(
         globals.fs.file('test').readAsStringSync(),
@@ -219,6 +220,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       );
       final FlutterCommand buildApkCommand = buildCommand.subcommands['apk']! as FlutterCommand;
@@ -386,8 +388,6 @@ class FakeDoctor extends Fake implements Doctor {
     return diagnoseSucceeds;
   }
 }
-
-class FakeAndroidStudio extends Fake implements AndroidStudio {}
 
 class FakeClock extends Fake implements SystemClock {
   List<int> times = <int>[];

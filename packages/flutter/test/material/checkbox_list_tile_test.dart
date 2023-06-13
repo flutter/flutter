@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -41,11 +42,14 @@ void main() {
     Color checkBoxCheckColor = const Color(0xffFFFFFF);
 
     Widget buildFrame(Color? color) {
-      return wrap(
-        child: CheckboxListTile(
-          value: true,
-          checkColor: color,
-          onChanged: (bool? value) {},
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
+          child: CheckboxListTile(
+            value: true,
+            checkColor: color,
+            onChanged: (bool? value) {},
+          ),
         ),
       );
     }
@@ -729,14 +733,17 @@ void main() {
     const double splashRadius = 24.0;
 
     Widget buildCheckbox({bool active = false, bool useOverlay = true}) {
-      return wrap(
-        child: CheckboxListTile(
-          value: active,
-          onChanged: (_) { },
-          fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-          overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
-          hoverColor: hoverColor,
-          splashRadius: splashRadius,
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
+          child: CheckboxListTile(
+            value: active,
+            onChanged: (_) { },
+            fillColor: const MaterialStatePropertyAll<Color>(fillColor),
+            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            hoverColor: hoverColor,
+            splashRadius: splashRadius,
+          ),
         ),
       );
     }
@@ -921,6 +928,38 @@ void main() {
     );
   });
 
+  testWidgets('CheckboxListTile.adaptive shows the correct checkbox platform widget', (WidgetTester tester) async {
+    Widget buildApp(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CheckboxListTile.adaptive(
+                value: false,
+                onChanged: (bool? newValue) {},
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(buildApp(platform));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoCheckbox), findsOneWidget);
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(buildApp(platform));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoCheckbox), findsNothing);
+    }
+  });
+
   group('feedback', () {
     late FeedbackTester feedback;
 
@@ -959,6 +998,31 @@ void main() {
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
     });
+  });
+
+  testWidgets('CheckboxListTile has proper semantics', (WidgetTester tester) async {
+    final List<dynamic> log = <dynamic>[];
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(wrap(
+      child: CheckboxListTile(
+        value: true,
+        onChanged: (bool? value) { log.add(value); },
+        title: const Text('Hello'),
+        checkboxSemanticLabel: 'there',
+      ),
+    ));
+
+    expect(tester.getSemantics(find.byType(CheckboxListTile)), matchesSemantics(
+      hasCheckedState: true,
+      isChecked: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      isFocusable: true,
+      label: 'Hello\nthere',
+    ));
+
+    handle.dispose();
   });
 }
 

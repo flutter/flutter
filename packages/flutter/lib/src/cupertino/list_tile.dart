@@ -292,10 +292,8 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       switch (widget._type) {
         case _CupertinoListTileType.base:
           padding = widget.subtitle == null ? _kPadding : _kPaddingWithSubtitle;
-          break;
         case _CupertinoListTileType.notched:
           padding = widget.leading == null ? _kNotchedPaddingWithoutLeading : _kNotchedPadding;
-          break;
       }
     }
 
@@ -331,10 +329,8 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     switch (widget._type) {
       case _CupertinoListTileType.base:
         minHeight = subtitle == null ? _kMinHeight : _kMinHeightWithSubtitle;
-        break;
       case _CupertinoListTileType.notched:
         minHeight = widget.leading == null ? _kNotchedMinHeightWithoutLeading : _kNotchedMinHeight;
-        break;
     }
 
     final Widget child = Container(

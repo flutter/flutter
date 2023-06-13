@@ -35,9 +35,8 @@ class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding 
 }
 
 class OffscreenRenderView extends RenderView {
-  OffscreenRenderView({required FlutterView view}) : super(
+  OffscreenRenderView({required super.view}) : super(
     configuration: const ViewConfiguration(size: _kTestViewSize),
-    window: view,
   );
 
   @override

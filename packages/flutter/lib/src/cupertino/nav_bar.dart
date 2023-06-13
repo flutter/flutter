@@ -144,10 +144,8 @@ Widget _wrapWithBackground({
     switch (newBrightness) {
       case Brightness.dark:
         overlayStyle = SystemUiOverlayStyle.light;
-        break;
       case Brightness.light:
         overlayStyle = SystemUiOverlayStyle.dark;
-        break;
     }
     // [SystemUiOverlayStyle.light] and [SystemUiOverlayStyle.dark] set some system
     // navigation bar properties,
@@ -604,7 +602,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.heroTag = _defaultHeroTag,
     this.stretch = false,
   }) : assert(
-         automaticallyImplyTitle == true || largeTitle != null,
+         automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
          'true.',
@@ -1544,7 +1542,6 @@ class _BackChevron extends StatelessWidget {
           transformHitTests: false,
           child: iconWidget,
         );
-        break;
       case TextDirection.ltr:
         break;
     }

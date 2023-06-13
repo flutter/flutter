@@ -36,6 +36,8 @@ import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
+import 'ios/application_package.dart';
+import 'ios/devices.dart';
 import 'project.dart';
 import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
@@ -118,8 +120,21 @@ class FlutterDevice {
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       // TODO(zanderso): consistently provide these flags across platforms.
-      const String platformDillName = 'ddc_outline_sound.dill';
+      final String platformDillName;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
+      if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
+        platformDillName = 'ddc_outline.dill';
+        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+          extraFrontEndOptions.add('--no-sound-null-safety');
+        }
+      } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
+        platformDillName = 'ddc_outline_sound.dill';
+        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+          extraFrontEndOptions.add('--sound-null-safety');
+        }
+      } else {
+        throw StateError('Expected buildInfo.nullSafetyMode to be one of unsound or sound, got ${buildInfo.nullSafetyMode}');
+      }
 
       final String platformDillPath = globals.fs.path.join(
         getWebPlatformBinariesDirectory(globals.artifacts!, buildInfo.webRenderer).path,
@@ -378,11 +393,19 @@ class FlutterDevice {
     return devFS!.create();
   }
 
-  Future<void> startEchoingDeviceLog() async {
+  Future<void> startEchoingDeviceLog(DebuggingOptions debuggingOptions) async {
     if (_loggingSubscription != null) {
       return;
     }
-    final Stream<String> logStream = (await device!.getLogReader(app: package)).logLines;
+    final Stream<String> logStream;
+    if (device is IOSDevice) {
+      logStream = (device! as IOSDevice).getLogReader(
+        app: package as IOSApp?,
+        usingCISystem: debuggingOptions.usingCISystem,
+      ).logLines;
+    } else {
+      logStream = (await device!.getLogReader(app: package)).logLines;
+    }
     _loggingSubscription = logStream.listen((String line) {
       if (!line.contains(globals.kVMServiceMessageRegExp)) {
         globals.printStatus(line, wrap: false);
@@ -438,7 +461,7 @@ class FlutterDevice {
       'multidex': hotRunner.multidexEnabled,
     };
 
-    await startEchoingDeviceLog();
+    await startEchoingDeviceLog(hotRunner.debuggingOptions);
 
     // Start the application.
     final Future<LaunchResult> futureResult = device!.startApp(
@@ -506,7 +529,7 @@ class FlutterDevice {
     platformArgs['trace-startup'] = coldRunner.traceStartup;
     platformArgs['multidex'] = coldRunner.multidexEnabled;
 
-    await startEchoingDeviceLog();
+    await startEchoingDeviceLog(coldRunner.debuggingOptions);
 
     final LaunchResult result = await device!.startApp(
       applicationPackage,
@@ -731,6 +754,22 @@ abstract class ResidentHandlers {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
         final String data = await device.vmService!.flutterDebugDumpLayerTree(
+          isolateId: view.uiIsolate!.id!,
+        );
+        logger.printStatus(data);
+      }
+    }
+    return true;
+  }
+
+  Future<bool> debugDumpFocusTree() async {
+    if (!supportsServiceProtocol || !isRunningDebug) {
+      return false;
+    }
+    for (final FlutterDevice? device in flutterDevices) {
+      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      for (final FlutterView view in views) {
+        final String data = await device.vmService!.flutterDebugDumpFocusTree(
           isolateId: view.uiIsolate!.id!,
         );
         logger.printStatus(data);
@@ -1421,7 +1460,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     try {
       await Future.wait(serveObservatoryRequests);
-    } on vm_service.RPCError catch(e) {
+    } on vm_service.RPCError catch (e) {
       globals.printWarning('Unable to enable Observatory: $e');
     }
   }
@@ -1508,6 +1547,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       commandHelp.t.print();
       if (isRunningDebug) {
         commandHelp.L.print();
+        commandHelp.f.print();
         commandHelp.S.print();
         commandHelp.U.print();
         commandHelp.i.print();
@@ -1693,6 +1733,8 @@ class TerminalHandler {
       case 'D':
         await residentRunner.detach();
         return true;
+      case 'f':
+        return residentRunner.debugDumpFocusTree();
       case 'g':
         await residentRunner.runSourceGenerators();
         return true;

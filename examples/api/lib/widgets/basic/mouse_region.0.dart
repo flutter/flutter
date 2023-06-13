@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [MouseRegion].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [MouseRegion].
 
 void main() => runApp(const MouseRegionApp());
 
@@ -69,8 +69,7 @@ class _MouseRegionExampleState extends State<MouseRegionExample> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Text(
-                  'You have entered or exited this box this many times:'),
+              const Text('You have entered or exited this box this many times:'),
               Text(
                 '$_enterCounter Entries\n$_exitCounter Exits',
                 style: Theme.of(context).textTheme.headlineMedium,

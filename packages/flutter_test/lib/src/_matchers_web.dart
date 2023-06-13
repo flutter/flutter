@@ -6,8 +6,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
-import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
+import 'package:matcher/expect.dart';
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/hooks.dart' show TestFailure;
 
 import 'binding.dart';
 import 'finders.dart';
@@ -57,7 +58,7 @@ class MatchesGoldenFile extends AsyncMatcher {
     final RenderObject renderObject = _findRepaintBoundary(element);
     final Size size = renderObject.paintBounds.size;
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
-    final Element e = binding.renderViewElement!;
+    final Element e = binding.rootElement!;
     final ui.FlutterView view = binding.platformDispatcher.implicitView!;
 
     // Unlike `flutter_tester`, we don't have the ability to render an element

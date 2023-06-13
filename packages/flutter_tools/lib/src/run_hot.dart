@@ -79,7 +79,7 @@ class DeviceReloadReport {
 
 class HotRunner extends ResidentRunner {
   HotRunner(
-    super.devices, {
+    super.flutterDevices, {
     required super.target,
     required super.debuggingOptions,
     this.benchmarkMode = false,
@@ -192,16 +192,21 @@ class HotRunner extends ResidentRunner {
     String isolateId,
     String expression,
     List<String> definitions,
+    List<String> definitionTypes,
     List<String> typeDefinitions,
+    List<String> typeBounds,
+    List<String> typeDefaults,
     String libraryUri,
     String? klass,
+    String? method,
     bool isStatic,
   ) async {
     for (final FlutterDevice? device in flutterDevices) {
       if (device!.generator != null) {
         final CompilerOutput? compilerOutput =
             await device.generator!.compileExpression(expression, definitions,
-                typeDefinitions, libraryUri, klass, isStatic);
+                definitionTypes, typeDefinitions, typeBounds, typeDefaults,
+                libraryUri, klass, method, isStatic);
         if (compilerOutput != null && compilerOutput.expressionData != null) {
           return base64.encode(compilerOutput.expressionData!);
         }
@@ -1042,6 +1047,16 @@ class HotRunner extends ResidentRunner {
     }
     commandHelp.c.print();
     commandHelp.q.print();
+    if (debuggingOptions.buildInfo.nullSafetyMode !=  NullSafetyMode.sound) {
+      globals.printStatus('');
+      globals.printStatus(
+        'Running without sound null safety ⚠️',
+        emphasis: true,
+      );
+      globals.printStatus(
+        'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
+      );
+    }
     globals.printStatus('');
     printDebuggerList();
   }
@@ -1394,25 +1409,18 @@ String _describePausedIsolates(int pausedIsolatesFound, String serviceEventKind)
   switch (serviceEventKind) {
     case vm_service.EventKind.kPauseStart:
       message.write('paused (probably due to --start-paused)');
-      break;
     case vm_service.EventKind.kPauseExit:
       message.write('paused because ${ plural ? 'they have' : 'it has' } terminated');
-      break;
     case vm_service.EventKind.kPauseBreakpoint:
       message.write('paused in the debugger on a breakpoint');
-      break;
     case vm_service.EventKind.kPauseInterrupted:
       message.write('paused due in the debugger');
-      break;
     case vm_service.EventKind.kPauseException:
       message.write('paused in the debugger after an exception was thrown');
-      break;
     case vm_service.EventKind.kPausePostRequest:
       message.write('paused');
-      break;
     case '':
       message.write('paused for various reasons');
-      break;
     default:
       message.write('paused');
   }

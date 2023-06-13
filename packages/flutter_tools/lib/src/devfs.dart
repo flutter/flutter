@@ -348,7 +348,7 @@ class _DevFSHttpWriter implements DevFSWriter {
     DevFSContent content, {
     int retry = 0,
   }) async {
-    while(true) {
+    while (true) {
       try {
         final HttpClientRequest request = await _client.putUrl(httpAddress!);
         request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
@@ -671,7 +671,6 @@ class DevFS {
                 shaderPathsToEvict.add(archivePath);
               }
             });
-            break;
           case AssetKind.model:
             if (sceneImporter == null) {
               break;
@@ -689,7 +688,6 @@ class DevFS {
                 scenePathsToEvict.add(archivePath);
               }
             });
-            break;
           case AssetKind.regular:
           case AssetKind.font:
           case null:

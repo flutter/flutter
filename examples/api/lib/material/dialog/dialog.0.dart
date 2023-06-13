@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Dialog].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Dialog].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const DialogExampleApp());
+
+class DialogExampleApp extends StatelessWidget {
+  const DialogExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class DialogExample extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                   const Text('This is a typical dialog.'),
+                    const Text('This is a typical dialog.'),
                     const SizedBox(height: 15),
                     TextButton(
                       onPressed: () {
@@ -66,7 +66,7 @@ class DialogExample extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                   const Text('This is a fullscreen dialog.'),
+                  const Text('This is a fullscreen dialog.'),
                   const SizedBox(height: 15),
                   TextButton(
                     onPressed: () {

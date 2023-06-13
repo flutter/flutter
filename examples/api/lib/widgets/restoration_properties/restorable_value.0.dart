@@ -2,41 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [RestorableValue].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [RestorableValue].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const RestorableValueExampleApp());
+
+class RestorableValueExampleApp extends StatelessWidget {
+  const RestorableValueExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
-      title: 'Flutter Code Sample',
+      title: 'RestorableValue Sample',
       color: const Color(0xffffffff),
       builder: (BuildContext context, Widget? child) {
         return const Center(
-          child: MyStatefulWidget(restorationId: 'main'),
+          child: RestorableValueExample(restorationId: 'main'),
         );
       },
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key, this.restorationId});
+class RestorableValueExample extends StatefulWidget {
+  const RestorableValueExample({super.key, this.restorationId});
 
   final String? restorationId;
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<RestorableValueExample> createState() => _RestorableValueExampleState();
 }
 
 /// RestorationProperty objects can be used because of RestorationMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
-    with RestorationMixin {
+class _RestorableValueExampleState extends State<RestorableValueExample> with RestorationMixin {
   // In this example, the restoration ID for the mixin is passed in through
   // the [StatefulWidget]'s constructor.
   @override

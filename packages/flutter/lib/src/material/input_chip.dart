@@ -30,8 +30,8 @@ import 'theme_data.dart';
 /// Input chips work together with other UI elements. They can appear:
 ///
 ///  * In a [Wrap] widget.
-///  * In a horizontally scrollable list, like a [ListView] whose
-///    scrollDirection is [Axis.horizontal].
+///  * In a horizontally scrollable list, for example configured such as a
+///    [ListView] with [ListView.scrollDirection] set to [Axis.horizontal].
 ///
 /// {@tool dartpad}
 /// This example shows how to create [InputChip]s with [onSelected] and
@@ -245,8 +245,6 @@ class InputChip extends StatelessWidget
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _InputChipDefaultsM3 extends ChipThemeData {
   _InputChipDefaultsM3(this.context, this.isEnabled, this.isSelected)

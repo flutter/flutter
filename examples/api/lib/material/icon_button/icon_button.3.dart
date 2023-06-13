@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [IconButton] with toggle feature.
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [IconButton] with toggle feature.
 
 void main() {
   runApp(const IconButtonToggleApp());
@@ -134,7 +134,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
             ),
           ],
         ),
-      ]
+      ],
     );
   }
 }

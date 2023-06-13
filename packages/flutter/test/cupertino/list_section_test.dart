@@ -176,4 +176,50 @@ void main() {
 
     expect(find.byType(ClipRRect), findsNothing);
   });
+
+  testWidgets('CupertinoListSection respects separatorColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoListSection(
+            separatorColor: const Color.fromARGB(255, 143, 193, 51),
+            children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
+              CupertinoListTile(title: Text('CupertinoListTile')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Column childrenColumn = tester.widget(find.byType(Column).at(1));
+    for (final Widget e in childrenColumn.children) {
+      if (e is Container) {
+        expect(e.color, const Color.fromARGB(255, 143, 193, 51));
+      }
+    }
+  });
+
+  testWidgets('CupertinoListSection.separatorColor defaults CupertinoColors.separator', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoListSection(
+            children: const <Widget>[
+              CupertinoListTile(title: Text('CupertinoListTile')),
+              CupertinoListTile(title: Text('CupertinoListTile')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.byType(CupertinoListSection));
+    final Column childrenColumn = tester.widget(find.byType(Column).at(1));
+    for (final Widget e in childrenColumn.children) {
+      if (e is Container) {
+        expect(e.color, CupertinoColors.separator.resolveFrom(context));
+      }
+    }
+  });
 }

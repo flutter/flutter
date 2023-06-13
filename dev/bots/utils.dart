@@ -12,7 +12,10 @@ import 'package:meta/meta.dart';
 
 const Duration _quietTimeout = Duration(minutes: 10); // how long the output should be hidden between calls to printProgress before just being verbose
 
-final bool hasColor = stdout.supportsAnsiEscapes;
+// If running from LUCI set to False.
+final bool isLuci =  Platform.environment['LUCI_CI'] == 'True';
+final bool hasColor = stdout.supportsAnsiEscapes && !isLuci;
+
 
 final String bold = hasColor ? '\x1B[1m' : ''; // shard titles
 final String red = hasColor ? '\x1B[31m' : ''; // errors

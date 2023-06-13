@@ -52,6 +52,7 @@ class ScreenshotCommand extends FlutterCommand {
       defaultsTo: _kDeviceType,
     );
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
   }
 
   final FileSystem fs;
@@ -64,6 +65,9 @@ class ScreenshotCommand extends FlutterCommand {
 
   @override
   final String category = FlutterCommandCategory.tools;
+
+  @override
+  bool get refreshWirelessDevices => true;
 
   @override
   final List<String> aliases = <String>['pic'];
@@ -83,7 +87,6 @@ class ScreenshotCommand extends FlutterCommand {
         if (!device!.supportsScreenshot) {
           throwToolExit('Screenshot not supported for ${device!.name}.');
         }
-        break;
       default:
         if (vmServiceUrl == null) {
           throwToolExit('VM Service URI must be specified for screenshot type $screenshotType');
@@ -111,13 +114,10 @@ class ScreenshotCommand extends FlutterCommand {
     switch (stringArg(_kType)) {
       case _kDeviceType:
         await runScreenshot(outputFile);
-        break;
       case _kSkiaType:
         success = await runSkia(outputFile);
-        break;
       case _kRasterizerType:
         success = await runRasterizer(outputFile);
-        break;
     }
 
     return success ? FlutterCommandResult.success()

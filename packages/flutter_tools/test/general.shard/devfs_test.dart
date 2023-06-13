@@ -211,7 +211,7 @@ void main() {
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, responseError: const OSError('Connection Reset by peer')),
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, responseError: const OSError('Connection Reset by peer')),
         // This is the value of `<int>[1, 2, 3, 4, 5]` run through `osUtils.gzipLevel1Stream`.
-        FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (List<int> chunk in expectedEncoded) ...chunk]),
+        FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (final List<int> chunk in expectedEncoded) ...chunk]),
       ]),
       uploadRetryThrottle: Duration.zero,
     );
@@ -506,13 +506,13 @@ void main() {
     final MemoryIOSink frontendServerStdIn = MemoryIOSink();
     Stream<List<int>> frontendServerStdOut() async* {
       int processed = 0;
-      while(true) {
-        while(frontendServerStdIn.writes.length == processed) {
+      while (true) {
+        while (frontendServerStdIn.writes.length == processed) {
           await Future<dynamic>.delayed(const Duration(milliseconds: 5));
         }
 
         String? boundaryKey;
-        while(processed < frontendServerStdIn.writes.length) {
+        while (processed < frontendServerStdIn.writes.length) {
           final List<int> data = frontendServerStdIn.writes[processed];
           final String stringData = utf8.decode(data);
           if (stringData.startsWith('compile ')) {

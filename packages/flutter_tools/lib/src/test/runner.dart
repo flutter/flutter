@@ -109,7 +109,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         '--file-reporter=$fileReporter',
       if (timeout != null)
         ...<String>['--timeout', timeout],
-      '--concurrency=$concurrency',
+      if (concurrency != null)
+        '--concurrency=$concurrency',
       for (final String name in names)
         ...<String>['--name', name],
       for (final String plainName in plainNames)
@@ -161,6 +162,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             shellPath: shellPath,
             flutterProject: flutterProject,
             pauseAfterLoad: debuggingOptions.startPaused,
+            nullAssertions: debuggingOptions.nullAssertions,
             buildInfo: debuggingOptions.buildInfo,
             webMemoryFS: result,
             logger: globals.logger,

@@ -46,6 +46,7 @@ void main() {
 
     testUsingContext('Can immediately tool exit on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -53,6 +54,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -137,6 +139,7 @@ void main() {
 
     testUsingContext('Verbose mode for APKs includes Gradle stacktrace and sets debug log level', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: BufferLogger.test(verbose: true),
         processManager: processManager,
         fileSystem: fileSystem,
@@ -144,6 +147,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -203,6 +207,7 @@ void main() {
 
     testUsingContext('Can retry build on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -210,6 +215,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
 
       const FakeCommand fakeCmd = FakeCommand(
@@ -307,6 +313,7 @@ void main() {
 
     testUsingContext('Converts recognized ProcessExceptions into tools exits', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -314,6 +321,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -398,6 +406,7 @@ void main() {
 
     testUsingContext('rethrows unrecognized ProcessException', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -405,6 +414,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(FakeCommand(
         command: const <String>[
@@ -461,6 +471,7 @@ void main() {
 
     testUsingContext('logs success event after a successful retry', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -468,6 +479,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -563,6 +575,7 @@ void main() {
 
     testUsingContext('performs code size analysis and sends analytics', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -574,6 +587,7 @@ void main() {
             'HOME': '/home',
           },
         ),
+        androidStudio: FakeAndroidStudio(),
       );
        processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -663,6 +677,7 @@ void main() {
 
     testUsingContext('indicates that an APK has been built successfully', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -670,6 +685,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -787,8 +803,9 @@ android {
       expect(androidApk?.id, 'com.example.foo');
     });
 
-    testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
+    testUsingContext('can call custom gradle task getBuildOptions and parse the result', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -796,6 +813,200 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printBuildVariants',
+        ],
+        stdout: '''
+BuildVariant: freeDebug
+BuildVariant: paidDebug
+BuildVariant: freeRelease
+BuildVariant: paidRelease
+BuildVariant: freeProfile
+BuildVariant: paidProfile
+        ''',
+      ));
+      final List<String> actual = await builder.getBuildVariants(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, <String>['freeDebug', 'paidDebug', 'freeRelease', 'paidRelease', 'freeProfile', 'paidProfile']);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('getBuildOptions returns empty list if gradle returns error', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printBuildVariants',
+        ],
+        stderr: '''
+Gradle Crashed
+        ''',
+        exitCode: 1,
+      ));
+      final List<String> actual = await builder.getBuildVariants(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, const <String>[]);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('can call custom gradle task getApplicationIdForVariant and parse the result', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printFreeDebugApplicationId',
+        ],
+        stdout: '''
+ApplicationId: com.example.id
+        ''',
+      ));
+      final String actual = await builder.getApplicationIdForVariant(
+        'freeDebug',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, 'com.example.id');
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('can call custom gradle task getApplicationIdForVariant with unknown crash', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printFreeDebugApplicationId',
+        ],
+        stdout: '''
+unknown crash
+        ''',
+      ));
+      final String actual = await builder.getApplicationIdForVariant(
+        'freeDebug',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, '');
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('can call custom gradle task getAppLinkDomainsForVariant and parse the result', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printFreeDebugAppLinkDomains',
+        ],
+        stdout: '''
+Domain: example.com
+Domain: example2.com
+        ''',
+      ));
+      final List<String> actual = await builder.getAppLinkDomainsForVariant(
+        'freeDebug',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, <String>['example.com', 'example2.com']);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('can call custom gradle task getAppLinkDomainsForVariant with unknown crash', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printFreeDebugAppLinkDomains',
+        ],
+        stdout: '''
+unknown crash
+        ''',
+      ));
+      final List<String> actual = await builder.getAppLinkDomainsForVariant(
+        'freeDebug',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual.isEmpty, isTrue);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -853,6 +1064,7 @@ android {
 
     testUsingContext('Verbose mode for AARs includes Gradle stacktrace and sets debug log level', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: BufferLogger.test(verbose: true),
         processManager: processManager,
         fileSystem: fileSystem,
@@ -860,6 +1072,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -910,6 +1123,7 @@ android {
 
     testUsingContext('gradle exit code and stderr is forwarded to tool exit', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -917,6 +1131,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -968,6 +1183,7 @@ android {
 
     testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -975,6 +1191,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1045,6 +1262,7 @@ android {
 
     testUsingContext('build apk uses selected local engine with arm64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1052,6 +1270,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1122,6 +1341,7 @@ android {
 
     testUsingContext('build apk uses selected local engine with x86 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1129,6 +1349,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1199,6 +1420,7 @@ android {
 
     testUsingContext('build apk uses selected local engine with x64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1206,6 +1428,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1277,6 +1500,7 @@ android {
 
     testUsingContext('honors --no-android-gradle-daemon setting', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1284,6 +1508,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(
         const FakeCommand(command: <String>[
@@ -1336,6 +1561,7 @@ android {
 
     testUsingContext('build aar uses selected local engine with arm32 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1343,6 +1569,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1422,6 +1649,7 @@ android {
 
     testUsingContext('build aar uses selected local engine with x64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1429,6 +1657,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1508,6 +1737,7 @@ android {
 
     testUsingContext('build aar uses selected local engine with x86 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1515,6 +1745,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1594,6 +1825,7 @@ android {
 
     testUsingContext('build aar uses selected local engine on x64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1601,6 +1833,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1689,5 +1922,5 @@ class FakeGradleUtils extends Fake implements GradleUtils {
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
-  String get javaPath => 'java';
+  String get javaPath => '/android-studio/jbr';
 }

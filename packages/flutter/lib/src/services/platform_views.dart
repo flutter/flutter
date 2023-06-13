@@ -72,13 +72,12 @@ class PlatformViewsService {
   static final PlatformViewsService _instance = PlatformViewsService._();
 
   Future<void> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'viewFocused':
         final int id = call.arguments as int;
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]!();
         }
-        break;
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by PlatformViewsService");
     }
@@ -625,19 +624,14 @@ class _AndroidMotionEventConverter {
       case PointerDeviceKind.touch:
       case PointerDeviceKind.trackpad:
         toolType = AndroidPointerProperties.kToolTypeFinger;
-        break;
       case PointerDeviceKind.mouse:
         toolType = AndroidPointerProperties.kToolTypeMouse;
-        break;
       case PointerDeviceKind.stylus:
         toolType = AndroidPointerProperties.kToolTypeStylus;
-        break;
       case PointerDeviceKind.invertedStylus:
         toolType = AndroidPointerProperties.kToolTypeEraser;
-        break;
       case PointerDeviceKind.unknown:
         toolType = AndroidPointerProperties.kToolTypeUnknown;
-        break;
     }
     return AndroidPointerProperties(id: pointerId, toolType: toolType);
   }
@@ -1164,10 +1158,10 @@ abstract class _AndroidViewControllerInternals {
       'id': viewId,
       'viewType': viewType,
       'direction': AndroidViewController._getAndroidDirection(layoutDirection),
-      if (hybrid == true) 'hybrid': hybrid,
+      if (hybrid) 'hybrid': hybrid,
       if (size != null) 'width': size.width,
       if (size != null) 'height': size.height,
-      if (hybridFallback == true) 'hybridFallback': hybridFallback,
+      if (hybridFallback) 'hybridFallback': hybridFallback,
       if (position != null) 'left': position.dx,
       if (position != null) 'top': position.dy,
     };
@@ -1384,6 +1378,7 @@ class UiKitViewController {
   Future<void> dispose() async {
     _debugDisposed = true;
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
+    PlatformViewsService._instance._focusCallbacks.remove(id);
   }
 }
 

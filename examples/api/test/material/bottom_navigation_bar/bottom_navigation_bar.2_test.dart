@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('BottomNavigationBar Updates Screen Content', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.BottomNavigationBarExampleApp(),
     );
 
     expect(find.widgetWithText(AppBar, 'BottomNavigationBar Sample'), findsOneWidget);

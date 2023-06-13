@@ -49,6 +49,7 @@ void main() {
     Key? formKey,
     ThemeData? theme,
     Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates,
+    bool acceptEmptyDate = false,
   }) {
     return MaterialApp(
       theme: theme ?? ThemeData.from(colorScheme: const ColorScheme.light()),
@@ -69,6 +70,7 @@ void main() {
             fieldHintText: fieldHintText,
             fieldLabelText: fieldLabelText,
             autofocus: autofocus,
+            acceptEmptyDate: acceptEmptyDate,
           ),
         ),
       ),
@@ -344,6 +346,35 @@ void main() {
           localizationsDelegates: delegates,
         )
       );
+    });
+
+    testWidgets('when an empty date is entered and acceptEmptyDate is true, then errorFormatText is not shown', (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      const String errorFormatText = 'That is not a date.';
+      await tester.pumpWidget(inputDatePickerField(
+        errorFormatText: errorFormatText,
+        formKey: formKey,
+        acceptEmptyDate: true,
+      ));
+      await tester.enterText(find.byType(TextField), '');
+      await tester.pumpAndSettle();
+      formKey.currentState!.validate();
+      await tester.pumpAndSettle();
+      expect(find.text(errorFormatText), findsNothing);
+    });
+
+    testWidgets('when an empty date is entered and acceptEmptyDate is false, then errorFormatText is shown', (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      const String errorFormatText = 'That is not a date.';
+      await tester.pumpWidget(inputDatePickerField(
+        errorFormatText: errorFormatText,
+        formKey: formKey,
+      ));
+      await tester.enterText(find.byType(TextField), '');
+      await tester.pumpAndSettle();
+      formKey.currentState!.validate();
+      await tester.pumpAndSettle();
+      expect(find.text(errorFormatText), findsOneWidget);
     });
   });
 }

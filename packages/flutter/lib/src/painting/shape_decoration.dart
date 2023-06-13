@@ -98,7 +98,6 @@ class ShapeDecoration extends Decoration {
         } else {
           shape = const CircleBorder();
         }
-        break;
       case BoxShape.rectangle:
         if (source.borderRadius != null) {
           assert(source.border == null || source.border!.isUniform);
@@ -109,7 +108,6 @@ class ShapeDecoration extends Decoration {
         } else {
           shape = source.border ?? const Border();
         }
-        break;
     }
     return ShapeDecoration(
       color: source.color,

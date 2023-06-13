@@ -329,7 +329,7 @@ public final class GeneratedPluginRegistrant {
   {{#supportsEmbeddingV2}}
     try {
       flutterEngine.getPlugins().add(new {{package}}.{{class}}());
-    } catch(Exception e) {
+    } catch (Exception e) {
       Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
     }
   {{/supportsEmbeddingV2}}
@@ -337,7 +337,7 @@ public final class GeneratedPluginRegistrant {
     {{#supportsEmbeddingV1}}
     try {
       {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
-    } catch(Exception e) {
+    } catch (Exception e) {
       Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
     }
     {{/supportsEmbeddingV1}}
@@ -424,7 +424,6 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         );
       }
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
-      break;
     case AndroidEmbeddingVersion.v1:
       globals.printWarning(
         'This app is using a deprecated version of the Android embedding.\n'
@@ -444,7 +443,6 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         }
       }
       templateContent = _androidPluginRegistryTemplateOldEmbedding;
-      break;
   }
   globals.printTrace('Generating $registryPath');
   _renderTemplateToFile(
@@ -705,7 +703,6 @@ const String _dartPluginRegisterWith = r'''
           '`{{pluginName}}` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
-        rethrow;
       }
 ''';
 

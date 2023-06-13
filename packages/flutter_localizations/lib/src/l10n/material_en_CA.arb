@@ -70,7 +70,7 @@
   "unspecifiedDateRange": "Date range",
   "unspecifiedDate": "Date",
   "selectYearSemanticsLabel": "Select year",
-  "dateHelpText": "mm/dd/yyyy",
+  "dateHelpText": "dd/mm/yyyy",
   "moreButtonTooltip": "More",
   "tabLabel": "Tab $tabIndex of $tabCount",
   "showAccountsLabel": "Show accounts",

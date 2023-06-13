@@ -40,6 +40,7 @@ const List<String> kDefaultClang = <String>[
   '-rpath',
   '-Xlinker',
   '@loader_path/Frameworks',
+  '-fapplication-extension',
   '-install_name',
   '@rpath/App.framework/App',
   '-o',

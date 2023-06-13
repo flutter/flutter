@@ -29,6 +29,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     super.flutterVersion,
     required super.buildSystem,
     required super.verboseHelp,
+    required super.logger,
     super.cache,
     super.platform,
   });
@@ -68,10 +69,11 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
 
     final List<BuildInfo> buildInfos = await getBuildInfos();
+    displayNullSafetyMode(buildInfos.first);
 
     for (final BuildInfo buildInfo in buildInfos) {
-      globals.printStatus('Building macOS frameworks in ${getNameForBuildMode(buildInfo.mode)} mode...');
-      final String xcodeBuildConfiguration = sentenceCase(getNameForBuildMode(buildInfo.mode));
+      globals.printStatus('Building macOS frameworks in ${buildInfo.mode.cliName} mode...');
+      final String xcodeBuildConfiguration = sentenceCase(buildInfo.mode.cliName);
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {
@@ -141,7 +143,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         throwToolExit('Could not find license at ${license.path}');
       }
       final String licenseSource = license.readAsStringSync();
-      final String artifactsMode = mode == BuildMode.debug ? 'darwin-x64' : 'darwin-x64-${mode.name}';
+      final String artifactsMode = mode == BuildMode.debug ? 'darwin-x64' : 'darwin-x64-${mode.cliName}';
 
       final String podspecContents = '''
 Pod::Spec.new do |s|
@@ -193,7 +195,7 @@ end
           kTargetFile: targetFile,
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.darwin),
           kDarwinArchs: defaultMacOSArchsForEnvironment(globals.artifacts!)
-              .map(getNameForDarwinArch)
+              .map((DarwinArch e) => e.name)
               .join(' '),
           ...buildInfo.toBuildSystemEnvironment(),
         },

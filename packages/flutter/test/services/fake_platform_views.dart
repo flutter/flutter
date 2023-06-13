@@ -183,12 +183,12 @@ class FakeAndroidPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'create':
         return _create(call);
       case 'dispose':
@@ -395,12 +395,12 @@ class FakeIosPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'create':
         return _create(call);
       case 'dispose':
@@ -490,7 +490,7 @@ class FakeHtmlPlatformViewsController {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'create':
         return _create(call);
       case 'dispose':

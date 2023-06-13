@@ -102,6 +102,11 @@ abstract class DeviceManager {
     _specifiedDeviceId = id;
   }
 
+  /// A minimum duration to use when discovering wireless iOS devices.
+  static const Duration minimumWirelessDeviceDiscoveryTimeout = Duration(
+    seconds: 5,
+  );
+
   /// True when the user has specified a single specific device.
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
 
@@ -231,6 +236,22 @@ abstract class DeviceManager {
     return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
   }
 
+  /// Discard existing cache of discoverers that are known to take longer to
+  /// discover wireless devices.
+  ///
+  /// Then, search for devices for those discoverers to populate the cache for
+  /// no longer than [timeout].
+  Future<void> refreshExtendedWirelessDeviceDiscoverers({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async {
+    await Future.wait<List<Device>>(<Future<List<Device>>>[
+      for (final DeviceDiscovery discoverer in _platformDiscoverers)
+        if (discoverer.requiresExtendedWirelessDeviceDiscovery)
+          discoverer.discoverDevices(timeout: timeout)
+    ]);
+  }
+
   /// Whether we're capable of listing any devices given the current environment configuration.
   bool get canListAnything {
     return _platformDiscoverers.any((DeviceDiscovery discoverer) => discoverer.canListAnything);
@@ -262,7 +283,7 @@ abstract class DeviceManager {
     bool includeDevicesUnsupportedByProject = false,
   }) {
     FlutterProject? flutterProject;
-    if (includeDevicesUnsupportedByProject == false) {
+    if (!includeDevicesUnsupportedByProject) {
       flutterProject = FlutterProject.current();
     }
     if (hasSpecifiedAllDevices) {
@@ -291,7 +312,7 @@ abstract class DeviceManager {
   Device? getSingleEphemeralDevice(List<Device> devices){
     if (!hasSpecifiedDeviceId) {
       try {
-        return devices.singleWhere((Device device) => device.ephemeral == true);
+        return devices.singleWhere((Device device) => device.ephemeral);
       } on StateError {
         return null;
       }
@@ -434,6 +455,10 @@ abstract class DeviceDiscovery {
   /// current environment configuration.
   bool get canListAnything;
 
+  /// Whether this device discovery is known to take longer to discover
+  /// wireless devices.
+  bool get requiresExtendedWirelessDeviceDiscovery => false;
+
   /// Return all connected devices, cached on subsequent calls.
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter});
 
@@ -504,6 +529,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   /// Get devices from cache filtered by [filter].
   ///
   /// If the cache is empty, populate the cache.
+  ///
+  /// If [filter] is null, it may return devices that are not connected.
   @override
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) {
     return _populateDevices(filter: filter);
@@ -512,6 +539,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   /// Empty the cache and repopulate it before getting devices from cache filtered by [filter].
   ///
   /// Search for devices to populate the cache for no longer than [timeout].
+  ///
+  /// If [filter] is null, it may return devices that are not connected.
   @override
   Future<List<Device>> discoverDevices({
     Duration? timeout,
@@ -933,12 +962,16 @@ class DebuggingOptions {
     this.webLaunchUrl,
     this.vmserviceOutFile,
     this.fastStart = false,
+    this.nullAssertions = false,
     this.nativeNullAssertions = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
+    this.enableVulkanValidation = false,
+    this.impellerForceGL = false,
     this.uninstallFirst = false,
-    this.serveObservatory = true,
+    this.serveObservatory = false,
     this.enableDartProfiling = true,
     this.enableEmbedderApi = false,
+    this.usingCISystem = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -956,9 +989,12 @@ class DebuggingOptions {
       this.cacheSkSL = false,
       this.traceAllowlist,
       this.enableImpeller = ImpellerStatus.platformDefault,
+      this.enableVulkanValidation = false,
+      this.impellerForceGL = false,
       this.uninstallFirst = false,
       this.enableDartProfiling = true,
       this.enableEmbedderApi = false,
+      this.usingCISystem = false,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -983,6 +1019,7 @@ class DebuggingOptions {
       vmserviceOutFile = null,
       fastStart = false,
       webEnableExpressionEvaluation = false,
+      nullAssertions = false,
       nativeNullAssertions = false,
       serveObservatory = false;
 
@@ -1025,12 +1062,16 @@ class DebuggingOptions {
     required this.webLaunchUrl,
     required this.vmserviceOutFile,
     required this.fastStart,
+    required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.enableImpeller,
+    required this.enableVulkanValidation,
+    required this.impellerForceGL,
     required this.uninstallFirst,
     required this.serveObservatory,
     required this.enableDartProfiling,
     required this.enableEmbedderApi,
+    required this.usingCISystem,
   });
 
   final bool debuggingEnabled;
@@ -1066,9 +1107,12 @@ class DebuggingOptions {
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
   final ImpellerStatus enableImpeller;
+  final bool enableVulkanValidation;
+  final bool impellerForceGL;
   final bool serveObservatory;
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
+  final bool usingCISystem;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1097,6 +1141,8 @@ class DebuggingOptions {
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
   final bool fastStart;
+
+  final bool nullAssertions;
 
   /// Additional null runtime checks inserted for web applications.
   ///
@@ -1193,11 +1239,15 @@ class DebuggingOptions {
     'webLaunchUrl': webLaunchUrl,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
+    'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
+    'enableVulkanValidation': enableVulkanValidation,
+    'impellerForceGL': impellerForceGL,
     'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
+    'usingCISystem': usingCISystem,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1240,12 +1290,16 @@ class DebuggingOptions {
       webLaunchUrl: json['webLaunchUrl'] as String?,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,
+      nullAssertions: json['nullAssertions']! as bool,
       nativeNullAssertions: json['nativeNullAssertions']! as bool,
       enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
+      enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
+      impellerForceGL: (json['impellerForceGL'] as bool?) ?? false,
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
       serveObservatory: (json['serveObservatory'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
       enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
+      usingCISystem: (json['usingCISystem'] as bool?) ?? false,
     );
 }
 
@@ -1321,9 +1375,13 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   void dispose() { }
 }
 
+/// Append --null_assertions to any existing Dart VM flags if
+/// [debuggingOptions.nullAssertions] is true.
 String computeDartVmFlags(DebuggingOptions debuggingOptions) {
-  if (debuggingOptions.dartFlags.isNotEmpty) {
-    return debuggingOptions.dartFlags;
-  }
-  return '';
+  return <String>[
+    if (debuggingOptions.dartFlags.isNotEmpty)
+      debuggingOptions.dartFlags,
+    if (debuggingOptions.nullAssertions)
+      '--null_assertions',
+  ].join(',');
 }

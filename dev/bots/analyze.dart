@@ -112,6 +112,9 @@ Future<void> run(List<String> arguments) async {
   printProgress('Trailing spaces...');
   await verifyNoTrailingSpaces(flutterRoot); // assumes no unexpected binaries, so should be after verifyNoBinaries
 
+  printProgress('Spaces after flow control statements...');
+  await verifySpacesAfterFlowControlStatements(flutterRoot);
+
   printProgress('Deprecations...');
   await verifyDeprecations(flutterRoot);
 
@@ -236,7 +239,15 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<CompilationUnit> {
 
   @override
   CompilationUnit? visitMethodInvocation(MethodInvocation node) {
-    if (node.methodName.name == 'clamp') {
+    final NodeList<Expression> arguments = node.argumentList.arguments;
+    // This may produce false positives when `node.target` is not a subtype of
+    // num. The static type of `node.target` isn't guaranteed to be resolved at
+    // this time. Check whether the argument list consists of 2 positional args
+    // to reduce false positives.
+    final bool isNumClampInvocation = node.methodName.name == 'clamp'
+                                   && arguments.length == 2
+                                   && !arguments.any((Expression exp) => exp is NamedExpression);
+    if (isNumClampInvocation) {
       final _Line line = _getLine(parseResult, node.function.offset);
       if (!line.content.contains('// ignore_clamp_double_lint')) {
         clamps.add(line);
@@ -534,6 +545,14 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
             String possibleReason = '';
             if (lines[lineNumber].trimLeft().startsWith('"')) {
               possibleReason = ' You might have used double quotes (") for the string instead of single quotes (\').';
+            } else if (!lines[lineNumber].contains("'")) {
+              possibleReason = ' It might be missing the line saying "This feature was deprecated after...".';
+            } else if (!lines[lineNumber].trimRight().endsWith(" '")) {
+              if (lines[lineNumber].contains('This feature was deprecated')) {
+                possibleReason = ' There might not be an explanatory message.';
+              } else {
+                possibleReason = ' There might be a missing space character at the end of the line.';
+              }
             }
             throw 'Deprecation notice does not match required pattern.$possibleReason';
           }
@@ -546,6 +565,8 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
             if (firstChar.toUpperCase() != firstChar) {
               throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
             }
+          } else {
+            message += messageMatch.namedGroup('message')!;
           }
           lineNumber += 1;
           if (lineNumber >= lines.length) {
@@ -565,7 +586,7 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
           }
         }
         if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?')) {
-          throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
+          throw 'Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "$message".';
         }
         if (!lines[lineNumber].startsWith("$indent  '")) {
           throw 'Unexpected deprecation notice indent.';
@@ -606,6 +627,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'cc', overrideMinimumMatches ?? 10, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'cpp', overrideMinimumMatches ?? 0, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
@@ -1022,6 +1044,38 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
     }
     if (lines.isNotEmpty && lines.last == '') {
       problems.add('${file.path}:${lines.length}: trailing blank line');
+    }
+  }
+  if (problems.isNotEmpty) {
+    foundError(problems);
+  }
+}
+
+final RegExp _flowControlStatementWithoutSpace = RegExp(r'(^|[ \t])(if|switch|for|do|while|catch)\(', multiLine: true);
+
+Future<void> verifySpacesAfterFlowControlStatements(String workingDirectory, { int minimumMatches = 4000 }) async {
+  const Set<String> extensions = <String>{
+    '.dart',
+    '.java',
+    '.js',
+    '.kt',
+    '.swift',
+    '.c',
+    '.cc',
+    '.cpp',
+    '.h',
+    '.m',
+  };
+  final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
+    .where((File file) => extensions.contains(path.extension(file.path)))
+    .toList();
+  final List<String> problems = <String>[];
+  for (final File file in files) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index += 1) {
+      if (lines[index].contains(_flowControlStatementWithoutSpace)) {
+        problems.add('${file.path}:${index + 1}: no space after flow control statement');
+      }
     }
   }
   if (problems.isNotEmpty) {
@@ -1771,7 +1825,14 @@ Future<void> _checkConsumerDependencies() async {
 
       final List<String> currentDependencies = (currentPackage['dependencies']! as List<Object?>).cast<String>();
       for (final String dependency in currentDependencies) {
-        workset.add(dependencyTree[dependency]!);
+        // Don't add dependencies we've already seen or we will get stuck
+        // forever if there are any circular references.
+        // TODO(dantup): Consider failing gracefully with the names of the
+        //  packages once the cycle between test_api and matcher is resolved.
+        //  https://github.com/dart-lang/test/issues/1979
+        if (!dependencies.contains(dependency)) {
+          workset.add(dependencyTree[dependency]!);
+        }
       }
     }
   }
@@ -2073,8 +2134,10 @@ bool _isGeneratedPluginRegistrant(File file) {
   final String filename = path.basename(file.path);
   return !file.path.contains('.pub-cache')
       && (filename == 'GeneratedPluginRegistrant.java' ||
+          filename == 'GeneratedPluginRegistrant.swift' ||
           filename == 'GeneratedPluginRegistrant.h' ||
           filename == 'GeneratedPluginRegistrant.m' ||
           filename == 'generated_plugin_registrant.dart' ||
-          filename == 'generated_plugin_registrant.h');
+          filename == 'generated_plugin_registrant.h' ||
+          filename == 'generated_plugin_registrant.cc');
 }

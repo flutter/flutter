@@ -17,6 +17,7 @@ import 'build.dart';
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
+    required super.logger,
     required OperatingSystemUtils operatingSystemUtils,
     bool verboseHelp = false,
   }) : _operatingSystemUtils = operatingSystemUtils,
@@ -61,8 +62,8 @@ class BuildLinuxCommand extends BuildSubCommand {
     final TargetPlatform targetPlatform =
         getTargetPlatformForName(stringArg('target-platform')!);
     final bool needCrossBuild =
-        getNameForHostPlatformArch(_operatingSystemUtils.hostPlatform)
-            != getNameForTargetPlatformArch(targetPlatform);
+        _operatingSystemUtils.hostPlatform.platformName
+            != targetPlatform.simpleName;
 
     if (!featureFlags.isLinuxEnabled) {
       throwToolExit('"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".');
@@ -81,6 +82,7 @@ class BuildLinuxCommand extends BuildSubCommand {
       throwToolExit(
           'Cross-build from Linux x64 host to Linux arm64 target is not currently supported.');
     }
+    displayNullSafetyMode(buildInfo);
     await buildLinux(
       flutterProject.linux,
       buildInfo,

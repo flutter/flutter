@@ -318,8 +318,9 @@ void main() {
           ],
         )),
       );
-      expect(find.byType(GestureDetector), findsNWidgets(2));
-      final Finder hitTestable = find.byType(GestureDetector).hitTestable();
+      expect(find.byType(GestureDetector), findsOneWidget);
+      expect(find.byType(GestureDetector, skipOffstage: false), findsNWidgets(2));
+      final Finder hitTestable = find.byType(GestureDetector, skipOffstage: false).hitTestable();
       expect(hitTestable, findsOneWidget);
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
     });

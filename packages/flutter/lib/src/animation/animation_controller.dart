@@ -576,7 +576,6 @@ class AnimationController extends Animation<double>
           // pattern of an eternally repeating animation might cause an endless loop if it weren't delayed
           // for at least one frame.
           scale = 0.05;
-          break;
         case AnimationBehavior.preserve:
           break;
       }
@@ -667,15 +666,18 @@ class AnimationController extends Animation<double>
   /// and initial velocity.
   ///
   /// If velocity is positive, the animation will complete, otherwise it will
-  /// dismiss.
+  /// dismiss. The velocity is specified in units per second. If the
+  /// [SemanticsBinding.disableAnimations] flag is set, the velocity is somewhat
+  /// arbitrarily multiplied by 200.
   ///
-  /// The [springDescription] parameter can be used to specify a custom [SpringType.criticallyDamped]
-  /// or [SpringType.overDamped] spring to drive the animation with. Defaults to null, which uses a
-  /// [SpringType.criticallyDamped] spring. See [SpringDescription.withDampingRatio] for how
-  /// to create a suitable [SpringDescription].
+  /// The [springDescription] parameter can be used to specify a custom
+  /// [SpringType.criticallyDamped] or [SpringType.overDamped] spring with which
+  /// to drive the animation. By default, a [SpringType.criticallyDamped] spring
+  /// is used. See [SpringDescription.withDampingRatio] for how to create a
+  /// suitable [SpringDescription].
   ///
-  /// The resulting spring simulation cannot be of type [SpringType.underDamped],
-  /// as this can lead to unexpected look of the produced animation.
+  /// The resulting spring simulation cannot be of type [SpringType.underDamped];
+  /// such a spring would oscillate rather than fling.
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
@@ -692,10 +694,7 @@ class AnimationController extends Animation<double>
     if (SemanticsBinding.instance.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
-          // TODO(zanderso): determine a better process for setting velocity.
-          // the value below was arbitrarily chosen because it worked for the drawer widget.
-          scale = 200.0;
-          break;
+          scale = 200.0; // This is arbitrary (it was chosen because it worked for the drawer widget).
         case AnimationBehavior.preserve:
           break;
       }
@@ -704,8 +703,10 @@ class AnimationController extends Animation<double>
       ..tolerance = _kFlingTolerance;
     assert(
       simulation.type != SpringType.underDamped,
-      'The resulting spring simulation is of type SpringType.underDamped.\n'
-      'This can lead to unexpected look of the animation, please adjust the springDescription parameter',
+      'The specified spring simulation is of type SpringType.underDamped.\n'
+      'An underdamped spring results in oscillation rather than a fling. '
+      'Consider specifying a different springDescription, or use animateWith() '
+      'with an explicit SpringSimulation if an underdamped spring is intentional.',
     );
     stop();
     return _startSimulation(simulation);

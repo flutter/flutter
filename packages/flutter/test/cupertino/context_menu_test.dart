@@ -626,6 +626,51 @@ void main() {
         expect(tester.getSize(find.byWidget(action)).width, 250);
       }
     });
+
+    testWidgets("ContextMenu route animation doesn't throw exception on dismiss", (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/124597.
+      final List<int> items = List<int>.generate(2, (int index) => index).toList();
+
+      await tester.pumpWidget(CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ListView(
+                children: items.map((int index) => CupertinoContextMenu(
+                  actions: <CupertinoContextMenuAction>[
+                    CupertinoContextMenuAction(
+                      child: const Text('DELETE'),
+                      onPressed: () {
+                        setState(() {
+                          items.remove(index);
+                          Navigator.of(context).pop();
+                        });
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                  child: Text('Item $index'),
+                )).toList(),
+              );
+            }
+          ),
+        ),
+      ));
+
+      // Open the CupertinoContextMenu.
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Item 1')));
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Tap the delete action.
+      await tester.tap(find.text('DELETE'));
+      await tester.pumpAndSettle();
+
+      // The CupertinoContextMenu should be closed with no exception.
+      expect(find.text('DELETE'), findsNothing);
+      expect(tester.takeException(), null);
+    });
   });
 
   group("Open layout differs depending on child's position on screen", () {

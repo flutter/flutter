@@ -81,10 +81,9 @@ void main() {
       endsWith(
         '[root]"\n' // End of ownership chain.
         '   No MediaQuery ancestor could be found starting from the context\n'
-        '   that was passed to MediaQuery.of(). This can happen because you\n'
-        '   have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
-        '   (those widgets introduce a MediaQuery), or it can happen if the\n'
-        '   context you use comes from a widget above those widgets.\n',
+        '   that was passed to MediaQuery.of(). This can happen because the\n'
+        '   context used is not a descendant of a View widget, which\n'
+        '   introduces a MediaQuery.\n'
       ),
     );
   });

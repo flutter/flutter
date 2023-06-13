@@ -2,38 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Focus].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Focus].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const FocusExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class FocusExampleApp extends StatelessWidget {
+  const FocusExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('Focus Sample')),
+        body: const FocusExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class FocusExample extends StatefulWidget {
+  const FocusExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<FocusExample> createState() => _FocusExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _FocusExampleState extends State<FocusExample> {
   Color _color = Colors.white;
 
   KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
@@ -91,9 +88,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     height: 100,
                     alignment: Alignment.center,
                     color: hasFocus ? _color : Colors.white,
-                    child: Text(hasFocus
-                        ? "I'm in color! Press R,G,B!"
-                        : 'Press to focus'),
+                    child: Text(hasFocus ? "I'm in color! Press R,G,B!" : 'Press to focus'),
                   ),
                 ),
               );

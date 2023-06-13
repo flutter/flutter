@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
+import '../src/fake_process_manager.dart';
 
 const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file.dart';
@@ -62,6 +64,8 @@ void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
 void main() {
   late MemoryFileSystem fs;
   late BufferLogger logger;
+  late Artifacts artifacts;
+  late ProcessManager processManager;
   late String defaultL10nPathString;
   late String syntheticPackagePath;
   late String syntheticL10nPackagePath;
@@ -69,6 +73,8 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem.test();
     logger = BufferLogger.test();
+    artifacts = Artifacts.test();
+    processManager = FakeProcessManager.empty();
 
     defaultL10nPathString = fs.path.join('lib', 'l10n');
     syntheticPackagePath = fs.path.join('.dart_tool', 'flutter_gen');
@@ -793,17 +799,19 @@ void main() {
       logger.printError('An error output from a different tool in flutter_tools');
 
       // Should run without error.
-      generateLocalizations(
+      await generateLocalizations(
         fileSystem: fs,
         options: LocalizationOptions(
-          arbDirectory: Uri.directory(defaultL10nPathString),
-          outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
-          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
-          useSyntheticPackage: false,
+          arbDir: Uri.directory(defaultL10nPathString).path,
+          outputDir: Uri.directory(defaultL10nPathString, windows: false).path,
+          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+          syntheticPackage: false,
         ),
         logger: logger,
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
+        artifacts: artifacts,
+        processManager: processManager,
       );
     });
 
@@ -811,26 +819,28 @@ void main() {
       _standardFlutterDirectoryL10nSetup(fs);
       final LocalizationOptions options = LocalizationOptions(
         header: 'HEADER',
-        arbDirectory: Uri.directory(defaultL10nPathString),
-        deferredLoading: true,
+        arbDir: Uri.directory(defaultL10nPathString).path,
+        useDeferredLoading: true,
         outputClass: 'Foo',
-        outputLocalizationsFile: Uri.file('bar.dart', windows: false),
-        outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
+        outputLocalizationFile: Uri.file('bar.dart', windows: false).path,
+        outputDir: Uri.directory(defaultL10nPathString, windows: false).path,
         preferredSupportedLocales: <String>['es'],
-        templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
-        untranslatedMessagesFile: Uri.file('untranslated', windows: false),
-        useSyntheticPackage: false,
-        areResourceAttributesRequired: true,
-        usesNullableGetter: false,
+        templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+        untranslatedMessagesFile: Uri.file('untranslated', windows: false).path,
+        syntheticPackage: false,
+        requiredResourceAttributes: true,
+        nullableGetter: false,
       );
 
       // Verify that values are correctly passed through the localizations target.
-      final LocalizationsGenerator generator = generateLocalizations(
+      final LocalizationsGenerator generator = await generateLocalizations(
         fileSystem: fs,
         options: options,
         logger: logger,
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
+        artifacts: artifacts,
+        processManager: processManager,
       );
 
       expect(generator.inputDirectory.path, '/lib/l10n/');
@@ -877,14 +887,14 @@ flutter:
 
       final LocalizationOptions options = LocalizationOptions(
         header: 'HEADER',
-        headerFile: Uri.file('header', windows: false),
-        arbDirectory: Uri.file('arb', windows: false),
-        deferredLoading: true,
+        headerFile: Uri.file('header', windows: false).path,
+        arbDir: Uri.file('arb', windows: false).path,
+        useDeferredLoading: true,
         outputClass: 'Foo',
-        outputLocalizationsFile: Uri.file('bar', windows: false),
+        outputLocalizationFile: Uri.file('bar', windows: false).path,
         preferredSupportedLocales: <String>['en_US'],
-        templateArbFile: Uri.file('example.arb', windows: false),
-        untranslatedMessagesFile: Uri.file('untranslated', windows: false),
+        templateArbFile: Uri.file('example.arb', windows: false).path,
+        untranslatedMessagesFile: Uri.file('untranslated', windows: false).path,
       );
 
       expect(
@@ -894,6 +904,8 @@ flutter:
           logger: BufferLogger.test(),
           projectDir: fs.currentDirectory,
           dependenciesDir: fs.currentDirectory,
+          artifacts: artifacts,
+          processManager: processManager,
         ),
         throwsToolExit(
           message: 'Attempted to generate localizations code without having the '
@@ -906,17 +918,19 @@ flutter:
       _standardFlutterDirectoryL10nSetup(fs);
 
       // Test without headers.
-      generateLocalizations(
+      await generateLocalizations(
         fileSystem: fs,
         options: LocalizationOptions(
-          arbDirectory: Uri.directory(defaultL10nPathString),
-          outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
-          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
-          useSyntheticPackage: false,
+          arbDir: Uri.directory(defaultL10nPathString).path,
+          outputDir: Uri.directory(defaultL10nPathString, windows: false).path,
+          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+          syntheticPackage: false,
         ),
         logger: BufferLogger.test(),
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
+        artifacts: artifacts,
+        processManager: processManager,
       );
 
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
@@ -932,18 +946,20 @@ class AppLocalizationsEn extends AppLocalizations {
 ''');
 
     // Test with headers.
-    generateLocalizations(
+    await generateLocalizations(
       fileSystem: fs,
       options: LocalizationOptions(
         header: 'HEADER',
-        arbDirectory: Uri.directory(defaultL10nPathString),
-        outputDirectory: Uri.directory(defaultL10nPathString, windows: false),
-        templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false),
-        useSyntheticPackage: false,
+        arbDir: Uri.directory(defaultL10nPathString).path,
+        outputDir: Uri.directory(defaultL10nPathString, windows: false).path,
+        templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+        syntheticPackage: false,
       ),
       logger: logger,
       projectDir: fs.currentDirectory,
       dependenciesDir: fs.currentDirectory,
+      artifacts: artifacts,
+      processManager: processManager,
     );
 
     expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
@@ -3195,5 +3211,81 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       ..loadResources()
       ..writeOutputFiles();
     expect(logger.hadWarningOutput, isFalse);
+  });
+
+  testWithoutContext('can use decimalPatternDigits with decimalDigits optional parameter', () {
+    const String arbFile = '''
+{
+  "treeHeight": "Tree height is {height}m.",
+  "@treeHeight": {
+    "placeholders": {
+      "height": {
+        "type": "double",
+        "format": "decimalPatternDigits",
+        "optionalParameters": {
+          "decimalDigits": 3
+        }
+      }
+    }
+  }
+}''';
+
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(arbFile);
+
+    LocalizationsGenerator(
+      fileSystem: fs,
+      inputPathString: defaultL10nPathString,
+      outputPathString: defaultL10nPathString,
+      templateArbFileName: defaultTemplateArbFileName,
+      outputFileString: defaultOutputFileString,
+      classNameString: defaultClassNameString,
+      logger: logger,
+    )
+      ..loadResources()
+      ..writeOutputFiles();
+
+    final String localizationsFile = fs.file(
+      fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+    ).readAsStringSync();
+    expect(localizationsFile, containsIgnoringWhitespace(r'''
+String treeHeight(double height) {
+'''));
+    expect(localizationsFile, containsIgnoringWhitespace(r'''
+NumberFormat.decimalPatternDigits(
+  locale: localeName,
+  decimalDigits: 3
+);
+'''));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/125461.
+  testWithoutContext('dollar signs are escaped properly when there is a select clause', () {
+    const String dollarSignWithSelect = r'''
+{
+  "dollarSignWithSelect": "$nice_bug\nHello Bug! Manifistation #1 {selectPlaceholder, select, case{message} other{messageOther}}"
+}''';
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+      .writeAsStringSync(dollarSignWithSelect);
+    LocalizationsGenerator(
+      fileSystem: fs,
+      inputPathString: defaultL10nPathString,
+      outputPathString: defaultL10nPathString,
+      templateArbFileName: defaultTemplateArbFileName,
+      outputFileString: defaultOutputFileString,
+      classNameString: defaultClassNameString,
+      logger: logger,
+      suppressWarnings: true,
+    )
+      ..loadResources()
+      ..writeOutputFiles();
+    final String localizationsFile = fs.file(
+      fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+    ).readAsStringSync();
+    expect(localizationsFile, contains(r'\$nice_bug\nHello Bug! Manifistation #1 $_temp0'));
   });
 }

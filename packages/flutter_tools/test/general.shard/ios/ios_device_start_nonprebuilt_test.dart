@@ -338,6 +338,8 @@ IOSDevice setUpIOSDevice({
     ),
     cpuArchitecture: DarwinArch.arm64,
     connectionInterface: DeviceConnectionInterface.attached,
+    isConnected: true,
+    devModeEnabled: true,
   );
 }
 

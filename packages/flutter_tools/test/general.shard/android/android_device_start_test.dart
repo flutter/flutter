@@ -56,8 +56,7 @@ void main() {
     TargetPlatform.android_x64,
   ]) {
     testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
-      final String arch = getNameForAndroidArch(
-        getAndroidArchForName(getNameForTargetPlatform(targetPlatform)));
+      final String arch = getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
       final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
         fileSystem: fileSystem,
         processManager: processManager,
@@ -250,7 +249,7 @@ void main() {
         '--ez', 'verify-entry-points', 'true',
         '--ez', 'start-paused', 'true',
         '--ez', 'disable-service-auth-codes', 'true',
-        '--es', 'dart-flags', 'foo',
+        '--es', 'dart-flags', 'foo,--null_assertions',
         '--ez', 'use-test-fonts', 'true',
         '--ez', 'verbose-logging', 'true',
         '--user', '10',
@@ -279,6 +278,7 @@ void main() {
         useTestFonts: true,
         verboseSystemLogs: true,
         enableImpeller: ImpellerStatus.enabled,
+        nullAssertions: true,
       ),
       platformArgs: <String, dynamic>{},
       userIdentifier: '10',

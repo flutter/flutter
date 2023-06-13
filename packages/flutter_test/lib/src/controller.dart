@@ -379,7 +379,7 @@ abstract class WidgetController {
   /// using [Iterator.moveNext].
   Iterable<Element> get allElements {
     TestAsyncUtils.guardSync();
-    return collectAllElementsFrom(binding.renderViewElement!, skipOffstage: false);
+    return collectAllElementsFrom(binding.rootElement!, skipOffstage: false);
   }
 
   /// The matching element in the widget tree.
@@ -1091,7 +1091,7 @@ abstract class WidgetController {
           ),
         ]),
       ...<PointerEventRecord>[
-        for(int t = 0; t <= intervals; t += 1)
+        for (int t = 0; t <= intervals; t += 1)
           PointerEventRecord(timeStamps[t], <PointerEvent>[
             PointerMoveEvent(
               timeStamp: timeStamps[t],
@@ -1133,6 +1133,19 @@ abstract class WidgetController {
     return result;
   }
 
+  TestGesture _createGesture({
+    int? pointer,
+    required PointerDeviceKind kind,
+    required int buttons,
+  }) {
+    return TestGesture(
+      dispatcher: sendEventToBinding,
+      kind: kind,
+      pointer: pointer ?? _getNextPointer(),
+      buttons: buttons,
+    );
+  }
+
   /// Creates gesture and returns the [TestGesture] object which you can use
   /// to continue the gesture using calls on the [TestGesture] object.
   ///
@@ -1143,12 +1156,7 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
-    return TestGesture(
-      dispatcher: sendEventToBinding,
-      kind: kind,
-      pointer: pointer ?? _getNextPointer(),
-      buttons: buttons,
-    );
+    return _createGesture(pointer: pointer, kind: kind, buttons: buttons);
   }
 
   /// Creates a gesture with an initial appropriate starting gesture at a
@@ -1172,11 +1180,7 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
-    final TestGesture result = await createGesture(
-      pointer: pointer,
-      kind: kind,
-      buttons: buttons,
-    );
+    final TestGesture result = _createGesture(pointer: pointer, kind: kind, buttons: buttons);
     if (kind == PointerDeviceKind.trackpad) {
       await result.panZoomStart(downLocation);
     } else {
@@ -1188,7 +1192,8 @@ abstract class WidgetController {
   /// Forwards the given location to the binding's hitTest logic.
   HitTestResult hitTestOnBinding(Offset location) {
     final HitTestResult result = HitTestResult();
-    binding.hitTest(result, location);
+    // TODO(goderbauer): Support multiple views in flutter_test pointer event handling, https://github.com/flutter/flutter/issues/128281
+    binding.hitTest(result, location); // ignore: deprecated_member_use
     return result;
   }
 
@@ -1309,7 +1314,8 @@ abstract class WidgetController {
     final Offset location = box.localToGlobal(sizeToPoint(box.size));
     if (warnIfMissed) {
       final HitTestResult result = HitTestResult();
-      binding.hitTest(result, location);
+      // TODO(goderbauer): Support multiple views in flutter_test pointer event handling, https://github.com/flutter/flutter/issues/128281
+      binding.hitTest(result, location); // ignore: deprecated_member_use
       bool found = false;
       for (final HitTestEntry entry in result.path) {
         if (entry.target == box) {
@@ -1599,16 +1605,12 @@ abstract class WidgetController {
       switch (widget<Scrollable>(scrollable!).axisDirection) {
         case AxisDirection.up:
           moveStep = Offset(0, delta);
-          break;
         case AxisDirection.down:
           moveStep = Offset(0, -delta);
-          break;
         case AxisDirection.left:
           moveStep = Offset(delta, 0);
-          break;
         case AxisDirection.right:
           moveStep = Offset(-delta, 0);
-          break;
       }
       await dragUntilVisible(
         finder,

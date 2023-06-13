@@ -59,9 +59,9 @@ void main() {
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
           child: Center(
             child: SizedBox(
               width: 200.0,
@@ -190,9 +190,9 @@ void main() {
 
   testWidgets('Does the Ink widget render anything', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
           child: Center(
             child: Ink(
               color: Colors.blue,
@@ -222,9 +222,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
           child: Center(
             child: Ink(
               color: Colors.red,
@@ -250,9 +250,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
           child: Center(
             child: InkWell( // this is at a different depth in the tree so it's now a new InkWell
               splashColor: Colors.green,
@@ -518,9 +518,9 @@ void main() {
     const Color splashColor = Color(0xff00ff00);
 
     Widget buildWidget({InteractiveInkFeatureFactory? splashFactory}) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
           child: Center(
             child: SizedBox(
               width: 100.0,
@@ -567,6 +567,28 @@ void main() {
       paints
         ..circle(x: 50.0, y: 50.0, color: splashColor)
     );
+  });
+
+  testWidgets('Ink with isVisible=false does not paint', (WidgetTester tester) async {
+    const Color testColor = Color(0xffff1234);
+    Widget inkWidget({required bool isVisible}) {
+      return Material(
+        child: Visibility.maintain(
+          visible: isVisible,
+          child: Ink(
+            decoration: const BoxDecoration(color: testColor),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(inkWidget(isVisible: true));
+    RenderBox box = tester.renderObject(find.byType(Material));
+    expect(box, paints..rect(color: testColor));
+
+    await tester.pumpWidget(inkWidget(isVisible: false));
+    box = tester.renderObject(find.byType(Material));
+    expect(box, isNot(paints..rect(color: testColor)));
   });
 }
 

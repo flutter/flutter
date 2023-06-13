@@ -215,7 +215,6 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     switch (type) {
       case 'fontsChange':
         _systemFonts.notifyListeners();
-        break;
     }
     return;
   }

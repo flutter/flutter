@@ -5,7 +5,7 @@ define the [`dart fix` framework](https://dart.dev/tools/dart-fix) refactorings
 used by the Flutter framework.
 
 The number of fix rules defined in a file should not exceed 50 for better
-maintainability. Searching for `title:` is a given `.yaml` file will account
+maintainability. Searching for `title:` in a given `.yaml` file will account
 for the number of fixes. Splitting out fix rules should be done by class.
 
 When adding a new `.yaml` file, make a copy of `fix_template.yaml`. If the new

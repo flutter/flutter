@@ -150,7 +150,6 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         expectedLabel = 'Open navigation menu';
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -208,7 +207,6 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         expectedLabel = 'Open navigation menu';
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:

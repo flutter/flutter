@@ -2,22 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FocusTraversalGroup].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [FocusTraversalGroup].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const FocusTraversalGroupExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class FocusTraversalGroupExampleApp extends StatelessWidget {
+  const FocusTraversalGroupExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      home: FocusTraversalGroupExample(),
     );
   }
 }
@@ -92,8 +89,7 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
     }
 
     Color? foregroundColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.focused) ||
-          states.contains(MaterialState.hovered)) {
+      if (states.contains(MaterialState.focused) || states.contains(MaterialState.hovered)) {
         return Colors.white;
       }
       return null; // defer to the default foregroundColor
@@ -107,10 +103,8 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
           focusNode: focusNode,
           autofocus: widget.autofocus,
           style: ButtonStyle(
-            overlayColor:
-                MaterialStateProperty.resolveWith<Color?>(overlayColor),
-            foregroundColor:
-                MaterialStateProperty.resolveWith<Color?>(foregroundColor),
+            overlayColor: MaterialStateProperty.resolveWith<Color?>(overlayColor),
+            foregroundColor: MaterialStateProperty.resolveWith<Color?>(foregroundColor),
           ),
           onPressed: () => _handleOnPressed(),
           child: Text(widget.name),
@@ -120,8 +114,8 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class FocusTraversalGroupExample extends StatelessWidget {
+  const FocusTraversalGroupExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -153,8 +147,7 @@ class MyStatelessWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List<Widget>.generate(3, (int index) {
                   // Order as "C" "B", "A".
-                  final String order =
-                      String.fromCharCode('A'.codeUnitAt(0) + (2 - index));
+                  final String order = String.fromCharCode('A'.codeUnitAt(0) + (2 - index));
                   return OrderedButton<String>(
                     name: 'String: $order',
                     order: order,

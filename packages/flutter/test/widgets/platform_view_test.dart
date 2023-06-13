@@ -2150,6 +2150,34 @@ void main() {
       expect(channelArguments['platformViewId'], currentViewId + 1);
     });
 
+    testWidgets('FocusNode is disposed on UIView dispose', (WidgetTester tester) async {
+      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+      // casting to dynamic is required since the state class is private.
+      // ignore: avoid_dynamic_calls, invalid_assignment
+      final FocusNode node = (tester.state(find.byType(UiKitView)) as dynamic).focusNode;
+      expect(() => ChangeNotifier.debugAssertNotDisposed(node), isNot(throwsAssertionError));
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+          ),
+        ),
+      );
+      expect(() => ChangeNotifier.debugAssertNotDisposed(node), throwsAssertionError);
+    });
+
     testWidgets('UiKitView has correct semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
