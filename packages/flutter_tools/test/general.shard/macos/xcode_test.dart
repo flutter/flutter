@@ -865,42 +865,6 @@ void main() {
           Platform: () => macPlatform,
         });
 
-        testUsingContext('iOS 17 devices are wirelessly connected', () async {
-          const String devicesOutput = '''
-[
-  {
-    "simulator" : false,
-    "operatingSystemVersion" : "17.0 (17C54)",
-    "interface" : "usb",
-    "available" : false,
-    "platform" : "com.apple.platform.iphoneos",
-    "modelCode" : "iPhone8,1",
-    "identifier" : "43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7",
-    "architecture" : "arm64",
-    "modelName" : "iPhone 6s",
-    "name" : "iPhone"
-  }
-]
-''';
-
-          fakeProcessManager.addCommand(const FakeCommand(
-            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
-            stdout: devicesOutput,
-          ));
-          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
-          expect(devices, hasLength(1));
-          expect(devices[0].id, '43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7');
-          expect(devices[0].name, 'iPhone');
-          expect(await devices[0].sdkNameAndVersion, 'iOS 17.0 17C54');
-          expect(devices[0].cpuArchitecture, DarwinArch.arm64);
-          expect(devices[0].connectionInterface, DeviceConnectionInterface.wireless);
-          expect(devices[0].isConnected, true);
-          expect(fakeProcessManager, hasNoRemainingExpectations);
-        }, overrides: <Type, Generator>{
-          Platform: () => macPlatform,
-          Artifacts: () => Artifacts.test(),
-        });
-
         testUsingContext('use connected entry when filtering out duplicates', () async {
           const String devicesOutput = '''
 [

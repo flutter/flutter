@@ -531,8 +531,6 @@ class XCDevice {
           }
         }
 
-        DeviceConnectionInterface connectionInterface = _interfaceType(device);
-
         String? sdkVersion = _sdkVersion(device);
 
         if (sdkVersion != null) {
@@ -540,12 +538,10 @@ class XCDevice {
           if (buildVersion != null) {
             sdkVersion = '$sdkVersion $buildVersion';
           }
-          // Starting in iOS 17, all paired devices are also connected wirelessly.
-          if (sdkVersion.startsWith('17')) {
-            connectionInterface = DeviceConnectionInterface.wireless;
-          }
         }
 
+        // Duplicate entries started appearing in Xcode 15, possibly due to
+        // Xcode's new device connectivity stack.
         // If a duplicate entry is found in `xcdevice list`, don't overwrite
         // existing entry when the existing entry indicates the device is
         // connected and the current entry indicates the device is not connected.
@@ -569,7 +565,7 @@ class XCDevice {
           identifier,
           name: name,
           cpuArchitecture: _cpuArchitecture(device),
-          connectionInterface: connectionInterface,
+          connectionInterface: _interfaceType(device),
           isConnected: isConnected,
           sdkVersion: sdkVersion,
           iProxy: _iProxy,
