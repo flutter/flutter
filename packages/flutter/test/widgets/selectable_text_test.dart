@@ -4115,7 +4115,6 @@ void main() {
       'maxLines: 10',
       'textAlign: end',
       'textDirection: ltr',
-      'textScaleFactor: 1.0',
       'textScaler: no scaling',
       'cursorWidth: 1.0',
       'cursorHeight: 1.0',

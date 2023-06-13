@@ -49,9 +49,11 @@ abstract class TextScaler {
   /// The value of this property is only an estimate, so it may not reflect the
   /// exact text scaling strategy this [TextScaler] represents, especially when
   /// this [TextScaler] is not linear. Consider using [TextScaler.scale] instead.
+  ///
   /// This property exists solely for backward compatibility purposes, such that
   /// unmigrated APIs can get an estimated `textScaleFactor` when the caller has
-  /// already migrated to using [TextScaler].
+  /// already migrated to using [TextScaler]. It may be removed in a future
+  /// version of Flutter.
   double get textScaleFactor;
 
   /// Returns a new [TextScaler] that restricts the scaled font size to within
