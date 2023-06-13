@@ -874,7 +874,10 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
       onPressed: widget.onPressed,
       variant: widget.variant,
       toggleable: toggleable,
-      child: widget.child,
+      child: Semantics(
+        selected: widget.isSelected,
+        child: widget.child,
+      ),
     );
   }
 }
