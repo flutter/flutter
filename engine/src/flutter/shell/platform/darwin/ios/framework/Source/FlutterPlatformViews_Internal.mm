@@ -9,6 +9,7 @@
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
 static int kMaxPointsInVerb = 4;
+static const NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
 
 namespace flutter {
 
@@ -26,7 +27,10 @@ FlutterPlatformViewLayer::~FlutterPlatformViewLayer() = default;
 
 FlutterPlatformViewsController::FlutterPlatformViewsController()
     : layer_pool_(std::make_unique<FlutterPlatformViewLayerPool>()),
-      weak_factory_(std::make_unique<fml::WeakPtrFactory<FlutterPlatformViewsController>>(this)){};
+      weak_factory_(std::make_unique<fml::WeakPtrFactory<FlutterPlatformViewsController>>(this)) {
+  mask_view_pool_.reset(
+      [[FlutterClippingMaskViewPool alloc] initWithCapacity:kFlutterClippingMaskViewPoolCapacity]);
+};
 
 FlutterPlatformViewsController::~FlutterPlatformViewsController() = default;
 
@@ -458,9 +462,10 @@ static BOOL _preparedOnce = NO;
 // The maximum number of `FlutterClippingMaskView` the pool can contain.
 // This prevents the pool to grow infinately and limits the maximum memory a pool can use.
 @property(assign, nonatomic) NSUInteger capacity;
-@property(retain, nonatomic) NSMutableArray<FlutterClippingMaskView*>* pool;
-// The index points to the first available FlutterClippingMaskView in the `pool`.
-@property(assign, nonatomic) NSUInteger availableIndex;
+
+// The pool contains the views that are available to use.
+// The number of items in the pool must not excceds `capacity`.
+@property(retain, nonatomic) NSMutableSet<FlutterClippingMaskView*>* pool;
 
 @end
 
@@ -468,48 +473,40 @@ static BOOL _preparedOnce = NO;
 
 - (instancetype)initWithCapacity:(NSInteger)capacity {
   if (self = [super init]) {
-    _pool = [[NSMutableArray alloc] initWithCapacity:capacity];
+    // Most of cases, there are only one PlatformView in the scene.
+    // Thus init with the capacity of 1.
+    _pool = [[NSMutableSet alloc] initWithCapacity:1];
     _capacity = capacity;
-    _availableIndex = 0;
   }
   return self;
 }
 
 - (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame {
-  FML_DCHECK(self.availableIndex <= self.capacity);
-  FlutterClippingMaskView* maskView;
-  if (self.availableIndex == self.capacity) {
-    // The pool is full, alloc a new one.
-    maskView =
+  FML_DCHECK(self.pool.count <= self.capacity);
+  if (self.pool.count == 0) {
+    // The pool is empty, alloc a new one.
+    return
         [[[FlutterClippingMaskView alloc] initWithFrame:frame
                                             screenScale:[UIScreen mainScreen].scale] autorelease];
-    return maskView;
   }
-
-  if (self.availableIndex >= self.pool.count) {
-    // The pool doesn't have enough maskViews, alloc a new one and add to the pool.
-    maskView =
-        [[[FlutterClippingMaskView alloc] initWithFrame:frame
-                                            screenScale:[UIScreen mainScreen].scale] autorelease];
-    [self.pool addObject:maskView];
-    FML_DCHECK(self.pool.count <= self.capacity);
-  } else {
-    // Reuse a maskView from the pool.
-    maskView = [self.pool objectAtIndex:self.availableIndex];
-    maskView.frame = frame;
-    [maskView reset];
-  }
-  self.availableIndex++;
+  FlutterClippingMaskView* maskView = [[[self.pool anyObject] retain] autorelease];
+  maskView.frame = frame;
+  [maskView reset];
+  [self.pool removeObject:maskView];
   return maskView;
 }
 
-- (void)recycleMaskViews {
-  self.availableIndex = 0;
+- (void)insertViewToPoolIfNeeded:(FlutterClippingMaskView*)maskView {
+  FML_DCHECK(![self.pool containsObject:maskView]);
+  FML_DCHECK(self.pool.count <= self.capacity);
+  if (self.pool.count == self.capacity) {
+    return;
+  }
+  [self.pool addObject:maskView];
 }
 
 - (void)dealloc {
   [_pool release];
-  _pool = nil;
 
   [super dealloc];
 }
