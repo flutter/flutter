@@ -1189,7 +1189,8 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('sets up parent data', (WidgetTester tester) async {
-      // Also tests computeChildPaintOffset & computeChildPaintExtent
+      // Also tests computeAbsolutePaintOffsetFor & computeChildPaintExtent
+      // Regression test for https://github.com/flutter/flutter/issues/128723
       final Map<ChildVicinity, UniqueKey> childKeys = <ChildVicinity, UniqueKey>{};
       final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
         maxXIndex: 5,
@@ -1250,7 +1251,7 @@ void main() {
       childParentData = parentDataOf(viewport.lastChild!);
       expect(childParentData.vicinity, const ChildVicinity(xIndex: 5, yIndex: 5));
       expect(childParentData.isVisible, isFalse);
-      expect(childParentData.paintOffset, const Offset(1000.0, -400.0));
+      expect(childParentData.paintOffset, const Offset(1000.0, -600.0));
       expect(childParentData.layoutOffset, const Offset(1000.0, 1000.0));
 
       // - horizontal reverse
@@ -1271,7 +1272,7 @@ void main() {
       childParentData = parentDataOf(viewport.lastChild!);
       expect(childParentData.vicinity, const ChildVicinity(xIndex: 5, yIndex: 5));
       expect(childParentData.isVisible, isFalse);
-      expect(childParentData.paintOffset, const Offset(-200.0, 1000.0));
+      expect(childParentData.paintOffset, const Offset(-400.0, 1000.0));
       expect(childParentData.layoutOffset, const Offset(1000.0, 1000.0));
 
       // - both reverse
@@ -1293,7 +1294,7 @@ void main() {
       childParentData = parentDataOf(viewport.lastChild!);
       expect(childParentData.vicinity, const ChildVicinity(xIndex: 5, yIndex: 5));
       expect(childParentData.isVisible, isFalse);
-      expect(childParentData.paintOffset, const Offset(-200.0, -400.0));
+      expect(childParentData.paintOffset, const Offset(-400.0, -600.0));
       expect(childParentData.layoutOffset, const Offset(1000.0, 1000.0));
 
       // Change the scroll positions to test partially visible.
