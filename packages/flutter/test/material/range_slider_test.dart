@@ -2540,4 +2540,45 @@ void main() {
       isNot(paints..circle(color: draggedColor)),
     );
   });
+
+   testWidgets('RangeSlider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/128433
+
+    int startFired = 0;
+    int endFired = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: GestureDetector(
+                onHorizontalDragUpdate: (_) { },
+                child: RangeSlider(
+                  values: const RangeValues(40, 80),
+                  max: 100,
+                  onChanged: (RangeValues newValue) { },
+                  onChangeStart: (RangeValues value) {
+                    startFired += 1;
+                  },
+                  onChangeEnd: (RangeValues value) {
+                    endFired += 1;
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.timedDragFrom(
+      tester.getTopLeft(find.byType(RangeSlider)),
+      const Offset(100.0, 0.0),
+      const Duration(milliseconds: 500),
+    );
+
+    expect(startFired, equals(1));
+    expect(endFired, equals(1));
+  });
 }

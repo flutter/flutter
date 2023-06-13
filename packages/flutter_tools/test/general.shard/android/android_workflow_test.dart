@@ -4,7 +4,6 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -125,13 +124,11 @@ void main() {
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
 
@@ -144,13 +141,11 @@ void main() {
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
 
@@ -168,13 +163,11 @@ void main() {
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -197,13 +190,11 @@ All SDK package licenses accepted.
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -226,13 +217,11 @@ All SDK package licenses accepted.
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: java,
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
 
@@ -256,13 +245,11 @@ Review licenses that have not been accepted (y/N)?
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -286,13 +273,11 @@ Review licenses that have not been accepted (y/N)?
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -312,13 +297,11 @@ Review licenses that have not been accepted (y/N)?
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
 
     expect(await licenseValidator.runLicenseManager(), isTrue);
@@ -331,13 +314,11 @@ Review licenses that have not been accepted (y/N)?
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
 
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
@@ -360,13 +341,11 @@ Review licenses that have not been accepted (y/N)?
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: logger,
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
 
     await licenseValidator.runLicenseManager();
@@ -381,13 +360,11 @@ Review licenses that have not been accepted (y/N)?
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
 
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
@@ -408,13 +385,11 @@ Review licenses that have not been accepted (y/N)?
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: logger,
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
 
     await expectLater(
@@ -649,11 +624,6 @@ class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
 
   @override
   String get platformName => '';
-}
-
-class FakeAndroidStudio extends Fake implements AndroidStudio {
-  @override
-  String get javaPath => 'java';
 }
 
 class ThrowingStdin<T> extends Fake implements IOSink {
