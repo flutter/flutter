@@ -851,6 +851,7 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -942,6 +943,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
+          useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(thumbVisibility: MaterialStateProperty.all(true)),
         ),
         home: const SingleChildScrollView(
@@ -988,10 +990,13 @@ void main() {
   testWidgets('Hover animation is not triggered by tap gestures', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
-          thumbVisibility: MaterialStateProperty.all(true),
-          showTrackOnHover: true,
-        )),
+        theme: ThemeData(
+          useMaterial3: false,
+          scrollbarTheme: ScrollbarThemeData(
+            thumbVisibility: MaterialStateProperty.all(true),
+            showTrackOnHover: true,
+          ),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
@@ -1060,19 +1065,22 @@ void main() {
   testWidgets('ScrollbarThemeData.thickness replaces hoverThickness', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
-          thumbVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) => true),
-          trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            return states.contains(MaterialState.hovered);
-          }),
-          thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
-              return 40.0;
-            }
-            // Default thickness
-            return 8.0;
-          }),
-        )),
+        theme: ThemeData(
+          useMaterial3: false,
+          scrollbarTheme: ScrollbarThemeData(
+            thumbVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) => true),
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              return states.contains(MaterialState.hovered);
+            }),
+            thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return 40.0;
+              }
+              // Default thickness
+              return 8.0;
+            }),
+          ),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
@@ -1129,15 +1137,18 @@ void main() {
   testWidgets('ScrollbarThemeData.trackVisibility replaces showTrackOnHover', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
-          thumbVisibility: MaterialStateProperty.all(true),
-          trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
-              return true;
-            }
-            return false;
-          }),
-        )),
+        theme: ThemeData(
+          useMaterial3: false,
+          scrollbarTheme: ScrollbarThemeData(
+            thumbVisibility: MaterialStateProperty.all(true),
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return true;
+              }
+              return false;
+            }),
+          ),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
@@ -1194,10 +1205,13 @@ void main() {
   testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
-          thumbVisibility: MaterialStateProperty.all(true),
-          showTrackOnHover: true,
-        )),
+        theme: ThemeData(
+          useMaterial3: false,
+          scrollbarTheme: ScrollbarThemeData(
+            thumbVisibility: MaterialStateProperty.all(true),
+            showTrackOnHover: true,
+          ),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
@@ -1387,6 +1401,7 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -1550,6 +1565,7 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
