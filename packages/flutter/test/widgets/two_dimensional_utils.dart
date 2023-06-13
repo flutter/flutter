@@ -17,6 +17,7 @@ final TwoDimensionalChildBuilderDelegate builderDelegate = TwoDimensionalChildBu
   maxYIndex: 5,
   builder: (BuildContext context, ChildVicinity vicinity) {
     return Container(
+      key: ValueKey<ChildVicinity>(vicinity),
       color: vicinity.xIndex.isEven && vicinity.yIndex.isEven
         ? Colors.amber[100]
         : (vicinity.xIndex.isOdd && vicinity.yIndex.isOdd
