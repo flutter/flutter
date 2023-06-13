@@ -1016,20 +1016,25 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     final Color? hoverColor = Colors.orange[500];
+    final ThemeData theme = ThemeData();
+    final bool material3 = theme.useMaterial3;
     Widget buildApp({bool enabled = true}) {
       return wrap(
-        child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-          return RadioListTile<int>(
-            value: 0,
-            onChanged: enabled ? (int? newValue) {
-              setState(() {
-                groupValue = newValue;
-              });
-            } : null,
-            hoverColor: hoverColor,
-            groupValue: groupValue,
-          );
-        }),
+        child: MaterialApp(
+          theme: theme,
+          home: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            return RadioListTile<int>(
+              value: 0,
+              onChanged: enabled ? (int? newValue) {
+                setState(() {
+                  groupValue = newValue;
+                });
+              } : null,
+              hoverColor: hoverColor,
+              groupValue: groupValue,
+            );
+          }),
+        ),
       );
     }
     await tester.pumpWidget(buildApp());
@@ -1040,8 +1045,8 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
-        ..circle(color: const Color(0xff2196f3))
-        ..circle(color: const Color(0xff2196f3)),
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xff2196f3))
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xff2196f3)),
     );
 
     // Start hovering
@@ -1069,8 +1074,8 @@ void main() {
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
         ..rect()
-        ..circle(color: const Color(0x61000000))
-        ..circle(color: const Color(0x61000000)),
+        ..circle(color: material3 ? theme.colorScheme.onSurface.withOpacity(0.38) : const Color(0x61000000))
+        ..circle(color: material3 ? theme.colorScheme.onSurface.withOpacity(0.38) : const Color(0x61000000)),
     );
   });
 
@@ -1096,15 +1101,20 @@ void main() {
       return null;
     }
 
+    final ThemeData theme = ThemeData();
+    final bool material3 = theme.useMaterial3;
     Widget buildRadio({bool active = false, bool useOverlay = true}) {
       return wrap(
-        child: RadioListTile<bool>(
-          value: active,
-          groupValue: true,
-          onChanged: (_) { },
-          fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-          overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
-          hoverColor: hoverColor,
+        child: MaterialApp(
+          theme: theme,
+          home: RadioListTile<bool>(
+            value: active,
+            groupValue: true,
+            onChanged: (_) { },
+            fillColor: const MaterialStatePropertyAll<Color>(fillColor),
+            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            hoverColor: hoverColor,
+          ),
         ),
       );
     }
@@ -1115,11 +1125,13 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle()
-        ..circle(
-          color: fillColor.withAlpha(kRadialReactionAlpha),
-          radius: 20,
-        ),
+      material3 ? (paints..circle(
+        color: fillColor.withAlpha(kRadialReactionAlpha),
+        radius: 20,
+      )) : (paints..circle()..circle(
+        color: fillColor.withAlpha(kRadialReactionAlpha),
+        radius: 20,
+      )),
       reason: 'Default inactive pressed Radio should have overlay color from fillColor',
     );
 
@@ -1129,11 +1141,13 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle()
-        ..circle(
-          color: fillColor.withAlpha(kRadialReactionAlpha),
-          radius: 20,
-        ),
+      material3 ? (paints..circle(
+        color: fillColor.withAlpha(kRadialReactionAlpha),
+        radius: 20,
+      )) : (paints..circle()..circle(
+        color: fillColor.withAlpha(kRadialReactionAlpha),
+        radius: 20,
+      )),
       reason: 'Default active pressed Radio should have overlay color from fillColor',
     );
 
@@ -1143,11 +1157,13 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle()
-        ..circle(
-          color: inactivePressedOverlayColor,
-          radius: 20,
-        ),
+      material3 ? (paints..circle(
+        color: inactivePressedOverlayColor,
+        radius: 20,
+      )) : (paints..circle()..circle(
+        color: inactivePressedOverlayColor,
+        radius: 20,
+      )),
       reason: 'Inactive pressed Radio should have overlay color: $inactivePressedOverlayColor',
     );
 
@@ -1157,11 +1173,13 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle()
-        ..circle(
-          color: activePressedOverlayColor,
-          radius: 20,
-        ),
+      material3 ? (paints..circle(
+        color: activePressedOverlayColor,
+        radius: 20,
+      )) : (paints..circle()..circle(
+        color: activePressedOverlayColor,
+        radius: 20,
+      )),
       reason: 'Active pressed Radio should have overlay color: $activePressedOverlayColor',
     );
 
@@ -1177,11 +1195,13 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints
-        ..circle(
-          color: hoverOverlayColor,
-          radius: 20,
-        ),
+      material3 ? (paints..circle(
+        color: hoverOverlayColor,
+        radius: 20,
+      )) : (paints..circle(
+        color: hoverOverlayColor,
+        radius: 20,
+      )),
       reason: 'Hovered Radio should use overlay color $hoverOverlayColor over $hoverColor',
     );
   });

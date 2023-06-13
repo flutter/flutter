@@ -119,6 +119,7 @@ void main() {
 
   testWidgets('ThemeData properties are used when no CardTheme is set', (WidgetTester tester) async {
     final ThemeData themeData = _themeData();
+    final bool material3 = themeData.useMaterial3;
 
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -128,7 +129,7 @@ void main() {
     ));
 
     final Material material = _getCardMaterial(tester);
-    expect(material.color, themeData.cardColor);
+    expect(material.color, material3 ? themeData.colorScheme.surface: themeData.cardColor);
   });
 
   testWidgets('CardTheme customizes shape', (WidgetTester tester) async {

@@ -474,6 +474,7 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     const Key radioKey = Key('radio');
+    final bool material3 = theme.useMaterial3;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
         theme: theme,
@@ -511,12 +512,12 @@ void main() {
       Material.of(tester.element(find.byKey(radioKey))),
       paints
         ..rect(
-            color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-          )
+          color: const Color(0xffffffff),
+          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+        )
         ..circle(color: Colors.orange[500])
-        ..circle(color: const Color(0xff2196f3))
-        ..circle(color: const Color(0xff2196f3)),
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xff2196f3))
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xff2196f3)),
     );
 
     // Check when the radio isn't selected.
@@ -549,8 +550,8 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: const Color(0x61000000))
-        ..circle(color: const Color(0x61000000)),
+        ..circle(color: material3 ? theme.colorScheme.onSurface.withOpacity(0.38) : const Color(0x61000000))
+        ..circle(color: material3 ? theme.colorScheme.onSurface.withOpacity(0.38) : const Color(0x61000000)),
     );
   });
 
@@ -558,6 +559,7 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     const Key radioKey = Key('radio');
+    final bool material3 = theme.useMaterial3;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
         theme: theme,
@@ -596,8 +598,8 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: const Color(0xff2196f3))
-        ..circle(color: const Color(0xff2196f3)),
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xff2196f3))
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xff2196f3)),
     );
 
     // Start hovering
@@ -632,8 +634,8 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: const Color(0x61000000))
-        ..circle(color: const Color(0x61000000)),
+        ..circle(color: material3 ? theme.colorScheme.onSurface.withOpacity(0.38) : const Color(0x61000000))
+        ..circle(color: material3 ? theme.colorScheme.onSurface.withOpacity(0.38) : const Color(0x61000000)),
     );
   });
 
@@ -1262,6 +1264,7 @@ void main() {
   });
 
   testWidgets('Radio button default colors', (WidgetTester tester) async {
+    final bool material3 = theme.useMaterial3;
     Widget buildRadio({bool enabled = true, bool selected = true}) {
       return MaterialApp(
         theme: theme,
@@ -1281,8 +1284,8 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
-        ..circle(color: const Color(0xFF2196F3)) // Outer circle - blue primary value
-        ..circle(color: const Color(0xFF2196F3))..restore(), // Inner circle - blue primary value
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xFF2196F3)) // Outer circle - primary value
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xFF2196F3))..restore(), // Inner circle - primary value
     );
 
     await tester.pumpWidget(Container());
@@ -1293,7 +1296,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..save()
-        ..circle(color: const Color(0xFF2196F3))
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xFF2196F3))
         ..restore(),
     );
 
@@ -1365,7 +1368,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
       material3
-        ? (paints..circle(color: colors.primary.withOpacity(0.12))..circle(color: colors.onSurface.withOpacity(1)))
+        ? (paints..circle(color: colors.primary.withOpacity(0.12))..circle(color: colors.onSurfaceVariant.withOpacity(1)))
         : (paints..circle(color: theme.unselectedWidgetColor.withAlpha(0x1F))..circle(color: theme.unselectedWidgetColor))
     );
 
