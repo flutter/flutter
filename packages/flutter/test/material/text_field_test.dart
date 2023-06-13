@@ -16021,12 +16021,15 @@ void main() {
 
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
 
-      await tester.tapAt(
+      final TestGesture gesture = await tester.startGesture(
         tester.getBottomLeft(find.byType(TextField)) - const Offset(10.0, 20.0),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+      await gesture.up();
+      await tester.pump();
 
-      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
     },
       skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),

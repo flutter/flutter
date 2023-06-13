@@ -260,7 +260,6 @@ class MagnifierController {
    _overlayEntry = OverlayEntry(
       builder: (BuildContext context) => capturedThemes.wrap(builder(context)),
     );
-     // TODO(justinmc): The magnifier is inserted but I can't find it in the test.
     overlayState.insert(overlayEntry!, below: below);
 
     if (animationController != null) {
