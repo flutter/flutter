@@ -2288,7 +2288,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(nestedRelatedProperty, isNot(contains('children')));
     });
 
-    testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree, DiagnosticsNode', (WidgetTester tester) async {
+    testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree on $DiagnosticsNode', (WidgetTester tester) async {
       // TODO (polina-c): delete this test once getChildrenSummaryTree stops accepting DiagnosticsNode.
       // https://github.com/flutter/devtools/issues/3951
       const String group = 'test-group';
@@ -2399,7 +2399,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(childJson['chidlren'], isNull);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
-    testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree, Dianosticable', (WidgetTester tester) async {
+    testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree on $Diagnosticable', (WidgetTester tester) async {
       const String group = 'test-group';
 
       await tester.pumpWidget(
