@@ -1,0 +1,46 @@
+{
+    "drone_dimensions": [
+        "device_type=none",
+        "os=Linux"
+    ],
+    "gn": [
+         "--android",
+         "--android-cpu=x64",
+         "--no-lto"
+    ],
+    "name": "android_debug_x64",
+    "ninja": {
+        "config": "android_debug_x64",
+        "targets": [
+            "flutter/shell/platform/android:flutter_shell_native_unittests",
+            "flutter/testing/scenario_app"
+        ]
+    },
+    "tests": [
+        {
+            "language": "python3",
+            "name": "Android Unit Tests",
+            "contexts": [
+                "android_virtual_device"
+            ],
+	    "parameters": [
+                "--android-variant",
+                "android_debug_x64",
+                "--type",
+                "android"
+	    ],
+            "script": "flutter/testing/run_tests.py"
+        },
+        {
+            "language": "bash",
+            "name": "Scenario App Integration Tests",
+            "contexts": [
+                "android_virtual_device"
+            ],
+	    "parameters": [
+                "android_debug_x64"
+	    ],
+            "script": "flutter/testing/scenario_app/run_android_tests.sh"
+        }
+    ]
+}
