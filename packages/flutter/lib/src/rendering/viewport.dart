@@ -108,11 +108,17 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   /// when the offset of the viewport is changed by x then `target` also moves
   /// by x within the viewport.
   ///
+  /// TODO(Piinks): Add docs on new axis param
+  ///
   /// See also:
   ///
   ///  * [RevealedOffset], which describes the return value of this method.
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect });
-
+  RevealedOffset getOffsetToReveal(
+    RenderObject target,
+    double alignment, {
+    Rect? rect,
+    AxisDirection? axisDirection,
+  });
   /// The default value for the cache extent of the viewport.
   ///
   /// This default assumes [CacheExtentStyle.pixel].
@@ -753,7 +759,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {
+  RevealedOffset getOffsetToReveal(
+    RenderObject target,
+    double alignment, {
+    Rect? rect,
+    AxisDirection? axisDirection,
+  }) {
+    assert(axisDirection == null || axisDirection == this.axisDirection);
+    axisDirection ??= this.axisDirection;
     // Steps to convert `rect` (from a RenderBox coordinate system) to its
     // scroll offset within this viewport (not in the exact order):
     //

@@ -493,9 +493,7 @@ class TwoDimensionalViewportParentData extends ParentData {
 ///
 /// Subclasses should not override [performLayout], as it handles housekeeping
 /// on either side of the call to [layoutChildSequence].
-// TODO(Piinks): Two follow up changes:
-//  - Keep alive https://github.com/flutter/flutter/issues/126297
-//  - ensureVisible https://github.com/flutter/flutter/issues/126299
+// TODO(Piinks): Add support for keep alive https://github.com/flutter/flutter/issues/126297
 abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderAbstractViewport {
   /// Initializes fields for subclasses.
   ///
@@ -894,9 +892,119 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {
-    // TODO(Piinks): Add this back in follow up change (ensureVisible), https://github.com/flutter/flutter/issues/126299
-    return const RevealedOffset(offset: 0.0, rect: Rect.zero);
+  RevealedOffset getOffsetToReveal(
+    RenderObject target,
+    double alignment, {
+    Rect? rect,
+    AxisDirection? axisDirection,
+  }) {
+    // We must know which axis we are revealing for.
+    assert(axisDirection != null);
+
+    // Starting at `target` and walking towards the root:
+    //  - `child` will be the last object before we reach this viewport, and
+    //  - `pivot` will be the last RenderBox before we reach this viewport.
+    RenderObject child = target;
+    RenderBox? pivot;
+    // Find the direct child of the viewport that contains our target
+    while (child.parent != this) {
+      final RenderObject parent = child.parent! as RenderObject;
+      if (child is RenderBox) {
+        pivot = child;
+      }
+      child = parent;
+    }
+    final double offset = switch(axisDirectionToAxis(axisDirection!)) {
+      Axis.vertical => verticalOffset.pixels,
+      Axis.horizontal => horizontalOffset.pixels,
+    };
+
+    // `rect` in the new intermediate coordinate system.
+    final Rect rectLocal;
+    // Our new reference frame render object's main axis extent.
+    final double pivotExtent;
+    if (pivot != null) {
+      assert(pivot.parent != null);
+      assert(pivot.parent != this);
+      assert(pivot != this);
+      assert(pivot.parent is RenderBox);
+      pivotExtent = switch (axisDirectionToAxis(axisDirection)) {
+        Axis.horizontal => pivot.size.width,
+        Axis.vertical => pivot.size.height,
+      };
+      rect ??= target.paintBounds;
+      rectLocal = MatrixUtils.transformRect(target.getTransformTo(pivot), rect);
+    } else {
+      assert(rect != null);
+      return RevealedOffset(offset: offset, rect: rect!);
+    }
+
+    assert(child.parent == this);
+    final RenderBox box = child as RenderBox;
+
+    final double targetMainAxisExtent;
+    double leadingScrollOffset = offset;
+    // The scroll offset of `rect` within `child`.
+    switch (axisDirection) {
+      case AxisDirection.up:
+        leadingScrollOffset += pivotExtent - rectLocal.bottom;
+        targetMainAxisExtent = rectLocal.height;
+      case AxisDirection.right:
+        leadingScrollOffset += rectLocal.left;
+        targetMainAxisExtent = rectLocal.width;
+      case AxisDirection.down:
+        leadingScrollOffset += rectLocal.top;
+        targetMainAxisExtent = rectLocal.height;
+      case AxisDirection.left:
+        leadingScrollOffset += pivotExtent - rectLocal.right;
+        targetMainAxisExtent = rectLocal.width;
+    }
+
+    // So far leadingScrollOffset is the scroll offset of `rect` in the `child`
+    // sliver's sliver coordinate system. The sign of this value indicates
+    // whether the `rect` protrudes the leading edge of the `child` sliver. When
+    // this value is non-negative and `child`'s `maxScrollObstructionExtent` is
+    // greater than 0, we assume `rect` can't be obstructed by the leading edge
+    // of the viewport (i.e. its pinned to the leading edge).
+
+    // The scroll offset in the viewport to `rect`.
+    final TwoDimensionalViewportParentData childParentData = parentDataOf(box);
+    leadingScrollOffset += switch(axisDirection) {
+      AxisDirection.down => childParentData.paintOffset!.dy,
+      AxisDirection.up => viewportDimension.height - childParentData.paintOffset!.dy - box.size.height,
+      AxisDirection.right => childParentData.paintOffset!.dx,
+      AxisDirection.left => viewportDimension.width - childParentData.paintOffset!.dx - box.size.width,
+    };
+
+    // This step assumes the viewport's layout is up-to-date, i.e., if
+    // the position is changed after the last performLayout, the new scroll
+    // position will not be accounted for.
+    final Matrix4 transform = target.getTransformTo(this);
+    Rect targetRect = MatrixUtils.transformRect(transform, rect);
+
+    final double mainAxisExtent = switch (axisDirectionToAxis(axisDirection)) {
+      Axis.horizontal => viewportDimension.width,
+      Axis.vertical => viewportDimension.height,
+    };
+
+    final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+    final double offsetDifference = switch(axisDirectionToAxis(axisDirection)){
+      Axis.vertical => verticalOffset.pixels - targetOffset,
+      Axis.horizontal => horizontalOffset.pixels - targetOffset,
+    };
+    switch (axisDirection) {
+      case AxisDirection.down:
+        targetRect = targetRect.translate(0.0, offsetDifference);
+      case AxisDirection.right:
+        targetRect = targetRect.translate(offsetDifference, 0.0);
+      case AxisDirection.up:
+        targetRect = targetRect.translate(0.0, -offsetDifference);
+      case AxisDirection.left:
+        targetRect = targetRect.translate(-offsetDifference, 0.0);
+    }
+
+    final RevealedOffset revealedOffset = RevealedOffset(offset: targetOffset, rect: targetRect);
+    return revealedOffset;
   }
 
   /// Should be used by subclasses to invalidate any cached metrics for the

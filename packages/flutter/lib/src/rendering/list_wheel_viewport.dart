@@ -1123,7 +1123,14 @@ class RenderListWheelViewport
   }
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {
+  RevealedOffset getOffsetToReveal(
+    RenderObject target,
+    double alignment, {
+    Rect? rect,
+    AxisDirection? axisDirection,
+  }) {
+    // ListWheelViewport only support vertical axes.
+    assert(axisDirection == null || axisDirectionToAxis(axisDirection) == Axis.vertical);
     // `target` is only fully revealed when in the selected/center position. Therefore,
     // this method always returns the offset that shows `target` in the center position,
     // which is the same offset for all `alignment` values.
