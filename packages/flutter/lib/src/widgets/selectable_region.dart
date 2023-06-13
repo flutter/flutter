@@ -489,6 +489,22 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _updateSelectedContentIfNeeded();
   }
 
+  bool _positionIsOnActiveSelection({required Offset globalPosition}) {
+    for (final Selectable selectable in _selectionDelegate.selectables) {
+      if (!selectable.value.hasSelection || (selectable.value.status != SelectionStatus.uncollapsed)) {
+        continue;
+      }
+      for (final Rect selectionRect in selectable.value.selectionRects!) {
+        final Matrix4 transform = selectable.getTransformTo(null);
+        final Rect globalRect = MatrixUtils.transformRect(transform, selectionRect);
+        if (globalRect.contains(globalPosition)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   void _handleRightClickDown(TapDownDetails details) {
     final Offset? previousSecondaryTapDownPosition = lastSecondaryTapDownPosition;
     final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
@@ -501,20 +517,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         if (_selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed) {
           // If lastSecondaryTapDownPosition is within the current selection then
           // keep the current selection, if not then collapse it.
-          bool lastSecondaryTapDownPositionWasOnActiveSelection = false;
-          for (final Selectable selectable in _selectionDelegate.selectables) {
-            if (!selectable.value.hasSelection || (selectable.value.status != SelectionStatus.uncollapsed)) {
-              continue;
-            }
-            for (final Rect selectionRect in selectable.value.selectionRects!) {
-              final Matrix4 transform = selectable.getTransformTo(null);
-              final Rect globalRect = MatrixUtils.transformRect(transform, selectionRect);
-              if (globalRect.contains(details.globalPosition)) {
-                lastSecondaryTapDownPositionWasOnActiveSelection = true;
-                break;
-              }
-            }
-          }
+          final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
           if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
             _selectStartTo(offset: lastSecondaryTapDownPosition!);
             _selectEndTo(offset: lastSecondaryTapDownPosition!);
@@ -545,20 +548,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         if (_selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed) {
           // If lastSecondaryTapDownPosition is within the current selection then
           // keep the current selection, if not then collapse it.
-          bool lastSecondaryTapDownPositionWasOnActiveSelection = false;
-          for (final Selectable selectable in _selectionDelegate.selectables) {
-            if (!selectable.value.hasSelection || (selectable.value.status != SelectionStatus.uncollapsed)) {
-              continue;
-            }
-            for (final Rect selectionRect in selectable.value.selectionRects!) {
-              final Matrix4 transform = selectable.getTransformTo(null);
-              final Rect globalRect = MatrixUtils.transformRect(transform, selectionRect);
-              if (globalRect.contains(details.globalPosition)) {
-                lastSecondaryTapDownPositionWasOnActiveSelection = true;
-                break;
-              }
-            }
-          }
+          final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
           if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
             _selectStartTo(offset: lastSecondaryTapDownPosition!);
             _selectEndTo(offset: lastSecondaryTapDownPosition!);
