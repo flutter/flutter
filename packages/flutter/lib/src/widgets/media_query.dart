@@ -288,8 +288,8 @@ class MediaQueryData {
   ///    textScaleFactor defined for a [BuildContext].
   @Deprecated(
     'Use textScaler instead. '
-    'This enables non-linear accessibility font scaling on Android 14. '
-    'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
   )
   double get textScaleFactor => textScaler.textScaleFactor;
   final double _textScaleFactor;
@@ -538,8 +538,8 @@ class MediaQueryData {
     double? devicePixelRatio,
     @Deprecated(
       'Use textScaler instead. '
-      'This enables non-linear accessibility font scaling on Android 14. '
-      'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
     )
     double? textScaleFactor,
     TextScaler? textScaler,
@@ -1251,7 +1251,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [maybeTextScalerOf] instead.
   @Deprecated(
     'Use maybeTextScalerOf instead. '
-    'This enables non-linear accessibility font scaling on Android 14. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
     'Use of maybeTextScaleFactorOf was deprecated after v3.12.0-2.0.pre.',
   )
   static double? maybeTextScaleFactorOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.textScaleFactor)?.textScaleFactor;

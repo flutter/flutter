@@ -220,6 +220,10 @@ class SelectableText extends StatefulWidget {
           (maxLines == null) || (minLines == null) || (maxLines >= minLines),
           "minLines can't be greater than maxLines",
         ),
+        assert(
+          textScaler == null || textScaleFactor == null,
+          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
+        ),
         textSpan = null;
 
   /// Creates a selectable text widget with a [TextSpan].
@@ -270,6 +274,10 @@ class SelectableText extends StatefulWidget {
     assert(
       (maxLines == null) || (minLines == null) || (maxLines >= minLines),
       "minLines can't be greater than maxLines",
+    ),
+    assert(
+      textScaler == null || textScaleFactor == null,
+      'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
     ),
     data = null;
 

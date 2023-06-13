@@ -5734,6 +5734,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
+       assert(textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling), 'Use textScaler instead.'),
        textScaler = _effectiveTextScalerFrom(textScaler, textScaleFactor),
        super(children: WidgetSpan.extractFromInlineSpan(text, _effectiveTextScalerFrom(textScaler, textScaleFactor)));
 

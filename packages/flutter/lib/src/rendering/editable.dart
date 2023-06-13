@@ -298,8 +298,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     Color? selectionColor,
     @Deprecated(
       'Use textScaler instead. '
-      'This enables non-linear accessibility font scaling on Android 14. '
-      'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
     )
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,
@@ -340,6 +340,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        assert(
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
+       ),
+       assert(
+         identical(textScaler, TextScaler.noScaling) || textScaleFactor == 1.0,
+         'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        ),
        assert(obscuringCharacter.characters.length == 1),
        assert(cursorWidth >= 0.0),
@@ -1022,14 +1026,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// the specified font size.
   @Deprecated(
     'Use textScaler instead. '
-    'This enables non-linear accessibility font scaling on Android 14. '
-    'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
   )
   double get textScaleFactor => _textPainter.textScaleFactor;
   @Deprecated(
     'Use textScaler instead. '
-    'This enables non-linear accessibility font scaling on Android 14. '
-    'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
   )
   set textScaleFactor(double value) {
     textScaler = TextScaler.linear(value);

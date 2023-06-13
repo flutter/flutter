@@ -493,8 +493,8 @@ class TextPainter {
     TextDirection? textDirection,
     @Deprecated(
       'Use textScaler instead. '
-      'This enables non-linear accessibility font scaling on Android 14. '
-      'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
     )
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,
@@ -532,8 +532,8 @@ class TextPainter {
     TextAlign textAlign = TextAlign.start,
     @Deprecated(
       'Use textScaler instead. '
-      'This enables non-linear accessibility font scaling on Android 14. '
-      'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
     )
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,
@@ -584,8 +584,8 @@ class TextPainter {
     TextAlign textAlign = TextAlign.start,
     @Deprecated(
       'Use textScaler instead. '
-      'This enables non-linear accessibility font scaling on Android 14. '
-      'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
     )
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,
@@ -770,14 +770,14 @@ class TextPainter {
   /// After this is set, you must call [layout] before the next call to [paint].
   @Deprecated(
     'Use textScaler instead. '
-    'This enables non-linear accessibility font scaling on Android 14. '
-    'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
   )
   double get textScaleFactor => textScaler.textScaleFactor;
   @Deprecated(
     'Use textScaler instead. '
-    'This enables non-linear accessibility font scaling on Android 14. '
-    'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
   )
   set textScaleFactor(double value) {
     textScaler = TextScaler.linear(value);

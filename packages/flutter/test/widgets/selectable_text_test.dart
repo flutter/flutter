@@ -4087,7 +4087,6 @@ void main() {
       style: TextStyle(color: Color(0xff00ff00)),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
-      textScaleFactor: 1.0,
       textScaler: TextScaler.noScaling,
       autofocus: true,
       showCursor: true,

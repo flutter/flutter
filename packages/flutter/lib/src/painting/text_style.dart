@@ -1275,12 +1275,16 @@ class TextStyle with Diagnosticable {
   ui.TextStyle getTextStyle({
     @Deprecated(
       'Use textScaler instead. '
-      'This enables non-linear accessibility font scaling on Android 14. '
-      'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
     )
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,
   }) {
+    assert(
+      identical(textScaler, TextScaler.noScaling) || textScaleFactor == 1.0,
+      'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
+    );
     final double? fontSize = switch (this.fontSize) {
       null => null,
       final double size when textScaler == TextScaler.noScaling => size * textScaleFactor,
