@@ -5645,6 +5645,7 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoTextField(
+            autofocus: true,
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
             style: const TextStyle(fontSize: 10.0),

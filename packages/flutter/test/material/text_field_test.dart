@@ -2532,6 +2532,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: TextField(
+            autofocus: true,
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
             style: const TextStyle(fontSize: 10.0),
@@ -11992,6 +11993,9 @@ void main() {
         ),
       ),
     );
+
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
 
     // Just testing the test and making sure that the last character is outside
     // the bottom of the field.
