@@ -436,7 +436,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///   });
 ///
 ///   await testMain();
-/// });
+/// }
 /// ```
 /// {@end-tool}
 /// {@endtemplate}
