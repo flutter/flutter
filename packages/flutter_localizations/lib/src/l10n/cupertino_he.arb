@@ -32,6 +32,5 @@
   "tabSemanticsLabel": "כרטיסייה $tabIndex מתוך $tabCount",
   "modalBarrierDismissLabel": "סגירה",
   "searchTextFieldPlaceholderLabel": "חיפוש",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

@@ -22,6 +22,5 @@
   "tabSemanticsLabel": "タブ: $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "閉じる",
   "searchTextFieldPlaceholderLabel": "検索",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

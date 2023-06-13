@@ -22,6 +22,5 @@
   "tabSemanticsLabel": "탭 $tabCount개 중 $tabIndex번째",
   "modalBarrierDismissLabel": "닫기",
   "searchTextFieldPlaceholderLabel": "검색",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

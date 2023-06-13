@@ -139,6 +139,5 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded",
-  "menuDismissLabel": "Dismiss menu"
+  "collapsedHint": "Expanded"
 }

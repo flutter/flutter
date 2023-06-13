@@ -22,6 +22,5 @@
   "tabSemanticsLabel": "$tabIndex/$tabCount fitxa",
   "modalBarrierDismissLabel": "Baztertu",
   "searchTextFieldPlaceholderLabel": "Bilatu",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

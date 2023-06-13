@@ -22,6 +22,5 @@
   "tabSemanticsLabel": "$tabCount ടാബിൽ $tabIndex-ാമത്തേത്",
   "modalBarrierDismissLabel": "നിരസിക്കുക",
   "searchTextFieldPlaceholderLabel": "തിരയുക",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

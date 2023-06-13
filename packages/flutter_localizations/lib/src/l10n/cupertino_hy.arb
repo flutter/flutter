@@ -22,6 +22,5 @@
   "tabSemanticsLabel": "Ներդիր $tabIndex՝ $tabCount-ից",
   "modalBarrierDismissLabel": "Փակել",
   "searchTextFieldPlaceholderLabel": "Որոնում",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

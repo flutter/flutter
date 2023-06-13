@@ -182,6 +182,6 @@
 
   "menuDismissLabel": "Dismiss menu",
   "@menuDismissLabel": {
-    "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for the area around a context menu to indicate that a tap dismisses the context menu."
+    "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for the area around a menu to indicate that a tap dismisses the menu."
   }
 }

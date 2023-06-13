@@ -42,6 +42,5 @@
   "selectAllButtonLabel": "Dewis y Cyfan",
   "searchTextFieldPlaceholderLabel": "Chwilio",
   "modalBarrierDismissLabel": "Diystyru",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

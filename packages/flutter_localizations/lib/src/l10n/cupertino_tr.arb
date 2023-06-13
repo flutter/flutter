@@ -22,6 +22,5 @@
   "tabSemanticsLabel": "Sekme $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Kapat",
   "searchTextFieldPlaceholderLabel": "Ara",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

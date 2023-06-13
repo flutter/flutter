@@ -22,6 +22,5 @@
   "selectAllButtonLabel": "Velg alle",
   "modalBarrierDismissLabel": "Avvis",
   "searchTextFieldPlaceholderLabel": "Søk",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

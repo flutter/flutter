@@ -22,6 +22,5 @@
   "tabSemanticsLabel": "Ithebhu $tabIndex kwangu-$tabCount",
   "modalBarrierDismissLabel": "Cashisa",
   "searchTextFieldPlaceholderLabel": "Sesha",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

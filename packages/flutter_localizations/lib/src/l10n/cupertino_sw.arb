@@ -22,6 +22,5 @@
   "tabSemanticsLabel": "Kichupo cha $tabIndex kati ya $tabCount",
   "modalBarrierDismissLabel": "Ondoa",
   "searchTextFieldPlaceholderLabel": "Tafuta",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

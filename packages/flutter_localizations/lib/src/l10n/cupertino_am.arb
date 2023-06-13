@@ -22,6 +22,5 @@
   "tabSemanticsLabel": "ትር $tabIndex ከ$tabCount",
   "modalBarrierDismissLabel": "አሰናብት",
   "searchTextFieldPlaceholderLabel": "ፍለጋ",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }
