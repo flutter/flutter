@@ -493,7 +493,7 @@ class XCDevice {
     //  },
     // ...
 
-    final List<IOSDevice> devices = <IOSDevice>[];
+    final Map<String, IOSDevice> deviceMap = <String, IOSDevice>{};
     for (final Object device in allAvailableDevices) {
       if (device is Map<String, Object?>) {
         // Only include iPhone, iPad, iPod, or other iOS devices.
@@ -531,6 +531,8 @@ class XCDevice {
           }
         }
 
+        DeviceConnectionInterface connectionInterface = _interfaceType(device);
+
         String? sdkVersion = _sdkVersion(device);
 
         if (sdkVersion != null) {
@@ -538,13 +540,36 @@ class XCDevice {
           if (buildVersion != null) {
             sdkVersion = '$sdkVersion $buildVersion';
           }
+          // Starting in iOS 17, all paired devices are also connected wirelessly.
+          if (sdkVersion.startsWith('17')) {
+            connectionInterface = DeviceConnectionInterface.wireless;
+          }
         }
 
-        devices.add(IOSDevice(
+        // If a duplicate entry is found in `xcdevice list`, don't overwrite
+        // existing entry when the existing entry indicates the device is
+        // connected and the current entry indicates the device is not connected.
+        // Don't overwrite if current entry's sdkVersion is null.
+        // Don't overwrite if both entries indicate the device is not
+        // connected and the existing entry has a higher sdkVersion.
+        if (deviceMap.containsKey(identifier)) {
+          final IOSDevice deviceInMap = deviceMap[identifier]!;
+          if ((deviceInMap.isConnected && !isConnected) || sdkVersion == null) {
+            continue;
+          }
+          final String majorVersionString = sdkVersion.split('.').first.trim();
+          final int majorVersionInt = int.tryParse(majorVersionString) ?? 0;
+
+          if (!deviceInMap.isConnected && !isConnected && deviceInMap.majorSdkVersion > majorVersionInt) {
+            continue;
+          }
+        }
+
+        deviceMap[identifier] = IOSDevice(
           identifier,
           name: name,
           cpuArchitecture: _cpuArchitecture(device),
-          connectionInterface: _interfaceType(device),
+          connectionInterface: connectionInterface,
           isConnected: isConnected,
           sdkVersion: sdkVersion,
           iProxy: _iProxy,
@@ -553,11 +578,11 @@ class XCDevice {
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
           platform: globals.platform,
-          devModeEnabled: devModeEnabled
-        ));
+          devModeEnabled: devModeEnabled,
+        );
       }
     }
-    return devices;
+    return deviceMap.values.toList();
   }
 
   /// Despite the name, com.apple.platform.iphoneos includes iPhone, iPads, and all iOS devices.
