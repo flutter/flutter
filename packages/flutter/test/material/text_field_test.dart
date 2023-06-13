@@ -11705,6 +11705,9 @@ void main() {
     // the right side of the screen.
     expect(textOffsetToPosition(tester, 66).dx, greaterThan(screenSize.width));
 
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+
     final TestGesture gesture =
         await tester.startGesture(
           textOffsetToPosition(tester, 19),
