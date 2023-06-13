@@ -551,8 +551,9 @@ abstract class Layer with DiagnosticableTreeMixin {
 
   /// Adjust the [depth] of this node's children, if any.
   ///
-  /// Override this method in subclasses with child nodes to call [redepthChild]
-  /// for each child. Do not call this method directly.
+  /// Override this method in subclasses with child nodes to call
+  /// [ContainerLayer.redepthChild] for each child. Do not call this method
+  /// directly.
   @protected
   void redepthChildren() {
     // ContainerLayer provides an implementation since its the only one that
