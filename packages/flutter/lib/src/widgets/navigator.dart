@@ -3777,6 +3777,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _serializableHistory.dispose();
     userGestureInProgressNotifier.dispose();
     _history.removeListener(_onHistoryChanged);
+    _history.dispose();
     super.dispose();
     // don't unlock, so that the object becomes unusable
     assert(_debugLocked);
