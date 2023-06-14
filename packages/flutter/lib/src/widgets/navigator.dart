@@ -5937,9 +5937,15 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   static NavigatorState _defaultNavigatorFinder(BuildContext context) => Navigator.of(context);
 }
 
-/// A notification that navigation has taken place.
+/// A notification that a change in navigation has taken place.
+///
+/// Specifically, this notification indicates that at least one of the following
+/// has occurred:
+///
+///  * That route stack of a [Navigator] has changed in any way.
+///  * The ability to pop has changed, such as controlled by [PopScope].
 class NavigationNotification extends Notification {
-  /// Creates a notification that some navigation has happened.
+  /// Creates a notification that some change in navigation has happened.
   const NavigationNotification({
     required this.canPop,
   });
