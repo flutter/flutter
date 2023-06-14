@@ -11,6 +11,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'navigator_utils.dart';
 import 'observer_tester.dart';
 import 'semantics_tester.dart';
 
@@ -4179,17 +4180,6 @@ void main() {
           .setMockMethodCallHandler(SystemChannels.platform, null);
       SystemNavigator.setFrameworkHandlesBack(true);
     });
-
-    // Simulates a system back, like a back gesture on Android.
-    Future<void> systemBack() {
-      return ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'flutter/navigation',
-        const JSONMessageCodec().encodeMessage(<String, dynamic>{
-          'method': 'popRoute',
-        }),
-        (ByteData? _) {},
-      );
-    }
 
     testWidgets('a single route is already defaulted to false', (WidgetTester tester) async {
       await tester.pumpWidget(

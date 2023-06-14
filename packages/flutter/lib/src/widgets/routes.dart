@@ -1646,9 +1646,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       canPop: popEnabled() == RoutePopDisposition.doNotPop,
     );
     notification.dispatch(subtreeContext);
-
-    // TODO(justinmc): Write a test for this: You should be able to remove a PopScope
-    // from the tree (but not its route) and the SystemNavigator should update.
   }
 
   /// True if one or more [WillPopCallback] callbacks exist.
