@@ -2636,10 +2636,10 @@ void main() {
       behavior: SnackBarBehavior.floating,
       actionOverflowThreshold: 1,
     ));
-    await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate in.
 
     await expectLater(find.byType(MaterialApp),
-        matchesGoldenFile('snack_bar.goldenTest.multiLineWithIconWithZeroActionOverflowThreshold.png'));
+      matchesGoldenFile('snack_bar.goldenTest.multiLineWithIconWithZeroActionOverflowThreshold.png'));
   });
 
   testWidgets(
