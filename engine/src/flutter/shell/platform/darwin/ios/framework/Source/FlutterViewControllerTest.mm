@@ -1464,9 +1464,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
       } else {
         OCMExpect([deviceMock setValue:@(resultingOrientation) forKey:@"orientation"]);
       }
-
-      OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
-      OCMStub([mockApplication statusBarOrientation]).andReturn(currentOrientation);
+      if (@available(iOS 13.0, *)) {
+        mockWindowScene = OCMPartialMock(realVC.view.window.windowScene);
+        OCMStub(((UIWindowScene*)mockWindowScene).interfaceOrientation)
+            .andReturn(currentOrientation);
+      } else {
+        OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+        OCMStub([mockApplication statusBarOrientation]).andReturn(currentOrientation);
+      }
     }
 
     [realVC performOrientationUpdate:mask];
