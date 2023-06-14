@@ -600,7 +600,10 @@ void main() {
     expect(find.byWidget(flexibleSpace), findsOneWidget);
   });
 
-  group('contributes semantics', () {
+
+  group('contributes semantics with custom flexibleSpace', () {
+    const Widget flexibleSpace = Text('FlexibleSpace');
+
     TestSemantics buildExpected({ required String routeName }) {
       return TestSemantics.root(
         children: <TestSemantics>[
@@ -681,6 +684,134 @@ void main() {
                       ),
                       TestSemantics(
                         id: 5,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isButton,
+                          SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
+                        ],
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: 'Suggestions',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    testWidgets('includes routeName on Android', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
+      await tester.pumpWidget(TestHomePage(
+        delegate: delegate,
+      ));
+
+      await tester.tap(find.byTooltip('Search'));
+      await tester.pumpAndSettle();
+
+      expect(semantics, hasSemantics(
+        buildExpected(routeName: 'Search'),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+
+      semantics.dispose();
+    });
+
+    testWidgets('does not include routeName', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
+      await tester.pumpWidget(TestHomePage(
+        delegate: delegate,
+      ));
+
+      await tester.tap(find.byTooltip('Search'));
+      await tester.pumpAndSettle();
+
+      expect(semantics, hasSemantics(
+        buildExpected(routeName: ''),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+
+      semantics.dispose();
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  });
+
+
+  group('contributes semantics', () {
+    TestSemantics buildExpected({ required String routeName }) {
+      return TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 7,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.scopesRoute,
+                      SemanticsFlag.namesRoute,
+                    ],
+                    label: routeName,
+                    textDirection: TextDirection.ltr,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 9,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 10,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            tooltip: 'Back',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            id: 11,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocused,
+                              SemanticsFlag.isHeader,
+                              if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
+                                debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                            ],
+                            actions: <SemanticsAction>[
+                              if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
+                                debugDefaultTargetPlatformOverride == TargetPlatform.windows)
+                                SemanticsAction.didGainAccessibilityFocus,
+                              SemanticsAction.tap,
+                              SemanticsAction.setSelection,
+                              SemanticsAction.setText,
+                              SemanticsAction.paste,
+                            ],
+                            label: 'Search',
+                            textDirection: TextDirection.ltr,
+                            textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                          ),
+                          TestSemantics(
+                            id: 14,
+                            label: 'Bottom',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
+                      TestSemantics(
+                        id: 8,
                         flags: <SemanticsFlag>[
                           SemanticsFlag.hasEnabledState,
                           SemanticsFlag.isButton,
@@ -1006,7 +1137,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
-    this.flexibleSpace = const Text('FlexibleSpace'),
+    this.flexibleSpace ,
     this.defaultAppBarTheme = false,
     super.searchFieldDecorationTheme,
     super.searchFieldStyle,
@@ -1111,9 +1242,6 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
   Widget buildResults(BuildContext context) {
     return const Text('Results');
   }
-
-  // @override
-  // Widget? buildFlexibleSpace(BuildContext context) => null;
 
   @override
   PreferredSizeWidget buildBottom(BuildContext context) {

@@ -211,14 +211,13 @@ abstract class SearchDelegate<T> {
   ///
   PreferredSizeWidget? buildBottom(BuildContext context) => null;
 
-  /// Widget to display in the [AppBar] flexible space.
+  /// Widget to display a flexible space in the [AppBar].
   ///
   /// Returns null by default, i.e. a flexible space widget is not included.
   ///
   /// See also:
   ///
   ///  * [AppBar.flexibleSpace], the intended use for the return value of this method.
-  ///
   Widget? buildFlexibleSpace(BuildContext context) => null;
 
   /// The theme used to configure the search page.
