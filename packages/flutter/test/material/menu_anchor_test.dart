@@ -82,6 +82,7 @@ void main() {
   }) {
     final FocusNode focusNode = FocusNode();
     return MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Material(
         child: Directionality(
           textDirection: textDirection,
@@ -145,7 +146,7 @@ void main() {
   testWidgets('Menu responds to density changes', (WidgetTester tester) async {
     Widget buildMenu({VisualDensity? visualDensity = VisualDensity.standard}) {
       return MaterialApp(
-        theme: ThemeData(visualDensity: visualDensity),
+        theme: ThemeData(visualDensity: visualDensity, useMaterial3: false),
         home: Material(
           child: Column(
             children: <Widget>[
@@ -542,6 +543,7 @@ void main() {
     testWidgets('geometry', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Material(
             child: Column(
               children: <Widget>[
@@ -606,6 +608,7 @@ void main() {
     testWidgets('geometry with RTL direction', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Material(
             child: Directionality(
               textDirection: TextDirection.rtl,
@@ -815,6 +818,7 @@ void main() {
         Padding(
           padding: const EdgeInsets.all(10.0),
           child: MaterialApp(
+            theme: ThemeData(useMaterial3: false),
             home: Material(
               child: Column(
                 children: <Widget>[
@@ -867,6 +871,7 @@ void main() {
         Padding(
           padding: const EdgeInsets.all(10.0),
           child: MaterialApp(
+            theme: ThemeData(useMaterial3: false),
             home: Material(
               child: Directionality(
                 textDirection: TextDirection.rtl,
@@ -2295,6 +2300,7 @@ void main() {
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Material(
             child: Column(
               children: <Widget>[
@@ -2338,6 +2344,7 @@ void main() {
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: Material(
@@ -2384,6 +2391,7 @@ void main() {
       await changeSurfaceSize(tester, const Size(300, 300));
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Builder(
             builder: (BuildContext context) {
               return Directionality(
@@ -2428,6 +2436,7 @@ void main() {
       await changeSurfaceSize(tester, const Size(300, 300));
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Builder(
             builder: (BuildContext context) {
               return Directionality(
@@ -2472,6 +2481,7 @@ void main() {
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Builder(
             builder: (BuildContext context) {
               return Directionality(
@@ -2548,6 +2558,7 @@ void main() {
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Builder(
             builder: (BuildContext context) {
               return Directionality(
@@ -2624,6 +2635,7 @@ void main() {
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Builder(
             builder: (BuildContext context) {
               return Directionality(
@@ -2675,6 +2687,7 @@ void main() {
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Builder(
             builder: (BuildContext context) {
               return Directionality(
@@ -2730,7 +2743,7 @@ void main() {
     }) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.light().copyWith(visualDensity: visualDensity),
+          theme: ThemeData.light(useMaterial3: false).copyWith(visualDensity: visualDensity),
           home: Directionality(
             textDirection: textDirection,
             child: Material(
