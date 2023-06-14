@@ -1646,7 +1646,7 @@ void debugResetSemanticsIdCounter() {
 /// (i.e., during [PipelineOwner.flushSemantics]), which happens after
 /// compositing. The semantics tree is then uploaded into the engine for use
 /// by assistive technology.
-class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
+class SemanticsNode with DiagnosticableTreeMixin {
   /// Creates a semantic node.
   ///
   /// Each semantic node has a unique identifier that is assigned when the node
@@ -1923,7 +1923,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           if (child.parent == this) {
             // we might have already had our child stolen from us by
             // another node that is deeper in the tree.
-            dropChild(child);
+            _dropChild(child);
           }
           sawChange = true;
         }
@@ -1937,10 +1937,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           // ancestors. In that case, we drop the child eagerly here.
           // TODO(ianh): Find a way to assert that the same node didn't
           // actually appear in the tree in two places.
-          child.parent?.dropChild(child);
+          child.parent?._dropChild(child);
         }
         assert(!child.attached);
-        adoptChild(child);
+        _adoptChild(child);
         sawChange = true;
       }
     }
@@ -1998,22 +1998,73 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     return true;
   }
 
-  // AbstractNode OVERRIDES
+  /// The owner for this node (null if unattached).
+  ///
+  /// The entire subtree that this node belongs to will have the same owner.
+  SemanticsOwner? get owner => _owner;
+  SemanticsOwner? _owner;
 
-  @override
-  SemanticsOwner? get owner => super.owner as SemanticsOwner?;
+  /// Whether this node is in a tree whose root is attached to something.
+  ///
+  /// This becomes true during the call to [attach].
+  ///
+  /// This becomes false during the call to [detach].
+  bool get attached => _owner != null;
 
-  @override
-  SemanticsNode? get parent => super.parent as SemanticsNode?;
+  /// The parent of this node in the tree.
+  SemanticsNode? get parent => _parent;
+  SemanticsNode? _parent;
 
-  @override
-  void redepthChildren() {
-    _children?.forEach(redepthChild);
+  /// The depth of this node in the tree.
+  ///
+  /// The depth of nodes in a tree monotonically increases as you traverse down
+  /// the tree.
+  int get depth => _depth;
+  int _depth = 0;
+
+  void _redepthChild(SemanticsNode child) {
+    assert(child.owner == owner);
+    if (child._depth <= _depth) {
+      child._depth = _depth + 1;
+      child._redepthChildren();
+    }
   }
 
-  @override
+  void _redepthChildren() {
+    _children?.forEach(_redepthChild);
+  }
+
+  void _adoptChild(SemanticsNode child) {
+    assert(child._parent == null);
+    assert(() {
+      SemanticsNode node = this;
+      while (node.parent != null) {
+        node = node.parent!;
+      }
+      assert(node != child); // indicates we are about to create a cycle
+      return true;
+    }());
+    child._parent = this;
+    if (attached) {
+      child.attach(_owner!);
+    }
+    _redepthChild(child);
+  }
+
+  void _dropChild(SemanticsNode child) {
+    assert(child._parent == this);
+    assert(child.attached == attached);
+    child._parent = null;
+    if (attached) {
+      child.detach();
+    }
+  }
+
+  /// Mark this node as attached to the given owner.
+  @visibleForTesting
   void attach(SemanticsOwner owner) {
-    super.attach(owner);
+    assert(_owner == null);
+    _owner = owner;
     while (owner._nodes.containsKey(id)) {
       // Ids may repeat if the Flutter has generated > 2^16 ids. We need to keep
       // regenerating the id until we found an id that is not used.
@@ -2032,14 +2083,16 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
-  @override
+  /// Mark this node as detached.
+  @visibleForTesting
   void detach() {
+    assert(_owner != null);
     assert(owner!._nodes.containsKey(id));
     assert(!owner!._detachedNodes.contains(this));
     owner!._nodes.remove(id);
     owner!._detachedNodes.add(this);
-    super.detach();
-    assert(owner == null);
+    _owner = null;
+    assert(parent == null || attached == parent!.attached);
     if (_children != null) {
       for (final SemanticsNode child in _children!) {
         // The list of children may be stale and may contain nodes that have
