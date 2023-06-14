@@ -5,9 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 import 'package:meta/meta.dart';
 
-export 'package:leak_tracker/leak_tracker.dart' show LeakTrackingTestConfig, StackTraceCollectionConfig;
+export 'package:leak_tracker/leak_tracker.dart' show LeakDiagnosticConfig, LeakTrackingTestConfig;
 
 /// Set of objects, that does not hold the objects from garbage collection.
 ///
@@ -81,7 +82,7 @@ bool _webWarningPrinted = false;
 /// The method will fail if wrapped code contains memory leaks.
 ///
 /// See details in documentation for `withLeakTracking` at
-/// https://github.com/dart-lang/leak_tracker/blob/main/lib/src/orchestration.dart#withLeakTracking
+/// https://github.com/dart-lang/leak_tracker/blob/main/lib/src/leak_tracking/orchestration.dart
 ///
 /// The Flutter related enhancements are:
 /// 1. Listens to [MemoryAllocations] events.
@@ -117,7 +118,7 @@ Future<void> _withFlutterLeakTracking(
       Leaks leaks = await withLeakTracking(
         callback,
         asyncCodeRunner: asyncCodeRunner,
-        stackTraceCollectionConfig: config.stackTraceCollectionConfig,
+        leakDiagnosticConfig: config.leakDiagnosticConfig,
         shouldThrowOnLeaks: false,
       );
 
@@ -144,7 +145,7 @@ class LeakCleaner {
 
   Leaks clean(Leaks leaks) {
     final Leaks result =  Leaks(<LeakType, List<LeakReport>>{
-      for (LeakType leakType in leaks.byType.keys)
+      for (final LeakType leakType in leaks.byType.keys)
         leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak)).toList()
     });
     return result;
@@ -160,10 +161,10 @@ class LeakCleaner {
 
     switch (leakType) {
       case LeakType.notDisposed:
-        return !config.notDisposedAllowList.contains(leak.type);
+        return !config.notDisposedAllowList.containsKey(leak.type);
       case LeakType.notGCed:
       case LeakType.gcedLate:
-        return !config.notGCedAllowList.contains(leak.type);
+        return !config.notGCedAllowList.containsKey(leak.type);
     }
   }
 }

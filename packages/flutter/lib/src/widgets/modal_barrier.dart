@@ -70,7 +70,7 @@ class _RenderSemanticsClipper extends RenderProxyBox {
     if (_clipDetailsNotifier == newNotifier) {
       return;
     }
-    if(attached) {
+    if (attached) {
       _clipDetailsNotifier.removeListener(markNeedsSemanticsUpdate);
     }
     _clipDetailsNotifier = newNotifier;

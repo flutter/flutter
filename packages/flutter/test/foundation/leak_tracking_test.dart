@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 import 'leak_tracking.dart';
 
@@ -35,8 +36,8 @@ Future<void> main() async {
         await tester.pumpWidget(_StatelessLeakingWidget());
       },
       leakTrackingConfig: LeakTrackingTestConfig(
-        notDisposedAllowList: <String>{_leakTrackedClassName},
-        notGCedAllowList: <String>{_leakTrackedClassName},
+        notDisposedAllowList: <String, int?>{_leakTrackedClassName: null},
+        notGCedAllowList: <String, int?>{_leakTrackedClassName: null},
       ),
     );
 
@@ -55,7 +56,7 @@ Future<void> main() async {
             leaks = theLeaks;
           },
           failTestOnLeaks: false,
-          notGCedAllowList: <String>{_leakTrackedClassName},
+          notGCedAllowList: <String, int?>{_leakTrackedClassName: null},
         ),
       );
 

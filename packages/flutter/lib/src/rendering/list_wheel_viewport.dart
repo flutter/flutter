@@ -1067,18 +1067,6 @@ class RenderListWheelViewport
     return result;
   }
 
-  static bool _debugAssertValidPaintTransform(ListWheelParentData parentData) {
-    if (parentData.transform == null) {
-      throw FlutterError(
-        'Child paint transform happened to be null. \n'
-        '$RenderListWheelViewport normally paints all of the children it has laid out. \n'
-        'Did you forget to update the $ListWheelParentData.transform during the paint() call? \n'
-        'If this is intetional, change or remove this assertion accordingly.'
-      );
-    }
-    return true;
-  }
-
   static bool _debugAssertValidHitTestOffsets(String context, Offset offset1, Offset offset2) {
     if (offset1 != offset2) {
       throw FlutterError("$context - hit test expected values didn't match: $offset1 != $offset2");
@@ -1090,7 +1078,6 @@ class RenderListWheelViewport
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final ListWheelParentData parentData = child.parentData! as ListWheelParentData;
     final Matrix4? paintTransform = parentData.transform;
-    assert(_debugAssertValidPaintTransform(parentData));
     if (paintTransform != null) {
       transform.multiply(paintTransform);
     }
@@ -1110,26 +1097,25 @@ class RenderListWheelViewport
     while (child != null) {
       final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
       final Matrix4? transform = childParentData.transform;
-      assert(_debugAssertValidPaintTransform(childParentData));
-      final bool isHit = result.addWithPaintTransform(
-        transform: transform,
-        position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(() {
-            if (transform == null) {
-              return _debugAssertValidHitTestOffsets('Null transform', transformed, position);
-            }
-            final Matrix4? inverted = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
-            if (inverted == null) {
-              return _debugAssertValidHitTestOffsets('Null inverted transform', transformed, position);
-            }
-            return _debugAssertValidHitTestOffsets('MatrixUtils.transformPoint', transformed, MatrixUtils.transformPoint(inverted, position));
-          }());
-          return child!.hitTest(result, position: transformed);
-        },
-      );
-      if (isHit) {
-        return true;
+      // Skip not painted children
+      if (transform != null) {
+        final bool isHit = result.addWithPaintTransform(
+          transform: transform,
+          position: position,
+          hitTest: (BoxHitTestResult result, Offset transformed) {
+            assert(() {
+              final Matrix4? inverted = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
+              if (inverted == null) {
+                return _debugAssertValidHitTestOffsets('Null inverted transform', transformed, position);
+              }
+              return _debugAssertValidHitTestOffsets('MatrixUtils.transformPoint', transformed, MatrixUtils.transformPoint(inverted, position));
+            }());
+            return child!.hitTest(result, position: transformed);
+          },
+        );
+        if (isHit) {
+          return true;
+        }
       }
       child = childParentData.previousSibling;
     }

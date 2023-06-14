@@ -290,8 +290,13 @@ class CupertinoDatePicker extends StatefulWidget {
     this.use24hFormat = false,
     this.dateOrder,
     this.backgroundColor,
-    this.showDayOfWeek = false
+    this.showDayOfWeek = false,
+    this.itemExtent = _kItemExtent,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
+       assert(
+         itemExtent > 0,
+         'item extent should be greater than 0',
+       ),
        assert(
          minuteInterval > 0 && 60 % minuteInterval == 0,
          'minute interval is not a positive integer factor of 60',
@@ -405,6 +410,11 @@ class CupertinoDatePicker extends StatefulWidget {
 
   /// Whether to to show day of week alongside day. Defaults to false.
   final bool showDayOfWeek;
+
+  /// {@macro flutter.cupertino.picker.itemExtent}
+  ///
+  /// Defaults to a value that matches the default iOS date picker wheel.
+  final double itemExtent;
 
   @override
   State<StatefulWidget> createState() { // ignore: no_logic_in_create_state, https://github.com/flutter/flutter/issues/70499
@@ -725,7 +735,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       child: CupertinoPicker.builder(
         scrollController: dateController,
         offAxisFraction: offAxisFraction,
-        itemExtent: _kItemExtent,
+        itemExtent: widget.itemExtent,
         useMagnifier: _kUseMagnifier,
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
@@ -803,7 +813,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       child: CupertinoPicker(
         scrollController: hourController,
         offAxisFraction: offAxisFraction,
-        itemExtent: _kItemExtent,
+        itemExtent: widget.itemExtent,
         useMagnifier: _kUseMagnifier,
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
@@ -868,7 +878,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       child: CupertinoPicker(
         scrollController: minuteController,
         offAxisFraction: offAxisFraction,
-        itemExtent: _kItemExtent,
+        itemExtent: widget.itemExtent,
         useMagnifier: _kUseMagnifier,
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
@@ -918,7 +928,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       child: CupertinoPicker(
         scrollController: meridiemController,
         offAxisFraction: offAxisFraction,
-        itemExtent: _kItemExtent,
+        itemExtent: widget.itemExtent,
         useMagnifier: _kUseMagnifier,
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
@@ -1211,7 +1221,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       child: CupertinoPicker(
         scrollController: dayController,
         offAxisFraction: offAxisFraction,
-        itemExtent: _kItemExtent,
+        itemExtent: widget.itemExtent,
         useMagnifier: _kUseMagnifier,
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
@@ -1254,7 +1264,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       child: CupertinoPicker(
         scrollController: monthController,
         offAxisFraction: offAxisFraction,
-        itemExtent: _kItemExtent,
+        itemExtent: widget.itemExtent,
         useMagnifier: _kUseMagnifier,
         magnification: _kMagnification,
         backgroundColor: widget.backgroundColor,
@@ -1298,7 +1308,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       },
       child: CupertinoPicker.builder(
         scrollController: yearController,
-        itemExtent: _kItemExtent,
+        itemExtent: widget.itemExtent,
         offAxisFraction: offAxisFraction,
         useMagnifier: _kUseMagnifier,
         magnification: _kMagnification,
@@ -1895,13 +1905,18 @@ class CupertinoTimerPicker extends StatefulWidget {
     this.secondInterval = 1,
     this.alignment = Alignment.center,
     this.backgroundColor,
+    this.itemExtent = _kItemExtent,
     required this.onTimerDurationChanged,
   }) : assert(initialTimerDuration >= Duration.zero),
        assert(initialTimerDuration < const Duration(days: 1)),
        assert(minuteInterval > 0 && 60 % minuteInterval == 0),
        assert(secondInterval > 0 && 60 % secondInterval == 0),
        assert(initialTimerDuration.inMinutes % minuteInterval == 0),
-       assert(initialTimerDuration.inSeconds % secondInterval == 0);
+       assert(initialTimerDuration.inSeconds % secondInterval == 0),
+       assert(
+         itemExtent > 0,
+         'item extent should be greater than 0'
+       );
 
   /// The mode of the timer picker.
   final CupertinoTimerPickerMode mode;
@@ -1929,6 +1944,11 @@ class CupertinoTimerPicker extends StatefulWidget {
   ///
   /// Defaults to null, which disables background painting entirely.
   final Color? backgroundColor;
+
+  /// {@macro flutter.cupertino.picker.itemExtent}
+  ///
+  /// Defaults to a value that matches the default iOS timer picker wheel.
+  final double itemExtent;
 
   @override
   State<StatefulWidget> createState() => _CupertinoTimerPickerState();
@@ -2078,7 +2098,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     double maxWidth = double.negativeInfinity;
     for (int i = 0; i < labels.length; i++) {
       final String? label = labels[i];
-      if(label == null) {
+      if (label == null) {
         continue;
       }
 
@@ -2148,7 +2168,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       scrollController: FixedExtentScrollController(initialItem: selectedHour!),
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(additionalPadding.start, 0),
-      itemExtent: _kItemExtent,
+      itemExtent: widget.itemExtent,
       backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
@@ -2212,7 +2232,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           additionalPadding.start,
           widget.mode == CupertinoTimerPickerMode.ms ? 0 : 1,
       ),
-      itemExtent: _kItemExtent,
+      itemExtent: widget.itemExtent,
       backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       looping: true,
@@ -2278,7 +2298,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           additionalPadding.start,
           widget.mode == CupertinoTimerPickerMode.ms ? 1 : 2,
       ),
-      itemExtent: _kItemExtent,
+      itemExtent: widget.itemExtent,
       backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       looping: true,

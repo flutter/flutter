@@ -199,6 +199,7 @@
 /dev/devicelab/bin/tasks/simple_animation_perf_ios.dart @cyanglaz @flutter/engine
 /dev/devicelab/bin/tasks/tiles_scroll_perf_ios__timeline_summary.dart @cyanglaz @flutter/engine
 /dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/draw_points_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 
 ## Host only DeviceLab tests
 /dev/devicelab/bin/tasks/animated_complex_opacity_perf_macos__e2e_summary.dart @cbracken @flutter/desktop
@@ -281,9 +282,9 @@
 # Linux web_smoke_test
 /examples/hello_world/test_driver/smoke_web_engine.dart @yjbanov @flutter/web
 # Linux android views
-/dev/integration_tests/android_views @garyqian @flutter/android
+/dev/integration_tests/android_views @gmackall @flutter/android
 # Linux deferred components
-/dev/integration_tests/deferred_components_test @garyqian @flutter/android
+/dev/integration_tests/deferred_components_test @gmackall @flutter/android
 
 ## Firebase tests
 /dev/integration_tests/abstract_method_smoke_test @reidbaker @flutter/android

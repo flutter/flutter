@@ -2,21 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Generate component theme data defaults based on the Material
-// Design Token database. These tokens were extracted into a
-// JSON file from the internal Google database.
-//
 // ## Usage
 //
 // Run this program from the root of the git repository.
 //
 // ```
-// dart dev/tools/gen_defaults/bin/gen_defaults.dart
+// dart dev/tools/gen_defaults/bin/gen_defaults.dart [-v]
 // ```
 
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:gen_defaults/action_chip_template.dart';
 import 'package:gen_defaults/app_bar_template.dart';
 import 'package:gen_defaults/badge_template.dart';
@@ -26,6 +23,7 @@ import 'package:gen_defaults/bottom_sheet_template.dart';
 import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
 import 'package:gen_defaults/checkbox_template.dart';
+import 'package:gen_defaults/chip_template.dart';
 import 'package:gen_defaults/color_scheme_template.dart';
 import 'package:gen_defaults/date_picker_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
@@ -55,90 +53,52 @@ import 'package:gen_defaults/switch_template.dart';
 import 'package:gen_defaults/tabs_template.dart';
 import 'package:gen_defaults/text_field_template.dart';
 import 'package:gen_defaults/time_picker_template.dart';
+import 'package:gen_defaults/token_logger.dart';
 import 'package:gen_defaults/typography_template.dart';
 
-Map<String, dynamic> _readTokenFile(String fileName) {
-  return jsonDecode(File('dev/tools/gen_defaults/data/$fileName').readAsStringSync()) as Map<String, dynamic>;
+Map<String, dynamic> _readTokenFile(File file) {
+  return jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
 }
 
+const String materialLib = 'packages/flutter/lib/src/material';
+const String dataDir = 'dev/tools/gen_defaults/data';
+
 Future<void> main(List<String> args) async {
-  const String materialLib = 'packages/flutter/lib/src/material';
-  const List<String> tokenFiles = <String>[
-    'badge.json',
-    'banner.json',
-    'badge.json',
-    'bottom_app_bar.json',
-    'button_elevated.json',
-    'button_filled.json',
-    'button_filled_tonal.json',
-    'button_outlined.json',
-    'button_text.json',
-    'card_elevated.json',
-    'card_filled.json',
-    'card_outlined.json',
-    'checkbox.json',
-    'chip_assist.json',
-    'chip_filter.json',
-    'chip_input.json',
-    'chip_suggestion.json',
-    'color_dark.json',
-    'color_light.json',
-    'date_picker_docked.json',
-    'date_picker_modal.json',
-    'dialog.json',
-    'dialog_fullscreen.json',
-    'divider.json',
-    'elevation.json',
-    'fab_extended_primary.json',
-    'fab_large_primary.json',
-    'fab_primary.json',
-    'fab_small_primary.json',
-    'icon_button.json',
-    'icon_button_filled.json',
-    'icon_button_filled_tonal.json',
-    'icon_button_outlined.json',
-    'list.json',
-    'menu.json',
-    'motion.json',
-    'navigation_bar.json',
-    'navigation_drawer.json',
-    'navigation_rail.json',
-    'navigation_tab_primary.json',
-    'navigation_tab_secondary.json',
-    'palette.json',
-    'progress_indicator_circular.json',
-    'progress_indicator_linear.json',
-    'radio_button.json',
-    'search_bar.json',
-    'search_view.json',
-    'segmented_button_outlined.json',
-    'shape.json',
-    'sheet_bottom.json',
-    'slider.json',
-    'snackbar.json',
-    'state.json',
-    'switch.json',
-    'text_field_filled.json',
-    'text_field_outlined.json',
-    'text_style.json',
-    'time_picker.json',
-    'top_app_bar_large.json',
-    'top_app_bar_medium.json',
-    'top_app_bar_small.json',
-    'typeface.json',
-  ];
+  // Parse arguments
+  final ArgParser parser = ArgParser();
+  parser.addFlag(
+    'verbose',
+    abbr: 'v',
+    help: 'Enable verbose output',
+    negatable: false,
+  );
+  final ArgResults argResults = parser.parse(args);
+  final bool verbose = argResults['verbose'] as bool;
 
-  // Generate a map with all the tokens to simplify the template interface.
+  // Map of version number to list of data files that use that version.
+  final Map<String, List<String>> versionMap = <String, List<String>>{};
+  // Map of all tokens to their values.
   final Map<String, dynamic> tokens = <String, dynamic>{};
-  for (final String tokenFile in tokenFiles) {
-    tokens.addAll(_readTokenFile(tokenFile));
+
+  // Initialize.
+  for (final FileSystemEntity tokenFile in Directory(dataDir).listSync()) {
+    final Map<String, dynamic> tokenFileTokens = _readTokenFile(tokenFile as File);
+    final String version = tokenFileTokens['version'] as String;
+    tokenFileTokens.remove('version');
+    if (versionMap[version] == null) {
+      versionMap[version] = List<String>.empty(growable: true);
+    }
+    versionMap[version]!.add(tokenFile.uri.pathSegments.last);
+
+    tokens.addAll(tokenFileTokens);
   }
+  tokenLogger.init(allTokens: tokens, versionMap: versionMap);
+  // Handle light/dark color tokens separately because they share identical token names.
+  final Map<String, dynamic> colorLightTokens = _readTokenFile(File('$dataDir/color_light.json'));
+  final Map<String, dynamic> colorDarkTokens = _readTokenFile(File('$dataDir/color_dark.json'));
 
-  // Special case the light and dark color schemes.
-  tokens['colorsLight'] = _readTokenFile('color_light.json');
-  tokens['colorsDark'] = _readTokenFile('color_dark.json');
-
-  ActionChipTemplate('Chip', '$materialLib/chip.dart', tokens).updateFile();
+  // Generate tokens files.
+  ChipTemplate('Chip', '$materialLib/chip.dart', tokens).updateFile();
   ActionChipTemplate('ActionChip', '$materialLib/action_chip.dart', tokens).updateFile();
   AppBarTemplate('AppBar', '$materialLib/app_bar.dart', tokens).updateFile();
   BottomAppBarTemplate('BottomAppBar', '$materialLib/bottom_app_bar.dart', tokens).updateFile();
@@ -153,7 +113,7 @@ Future<void> main(List<String> args) async {
   ButtonTemplate('md.comp.text-button', 'TextButton', '$materialLib/text_button.dart', tokens).updateFile();
   CardTemplate('Card', '$materialLib/card.dart', tokens).updateFile();
   CheckboxTemplate('Checkbox', '$materialLib/checkbox.dart', tokens).updateFile();
-  ColorSchemeTemplate('ColorScheme', '$materialLib/theme_data.dart', tokens).updateFile();
+  ColorSchemeTemplate(colorLightTokens, colorDarkTokens, 'ColorScheme', '$materialLib/theme_data.dart', tokens).updateFile();
   DatePickerTemplate('DatePicker', '$materialLib/date_picker_theme.dart', tokens).updateFile();
   DialogFullscreenTemplate('DialogFullscreen', '$materialLib/dialog.dart', tokens).updateFile();
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
@@ -188,4 +148,12 @@ Future<void> main(List<String> args) async {
   TextFieldTemplate('TextField', '$materialLib/text_field.dart', tokens).updateFile();
   TabsTemplate('Tabs', '$materialLib/tabs.dart', tokens).updateFile();
   TypographyTemplate('Typography', '$materialLib/typography.dart', tokens).updateFile();
+
+  tokenLogger.printVersionUsage(verbose: verbose);
+  tokenLogger.printTokensUsage(verbose: verbose);
+  if (!verbose) {
+    print('\nTo see detailed version and token usage, run with --verbose (-v).');
+  }
+
+  tokenLogger.dumpToFile('dev/tools/gen_defaults/generated/used_tokens.csv');
 }

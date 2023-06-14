@@ -505,7 +505,7 @@ class XCDevice {
         if (identifier == null || name == null) {
           continue;
         }
-
+        bool devModeEnabled = true;
         bool isConnected = true;
         final Map<String, Object?>? errorProperties = _errorProperties(device);
         if (errorProperties != null) {
@@ -524,6 +524,10 @@ class XCDevice {
           // Other times this is a false positive and the app will successfully launch despite the error.
           if (code != -10) {
             isConnected = false;
+          }
+
+          if (code == 6) {
+            devModeEnabled = false;
           }
         }
 
@@ -549,6 +553,7 @@ class XCDevice {
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
           platform: globals.platform,
+          devModeEnabled: devModeEnabled
         ));
       }
     }

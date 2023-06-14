@@ -250,7 +250,7 @@ class FormState extends State<Form> {
       errorMessage += field.errorText ?? '';
     }
 
-    if(errorMessage.isNotEmpty) {
+    if (errorMessage.isNotEmpty) {
       final TextDirection directionality = Directionality.of(context);
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(Future<void>(() async {

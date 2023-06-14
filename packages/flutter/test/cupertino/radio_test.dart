@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -348,6 +349,61 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pumpAndSettle();
     expect(groupValue, equals(2));
+  });
+
+  testWidgets('Show a checkmark when useCheckmarkStyle is true', (WidgetTester tester) async {
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 1,
+          onChanged: (int? i) { },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Has no checkmark when useCheckmarkStyle is false
+    expect(
+      tester.firstRenderObject<RenderBox>(find.byType(CupertinoRadio<int>)),
+      isNot(paints..path())
+    );
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 2,
+          useCheckmarkStyle: true,
+          onChanged: (int? i) { },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Has no checkmark when group value doesn't match the value
+    expect(
+      tester.firstRenderObject<RenderBox>(find.byType(CupertinoRadio<int>)),
+      isNot(paints..path())
+    );
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 1,
+          useCheckmarkStyle: true,
+          onChanged: (int? i) { },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Draws a path to show the checkmark when toggled on
+    expect(
+      tester.firstRenderObject<RenderBox>(find.byType(CupertinoRadio<int>)),
+      paints..path()
+    );
   });
 
   testWidgets('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {

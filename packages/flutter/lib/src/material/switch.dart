@@ -570,22 +570,22 @@ class Switch extends StatelessWidget {
 
   Widget _buildCupertinoSwitch(BuildContext context) {
     final Size size = _getSwitchSize(context);
-    return Focus(
-      focusNode: focusNode,
-      onFocusChange: onFocusChange,
-      autofocus: autofocus,
-      child: Container(
-        width: size.width, // Same size as the Material switch.
-        height: size.height,
-        alignment: Alignment.center,
-        child: CupertinoSwitch(
-          dragStartBehavior: dragStartBehavior,
-          value: value,
-          onChanged: onChanged,
-          activeColor: activeColor,
-          trackColor: inactiveTrackColor,
-          applyTheme: applyCupertinoTheme,
-        ),
+    return Container(
+      width: size.width, // Same size as the Material switch.
+      height: size.height,
+      alignment: Alignment.center,
+      child: CupertinoSwitch(
+        dragStartBehavior: dragStartBehavior,
+        value: value,
+        onChanged: onChanged,
+        activeColor: activeColor,
+        trackColor: inactiveTrackColor,
+        thumbColor: thumbColor?.resolve(<MaterialState>{}),
+        applyTheme: applyCupertinoTheme,
+        focusColor: focusColor,
+        focusNode: focusNode,
+        onFocusChange: onFocusChange,
+        autofocus: autofocus,
       ),
     );
   }
@@ -1736,11 +1736,11 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
       if (states.contains(MaterialState.pressed)) {
         return thumbColor.resolve(states).withAlpha(kRadialReactionAlpha);
       }
-      if (states.contains(MaterialState.focused)) {
-        return _theme.focusColor;
-      }
       if (states.contains(MaterialState.hovered)) {
         return _theme.hoverColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _theme.focusColor;
       }
       return null;
     });
@@ -1756,8 +1756,6 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _SwitchDefaultsM3 extends SwitchThemeData {
   _SwitchDefaultsM3(this.context);

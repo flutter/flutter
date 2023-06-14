@@ -340,7 +340,7 @@ class _LinuxUtils extends _PosixUtils {
     for (String entry in osReleaseSplit) {
       entry = entry.trim();
       final List<String> entryKeyValuePair = entry.split('=');
-      if(entryKeyValuePair[0] == key) {
+      if (entryKeyValuePair[0] == key) {
         final String value =  entryKeyValuePair[1];
         // Remove quotes from either end of the value if they exist
         final String quote = value[0];

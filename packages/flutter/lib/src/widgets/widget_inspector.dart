@@ -1417,7 +1417,7 @@ mixin WidgetInspectorService {
     pubRootDirectories = pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
 
     final Set<String> directorySet = Set<String>.from(pubRootDirectories);
-    if(_pubRootDirectories != null) {
+    if (_pubRootDirectories != null) {
       directorySet.addAll(_pubRootDirectories!);
     }
 
@@ -3010,7 +3010,7 @@ class _InspectorOverlayLayer extends Layer {
       inDebugMode = true;
       return true;
     }());
-    if (inDebugMode == false) {
+    if (!inDebugMode) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
           'The inspector should never be used in production mode due to the '
@@ -3256,7 +3256,7 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
-    // ignore: unused_element
+    // ignore: unused_element, unused_element_parameter
     this.name,
   });
 
@@ -3627,7 +3627,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   @override
   List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
     if (maxDescendantsTruncatableNode >= 0 &&
-        owner!.allowTruncate == true &&
+        owner!.allowTruncate &&
         nodes.length > maxDescendantsTruncatableNode) {
       nodes = service._truncateNodes(nodes, maxDescendantsTruncatableNode);
     }

@@ -63,6 +63,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         title: 'Pirate app',
         home: Scaffold(
           appBar: AppBar(
@@ -167,8 +168,9 @@ void main() {
     });
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Center(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Center(
           child: LicensePage(),
         ),
       ),
@@ -220,9 +222,10 @@ void main() {
     });
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         title: 'Pirate app',
-        home: Center(
+        home: const Center(
           child: LicensePage(
             applicationName: 'LicensePage test app',
             applicationVersion: '0.1.2',
@@ -298,6 +301,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
+          useMaterial3: false,
           primaryTextTheme: const TextTheme(
             titleLarge: titleTextStyle,
             titleSmall: subtitleTextStyle,
@@ -384,8 +388,9 @@ void main() {
     });
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: MediaQuery(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const MediaQuery(
           data: MediaQueryData(
             padding: EdgeInsets.all(safeareaPadding),
           ),
@@ -427,7 +432,7 @@ void main() {
     final FakeLicenseEntry licenseEntry = FakeLicenseEntry();
     licenseCompleter.complete(licenseEntry);
     expect(licenseEntry.packagesCalled, false);
-  }, leakTrackingConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String>{'ValueNotifier<_OverlayEntryWidgetState?>'})); // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126100.
+  });
 
   testWidgetsWithLeakTracking('LicensePage returns late if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
@@ -452,7 +457,7 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(licenseEntry.packagesCalled, true);
-  }, leakTrackingConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String>{'ValueNotifier<_OverlayEntryWidgetState?>'})); // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126100.
+  });
 
   testWidgetsWithLeakTracking('LicensePage logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -830,7 +835,7 @@ void main() {
     const Color cardColor = Color(0xFF654321);
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData.light().copyWith(
+      theme: ThemeData.light(useMaterial3: false).copyWith(
         scaffoldBackgroundColor: scaffoldColor,
         cardColor: cardColor,
       ),
@@ -1051,7 +1056,12 @@ void main() {
 
   testWidgetsWithLeakTracking('Error handling test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() => Stream<LicenseEntry>.error(Exception('Injected failure')));
-    await tester.pumpWidget(const MaterialApp(home: Material(child: AboutListTile())));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Material(child: AboutListTile())
+      )
+    );
     await tester.tap(find.byType(ListTile));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
@@ -1082,9 +1092,10 @@ void main() {
     await tester.binding.setSurfaceSize(defaultSize);
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         title: title,
-        home: Scaffold(
+        home: const Scaffold(
           body: Directionality(
             textDirection: textDirection,
             child: LicensePage(),
@@ -1128,7 +1139,7 @@ void main() {
 
     // Configure to show the default layout.
     await tester.binding.setSurfaceSize(defaultSize);
-  }, leakTrackingConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String>{'ValueNotifier<_OverlayEntryWidgetState?>'})); // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126100.
+  });
 
   testWidgetsWithLeakTracking('LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
@@ -1145,9 +1156,10 @@ void main() {
     await tester.binding.setSurfaceSize(defaultSize);
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         title: title,
-        home: Scaffold(
+        home: const Scaffold(
           body: Directionality(
             textDirection: textDirection,
             child: LicensePage(),
@@ -1191,7 +1203,7 @@ void main() {
 
     // Configure to show the default layout.
     await tester.binding.setSurfaceSize(defaultSize);
-  }, leakTrackingConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String>{'ValueNotifier<_OverlayEntryWidgetState?>'})); // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126100.
+  });
 
   testWidgetsWithLeakTracking('License page title in lateral UI does not use AppBarTheme.foregroundColor', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/108991
@@ -1270,8 +1282,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgetsWithLeakTracking('License page default title text color in the nested UI', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/108991

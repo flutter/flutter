@@ -18,6 +18,7 @@ import 'src/color_filter_cache.dart';
 import 'src/color_filter_with_unstable_child.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
+import 'src/draw_points.dart';
 import 'src/filtered_child_animation.dart';
 import 'src/fullscreen_textfield.dart';
 import 'src/gradient_perf.dart';
@@ -87,6 +88,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kAnimatedComplexImageFilteredPerfRouteName: (BuildContext context) => const AnimatedComplexImageFiltered(),
         kAnimatedBlurBackdropFilter: (BuildContext context) => const AnimatedBlurBackdropFilter(),
         kSlidersRouteName: (BuildContext context) => const SlidersPage(),
+        kDrawPointsPageRougeName: (BuildContext context) => const DrawPointsPage(),
       },
     );
   }
@@ -328,6 +330,13 @@ class HomePage extends StatelessWidget {
               Navigator.pushNamed(context, kSlidersRouteName);
             },
           ),
+          ElevatedButton(
+            key: const Key(kDrawPointsPageRougeName),
+            child: const Text('Draw Points'),
+            onPressed: () {
+              Navigator.pushNamed(context, kDrawPointsPageRougeName);
+            },
+          )
         ],
       ),
     );

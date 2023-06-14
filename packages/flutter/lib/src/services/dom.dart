@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// For now, we're hiding dart:js_interop's `@JS` to avoid a conflict with
-// package:js' `@JS`. In the future, we should be able to remove package:js
-// altogether and just import dart:js_interop.
-import 'dart:js_interop' hide JS;
-import 'package:js/js.dart';
+import 'dart:js_interop';
 
 /// This file includes static interop helpers for Flutter Web.
 // TODO(joshualitt): This file will eventually be removed,
