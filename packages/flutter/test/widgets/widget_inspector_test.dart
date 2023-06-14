@@ -2289,7 +2289,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree on $DiagnosticsNode', (WidgetTester tester) async {
-      // TODO (polina-c): delete this test once getChildrenSummaryTree stops accepting DiagnosticsNode.
+      // TODO(polina-c): delete this test once getChildrenSummaryTree stops accepting DiagnosticsNode.
       // https://github.com/flutter/devtools/issues/3951
       const String group = 'test-group';
 
