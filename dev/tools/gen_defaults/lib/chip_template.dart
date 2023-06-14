@@ -32,16 +32,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")};
 
   @override
-  MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return ${componentColor("$tokenGroup$variant.disabled.container")};
-      }
-      if (states.contains(MaterialState.selected)) {
-        return ${componentColor("$tokenGroup$variant.selected.container")};
-      }
-      return ${componentColor("$tokenGroup$variant.container")};
-    });
+  MaterialStateProperty<Color?>? get color => null; // Subclasses override this getter
 
   @override
   Color? get shadowColor => ${colorOrTransparent("$tokenGroup.container.shadow-color")};
