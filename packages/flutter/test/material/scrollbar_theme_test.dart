@@ -35,6 +35,7 @@ void main() {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: ScrollConfiguration(
           behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
@@ -259,7 +260,7 @@ void main() {
   testWidgets('ScrollbarTheme can disable gestures', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(interactive: false)),
+      theme: ThemeData(useMaterial3: false, scrollbarTheme: const ScrollbarThemeData(interactive: false)),
       home: Scrollbar(
         thumbVisibility: true,
         controller: scrollController,
@@ -306,7 +307,7 @@ void main() {
   testWidgets('Scrollbar.interactive takes priority over ScrollbarTheme', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(interactive: false)),
+      theme: ThemeData(useMaterial3: false, scrollbarTheme: const ScrollbarThemeData(interactive: false)),
       home: Scrollbar(
         interactive: true,
         thumbVisibility: true,
@@ -625,7 +626,7 @@ void main() {
     }
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData().copyWith(
+        theme: ThemeData(useMaterial3: false).copyWith(
           scrollbarTheme: _scrollbarTheme(
             trackVisibility: MaterialStateProperty.resolveWith(getTrackVisibility),
           ),
