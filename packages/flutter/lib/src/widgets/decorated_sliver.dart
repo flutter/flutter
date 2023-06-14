@@ -27,7 +27,7 @@ import 'image.dart';
 /// {@tool dartpad}
 /// This sample shows a radial gradient that draws a moon on a night sky:
 ///
-/// ** See code in examples/api/lib/widgets/sliver/sliver_decoration.0.dart **
+/// ** See code in examples/api/lib/widgets/sliver/decorated_sliver.0.dart **
 /// {@end-tool}
 ///
 /// See also:
