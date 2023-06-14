@@ -243,31 +243,31 @@ std::unique_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
   //----------------------------------------------------------------------------
   /// Vertex Input Setup
   ///
-  vk::VertexInputBindingDescription binding_description;
-  // Only 1 stream of data is supported for now.
-  binding_description.setBinding(0);
-  binding_description.setInputRate(vk::VertexInputRate::eVertex);
-
   std::vector<vk::VertexInputAttributeDescription> attr_descs;
-  uint32_t offset = 0;
+  std::vector<vk::VertexInputBindingDescription> buffer_descs;
+
   const auto& stage_inputs = desc.GetVertexDescriptor()->GetStageInputs();
+  const auto& stage_buffer_layouts =
+      desc.GetVertexDescriptor()->GetStageLayouts();
   for (const ShaderStageIOSlot& stage_in : stage_inputs) {
     vk::VertexInputAttributeDescription attr_desc;
     attr_desc.setBinding(stage_in.binding);
     attr_desc.setLocation(stage_in.location);
     attr_desc.setFormat(ToVertexDescriptorFormat(stage_in));
-    attr_desc.setOffset(offset);
+    attr_desc.setOffset(stage_in.offset);
     attr_descs.push_back(attr_desc);
-    uint32_t len = (stage_in.bit_width * stage_in.vec_size) / 8;
-    offset += len;
   }
-
-  binding_description.setStride(offset);
+  for (const ShaderStageBufferLayout& layout : stage_buffer_layouts) {
+    vk::VertexInputBindingDescription binding_description;
+    binding_description.setBinding(layout.binding);
+    binding_description.setInputRate(vk::VertexInputRate::eVertex);
+    binding_description.setStride(layout.stride);
+    buffer_descs.push_back(binding_description);
+  }
 
   vk::PipelineVertexInputStateCreateInfo vertex_input_state;
   vertex_input_state.setVertexAttributeDescriptions(attr_descs);
-  vertex_input_state.setVertexBindingDescriptionCount(1);
-  vertex_input_state.setPVertexBindingDescriptions(&binding_description);
+  vertex_input_state.setVertexBindingDescriptions(buffer_descs);
 
   pipeline_info.setPVertexInputState(&vertex_input_state);
 
