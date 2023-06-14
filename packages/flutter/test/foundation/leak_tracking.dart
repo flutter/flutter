@@ -146,19 +146,17 @@ class LeakCleaner {
   final LeakTrackingTestConfig config;
 
   Leaks clean(Leaks leaks) {
-    final Map<(String, LeakType), int> leaksByClassAndType = <(String, LeakType), int>{};
+    final Map<(String, LeakType), int> countByClassAndType = leaks.countByClassAndType();
 
     final Leaks result =  Leaks(<LeakType, List<LeakReport>>{
       for (final LeakType leakType in leaks.byType.keys)
-        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak, leaksByClassAndType)).toList()
+        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak, countByClassAndType)).toList()
     });
     return result;
   }
 
   /// Returns true if [leak] should be reported as failure.
-  ///
-  /// Also adds [leak] to [leaksByClassAndType] to track the number of leaks by class.
-  bool _shouldReportLeak(LeakType leakType, LeakReport leak, Map<(String, LeakType), int> leaksByClassAndType) {
+  bool _shouldReportLeak(LeakType leakType, LeakReport leak, Map<(String, LeakType), int> countByClassAndType) {
     // Tracking for non-GCed is temporarily disabled.
     // TODO(polina-c): turn on tracking for non-GCed after investigating existing leaks.
     if (leakType != LeakType.notDisposed) {
@@ -167,7 +165,6 @@ class LeakCleaner {
 
     final String leakingClass = leak.type;
     final (String, LeakType) classAndType = (leakingClass, leakType);
-    leaksByClassAndType[classAndType] = leaksByClassAndType[classAndType] ?? 0 + 1;
 
     bool isAllowedForClass(Map<String, int?> allowList) {
       if (!allowList.containsKey(leakingClass)) {
@@ -177,7 +174,7 @@ class LeakCleaner {
       if (allowedCount == null) {
         return true;
       }
-      return allowedCount >= leaksByClassAndType[classAndType]!;
+      return allowedCount >= countByClassAndType[classAndType]!;
     }
 
     switch (leakType) {
