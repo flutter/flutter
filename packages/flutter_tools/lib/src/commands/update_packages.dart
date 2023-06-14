@@ -40,8 +40,6 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'archive': '3.3.2',
   // https://github.com/flutter/flutter/issues/116376
   'path_provider_android': '2.0.21',
-  // https://github.com/flutter/flutter/issues/122039
-  'flutter_plugin_android_lifecycle': '2.0.8',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
