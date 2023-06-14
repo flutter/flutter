@@ -48,5 +48,6 @@ const Set<String> kCorePackageAllowList = <String>{
   'test_api',
   'vector_math',
   'vm_service',
+  'web',
   'webdriver',
 };
