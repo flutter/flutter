@@ -31,8 +31,8 @@ abstract class AssetManifest {
   /// file at build time.
   ///
   /// See [Specifying assets](https://docs.flutter.dev/development/ui/assets-and-images#specifying-assets)
-  /// and [Loading assets](https://docs.flutter.dev/development/ui/assets-and-images#loading-assets) for more
-  /// information.
+  /// and [Loading assets](https://docs.flutter.dev/development/ui/assets-and-images#loading-assets)
+  /// for more information.
   List<String> listAssets();
 
   /// Retrieves metadata about an asset and its variants. Returns null if the
