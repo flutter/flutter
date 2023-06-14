@@ -541,15 +541,9 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      final String encodedDefines = environment.defines[kDartDefines]!;
-      const Utf8Decoder byteDecoder = Utf8Decoder();
-      final Iterable<String> decodedDefines = encodedDefines
-          .split(',')
-          .map<Uint8List>(base64.decode)
-          .map<String>(byteDecoder.convert);
       expect(
-        decodedDefines,
-        containsAllInOrder(<String>[
+        _decodeDartDefines(environment),
+        containsAllInOrder(const <String>[
           'kInt=1',
           'kDouble=1.1',
           'name=denghaizhu',
@@ -596,7 +590,10 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      expect(environment.defines[kDartDefines], 'a0ludD0y,a0RvdWJsZT0xLjE=,bmFtZT1kZW5naGFpemh1,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=');
+      expect(
+        _decodeDartDefines(environment),
+        containsAllInOrder(<String>['kInt=2', 'kDouble=1.1', 'name=denghaizhu', 'title=this is title from config json file']),
+      );
     }),
     FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
@@ -650,6 +647,15 @@ void main() {
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
     ProcessManager: () => FakeProcessManager.any(),
   });
+}
+
+Iterable<String> _decodeDartDefines(Environment environment) {
+  final String encodedDefines = environment.defines[kDartDefines]!;
+  const Utf8Decoder byteDecoder = Utf8Decoder();
+  return encodedDefines
+      .split(',')
+      .map<Uint8List>(base64.decode)
+      .map<String>(byteDecoder.convert);
 }
 
 class FakeBundleBuilder extends Fake implements BundleBuilder {
