@@ -185,7 +185,11 @@ class SelectableText extends StatefulWidget {
     this.strutStyle,
     this.textAlign,
     this.textDirection,
-    // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     this.textScaleFactor,
     this.textScaler,
     this.showCursor = false,
@@ -240,7 +244,11 @@ class SelectableText extends StatefulWidget {
     this.strutStyle,
     this.textAlign,
     this.textDirection,
-    // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     this.textScaleFactor,
     this.textScaler,
     this.showCursor = false,
@@ -334,7 +342,11 @@ class SelectableText extends StatefulWidget {
   final TextDirection? textDirection;
 
   /// {@macro flutter.widgets.editableText.textScaleFactor}
-  // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   final double? textScaleFactor;
 
   /// {@macro flutter.painting.textPainter.textScaler}

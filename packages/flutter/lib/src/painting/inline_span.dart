@@ -9,8 +9,8 @@ import 'package:flutter/gestures.dart';
 
 import 'basic_types.dart';
 import 'text_painter.dart';
-import 'text_span.dart';
 import 'text_scaler.dart';
+import 'text_span.dart';
 import 'text_style.dart';
 
 // Examples can assume:

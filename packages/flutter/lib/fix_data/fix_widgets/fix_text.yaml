@@ -15,7 +15,7 @@
 # For documentation about this file format, see
 # https://dart.dev/go/data-driven-fixes.
 
-# * Fixes in this file are for RichText from the widgets library. *
+# * Fixes in this file are for Text from the widgets library. *
 version: 1
 transforms:
   # Change made in https://github.com/flutter/flutter/pull/128522
@@ -24,31 +24,9 @@ transforms:
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       getter: 'textScaleFactor'
-      inClass: 'RichText'
+      inClass: 'Text'
     changes:
       - kind: 'rename'
-        newName: 'textScaler.textScaleFactor'
-
-  # Change made in https://github.com/flutter/flutter/pull/128522
-  - title: "Migrate to 'textScaler'"
-    date: 2023-06-09
-    element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
-      constructor: ''
-      inClass: 'RichText'
-    changes:
-      - kind: 'addParameter'
-        index: 7
-        name: 'textScaler'
-        style: optional_named
-        argumentValue:
-          expression: 'TextScaler.linear({% textScaleFactor %})'
-          requiredIf: "textScaleFactor != ''"
-      - kind: 'removeParameter'
-        name: 'textScaleFactor'
-    variables:
-      textScaleFactor:
-        kind: 'fragment'
-        value: 'arguments[textScaleFactor]'
+        newName: 'textScaler?.textScaleFactor'
 
 # Before adding a new fix: read instructions at the top of this file.

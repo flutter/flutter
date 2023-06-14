@@ -30,7 +30,6 @@ transforms:
         index: 5
         name: 'textScaler'
         style: optional_named
-        defaultValue: 'TextScaler.noScaling'
         argumentValue:
           expression: 'TextScaler.linear({% textScaleFactor %})'
           requiredIf: "textScaleFactor != ''"
@@ -53,7 +52,6 @@ transforms:
         index: 15
         name: 'textScaler'
         style: optional_named
-        defaultValue: 'TextScaler.noScaling'
         argumentValue:
           expression: 'TextScaler.linear({% textScaleFactor %})'
           requiredIf: "textScaleFactor != ''"

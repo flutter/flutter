@@ -435,7 +435,11 @@ class Text extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
-    // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     this.textScaleFactor,
     this.textScaler,
     this.maxLines,
@@ -469,7 +473,11 @@ class Text extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
-    // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     this.textScaleFactor,
     this.textScaler,
     this.maxLines,
@@ -541,6 +549,9 @@ class Text extends StatelessWidget {
   /// from the nearest [DefaultTextStyle] ancestor will be used.
   final TextOverflow? overflow;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [textScaler] instead.
+  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
@@ -549,7 +560,11 @@ class Text extends StatelessWidget {
   /// The value given to the constructor as textScaleFactor. If null, will
   /// use the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
-  // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   final double? textScaleFactor;
 
   /// {@macro flutter.painting.textPainter.textScaler}

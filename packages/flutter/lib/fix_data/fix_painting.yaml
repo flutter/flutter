@@ -30,7 +30,6 @@ transforms:
         index: 4
         name: 'textScaler'
         style: optional_named
-        defaultValue: 'TextScaler.noScaling'
         argumentValue:
           expression: 'TextScaler.linear({% textScaleFactor %})'
           requiredIf: "textScaleFactor != ''"
@@ -53,7 +52,6 @@ transforms:
         index: 4
         name: 'textScaler'
         style: optional_named
-        defaultValue: 'TextScaler.noScaling'
         argumentValue:
           expression: 'TextScaler.linear({% textScaleFactor %})'
           requiredIf: "textScaleFactor != ''"
@@ -76,7 +74,6 @@ transforms:
         index: 0
         name: 'textScaler'
         style: optional_named
-        defaultValue: 'TextScaler.noScaling'
         argumentValue:
           expression: 'TextScaler.linear({% textScaleFactor %})'
           requiredIf: "textScaleFactor != ''"
@@ -99,7 +96,6 @@ transforms:
         index: 0
         name: 'textScaler'
         style: optional_named
-        defaultValue: 'TextScaler.noScaling'
         argumentValue:
           expression: 'TextScaler.linear({% textScaleFactor %})'
           requiredIf: "textScaleFactor != ''"

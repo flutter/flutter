@@ -147,7 +147,11 @@ class MediaQueryData {
   const MediaQueryData({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
-    // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,
     this.platformBrightness = Brightness.light,
@@ -1232,27 +1236,34 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// the [MediaQueryData.devicePixelRatio] property of the ancestor [MediaQuery] changes.
   static double? maybeDevicePixelRatioOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.devicePixelRatio)?.devicePixelRatio;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [maybeTextScalerOf] instead.
+  ///
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or
   /// 1.0, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery] changes.
-  // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
+  @Deprecated(
+    'Use textScalerOf instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   static double textScaleFactorOf(BuildContext context) => maybeTextScaleFactorOf(context) ?? 1.0;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [maybeTextScalerOf] instead.
+  ///
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or
   /// null, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery]
   /// changes.
-  ///
-  /// Deprecated. Will be removed in a future version of Flutter. Use
-  /// [maybeTextScalerOf] instead.
   @Deprecated(
     'Use maybeTextScalerOf instead. '
     'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
-    'Use of maybeTextScaleFactorOf was deprecated after v3.12.0-2.0.pre.',
+    'This feature was deprecated after v3.12.0-2.0.pre.',
   )
   static double? maybeTextScaleFactorOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.textScaleFactor)?.textScaleFactor;
 
