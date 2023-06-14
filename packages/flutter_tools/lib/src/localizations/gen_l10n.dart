@@ -1157,6 +1157,7 @@ class LocalizationsGenerator {
       // When traversing through a placeholderExpr node, return "$placeholderName".
       // When traversing through a pluralExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
       // When traversing through a selectExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
+      // When traversing through an argumentExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
       // When traversing through a message node, return concatenation of all of "generateVariables(child)" for each child.
       String generateVariables(Node node, { bool isRoot = false }) {
         switch (node.type) {
@@ -1258,6 +1259,25 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
               .replaceAll('@(choice)', identifier.value!)
               .replaceAll('@(selectCases)', selectLogicArgs.join('\n'))
             );
+            return '\$$tempVarName';
+          case ST.argumentExpr:
+            requiresIntlImport = true;
+            assert(node.children[1].type == ST.identifier);
+            assert(node.children[3].type == ST.argType);
+            assert(node.children[7].type == ST.identifier);
+            final String identifierName = node.children[1].value!;
+            final String formatType = node.children[7].value!;
+            final ST dateOrTime = node.children[3].children[0].type;
+            final String tempVarName = getTempVariableName();
+            if (dateOrTime == ST.date) {
+              tempVariables.add(dateVariableTemplate
+                .replaceAll('@(varName)', tempVarName)
+                .replaceAll('@(formatType)', formatType)
+                .replaceAll('@(argument)', identifierName)
+              );
+            } else if (dateOrTime == ST.time) {
+              // handle later
+            }
             return '\$$tempVarName';
           // ignore: no_default_cases
           default:
