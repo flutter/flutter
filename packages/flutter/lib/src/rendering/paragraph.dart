@@ -1517,6 +1517,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     final ({TextPosition wordStart, TextPosition wordEnd})? wordBoundary = !_rect.contains(localPosition) ? null : _getWordBoundaryAtPosition(position);
     TextPosition? targetPosition;
     if (wordBoundary != null) {
+      assert(wordBoundary.wordStart.offset >= range.start && wordBoundary.wordEnd.offset <= range.end);
       if (existingSelectionStart != null && existingSelectionEnd != null) {
         final TextPosition edgeToKeepInPlace = isEnd ? existingSelectionStart : existingSelectionEnd;
         final TextPosition currentMovingEdge = isEnd ? existingSelectionEnd : existingSelectionStart;
@@ -1532,6 +1533,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
             // The static edge is moved to the opposite end of the word boundary to
             // keep the entire origin word in the selection
             final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
+            assert(localWordBoundary.wordStart.offset >= range.start && localWordBoundary.wordEnd.offset <= range.end);
             _setSelectionPosition(isEnd ? localWordBoundary.wordEnd : localWordBoundary.wordStart, isEnd: !isEnd);
           } else {
             // If the new position falls on the same position of the static
@@ -1549,6 +1551,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
             // The static edge is moved to the opposite end of the word boundary to
             // keep the entire origin word in the selection
             final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
+            assert(localWordBoundary.wordStart.offset >= range.start && localWordBoundary.wordEnd.offset <= range.end);
             _setSelectionPosition(isEnd ? localWordBoundary.wordStart : localWordBoundary.wordEnd, isEnd: !isEnd);
           } else {
             // If the new position falls on the same position of the static
@@ -1587,11 +1590,13 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         if (existingSelectionStart.offset < existingSelectionEnd.offset) {
           if (shouldSwapEdgesWhenSelectionIsNormalized || position.offset == edgeToKeepInPlace.offset && _selectableContainsOriginWord!) {
             final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
+            assert(localWordBoundary.wordStart.offset >= range.start && localWordBoundary.wordEnd.offset <= range.end);
             _setSelectionPosition(isEnd ? localWordBoundary.wordEnd : localWordBoundary.wordStart, isEnd: !isEnd);
           }
         } else {
           if (shouldSwapEdgesWhenSelectionNotNormalized || position.offset == edgeToKeepInPlace.offset && _selectableContainsOriginWord!) {
             final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
+            assert(localWordBoundary.wordStart.offset >= range.start && localWordBoundary.wordEnd.offset <= range.end);
             _setSelectionPosition(isEnd ? localWordBoundary.wordStart : localWordBoundary.wordEnd, isEnd: !isEnd);
           }
         }
@@ -1656,6 +1661,14 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       return SelectionResult.end;
     }
     final ({TextPosition wordStart, TextPosition wordEnd}) wordBoundary = _getWordBoundaryAtPosition(position);
+    if (wordBoundary.wordStart.offset < range.start && wordBoundary.wordEnd.offset < range.start) {
+      return SelectionResult.previous;
+    } else if (wordBoundary.wordStart.offset > range.end && wordBoundary.wordEnd.offset > range.end) {
+      return SelectionResult.next;
+    }
+    // Fragments are separated by placeholder span, the word boundary shouldn't
+    // expand across fragments.
+    assert(wordBoundary.wordStart.offset >= range.start && wordBoundary.wordEnd.offset <= range.end);
     _textSelectionStart = wordBoundary.wordStart;
     _textSelectionEnd = wordBoundary.wordEnd;
     return SelectionResult.end;
@@ -1664,21 +1677,14 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   ({TextPosition wordStart, TextPosition wordEnd}) _getWordBoundaryAtPosition(TextPosition position) {
     final TextRange word = paragraph.getWordBoundary(position);
     assert(word.isNormalized);
-    if (word.start < range.start && word.end < range.start) {
-      return SelectionResult.previous;
-    } else if (word.start > range.end && word.end > range.end) {
-      return SelectionResult.next;
-    }
-    // Fragments are separated by placeholder span, the word boundary shouldn't
-    // expand across fragments.
-    assert(word.start >= range.start && word.end <= range.end);
     late TextPosition start;
     late TextPosition end;
-    if (position.offset >= word.end) {
+    // if (position.offset >= word.end) {
+    if (position.offset > word.end) {
       // This seems to cause an issue when dragging between words.
-      // start = end = TextPosition(offset: position.offset);
-      start = TextPosition(offset: word.start);
-      end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
+      start = end = TextPosition(offset: position.offset);
+      // start = TextPosition(offset: word.start);
+      // end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
     } else {
       start = TextPosition(offset: word.start);
       end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
