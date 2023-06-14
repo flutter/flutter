@@ -331,7 +331,7 @@ void main() {
             policy: WidgetOrderTraversalPolicy(),
             child: Center(
               child: Builder(builder: (BuildContext context) {
-                return MaterialButton(
+                return ElevatedButton(
                   key: key1,
                   focusNode: testNode1,
                   autofocus: true,
@@ -340,7 +340,7 @@ void main() {
                       MaterialPageRoute<void>(
                         builder: (BuildContext context) {
                           return Center(
-                            child: MaterialButton(
+                            child: ElevatedButton(
                               key: key2,
                               focusNode: testNode2,
                               autofocus: true,
@@ -1218,7 +1218,7 @@ void main() {
               child: Builder(builder: (BuildContext context) {
                 return FocusTraversalOrder(
                   order: const NumericFocusOrder(0),
-                  child: MaterialButton(
+                  child: ElevatedButton(
                     key: key1,
                     focusNode: testNode1,
                     autofocus: true,
@@ -1229,7 +1229,7 @@ void main() {
                             return Center(
                               child: FocusTraversalOrder(
                                 order: const NumericFocusOrder(0),
-                                child: MaterialButton(
+                                child: ElevatedButton(
                                   key: key2,
                                   focusNode: testNode2,
                                   autofocus: true,
