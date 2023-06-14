@@ -842,11 +842,12 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 
   @override
   TextStyle? get contentTextStyle => ThemeData(
-          brightness: _theme.brightness == Brightness.light
-              ? Brightness.dark
-              : Brightness.light)
-      .textTheme
-      .titleMedium;
+    useMaterial3: _theme.useMaterial3,
+    brightness: _theme.brightness == Brightness.light
+      ? Brightness.dark
+      : Brightness.light)
+    .textTheme
+    .titleMedium;
 
   @override
   SnackBarBehavior get behavior => SnackBarBehavior.fixed;
