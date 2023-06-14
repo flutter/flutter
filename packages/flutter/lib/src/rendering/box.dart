@@ -1978,15 +1978,15 @@ abstract class RenderBox extends RenderObject {
             // object is trying to access the size.
             if (RenderObject.debugActiveLayout != parent) {
               throw AssertionError(
-                'RenderBox.size accessed by an object that isn\'t the parent of '
+                'RenderBox.size accessed by an object that isn't the parent of '
                 'this RenderBox. RenderBox.size may only be accessed by the parent '
-                'RenderObject. This RenderBox\'s parent is: $parent',
+                'RenderObject. This RenderBox's parent is: $parent',
               );
             } else if (size._canBeUsedByParent) {
               throw AssertionError(
                 'RenderBox.size was accessed by its parent, without permission. '
-                'If you hit this assert trying to access a child\'s size, pass '
-                '"parentUsesSize: true" to that child\'s layout().',
+                'If you hit this assert trying to access a child's size, pass '
+                '"parentUsesSize: true" to that child's layout().',
               );
             }
           }
