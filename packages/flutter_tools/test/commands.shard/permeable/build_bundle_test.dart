@@ -518,7 +518,7 @@ void main() {
           "kDouble": 1.1,
           "name": "denghaizhu",
           "title": "this is title from config json file",
-          "null-value": null
+          "nullValue": null
         }
       '''
     );
@@ -554,10 +554,10 @@ void main() {
           'kDouble=1.1',
           'name=denghaizhu',
           'title=this is title from config json file',
+          'nullValue=null',
           'body=this is body from config json file',
         ]),
       );
-      //expect(environment.defines[kDartDefines], 'a0ludD0x,a0RvdWJsZT0xLjE=,bmFtZT1kZW5naGFpemh1,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=,Ym9keT10aGlzIGlzIGJvZHkgZnJvbSBjb25maWcganNvbiBmaWxl');
     }),
     FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
