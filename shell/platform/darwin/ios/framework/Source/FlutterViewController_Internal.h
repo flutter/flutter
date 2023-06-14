@@ -65,6 +65,7 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 - (void)addInternalPlugins;
 - (void)deregisterNotifications;
 - (int32_t)accessibilityFlags;
+- (UIWindowScene*)windowSceneIfViewLoaded API_AVAILABLE(ios(13.0));
 
 @end
 
