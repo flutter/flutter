@@ -80,6 +80,6 @@ If a Gradle dependency is updated, lockfiles must be regenerated.
 To generate new lockfiles, run:
 
 ```bash
-cd android
-../../../../third_party/gradle/bin/gradle generateLockfiles
+cd android/app
+../../../../../third_party/gradle/bin/gradle generateLockfiles
 ```
