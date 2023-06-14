@@ -1973,7 +1973,9 @@ abstract class RenderBox extends RenderObject {
           // The Flutter pipeline is currently running a layout pass. 
           // TODO: explain why we care that debugDoingThisLayoutWithCallback
           
-          if (!debugDoingThisResize && !debugDoingThisLayout && !_computingThisDryLayout && (RenderObject.debugActiveLayout != parent || !size._canBeUsedByParent)) {
+          if (!debugDoingThisResize && !debugDoingThisLayout && !_computingThisDryLayout) {
+            // This RenderBox is not in the middle of running its own layout, which means some other
+            // object is trying to access the size.
             if (RenderObject.debugActiveLayout != parent) {
               throw AssertionError(
                 'RenderBox.size accessed by an object that isn\'t the parent of '
