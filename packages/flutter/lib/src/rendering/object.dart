@@ -2290,10 +2290,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       informationCollector: () {
         final List<String> stack = StackTrace.current.toString().split('\n');
         int? targetFrame;
-        final Pattern layoutFramePattern = RegExp(r'^#[0-9]+ +RenderObject.layout \(');
+        final Pattern layoutFramePattern = RegExp(r'^#[0-9]+ +Render(?:Object|Box).layout \(');
         for (int i = 0; i < stack.length; i += 1) {
           if (layoutFramePattern.matchAsPrefix(stack[i]) != null) {
             targetFrame = i + 1;
+          } else if (targetFrame != null) {
             break;
           }
         }
@@ -2301,7 +2302,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           final Pattern targetFramePattern = RegExp(r'^#[0-9]+ +(.+)$');
           final Match? targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
           final String? problemFunction = (targetFrameMatch != null && targetFrameMatch.groupCount > 0) ? targetFrameMatch.group(1) : stack[targetFrame].trim();
-          // TODO(jacobr): this case is similar to displaying a single stack frame.
           return <DiagnosticsNode>[
             ErrorDescription(
               "These invalid constraints were provided to $runtimeType's layout() "
