@@ -27,7 +27,7 @@ class SliverDecorationExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: <Widget>[
-        SliverDecoration(
+        DecoratedSliver(
           decoration: const BoxDecoration(
             gradient: RadialGradient(
               center: Alignment(-0.5, -0.6),
@@ -44,6 +44,13 @@ class SliverDecorationExample extends StatelessWidget {
                const Text('Goodnight Moon'),
             ]),
           ),
+        ),
+        const DecoratedSliver(
+          decoration: BoxDecoration(
+            color: Colors.amber,
+            borderRadius: BorderRadius.all(Radius.circular(50))
+          ),
+          sliver: SliverToBoxAdapter(child: SizedBox(height: 300)),
         ),
       ],
     );

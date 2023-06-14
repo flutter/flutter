@@ -16,7 +16,7 @@ import 'image.dart';
 ///
 /// If the child sliver has infinite [SliverGeometry.scrollExtent], then we only
 /// draw the decoration down to the bottom [SliverGeometry.cacheExtent], and
-/// the developer is expected to ensure that the bottom border does not creep
+/// it is necessary to ensure that the bottom border does not creep
 /// above the top of the bottom cache.
 ///
 /// Commonly used with [BoxDecoration].
@@ -34,14 +34,14 @@ import 'image.dart';
 ///
 ///  * [DecoratedBox], the version of this class that works with regular widgets.
 ///  * [Decoration], which you can extend to provide other effects with
-///    [SliverDecoration].
+///    [DecoratedSliver].
 ///  * [CustomPaint], another way to draw custom effects from the widget layer.
-class SliverDecoration extends SingleChildRenderObjectWidget {
+class DecoratedSliver extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints a [Decoration].
   ///
   /// The [decoration] and [position] arguments must not be null. By default the
   /// decoration paints behind the child.
-  const SliverDecoration({
+  const DecoratedSliver({
     super.key,
     required this.decoration,
     this.position = DecorationPosition.background,
@@ -57,8 +57,8 @@ class SliverDecoration extends SingleChildRenderObjectWidget {
   final DecorationPosition position;
 
   @override
-  RenderSliverDecoration createRenderObject(BuildContext context) {
-    return RenderSliverDecoration(
+  RenderDecoratedSliver createRenderObject(BuildContext context) {
+    return RenderDecoratedSliver(
       decoration: decoration,
       position: position,
       configuration: createLocalImageConfiguration(context),
@@ -66,7 +66,7 @@ class SliverDecoration extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSliverDecoration renderObject) {
+  void updateRenderObject(BuildContext context, RenderDecoratedSliver renderObject) {
     renderObject
       ..decoration = decoration
       ..position = position

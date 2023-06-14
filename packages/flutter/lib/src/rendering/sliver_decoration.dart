@@ -9,7 +9,9 @@ import 'proxy_sliver.dart';
 import 'sliver.dart';
 
 /// Paints a [Decoration] either before or after its child paints.
-class RenderSliverDecoration extends RenderProxySliver {
+/// If the child has infinite scroll extent, then it only paints itself up to the
+/// bottom cache extent.
+class RenderDecoratedSliver extends RenderProxySliver {
   /// Creates a decorated sliver.
   ///
   /// The [decoration], [position], and [configuration] arguments must not be
@@ -17,7 +19,7 @@ class RenderSliverDecoration extends RenderProxySliver {
   ///
   /// The [ImageConfiguration] will be passed to the decoration (with the size
   /// filled in) to let it resolve images.
-  RenderSliverDecoration({
+  RenderDecoratedSliver({
     required Decoration decoration,
     DecorationPosition position = DecorationPosition.background,
     ImageConfiguration configuration = ImageConfiguration.empty,
@@ -98,7 +100,7 @@ class RenderSliverDecoration extends RenderProxySliver {
 
       // In the case where the child sliver has infinite scroll extent, the decoration
       // should only extend down to the bottom cache extent.
-      final double cappedMainAxisExtent = child!.geometry!.scrollExtent == double.infinity
+      final double cappedMainAxisExtent = child!.geometry!.scrollExtent.isInfinite
         ? constraints.scrollOffset + child!.geometry!.cacheExtent + constraints.cacheOrigin
         : child!.geometry!.scrollExtent;
       switch (constraints.axis) {
