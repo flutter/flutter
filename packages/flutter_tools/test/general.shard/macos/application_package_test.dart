@@ -167,7 +167,7 @@ group('PrebuiltMacOSApp', () {
 
       const BuildInfo flavoredApp = BuildInfo(BuildMode.release, 'flavor', treeShakeIcons: false);
       applicationBundle = macosApp.bundleDirectory(flavoredApp);
-      expect(applicationBundle, 'Release Flavor');
+      expect(applicationBundle, 'Release-flavor');
 
     }, overrides: overrides);
   });
