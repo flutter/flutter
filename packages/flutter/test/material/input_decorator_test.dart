@@ -4488,6 +4488,7 @@ void main() {
       // This is a regression test for https://github.com/flutter/flutter/issues/82321
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: Container(
               padding: const EdgeInsets.all(16.0),
@@ -4536,6 +4537,7 @@ void main() {
 
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: Container(
               padding: const EdgeInsets.all(16.0),
