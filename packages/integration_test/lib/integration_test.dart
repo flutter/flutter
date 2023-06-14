@@ -445,11 +445,11 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   Timeout defaultTestTimeout = Timeout.none;
 
   @override
-  void attachRootWidget(Widget rootWidget) {
+  Widget wrapWithDefaultView(Widget rootWidget) {
     // This is a workaround where screenshots of root widgets have incorrect
     // bounds.
     // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
-    super.attachRootWidget(RepaintBoundary(child: rootWidget));
+    return super.wrapWithDefaultView(RepaintBoundary(child: rootWidget));
   }
 
   @override
