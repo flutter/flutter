@@ -58,7 +58,7 @@ export 'src/rendering/selection.dart';
 export 'src/rendering/service_extensions.dart';
 export 'src/rendering/shifted_box.dart';
 export 'src/rendering/sliver.dart';
-export 'src/rendering/sliver_decoration.dart';
+export 'src/rendering/decorated_sliver.dart';
 export 'src/rendering/sliver_fill.dart';
 export 'src/rendering/sliver_fixed_extent_list.dart';
 export 'src/rendering/sliver_grid.dart';
