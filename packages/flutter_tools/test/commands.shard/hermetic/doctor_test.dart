@@ -765,6 +765,7 @@ void main() {
   group('FlutterValidator', () {
     late FakeFlutterVersion initialVersion;
     late FakeFlutterVersion secondVersion;
+    late TestFeatureFlags featureFlags;
 
     setUp(() {
       secondVersion = FakeFlutterVersion(frameworkRevisionShort: '222');
@@ -772,18 +773,19 @@ void main() {
         frameworkRevisionShort: '111',
         nextFlutterVersion: secondVersion,
       );
+      featureFlags = TestFeatureFlags();
     });
 
     testUsingContext('FlutterValidator fetches tags and gets fresh version', () async {
       final Directory devtoolsDir = fs.directory('/path/to/flutter/bin/cache/dart-sdk/bin/resources/devtools')
           ..createSync(recursive: true);
+      fs.directory('/path/to/flutter/bin/cache/artifacts').createSync(recursive: true);
       devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "123"}');
       fakeProcessManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>['which', 'java']),
-        FakeCommand(command: <String>['chmod', '755', '/path/to/flutter/bin/cache/artifacts']),
       ]);
       final List<DoctorValidator> validators = DoctorValidatorsProvider.test(
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
         platform: FakePlatform(),
       ).validators;
       final FlutterValidator flutterValidator = validators.whereType<FlutterValidator>().first;
@@ -802,6 +804,7 @@ void main() {
       FlutterVersion: () => initialVersion,
       Platform: () => FakePlatform(),
       ProcessManager: () => fakeProcessManager,
+      TestFeatureFlags: () => featureFlags,
     });
   });
   testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
