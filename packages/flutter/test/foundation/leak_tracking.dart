@@ -145,8 +145,20 @@ class LeakCleaner {
 
   final LeakTrackingTestConfig config;
 
+  static Map<(String, LeakType), int> _countByClassAndType(Leaks leaks) {
+    final Map<(String, LeakType), int> result = <(String, LeakType), int>{};
+
+    for (final MapEntry<LeakType, List<LeakReport>> entry in leaks.byType.entries) {
+      for (final LeakReport leak in entry.value) {
+        final (String, LeakType) classAndType = (leak.type, entry.key);
+        result[classAndType] = (result[classAndType] ?? 0) + 1;
+      }
+    }
+    return result;
+  }
+
   Leaks clean(Leaks leaks) {
-    final Map<(String, LeakType), int> countByClassAndType = leaks.countByClassAndType();
+    final Map<(String, LeakType), int> countByClassAndType = _countByClassAndType(leaks);
 
     final Leaks result =  Leaks(<LeakType, List<LeakReport>>{
       for (final LeakType leakType in leaks.byType.keys)
