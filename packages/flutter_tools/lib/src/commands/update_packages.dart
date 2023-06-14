@@ -306,8 +306,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         // we need to run update-packages to recapture the transitive deps.
         globals.printWarning(
             'Warning: pubspec in ${directory.path} has updated or new dependencies. '
-            'Please run "flutter update-packages --force-upgrade" to update them correctly '
-            '(checksum ${pubspec.checksum.value} != $checksum).'
+            'Please run "flutter update-packages --force-upgrade" to update them correctly.'
         );
         needsUpdate = true;
       } else {
