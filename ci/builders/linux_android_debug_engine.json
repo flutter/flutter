@@ -146,7 +146,7 @@
                 "--no-lto",
                 "--enable-vulkan-validation-layers"
             ],
-            "name": "android_debug_arm64",
+            "name": "android_debug_arm64_validation_layers",
             "ninja": {
                 "config": "android_debug_arm64",
                 "targets": [
