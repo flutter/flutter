@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -80,6 +81,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             key: dragTarget,
@@ -159,7 +161,10 @@ void main() {
       ),
     );
 
-    final Opacity backgroundOpacity = tester.firstWidget(find.byType(Opacity));
+    final dynamic backgroundOpacity = tester.firstWidget(
+      find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_FlexibleSpaceHeaderOpacity'));
+    // accessing private type member.
+    // ignore: avoid_dynamic_calls
     expect(backgroundOpacity.opacity, 1.0);
   });
 
@@ -168,6 +173,7 @@ void main() {
     const double expandedHeight = 200;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
@@ -348,7 +354,7 @@ void main() {
                               rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0),
                               children: <TestSemantics>[
                                 TestSemantics(
-                                  id: 18,
+                                  id: 11,
                                   rect: const Rect.fromLTRB(0.0, 36.0, 800.0, 92.0),
                                   label: 'Expanded title',
                                   textDirection: TextDirection.ltr,
@@ -434,6 +440,7 @@ void main() {
     late double width;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
@@ -482,6 +489,7 @@ void main() {
     const double expandedTitleScale = 3.0;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
@@ -551,6 +559,7 @@ void main() {
     const double height = 300.0;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
@@ -611,6 +620,7 @@ void main() {
     const double expandedTitleScale = 3.0;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
@@ -670,7 +680,7 @@ void main() {
   testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
-        theme: ThemeData(platform: platform),
+        theme: ThemeData(platform: platform, useMaterial3: false),
         home: Scaffold(
           appBar: AppBar(
             flexibleSpace: FlexibleSpaceBar(
@@ -720,7 +730,7 @@ void main() {
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
-        theme: ThemeData(platform: platform),
+        theme: ThemeData(platform: platform, useMaterial3: false),
         home: Scaffold(
           appBar: AppBar(
             flexibleSpace: FlexibleSpaceBar(
@@ -790,7 +800,7 @@ void main() {
       home: SubCategoryScreenView(),
     ));
 
-    expect(RebuildTracker.count, 1);
+    expect(RenderRebuildTracker.count, 1);
 
     // We drag up to fully collapse the space bar.
     for (int i = 0; i < 20; i++) {
@@ -798,7 +808,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    expect(RebuildTracker.count, greaterThan(1));
+    expect(RenderRebuildTracker.count, greaterThan(1));
   });
 }
 
@@ -825,15 +835,22 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(TestDelegate oldDelegate) => false;
 }
 
-class RebuildTracker extends StatelessWidget {
+class RebuildTracker extends SingleChildRenderObjectWidget {
   const RebuildTracker({super.key});
 
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderRebuildTracker();
+  }
+}
+
+class RenderRebuildTracker extends RenderProxyBox {
   static int count = 0;
 
   @override
-  Widget build(BuildContext context)  {
+  void paint(PaintingContext context, Offset offset) {
     count++;
-    return const SizedBox(width: 100, height: 100);
+    super.paint(context, offset);
   }
 }
 

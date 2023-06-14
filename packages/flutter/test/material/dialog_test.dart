@@ -293,16 +293,17 @@ void main() {
   });
 
   testWidgets('Null dialog shape', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
     );
-    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
     final Material materialWidget = _getMaterialFromDialog(tester);
-    expect(materialWidget.shape, _defaultM2DialogShape);
+    expect(materialWidget.shape, theme.useMaterial3 ? _defaultM3DialogShape : _defaultM2DialogShape);
   });
 
   testWidgets('Rectangular dialog shape', (WidgetTester tester) async {
@@ -767,7 +768,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      _buildAppWithDialog(dialog),
+      _buildAppWithDialog(dialog, theme: ThemeData(useMaterial3: false)),
     );
 
     await tester.tap(find.text('X'));
@@ -2544,6 +2545,7 @@ void main() {
 
     Widget buildFrame(MainAxisAlignment? alignment) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: AlertDialog(
             content: const SizedBox(width: 800),
