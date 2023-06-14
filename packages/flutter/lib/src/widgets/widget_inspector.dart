@@ -1722,7 +1722,8 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getProperties(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getProperties(String? diagnosticsNodeId, String groupName) {
+  List<Object>  _getProperties(String? diagnosticsNodeId, String groupName) {
+    /// ???
     final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode?;
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), InspectorSerializationDelegate(groupName: groupName, service: this), parent: node);
   }
