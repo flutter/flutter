@@ -300,7 +300,7 @@ def to_gn_args(args):
   gn_args['skia_use_x11'
          ] = False  # Never add the X11 dependency (only takes effect on Linux).
   gn_args['skia_use_wuffs'] = True
-  gn_args['skia_use_expat'] = args.target_os == 'android'
+  gn_args['skia_use_expat'] = True
   gn_args['skia_use_fontconfig'] = args.enable_fontconfig
   gn_args['skia_use_icu'] = True
   gn_args['is_official_build'] = True  # Disable Skia test utilities.
