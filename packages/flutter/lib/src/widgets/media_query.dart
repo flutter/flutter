@@ -153,7 +153,7 @@ class MediaQueryData {
       'This feature was deprecated after v3.12.0-2.0.pre.',
     )
     double textScaleFactor = 1.0,
-    TextScaler textScaler = TextScaler.noScaling,
+    TextScaler textScaler = const _UnspecifiedTextScaler(),
     this.platformBrightness = Brightness.light,
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
@@ -171,7 +171,7 @@ class MediaQueryData {
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
        assert(
-         identical(textScaler, TextScaler.noScaling) || textScaleFactor == 1.0,
+         identical(textScaler, _defaultMediaQueryTextScaler) || textScaleFactor == 1.0,
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        );
 
@@ -313,7 +313,7 @@ class MediaQueryData {
   TextScaler get textScaler {
     // The constructor was called with an explicitly specified textScaler value,
     // we assume the caller is unmigrated and ignore _textScaleFactor.
-    if (!identical(TextScaler.noScaling, _textScaler)) {
+    if (!identical(_defaultMediaQueryTextScaler, _textScaler)) {
       return _textScaler;
     }
     return _textScaleFactor == 1.0
@@ -1743,4 +1743,20 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
       child: widget.child,
     );
   }
+}
+
+const TextScaler _defaultMediaQueryTextScaler = _UnspecifiedTextScaler();
+// TODO(LongCatIsLooong): Remove once `MediaQueryData.textScaleFactor` is
+// removed: https://github.com/flutter/flutter/issues/128825.
+class _UnspecifiedTextScaler implements TextScaler {
+  const _UnspecifiedTextScaler();
+
+  @override
+  TextScaler clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) => throw UnimplementedError();
+
+  @override
+  double scale(double fontSize) => throw UnimplementedError();
+
+  @override
+  double get textScaleFactor => throw UnimplementedError();
 }

@@ -44,16 +44,17 @@ abstract class TextScaler {
   /// scaled to the same value.
   double scale(double fontSize);
 
-  /// The estimated number of font pixels for each logical pixel.
+  /// The estimated number of font pixels for each logical pixel. This property
+  /// exists only for backward compatibility purposes, and will be removed in
+  /// a future version of Flutter.
   ///
   /// The value of this property is only an estimate, so it may not reflect the
   /// exact text scaling strategy this [TextScaler] represents, especially when
   /// this [TextScaler] is not linear. Consider using [TextScaler.scale] instead.
-  ///
-  /// This property exists solely for backward compatibility purposes, such that
-  /// unmigrated APIs can get an estimated `textScaleFactor` when the caller has
-  /// already migrated to using [TextScaler]. It may be removed in a future
-  /// version of Flutter.
+  @Deprecated(
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   double get textScaleFactor;
 
   /// Returns a new [TextScaler] that restricts the scaled font size to within
