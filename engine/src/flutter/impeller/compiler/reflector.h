@@ -113,9 +113,14 @@ class Reflector {
   std::shared_ptr<fml::Mapping> InflateTemplate(std::string_view tmpl) const;
 
   std::optional<nlohmann::json::object_t> ReflectResource(
-      const spirv_cross::Resource& resource) const;
+      const spirv_cross::Resource& resource,
+      std::optional<size_t> offset) const;
 
   std::optional<nlohmann::json::array_t> ReflectResources(
+      const spirv_cross::SmallVector<spirv_cross::Resource>& resources,
+      bool compute_offsets = false) const;
+
+  std::vector<size_t> ComputeOffsets(
       const spirv_cross::SmallVector<spirv_cross::Resource>& resources) const;
 
   std::optional<nlohmann::json::object_t> ReflectType(

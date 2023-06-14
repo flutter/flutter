@@ -86,7 +86,8 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
     {{stage_input.type.type_name}},     // type
     {{stage_input.type.bit_width}}u,    // bit width of type
     {{stage_input.type.vec_size}}u,     // vec size
-    {{stage_input.type.columns}}u       // number of columns
+    {{stage_input.type.columns}}u,      // number of columns
+    {{stage_input.offset}}u,            // offset for interleaved layout
   };
 {% endfor %}
 {% endif %}
@@ -96,6 +97,20 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
     &kInput{{camel_case(stage_input.name)}}, // {{stage_input.name}}
 {% endfor %}
   };
+
+{% if shader_stage == "vertex" %}
+  static constexpr auto kInterleavedLayout = ShaderStageBufferLayout {
+{% if length(stage_inputs) > 0 %}
+    sizeof(PerVertexData),                 // stride for interleaved layout
+{% else %}
+    0u,
+{% endif %}
+    0u,                                    // attribute binding
+  };
+  static constexpr std::array<const ShaderStageBufferLayout*, 1> kInterleavedBufferLayout = {
+    &kInterleavedLayout
+  };
+{% endif %}
 
 {% if length(sampled_images) > 0 %}
   // ===========================================================================
