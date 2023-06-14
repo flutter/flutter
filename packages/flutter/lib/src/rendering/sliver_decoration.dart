@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
-
 import 'object.dart';
+import 'proxy_box.dart';
 import 'proxy_sliver.dart';
 import 'sliver.dart';
 
