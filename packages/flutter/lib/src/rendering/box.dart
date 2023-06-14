@@ -1970,16 +1970,24 @@ abstract class RenderBox extends RenderObject {
         assert(size._owner == this);
         if (RenderObject.debugActiveLayout != null &&
             !RenderObject.debugActiveLayout!.debugDoingThisLayoutWithCallback) {
-          assert(
-            debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
-              (RenderObject.debugActiveLayout == parent && size._canBeUsedByParent),
-            'RenderBox.size accessed beyond the scope of resize, layout, or '
-            'permitted parent access. RenderBox can always access its own size, '
-            'otherwise, the only object that is allowed to read RenderBox.size '
-            'is its parent, if they have said they will. It you hit this assert '
-            'trying to access a child\'s size, pass "parentUsesSize: true" to '
-            "that child's layout().",
-          );
+          // The Flutter pipeline is currently running a layout pass. 
+          // TODO: explain why we care that debugDoingThisLayoutWithCallback
+          
+          if (!debugDoingThisResize && !debugDoingThisLayout && !_computingThisDryLayout && (RenderObject.debugActiveLayout != parent || !size._canBeUsedByParent)) {
+            if (RenderObject.debugActiveLayout != parent) {
+              throw AssertionError(
+                'RenderBox.size accessed by an object that isn\'t the parent of '
+                'this RenderBox. RenderBox.size may only be accessed by the parent '
+                'RenderObject. This RenderBox\'s parent is: $parent',
+              );
+            } else if (size._canBeUsedByParent) {
+              throw AssertionError(
+                'RenderBox.size was accessed by its parent, without permission. '
+                'If you hit this assert trying to access a child\'s size, pass '
+                '"parentUsesSize: true" to that child\'s layout().',
+              );
+            }
+          }
         }
         assert(size == _size);
       }
