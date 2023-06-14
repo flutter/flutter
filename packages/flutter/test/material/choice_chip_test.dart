@@ -403,7 +403,7 @@ void main() {
     testWidgets('ChoiceChip defaults', (WidgetTester tester) async {
       Widget buildFrame(Brightness brightness) {
         return MaterialApp(
-          theme: ThemeData(brightness: brightness),
+          theme: ThemeData(useMaterial3: false, brightness: brightness),
           home: const Scaffold(
             body: Center(
               child: ChoiceChip(
