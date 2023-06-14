@@ -653,6 +653,62 @@ void main() {
     semantics.dispose();
   });
 
+    testWidgets('IconButton Semantics (selected) - M3', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      wrap(
+        useMaterial3: true,
+        child: IconButton(
+          onPressed: mockOnPressedFunction.handler,
+          isSelected: true,
+          icon: const Icon(Icons.link, semanticLabel: 'link'),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          actions: <SemanticsAction>[
+                            SemanticsAction.tap,
+                          ],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.isSelected,
+                          ],
+                          label: 'link',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
+  });
+
   testWidgets('IconButton loses focus when disabled.', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'IconButton');
     await tester.pumpWidget(
@@ -733,7 +789,7 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-        useMaterial3: theme.useMaterial3,
+        useMaterial3: false,
         child: Column(
           children: <Widget>[
             IconButton(

@@ -278,6 +278,9 @@ class Cache {
   // Whether to cache the unsigned mac binaries. Defaults to caching the signed binaries.
   bool useUnsignedMacBinaries = false;
 
+  // Whether the warning printed when a custom artifact URL is used is fatal.
+  bool fatalStorageWarning = true;
+
   static RandomAccessFile? _lock;
   static bool _lockEnabled = true;
 
@@ -340,12 +343,11 @@ class Cache {
           // version --machine"). It's not really a "warning" though, so print it
           // in grey. Also, make sure that it isn't counted as a warning for
           // Logger.warningsAreFatal.
-          final bool oldWarnings = _logger.hadWarningOutput;
           _logger.printWarning(
             'Waiting for another flutter command to release the startup lock...',
             color: TerminalColor.grey,
+            fatal: false,
           );
-          _logger.hadWarningOutput = oldWarnings;
           printed = true;
         }
         await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -522,6 +524,7 @@ class Cache {
     _logger.printWarning(
       'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
       emphasis: true,
+      fatal: false,
     );
     _hasWarnedAboutStorageOverride = true;
   }
