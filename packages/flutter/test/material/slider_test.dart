@@ -3509,6 +3509,56 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
+  testWidgets('Value indicator disappears after adjusting the slider', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/123313.
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const double currentValue = 0.5;
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Material(
+        child: Center(
+          child: Slider(
+            value: currentValue,
+            divisions: 5,
+            label: currentValue.toStringAsFixed(1),
+            onChanged: (double value) {},
+          ),
+        ),
+      ),
+    ));
+
+    // Slider does not show value indicator initially.
+    await tester.pumpAndSettle();
+    RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      isNot(paints..scale()..path(color: theme.colorScheme.primary)),
+    );
+
+    final Offset sliderCenter = tester.getCenter(find.byType(Slider));
+    final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
+
+    // Tap the slider to bring up the value indicator.
+    await tester.tapAt(tapLocation);
+    await tester.pumpAndSettle();
+
+    // Value indicator is visible.
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..scale()..path(color: theme.colorScheme.primary),
+    );
+
+    // Wait for the value indicator to disappear.
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    // Value indicator is no longer visible.
+    expect(
+      valueIndicatorBox,
+      isNot(paints..scale()..path(color: theme.colorScheme.primary)),
+    );
+  });
+
   testWidgets('Value indicator remains when Slider is in focus on desktop', (WidgetTester tester) async {
     double value = 0.5;
     final FocusNode focusNode = FocusNode();
