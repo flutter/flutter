@@ -112,7 +112,7 @@ void main() {
   testWidgets('The width of the text field should always be the same as the menu view',
     (WidgetTester tester) async {
 
-    final ThemeData themeData = ThemeData();
+    final ThemeData themeData = ThemeData(useMaterial3: false);
     final bool useMaterial3 = themeData.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(

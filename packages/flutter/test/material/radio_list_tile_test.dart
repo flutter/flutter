@@ -1101,7 +1101,7 @@ void main() {
       return null;
     }
 
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: false);
     final bool material3 = theme.useMaterial3;
     Widget buildRadio({bool active = false, bool useOverlay = true}) {
       return wrap(
