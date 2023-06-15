@@ -1788,17 +1788,17 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
-  /// object that `diagnosticsNodeId` references providing information needed
+  /// object that [diagnosticsOrDiagnosticableId] references providing information needed
   /// for the details subtree view.
   ///
   /// The details subtree shows properties inline and includes all children
   /// rather than a filtered set of important children.
-  String getChildrenDetailsSubtree(String diagnosticsNodeId, String groupName) {
-    return _safeJsonEncode(_getChildrenDetailsSubtree(diagnosticsNodeId, groupName));
+  String getChildrenDetailsSubtree(String diagnosticsOrDiagnosticableId, String groupName) {
+    return _safeJsonEncode(_getChildrenDetailsSubtree(diagnosticsOrDiagnosticableId, groupName));
   }
 
-  List<Object> _getChildrenDetailsSubtree(String? diagnosticsNodeId, String groupName) {
-    final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode?;
+  List<Object> _getChildrenDetailsSubtree(String? diagnosticsOrDiagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
     // With this value of minDepth we only expand one extra level of important nodes.
     final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, includeProperties: true, service: this);
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate, parent: node);
@@ -1910,19 +1910,19 @@ mixin WidgetInspectorService {
   ///  * [getChildrenDetailsSubtree], a method to get children of a node
   ///    in the details subtree.
   String getDetailsSubtree(
-    String id,
+    String diagnosticsOrDiagnosticableId,
     String groupName, {
     int subtreeDepth = 2,
   }) {
-    return _safeJsonEncode(_getDetailsSubtree( id, groupName, subtreeDepth));
+    return _safeJsonEncode(_getDetailsSubtree(diagnosticsOrDiagnosticableId, groupName, subtreeDepth));
   }
 
   Map<String, Object?>? _getDetailsSubtree(
-    String? id,
+    String? diagnosticsOrDiagnosticableId,
     String? groupName,
     int subtreeDepth,
   ) {
-    final DiagnosticsNode? root = toObject(id) as DiagnosticsNode?;
+    final DiagnosticsNode? root = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
     if (root == null) {
       return null;
     }
@@ -1943,8 +1943,8 @@ mixin WidgetInspectorService {
   /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
   /// reused.
   @protected
-  String getSelectedWidget(String? previousSelectionId, String groupName) {
-    return _safeJsonEncode(_getSelectedWidget(previousSelectionId, groupName));
+  String getSelectedWidget(String? diagnosticsOrDiagnosticableId, String groupName) {
+    return _safeJsonEncode(_getSelectedWidget(diagnosticsOrDiagnosticableId, groupName));
   }
 
   /// Captures an image of the current state of an [object] that is a
@@ -2020,18 +2020,18 @@ mixin WidgetInspectorService {
   Future<Map<String, Object?>> _getLayoutExplorerNode(
     Map<String, String> parameters,
   ) {
-    final String? id = parameters['id'];
+    final String? diagnosticsOrDiagnosticableId = parameters['id'];
     final int subtreeDepth = int.parse(parameters['subtreeDepth']!);
     final String? groupName = parameters['groupName'];
     Map<String, dynamic>? result = <String, dynamic>{};
-    final Object? root = toObject(id);
+    final DiagnosticsNode? root = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
     if (root == null) {
       return Future<Map<String, dynamic>>.value(<String, dynamic>{
         'result': result,
       });
     }
     result = _nodeToJson(
-      root as DiagnosticsNode,
+      root,
       InspectorSerializationDelegate(
         groupName: groupName,
         summaryTree: true,
@@ -2211,15 +2211,16 @@ mixin WidgetInspectorService {
     throw Exception('Enum value $name not found');
   }
 
-  Map<String, Object?>? _getSelectedWidget(String? previousSelectionId, String groupName) {
+  Map<String, Object?>? _getSelectedWidget(String? diagnosticsOrDiagnosticableId, String groupName) {
     return _nodeToJson(
-      _getSelectedWidgetDiagnosticsNode(previousSelectionId),
+      _getSelectedWidgetDiagnosticsNode(diagnosticsOrDiagnosticableId),
       InspectorSerializationDelegate(groupName: groupName, service: this),
     );
   }
 
-  DiagnosticsNode? _getSelectedWidgetDiagnosticsNode(String? previousSelectionId) {
-    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
+  DiagnosticsNode? _getSelectedWidgetDiagnosticsNode(String? diagnosticsOrDiagnosticableId) {
+    final DiagnosticsNode? previousSelection = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+
     final Element? current = selection.currentElement;
     return current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode();
   }
@@ -2232,19 +2233,19 @@ mixin WidgetInspectorService {
   /// If the currently selected [Element] is identical to the [Element]
   /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
   /// reused.
-  String getSelectedSummaryWidget(String previousSelectionId, String groupName) {
-    return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
+  String getSelectedSummaryWidget(String diagnosticsOrDiagnosticableId, String groupName) {
+    return _safeJsonEncode(_getSelectedSummaryWidget(diagnosticsOrDiagnosticableId, groupName));
   }
 
-  _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId) {
-     return _getCreationLocation(_getSelectedSummaryDiagnosticsNode(previousSelectionId)?.value);
+  _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionDiagnosticsOrDiagnosticableId) {
+     return _getCreationLocation(_getSelectedSummaryDiagnosticsNode(previousSelectionDiagnosticsOrDiagnosticableId)?.value);
   }
 
-  DiagnosticsNode? _getSelectedSummaryDiagnosticsNode(String? previousSelectionId) {
+  DiagnosticsNode? _getSelectedSummaryDiagnosticsNode(String? previousSelectionDiagnosticsOrDiagnosticableId) {
     if (!isWidgetCreationTracked()) {
-      return _getSelectedWidgetDiagnosticsNode(previousSelectionId);
+      return _getSelectedWidgetDiagnosticsNode(previousSelectionDiagnosticsOrDiagnosticableId);
     }
-    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
+    final DiagnosticsNode? previousSelection = _idToDiagnosticsNode(previousSelectionDiagnosticsOrDiagnosticableId);
     Element? current = selection.currentElement;
     if (current != null && !_isValueCreatedByLocalProject(current)) {
       Element? firstLocal;
@@ -2259,8 +2260,8 @@ mixin WidgetInspectorService {
     return current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode();
   }
 
-  Map<String, Object?>? _getSelectedSummaryWidget(String? previousSelectionId, String groupName) {
-    return _nodeToJson(_getSelectedSummaryDiagnosticsNode(previousSelectionId), InspectorSerializationDelegate(groupName: groupName, service: this));
+  Map<String, Object?>? _getSelectedSummaryWidget(String? previousSelectionDiagnosticsOrDiagnosticableId, String groupName) {
+    return _nodeToJson(_getSelectedSummaryDiagnosticsNode(previousSelectionDiagnosticsOrDiagnosticableId), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns whether [Widget] creation locations are available.
