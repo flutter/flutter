@@ -362,6 +362,7 @@ class HtmlElementView extends StatelessWidget {
     super.key,
     required this.viewType,
     this.onPlatformViewCreated,
+    this.creationParams,
   }) : assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.');
 
   /// The unique identifier for the HTML view type to be embedded by this widget.
@@ -373,6 +374,9 @@ class HtmlElementView extends StatelessWidget {
   ///
   /// May be null.
   final PlatformViewCreatedCallback? onPlatformViewCreated;
+
+  /// Passed as the 2nd argument (i.e. `params`) of the registered view factory.
+  final Object? creationParams;
 
   @override
   Widget build(BuildContext context) {
@@ -391,7 +395,11 @@ class HtmlElementView extends StatelessWidget {
 
   /// Creates the controller and kicks off its initialization.
   _HtmlElementViewController _createHtmlElementView(PlatformViewCreationParams params) {
-    final _HtmlElementViewController controller = _HtmlElementViewController(params.id, viewType);
+    final _HtmlElementViewController controller = _HtmlElementViewController(
+      params.id,
+      viewType,
+      creationParams,
+    );
     controller._initialize().then((_) {
       params.onPlatformViewCreated(params.id);
       onPlatformViewCreated?.call(params.id);
@@ -404,6 +412,7 @@ class _HtmlElementViewController extends PlatformViewController {
   _HtmlElementViewController(
     this.viewId,
     this.viewType,
+    this.creationParams,
   );
 
   @override
@@ -414,12 +423,15 @@ class _HtmlElementViewController extends PlatformViewController {
   /// A PlatformViewFactory for this type must have been registered.
   final String viewType;
 
+  final dynamic creationParams;
+
   bool _initialized = false;
 
   Future<void> _initialize() async {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': viewType,
+      'params': creationParams,
     };
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
     _initialized = true;
