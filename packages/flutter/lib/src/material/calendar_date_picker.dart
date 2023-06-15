@@ -1013,7 +1013,7 @@ class _DayPickerState extends State<_DayPicker> {
               // for the day of month. To do that we prepend day of month to the
               // formatted full date.
               label: '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}$semanticLabelSuffix',
-              // We set button to true to make the date selectable.
+              // Set button to true to make the date selectable.
               button: true,
               selected: isSelectedDay,
               excludeSemantics: true,
