@@ -491,12 +491,14 @@ const double _kTrackInnerEnd = _kTrackWidth - _kTrackInnerStart;
 const double _kTrackInnerLength = _kTrackInnerEnd - _kTrackInnerStart;
 const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
-const double _kOnLabelWidth = 2.0 / 2.0;
-const double _kOnLabelHeight = 20.0 / 2.0;
-const double _kOnLabelPaddingHorizontal = 22.0 / 2.0;
-const double _kOffLabelWidth = 2.0 / 2.0;
-const double _kOffLabelPaddingHorizontal = 24.0 / 2.0;
-const double _kOffLabelRadius = 10.0 / 2.0;
+// Label sizes and padding taken from xcode inspector.
+// See https://github.com/flutter/flutter/issues/4830#issuecomment-528495360
+const double _kOnLabelWidth = 1.0;
+const double _kOnLabelHeight = 10.0;
+const double _kOnLabelPaddingHorizontal = 11.0;
+const double _kOffLabelWidth = 1.0;
+const double _kOffLabelPaddingHorizontal = 12.0;
+const double _kOffLabelRadius = 5.0;
 // Opacity of a disabled switch, as eye-balled from iOS Simulator on Mac.
 const double _kCupertinoSwitchDisabledOpacity = 0.5;
 
