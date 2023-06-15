@@ -18,6 +18,7 @@ class TestPage extends StatelessWidget {
     return MaterialApp(
       title: 'Test',
       theme: ThemeData(
+        useMaterial3: false,
         primarySwatch: Colors.blue,
       ),
       home: const HomePage(),
