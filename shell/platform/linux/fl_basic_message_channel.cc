@@ -232,7 +232,6 @@ G_MODULE_EXPORT void fl_basic_message_channel_send(FlBasicMessageChannel* self,
                                                    GAsyncReadyCallback callback,
                                                    gpointer user_data) {
   g_return_if_fail(FL_IS_BASIC_MESSAGE_CHANNEL(self));
-  g_return_if_fail(message != nullptr);
 
   g_autoptr(GTask) task =
       callback != nullptr ? g_task_new(self, cancellable, callback, user_data)
