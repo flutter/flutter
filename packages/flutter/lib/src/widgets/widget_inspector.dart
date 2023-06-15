@@ -1725,7 +1725,7 @@ mixin WidgetInspectorService {
   List<Object>  _getProperties(String? diagnosticsOrDiagnosticableId, String groupName) {
     final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
     if (node == null) {
-      return const <DiagnosticsNode>[];
+      return const <Object>[];
     }
     return _nodesToJson(node.getProperties(), InspectorSerializationDelegate(groupName: groupName, service: this), parent: node);
   }
