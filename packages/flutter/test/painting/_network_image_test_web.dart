@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_interop';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/painting/_network_image_web.dart';
@@ -22,7 +20,7 @@ void runTests() {
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
-      ..mockEvent = MockEvent('load', web.Event('test error'.toJS))
+      ..mockEvent = MockEvent('load', web.Event('test error'))
       ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
@@ -48,7 +46,7 @@ void runTests() {
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 404
-      ..mockEvent = MockEvent('error', web.Event('test error'.toJS));
+      ..mockEvent = MockEvent('error', web.Event('test error'));
 
 
     httpRequestFactory = () {
@@ -73,7 +71,7 @@ void runTests() {
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
-      ..mockEvent = MockEvent('load', web.Event('test error'.toJS))
+      ..mockEvent = MockEvent('load', web.Event('test error'))
       ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {

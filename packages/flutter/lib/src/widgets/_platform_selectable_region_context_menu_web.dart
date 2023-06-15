@@ -85,13 +85,13 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
       final SelectionContainerDelegate? client = _activeClient;
       if (client != null) {
         // Converts the html right click event to flutter coordinate.
-        final Offset localOffset = Offset(event.offsetX.toDart, event.offsetY.toDart);
+        final Offset localOffset = Offset(event.offsetX, event.offsetY);
         final Matrix4 transform = client.getTransformTo(null);
         final Offset globalOffset = MatrixUtils.transformPoint(transform, localOffset);
         client.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: globalOffset));
         // The innerText must contain the text in order to be selected by
         // the browser.
-        element.innerText = (client.getSelectedContent()?.plainText ?? '').toJS;
+        element.innerText = client.getSelectedContent()?.plainText ?? '';
 
         // Programmatically select the dom element in browser.
         final web.Range range = web.document.createRange();
@@ -107,22 +107,22 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
 
   static String _registerWebSelectionCallback(_WebSelectionCallBack callback) {
     _registerViewFactory(_viewType, (int viewId) {
-      final web.HTMLElement htmlElement = web.document.createElement('div'.toJS) as web.HTMLElement;
+      final web.HTMLElement htmlElement = web.document.createElement('div') as web.HTMLElement;
       htmlElement
-        ..style.width = '100%'.toJS
-        ..style.height = '100%'.toJS
-        ..classList.add(_kClassName.toJS);
+        ..style.width = '100%'
+        ..style.height = '100%'
+        ..classList.add(_kClassName);
 
       // Create css style for _kClassName.
-      final web.HTMLStyleElement styleElement = web.document.createElement('style'.toJS) as web.HTMLStyleElement;
+      final web.HTMLStyleElement styleElement = web.document.createElement('style') as web.HTMLStyleElement;
       web.document.head!.append(styleElement);
       final web.CSSStyleSheet sheet = styleElement.sheet!;
-      sheet.insertRule(_kClassRule.toJS, 0.toJS);
-      sheet.insertRule(_kClassSelectionRule.toJS, 1.toJS);
+      sheet.insertRule(_kClassRule, 0);
+      sheet.insertRule(_kClassSelectionRule, 1);
 
-      htmlElement.addEventListener('mousedown'.toJS, (web.Event event) {
+      htmlElement.addEventListener('mousedown', (web.Event event) {
         final web.MouseEvent mouseEvent = event as web.MouseEvent;
-        if (mouseEvent.button != _kRightClickButton.toJS) {
+        if (mouseEvent.button != _kRightClickButton) {
           return;
         }
         callback(htmlElement, mouseEvent);

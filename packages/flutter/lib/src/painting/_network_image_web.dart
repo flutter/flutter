@@ -139,16 +139,16 @@ class NetworkImage
           Completer<web.XMLHttpRequest>();
       final web.XMLHttpRequest request = httpRequestFactory();
 
-      request.open('GET'.toJS, key.url.toJS, true.toJS);
-      request.responseType = 'arraybuffer'.toJS;
+      request.open('GET', key.url, true);
+      request.responseType = 'arraybuffer';
       if (containsNetworkImageHeaders) {
         key.headers!.forEach((String header, String value) {
-          request.setRequestHeader(header.toJS, value.toJS);
+          request.setRequestHeader(header, value);
         });
       }
 
-      request.addEventListener('load'.toJS, (web.Event e) {
-        final int status = request.status.toDart.toInt();
+      request.addEventListener('load', (web.Event e) {
+        final int status = request.status;
         final bool accepted = status >= 200 && status < 300;
         final bool fileUri = status == 0; // file:// URIs have status of 0.
         final bool notModified = status == 304;
@@ -165,7 +165,7 @@ class NetworkImage
         }
       }.toJS);
 
-      request.addEventListener('error'.toJS, completer.completeError.toJS);
+      request.addEventListener('error', completer.completeError.toJS);
 
       request.send();
 
@@ -174,9 +174,8 @@ class NetworkImage
       final Uint8List bytes = (request.response! as JSArrayBuffer).toDart.asUint8List();
 
       if (bytes.lengthInBytes == 0) {
-        final int status = request.status.toDart.toInt();
         throw image_provider.NetworkImageLoadException(
-            statusCode: status, uri: resolved);
+            statusCode: request.status, uri: resolved);
       }
 
       if (decode != null) {
