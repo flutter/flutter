@@ -19,6 +19,7 @@ struct FrameSynchronizer {
   vk::UniqueFence acquire;
   vk::UniqueSemaphore render_ready;
   vk::UniqueSemaphore present_ready;
+  std::shared_ptr<CommandBuffer> final_cmd_buffer;
   bool is_valid = false;
 
   explicit FrameSynchronizer(const vk::Device& device) {
@@ -382,18 +383,18 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
   //----------------------------------------------------------------------------
   /// Transition the image to color-attachment-optimal.
   ///
+  sync->final_cmd_buffer = context.CreateCommandBuffer();
+  if (!sync->final_cmd_buffer) {
+    return false;
+  }
+
+  auto vk_final_cmd_buffer = CommandBufferVK::Cast(*sync->final_cmd_buffer)
+                                 .GetEncoder()
+                                 ->GetCommandBuffer();
   {
-    auto cmd_buffer = context.CreateCommandBuffer();
-    if (!cmd_buffer) {
-      return false;
-    }
-
-    auto vk_cmd_buffer =
-        CommandBufferVK::Cast(*cmd_buffer).GetEncoder()->GetCommandBuffer();
-
     LayoutTransition transition;
     transition.new_layout = vk::ImageLayout::ePresentSrcKHR;
-    transition.cmd_buffer = vk_cmd_buffer;
+    transition.cmd_buffer = vk_final_cmd_buffer;
     transition.src_access = vk::AccessFlagBits::eColorAttachmentWrite;
     transition.src_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
     transition.dst_access = {};
@@ -403,7 +404,7 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
       return false;
     }
 
-    if (!cmd_buffer->SubmitCommands()) {
+    if (vk_final_cmd_buffer.end() != vk::Result::eSuccess) {
       return false;
     }
   }
@@ -418,6 +419,7 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
     submit_info.setWaitDstStageMask(wait_stage);
     submit_info.setWaitSemaphores(*sync->render_ready);
     submit_info.setSignalSemaphores(*sync->present_ready);
+    submit_info.setCommandBuffers(vk_final_cmd_buffer);
     auto result =
         context.GetGraphicsQueue()->Submit(submit_info, *sync->acquire);
     if (result != vk::Result::eSuccess) {
