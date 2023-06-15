@@ -2803,40 +2803,53 @@ void main() {
   });
 
   testWidgets('Animated closing bottom sheet and removing floating action button', (WidgetTester tester) async {
+    final Key bottomSheetKey = UniqueKey();
     PersistentBottomSheetController<void>? controller;
     bool show = true;
-    late StateSetter setState;
 
-    await tester.pumpWidget(StatefulBuilder(builder: (_, StateSetter stateSetter) {
-      setState = stateSetter;
-      return MaterialApp(
+    await tester.pumpWidget(StatefulBuilder(
+      builder: (_, StateSetter setState) => MaterialApp(
         home: Scaffold(
-          body: Builder(builder: (BuildContext context) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (show) {
-                controller = Scaffold.of(context).showBottomSheet(
-                  (_) => Container(height: 200),
-                );
-              } else {
-                controller?.close();
-              }
-            });
-            return Container();
-          }),
+          body: Center(
+            child: Builder(
+                builder: (BuildContext context) => ElevatedButton(
+                      onPressed: () {
+                        if (controller == null) {
+                          controller = showBottomSheet(
+                              context: context,
+                              builder: (_) => Container(
+                                    key: bottomSheetKey,
+                                    height: 200,
+                                  ));
+                        } else {
+                          controller!.close();
+                          controller = null;
+                        }
+                      },
+                      child: const Text('BottomSheet'),
+                    )),
+          ),
           floatingActionButton: show
-              ? FloatingActionButton(onPressed: () {})
+              ? FloatingActionButton(
+                  onPressed: () => setState(() => show = false),
+                )
               : null,
         ),
-      );
-    }));
+      ),
+    ));
 
-    setState(() => show = false);
+    // Open bottom sheet
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.byKey(bottomSheetKey), findsOneWidget);
 
+    // Close bottom sheet while hiding FAB
+    await tester.tap(find.byType(FloatingActionButton));
     await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(controller?.closed, completes);
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byKey(bottomSheetKey), findsNothing);
   });
 }
 
