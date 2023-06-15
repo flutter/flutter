@@ -44,6 +44,7 @@ void PlatformViewLayer::Paint(PaintContext& context) const {
   DlCanvas* canvas = context.view_embedder->CompositeEmbeddedView(view_id_);
   context.canvas = canvas;
   context.state_stack.set_delegate(canvas);
+  context.rendering_above_platform_view = true;
 }
 
 }  // namespace flutter

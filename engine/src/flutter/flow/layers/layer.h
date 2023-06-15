@@ -106,6 +106,11 @@ struct PaintContext {
   LayerStateStack& state_stack;
   DlCanvas* canvas;
 
+  // Whether current canvas is an overlay canvas. Used to determine if the
+  // raster cache is painting to a surface that will be displayed above a
+  // platform view, in which case it will attempt to preserve the R-Tree.
+  bool rendering_above_platform_view = false;
+
   GrDirectContext* gr_context;
   SkColorSpace* dst_color_space;
   ExternalViewEmbedder* view_embedder;

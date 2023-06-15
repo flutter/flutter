@@ -30,11 +30,14 @@ class RasterCacheResult {
  public:
   RasterCacheResult(sk_sp<DlImage> image,
                     const SkRect& logical_rect,
-                    const char* type);
+                    const char* type,
+                    sk_sp<const DlRTree> rtree = nullptr);
 
   virtual ~RasterCacheResult() = default;
 
-  virtual void draw(DlCanvas& canvas, const DlPaint* paint) const;
+  virtual void draw(DlCanvas& canvas,
+                    const DlPaint* paint,
+                    bool preserve_rtree) const;
 
   virtual SkISize image_dimensions() const {
     return image_ ? image_->dimensions() : SkISize::Make(0, 0);
@@ -48,6 +51,7 @@ class RasterCacheResult {
   sk_sp<DlImage> image_;
   SkRect logical_rect_;
   fml::tracing::TraceFlow flow_;
+  sk_sp<const DlRTree> rtree_;
 };
 
 class Layer;
@@ -127,6 +131,7 @@ class RasterCache {
 
   std::unique_ptr<RasterCacheResult> Rasterize(
       const RasterCache::Context& context,
+      sk_sp<const DlRTree> rtree,
       const std::function<void(DlCanvas*)>& draw_function,
       const std::function<void(DlCanvas*, const SkRect& rect)>&
           draw_checkerboard) const;
@@ -143,9 +148,15 @@ class RasterCache {
   // if the item was disabled due to conditions discovered during |Preroll|
   // or if the attempt to populate the entry failed due to bounds overflow
   // conditions.
+  // If |preserve_rtree| is true, the raster cache will preserve the original
+  // RTree of cached content by blitting individual rectangles from the cached
+  // image to the canvas according to the original layer R-Tree (if present).
+  // This is to ensure that the target surface R-Tree will not be clobbered with
+  // one large blit as it can affect platform view overlays and hit testing.
   bool Draw(const RasterCacheKeyID& id,
             DlCanvas& canvas,
-            const DlPaint* paint) const;
+            const DlPaint* paint,
+            bool preserve_rtree = false) const;
 
   bool HasEntry(const RasterCacheKeyID& id, const SkMatrix&) const;
 
@@ -234,10 +245,10 @@ class RasterCache {
    */
   int GetAccessCount(const RasterCacheKeyID& id, const SkMatrix& matrix) const;
 
-  bool UpdateCacheEntry(
-      const RasterCacheKeyID& id,
-      const Context& raster_cache_context,
-      const std::function<void(DlCanvas*)>& render_function) const;
+  bool UpdateCacheEntry(const RasterCacheKeyID& id,
+                        const Context& raster_cache_context,
+                        const std::function<void(DlCanvas*)>& render_function,
+                        sk_sp<const DlRTree> rtree = nullptr) const;
 
  private:
   struct Entry {

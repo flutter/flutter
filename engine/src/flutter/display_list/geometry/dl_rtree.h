@@ -85,6 +85,10 @@ class DlRTree : public SkRefCnt {
                : invalid_id_;
   }
 
+  /// Returns maximum and minimum axis values of rectangles in this R-Tree.
+  /// If R-Tree is empty returns an empty SkRect.
+  const SkRect& bounds() const;
+
   /// Return the rectangle bounds for the indicated result of a query
   /// or an empty rect if the index is not a valid leaf node index.
   const SkRect& bounds(int result_index) const {

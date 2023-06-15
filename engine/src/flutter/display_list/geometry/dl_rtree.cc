@@ -201,4 +201,12 @@ void DlRTree::search(const Node& parent,
   }
 }
 
+const SkRect& DlRTree::bounds() const {
+  if (!nodes_.empty()) {
+    return nodes_.back().bounds;
+  } else {
+    return empty_;
+  }
+}
+
 }  // namespace flutter
