@@ -899,7 +899,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
     });
 
-    test('WidgetInspectorService getProperties for diagnosticsNode', () {
+    test('WidgetInspectorService getProperties for $DiagnosticsNode', () {
       final DiagnosticsNode diagnostic = const Text('a', textDirection: TextDirection.ltr).toDiagnosticsNode();
       const String group = 'group';
       service.disposeAllGroups();
@@ -915,7 +915,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
     });
 
-    test('WidgetInspectorService getProperties for diagnosticable', () {
+    test('WidgetInspectorService getProperties for $Diagnosticable', () {
       const Diagnosticable diagnosticable = Text('a', textDirection: TextDirection.ltr);
       const String group = 'group';
       service.disposeAllGroups();
@@ -2123,7 +2123,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
     });
 
-    test('ext.flutter.inspector.getProperties for diagnosticsNode', () async {
+    test('ext.flutter.inspector.getProperties for $DiagnosticsNode', () async {
       final DiagnosticsNode diagnostic = const Text('a', textDirection: TextDirection.ltr).toDiagnosticsNode();
       const String group = 'group';
       final String id = service.toId(diagnostic, group)!;
@@ -2141,7 +2141,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
     });
 
-    test('ext.flutter.inspector.getProperties for diagnosticable', () async {
+    test('ext.flutter.inspector.getProperties for $Diagnosticable', () async {
       const Diagnosticable diagnosticable = Text('a', textDirection: TextDirection.ltr);
       const String group = 'group';
       final String id = service.toId(diagnosticable, group)!;
