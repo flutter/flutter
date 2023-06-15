@@ -1313,7 +1313,10 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
   }
 }
 
-/// Encapsulates common aspects of platform view controllers.
+/// Base class for iOS and macOS view controllers.
+///
+/// View controllers are used to create and interact with the UIView or NSView
+/// underlying a platform view.
 class DarwinPlatformViewController {
   /// Public default for subclasses to override.
   DarwinPlatformViewController(
