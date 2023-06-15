@@ -6,13 +6,18 @@
 // KEEP THIS SYNCHRONIZED WITH ../web_ui/lib/channel_buffers.dart
 part of dart.ui;
 
+/// Deprecated. Migrate to [ChannelCallback] instead.
+///
 /// Signature for [ChannelBuffers.drain]'s `callback` argument.
 ///
 /// The first argument is the data sent by the plugin.
 ///
 /// The second argument is a closure that, when called, will send messages
 /// back to the plugin.
-// TODO(ianh): deprecate this once the framework is migrated to [ChannelCallback].
+@Deprecated(
+  'Migrate to ChannelCallback instead. '
+  'This feature was deprecated after v3.11.0-20.0.pre.',
+)
 typedef DrainChannelCallback = Future<void> Function(ByteData? data, PlatformMessageResponseCallback callback);
 
 /// Signature for [ChannelBuffers.setListener]'s `callback` argument.
@@ -377,6 +382,8 @@ class ChannelBuffers {
     }
   }
 
+  /// Deprecated. Migrate to [setListener] instead.
+  ///
   /// Remove and process all stored messages for a given channel.
   ///
   /// This should be called once a channel is prepared to handle messages
@@ -384,7 +391,10 @@ class ChannelBuffers {
   ///
   /// The messages are processed by calling the given `callback`. Each message
   /// is processed in its own microtask.
-  // TODO(ianh): deprecate once framework uses [setListener].
+  @Deprecated(
+    'Migrate to setListener instead. '
+    'This feature was deprecated after v3.11.0-20.0.pre.',
+  )
   Future<void> drain(String name, DrainChannelCallback callback) async {
     final _Channel? channel = _channels[name];
     while (channel != null && !channel._queue.isEmpty) {
