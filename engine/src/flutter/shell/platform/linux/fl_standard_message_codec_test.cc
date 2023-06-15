@@ -60,6 +60,19 @@ TEST(FlStandardMessageCodecTest, EncodeNull) {
   EXPECT_STREQ(hex_string, "00");
 }
 
+TEST(FlStandardMessageCodecTest, DecodeNull) {
+  // Regression test for https://github.com/flutter/flutter/issues/128704.
+
+  g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
+  g_autoptr(GBytes) data = g_bytes_new(nullptr, 0);
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(FlValue) value =
+      fl_message_codec_decode_message(FL_MESSAGE_CODEC(codec), data, &error);
+
+  EXPECT_FALSE(value == nullptr);
+  EXPECT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_NULL);
+}
+
 static gchar* encode_bool(gboolean value) {
   g_autoptr(FlValue) v = fl_value_new_bool(value);
   return encode_message(v);

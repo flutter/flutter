@@ -62,7 +62,8 @@ TEST(FlBasicMessageChannelTest, SendMessageWithoutResponse) {
 }
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
 
-// Called when the message response is received in the SendMessage test.
+// Called when the message response is received in the SendMessageWithResponse
+// test.
 static void echo_response_cb(GObject* object,
                              GAsyncResult* result,
                              gpointer user_data) {
@@ -187,5 +188,37 @@ TEST(FlBasicMessageChannelTest, ReceiveMessage) {
                                 nullptr);
 
   // Blocks here until response_cb is called.
+  g_main_loop_run(loop);
+}
+
+// Called when the message response is received in the
+// SendNullMessageWithResponse test.
+static void null_message_response_cb(GObject* object,
+                                     GAsyncResult* result,
+                                     gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(FlValue) message = fl_basic_message_channel_send_finish(
+      FL_BASIC_MESSAGE_CHANNEL(object), result, &error);
+  EXPECT_NE(message, nullptr);
+  EXPECT_EQ(error, nullptr);
+
+  EXPECT_EQ(fl_value_get_type(message), FL_VALUE_TYPE_NULL);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+}
+
+// Checks sending a null message with a response works.
+TEST(FlBasicMessageChannelTest, SendNullMessageWithResponse) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
+  g_autoptr(FlBasicMessageChannel) channel = fl_basic_message_channel_new(
+      messenger, "test/echo", FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_send(channel, nullptr, nullptr,
+                                null_message_response_cb, loop);
+
+  // Blocks here until null_message_response_cb is called.
   g_main_loop_run(loop);
 }

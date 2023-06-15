@@ -420,6 +420,10 @@ static GBytes* fl_standard_message_codec_encode_message(FlMessageCodec* codec,
 static FlValue* fl_standard_message_codec_decode_message(FlMessageCodec* codec,
                                                          GBytes* message,
                                                          GError** error) {
+  if (g_bytes_get_size(message) == 0) {
+    return fl_value_new_null();
+  }
+
   FlStandardMessageCodec* self =
       reinterpret_cast<FlStandardMessageCodec*>(codec);
 
