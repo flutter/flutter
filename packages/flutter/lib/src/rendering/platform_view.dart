@@ -282,7 +282,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
   }) : _viewController = viewController;
 
 
-  /// The unique identifier of the view controlled by this controller.
+  /// The unique identifier of the platform view controlled by this controller.
   T get viewController => _viewController;
   T _viewController;
   set viewController(T value) {
