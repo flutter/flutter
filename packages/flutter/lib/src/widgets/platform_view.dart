@@ -195,7 +195,10 @@ class AndroidView extends StatefulWidget {
   State<AndroidView> createState() => _AndroidViewState();
 }
 
-/// Common superclass for platform views.
+/// Common superclass for iOS and macOS platform views.
+///
+/// Platform views are used to embed native views in the widget hierarchy, with
+/// support for transforms, clips, and opacity similar to any other Flutter widget.
 abstract class _DarwinView extends StatefulWidget {
   /// Creates a widget that embeds a platform view.
   ///
