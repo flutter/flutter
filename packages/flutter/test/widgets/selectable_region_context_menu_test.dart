@@ -5,27 +5,23 @@
 @TestOn('browser') // This file contains web-only library.
 library;
 
-import 'dart:js_interop';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
-extension on JSString {
-  external JSBoolean includes(JSString searchString);
-}
 extension on web.HTMLCollection {
-  Iterable<web.Element> get iterable => _genIterable(length, (JSNumber i) => item(i));
+  Iterable<web.Element> get iterable => _genIterable(this);
 }
 extension on web.CSSRuleList {
-  Iterable<web.CSSRule> get iterable => _genIterable(length, (JSNumber i) => item(i));
+  Iterable<web.CSSRule> get iterable => _genIterable(this);
 }
 
-typedef ItemGetter<T> = T? Function(JSNumber index);
-Iterable<T> _genIterable<T>(JSNumber length, ItemGetter<T> getItem) {
-  return Iterable<T>.generate(length.toDart.toInt(), (int index) => getItem(index.toJS)!);
+typedef ItemGetter<T> = T? Function(int index);
+Iterable<T> _genIterable<T>(dynamic jsCollection) {
+  // ignore: avoid_dynamic_calls
+  return Iterable<T>.generate(jsCollection.length as int, (int index) => jsCollection.item(index) as T,);
 }
 
 void main() {
@@ -42,20 +38,20 @@ void main() {
 
   test('DOM element is set up correctly', () async {
     expect(element, isNotNull);
-    expect(element!.style.width, '100%'.toJS);
-    expect(element!.style.height, '100%'.toJS);
-    expect(element!.classList.length, 1.toJS);
-    final JSString className = element!.className;
+    expect(element!.style.width, '100%');
+    expect(element!.style.height, '100%');
+    expect(element!.classList.length, 1);
+    final String className = element!.className;
 
     expect(web.document.head!.children.iterable, isNotEmpty);
     bool foundStyle = false;
     for (final web.Element element in web.document.head!.children.iterable) {
-      if (element.tagName != 'STYLE'.toJS) {
+      if (element.tagName != 'STYLE') {
         continue;
       }
       final web.CSSRuleList? rules = (element as web.HTMLStyleElement).sheet?.rules;
       if (rules != null) {
-        foundStyle = rules.iterable.any((web.CSSRule rule) => rule.cssText.includes(className).toDart);
+        foundStyle = rules.iterable.any((web.CSSRule rule) => rule.cssText.contains(className));
       }
       if (foundStyle) {
         break;
@@ -84,11 +80,11 @@ void main() {
     // Dispatch right click.
     element!.dispatchEvent(
       web.MouseEvent(
-        'mousedown'.toJS,
+        'mousedown',
         web.MouseEventInit(
-          button: 2.toJS,
-          clientX: 200.toJS,
-          clientY: 300.toJS,
+          button: 2,
+          clientX: 200,
+          clientY: 300,
         ),
       ),
     );
