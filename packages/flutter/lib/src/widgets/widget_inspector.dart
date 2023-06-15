@@ -1762,7 +1762,7 @@ mixin WidgetInspectorService {
 
   DiagnosticsNode? _idToDiagnosticsNode(String? diagnosticsOrDiagnosticableId) {
     // TODO(polina-c): start always assuming Diagnosticable, when DevTools stops sending DiagnosticsNode to
-    // getChildrenSummaryTree and getProperties.
+    // APIs that invoke this method.
     // https://github.com/flutter/devtools/issues/3951
     final Object? theObject = toObject(diagnosticsOrDiagnosticableId);
     if (theObject is DiagnosticsNode) {
