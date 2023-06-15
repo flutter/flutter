@@ -787,6 +787,8 @@ class SingletonFlutterWindow extends FlutterView {
     platformDispatcher.sendPlatformMessage(name, data, callback);
   }
 
+  /// Deprecated. Migrate to [ChannelBuffers.setListener] instead.
+  ///
   /// Called whenever this window receives a message from a platform-specific
   /// plugin.
   ///
@@ -802,8 +804,15 @@ class SingletonFlutterWindow extends FlutterView {
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
-  // TODO(ianh): deprecate once framework uses [ChannelBuffers.setListener].
+  @Deprecated(
+    'Migrate to ChannelBuffers.setListener instead. '
+    'This feature was deprecated after v3.11.0-20.0.pre.',
+  )
   PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
+  @Deprecated(
+    'Migrate to ChannelBuffers.setListener instead. '
+    'This feature was deprecated after v3.11.0-20.0.pre.',
+  )
   set onPlatformMessage(PlatformMessageCallback? callback) {
     platformDispatcher.onPlatformMessage = callback;
   }

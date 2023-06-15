@@ -41,8 +41,13 @@ typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action
 /// [PlatformDispatcher.onPlatformMessage].
 typedef PlatformMessageResponseCallback = void Function(ByteData? data);
 
+/// Deprecated. Migrate to [ChannelBuffers.setListener] instead.
+///
 /// Signature for [PlatformDispatcher.onPlatformMessage].
-// TODO(ianh): deprecate once framework uses [ChannelBuffers.setListener].
+@Deprecated(
+  'Migrate to ChannelBuffers.setListener instead. '
+  'This feature was deprecated after v3.11.0-20.0.pre.',
+)
 typedef PlatformMessageCallback = void Function(String name, ByteData? data, PlatformMessageResponseCallback? callback);
 
 // Signature for _setNeedsReportTimings.
@@ -651,6 +656,8 @@ class PlatformDispatcher {
   @Native<Void Function(Int64)>(symbol: 'PlatformConfigurationNativeApi::RegisterBackgroundIsolate')
   external static void __registerBackgroundIsolate(int rootIsolateId);
 
+  /// Deprecated. Migrate to [ChannelBuffers.setListener] instead.
+  ///
   /// Called whenever this platform dispatcher receives a message from a
   /// platform-specific plugin.
   ///
@@ -664,11 +671,17 @@ class PlatformDispatcher {
   ///
   /// The framework invokes this callback in the same zone in which the callback
   /// was set.
-  // TODO(ianh): Deprecate onPlatformMessage once the framework is moved over
-  // to using channel buffers exclusively.
+  @Deprecated(
+    'Migrate to ChannelBuffers.setListener instead. '
+    'This feature was deprecated after v3.11.0-20.0.pre.',
+  )
   PlatformMessageCallback? get onPlatformMessage => _onPlatformMessage;
   PlatformMessageCallback? _onPlatformMessage;
   Zone _onPlatformMessageZone = Zone.root;
+  @Deprecated(
+    'Migrate to ChannelBuffers.setListener instead. '
+    'This feature was deprecated after v3.11.0-20.0.pre.',
+  )
   set onPlatformMessage(PlatformMessageCallback? callback) {
     _onPlatformMessage = callback;
     _onPlatformMessageZone = Zone.current;
