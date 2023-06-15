@@ -1722,8 +1722,8 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getProperties(diagnosticsNodeId, groupName));
   }
 
-  List<Object>  _getProperties(String? diagnosticsNodeOrDiagnosticableId, String groupName) {
-    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsNodeOrDiagnosticableId);
+  List<Object>  _getProperties(String? diagnosticsOrDiagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
     if (node == null) {
       return const <DiagnosticsNode>[];
     }
@@ -1760,11 +1760,11 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getChildrenSummaryTree(diagnosticsNodeId, groupName));
   }
 
-  DiagnosticsNode? _idToDiagnosticsNode(String? diagnosticsNodeOrDiagnosticableId) {
+  DiagnosticsNode? _idToDiagnosticsNode(String? diagnosticsOrDiagnosticableId) {
     // TODO(polina-c): start always assuming Diagnosticable, when DevTools stops sending DiagnosticsNode to
     // getChildrenSummaryTree and getProperties.
     // https://github.com/flutter/devtools/issues/3951
-    final Object? theObject = toObject(diagnosticsNodeOrDiagnosticableId);
+    final Object? theObject = toObject(diagnosticsOrDiagnosticableId);
     if (theObject is DiagnosticsNode) {
       return theObject;
     }
@@ -1777,8 +1777,8 @@ mixin WidgetInspectorService {
     throw StateError('Unexpected object type ${theObject.runtimeType}.');
   }
 
-  List<Object> _getChildrenSummaryTree(String? diagnosticsNodeOrDiagnosticableId, String groupName) {
-    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsNodeOrDiagnosticableId);
+  List<Object> _getChildrenSummaryTree(String? diagnosticsOrDiagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
     if (node == null) {
       return <Object>[];
     }
