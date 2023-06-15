@@ -294,6 +294,64 @@ TEST_F(DisplayListLayerTest, CachedIncompatibleDisplayListOpacityInheritance) {
   EXPECT_TRUE(DisplayListsEQ_Verbose(expected.Build(), this->display_list()));
 }
 
+TEST_F(DisplayListLayerTest, RasterCachePreservesRTree) {
+  const SkRect picture1_bounds = SkRect::MakeXYWH(10, 10, 10, 10);
+  const SkRect picture2_bounds = SkRect::MakeXYWH(15, 15, 10, 10);
+  DisplayListBuilder builder(true);
+  builder.DrawRect(picture1_bounds, DlPaint());
+  builder.DrawRect(picture2_bounds, DlPaint());
+  auto display_list = builder.Build();
+  auto display_list_layer = std::make_shared<DisplayListLayer>(
+      SkPoint::Make(3, 3), display_list, true, false);
+
+  use_skia_raster_cache();
+
+  auto context = preroll_context();
+  {
+    auto mutator = context->state_stack.save();
+    mutator.transform(SkMatrix::Scale(2.0, 2.0));
+    display_list_layer->Preroll(preroll_context());
+    EXPECT_EQ(context->renderable_state_flags, 0);
+
+    // Pump the DisplayListLayer until it is ready to cache its DL
+    display_list_layer->Preroll(preroll_context());
+    display_list_layer->Preroll(preroll_context());
+    display_list_layer->Preroll(preroll_context());
+    LayerTree::TryToRasterCache(*preroll_context()->raster_cached_entries,
+                                &paint_context(), false);
+  }
+
+  DisplayListBuilder expected_root_canvas(true);
+  expected_root_canvas.Scale(2.0, 2.0);
+  ASSERT_TRUE(context->raster_cache->Draw(display_list_layer->caching_key_id(),
+                                          expected_root_canvas, nullptr,
+                                          false));
+  auto root_canvas_dl = expected_root_canvas.Build();
+  const auto root_canvas_rects =
+      root_canvas_dl->rtree()->searchAndConsolidateRects(kGiantRect, true);
+  std::list<SkRect> root_canvas_rects_expected = {
+      SkRect::MakeLTRB(26, 26, 56, 56),
+  };
+  EXPECT_EQ(root_canvas_rects_expected, root_canvas_rects);
+
+  DisplayListBuilder expected_overlay_canvas(true);
+  expected_overlay_canvas.Scale(2.0, 2.0);
+  ASSERT_TRUE(context->raster_cache->Draw(display_list_layer->caching_key_id(),
+                                          expected_overlay_canvas, nullptr,
+                                          true));
+  auto overlay_canvas_dl = expected_overlay_canvas.Build();
+  const auto overlay_canvas_rects =
+      overlay_canvas_dl->rtree()->searchAndConsolidateRects(kGiantRect, true);
+
+  // Same bounds as root canvas, but preserves individual rects.
+  std::list<SkRect> overlay_canvas_rects_expected = {
+      SkRect::MakeLTRB(26, 26, 46, 36),
+      SkRect::MakeLTRB(26, 36, 56, 46),
+      SkRect::MakeLTRB(36, 46, 56, 56),
+  };
+  EXPECT_EQ(overlay_canvas_rects_expected, overlay_canvas_rects);
+};
+
 using DisplayListLayerDiffTest = DiffContextTest;
 
 TEST_F(DisplayListLayerDiffTest, SimpleDisplayList) {

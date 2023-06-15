@@ -182,14 +182,16 @@ bool LayerRasterCacheItem::Draw(const PaintContext& context,
     case RasterCacheItem::kNone:
       return false;
     case RasterCacheItem::kCurrent: {
-      return context.raster_cache->Draw(key_id_, *canvas, paint);
+      return context.raster_cache->Draw(key_id_, *canvas, paint,
+                                        context.rendering_above_platform_view);
     }
     case RasterCacheItem::kChildren: {
       if (!layer_children_id_.has_value()) {
         return false;
       }
       return context.raster_cache->Draw(layer_children_id_.value(), *canvas,
-                                        paint);
+                                        paint,
+                                        context.rendering_above_platform_view);
     }
   }
 }
