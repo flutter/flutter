@@ -43,8 +43,6 @@ void main() {
     final Directory testDirectory = parentDirectory.childDirectory('flutter');
     testDirectory.createSync(recursive: true);
 
-    int exitCode = 0;
-
     // Enable longpaths for windows integration test.
     await processManager.run(<String>[
       'git', 'config', '--system', 'core.longpaths', 'true',

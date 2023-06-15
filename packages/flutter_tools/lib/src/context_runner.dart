@@ -226,7 +226,10 @@ Future<T> runInContext<T>(
         config: globals.config,
         platform: globals.platform,
       ),
-      FlutterVersion: () => FlutterVersion(),
+      FlutterVersion: () => FlutterVersion(
+        fs: globals.fs,
+        flutterRoot: Cache.flutterRoot!,
+      ),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
