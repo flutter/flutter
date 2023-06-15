@@ -171,7 +171,8 @@ gboolean fl_basic_message_channel_respond(
 /**
  * fl_basic_message_channel_send:
  * @channel: an #FlBasicMessageChannel.
- * @message: message to send, must match what the #FlMessageCodec supports.
+ * @message: (allow-none): message to send, must match what the #FlMessageCodec
+ * supports.
  * @cancellable: (allow-none): a #GCancellable or %NULL.
  * @callback: (scope async): (allow-none): a #GAsyncReadyCallback to call when
  * the request is satisfied or %NULL to ignore the response.
