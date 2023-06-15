@@ -490,16 +490,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   bool _positionIsOnActiveSelection({required Offset globalPosition}) {
-    for (final Selectable selectable in _selectionDelegate.selectables) {
-      if (!selectable.value.hasSelection || selectable.value.status != SelectionStatus.uncollapsed) {
-        continue;
-      }
-      for (final Rect selectionRect in selectable.value.selectionRects!) {
-        final Matrix4 transform = selectable.getTransformTo(null);
-        final Rect globalRect = MatrixUtils.transformRect(transform, selectionRect);
-        if (globalRect.contains(globalPosition)) {
-          return true;
-        }
+    for (final Rect selectionRect in _selectionDelegate.value.selectionRects!) {
+      if (selectionRect.contains(globalPosition)) {
+        return true;
       }
     }
     return false;
@@ -1833,7 +1826,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     for (int index = currentSelectionStartIndex; index <= currentSelectionEndIndex; index++) {
       final List<Rect>? currSelectableSelectionRects = selectables[index].value.selectionRects;
       if (currSelectableSelectionRects != null) {
-        selectionRects.addAll(currSelectableSelectionRects);
+        selectionRects.addAll(currSelectableSelectionRects.map((Rect selectionRect) {
+          final Matrix4 transform = selectables[index].getTransformTo(null);
+          final Rect globalRect = MatrixUtils.transformRect(transform, selectionRect);
+          return globalRect;
+        }));
       }
     }
 
