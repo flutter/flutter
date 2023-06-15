@@ -44,7 +44,7 @@ import 'package:meta/meta.dart';
 /// [depth] will still be 2. The [depth] is automatically maintained by the
 /// [adoptChild] and [dropChild] methods.
 @Deprecated(
-  'If needed, inline the any required functionality of AbstractNode in your class directly. '
+  'If needed, inline any required functionality of AbstractNode in your class directly. '
   'This feature was deprecated after v3.12.0-4.0.pre.',
 )
 class AbstractNode {
