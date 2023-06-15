@@ -133,7 +133,8 @@ bool DisplayListRasterCacheItem::Draw(const PaintContext& context,
     return false;
   }
   if (cache_state_ == CacheState::kCurrent) {
-    return context.raster_cache->Draw(key_id_, *canvas, paint);
+    return context.raster_cache->Draw(key_id_, *canvas, paint,
+                                      context.rendering_above_platform_view);
   }
   return false;
 }
@@ -166,8 +167,10 @@ bool DisplayListRasterCacheItem::TryToPrepareRasterCache(
       // clang-format on
   };
   return context.raster_cache->UpdateCacheEntry(
-      id.value(), r_context, [display_list = display_list_](DlCanvas* canvas) {
+      id.value(), r_context,
+      [display_list = display_list_](DlCanvas* canvas) {
         canvas->DrawDisplayList(display_list);
-      });
+      },
+      display_list_->rtree());
 }
 }  // namespace flutter

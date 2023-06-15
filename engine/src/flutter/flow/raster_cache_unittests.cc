@@ -178,11 +178,11 @@ TEST(RasterCache, SetCheckboardCacheImages) {
   };
 
   cache.SetCheckboardCacheImages(false);
-  cache.Rasterize(r_context, dummy_draw_function, draw_checkerboard);
+  cache.Rasterize(r_context, nullptr, dummy_draw_function, draw_checkerboard);
   ASSERT_FALSE(did_draw_checkerboard);
 
   cache.SetCheckboardCacheImages(true);
-  cache.Rasterize(r_context, dummy_draw_function, draw_checkerboard);
+  cache.Rasterize(r_context, nullptr, dummy_draw_function, draw_checkerboard);
   ASSERT_TRUE(did_draw_checkerboard);
 }
 
