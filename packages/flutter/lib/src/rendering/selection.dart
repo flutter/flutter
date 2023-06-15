@@ -628,7 +628,8 @@ class SelectionGeometry {
   /// The status of ongoing selection in the [Selectable] or [SelectionHandler].
   final SelectionStatus status;
 
-  /// The rects that represent the selection if there is any.
+  /// The rects in the local coordinates of the containing [Selectable] that
+  /// represent the selection if there is any.
   final List<Rect>? selectionRects;
 
   /// Whether there is any selectable content in the [Selectable] or
