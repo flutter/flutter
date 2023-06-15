@@ -121,6 +121,7 @@
                     "include_paths": [
                         "out/android_profile_arm64/zip_archives/android-arm64-profile/artifacts.zip",
                         "out/android_profile_arm64/zip_archives/android-arm64-profile/linux-x64.zip",
+                        "out/android_profile_arm64/zip_archives/android-arm64-profile/symbols.zip",
                         "out/android_profile_arm64/zip_archives/android-arm64-profile/analyze-snapshot-linux-x64.zip",
                         "out/android_profile_arm64/zip_archives/download.flutter.io"
                     ],
