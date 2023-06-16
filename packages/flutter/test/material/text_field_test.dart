@@ -15671,7 +15671,7 @@ void main() {
       );
       final TextField textField = TextField(
         magnifierConfiguration: TextMagnifierConfiguration(
-          magnifierBuilder: (_, __, ___) => customMagnifier,
+          magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo>? info) => customMagnifier,
         ),
       );
 
@@ -15769,7 +15769,7 @@ void main() {
             controller: controller,
             magnifierConfiguration: TextMagnifierConfiguration(
               magnifierBuilder: (
-                  _,
+                  BuildContext context,
                   MagnifierController controller,
                   ValueNotifier<MagnifierInfo> localMagnifierInfo
                 ) {
@@ -15833,7 +15833,7 @@ void main() {
                 controller: controller,
                 magnifierConfiguration: TextMagnifierConfiguration(
                   magnifierBuilder: (
-                      _,
+                      BuildContext context,
                       MagnifierController controller,
                       ValueNotifier<MagnifierInfo> localMagnifierInfo
                     ) {
@@ -15935,7 +15935,7 @@ void main() {
                 controller: controller,
                 magnifierConfiguration: TextMagnifierConfiguration(
                   magnifierBuilder: (
-                      _,
+                      BuildContext context,
                       MagnifierController controller,
                       ValueNotifier<MagnifierInfo> localMagnifierInfo
                     ) {
@@ -15997,7 +15997,7 @@ void main() {
               child: TextField(
                 magnifierConfiguration: TextMagnifierConfiguration(
                   magnifierBuilder: (
-                      _,
+                      BuildContext context,
                       MagnifierController controller,
                       ValueNotifier<MagnifierInfo> localMagnifierInfo
                     ) {
@@ -16429,7 +16429,7 @@ class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
     return MaterialApp(
       home: Scaffold(
         body: Builder(
-          builder: (_) {
+          builder: (BuildContext context) {
             return Column(
               children: <Widget>[
                 TextField(
