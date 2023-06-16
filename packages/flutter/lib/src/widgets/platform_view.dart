@@ -346,7 +346,7 @@ class HtmlElementView extends StatelessWidget {
     required this.viewType,
     this.onPlatformViewCreated,
     this.creationParams,
-  }) : assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.');
+  });
 
   /// The unique identifier for the HTML view type to be embedded by this widget.
   ///
@@ -363,6 +363,7 @@ class HtmlElementView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.');
     return PlatformViewLink(
       viewType: viewType,
       onCreatePlatformView: _createHtmlElementView,
