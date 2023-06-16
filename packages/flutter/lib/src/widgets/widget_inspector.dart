@@ -1771,10 +1771,7 @@ mixin WidgetInspectorService {
     if (theObject is Diagnosticable) {
       return theObject.toDiagnosticsNode();
     }
-    if (theObject == null) {
-      return null;
-    }
-    throw StateError('Unexpected object type ${theObject.runtimeType}.');
+    return null;
   }
 
   List<Object> _getChildrenSummaryTree(String? diagnosticsOrDiagnosticableId, String groupName) {
