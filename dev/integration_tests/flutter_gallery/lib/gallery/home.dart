@@ -178,7 +178,7 @@ class _DemoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
-    final double textScaleFactor = MediaQuery.textScalerOf(context).textScaleFactor;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).textScaleFactor; // ignore: deprecated_member_use
     return RawMaterialButton(
       splashColor: theme.primaryColor.withOpacity(0.12),
       highlightColor: Colors.transparent,

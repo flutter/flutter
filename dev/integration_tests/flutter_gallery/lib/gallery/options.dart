@@ -100,7 +100,7 @@ class _OptionsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double textScaleFactor = MediaQuery.textScalerOf(context).textScaleFactor;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).textScaleFactor; // ignore: deprecated_member_use
 
     return MergeSemantics(
       child: Container(

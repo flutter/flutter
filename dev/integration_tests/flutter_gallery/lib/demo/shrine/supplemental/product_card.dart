@@ -52,7 +52,7 @@ class ProductCard extends StatelessWidget {
                 child: imageWidget,
               ),
               SizedBox(
-                height: kTextBoxHeight * MediaQuery.textScalerOf(context).textScaleFactor,
+                height: kTextBoxHeight * MediaQuery.textScalerOf(context).textScaleFactor, // ignore: deprecated_member_use
                 width: 121.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
