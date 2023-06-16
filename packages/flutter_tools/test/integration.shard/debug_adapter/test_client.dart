@@ -4,9 +4,7 @@
 
 import 'dart:async';
 
-import 'package:dds/src/dap/logging.dart';
-import 'package:dds/src/dap/protocol_generated.dart';
-import 'package:dds/src/dap/protocol_stream.dart';
+import 'package:dds/dap.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
 
 import 'test_server.dart';

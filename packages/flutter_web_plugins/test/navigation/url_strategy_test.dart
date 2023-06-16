@@ -11,76 +11,21 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'common.dart';
 
 void main() {
-  group('$HashUrlStrategy', () {
-    late TestPlatformLocation location;
-
-    setUp(() {
-      location = TestPlatformLocation();
-    });
-
-    test('allows null state', () {
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
-      expect(() => strategy.pushState(null, '', '/'), returnsNormally);
-      expect(() => strategy.replaceState(null, '', '/'), returnsNormally);
-    });
-
-    test('leading slash is optional', () {
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
-
-      location.hash = '#/';
-      expect(strategy.getPath(), '/');
-
-      location.hash = '#/foo';
-      expect(strategy.getPath(), '/foo');
-
-      location.hash = '#foo';
-      expect(strategy.getPath(), 'foo');
-    });
-
-    test('path should not be empty', () {
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
-
-      location.hash = '';
-      expect(strategy.getPath(), '/');
-
-      location.hash = '#';
-      expect(strategy.getPath(), '/');
-    });
-
-    test('allows location path/search before fragment', () {
-      const String internalUrl = '/menu?foo=bar';
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
-
-      location.pathname = '/';
-      expect(strategy.prepareExternalUrl(internalUrl), '/#/menu?foo=bar');
-
-      location.pathname = '/main';
-      expect(strategy.prepareExternalUrl(internalUrl), '/main#/menu?foo=bar');
-
-      location.search = '?foo=bar';
-      expect(
-        strategy.prepareExternalUrl(internalUrl),
-        '/main?foo=bar#/menu?foo=bar',
-      );
-    });
-  });
-
   group('$PathUrlStrategy', () {
     late TestPlatformLocation location;
 
     setUp(() {
       location = TestPlatformLocation();
+      location.baseHref = '/';
     });
 
     test('allows null state', () {
-      location.baseHref = '/';
       final PathUrlStrategy strategy = PathUrlStrategy(location);
       expect(() => strategy.pushState(null, '', '/'), returnsNormally);
       expect(() => strategy.replaceState(null, '', '/'), returnsNormally);
     });
 
     test('validates base href', () {
-      location.baseHref = '/';
       expect(
         () => PathUrlStrategy(location),
         returnsNormally,
@@ -112,7 +57,6 @@ void main() {
     });
 
     test('leading slash is always prepended', () {
-      location.baseHref = '/';
       final PathUrlStrategy strategy = PathUrlStrategy(location);
 
       location.pathname = '';
@@ -149,13 +93,35 @@ void main() {
       expect(strategy.getPath(), '/bar?q=1&t=r');
     });
 
+    test('empty route name is ok', () {
+      final PathUrlStrategy strategy = PathUrlStrategy(location);
+      expect(strategy.prepareExternalUrl(''), '/');
+      expect(() => strategy.pushState(null, '', ''), returnsNormally);
+      expect(() => strategy.replaceState(null, '', ''), returnsNormally);
+    });
+
+    test('route names must start with /', () {
+      final PathUrlStrategy strategy = PathUrlStrategy(location);
+
+      expect(() => strategy.prepareExternalUrl('foo'), throwsAssertionError);
+      expect(() => strategy.prepareExternalUrl('foo/'), throwsAssertionError);
+      expect(() => strategy.prepareExternalUrl('foo/bar'), throwsAssertionError);
+
+      expect(() => strategy.pushState(null, '', 'foo'), throwsAssertionError);
+      expect(() => strategy.pushState(null, '', 'foo/'), throwsAssertionError);
+      expect(() => strategy.pushState(null, '', 'foo/bar'), throwsAssertionError);
+
+      expect(() => strategy.replaceState(null, '', 'foo'), throwsAssertionError);
+      expect(() => strategy.replaceState(null, '', 'foo/'), throwsAssertionError);
+      expect(() => strategy.replaceState(null, '', 'foo/bar'), throwsAssertionError);
+    });
+
     test('generates external path correctly in the presence of basePath', () {
       location.baseHref = 'https://example.com/foo/';
       final PathUrlStrategy strategy = PathUrlStrategy(location);
 
-      expect(strategy.prepareExternalUrl(''), '/foo');
+      expect(strategy.prepareExternalUrl(''), '/foo/');
       expect(strategy.prepareExternalUrl('/'), '/foo/');
-      expect(strategy.prepareExternalUrl('bar'), '/foo/bar');
       expect(strategy.prepareExternalUrl('/bar'), '/foo/bar');
       expect(strategy.prepareExternalUrl('/bar/'), '/foo/bar/');
     });

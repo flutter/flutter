@@ -147,7 +147,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData.light(useMaterial3: false).copyWith(
           chipTheme: chipTheme,
         ),
         home: Directionality(
@@ -193,7 +193,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData.light(useMaterial3: false).copyWith(
           chipTheme: shadowedChipTheme,
         ),
         home: ChipTheme(
@@ -242,6 +242,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: ChipTheme(
           data: shadowedChipTheme,
           child: Builder(
@@ -654,6 +655,7 @@ void main() {
     Widget chipWidget({ bool selected = false }) {
       return MaterialApp(
         theme: ThemeData(
+          useMaterial3: false,
           chipTheme: ThemeData.light().chipTheme.copyWith(
             side: MaterialStateBorderSide.resolveWith(getBorderSide),
           ),
@@ -699,7 +701,7 @@ void main() {
 
     Widget chipWidget({ bool selected = false }) {
       return MaterialApp(
-        theme: ThemeData(chipTheme: chipTheme),
+        theme: ThemeData(useMaterial3: false, chipTheme: chipTheme),
         home: Scaffold(
           body: ChoiceChip(
             label: const Text('Chip'),
@@ -739,7 +741,7 @@ void main() {
 
     Widget chipWidget({ bool selected = false }) {
       return MaterialApp(
-        theme: ThemeData(chipTheme: chipTheme),
+        theme: ThemeData(useMaterial3: false, chipTheme: chipTheme),
         home: Scaffold(
           body: ChoiceChip(
             label: const Text('Chip'),

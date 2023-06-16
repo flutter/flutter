@@ -5,10 +5,12 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:test/fake.dart';
 import 'package:webdriver/async_io.dart';
 
@@ -19,12 +21,14 @@ import '../../src/fakes.dart';
 
 void main() {
 
+  late Config config;
   late Logger logger;
   late FileSystem fs;
   late Platform platform;
   late FakeProcessManager processManager;
 
   setUp(() {
+    config = Config.test();
     logger = BufferLogger.test();
     fs = MemoryFileSystem.test();
     platform = FakePlatform(environment: <String, String>{
@@ -53,19 +57,19 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 '''
         ));
         final Java java = Java.find(
+          config: config,
           androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
           platform: platform,
           processManager: processManager,
         )!;
-        final JavaVersion version = java.version!;
 
         expect(java.javaHome, androidStudioBundledJdkHome);
         expect(java.binaryPath, expectedJavaBinaryPath);
 
-        expect(version.longText, 'OpenJDK Runtime Environment Zulu19.32+15-CA (build 19.0.2+7)');
-        expect(version.number, '19.0.2');
+        expect(java.version!.toString(), 'OpenJDK Runtime Environment Zulu19.32+15-CA (build 19.0.2+7)');
+        expect(java.version, equals(Version(19, 0, 2)));
       });
 
       testWithoutContext('finds JAVA_HOME if it is set and the JDK bundled with Android Studio could not be found', () {
@@ -74,11 +78,12 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         final String expectedJavaBinaryPath = fs.path.join(javaHome, 'bin', 'java');
 
         final Java java = Java.find(
+          config: config,
           androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
           platform: FakePlatform(environment: <String, String>{
-            'JAVA_HOME': javaHome,
+            Java.javaHomeEnvironmentVariable: javaHome,
           }),
           processManager: processManager,
         )!;
@@ -99,6 +104,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         );
 
         final Java java = Java.find(
+          config: config,
           androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
@@ -119,6 +125,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           ),
         );
         final Java? java = Java.find(
+          config: config,
           androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
@@ -126,6 +133,53 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           processManager: processManager,
         );
         expect(java, isNull);
+      });
+
+      testWithoutContext('finds and prefers JDK found at config item "jdk-dir" if it is set', () {
+        const String configuredJdkPath = '/jdk';
+        config.setValue('jdk-dir', configuredJdkPath);
+
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['which', 'java'],
+            stdout: '/fake/which/java/path',
+          ),
+        );
+
+        final _FakeAndroidStudioWithJdk androidStudio = _FakeAndroidStudioWithJdk();
+        final FakePlatform platformWithJavaHome = FakePlatform(
+          environment: <String, String>{
+            'JAVA_HOME': '/old/jdk'
+          },
+        );
+        Java? java = Java.find(
+          config: config,
+          androidStudio: androidStudio,
+          logger: logger,
+          fileSystem: fs,
+          platform: platformWithJavaHome,
+          processManager: processManager,
+        );
+
+        expect(java, isNotNull);
+        expect(java!.javaHome, configuredJdkPath);
+        expect(java.binaryPath, fs.path.join(configuredJdkPath, 'bin', 'java'));
+
+        config.removeValue('jdk-dir');
+
+        java = Java.find(
+          config: config,
+          androidStudio: androidStudio,
+          logger: logger,
+          fileSystem: fs,
+          platform: platformWithJavaHome,
+          processManager: processManager,
+        );
+
+        expect(java, isNotNull);
+        assert(androidStudio.javaPath != configuredJdkPath);
+        expect(java!.javaHome, androidStudio.javaPath);
+        expect(java.binaryPath, fs.path.join(androidStudio.javaPath!, 'bin', 'java'));
       });
     });
 
@@ -160,9 +214,9 @@ java version "1.8.0_202"
 Java(TM) SE Runtime Environment (build 1.8.0_202-b10)
 Java HotSpot(TM) 64-Bit Server VM (build 25.202-b10, mixed mode)
 ''');
-        final JavaVersion version = java.version!;
-        expect(version.longText, 'Java(TM) SE Runtime Environment (build 1.8.0_202-b10)');
-        expect(version.number, '1.8.0');
+        final Version version = java.version!;
+        expect(version.toString(), 'Java(TM) SE Runtime Environment (build 1.8.0_202-b10)');
+        expect(version, equals(Version(1, 8, 0)));
       });
       testWithoutContext('parses jdk 11 windows', () {
         addJavaVersionCommand('''
@@ -170,9 +224,9 @@ java version "11.0.14"
 Java(TM) SE Runtime Environment (build 11.0.14+10-b13)
 Java HotSpot(TM) 64-Bit Server VM (build 11.0.14+10-b13, mixed mode)
 ''');
-        final JavaVersion version = java.version!;
-        expect(version.longText, 'Java(TM) SE Runtime Environment (build 11.0.14+10-b13)');
-        expect(version.number, '11.0.14');
+        final Version version = java.version!;
+        expect(version.toString(), 'Java(TM) SE Runtime Environment (build 11.0.14+10-b13)');
+        expect(version, equals(Version(11, 0, 14)));
       });
 
       testWithoutContext('parses jdk 11 mac/linux', () {
@@ -181,9 +235,9 @@ openjdk version "11.0.18" 2023-01-17 LTS
 OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)
 OpenJDK 64-Bit Server VM Zulu11.62+17-CA (build 11.0.18+10-LTS, mixed mode)
 ''');
-        final JavaVersion version = java.version!;
-        expect(version.longText, 'OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)');
-        expect(version.number, '11.0.18');
+        final Version version = java.version!;
+        expect(version.toString(), 'OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)');
+        expect(version, equals(Version(11, 0, 18)));
       });
 
       testWithoutContext('parses jdk 17', () {
@@ -192,9 +246,9 @@ openjdk 17.0.6 2023-01-17
 OpenJDK Runtime Environment (build 17.0.6+0-17.0.6b802.4-9586694)
 OpenJDK 64-Bit Server VM (build 17.0.6+0-17.0.6b802.4-9586694, mixed mode)
 ''');
-        final JavaVersion version = java.version!;
-        expect(version.longText, 'OpenJDK Runtime Environment (build 17.0.6+0-17.0.6b802.4-9586694)');
-        expect(version.number, '17.0.6');
+        final Version version = java.version!;
+        expect(version.toString(), 'OpenJDK Runtime Environment (build 17.0.6+0-17.0.6b802.4-9586694)');
+        expect(version, equals(Version(17, 0, 6)));
       });
 
       testWithoutContext('parses jdk 19', () {
@@ -203,9 +257,9 @@ openjdk 19.0.2 2023-01-17
 OpenJDK Runtime Environment Homebrew (build 19.0.2)
 OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
 ''');
-        final JavaVersion version = java.version!;
-        expect(version.longText, 'OpenJDK Runtime Environment Homebrew (build 19.0.2)');
-        expect(version.number, '19.0.2');
+        final Version version = java.version!;
+        expect(version.toString(), 'OpenJDK Runtime Environment Homebrew (build 19.0.2)');
+        expect(version, equals(Version(19, 0, 2)));
       });
 
       // https://chrome-infra-packages.appspot.com/p/flutter/java/openjdk/
@@ -215,16 +269,16 @@ openjdk 11.0.2 2019-01-15
 OpenJDK Runtime Environment 18.9 (build 11.0.2+9)
 OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
 ''');
-        final JavaVersion version = java.version!;
-        expect(version.longText, 'OpenJDK Runtime Environment 18.9 (build 11.0.2+9)');
-        expect(version.number, '11.0.2');
+        final Version version = java.version!;
+        expect(version.toString(), 'OpenJDK Runtime Environment 18.9 (build 11.0.2+9)');
+        expect(version, equals(Version(11, 0, 2)));
       });
 
       testWithoutContext('parses jdk two number versions', () {
         addJavaVersionCommand('openjdk 19.0 2023-01-17');
-        final JavaVersion version = java.version!;
-        expect(version.longText, 'openjdk 19.0 2023-01-17');
-        expect(version.number, '19.0');
+        final Version version = java.version!;
+        expect(version.toString(), 'openjdk 19.0 2023-01-17');
+        expect(version, equals(Version(19, 0, null)));
       });
     });
   });

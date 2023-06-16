@@ -17,6 +17,7 @@ import 'segmented_button_theme.dart';
 import 'text_button.dart';
 import 'text_button_theme.dart';
 import 'theme.dart';
+import 'tooltip.dart';
 
 /// Data describing a segment of a [SegmentedButton].
 class ButtonSegment<T> {
@@ -27,6 +28,7 @@ class ButtonSegment<T> {
     required this.value,
     this.icon,
     this.label,
+    this.tooltip,
     this.enabled = true,
   }) : assert(icon != null || label != null);
 
@@ -40,6 +42,9 @@ class ButtonSegment<T> {
 
   /// Optional label displayed in the segment.
   final Widget? label;
+
+  /// Optional tooltip for the segment
+  final String? tooltip;
 
   /// Determines if the segment is available for selection.
   final bool enabled;
@@ -335,11 +340,18 @@ class SegmentedButton<T> extends StatelessWidget {
             child: label,
           );
 
+      final Widget buttonWithTooltip = segment.tooltip != null
+        ? Tooltip(
+            message: segment.tooltip,
+            child: button,
+          )
+        : button;
+
       return MergeSemantics(
         child: Semantics(
           checked: segmentSelected,
           inMutuallyExclusiveGroup: multiSelectionEnabled ? null : true,
-          child: button,
+          child: buttonWithTooltip,
         ),
       );
     }
@@ -713,8 +725,6 @@ class _RenderSegmentedButton<T> extends RenderBox with
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   _SegmentedButtonDefaultsM3(this.context);
