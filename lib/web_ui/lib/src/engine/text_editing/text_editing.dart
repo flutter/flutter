@@ -1077,24 +1077,35 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
   void placeElement() {
     geometry?.applyToDomElement(activeDomElement);
     if (hasAutofillGroup) {
-      placeForm();
-      // On Safari Desktop, when a form is focused, it opens an autofill menu
-      // immediately.
-      // Flutter framework sends `setEditableSizeAndTransform` for informing
-      // the engine about the location of the text field. This call may arrive
-      // after the first `show` call, depending on the text input widget's
-      // implementation. Therefore form is placed, when
-      // `setEditableSizeAndTransform` method is called and focus called on the
-      // form only after placing it to the correct position and only once after
-      // that. Calling focus multiple times causes flickering.
-      focusedFormElement!.focus();
+      // We listen to pointerdown events on the Flutter View element and programatically
+      // focus our inputs. However, these inputs are focused before the pointerdown
+      // events conclude. Thus, the browser triggers a blur event immediately after
+      // focusing these inputs. This causes issues with Safari Desktop's autofill
+      // dialog (ref: https://github.com/flutter/flutter/issues/127960).
+      // In order to guarantee that we only focus after the pointerdown event concludes,
+      // we wrap the form autofill placement and focus logic in a zero-duration Timer.
+      // This ensures that our input doesn't have instantaneous focus/blur events
+      // occur on it and fixes the autofill dialog bug as a result.
+      Timer(Duration.zero, () {
+        placeForm();
+        // On Safari Desktop, when a form is focused, it opens an autofill menu
+        // immediately.
+        // Flutter framework sends `setEditableSizeAndTransform` for informing
+        // the engine about the location of the text field. This call may arrive
+        // after the first `show` call, depending on the text input widget's
+        // implementation. Therefore form is placed, when
+        // `setEditableSizeAndTransform` method is called and focus called on the
+        // form only after placing it to the correct position and only once after
+        // that. Calling focus multiple times causes flickering.
+        focusedFormElement!.focus();
 
-      // Set the last editing state if it exists, this is critical for a
-      // users ongoing work to continue uninterrupted when there is an update to
-      // the transform.
-      // If domElement is not focused cursor location will not be correct.
-      activeDomElement.focus();
-      lastEditingState?.applyToDomElement(activeDomElement);
+        // Set the last editing state if it exists, this is critical for a
+        // users ongoing work to continue uninterrupted when there is an update to
+        // the transform.
+        // If domElement is not focused cursor location will not be correct.
+        activeDomElement.focus();
+        lastEditingState?.applyToDomElement(activeDomElement);
+      });
     }
   }
 
