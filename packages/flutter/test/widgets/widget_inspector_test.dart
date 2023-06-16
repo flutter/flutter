@@ -261,6 +261,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
     });
 
+    test ('objectToDiagnosticsNode returns null for non-diagnosticable', () {
+      expect(WidgetInspectorService.objectToDiagnosticsNode(Alignment.bottomCenter), isNull);
+    });
+
     testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
       // This is a smoke test to verify that adding the inspector doesn't crash.
       await tester.pumpWidget(
