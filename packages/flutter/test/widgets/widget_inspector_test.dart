@@ -899,13 +899,29 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
     });
 
-    test('WidgetInspectorService getProperties', () {
+    test('WidgetInspectorService getProperties for $DiagnosticsNode', () {
       final DiagnosticsNode diagnostic = const Text('a', textDirection: TextDirection.ltr).toDiagnosticsNode();
       const String group = 'group';
       service.disposeAllGroups();
       final String id = service.toId(diagnostic, group)!;
       final List<Object?> propertiesJson = json.decode(service.getProperties(id, group)) as List<Object?>;
       final List<DiagnosticsNode> properties = diagnostic.getProperties();
+      expect(properties, isNotEmpty);
+      expect(propertiesJson.length, equals(properties.length));
+      for (int i = 0; i < propertiesJson.length; ++i) {
+        final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
+        expect(service.toObject(propertyJson['valueId'] as String?), equals(properties[i].value));
+        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
+      }
+    });
+
+    test('WidgetInspectorService getProperties for $Diagnosticable', () {
+      const Diagnosticable diagnosticable = Text('a', textDirection: TextDirection.ltr);
+      const String group = 'group';
+      service.disposeAllGroups();
+      final String id = service.toId(diagnosticable, group)!;
+      final List<Object?> propertiesJson = json.decode(service.getProperties(id, group)) as List<Object?>;
+      final List<DiagnosticsNode> properties = diagnosticable.toDiagnosticsNode().getProperties();
       expect(properties, isNotEmpty);
       expect(propertiesJson.length, equals(properties.length));
       for (int i = 0; i < propertiesJson.length; ++i) {
@@ -2107,7 +2123,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
     });
 
-    test('ext.flutter.inspector.getProperties', () async {
+    test('ext.flutter.inspector.getProperties for $DiagnosticsNode', () async {
       final DiagnosticsNode diagnostic = const Text('a', textDirection: TextDirection.ltr).toDiagnosticsNode();
       const String group = 'group';
       final String id = service.toId(diagnostic, group)!;
@@ -2116,6 +2132,24 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         <String, String>{'arg': id, 'objectGroup': group},
       ))! as List<Object?>;
       final List<DiagnosticsNode> properties = diagnostic.getProperties();
+      expect(properties, isNotEmpty);
+      expect(propertiesJson.length, equals(properties.length));
+      for (int i = 0; i < propertiesJson.length; ++i) {
+        final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
+        expect(service.toObject(propertyJson['valueId'] as String?), equals(properties[i].value));
+        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
+      }
+    });
+
+    test('ext.flutter.inspector.getProperties for $Diagnosticable', () async {
+      const Diagnosticable diagnosticable = Text('a', textDirection: TextDirection.ltr);
+      const String group = 'group';
+      final String id = service.toId(diagnosticable, group)!;
+      final List<Object?> propertiesJson = (await service.testExtension(
+        WidgetInspectorServiceExtensions.getProperties.name,
+        <String, String>{'arg': id, 'objectGroup': group},
+      ))! as List<Object?>;
+      final List<DiagnosticsNode> properties = diagnosticable.toDiagnosticsNode().getProperties();
       expect(properties, isNotEmpty);
       expect(propertiesJson.length, equals(properties.length));
       for (int i = 0; i < propertiesJson.length; ++i) {
