@@ -1942,6 +1942,8 @@ mixin WidgetInspectorService {
   /// If the currently selected [Element] is identical to the [Element]
   /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
   /// reused.
+  // TODO(polina-c): delete this entry point when it is not used in DevTools
+  // https://github.com/flutter/devtools/issues/3951
   @protected
   String getSelectedWidget(String? previousSelectionId, String groupName) {
     return _safeJsonEncode(_getSelectedWidget(previousSelectionId, groupName));
@@ -2233,6 +2235,8 @@ mixin WidgetInspectorService {
   /// If the currently selected [Element] is identical to the [Element]
   /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
   /// reused.
+  // TODO(polina-c): delete this entry point when it is not used in DevTools
+  // https://github.com/flutter/devtools/issues/3951
   String getSelectedSummaryWidget(String previousSelectionId, String groupName) {
     return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
   }
