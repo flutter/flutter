@@ -11,10 +11,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
-
-// The test_api package is not for general use... it's literally for our use.
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/scaffolding.dart' as test_package;
 
 import 'all_elements.dart';
 import 'binding.dart';
@@ -49,11 +46,21 @@ export 'package:matcher/expect.dart' hide expect, isInstanceOf;
 // The test_api package has a deprecation warning to discourage direct use but
 // that doesn't apply here.
 export 'package:test_api/hooks.dart' show TestFailure;
-// ignore: deprecated_member_use
 export 'package:test_api/scaffolding.dart'
-    hide group, setUp, setUpAll, tearDown, tearDownAll, test;
-// ignore: implementation_imports
-export 'package:test_api/src/scaffolding/utils.dart' show registerException;
+    show
+        OnPlatform,
+        Retry,
+        Skip,
+        Tags,
+        TestOn,
+        Timeout,
+        addTearDown,
+        markTestSkipped,
+        printOnFailure,
+        pumpEventQueue,
+        registerException,
+        spawnHybridCode,
+        spawnHybridUri;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
@@ -136,6 +143,7 @@ void testWidgets(
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
+  int? retry,
 }) {
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -155,7 +163,7 @@ void testWidgets(
         tester._testDescription = combinedDescription;
         SemanticsHandle? semanticsHandle;
         tester._recordNumberOfSemanticsHandles();
-        if (semanticsEnabled == true) {
+        if (semanticsEnabled) {
           semanticsHandle = tester.ensureSemantics();
         }
         test_package.addTearDown(binding.postTest);
@@ -180,6 +188,7 @@ void testWidgets(
       skip: skip,
       timeout: timeout ?? binding.defaultTestTimeout,
       tags: tags,
+      retry: retry,
     );
   }
 }
@@ -426,7 +435,7 @@ Future<void> benchmarkWidgets(
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
   SemanticsHandle? semanticsHandle;
-  if (semanticsEnabled == true) {
+  if (semanticsEnabled) {
     semanticsHandle = tester.ensureSemantics();
   }
   tester._recordNumberOfSemanticsHandles();
@@ -689,7 +698,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final WidgetsBinding binding = this.binding;
       if (binding is LiveTestWidgetsFlutterBinding &&
           binding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
-        test_package.fail(
+        matcher_expect.fail(
           'When using LiveTestWidgetsFlutterBindingFramePolicy.benchmark, '
           'hasScheduledFrame is never set to true. This means that pumpAndSettle() '
           'cannot be used, because it has no way to know if the application has '
@@ -838,7 +847,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   HitTestResult hitTestOnBinding(Offset location) {
-    location = binding.localToGlobal(location);
+    location = binding.localToGlobal(location, binding.renderView);
     return super.hitTestOnBinding(location);
   }
 

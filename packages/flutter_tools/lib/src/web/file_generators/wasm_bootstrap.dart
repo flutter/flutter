@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../web_constants.dart';
+
 String generateWasmBootstrapFile(bool isSkwasm) {
   return '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
@@ -18,6 +20,7 @@ String generateWasmBootstrapFile(bool isSkwasm) {
     moduleInstance = await dart2wasm_runtime.instantiate(dartModulePromise, imports);
   } catch (exception) {
     console.error(`Failed to fetch and instantiate wasm module: \${exception}`);
+    console.error('$kWasmMoreInfo');
   }
 
   if (moduleInstance) {

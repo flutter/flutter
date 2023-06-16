@@ -997,7 +997,7 @@ void main() {
             TestSemantics(
               label: 'INTERRUPTION',
               textDirection: TextDirection.rtl,
-              rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 80.0),
+              rect: const Rect.fromLTRB(0.0, 0.0, 20.0, 40.0),
             ),
             TestSemantics(
               label: 'sky',
@@ -1225,9 +1225,11 @@ void main() {
               width: 400,
               child: Center(
                 child: RichText(
+                  // 400 is not wide enough for this string. The part after the
+                  // whitespace is going to be broken into a 2nd line.
                   text: const TextSpan(text: 'fwefwefwewfefewfwe fwfwfwefweabcdefghijklmnopqrstuvwxyz'),
                   textWidthBasis: TextWidthBasis.longestLine,
-                  textDirection: TextDirection.ltr,
+                  textDirection: TextDirection.rtl,
                 ),
               ),
             ),
@@ -1239,11 +1241,12 @@ void main() {
           return false;
         }
         final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
-        if (paragraph.longestLine > paragraph.width) {
-          throw 'paragraph width (${paragraph.width}) greater than its longest line (${paragraph.longestLine}).';
-        }
-        if (paragraph.width >= 400) {
-          throw 'paragraph.width (${paragraph.width}) >= 400';
+        final Offset offset = arguments[1] as Offset;
+        final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+        for (final ui.LineMetrics line in lines) {
+          if (line.left + offset.dx + line.width >= 400) {
+            throw 'line $line is greater than the max width constraints';
+          }
         }
         return true;
       }));
@@ -1534,6 +1537,59 @@ void main() {
     expect(paragraph.getMinIntrinsicWidth(0.0), 200);
   });
 
+  testWidgets('can compute intrinsic width and height for widget span with text scaling', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/59316
+    const Key textKey = Key('RichText');
+    Widget textWithNestedInlineSpans({ required double textScaleFactor, required double screenWidth }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: OverflowBox(
+            alignment: Alignment.topLeft,
+            maxWidth: screenWidth,
+            child: RichText(
+              key: textKey,
+              textScaleFactor: textScaleFactor,
+              text: const TextSpan(children: <InlineSpan>[
+                WidgetSpan(child: Text('one two')),
+              ]),
+            ),
+          ),
+        ),
+      );
+    }
+    // The render object is going to be reused across widget tree rebuilds.
+    late final RenderParagraph outerParagraph = tester.renderObject(find.byKey(textKey));
+
+    await tester.pumpWidget(textWithNestedInlineSpans(textScaleFactor: 1.0, screenWidth: 100.0));
+    expect(
+      outerParagraph.getMaxIntrinsicHeight(100.0),
+      14.0,
+      reason: 'singleLineHeight = 14.0',
+    );
+
+    await tester.pumpWidget(textWithNestedInlineSpans(textScaleFactor: 2.0, screenWidth: 100.0));
+    expect(
+      outerParagraph.getMinIntrinsicHeight(100.0),
+      14.0 * 2.0 * 2,
+      reason: 'intrinsicHeight = singleLineHeight * textScaleFactor * two lines.',
+    );
+
+    await tester.pumpWidget(textWithNestedInlineSpans(textScaleFactor: 1.0, screenWidth: 1000.0));
+    expect(
+      outerParagraph.getMaxIntrinsicWidth(1000.0),
+      14.0 * 7,
+      reason: 'intrinsic width = 14.0 * 7',
+    );
+
+    await tester.pumpWidget(textWithNestedInlineSpans(textScaleFactor: 2.0, screenWidth: 1000.0));
+    expect(
+      outerParagraph.getMaxIntrinsicWidth(1000.0),
+      14.0 * 2.0 * 7,
+      reason: 'intrinsic width = glyph advance * textScaleFactor * num of glyphs',
+    );
+  });
+
   testWidgets('Text uses TextStyle.overflow', (WidgetTester tester) async {
     const TextOverflow overflow = TextOverflow.fade;
 
@@ -1583,6 +1639,39 @@ void main() {
 
       await tester.tap(find.text('Hello World'));
       expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Mouse hovering over selectable Text uses SystemMouseCursor.text', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: SelectionArea(
+        child: Text('Flutter'),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
+
+  testWidgets('Mouse hovering over selectable Text uses default selection style mouse cursor', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        child: DefaultSelectionStyle.merge(
+          mouseCursor: SystemMouseCursors.click,
+          child: const Text('Flutter'),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 }
 

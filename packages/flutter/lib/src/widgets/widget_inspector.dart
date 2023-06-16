@@ -1417,7 +1417,7 @@ mixin WidgetInspectorService {
     pubRootDirectories = pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
 
     final Set<String> directorySet = Set<String>.from(pubRootDirectories);
-    if(_pubRootDirectories != null) {
+    if (_pubRootDirectories != null) {
       directorySet.addAll(_pubRootDirectories!);
     }
 
@@ -1722,9 +1722,12 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getProperties(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getProperties(String? diagnosticsNodeId, String groupName) {
-    final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode?;
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), InspectorSerializationDelegate(groupName: groupName, service: this), parent: node);
+  List<Object>  _getProperties(String? diagnosticsOrDiagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    if (node == null) {
+      return const <Object>[];
+    }
+    return _nodesToJson(node.getProperties(), InspectorSerializationDelegate(groupName: groupName, service: this), parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -1757,10 +1760,31 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getChildrenSummaryTree(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getChildrenSummaryTree(String? diagnosticsNodeId, String groupName) {
-    final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode?;
+  DiagnosticsNode? _idToDiagnosticsNode(String? diagnosticsOrDiagnosticableId) {
+    // TODO(polina-c): start always assuming Diagnosticable, when DevTools stops sending DiagnosticsNode to
+    // getChildrenSummaryTree and getProperties.
+    // https://github.com/flutter/devtools/issues/3951
+    final Object? theObject = toObject(diagnosticsOrDiagnosticableId);
+    if (theObject is DiagnosticsNode) {
+      return theObject;
+    }
+    if (theObject is Diagnosticable) {
+      return theObject.toDiagnosticsNode();
+    }
+    if (theObject == null) {
+      return null;
+    }
+    throw StateError('Unexpected object type ${theObject.runtimeType}.');
+  }
+
+  List<Object> _getChildrenSummaryTree(String? diagnosticsOrDiagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    if (node == null) {
+      return <Object>[];
+    }
+
     final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, summaryTree: true, service: this);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate, parent: node);
+    return _nodesToJson(_getChildrenFiltered(node, delegate), delegate, parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -3010,7 +3034,7 @@ class _InspectorOverlayLayer extends Layer {
       inDebugMode = true;
       return true;
     }());
-    if (inDebugMode == false) {
+    if (!inDebugMode) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
           'The inspector should never be used in production mode due to the '
@@ -3256,7 +3280,7 @@ class _Location {
     required this.file,
     required this.line,
     required this.column,
-    // ignore: unused_element
+    // ignore: unused_element, unused_element_parameter
     this.name,
   });
 
@@ -3627,7 +3651,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   @override
   List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
     if (maxDescendantsTruncatableNode >= 0 &&
-        owner!.allowTruncate == true &&
+        owner!.allowTruncate &&
         nodes.length > maxDescendantsTruncatableNode) {
       nodes = service._truncateNodes(nodes, maxDescendantsTruncatableNode);
     }

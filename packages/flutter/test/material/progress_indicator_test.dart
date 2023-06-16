@@ -443,6 +443,47 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
+  testWidgets('CircularProgressIndicator strokeAlign', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(),
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), paints..arc(rect: Offset.zero & const Size(800.0, 600.0)));
+
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(
+          strokeAlign: CircularProgressIndicator.strokeAlignInside,
+        ),
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), paints..arc(rect: const Offset(2.0, 2.0) & const Size(796.0, 596.0)));
+
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(
+          strokeAlign: CircularProgressIndicator.strokeAlignOutside,
+        ),
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), paints..arc(rect: const Offset(-2.0, -2.0) & const Size(804.0, 604.0)));
+
+    // Unbounded alignment.
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(
+          strokeAlign: 2.0,
+        ),
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), paints..arc(rect: const Offset(-4.0, -4.0) & const Size(808.0, 608.0)));
+  });
+
   testWidgets('CircularProgressIndicator with strokeCap', (WidgetTester tester) async {
     await tester.pumpWidget(const CircularProgressIndicator());
     expect(find.byType(CircularProgressIndicator),
@@ -463,6 +504,41 @@ void main() {
 
     await tester.pumpWidget(const CircularProgressIndicator(strokeCap: StrokeCap.round));
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
+  });
+
+  testWidgets('LinearProgressIndicator with indicatorBorderRadius', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              height: 4.0,
+              child: LinearProgressIndicator(
+                value: 0.25,
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(
+        find.byType(LinearProgressIndicator),
+        paints
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(10.0)),
+        )
+        ..rrect(
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTRB(0.0, 0.0, 25.0, 4.0),
+            const Radius.circular(10.0),
+          ),
+        ),
+    );
+    expect(tester.binding.transientCallbackCount, 0);
   });
 
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
@@ -647,7 +723,10 @@ void main() {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
 
     await tester.pumpFrames(animationSheet.record(
-      const _RefreshProgressIndicatorGolden(),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const _RefreshProgressIndicatorGolden()
+      ),
     ), const Duration(seconds: 3));
 
     await expectLater(
@@ -925,11 +1004,14 @@ void main() {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
 
     await tester.pumpFrames(animationSheet.record(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Padding(
-          padding: EdgeInsets.all(4),
-          child: CircularProgressIndicator(),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Padding(
+            padding: EdgeInsets.all(4),
+            child: CircularProgressIndicator(),
+          ),
         ),
       ),
     ), const Duration(seconds: 2));

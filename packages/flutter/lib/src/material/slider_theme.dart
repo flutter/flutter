@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'material_state.dart';
+import 'slider.dart';
 import 'theme.dart';
 
 /// Applies a slider theme to descendant [Slider] widgets.
@@ -292,6 +293,7 @@ class SliderThemeData with Diagnosticable {
     this.minThumbSeparation,
     this.thumbSelector,
     this.mouseCursor,
+    this.allowedInteraction,
   });
 
   /// Generates a SliderThemeData from three main colors.
@@ -576,6 +578,11 @@ class SliderThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Slider.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
+  /// Allowed way for the user to interact with the [Slider].
+  ///
+  /// If specified, overrides the default value of [Slider.allowedInteraction].
+  final SliderInteraction? allowedInteraction;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SliderThemeData copyWith({
@@ -609,6 +616,7 @@ class SliderThemeData with Diagnosticable {
     double? minThumbSeparation,
     RangeThumbSelector? thumbSelector,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
+    SliderInteraction? allowedInteraction,
   }) {
     return SliderThemeData(
       trackHeight: trackHeight ?? this.trackHeight,
@@ -641,6 +649,7 @@ class SliderThemeData with Diagnosticable {
       minThumbSeparation: minThumbSeparation ?? this.minThumbSeparation,
       thumbSelector: thumbSelector ?? this.thumbSelector,
       mouseCursor: mouseCursor ?? this.mouseCursor,
+      allowedInteraction: allowedInteraction ?? this.allowedInteraction,
     );
   }
 
@@ -684,6 +693,7 @@ class SliderThemeData with Diagnosticable {
       minThumbSeparation: lerpDouble(a.minThumbSeparation, b.minThumbSeparation, t),
       thumbSelector: t < 0.5 ? a.thumbSelector : b.thumbSelector,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
+      allowedInteraction: t < 0.5 ? a.allowedInteraction : b.allowedInteraction,
     );
   }
 
@@ -720,6 +730,7 @@ class SliderThemeData with Diagnosticable {
       minThumbSeparation,
       thumbSelector,
       mouseCursor,
+      allowedInteraction,
     ),
   );
 
@@ -761,7 +772,8 @@ class SliderThemeData with Diagnosticable {
         && other.valueIndicatorTextStyle == valueIndicatorTextStyle
         && other.minThumbSeparation == minThumbSeparation
         && other.thumbSelector == thumbSelector
-        && other.mouseCursor == mouseCursor;
+        && other.mouseCursor == mouseCursor
+        && other.allowedInteraction == allowedInteraction;
   }
 
   @override
@@ -798,6 +810,7 @@ class SliderThemeData with Diagnosticable {
     properties.add(DoubleProperty('minThumbSeparation', minThumbSeparation, defaultValue: defaultData.minThumbSeparation));
     properties.add(DiagnosticsProperty<RangeThumbSelector>('thumbSelector', thumbSelector, defaultValue: defaultData.thumbSelector));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: defaultData.mouseCursor));
+    properties.add(EnumProperty<SliderInteraction>('allowedInteraction', allowedInteraction, defaultValue: defaultData.allowedInteraction));
   }
 }
 
@@ -1771,6 +1784,52 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   }
 }
 
+
+/// Base range slider track shape that provides an implementation of [getPreferredRect] for
+/// default sizing.
+///
+/// The height is set from [SliderThemeData.trackHeight] and the width of the
+/// parent box less the larger of the widths of [SliderThemeData.rangeThumbShape] and
+/// [SliderThemeData.overlayShape].
+///
+/// See also:
+///
+///  * [RectangularRangeSliderTrackShape], which is a track shape with sharp
+///    rectangular edges
+mixin BaseRangeSliderTrackShape {
+  /// Returns a rect that represents the track bounds that fits within the
+  /// [Slider].
+  ///
+  /// The width is the width of the [RangeSlider], but padded by the max
+  /// of the overlay and thumb radius. The height is defined by the  [SliderThemeData.trackHeight].
+  ///
+  /// The [Rect] is centered both horizontally and vertically within the slider
+  /// bounds.
+  Rect getPreferredRect({
+    required RenderBox parentBox,
+    Offset offset = Offset.zero,
+    required SliderThemeData sliderTheme,
+    bool isEnabled = false,
+    bool isDiscrete = false,
+  }) {
+    assert(sliderTheme.rangeThumbShape != null);
+    assert(sliderTheme.overlayShape != null);
+    assert(sliderTheme.trackHeight != null);
+    final double thumbWidth = sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete).width;
+    final double overlayWidth = sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
+    final double trackHeight = sliderTheme.trackHeight!;
+    assert(overlayWidth >= 0);
+    assert(trackHeight >= 0);
+
+    final double trackLeft = offset.dx + math.max(overlayWidth / 2, thumbWidth / 2);
+    final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
+    final double trackRight = trackLeft + parentBox.size.width - math.max(thumbWidth, overlayWidth);
+    final double trackBottom = trackTop + trackHeight;
+    // If the parentBox'size less than slider's size the trackRight will be less than trackLeft, so switch them.
+    return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
+  }
+}
+
 /// A [RangeSlider] track that's a simple rectangle.
 ///
 /// It paints a solid colored rectangle, vertically centered in the
@@ -1798,34 +1857,12 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///    the [RangeSlider]'s track.
 ///  * [RoundedRectRangeSliderTrackShape], for a similar track with rounded
 ///    edges.
-class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
+class RectangularRangeSliderTrackShape extends RangeSliderTrackShape with BaseRangeSliderTrackShape {
   /// Create a slider track with rectangular outer edges.
   ///
   /// The middle track segment is the selected range and is active, and the two
   /// outer track segments are inactive.
   const RectangularRangeSliderTrackShape();
-
-  @override
-  Rect getPreferredRect({
-    required RenderBox parentBox,
-    Offset offset = Offset.zero,
-    required SliderThemeData sliderTheme,
-    bool isEnabled = false,
-    bool isDiscrete = false,
-  }) {
-    assert(sliderTheme.overlayShape != null);
-    final double overlayWidth = sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
-    final double trackHeight = sliderTheme.trackHeight!;
-    assert(overlayWidth >= 0);
-    assert(trackHeight >= 0);
-
-    final double trackLeft = offset.dx + overlayWidth / 2;
-    final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackRight = trackLeft + parentBox.size.width - overlayWidth;
-    final double trackBottom = trackTop + trackHeight;
-    // If the parentBox'size less than slider's size the trackRight will be less than trackLeft, so switch them.
-    return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
-  }
 
   @override
   void paint(
@@ -1913,35 +1950,12 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
 ///  * [RangeSliderTrackShape], which can be used to create custom shapes for
 ///    the [RangeSlider]'s track.
 ///  * [RectangularRangeSliderTrackShape], for a similar track with sharp edges.
-class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
+class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape with BaseRangeSliderTrackShape {
   /// Create a slider track with rounded outer edges.
   ///
   /// The middle track segment is the selected range and is active, and the two
   /// outer track segments are inactive.
   const RoundedRectRangeSliderTrackShape();
-
-  @override
-  Rect getPreferredRect({
-    required RenderBox parentBox,
-    Offset offset = Offset.zero,
-    required SliderThemeData sliderTheme,
-    bool isEnabled = false,
-    bool isDiscrete = false,
-  }) {
-    assert(sliderTheme.overlayShape != null);
-    assert(sliderTheme.trackHeight != null);
-    final double overlayWidth = sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
-    final double trackHeight = sliderTheme.trackHeight!;
-    assert(overlayWidth >= 0);
-    assert(trackHeight >= 0);
-
-    final double trackLeft = offset.dx + overlayWidth / 2;
-    final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackRight = trackLeft + parentBox.size.width - overlayWidth;
-    final double trackBottom = trackTop + trackHeight;
-    // If the parentBox'size less than slider's size the trackRight will be less than trackLeft, so switch them.
-    return Rect.fromLTRB(math.min(trackLeft, trackRight), trackTop, math.max(trackLeft, trackRight), trackBottom);
-  }
 
   @override
   void paint(
@@ -2321,7 +2335,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size.fromRadius(isEnabled == true ? enabledThumbRadius : _disabledThumbRadius);
+    return Size.fromRadius(isEnabled ? enabledThumbRadius : _disabledThumbRadius);
   }
 
   @override
@@ -2430,7 +2444,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size.fromRadius(isEnabled == true ? enabledThumbRadius : _disabledThumbRadius);
+    return Size.fromRadius(isEnabled ? enabledThumbRadius : _disabledThumbRadius);
   }
 
   @override

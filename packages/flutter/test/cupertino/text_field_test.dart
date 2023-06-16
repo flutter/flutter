@@ -41,7 +41,7 @@ class MockTextSelectionControls extends TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     throw UnimplementedError();
@@ -81,7 +81,7 @@ class PathBoundsMatcher extends Matcher {
     final List<dynamic> values = <dynamic> [bounds, bounds.top, bounds.left, bounds.right, bounds.bottom];
     final Map<Matcher, dynamic> failedMatcher = <Matcher, dynamic> {};
 
-    for(int idx = 0; idx < matchers.length; idx++) {
+    for (int idx = 0; idx < matchers.length; idx++) {
       if (!(matchers[idx]?.matches(values[idx], matchState) ?? true)) {
         failedMatcher[matchers[idx]!] = values[idx];
       }
@@ -5417,6 +5417,51 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
+  testWidgets('Cursor should not move on a quick touch drag when touch does not begin on previous selection (iOS)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
+
+    // Tap on text field to gain focus, and set selection to '|a'. On iOS
+    // the selection is set to the word edge closest to the tap position.
+    // We await for [kDoubleTapTimeout] after the up event, so our next down
+    // event does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(aPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // The position we tap during a drag start is not on the collapsed selection,
+    // so the cursor should not move.
+    await gesture.down(textOffsetToPosition(tester, 7));
+    await gesture.moveTo(iPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
   testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -9440,4 +9485,122 @@ void main() {
     expect(placeholderWidget.overflow, placeholderStyle.overflow);
     expect(placeholderWidget.style!.overflow, placeholderStyle.overflow);
   });
+
+  testWidgets('tapping on a misspelled word on iOS hides the handles and shows red selection', (WidgetTester tester) async {
+    tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+      true;
+    // The default derived color for the iOS text selection highlight.
+    const Color defaultSelectionColor = Color(0x33007aff);
+    final TextEditingController controller = TextEditingController(
+      text: 'test test testt',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: CupertinoTextField.cupertinoMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    state.spellCheckResults = SpellCheckResults(
+      controller.value.text,
+      const <SuggestionSpan>[
+        SuggestionSpan(TextRange(start: 10, end: 15), <String>['test']),
+      ]);
+
+    // Double tapping a non-misspelled word shows the normal blue selection and
+    // the selection handles.
+    expect(state.selectionOverlay, isNull);
+    await tester.tapAt(textOffsetToPosition(tester, 2));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    await tester.tapAt(textOffsetToPosition(tester, 2));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 4),
+    );
+    expect(state.selectionOverlay!.handlesAreVisible, isTrue);
+    expect(state.renderEditable.selectionColor, defaultSelectionColor);
+
+    // Single tapping a non-misspelled word shows a collpased cursor.
+    await tester.tapAt(textOffsetToPosition(tester, 7));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 9, affinity: TextAffinity.upstream),
+    );
+    expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    expect(state.renderEditable.selectionColor, defaultSelectionColor);
+
+    // Single tapping a misspelled word selects it in red with no handles.
+    await tester.tapAt(textOffsetToPosition(tester, 13));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 10, extentOffset: 15),
+    );
+    expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    expect(
+      state.renderEditable.selectionColor,
+      CupertinoTextField.kMisspelledSelectionColor,
+    );
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('text selection toolbar is hidden on tap down', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+
+    TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(tester, 8),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
+
+    gesture = await tester.startGesture(
+      textOffsetToPosition(tester, 2),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+
+    // After the gesture is down but not up, the toolbar is already gone.
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+  },
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
+  );
 }

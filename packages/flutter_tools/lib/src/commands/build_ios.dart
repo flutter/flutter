@@ -376,11 +376,11 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     final Map<String, String?> xcodeProjectSettingsMap = <String, String?>{};
 
-    xcodeProjectSettingsMap['Version Number'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleShortVersionStringKey);
-    xcodeProjectSettingsMap['Build Number'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleVersionKey);
-    xcodeProjectSettingsMap['Display Name'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleDisplayNameKey);
-    xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
-    xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
+    xcodeProjectSettingsMap['Version Number'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleShortVersionStringKey);
+    xcodeProjectSettingsMap['Build Number'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleVersionKey);
+    xcodeProjectSettingsMap['Display Name'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleDisplayNameKey);
+    xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kMinimumOSVersionKey);
+    xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleIdentifierKey);
 
     final List<ValidationMessage> validationMessages = xcodeProjectSettingsMap.entries.map((MapEntry<String, String?> entry) {
       final String title = entry.key;
@@ -673,7 +673,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         appFilenamePattern: 'App'
       );
       // Only support 64bit iOS code size analysis.
-      final String arch = getNameForDarwinArch(DarwinArch.arm64);
+      final String arch = DarwinArch.arm64.name;
       final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
         .childFile('snapshot.$arch.json');
       final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)

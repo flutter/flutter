@@ -88,11 +88,7 @@ class UnpackWindows extends Target {
         platform: TargetPlatform.windows_x64
       )
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile(_kWindowsDepfile),
     );
@@ -145,11 +141,7 @@ abstract class BundleWindowsAssets extends Target {
       targetPlatform: TargetPlatform.windows_x64,
       shaderTarget: ShaderTarget.sksl,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );

@@ -21,6 +21,7 @@ class SpellCheckConfiguration {
   /// for spell check.
   const SpellCheckConfiguration({
     this.spellCheckService,
+    this.misspelledSelectionColor,
     this.misspelledTextStyle,
     this.spellCheckSuggestionsToolbarBuilder,
   }) : _spellCheckEnabled = true;
@@ -30,10 +31,18 @@ class SpellCheckConfiguration {
     :  _spellCheckEnabled = false,
        spellCheckService = null,
        spellCheckSuggestionsToolbarBuilder = null,
-       misspelledTextStyle = null;
+       misspelledTextStyle = null,
+       misspelledSelectionColor = null;
 
   /// The service used to fetch spell check results for text input.
   final SpellCheckService? spellCheckService;
+
+  /// The color the paint the selection highlight when spell check is showing
+  /// suggestions for a misspelled word.
+  ///
+  /// For example, on iOS, the selection appears red while the spell check menu
+  /// is showing.
+  final Color? misspelledSelectionColor;
 
   /// Style used to indicate misspelled words.
   ///
@@ -56,6 +65,7 @@ class SpellCheckConfiguration {
   /// specified overrides.
   SpellCheckConfiguration copyWith({
     SpellCheckService? spellCheckService,
+    Color? misspelledSelectionColor,
     TextStyle? misspelledTextStyle,
     EditableTextContextMenuBuilder? spellCheckSuggestionsToolbarBuilder}) {
     if (!_spellCheckEnabled) {
@@ -65,6 +75,7 @@ class SpellCheckConfiguration {
 
     return SpellCheckConfiguration(
       spellCheckService: spellCheckService ?? this.spellCheckService,
+      misspelledSelectionColor: misspelledSelectionColor ?? this.misspelledSelectionColor,
       misspelledTextStyle: misspelledTextStyle ?? this.misspelledTextStyle,
       spellCheckSuggestionsToolbarBuilder : spellCheckSuggestionsToolbarBuilder ?? this.spellCheckSuggestionsToolbarBuilder,
     );

@@ -118,7 +118,6 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
-
   testWidgets(
     'Tapping the Live Text button calls onLiveTextInput.',
     (WidgetTester tester) async {
@@ -184,6 +183,48 @@ void main() {
     },
     skip: kIsWeb, // [intended]
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/126312.
+  testWidgets('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
+    final Key key = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          key: key,
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          readOnly: true,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    // Reparent the EditableText, so that the parent has not yet been laid
+    // out when didUpdateWidget is called.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: FractionalTranslation(
+          translation: const Offset(0.1, 0.1),
+          child: EditableText(
+            key: key,
+            backgroundCursorColor: Colors.grey,
+            controller: TextEditingController(text: 'blah blah'),
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      ),
+    );
+  });
 
   testWidgets('Text with selection can be shown on the screen when the keyboard shown', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/119628
@@ -3182,6 +3223,42 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['readOnly'], isFalse);
   });
 
+  testWidgets('Sends "updateConfig" when obscureText is flipped', (WidgetTester tester) async {
+    bool obscureText = true;
+    late StateSetter setState;
+    final TextEditingController controller = TextEditingController(text: 'Lorem');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return EditableText(
+              obscureText: obscureText,
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            );
+          },
+        ),
+      ),
+    );
+
+    // Interact with the field to establish the input connection.
+    final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+    await tester.pump();
+
+    expect(tester.testTextInput.setClientArgs!['obscureText'], isTrue);
+
+    setState(() { obscureText = false; });
+    await tester.pump();
+
+    expect(tester.testTextInput.setClientArgs!['obscureText'], isFalse);
+  });
+
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
     late String changedValue;
     final Widget widget = MaterialApp(
@@ -5461,6 +5538,80 @@ void main() {
 
     // There should be a new platform message updating the selection rects.
     expect(log.where((MethodCall m) => m.method == 'TextInput.setSelectionRects').length, 0);
+
+    // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+
+  testWidgets('selection rects sent even when character corners are outside of paintBounds', (WidgetTester tester) async {
+    final List<List<SelectionRect>> log = <List<SelectionRect>>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) {
+      if (methodCall.method == 'TextInput.setSelectionRects') {
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        final List<SelectionRect> selectionRects = <SelectionRect>[];
+        for (final dynamic rect in args) {
+          selectionRects.add(SelectionRect(
+            position: (rect as List<dynamic>)[4] as int,
+            bounds: Rect.fromLTWH(rect[0] as double, rect[1] as double, rect[2] as double, rect[3] as double),
+          ));
+        }
+        log.add(selectionRects);
+      }
+      return null;
+    });
+
+    final TextEditingController controller = TextEditingController();
+    final ScrollController scrollController = ScrollController();
+    controller.text = 'Text1';
+
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey();
+
+    Future<void> pumpEditableText({ double? width, double? height, TextAlign textAlign = TextAlign.start }) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: SizedBox(
+                width: width,
+                height: height,
+                child: EditableText(
+                  controller: controller,
+                  textAlign: textAlign,
+                  scrollController: scrollController,
+                  maxLines: null,
+                  focusNode: focusNode,
+                  cursorWidth: 0,
+                  key: editableTextKey,
+                  style: Typography.material2018().black.titleMedium!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Set height to 1 pixel less than full height.
+    await pumpEditableText(height: 13);
+    expect(log, isEmpty);
+
+    // Scroll so that the top of each character is above the top of the renderEditable
+    // and the bottom of each character is below the bottom of the renderEditable.
+    editableTextKey.currentState!.renderEditable.offset = ViewportOffset.fixed(0.5);
+
+    await tester.showKeyboard(find.byType(EditableText));
+    // We should get all the rects.
+    expect(log.single, const <SelectionRect>[
+      SelectionRect(position: 0, bounds: Rect.fromLTRB(0.0, -0.5, 14.0, 13.5)),
+      SelectionRect(position: 1, bounds: Rect.fromLTRB(14.0, -0.5, 28.0, 13.5)),
+      SelectionRect(position: 2, bounds: Rect.fromLTRB(28.0, -0.5, 42.0, 13.5)),
+      SelectionRect(position: 3, bounds: Rect.fromLTRB(42.0, -0.5, 56.0, 13.5)),
+      SelectionRect(position: 4, bounds: Rect.fromLTRB(56.0, -0.5, 70.0, 13.5))
+    ]);
+    log.clear();
 
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
@@ -15535,6 +15686,67 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
       skip: kIsWeb, // [intended]
     );
+
+    testWidgets('tapping on a misspelled word hides the handles', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      controller.value = const TextEditingValue(
+        // All misspellings of "test". One the same length, one shorter, and one
+        // longer.
+        text: 'test test testt',
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            showSelectionHandles: true,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+              ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+
+      state.spellCheckResults = SpellCheckResults(
+        controller.value.text,
+        const <SuggestionSpan>[
+          SuggestionSpan(TextRange(start: 10, end: 15), <String>['test']),
+        ]);
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isFalse);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsNothing);
+      expect(state.selectionOverlay!.handlesAreVisible, isTrue);
+
+      await tester.tapAt(textOffsetToPosition(tester, 12));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsOneWidget);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isFalse);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsNothing);
+      expect(state.selectionOverlay!.handlesAreVisible, isTrue);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: kIsWeb, // [intended]
+    );
   });
 
   group('magnifier', () {
@@ -15987,6 +16199,408 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
     expect(state.buildTextSpan().style!.fontWeight, FontWeight.bold);
   });
+
+  testWidgets('code points are treated as single characters in obscure mode', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(),
+          focusNode: focusNode,
+          obscureText: true,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            cut: true,
+            paste: true,
+            selectAll: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.enterText(find.byType(EditableText), '👨‍👩‍👦');
+    await tester.pump();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textEditingValue.text, '👨‍👩‍👦');
+    // 👨‍👩‍👦|
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 8),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    // 👨‍👩‍|👦
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    // 👨‍👩|‍👦
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 5),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    // 👨‍|👩‍👦
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 3),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    // 👨|‍👩‍👦
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 2),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    // |👨‍👩‍👦
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 0),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    // 👨|‍👩‍👦
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 2),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    // 👨‍|👩‍👦
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 3),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    // 👨‍👩|‍👦
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 5),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    // 👨‍👩‍|👦
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    // 👨‍👩‍👦|
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 8),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(state.textEditingValue.text, '👨‍👩‍');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(state.textEditingValue.text, '👨‍👩');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(state.textEditingValue.text, '👨‍');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(state.textEditingValue.text, '👨');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(state.textEditingValue.text, '');
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('when manually placing the cursor in the middle of a code point', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(),
+          focusNode: focusNode,
+          obscureText: true,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            cut: true,
+            paste: true,
+            selectAll: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.enterText(find.byType(EditableText), '👨‍👩‍👦');
+    await tester.pump();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textEditingValue.text, '👨‍👩‍👦');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 8),
+    );
+
+    // Place the cursor in the middle of the last code point, which consists of
+    // two code units.
+    await tester.tapAt(textOffsetToPosition(tester, 7));
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 7),
+    );
+
+    // Using the arrow keys moves out of the code unit.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    await tester.tapAt(textOffsetToPosition(tester, 7));
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 7),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 8),
+    );
+
+    // Pressing delete doesn't delete only the left code unit, it deletes the
+    // entire code point (both code units, one to the left and one to the right
+    // of the cursor).
+    await tester.tapAt(textOffsetToPosition(tester, 7));
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 7),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(state.textEditingValue.text, '👨‍👩‍');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('when inserting a malformed string', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(),
+          focusNode: focusNode,
+          obscureText: true,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            cut: true,
+            paste: true,
+            selectAll: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    // This malformed string is the result of removing the final code unit from
+    // the extended grapheme cluster "👨‍👩‍👦", so that the final
+    // surrogate pair (the "👦" emoji or "\uD83D\uDC66"), only has its high
+    // surrogate.
+    await tester.enterText(find.byType(EditableText), '👨‍👩‍\uD83D');
+    await tester.pump();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textEditingValue.text, '👨‍👩‍\uD83D');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 7),
+    );
+
+    // The dangling high surrogate is treated as a single rune.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 7),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(state.textEditingValue.text, '👨‍👩‍');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('when inserting a malformed string that is a sequence of dangling high surrogates', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(),
+          focusNode: focusNode,
+          obscureText: true,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            cut: true,
+            paste: true,
+            selectAll: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    // This string is the high surrogate from the emoji "👦" ("\uD83D\uDC66"),
+    // repeated.
+    await tester.enterText(find.byType(EditableText), '\uD83D\uD83D\uD83D\uD83D\uD83D\uD83D');
+    await tester.pump();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textEditingValue.text, '\uD83D\uD83D\uD83D\uD83D\uD83D\uD83D');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    // Each dangling high surrogate is treated as a single character.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 5),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(state.textEditingValue.text, '\uD83D\uD83D\uD83D\uD83D\uD83D');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 5),
+    );
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('when inserting a malformed string that is a sequence of dangling low surrogates', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(),
+          focusNode: focusNode,
+          obscureText: true,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            cut: true,
+            paste: true,
+            selectAll: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    // This string is the low surrogate from the emoji "👦" ("\uD83D\uDC66"),
+    // repeated.
+    await tester.enterText(find.byType(EditableText), '\uDC66\uDC66\uDC66\uDC66\uDC66\uDC66');
+    await tester.pump();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textEditingValue.text, '\uDC66\uDC66\uDC66\uDC66\uDC66\uDC66');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    // Each dangling high surrogate is treated as a single character.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 5),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(state.textEditingValue.text, '\uDC66\uDC66\uDC66\uDC66\uDC66');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 5),
+    );
+  },
+    skip: kIsWeb, // [intended]
+  );
 }
 
 class UnsettableController extends TextEditingController {
@@ -16045,7 +16659,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return const SizedBox();
@@ -16074,10 +16688,8 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   int pasteCount = 0;
   int copyCount = 0;
 
-  // TODO(chunhtai): remove optional parameter once migration is done.
-  // https://github.com/flutter/flutter/issues/99360
   @override
-  void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
+  void handleCopy(TextSelectionDelegate delegate) {
     copyCount += 1;
   }
 
@@ -16086,10 +16698,8 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
     pasteCount += 1;
   }
 
-  // TODO(chunhtai): remove optional parameter once migration is done.
-  // https://github.com/flutter/flutter/issues/99360
   @override
-  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
+  void handleCut(TextSelectionDelegate delegate) {
     cutCount += 1;
   }
 
@@ -16129,7 +16739,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     final Offset selectionMidpoint = position;
@@ -16187,7 +16797,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
   @override
   void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     onCut?.call();
-    return super.handleCut(delegate, clipboardStatus);
+    return super.handleCut(delegate);
   }
 }
 

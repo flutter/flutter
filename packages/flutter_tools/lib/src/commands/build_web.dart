@@ -14,6 +14,7 @@ import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
 import '../web/file_generators/flutter_service_worker_js.dart';
+import '../web/web_constants.dart';
 import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
@@ -91,20 +92,24 @@ class BuildWebCommand extends BuildSubCommand {
     }
     argParser.addFlag(
       FlutterOptions.kWebWasmFlag,
-      help: 'Compile to WebAssembly rather than JavaScript.\nSee $kWasmPreviewUri for more information.',
+      help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
       negatable: false,
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
     argParser.addFlag(
       'omit-type-checks',
-      help: 'Omit type checks in Wasm output.',
+      help: 'Omit type checks in Wasm output.\n'
+          'Reduces code size and improves performance, but may affect runtime correctness. Use with care.',
       negatable: false,
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
-    argParser.addFlag(
+    argParser.addOption(
       'wasm-opt',
-      help: 'Run wasm-opt on the output wasm module.',
-      negatable: false,
+      help:
+          'Optimize output wasm using the Binaryen (https://github.com/WebAssembly/binaryen) tool.',
+      defaultsTo: WasmOptLevel.defaultValue.cliName,
+      allowed: WasmOptLevel.values.map<String>((WasmOptLevel e) => e.cliName),
+      allowedHelp: CliEnum.allowedHelp(WasmOptLevel.values),
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
   }
@@ -139,7 +144,7 @@ class BuildWebCommand extends BuildSubCommand {
       }
       compilerConfig = WasmCompilerConfig(
         omitTypeChecks: boolArg('omit-type-checks'),
-        runWasmOpt: boolArg('wasm-opt'),
+        wasmOpt: WasmOptLevel.values.byName(stringArg('wasm-opt')!),
       );
     } else {
       compilerConfig = JsCompilerConfig(

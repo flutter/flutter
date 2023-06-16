@@ -34,6 +34,8 @@ const String kAnimatedComplexOpacityPerfRouteName = '/animated_complex_opacity';
 const String kAnimatedComplexImageFilteredPerfRouteName = '/animated_complex_image_filtered';
 const String kListTextLayoutRouteName = '/list_text_layout';
 const String kAnimatedBlurBackdropFilter = '/animated_blur_backdrop_filter';
+const String kSlidersRouteName = '/sliders';
+const String kDrawPointsPageRougeName = '/draw_points';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';
 const String kOpacityPeepholeColumnOfOpacityRouteName = '$kOpacityPeepholeRouteName/column_of_opacity';

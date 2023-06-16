@@ -49,7 +49,12 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   /// Creates a [TestDefaultBinaryMessenger] instance.
   ///
   /// The [delegate] instance must not be null.
-  TestDefaultBinaryMessenger(this.delegate);
+  TestDefaultBinaryMessenger(
+    this.delegate, {
+    Map<String, MessageHandler> outboundHandlers = const <String, MessageHandler>{},
+  }) {
+    _outboundHandlers.addAll(outboundHandlers);
+  }
 
   /// The delegate [BinaryMessenger].
   final BinaryMessenger delegate;

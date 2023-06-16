@@ -318,7 +318,7 @@ abstract class PaintPattern {
   /// painting has completed, not at the time of the call. If the same [Paint]
   /// object is reused multiple times, then this may not match the actual
   /// arguments as they were seen by the method.
-  void arc({ Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, StrokeCap? strokeCap });
+  void arc({ Rect? rect, Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, StrokeCap? strokeCap });
 
   /// Indicates that a paragraph is expected next.
   ///
@@ -769,8 +769,8 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void arc({ Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, StrokeCap? strokeCap }) {
-    _predicates.add(_ArcPaintPredicate(color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style, strokeCap: strokeCap));
+  void arc({ Rect? rect, Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, StrokeCap? strokeCap }) {
+    _predicates.add(_ArcPaintPredicate(rect: rect, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style, strokeCap: strokeCap));
   }
 
   @override
@@ -1273,9 +1273,28 @@ class _LinePaintPredicate extends _DrawCommandPaintPredicate {
 }
 
 class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
-  _ArcPaintPredicate({ Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, StrokeCap? strokeCap }) : super(
+  _ArcPaintPredicate({ this.rect, Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, StrokeCap? strokeCap }) : super(
     #drawArc, 'an arc', 5, 4, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style, strokeCap: strokeCap,
   );
+
+  final Rect? rect;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments);
+    final Rect rectArgument = arguments[0] as Rect;
+    if (rect != null && rectArgument != rect) {
+      throw 'It called $methodName with a paint whose rect, $rectArgument, was not exactly the expected rect ($rect).';
+    }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (rect != null) {
+      description.add('rect $rect');
+    }
+  }
 }
 
 class _ShadowPredicate extends _PaintPredicate {

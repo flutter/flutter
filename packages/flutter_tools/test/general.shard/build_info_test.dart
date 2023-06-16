@@ -83,15 +83,15 @@ void main() {
   });
 
   testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK', () {
-    expect(getDartNameForDarwinArch(DarwinArch.armv7),  'armv7');
-    expect(getDartNameForDarwinArch(DarwinArch.arm64),  'arm64');
-    expect(getDartNameForDarwinArch(DarwinArch.x86_64), 'x64');
+    expect(DarwinArch.armv7.dartName,  'armv7');
+    expect(DarwinArch.arm64.dartName,  'arm64');
+    expect(DarwinArch.x86_64.dartName, 'x64');
   });
 
   testWithoutContext('getNameForDarwinArch returns Apple names', () {
-    expect(getNameForDarwinArch(DarwinArch.armv7),  'armv7');
-    expect(getNameForDarwinArch(DarwinArch.arm64),  'arm64');
-    expect(getNameForDarwinArch(DarwinArch.x86_64), 'x86_64');
+    expect(DarwinArch.armv7.name,  'armv7');
+    expect(DarwinArch.arm64.name,  'arm64');
+    expect(DarwinArch.x86_64.name, 'x86_64');
   });
 
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {

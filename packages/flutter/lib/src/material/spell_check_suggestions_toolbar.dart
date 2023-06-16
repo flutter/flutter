@@ -10,7 +10,6 @@ import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
 import 'material.dart';
 import 'spell_check_suggestions_toolbar_layout_delegate.dart';
-import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_text_button.dart';
 
 // The default height of the SpellCheckSuggestionsToolbar, which
@@ -73,10 +72,6 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   ///    [ContextMenuButtonItem]s used to build the Cupertino style spell check
   ///    suggestions toolbar.
   final List<ContextMenuButtonItem> buttonItems;
-
-  /// Padding between the toolbar and the anchor. Eyeballed on Pixel 4 emulator
-  /// running Android API 31.
-  static const double kToolbarContentDistanceBelow = TextSelectionToolbar.kHandleSize - 3.0;
 
   /// Builds the button items for the toolbar based on the available
   /// spell check suggestions.
@@ -153,6 +148,8 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
 
   /// Determines the Offset that the toolbar will be anchored to.
   static Offset getToolbarAnchor(TextSelectionToolbarAnchors anchors) {
+    // Since this will be positioned below the anchor point, use the secondary
+    // anchor by default.
     return anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!;
   }
 
@@ -190,24 +187,26 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     final double spellCheckSuggestionsToolbarHeight =
         _kDefaultToolbarHeight - (48.0 * (4 - buttonItems.length));
     // Incorporate the padding distance between the content and toolbar.
-    final Offset anchorPadded =
-        anchor + const Offset(0.0, kToolbarContentDistanceBelow);
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
     final double softKeyboardViewInsetsBottom = mediaQueryData.viewInsets.bottom;
-    final double paddingAbove = mediaQueryData.padding.top + CupertinoTextSelectionToolbar.kToolbarScreenPadding;
+    final double paddingAbove = mediaQueryData.padding.top
+        + CupertinoTextSelectionToolbar.kToolbarScreenPadding;
     // Makes up for the Padding.
-    final Offset localAdjustment = Offset(CupertinoTextSelectionToolbar.kToolbarScreenPadding, paddingAbove);
+    final Offset localAdjustment = Offset(
+      CupertinoTextSelectionToolbar.kToolbarScreenPadding,
+      paddingAbove,
+    );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
         CupertinoTextSelectionToolbar.kToolbarScreenPadding,
-        kToolbarContentDistanceBelow,
+        paddingAbove,
         CupertinoTextSelectionToolbar.kToolbarScreenPadding,
         CupertinoTextSelectionToolbar.kToolbarScreenPadding + softKeyboardViewInsetsBottom,
       ),
       child: CustomSingleChildLayout(
         delegate: SpellCheckSuggestionsToolbarLayoutDelegate(
-          anchor: anchorPadded - localAdjustment,
+          anchor: anchor - localAdjustment,
         ),
         child: AnimatedSize(
           // This duration was eyeballed on a Pixel 2 emulator running Android

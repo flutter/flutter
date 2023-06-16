@@ -887,7 +887,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
       return null;
     }
-    return DateTime(year, month, day);
+
+    try {
+      return DateTime(year, month, day);
+    } on ArgumentError {
+      return null;
+    }
   }
 
   @override

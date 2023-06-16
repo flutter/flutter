@@ -23,7 +23,7 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueNotifier<ClipboardStatus>? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);

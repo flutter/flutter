@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -95,7 +96,8 @@ class Radio<T> extends StatefulWidget {
     this.visualDensity,
     this.focusNode,
     this.autofocus = false,
-  }) : _radioType = _RadioType.material;
+  }) : _radioType = _RadioType.material,
+       useCupertinoCheckmarkStyle = false;
 
   /// Creates an adaptive [Radio] based on whether the target platform is iOS
   /// or macOS, following Material design's
@@ -109,6 +111,8 @@ class Radio<T> extends StatefulWidget {
   /// If a [CupertinoRadio] is created, the following parameters are ignored:
   /// [mouseCursor], [fillColor], [hoverColor], [overlayColor], [splashRadius],
   /// [materialTapTargetSize], [visualDensity].
+  ///
+  /// [useCupertinoCheckmarkStyle] is used only if a [CupertinoRadio] is created.
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Radio.adaptive({
@@ -128,6 +132,7 @@ class Radio<T> extends StatefulWidget {
     this.visualDensity,
     this.focusNode,
     this.autofocus = false,
+    this.useCupertinoCheckmarkStyle = false
   }) : _radioType = _RadioType.adaptive;
 
   /// The value represented by this radio button.
@@ -344,6 +349,15 @@ class Radio<T> extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// Controls whether the checkmark style is used in an iOS-style radio.
+  ///
+  /// Only usable under the [Radio.adaptive] constructor. If set to true, on
+  /// Apple platforms the radio button will appear as an iOS styled checkmark.
+  /// Controls the [CupertinoRadio] through [CupertinoRadio.useCheckmarkStyle].
+  ///
+  /// Defaults to false.
+  final bool useCupertinoCheckmarkStyle;
+
   final _RadioType _radioType;
 
   bool get _selected => value == groupValue;
@@ -426,6 +440,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
               focusColor: widget.focusColor,
               focusNode: widget.focusNode,
               autofocus: widget.autofocus,
+              useCheckmarkStyle: widget.useCupertinoCheckmarkStyle,
             );
         }
     }
@@ -498,10 +513,24 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
         ? effectiveActivePressedOverlayColor
         : effectiveInactivePressedOverlayColor;
     }
+    final bool? accessibilitySelected;
+    // Apple devices also use `selected` to annotate radio button's semantics
+    // state.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        accessibilitySelected = null;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        accessibilitySelected = widget._selected;
+    }
 
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: widget._selected,
+      selected: accessibilitySelected,
       child: buildToggleable(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
@@ -576,11 +605,11 @@ class _RadioDefaultsM2 extends RadioThemeData {
       if (states.contains(MaterialState.pressed)) {
         return fillColor.resolve(states).withAlpha(kRadialReactionAlpha);
       }
-      if (states.contains(MaterialState.focused)) {
-        return _theme.focusColor;
-      }
       if (states.contains(MaterialState.hovered)) {
         return _theme.hoverColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _theme.focusColor;
       }
       return Colors.transparent;
     });
@@ -599,8 +628,6 @@ class _RadioDefaultsM2 extends RadioThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _RadioDefaultsM3 extends RadioThemeData {
   _RadioDefaultsM3(this.context);

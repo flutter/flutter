@@ -194,6 +194,40 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(40.0, 40.0));
   });
 
+  testWidgets('Radio selected semantics - platform adaptive', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(Theme(
+      data: theme,
+      child: Material(
+        child: Radio<int>(
+          value: 1,
+          groupValue: 1,
+          onChanged: (int? i) {},
+        ),
+      ),
+    ));
+    final bool isApple = defaultTargetPlatform == TargetPlatform.iOS ||
+                         defaultTargetPlatform == TargetPlatform.macOS;
+    expect(
+      semantics,
+      includesNodeWith(
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isInMutuallyExclusiveGroup,
+          SemanticsFlag.hasCheckedState,
+          SemanticsFlag.hasEnabledState,
+          SemanticsFlag.isEnabled,
+          SemanticsFlag.isFocusable,
+          SemanticsFlag.isChecked,
+          if (isApple) SemanticsFlag.isSelected,
+        ],
+        actions: <SemanticsAction>[
+          SemanticsAction.tap,
+        ],
+      ),
+    );
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('Radio semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -440,6 +474,7 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     const Key radioKey = Key('radio');
+    final bool material3 = theme.useMaterial3;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
         theme: theme,
@@ -477,12 +512,12 @@ void main() {
       Material.of(tester.element(find.byKey(radioKey))),
       paints
         ..rect(
-            color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-          )
+          color: const Color(0xffffffff),
+          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+        )
         ..circle(color: Colors.orange[500])
-        ..circle(color: const Color(0xff2196f3))
-        ..circle(color: const Color(0xff2196f3)),
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xff2196f3))
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xff2196f3)),
     );
 
     // Check when the radio isn't selected.
@@ -515,8 +550,8 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: const Color(0x61000000))
-        ..circle(color: const Color(0x61000000)),
+        ..circle(color: material3 ? theme.colorScheme.onSurface.withOpacity(0.38) : const Color(0x61000000))
+        ..circle(color: material3 ? theme.colorScheme.onSurface.withOpacity(0.38) : const Color(0x61000000)),
     );
   });
 
@@ -524,6 +559,7 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     const Key radioKey = Key('radio');
+    final bool material3 = theme.useMaterial3;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
         theme: theme,
@@ -562,8 +598,8 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: const Color(0xff2196f3))
-        ..circle(color: const Color(0xff2196f3)),
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xff2196f3))
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xff2196f3)),
     );
 
     // Start hovering
@@ -598,8 +634,8 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: const Color(0x61000000))
-        ..circle(color: const Color(0x61000000)),
+        ..circle(color: material3 ? theme.colorScheme.onSurface.withOpacity(0.38) : const Color(0x61000000))
+        ..circle(color: material3 ? theme.colorScheme.onSurface.withOpacity(0.38) : const Color(0x61000000)),
     );
   });
 
@@ -995,7 +1031,7 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: theme.useMaterial3 ? theme.colorScheme.primary.withOpacity(0.08) : Colors.black12)
+        ..circle(color: theme.useMaterial3 ? theme.colorScheme.primary.withOpacity(0.08) : theme.hoverColor)
         ..circle(color: hoveredFillColor),
     );
   });
@@ -1216,15 +1252,19 @@ void main() {
       )
     );
 
-    final Finder tooltip1 = find.byType(Tooltip);
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
     expect(find.text(tapTooltip), findsNothing);
+    expect(find.text(longPressTooltip), findsNothing);
 
+    final Finder tooltip1 = find.byType(Tooltip);
     await tester.tap(tooltip1);
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(tapTooltip), findsOneWidget);
   });
 
   testWidgets('Radio button default colors', (WidgetTester tester) async {
+    final bool material3 = theme.useMaterial3;
     Widget buildRadio({bool enabled = true, bool selected = true}) {
       return MaterialApp(
         theme: theme,
@@ -1244,8 +1284,8 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
-        ..circle(color: const Color(0xFF2196F3)) // Outer circle - blue primary value
-        ..circle(color: const Color(0xFF2196F3))..restore(), // Inner circle - blue primary value
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xFF2196F3)) // Outer circle - primary value
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xFF2196F3))..restore(), // Inner circle - primary value
     );
 
     await tester.pumpWidget(Container());
@@ -1256,7 +1296,7 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints
         ..save()
-        ..circle(color: const Color(0xFF2196F3))
+        ..circle(color: material3 ? theme.colorScheme.primary : const Color(0xFF2196F3))
         ..restore(),
     );
 
@@ -1328,7 +1368,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
       material3
-        ? (paints..circle(color: colors.primary.withOpacity(0.12))..circle(color: colors.onSurface.withOpacity(1)))
+        ? (paints..circle(color: colors.primary.withOpacity(0.12))..circle(color: colors.onSurfaceVariant.withOpacity(1)))
         : (paints..circle(color: theme.unselectedWidgetColor.withAlpha(0x1F))..circle(color: theme.unselectedWidgetColor))
     );
 
@@ -1403,5 +1443,70 @@ void main() {
 
       expect(find.byType(CupertinoRadio<int>), findsNothing);
     }
+  });
+
+  testWidgets('Radio default overlayColor and fillColor resolves pressed state', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final bool material3 = theme.useMaterial3;
+
+    Finder findRadio() {
+      return find.byWidgetPredicate((Widget widget) => widget is Radio<bool>);
+    }
+
+    MaterialInkController? getRadioMaterial(WidgetTester tester) {
+      return Material.of(tester.element(findRadio()));
+    }
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Scaffold(
+        body: Radio<bool>(
+          focusNode: focusNode,
+          value: true,
+          groupValue: true,
+          onChanged: (_) { },
+        ),
+      ),
+    ));
+
+    // Hover
+    final Offset center = tester.getCenter(find.byType(Radio<bool>));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(getRadioMaterial(tester),
+      paints
+        ..circle(color: material3 ? theme.colorScheme.primary.withOpacity(0.08) : theme.hoverColor)
+        ..circle(color: material3 ? theme.colorScheme.primary : theme.colorScheme.secondary)
+    );
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+
+    expect(getRadioMaterial(tester),
+      paints
+        ..circle(color: material3 ? theme.colorScheme.onSurface.withOpacity(0.12) : theme.colorScheme.secondary.withAlpha(kRadialReactionAlpha))
+        ..circle(color: material3 ? theme.colorScheme.primary : theme.colorScheme.secondary)
+    );
+    // Remove pressed and hovered states
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(getRadioMaterial(tester),
+      paints
+        ..circle(color: material3 ? theme.colorScheme.primary.withOpacity(0.12) : theme.focusColor)
+        ..circle(color: material3 ? theme.colorScheme.primary : theme.colorScheme.secondary)
+    );
   });
 }

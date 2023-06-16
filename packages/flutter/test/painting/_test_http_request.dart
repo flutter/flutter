@@ -2,14 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// For now, we're hiding dart:js_interop's `@JS` to avoid a conflict with
-// package:js' `@JS`. In the future, we should be able to remove package:js
-// altogether and just import dart:js_interop.
-import 'dart:js_interop' hide JS;
+import 'dart:js_interop';
 
 import 'package:flutter/src/services/dom.dart';
-import 'package:js/js.dart';
-import 'package:js/js_util.dart' as js_util;
 
 /// Defines a new property on an Object.
 @JS('Object.defineProperty')
@@ -17,13 +12,12 @@ external JSVoid objectDefineProperty(JSAny o, JSString symbol, JSAny desc);
 
 void createGetter(JSAny mock, String key, JSAny? Function() get) {
   objectDefineProperty(
-      mock,
-      key.toJS,
-      js_util.jsify(
-          <String, Object>{
-            'get': () { return get(); }.toJS
-          }
-      ) as JSAny);
+    mock,
+    key.toJS,
+    <String, JSFunction>{
+      'get': (() => get()).toJS,
+    }.jsify()!,
+  );
 }
 
 @JS()
@@ -49,11 +43,14 @@ class TestHttpRequest {
         setRequestHeader: setRequestHeader.toJS,
         addEventListener: addEventListener.toJS,
     );
-    createGetter(_mock, 'headers', () => js_util.jsify(headers) as JSAny);
-    createGetter(_mock,
-        'responseHeaders', () => js_util.jsify(responseHeaders) as JSAny);
-    createGetter(_mock, 'status', () => status.toJS);
-    createGetter(_mock, 'response', () => js_util.jsify(response) as JSAny);
+    // TODO(srujzs): This is needed for when we reify JS types. Right now, JSAny
+    // is a typedef for Object?, but when we reify, it'll be its own type.
+    final JSAny mock = _mock as JSAny;
+    createGetter(mock, 'headers', () => headers.jsify());
+    createGetter(mock,
+        'responseHeaders', () => responseHeaders.jsify());
+    createGetter(mock, 'status', () => status.toJS);
+    createGetter(mock, 'response', () => response.jsify());
   }
 
   late DomXMLHttpRequestMock _mock;
@@ -71,7 +68,9 @@ class TestHttpRequest {
 
   JSVoid addEventListener(JSString type, DomEventListener listener) {
     if (type.toDart == mockEvent?.type) {
-      (listener.toDart as DartDomEventListener)(mockEvent!.event);
+      final DartDomEventListener dartListener =
+        (listener as JSExportedDartFunction).toDart as DartDomEventListener;
+      dartListener(mockEvent!.event);
     }
   }
 

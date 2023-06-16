@@ -444,7 +444,6 @@ void sanityCheckDocs([Platform platform = const LocalPlatform()]) {
   final List<String> argumentRegExps = <String>[
     r'split=\d+',
     r'run=true',
-    r'null_safety=true',
     r'sample_id=widgets\.Listener\.\d+',
     'sample_channel=$expectedBranch',
     'channel=$expectedBranch',

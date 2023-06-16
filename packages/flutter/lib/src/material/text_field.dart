@@ -833,6 +833,25 @@ class TextField extends StatefulWidget {
     }
   }
 
+  /// Returns a new [SpellCheckConfiguration] where the given configuration has
+  /// had any missing values replaced with their defaults for the Android
+  /// platform.
+  static SpellCheckConfiguration inferAndroidSpellCheckConfiguration(
+    SpellCheckConfiguration? configuration,
+  ) {
+    if (configuration == null
+      || configuration == const SpellCheckConfiguration.disabled()) {
+      return const SpellCheckConfiguration.disabled();
+    }
+    return configuration.copyWith(
+      misspelledTextStyle: configuration.misspelledTextStyle
+        ?? TextField.materialMisspelledTextStyle,
+      spellCheckSuggestionsToolbarBuilder:
+        configuration.spellCheckSuggestionsToolbarBuilder
+          ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+    );
+  }
+
   @override
   State<TextField> createState() => _TextFieldState();
 
@@ -1039,7 +1058,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _effectiveFocusNode.canRequestFocus = _canRequestFocus;
 
     if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
-      if(_effectiveController.selection.isCollapsed) {
+      if (_effectiveController.selection.isCollapsed) {
         _showSelectionHandles = !widget.readOnly;
       }
     }
@@ -1215,7 +1234,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     assert(
-      !(widget.style != null && widget.style!.inherit == false &&
+      !(widget.style != null && !widget.style!.inherit &&
         (widget.style!.fontSize == null || widget.style!.textBaseline == null)),
       'inherit false style must supply fontSize and textBaseline',
     );
@@ -1236,19 +1255,24 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     ];
 
     // Set configuration as disabled if not otherwise specified. If specified,
-    // ensure that configuration uses Material text style for misspelled words
-    // unless a custom style is specified.
-    final SpellCheckConfiguration spellCheckConfiguration =
-      widget.spellCheckConfiguration != null &&
-      widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
-        ? widget.spellCheckConfiguration!.copyWith(
-            misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
-              ?? TextField.materialMisspelledTextStyle,
-            spellCheckSuggestionsToolbarBuilder:
-              widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
-                ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder,
-          )
-        : const SpellCheckConfiguration.disabled();
+    // ensure that configuration uses the correct style for misspelled words for
+    // the current platform, unless a custom style is specified.
+    final SpellCheckConfiguration spellCheckConfiguration;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        spellCheckConfiguration =
+            CupertinoTextField.inferIOSSpellCheckConfiguration(
+              widget.spellCheckConfiguration,
+            );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        spellCheckConfiguration = TextField.inferAndroidSpellCheckConfiguration(
+          widget.spellCheckConfiguration,
+        );
+    }
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     final bool paintCursorAboveText;
@@ -1478,8 +1502,6 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
   if (states.contains(MaterialState.disabled)) {

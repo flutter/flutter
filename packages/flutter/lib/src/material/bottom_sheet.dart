@@ -210,14 +210,13 @@ class BottomSheet extends StatefulWidget {
 
   /// Defines minimum and maximum sizes for a [BottomSheet].
   ///
-  /// Typically a bottom sheet will cover the entire width of its
-  /// parent. Consider limiting the width by setting smaller constraints
-  /// for large screens.
-  ///
   /// If null, then the ambient [ThemeData.bottomSheetTheme]'s
   /// [BottomSheetThemeData.constraints] will be used. If that
-  /// is null then the bottom sheet's size will be constrained
-  /// by its parent (usually a [Scaffold]).
+  /// is null and [ThemeData.useMaterial3] is true, then the bottom sheet
+  /// will have a max width of 640dp. If [ThemeData.useMaterial3] is false, then
+  /// the bottom sheet's size will be constrained by its parent
+  /// (usually a [Scaffold]). In this case, consider limiting the width by
+  /// setting smaller constraints for large screens.
   ///
   /// If constraints are specified (either in this property or in the
   /// theme), the bottom sheet will be aligned to the bottom-center of
@@ -316,7 +315,7 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   bool extentChanged(DraggableScrollableNotification notification) {
-    if (notification.extent == notification.minExtent) {
+    if (notification.extent == notification.minExtent && notification.shouldCloseOnMinExtent) {
       widget.onClosing();
     }
     return false;
@@ -325,7 +324,7 @@ class _BottomSheetState extends State<BottomSheet> {
   void _handleDragHandleHover(bool hovering) {
     if (hovering != dragHandleMaterialState.contains(MaterialState.hovered)) {
       setState(() {
-        if(hovering){
+        if (hovering){
           dragHandleMaterialState.add(MaterialState.hovered);
         }
         else{
@@ -358,15 +357,14 @@ class _BottomSheetState extends State<BottomSheet> {
         dragHandleColor: widget.dragHandleColor,
         dragHandleSize: widget.dragHandleSize,
       );
-      // Only add [GestureDetector] to the drag handle when the rest of the
+      // Only add [_BottomSheetGestureDetector] to the drag handle when the rest of the
       // bottom sheet is not draggable. If the whole bottom sheet is draggable,
       // no need to add it.
-      if(!widget.enableDrag) {
-        dragHandle = GestureDetector(
+      if (!widget.enableDrag) {
+        dragHandle = _BottomSheetGestureDetector(
           onVerticalDragStart: _handleDragStart,
           onVerticalDragUpdate: _handleDragUpdate,
           onVerticalDragEnd: _handleDragEnd,
-          excludeFromSemantics: true,
           child: dragHandle,
         );
       }
@@ -408,11 +406,10 @@ class _BottomSheetState extends State<BottomSheet> {
       );
     }
 
-    return !widget.enableDrag ? bottomSheet : GestureDetector(
+    return !widget.enableDrag ? bottomSheet : _BottomSheetGestureDetector(
       onVerticalDragStart: _handleDragStart,
       onVerticalDragUpdate: _handleDragUpdate,
       onVerticalDragEnd: _handleDragEnd,
-      excludeFromSemantics: true,
       child: bottomSheet,
     );
   }
@@ -882,14 +879,13 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   /// Defines minimum and maximum sizes for a [BottomSheet].
   ///
-  /// Typically a bottom sheet will cover the entire width of its
-  /// parent. Consider limiting the width by setting smaller constraints
-  /// for large screens.
-  ///
   /// If null, the ambient [ThemeData.bottomSheetTheme]'s
   /// [BottomSheetThemeData.constraints] will be used. If that
-  /// is null, the bottom sheet's size will be constrained
-  /// by its parent (usually a [Scaffold]).
+  /// is null and [ThemeData.useMaterial3] is true, then the bottom sheet
+  /// will have a max width of 640dp. If [ThemeData.useMaterial3] is false, then
+  /// the bottom sheet's size will be constrained by its parent
+  /// (usually a [Scaffold]). In this case, consider limiting the width by
+  /// setting smaller constraints for large screens.
   ///
   /// If constraints are specified (either in this property or in the
   /// theme), the bottom sheet will be aligned to the bottom-center of
@@ -1154,6 +1150,9 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
+/// The 'barrierLabel' parameter can be used to set a custom barrierlabel.
+/// Will default to modalBarrierDismissLabel of context if not set.
+///
 /// {@tool dartpad}
 /// This example demonstrates how to use [showModalBottomSheet] to display a
 /// bottom sheet that obscures the content behind it when a user taps a button.
@@ -1186,6 +1185,7 @@ Future<T?> showModalBottomSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   Color? backgroundColor,
+  String? barrierLabel,
   double? elevation,
   ShapeBorder? shape,
   Clip? clipBehavior,
@@ -1210,7 +1210,7 @@ Future<T?> showModalBottomSheet<T>({
     builder: builder,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     isScrollControlled: isScrollControlled,
-    barrierLabel: localizations.scrimLabel,
+    barrierLabel: barrierLabel ?? localizations.scrimLabel,
     barrierOnTapHint: localizations.scrimOnTapHint(localizations.bottomSheetLabel),
     backgroundColor: backgroundColor,
     elevation: elevation,
@@ -1298,7 +1298,39 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   );
 }
 
+class _BottomSheetGestureDetector extends StatelessWidget {
+  const _BottomSheetGestureDetector({
+    required this.child,
+    required this.onVerticalDragStart,
+    required this.onVerticalDragUpdate,
+    required this.onVerticalDragEnd,
+  });
 
+  final Widget child;
+  final GestureDragStartCallback onVerticalDragStart;
+  final GestureDragUpdateCallback onVerticalDragUpdate;
+  final GestureDragEndCallback onVerticalDragEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    return RawGestureDetector(
+      excludeFromSemantics: true,
+      gestures: <Type, GestureRecognizerFactory<GestureRecognizer>>{
+        VerticalDragGestureRecognizer : GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+          () => VerticalDragGestureRecognizer(debugOwner: this),
+          (VerticalDragGestureRecognizer instance) {
+            instance
+              ..onStart = onVerticalDragStart
+              ..onUpdate = onVerticalDragUpdate
+              ..onEnd = onVerticalDragEnd
+              ..onlyAcceptDragOnThreshold = true;
+          },
+        ),
+      },
+      child: child,
+    );
+  }
+}
 
 // BEGIN GENERATED TOKEN PROPERTIES - BottomSheet
 
@@ -1306,8 +1338,6 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
   _BottomSheetDefaultsM3(this.context)
@@ -1335,6 +1365,9 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
 
   @override
   Size? get dragHandleSize => const Size(32, 4);
+
+  @override
+  BoxConstraints? get constraints => const BoxConstraints(maxWidth: 640.0);
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomSheet

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -29,6 +30,46 @@ void main() {
     expect(pressed, true);
   });
 
+  testWidgets('keeps contrast with background on hover',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDesktopTextSelectionToolbarButton.text(
+            text: 'Tap me',
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context =
+        tester.element(find.byType(CupertinoDesktopTextSelectionToolbarButton));
+
+    // The Text color is a CupertinoDynamicColor so we have to compare the color
+    // values instead of just comparing the colors themselves.
+    expect(
+      (tester.firstWidget(find.text('Tap me')) as Text).style!.color!.value,
+      CupertinoColors.black.value,
+    );
+
+    // Hover gesture
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(tester
+        .getCenter(find.byType(CupertinoDesktopTextSelectionToolbarButton)));
+    await tester.pumpAndSettle();
+
+    // The color here should be a standard Color, there's no need to use value.
+    expect(
+      (tester.firstWidget(find.text('Tap me')) as Text).style!.color,
+      CupertinoTheme.of(context).primaryContrastingColor,
+    );
+  });
+
   testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -49,7 +90,8 @@ void main() {
     expect(opacity.opacity.value, 1.0);
 
     // Make a "down" gesture on the button.
-    final Offset center = tester.getCenter(find.byType(CupertinoDesktopTextSelectionToolbarButton));
+    final Offset center = tester
+        .getCenter(find.byType(CupertinoDesktopTextSelectionToolbarButton));
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
