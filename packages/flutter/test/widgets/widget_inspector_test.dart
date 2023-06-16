@@ -900,6 +900,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     test('WidgetInspectorService getProperties for $DiagnosticsNode', () {
+      // TODO(polina-c): delete this test once getChildrenDetailsSubtree stops accepting DiagnosticsNode.
+      // https://github.com/flutter/devtools/issues/3951
       final DiagnosticsNode diagnostic = const Text('a', textDirection: TextDirection.ltr).toDiagnosticsNode();
       const String group = 'group';
       service.disposeAllGroups();
@@ -2124,6 +2126,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     test('ext.flutter.inspector.getProperties for $DiagnosticsNode', () async {
+      // TODO(polina-c): delete this test once getChildrenDetailsSubtree stops accepting DiagnosticsNode.
+      // https://github.com/flutter/devtools/issues/3951
       final DiagnosticsNode diagnostic = const Text('a', textDirection: TextDirection.ltr).toDiagnosticsNode();
       const String group = 'group';
       final String id = service.toId(diagnostic, group)!;
@@ -5090,7 +5094,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(box2.localToGlobal(Offset.zero), equals(position2));
     });
 
-    testWidgets('getChildrenDetailsSubtree', (WidgetTester tester) async {
+    testWidgets('getChildrenDetailsSubtree with $DiagnosticsNode', (WidgetTester tester) async {
+      // TODO(polina-c): delete this test once getChildrenDetailsSubtree stops accepting DiagnosticsNode.
+      // https://github.com/flutter/devtools/issues/3951
       await tester.pumpWidget(
         MaterialApp(
           title: 'Hello, World',
@@ -5131,6 +5137,66 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final Map<String, Object?> scaffold = childrenOfMaterialApp.first! as Map<String, Object?>;
       expect(scaffold['description'], 'Scaffold');
       final String objectId = scaffold['objectId']! as String;
+      final String details = service.getDetailsSubtree(objectId, 'foo2');
+      // ignore: avoid_dynamic_calls
+      final List<Object?> detailedChildren = json.decode(details)['children'] as List<Object?>;
+
+      final List<Map<String, Object?>> appBars = <Map<String, Object?>>[];
+      void visitChildren(List<Object?> children) {
+        for (final Map<String, Object?> child in children.cast<Map<String, Object?>>()) {
+          if (child['description'] == 'AppBar') {
+            appBars.add(child);
+          }
+          if (child.containsKey('children')) {
+            visitChildren(child['children']! as List<Object?>);
+          }
+        }
+      }
+      visitChildren(detailedChildren);
+      expect(appBars.single, isNot(contains('children')));
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+
+    testWidgets('getChildrenDetailsSubtree with $Diagnosticable', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          title: 'Hello, World',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Hello, World'),
+            ),
+            body: const Center(
+              child: Text('Hello, World!'),
+            ),
+          ),
+        ),
+      );
+      service.setSelection(find.text('Hello, World!').evaluate().first, 'my-group');
+
+      // Figure out the pubRootDirectory
+      final Map<String, Object?> jsonObject = (await service.testExtension(
+        WidgetInspectorServiceExtensions.getSelectedWidget.name,
+        <String, String>{'objectGroup': 'my-group'},
+      ))! as Map<String, Object?>;
+      final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
+      expect(creationLocation, isNotNull);
+      final String file = creationLocation['file']! as String;
+      expect(file, endsWith('widget_inspector_test.dart'));
+      final List<String> segments = Uri.parse(file).pathSegments;
+      // Strip a couple subdirectories away to generate a plausible pub rootdirectory.
+      final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
+      service.resetPubRootDirectories();
+      service.addPubRootDirectories(<String>[pubRootTest]);
+
+      final String summary = service.getRootWidgetSummaryTree('foo1');
+      // ignore: avoid_dynamic_calls
+      final List<Object?> childrenOfRoot = json.decode(summary)['children'] as List<Object?>;
+      final List<Object?> childrenOfMaterialApp = (childrenOfRoot.first! as Map<String, Object?>)['children']! as List<Object?>;
+      final Map<String, Object?> scaffold = childrenOfMaterialApp.first! as Map<String, Object?>;
+      expect(scaffold['description'], 'Scaffold');
+      final String objectId = scaffold['valueId']! as String;
       final String details = service.getDetailsSubtree(objectId, 'foo2');
       // ignore: avoid_dynamic_calls
       final List<Object?> detailedChildren = json.decode(details)['children'] as List<Object?>;
