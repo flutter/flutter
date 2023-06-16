@@ -553,7 +553,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
   }) {
     RenderObject repaintBoundary = renderObject;
     while (!repaintBoundary.isRepaintBoundary) {
-      repaintBoundary = repaintBoundary.parent! as RenderObject;
+      repaintBoundary = repaintBoundary.parent!;
     }
     final _ScreenshotData data = _ScreenshotData(target: renderObject);
     final _ScreenshotPaintingContext context = _ScreenshotPaintingContext(
@@ -1632,7 +1632,7 @@ mixin WidgetInspectorService {
     final List<RenderObject> chain = <RenderObject>[];
     while (renderObject != null) {
       chain.add(renderObject);
-      renderObject = renderObject.parent as RenderObject?;
+      renderObject = renderObject.parent;
     }
     return _followDiagnosticableChain(chain.reversed.toList());
   }
@@ -2053,7 +2053,7 @@ mixin WidgetInspectorService {
             'renderObject': renderObject.toDiagnosticsNode().toJsonMap(renderObjectSerializationDelegate),
           };
 
-          final AbstractNode? renderParent = renderObject.parent;
+          final RenderObject? renderParent = renderObject.parent;
           if (renderParent is RenderObject && subtreeDepth > 0) {
             final Object? parentCreator = renderParent.debugCreator;
             if (parentCreator is DebugCreator) {
@@ -2948,7 +2948,7 @@ class _RenderInspectorOverlay extends RenderBox {
     context.addLayer(_InspectorOverlayLayer(
       overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       selection: selection,
-      rootRenderObject: parent is RenderObject ? parent! as RenderObject : null,
+      rootRenderObject: parent is RenderObject ? parent! : null,
     ));
   }
 }
@@ -3237,14 +3237,14 @@ class _InspectorOverlayLayer extends Layer {
   /// overlays in the same app (i.e. an storyboard), a selected or candidate
   /// render object may not belong to this tree.
   bool _isInInspectorRenderObjectTree(RenderObject child) {
-    RenderObject? current = child.parent as RenderObject?;
+    RenderObject? current = child.parent;
     while (current != null) {
       // We found the widget inspector render object.
       if (current is RenderStack
           && current.lastChild is _RenderInspectorOverlay) {
         return rootRenderObject == current;
       }
-      current = current.parent as RenderObject?;
+      current = current.parent;
     }
     return false;
   }
