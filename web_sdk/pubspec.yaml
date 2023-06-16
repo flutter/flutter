@@ -28,6 +28,8 @@ dependency_overrides: # Must include all transitive dependencies from the "any" 
     path: ../../third_party/dart/third_party/pkg/convert
   crypto:
     path: ../../third_party/dart/third_party/pkg/crypto
+  dart_internal:
+    path: ../../third_party/dart/pkg/dart_internal
   file:
     path: ../../third_party/pkg/file/packages/file
   glob:
