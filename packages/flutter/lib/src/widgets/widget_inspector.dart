@@ -2233,19 +2233,19 @@ mixin WidgetInspectorService {
   /// If the currently selected [Element] is identical to the [Element]
   /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
   /// reused.
-  String getSelectedSummaryWidget(String diagnosticsOrDiagnosticableId, String groupName) {
-    return _safeJsonEncode(_getSelectedSummaryWidget(diagnosticsOrDiagnosticableId, groupName));
+    String getSelectedSummaryWidget(String previousSelectionId, String groupName) {
+    return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
   }
 
-  _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionDiagnosticsOrDiagnosticableId) {
-     return _getCreationLocation(_getSelectedSummaryDiagnosticsNode(previousSelectionDiagnosticsOrDiagnosticableId)?.value);
+  _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId) {
+     return _getCreationLocation(_getSelectedSummaryDiagnosticsNode(previousSelectionId)?.value);
   }
 
-  DiagnosticsNode? _getSelectedSummaryDiagnosticsNode(String? previousSelectionDiagnosticsOrDiagnosticableId) {
+  DiagnosticsNode? _getSelectedSummaryDiagnosticsNode(String? previousSelectionId) {
     if (!isWidgetCreationTracked()) {
-      return _getSelectedWidgetDiagnosticsNode(previousSelectionDiagnosticsOrDiagnosticableId);
+      return _getSelectedWidgetDiagnosticsNode(previousSelectionId);
     }
-    final DiagnosticsNode? previousSelection = _idToDiagnosticsNode(previousSelectionDiagnosticsOrDiagnosticableId);
+    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
     Element? current = selection.currentElement;
     if (current != null && !_isValueCreatedByLocalProject(current)) {
       Element? firstLocal;
@@ -2260,8 +2260,8 @@ mixin WidgetInspectorService {
     return current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode();
   }
 
-  Map<String, Object?>? _getSelectedSummaryWidget(String? previousSelectionDiagnosticsOrDiagnosticableId, String groupName) {
-    return _nodeToJson(_getSelectedSummaryDiagnosticsNode(previousSelectionDiagnosticsOrDiagnosticableId), InspectorSerializationDelegate(groupName: groupName, service: this));
+  Map<String, Object?>? _getSelectedSummaryWidget(String? previousSelectionId, String groupName) {
+    return _nodeToJson(_getSelectedSummaryDiagnosticsNode(previousSelectionId), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns whether [Widget] creation locations are available.
