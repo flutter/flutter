@@ -7,22 +7,10 @@ import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
-import 'package:ui/src/engine/canvaskit/renderer.dart';
-import 'package:ui/src/engine/renderer.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../engine.dart'  show flutterViewEmbedder, platformViewManager, registerHotRestartListener;
-import 'clipboard.dart';
-import 'dom.dart';
-import 'mouse_cursor.dart';
-import 'platform_views/message_handler.dart';
-import 'plugins.dart';
-import 'safe_browser_api.dart';
-import 'semantics.dart';
-import 'services.dart';
-import 'text_editing/text_editing.dart';
-import 'util.dart';
-import 'window.dart';
+import '../engine.dart';
 
 /// Requests that the browser schedule a frame.
 ///
@@ -688,7 +676,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   Future<void> _handleFlutterAssetsMessage(String url, ui.PlatformMessageResponseCallback? callback) async {
     try {
-      final HttpFetchResponse response = await ui.webOnlyAssetManager.loadAsset(url);
+      final HttpFetchResponse response = await ui_web.assetManager.loadAsset(url) as HttpFetchResponse;
       final ByteBuffer assetData = await response.asByteBuffer();
       replyToPlatformMessage(callback, assetData.asByteData());
     } catch (error) {

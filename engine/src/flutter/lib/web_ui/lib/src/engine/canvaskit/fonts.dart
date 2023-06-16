@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 // This URL was found by using the Google Fonts Developer API to find the URL
 // for Roboto. The API warns that this URL is not stable. In order to update
@@ -109,7 +110,7 @@ class SkiaFontCollection implements FlutterFontCollection {
         loadedRoboto = true;
       }
       for (final FontAsset fontAsset in family.fontAssets) {
-        final String url = assetManager.getAssetUrl(fontAsset.asset);
+        final String url = ui_web.assetManager.getAssetUrl(fontAsset.asset);
         pendingDownloads.add(_downloadFont(fontAsset.asset, url, family.name));
       }
     }

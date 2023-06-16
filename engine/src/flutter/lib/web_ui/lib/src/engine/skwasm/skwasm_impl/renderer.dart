@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class SkwasmRenderer implements Renderer {
   late DomCanvasElement sceneElement;
@@ -438,7 +439,7 @@ class SkwasmRenderer implements Renderer {
     if (_programs.containsKey(assetKey)) {
       return _programs[assetKey]!;
     }
-    return _programs[assetKey] = assetManager.load(assetKey).then((ByteData data) {
+    return _programs[assetKey] = ui_web.assetManager.load(assetKey).then((ByteData data) {
       return SkwasmFragmentProgram.fromBytes(assetKey, data.buffer.asUint8List());
     });
   }

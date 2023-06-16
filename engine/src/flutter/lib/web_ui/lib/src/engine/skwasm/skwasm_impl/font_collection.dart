@@ -10,6 +10,7 @@ import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 // This URL was found by using the Google Fonts Developer API to find the URL
 // for Roboto. The API warns that this URL is not stable. In order to update
@@ -99,12 +100,12 @@ class SkwasmFontCollection implements FlutterFontCollection {
   Future<FontLoadError?> _downloadFontAsset(FontAsset asset, String family) async {
     final HttpFetchResponse response;
     try {
-      response = await assetManager.loadAsset(asset.asset);
+      response = await ui_web.assetManager.loadAsset(asset.asset) as HttpFetchResponse;
     } catch (error) {
-      return FontDownloadError(assetManager.getAssetUrl(asset.asset), error);
+      return FontDownloadError(ui_web.assetManager.getAssetUrl(asset.asset), error);
     }
     if (!response.hasPayload) {
-      return FontNotFoundError(assetManager.getAssetUrl(asset.asset));
+      return FontNotFoundError(ui_web.assetManager.getAssetUrl(asset.asset));
     }
     int length = 0;
     final List<JSUint8Array> chunks = <JSUint8Array>[];
@@ -128,7 +129,7 @@ class SkwasmFontCollection implements FlutterFontCollection {
       skStringFree(familyNameHandle);
       return null;
     } else {
-      return FontInvalidDataError(assetManager.getAssetUrl(asset.asset));
+      return FontInvalidDataError(ui_web.assetManager.getAssetUrl(asset.asset));
     }
   }
 

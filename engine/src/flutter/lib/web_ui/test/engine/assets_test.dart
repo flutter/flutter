@@ -8,6 +8,7 @@ library;
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/matchers.dart';
 
@@ -23,7 +24,7 @@ void testMain() {
     });
 
     test('initializes with default values', () {
-      final AssetManager assets = AssetManager();
+      final ui_web.AssetManager assets = ui_web.AssetManager();
 
       expect(
         assets.getAssetUrl('asset.txt'),
@@ -33,25 +34,25 @@ void testMain() {
     });
 
     test('assetsDir changes the directory where assets are stored', () {
-      final AssetManager assets = AssetManager(assetsDir: 'static');
+      final ui_web.AssetManager assets = ui_web.AssetManager(assetsDir: 'static');
 
       expect(assets.getAssetUrl('asset.txt'), 'static/asset.txt');
     });
 
     test('assetBase must end with slash', () {
       expect(() {
-        AssetManager(assetBase: '/deployment');
+        ui_web.AssetManager(assetBase: '/deployment');
       }, throwsAssertionError);
     });
 
     test('assetBase can be relative', () {
-      final AssetManager assets = AssetManager(assetBase: 'base/');
+      final ui_web.AssetManager assets = ui_web.AssetManager(assetBase: 'base/');
 
       expect(assets.getAssetUrl('asset.txt'), 'base/assets/asset.txt');
     });
 
     test('assetBase can be absolute', () {
-      final AssetManager assets = AssetManager(
+      final ui_web.AssetManager assets = ui_web.AssetManager(
         assetBase: 'https://www.gstatic.com/my-app/',
       );
 
@@ -62,7 +63,7 @@ void testMain() {
     });
 
     test('assetBase in conjunction with assetsDir, fully custom paths', () {
-      final AssetManager assets = AssetManager(
+      final ui_web.AssetManager assets = ui_web.AssetManager(
         assetBase: '/asset/base/',
         assetsDir: 'static',
       );
@@ -71,7 +72,7 @@ void testMain() {
     });
 
     test('Fully-qualified asset URLs are untouched', () {
-      final AssetManager assets = AssetManager();
+      final ui_web.AssetManager assets = ui_web.AssetManager();
 
       expect(
         assets.getAssetUrl('https://static.my-app.com/favicon.ico'),
@@ -80,7 +81,7 @@ void testMain() {
     });
 
     test('Fully-qualified asset URLs are untouched (even with assetBase)', () {
-      final AssetManager assets = AssetManager(
+      final ui_web.AssetManager assets = ui_web.AssetManager(
         assetBase: 'https://static.my-app.com/',
       );
 
@@ -98,20 +99,20 @@ void testMain() {
     });
 
     test('reads value from DOM', () {
-      final AssetManager assets = AssetManager();
+      final ui_web.AssetManager assets = ui_web.AssetManager();
 
       expect(assets.getAssetUrl('asset.txt'), '/dom/base/assets/asset.txt');
     });
 
     test('reads value from DOM (only once!)', () {
-      final AssetManager firstManager = AssetManager();
+      final ui_web.AssetManager firstManager = ui_web.AssetManager();
       expect(
         firstManager.getAssetUrl('asset.txt'),
         '/dom/base/assets/asset.txt',
       );
 
       removeAssetBaseMeta();
-      final AssetManager anotherManager = AssetManager();
+      final ui_web.AssetManager anotherManager = ui_web.AssetManager();
 
       expect(
         firstManager.getAssetUrl('asset.txt'),

@@ -1893,7 +1893,6 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/semantics.dart + ../../../flutter/LICENS
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/alarm_clock.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/app_bootstrap.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/assets.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/browser_detection.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvas_pool.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/canvas.dart + ../../../flutter/LICENSE
@@ -2109,6 +2108,7 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/text.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/tile_mode.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/ui.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/ui_web/src/ui_web.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/ui_web/src/ui_web/asset_manager.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/ui_web/src/ui_web/navigation/platform_location.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/ui_web/src/ui_web/navigation/url_strategy.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/ui_web/src/ui_web/platform_view_registry.dart + ../../../flutter/LICENSE
@@ -4572,7 +4572,6 @@ FILE: ../../../flutter/lib/web_ui/lib/semantics.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/alarm_clock.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/app_bootstrap.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/assets.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/browser_detection.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvas_pool.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/canvas.dart
@@ -4788,6 +4787,7 @@ FILE: ../../../flutter/lib/web_ui/lib/text.dart
 FILE: ../../../flutter/lib/web_ui/lib/tile_mode.dart
 FILE: ../../../flutter/lib/web_ui/lib/ui.dart
 FILE: ../../../flutter/lib/web_ui/lib/ui_web/src/ui_web.dart
+FILE: ../../../flutter/lib/web_ui/lib/ui_web/src/ui_web/asset_manager.dart
 FILE: ../../../flutter/lib/web_ui/lib/ui_web/src/ui_web/navigation/platform_location.dart
 FILE: ../../../flutter/lib/web_ui/lib/ui_web/src/ui_web/navigation/url_strategy.dart
 FILE: ../../../flutter/lib/web_ui/lib/ui_web/src/ui_web/platform_view_registry.dart

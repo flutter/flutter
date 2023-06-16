@@ -17,7 +17,6 @@ library engine;
 
 export 'engine/alarm_clock.dart';
 export 'engine/app_bootstrap.dart';
-export 'engine/assets.dart';
 export 'engine/browser_detection.dart';
 export 'engine/canvas_pool.dart';
 export 'engine/canvaskit/canvas.dart';
