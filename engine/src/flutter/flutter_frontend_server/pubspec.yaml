@@ -49,6 +49,8 @@ dependency_overrides:
     path: ../../third_party/dart/pkg/compiler
   crypto:
     path: ../../third_party/dart/third_party/pkg/crypto
+  dart_internal:
+    path: ../../third_party/dart/pkg/dart_internal
   dart2js_info:
     path: ../../third_party/dart/pkg/dart2js_info
   dev_compiler:
