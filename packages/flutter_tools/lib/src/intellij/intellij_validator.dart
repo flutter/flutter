@@ -396,10 +396,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     bool checkForJetBrainsToolboxWrapper(String installPath) {
       final Map<String, dynamic> plistValues = plistParser.parseFile(
           fileSystem.path.join(installPath, 'Contents', 'Info.plist'));
-      if (plistValues.containsKey('JetBrainsToolboxApp')) {
-        return true;
-      }
-      return false;
+      return plistValues.containsKey('JetBrainsToolboxApp');
     }
 
     void checkForIntelliJ(Directory dir) {
