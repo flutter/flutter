@@ -26,7 +26,9 @@ class LiveText {
 
   /// Start Live Text input.
   ///
-  /// This method should only be called when Live Text input is available.
+  /// If any text field are currently active, call this method will let text field
+  /// start Live Text input. And if current device doesn't support Live Text input,
+  /// nothing will happen.
   static void startLiveTextInput() {
     SystemChannels.textInput.invokeMethod('TextInput.startLiveTextInput');
   }
