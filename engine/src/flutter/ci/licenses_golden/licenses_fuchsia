@@ -1,4 +1,4 @@
-Signature: ccd40525fcfc5d7b8ec5363a6f0fa5a3
+Signature: e8c7524bad2a6d2ac67ddb0b13faefc9
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -905,7 +905,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/limits.h + ../../..
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/namespace.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/unsafe.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_base/decoding_and_validating.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_base/encoding.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_base/formatting.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/coding.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/internal.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -1023,7 +1022,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/limits.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/namespace.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/unsafe.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/decoding_and_validating.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/encoding.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/formatting.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/coding.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/internal.h
@@ -2342,8 +2340,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/include/lib/inspect/s
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/reader.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/service.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/magma_client/include/lib/magma/magma_sysmem.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/modular_cpp/agent.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/modular_cpp/include/lib/modular/cpp/agent.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_ref_pair.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_token_pair.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_ref_pair.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -2662,8 +2658,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/include/lib/inspect/ser
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/reader.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/service.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/magma_client/include/lib/magma/magma_sysmem.h
-FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/agent.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/include/lib/modular/cpp/agent.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_ref_pair.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_token_pair.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_ref_pair.cc
