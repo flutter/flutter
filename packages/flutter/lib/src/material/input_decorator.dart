@@ -4282,6 +4282,60 @@ class InputDecorationTheme with Diagnosticable {
     );
   }
 
+  /// Returns a copy of this InputDecorationTheme where the non-null fields in
+  /// the given InputDecorationTheme override the corresponding fields in this
+  /// InputDecorationTheme.
+  ///
+  /// In other words, [inputDecorationTheme]'s fields are used to fill in the
+  /// (unspecified) fields of this InputDecorationTheme.
+  InputDecorationTheme merge(InputDecorationTheme? inputDecorationTheme) {
+    if (inputDecorationTheme == null) {
+      return this;
+    }
+    return copyWith(
+      labelStyle: labelStyle ?? inputDecorationTheme.labelStyle,
+      floatingLabelStyle: floatingLabelStyle ?? inputDecorationTheme.floatingLabelStyle,
+      helperStyle: helperStyle ?? inputDecorationTheme.helperStyle,
+      helperMaxLines: helperMaxLines ?? inputDecorationTheme.helperMaxLines,
+      hintStyle: hintStyle ?? inputDecorationTheme.hintStyle,
+      errorStyle: errorStyle ?? inputDecorationTheme.errorStyle,
+      errorMaxLines: errorMaxLines ?? inputDecorationTheme.errorMaxLines,
+      floatingLabelBehavior: floatingLabelBehavior == inputDecorationTheme.floatingLabelBehavior
+        ? floatingLabelBehavior
+        : inputDecorationTheme.floatingLabelBehavior,
+      floatingLabelAlignment: floatingLabelAlignment == inputDecorationTheme.floatingLabelAlignment
+        ? floatingLabelAlignment
+        : inputDecorationTheme.floatingLabelAlignment,
+      isDense: isDense == inputDecorationTheme.isDense ? isDense : inputDecorationTheme.isDense,
+      contentPadding: contentPadding ?? inputDecorationTheme.contentPadding,
+      isCollapsed: isCollapsed == inputDecorationTheme.isCollapsed
+        ? isCollapsed
+        : inputDecorationTheme.isCollapsed,
+      iconColor: iconColor ?? inputDecorationTheme.iconColor,
+      prefixStyle: prefixStyle ?? inputDecorationTheme.prefixStyle,
+      prefixIconColor: prefixIconColor ?? inputDecorationTheme.prefixIconColor,
+      suffixStyle: suffixStyle ?? inputDecorationTheme.suffixStyle,
+      suffixIconColor: suffixIconColor ?? inputDecorationTheme.suffixIconColor,
+      counterStyle: counterStyle ?? inputDecorationTheme.counterStyle,
+      filled: filled == inputDecorationTheme.filled ? filled : inputDecorationTheme.filled,
+      fillColor: fillColor ?? inputDecorationTheme.fillColor,
+      activeIndicatorBorder: activeIndicatorBorder ?? inputDecorationTheme.activeIndicatorBorder,
+      outlineBorder: outlineBorder ?? inputDecorationTheme.outlineBorder,
+      focusColor: focusColor ?? inputDecorationTheme.focusColor,
+      hoverColor: hoverColor ?? inputDecorationTheme.hoverColor,
+      errorBorder: errorBorder ?? inputDecorationTheme.errorBorder,
+      focusedBorder: focusedBorder ?? inputDecorationTheme.focusedBorder,
+      focusedErrorBorder: focusedErrorBorder ?? inputDecorationTheme.focusedErrorBorder,
+      disabledBorder: disabledBorder ?? inputDecorationTheme.disabledBorder,
+      enabledBorder: enabledBorder ?? inputDecorationTheme.enabledBorder,
+      border: border ?? inputDecorationTheme.border,
+      alignLabelWithHint: alignLabelWithHint == inputDecorationTheme.alignLabelWithHint
+        ? alignLabelWithHint
+        : inputDecorationTheme.alignLabelWithHint,
+      constraints: constraints ?? inputDecorationTheme.constraints,
+    );
+  }
+
   @override
   int get hashCode => Object.hash(
     labelStyle,
