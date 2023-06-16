@@ -1722,9 +1722,12 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getProperties(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getProperties(String? diagnosticsNodeId, String groupName) {
-    final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode?;
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), InspectorSerializationDelegate(groupName: groupName, service: this), parent: node);
+  List<Object>  _getProperties(String? diagnosticsOrDiagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    if (node == null) {
+      return const <Object>[];
+    }
+    return _nodesToJson(node.getProperties(), InspectorSerializationDelegate(groupName: groupName, service: this), parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -1757,26 +1760,31 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getChildrenSummaryTree(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getChildrenSummaryTree(String? diagnosticsNodeId, String groupName) {
-    final Object? theObject = toObject(diagnosticsNodeId);
-    final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, summaryTree: true, service: this);
-
-    // TODO(polina-c): remove this, when DevTools stops sending DiagnosticsNode.
+  DiagnosticsNode? _idToDiagnosticsNode(String? diagnosticsOrDiagnosticableId) {
+    // TODO(polina-c): start always assuming Diagnosticable, when DevTools stops sending DiagnosticsNode to
+    // getChildrenSummaryTree and getProperties.
     // https://github.com/flutter/devtools/issues/3951
+    final Object? theObject = toObject(diagnosticsOrDiagnosticableId);
     if (theObject is DiagnosticsNode) {
-      return _nodesToJson(_getChildrenFiltered(theObject, delegate), delegate, parent: theObject);
+      return theObject;
     }
-
     if (theObject is Diagnosticable) {
-      final DiagnosticsNode node = theObject.toDiagnosticsNode();
-      return _nodesToJson(_getChildrenFiltered(node, delegate), delegate, parent: node);
+      return theObject.toDiagnosticsNode();
     }
-
     if (theObject == null) {
+      return null;
+    }
+    throw StateError('Unexpected object type ${theObject.runtimeType}.');
+  }
+
+  List<Object> _getChildrenSummaryTree(String? diagnosticsOrDiagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    if (node == null) {
       return <Object>[];
     }
 
-    throw StateError('Unexpected object type ${theObject.runtimeType}');
+    final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, summaryTree: true, service: this);
+    return _nodesToJson(_getChildrenFiltered(node, delegate), delegate, parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
