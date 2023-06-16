@@ -593,7 +593,8 @@ class SelectionGeometry {
     this.selectionRects = const <Rect>[],
     required this.status,
     required this.hasContent,
-  }) : assert((startSelectionPoint == null && endSelectionPoint == null) || status != SelectionStatus.none);
+  }) : assert((startSelectionPoint == null && endSelectionPoint == null) || status != SelectionStatus.none),
+       assert(status == SelectionStatus.uncollapsed || selectionRects.isEmpty);
 
   /// The geometry information at the selection start.
   ///
