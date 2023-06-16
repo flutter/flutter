@@ -1010,7 +1010,8 @@ class BrowserManager {
           );
 
           final Map<String, Uri> packageMap = <String, Uri>{
-            for (Package p in packageConfig.packages) p.name: p.packageUriRoot
+            for (final Package p in packageConfig.packages)
+              p.name: p.packageUriRoot
           };
           final JSStackTraceMapper mapper = JSStackTraceMapper(
             await File(mapPath).readAsString(),
