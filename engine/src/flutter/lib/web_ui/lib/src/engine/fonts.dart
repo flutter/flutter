@@ -8,6 +8,7 @@ import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class FontAsset {
   FontAsset(this.asset, this.descriptors);
@@ -29,8 +30,8 @@ class FontManifest {
   final List<FontFamily> families;
 }
 
-Future<FontManifest> fetchFontManifest(AssetManager assetManager) async {
-  final HttpFetchResponse response = await assetManager.loadAsset('FontManifest.json');
+Future<FontManifest> fetchFontManifest(ui_web.AssetManager assetManager) async {
+  final HttpFetchResponse response = await assetManager.loadAsset('FontManifest.json') as HttpFetchResponse;
   if (!response.hasPayload) {
     printWarning('Font manifest does not exist at `${response.url}` - ignoring.');
     return FontManifest(<FontFamily>[]);

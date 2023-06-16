@@ -111,11 +111,18 @@ set debugEmulateFlutterTesterEnvironment(bool value) {
 bool _debugEmulateFlutterTesterEnvironment = false;
 
 /// Provides the asset manager.
-// TODO(yjbanov): this function should not return a private type. Instead, we
-//                should create a public interface for the returned value that's
-//                implemented by the engine.
-//                https://github.com/flutter/flutter/issues/100394
-engine.AssetManager get webOnlyAssetManager => engine.assetManager;
+// TODO(mdebbar): Deprecate this and remove it.
+// https://github.com/flutter/flutter/issues/127395
+ui_web.AssetManager get webOnlyAssetManager {
+  assert(() {
+    engine.printWarning(
+      'The webOnlyAssetManager getter is deprecated and will be removed in a '
+      'future release. Please use `assetManager` from `dart:ui_web` instead.',
+    );
+    return true;
+  }());
+  return ui_web.assetManager;
+}
 
 /// Sets the handler that forwards platform messages to web plugins.
 ///
