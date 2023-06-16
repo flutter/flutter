@@ -2222,7 +2222,6 @@ mixin WidgetInspectorService {
 
   DiagnosticsNode? _getSelectedWidgetDiagnosticsNode(String? previousSelectionId) {
     final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
-
     final Element? current = selection.currentElement;
     return current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode();
   }
