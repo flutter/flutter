@@ -16,6 +16,11 @@
             "name": "ios_debug_sim",
             "ninja": {
                 "config": "ios_debug_sim"
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e222b"
+                }
             }
         },
         {
@@ -35,6 +40,11 @@
             "name": "ios_debug_sim_arm64",
             "ninja": {
                 "config": "ios_debug_sim_arm64"
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e222b"
+                }
             }
         },
         {
@@ -54,6 +64,11 @@
                 "targets": [
                     "flutter/shell/platform/darwin/ios:flutter_framework"
                 ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e222b"
+                }
             }
         },
         {
@@ -74,6 +89,11 @@
                     "flutter/shell/platform/darwin/ios:flutter_framework",
                     "flutter/lib/snapshot:generate_snapshot_bin"
                 ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e222b"
+                }
             }
         },
         {
@@ -94,6 +114,11 @@
                     "flutter/shell/platform/darwin/ios:flutter_framework",
                     "flutter/lib/snapshot:generate_snapshot_bin"
                 ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e222b"
+                }
             }
         }
     ],

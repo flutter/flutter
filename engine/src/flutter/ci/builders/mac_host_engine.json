@@ -45,6 +45,11 @@
                     "flutter:unittests"
                 ]
             },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e222b"
+                }
+            },
             "tests": [
                 {
                     "language": "python3",
@@ -98,6 +103,11 @@
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
                     "flutter:unittests"
                 ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e222b"
+                }
             },
             "tests": [
                 {
@@ -164,6 +174,11 @@
                     "flutter:unittests"
                 ]
             },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e222b"
+                }
+            },
             "tests": [
                 {
                     "language": "python3",
@@ -219,6 +234,11 @@
                     "flutter/build/archives:flutter_embedder_framework",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e222b"
+                }
             }
         },
         {
@@ -257,6 +277,11 @@
                     "flutter/build/archives:artifacts",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e222b"
+                }
             }
         },
         {
@@ -297,6 +322,11 @@
                     "flutter/build/archives:artifacts",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e222b"
+                }
             }
         }
     ],

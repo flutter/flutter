@@ -513,6 +513,10 @@ targets:
         [
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14e222b"
+        }
     drone_dimensions:
       - os=Mac-12
 
@@ -603,6 +607,10 @@ targets:
         [
           {"dependency": "jazzy", "version": "0.14.1"}
         ]
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14e222b"
+        }
     drone_dimensions:
       - os=Mac-12
       - cpu=x86
