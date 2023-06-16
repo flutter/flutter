@@ -263,7 +263,7 @@ class SelectableRegion extends StatefulWidget {
     required final VoidCallback onCopy,
     required final VoidCallback onSelectAll,
   }) {
-    final bool canCopy = selectionGeometry.hasSelection && selectionGeometry.status == SelectionStatus.uncollapsed;
+    final bool canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
 
     // Determine which buttons will appear so that the order and total number is
@@ -490,8 +490,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   bool _positionIsOnActiveSelection({required Offset globalPosition}) {
-    for (final Rect selectionRect in _selectionDelegate.value.selectionRects!) {
-      if (selectionRect.contains(globalPosition)) {
+    for (final Rect selectionRect in _selectionDelegate.value.selectionRects) {
+      final Matrix4 transform = _selectable!.getTransformTo(null);
+      final Rect globalRect = MatrixUtils.transformRect(transform, selectionRect);
+      if (globalRect.contains(globalPosition)) {
         return true;
       }
     }
@@ -509,8 +511,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.windows:
         // If lastSecondaryTapDownPosition is within the current selection then
         // keep the current selection, if not then collapse it.
-        final bool uncollapsedSelectionExists = _selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed;
-        final bool lastSecondaryTapDownPositionWasOnActiveSelection = uncollapsedSelectionExists && _positionIsOnActiveSelection(globalPosition: details.globalPosition);
+        final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
         if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
           _selectStartTo(offset: lastSecondaryTapDownPosition!);
           _selectEndTo(offset: lastSecondaryTapDownPosition!);
@@ -536,8 +537,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         }
         // If lastSecondaryTapDownPosition is within the current selection then
         // keep the current selection, if not then collapse it.
-        final bool uncollapsedSelectionExists = _selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed;
-        final bool lastSecondaryTapDownPositionWasOnActiveSelection = uncollapsedSelectionExists && _positionIsOnActiveSelection(globalPosition: details.globalPosition);
+        final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
         if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
           _selectStartTo(offset: lastSecondaryTapDownPosition!);
           _selectEndTo(offset: lastSecondaryTapDownPosition!);
@@ -1824,14 +1824,12 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     // currentSelectionStartIndex to the currentSelectionEndIndex.
     final List<Rect> selectionRects = <Rect>[];
     for (int index = currentSelectionStartIndex; index <= currentSelectionEndIndex; index++) {
-      final List<Rect>? currSelectableSelectionRects = selectables[index].value.selectionRects;
-      if (currSelectableSelectionRects != null) {
-        selectionRects.addAll(currSelectableSelectionRects.map((Rect selectionRect) {
-          final Matrix4 transform = selectables[index].getTransformTo(null);
-          final Rect globalRect = MatrixUtils.transformRect(transform, selectionRect);
-          return globalRect;
-        }));
-      }
+      final List<Rect> currSelectableSelectionRects = selectables[index].value.selectionRects;
+      selectionRects.addAll(currSelectableSelectionRects.map((Rect selectionRect) {
+        final Matrix4 transform = getTransformFrom(selectables[index]);
+        final Rect localRect = MatrixUtils.transformRect(transform, selectionRect);
+        return localRect;
+      }));
     }
 
     return SelectionGeometry(

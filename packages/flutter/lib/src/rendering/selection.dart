@@ -590,7 +590,7 @@ class SelectionGeometry {
   const SelectionGeometry({
     this.startSelectionPoint,
     this.endSelectionPoint,
-    this.selectionRects,
+    this.selectionRects = const <Rect>[],
     required this.status,
     required this.hasContent,
   }) : assert((startSelectionPoint == null && endSelectionPoint == null) || status != SelectionStatus.none);
@@ -630,7 +630,7 @@ class SelectionGeometry {
 
   /// The rects in the local coordinates of the containing [Selectable] that
   /// represent the selection if there is any.
-  final List<Rect>? selectionRects;
+  final List<Rect> selectionRects;
 
   /// Whether there is any selectable content in the [Selectable] or
   /// [SelectionHandler].
@@ -643,12 +643,14 @@ class SelectionGeometry {
   SelectionGeometry copyWith({
     SelectionPoint? startSelectionPoint,
     SelectionPoint? endSelectionPoint,
+    List<Rect>? selectionRects,
     SelectionStatus? status,
     bool? hasContent,
   }) {
     return SelectionGeometry(
       startSelectionPoint: startSelectionPoint ?? this.startSelectionPoint,
       endSelectionPoint: endSelectionPoint ?? this.endSelectionPoint,
+      selectionRects: selectionRects ?? this.selectionRects,
       status: status ?? this.status,
       hasContent: hasContent ?? this.hasContent,
     );
@@ -665,6 +667,7 @@ class SelectionGeometry {
     return other is SelectionGeometry
         && other.startSelectionPoint == startSelectionPoint
         && other.endSelectionPoint == endSelectionPoint
+        && other.selectionRects == selectionRects
         && other.status == status
         && other.hasContent == hasContent;
   }
@@ -674,6 +677,7 @@ class SelectionGeometry {
     return Object.hash(
       startSelectionPoint,
       endSelectionPoint,
+      selectionRects,
       status,
       hasContent,
     );
