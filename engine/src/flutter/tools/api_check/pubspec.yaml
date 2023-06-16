@@ -52,6 +52,8 @@ dependency_overrides:
     path: ../../../third_party/dart/third_party/pkg/convert
   crypto:
     path: ../../../third_party/dart/third_party/pkg/crypto
+  dart_internal:
+    path: ../../../third_party/dart/pkg/dart_internal
   expect:
     path: ../../../third_party/dart/pkg/expect
   file:
