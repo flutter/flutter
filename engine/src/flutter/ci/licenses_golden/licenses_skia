@@ -1,4 +1,4 @@
-Signature: 11f19eeedf2b341622a2f7b3a7f5579d
+Signature: 2799cd3128a63b18155b3e8296902aa3
 
 ====================================================================================================
 LIBRARY: etc1
@@ -393,6 +393,7 @@ FILE: ../../../third_party/skia/relnotes/skif_runtimeshader_sampleradius.md
 FILE: ../../../third_party/skia/relnotes/skimagefilters_alphathreshold_remove.md
 FILE: ../../../third_party/skia/relnotes/skimagefilters_image_remove.md
 FILE: ../../../third_party/skia/relnotes/skimagegenerator_grexternaltexturegenerator.md
+FILE: ../../../third_party/skia/relnotes/skpoint_float.md
 FILE: ../../../third_party/skia/relnotes/sksamplingoptions_implicit.md
 FILE: ../../../third_party/skia/relnotes/skshaders_namespace.md
 FILE: ../../../third_party/skia/relnotes/sksurface_methods.md
