@@ -1087,12 +1087,13 @@ class SelectionOverlay {
   final ValueChanged<DragStartDetails>? onStartHandleDragStart;
 
   void _handleStartHandleDragStart(DragStartDetails details) {
+    assert(!_isDraggingStartHandle);
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
+      _isDraggingStartHandle = false;
       return;
     }
-    assert(!_isDraggingStartHandle);
     _isDraggingStartHandle = details.kind == PointerDeviceKind.touch;
     onStartHandleDragStart?.call(details);
   }
@@ -1101,6 +1102,7 @@ class SelectionOverlay {
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
+      _isDraggingStartHandle = false;
       return;
     }
     onStartHandleDragUpdate?.call(details);
@@ -1114,12 +1116,12 @@ class SelectionOverlay {
   final ValueChanged<DragEndDetails>? onStartHandleDragEnd;
 
   void _handleStartHandleDragEnd(DragEndDetails details) {
+    _isDraggingStartHandle = false;
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
       return;
     }
-    _isDraggingStartHandle = false;
     onStartHandleDragEnd?.call(details);
   }
 
@@ -1169,6 +1171,7 @@ class SelectionOverlay {
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
+      _isDraggingEndHandle = false;
       return;
     }
     _isDraggingEndHandle = details.kind == PointerDeviceKind.touch;
@@ -1179,6 +1182,7 @@ class SelectionOverlay {
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
+      _isDraggingEndHandle = false;
       return;
     }
     onEndHandleDragUpdate?.call(details);
@@ -1192,12 +1196,12 @@ class SelectionOverlay {
   final ValueChanged<DragEndDetails>? onEndHandleDragEnd;
 
   void _handleEndHandleDragEnd(DragEndDetails details) {
+    _isDraggingEndHandle = false;
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
       return;
     }
-    _isDraggingEndHandle = false;
     onEndHandleDragEnd?.call(details);
   }
 
