@@ -2385,27 +2385,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
     if (_hasInputConnection) {
-      _textInputConnection?.startLiveTextInput();
+      LiveText.startLiveTextInput();
     }
     if (cause == SelectionChangedCause.toolbar) {
-      hideToolbar();
-    }
-  }
-
-  /// Replace composing region with specified text.
-  void replaceComposingRegion(SelectionChangedCause cause, String text) {
-    // Replacement cannot be performed if the text is read only or obscured.
-    assert(!widget.readOnly && !widget.obscureText);
-
-    _replaceText(ReplaceTextIntent(textEditingValue, text, textEditingValue.composing, cause));
-
-    if (cause == SelectionChangedCause.toolbar) {
-      // Schedule a call to bringIntoView() after renderEditable updates.
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          bringIntoView(textEditingValue.selection.extent);
-        }
-      });
       hideToolbar();
     }
   }

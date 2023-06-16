@@ -834,12 +834,6 @@ void main() {
       expect(control.methodCalls, expectedMethodCalls);
     });
 
-    test('start live text input correctly', () {
-      final FakeTextInputControl control = FakeTextInputControl();
-      control.startLiveTextInput();
-      expect(control.methodCalls, <String>['startLiveTextInput']);
-    });
-
     test('receives text input state changes', () {
       final FakeTextInputControl control = FakeTextInputControl();
       TextInput.setInputControl(control);
@@ -1101,11 +1095,6 @@ class FakeTextInputControl with TextInputControl {
   @override
   void show() {
     methodCalls.add('show');
-  }
-
-  @override
-  void startLiveTextInput() {
-    methodCalls.add('startLiveTextInput');
   }
 
   @override

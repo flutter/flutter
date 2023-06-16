@@ -1344,18 +1344,6 @@ class TextInputConnection {
     TextInput._instance._show();
   }
 
-  /// Start Live Text input.
-  ///
-  /// This method should only be called when Live Text input is available.
-  ///
-  /// See also:
-  ///  * [LiveText], where the availability of Live Text input can be obtained.
-  ///  * [LiveTextInputStatusNotifier], where the status of Live Text can be listened to.
-  void startLiveTextInput() {
-    assert(attached);
-    TextInput._instance._startLiveTextInput();
-  }
-
   /// Requests the system autofill UI to appear.
   ///
   /// Currently only works on Android. Other platforms do not respond to this
@@ -1966,12 +1954,6 @@ class TextInput {
     }
   }
 
-  void _startLiveTextInput() {
-    for (final TextInputControl control in _inputControls) {
-      control.startLiveTextInput();
-    }
-  }
-
   void _hide() {
     for (final TextInputControl control in _inputControls) {
       control.hide();
@@ -2162,15 +2144,6 @@ mixin TextInputControl {
   /// This method is called when the input control should become visible.
   void show() {}
 
-  /// Requests that the text input control starts Live Text input.
-  ///
-  /// This method is called when the input control will start Live Text input.
-  ///
-  /// See also:
-  ///  * [LiveText], where the availability of Live Text input can be obtained.
-  ///  * [LiveTextInputStatusNotifier], where the status of Live Text can be listened to.
-  void startLiveTextInput() {}
-
   /// Requests that the text input control is hidden.
   ///
   /// This method is called when the input control should hide.
@@ -2289,11 +2262,6 @@ class _PlatformTextInputControl with TextInputControl {
   @override
   void show() {
     _channel.invokeMethod<void>('TextInput.show');
-  }
-
-  @override
-  void startLiveTextInput() {
-    _channel.invokeMethod<void>('TextInput.startLiveTextInput');
   }
 
   @override

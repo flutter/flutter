@@ -23,4 +23,11 @@ class LiveText {
         await SystemChannels.platform.invokeMethod('LiveText.isLiveTextInputAvailable') ?? false;
     return supportLiveTextInput;
   }
+
+  /// Start Live Text input.
+  ///
+  /// This method should only be called when Live Text input is available.
+  static void startLiveTextInput() {
+    SystemChannels.textInput.invokeMethod('TextInput.startLiveTextInput');
+  }
 }
