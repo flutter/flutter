@@ -8,6 +8,7 @@
 // ignore: unnecessary_library_directive
 library ui_web;
 
+export 'ui_web/asset_manager.dart';
 export 'ui_web/navigation/platform_location.dart';
 export 'ui_web/navigation/url_strategy.dart';
 export 'ui_web/platform_view_registry.dart';

@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 enum CanvasKitVariant {
   /// The appropriate variant is chosen based on the browser.
@@ -384,7 +385,7 @@ class CanvasKitRenderer implements Renderer {
     if (_programs.containsKey(assetKey)) {
       return _programs[assetKey]!;
     }
-    return _programs[assetKey] = assetManager.load(assetKey).then((ByteData data) {
+    return _programs[assetKey] = ui_web.assetManager.load(assetKey).then((ByteData data) {
       return CkFragmentProgram.fromBytes(assetKey, data.buffer.asUint8List());
     });
   }

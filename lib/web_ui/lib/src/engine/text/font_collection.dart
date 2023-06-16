@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 /// This class is responsible for registering and loading fonts.
 ///
@@ -14,7 +15,7 @@ import 'package:ui/src/engine.dart';
 /// font manifest. If test fonts are enabled, then call
 /// [debugDownloadTestFonts] as well.
 class HtmlFontCollection implements FlutterFontCollection {
-  /// Reads the font manifest using the [assetManager] and downloads all of the
+  /// Reads the font manifest using the [ui_web.assetManager] and downloads all of the
   /// fonts declared within.
   @override
   Future<AssetFontsResult> loadAssetFonts(FontManifest manifest) async {
@@ -149,7 +150,7 @@ class HtmlFontCollection implements FlutterFontCollection {
   ) async {
     // try/catch because `new FontFace` can crash with an improper font family.
     try {
-      final DomFontFace fontFace = createDomFontFace(family, 'url(${assetManager.getAssetUrl(asset)})', descriptors);
+      final DomFontFace fontFace = createDomFontFace(family, 'url(${ui_web.assetManager.getAssetUrl(asset)})', descriptors);
       return await fontFace.load();
     } catch (e) {
       printWarning('Error while loading font family "$family":\n$e');

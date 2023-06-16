@@ -5,8 +5,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'dom.dart';
-import 'util.dart';
+import 'package:ui/src/engine.dart';
+
+/// Provides the [AssetManager] used by the Flutter Engine.
+AssetManager get assetManager => engineAssetManager;
 
 /// This class downloads assets over the network.
 ///
@@ -79,11 +81,11 @@ class AssetManager {
   }
 
   /// Loads an asset and returns the server response.
-  Future<HttpFetchResponse> loadAsset(String asset) {
+  Future<Object> loadAsset(String asset) {
     return httpFetch(getAssetUrl(asset));
   }
 
-  /// Loads an asset using an [DomXMLHttpRequest] and returns data as [ByteData].
+  /// Loads an asset using an [XMLHttpRequest] and returns data as [ByteData].
   Future<ByteData> load(String asset) async {
     final String url = getAssetUrl(asset);
     final HttpFetchResponse response = await httpFetch(url);
