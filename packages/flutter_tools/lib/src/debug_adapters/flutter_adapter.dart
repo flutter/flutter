@@ -126,7 +126,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
 
     if (vmServiceUri != null && vmServiceInfoFile != null) {
       sendConsoleOutput(
-        'To attach, provide only one of vmServiceUri/vmServiceInfoFile',
+        'To attach, provide only one (or neither) of vmServiceUri/vmServiceInfoFile',
       );
       handleSessionTerminate();
       return;
