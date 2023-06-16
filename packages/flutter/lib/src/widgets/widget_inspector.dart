@@ -1943,8 +1943,8 @@ mixin WidgetInspectorService {
   /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
   /// reused.
   @protected
-  String getSelectedWidget(String? diagnosticsOrDiagnosticableId, String groupName) {
-    return _safeJsonEncode(_getSelectedWidget(diagnosticsOrDiagnosticableId, groupName));
+  String getSelectedWidget(String? previousSelectionId, String groupName) {
+    return _safeJsonEncode(_getSelectedWidget(previousSelectionId, groupName));
   }
 
   /// Captures an image of the current state of an [object] that is a
@@ -2211,15 +2211,15 @@ mixin WidgetInspectorService {
     throw Exception('Enum value $name not found');
   }
 
-  Map<String, Object?>? _getSelectedWidget(String? diagnosticsOrDiagnosticableId, String groupName) {
+  Map<String, Object?>? _getSelectedWidget(String? previousSelectionId, String groupName) {
     return _nodeToJson(
-      _getSelectedWidgetDiagnosticsNode(diagnosticsOrDiagnosticableId),
+      _getSelectedWidgetDiagnosticsNode(previousSelectionId),
       InspectorSerializationDelegate(groupName: groupName, service: this),
     );
   }
 
-  DiagnosticsNode? _getSelectedWidgetDiagnosticsNode(String? diagnosticsOrDiagnosticableId) {
-    final DiagnosticsNode? previousSelection = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+  DiagnosticsNode? _getSelectedWidgetDiagnosticsNode(String? previousSelectionId) {
+    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
 
     final Element? current = selection.currentElement;
     return current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode();
@@ -2233,7 +2233,7 @@ mixin WidgetInspectorService {
   /// If the currently selected [Element] is identical to the [Element]
   /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
   /// reused.
-    String getSelectedSummaryWidget(String previousSelectionId, String groupName) {
+  String getSelectedSummaryWidget(String previousSelectionId, String groupName) {
     return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
   }
 
