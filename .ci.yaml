@@ -348,7 +348,6 @@ targets:
     recipe: engine_v2/engine_v2
     timeout: 60
     properties:
-      release_build: "true"
       config_name: linux_clang_tidy
 
   - name: Linux linux_arm_host_engine
