@@ -237,13 +237,13 @@ class ClangTidy {
     final List<Command> totalCommands = <Command>[];
     if (sharedBuildCommandsData.isNotEmpty) {
       final List<Command> buildCommands = <Command>[
-        for (Object? data in buildCommandsData)
+        for (final Object? data in buildCommandsData)
           Command.fromMap((data as Map<String, Object?>?)!)
       ];
       final List<Set<String>> shardFilePaths = <Set<String>>[
-        for (List<Object?> list in sharedBuildCommandsData)
+        for (final List<Object?> list in sharedBuildCommandsData)
           <String>{
-            for (Object? data in list)
+            for (final Object? data in list)
               Command.fromMap((data as Map<String, Object?>?)!).filePath
           }
       ];
@@ -255,7 +255,7 @@ class ClangTidy {
         }
       }
       final List<Command> intersection = <Command>[
-        for (_SetStatusCommand result in intersectionResults)
+        for (final _SetStatusCommand result in intersectionResults)
           if (result.setStatus == _SetStatus.Intersection) result.command
       ];
       // Make sure to sort results so the sharding scheme is guaranteed to work
@@ -266,7 +266,7 @@ class ClangTidy {
           _takeShard(intersection, shardId!, 1 + sharedBuildCommandsData.length));
     } else {
       totalCommands.addAll(<Command>[
-        for (Object? data in buildCommandsData)
+        for (final Object? data in buildCommandsData)
           Command.fromMap((data as Map<String, Object?>?)!)
       ]);
     }
