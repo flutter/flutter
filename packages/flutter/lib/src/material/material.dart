@@ -762,7 +762,7 @@ abstract class InkFeature {
       final int toDepth = to.depth;
 
       if (fromDepth >= toDepth) {
-        final AbstractNode? fromParent = from.parent;
+        final RenderObject? fromParent = from.parent;
         // Return early if the 2 render objects are not in the same render tree,
         // or either of them is offscreen and thus won't get painted.
         if (fromParent is! RenderObject || !fromParent.paintsChild(from)) {
@@ -773,7 +773,7 @@ abstract class InkFeature {
       }
 
       if (fromDepth <= toDepth) {
-        final AbstractNode? toParent = to.parent;
+        final RenderObject? toParent = to.parent;
         if (toParent is! RenderObject || !toParent.paintsChild(to)) {
           return null;
         }

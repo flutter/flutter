@@ -865,6 +865,13 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       }
       context.canvas.clipRect(bounds);
     }
+
+    if (_lastSelectableFragments != null) {
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paint(context, offset);
+      }
+    }
+
     _textPainter.paint(context.canvas, offset);
 
     paintInlineChildren(context, offset);
@@ -878,11 +885,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
         context.canvas.drawRect(Offset.zero & size, paint);
       }
       context.canvas.restore();
-    }
-    if (_lastSelectableFragments != null) {
-      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
-        fragment.paint(context, offset);
-      }
     }
   }
 
@@ -1476,6 +1478,11 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     }
     final TextRange word = paragraph.getWordBoundary(position);
     assert(word.isNormalized);
+    if (word.start < range.start && word.end < range.start) {
+      return SelectionResult.previous;
+    } else if (word.start > range.end && word.end > range.end) {
+      return SelectionResult.next;
+    }
     // Fragments are separated by placeholder span, the word boundary shouldn't
     // expand across fragments.
     assert(word.start >= range.start && word.end <= range.end);

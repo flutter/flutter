@@ -991,6 +991,7 @@ void main() {
 
   testWidgets('ListTile can be splashed and has correct splash color', (WidgetTester tester) async {
     final Widget buildApp = MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Material(
         child: Center(
           child: SizedBox(
@@ -1279,6 +1280,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Center(
             child: ListTile(
@@ -1807,6 +1809,7 @@ void main() {
       bool selected = false,
     }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Center(
             child: Builder(
@@ -1947,13 +1950,13 @@ void main() {
     // ListTile default text colors.
     await tester.pumpWidget(buildFrame());
     final RenderParagraph leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.color, theme.textTheme.labelSmall!.color);
+    expect(leading.text.style!.color, theme.colorScheme.onSurfaceVariant);
     final RenderParagraph title = _getTextRenderObject(tester, 'title');
-    expect(title.text.style!.color, theme.textTheme.bodyLarge!.color);
+    expect(title.text.style!.color, theme.colorScheme.onSurface);
     final RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
-    expect(subtitle.text.style!.color, theme.textTheme.bodyMedium!.color);
+    expect(subtitle.text.style!.color, theme.colorScheme.onSurfaceVariant);
     final RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.color, theme.textTheme.labelSmall!.color);
+    expect(trailing.text.style!.color, theme.colorScheme.onSurfaceVariant);
   });
 
   testWidgets('Default ListTile debugFillProperties', (WidgetTester tester) async {
@@ -3571,6 +3574,7 @@ void main() {
     });
 
     testWidgets('ListTile text color', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
       Widget buildFrame({
         bool dense = false,
         bool enabled = true,
@@ -3578,7 +3582,7 @@ void main() {
         ListTileStyle? style,
       }) {
         return MaterialApp(
-          theme: ThemeData(useMaterial3: false),
+          theme: theme,
           home: Material(
             child: Center(
               child: Builder(
@@ -3599,8 +3603,6 @@ void main() {
           ),
         );
       }
-
-      final ThemeData theme = ThemeData();
 
       // ListTile - ListTileStyle.list (default).
       await tester.pumpWidget(buildFrame());
