@@ -1005,7 +1005,7 @@ void main() {
       editable.painter = null;
       editable.paintCount = 0;
 
-      final AbstractNode? parent = editable.parent;
+      final RenderObject? parent = editable.parent;
       if (parent is RenderConstrainedBox) {
         parent.child = null;
       }

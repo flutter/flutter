@@ -62,7 +62,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
     color: isEnabled
       ? ${color("$tokenGroup.with-icon.icon.color")}
       : ${color("$tokenGroup.with-icon.disabled.icon.color")},
-    size: ${tokens["$tokenGroup.with-icon.icon.size"]},
+    size: ${getToken("$tokenGroup.with-icon.icon.size")},
   );
 
   @override

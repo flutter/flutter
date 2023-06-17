@@ -894,6 +894,13 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       }
       context.canvas.clipRect(bounds);
     }
+
+    if (_lastSelectableFragments != null) {
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paint(context, offset);
+      }
+    }
+
     _textPainter.paint(context.canvas, offset);
 
     paintInlineChildren(context, offset);
@@ -907,11 +914,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
         context.canvas.drawRect(Offset.zero & size, paint);
       }
       context.canvas.restore();
-    }
-    if (_lastSelectableFragments != null) {
-      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
-        fragment.paint(context, offset);
-      }
     }
   }
 
