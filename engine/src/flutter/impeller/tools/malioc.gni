@@ -70,7 +70,7 @@ template("malioc_analyze_shaders") {
                                          "script",
                                        ])
 
-                script = "//build/gn_run_binary.py"
+                script = "//build/gn_run_malioc.py"
                 pool = "//flutter/impeller/tools:malioc_pool"
 
                 # Nest all malioc output under its own subdirectory of root_gen_dir
@@ -101,13 +101,12 @@ template("malioc_analyze_shaders") {
 
                 args = [
                   rebase_path(impeller_malioc_path, root_build_dir),
+                  rebase_path(output_file),
                   "--format",
                   "json",
                   shader_kind_flag,
                   "--core",
                   core.core,
-                  "--output",
-                  rebase_path(output_file),
                 ]
 
                 if (backend_ext == "vkspv") {

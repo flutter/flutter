@@ -40,7 +40,10 @@ def validate_args(args):
 
 
 def malioc_core_list(malioc):
-  malioc_cores = subprocess.check_output([malioc, '--list', '--format', 'json'])
+  malioc_cores = subprocess.check_output(
+      [malioc, '--list', '--format', 'json'],
+      stderr=subprocess.STDOUT,
+  )
   cores_json = json.loads(malioc_cores)
   cores = []
   for core in cores_json['cores']:
@@ -49,9 +52,10 @@ def malioc_core_list(malioc):
 
 
 def malioc_core_info(malioc, core):
-  malioc_info = subprocess.check_output([
-      malioc, '--info', '--core', core, '--format', 'json'
-  ])
+  malioc_info = subprocess.check_output(
+      [malioc, '--info', '--core', core, '--format', 'json'],
+      stderr=subprocess.STDOUT,
+  )
   info_json = json.loads(malioc_info)
 
   apis = info_json['apis']
