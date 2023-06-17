@@ -1827,7 +1827,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       .fromLTWH(0, 0, containerSize.width, containerSize.height) : null;
     for (int index = currentSelectionStartIndex; index <= currentSelectionEndIndex; index++) {
       final List<Rect> currSelectableSelectionRects = selectables[index].value.selectionRects;
-      final List<Rect> finiteSelectionRects = currSelectableSelectionRects.map((Rect selectionRect) {
+      final List<Rect> selectionRectsWithinDrawableArea = currSelectableSelectionRects.map((Rect selectionRect) {
         final Matrix4 transform = getTransformFrom(selectables[index]);
         final Rect localRect = MatrixUtils.transformRect(transform, selectionRect);
         if (drawableArea != null) {
@@ -1837,7 +1837,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       }).where((Rect selectionRect) {
         return selectionRect.isFinite && !selectionRect.isEmpty;
       }).toList();
-      selectionRects.addAll(finiteSelectionRects);
+      selectionRects.addAll(selectionRectsWithinDrawableArea);
     }
 
     return SelectionGeometry(
