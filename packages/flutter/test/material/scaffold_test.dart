@@ -2802,55 +2802,67 @@ void main() {
     expect(findModalBarrier(), findsNothing);
   });
 
-  testWidgets('Animated closing bottom sheet and removing floating action button', (WidgetTester tester) async {
-    final Key bottomSheetKey = UniqueKey();
-    PersistentBottomSheetController<void>? controller;
-    bool show = true;
+  testWidgets(
+    "Closing bottom sheet & removing FAB at the same time doesn't throw assertion",
+    (WidgetTester tester) async {
+      final Key bottomSheetKey = UniqueKey();
+      PersistentBottomSheetController<void>? controller;
+      bool show = true;
 
-    await tester.pumpWidget(StatefulBuilder(
-      builder: (_, StateSetter setState) => MaterialApp(
-        home: Scaffold(
-          body: Center(
+      await tester.pumpWidget(StatefulBuilder(
+        builder: (_, StateSetter setState) => MaterialApp(
+          home: Scaffold(
+            body: Center(
             child: Builder(
                 builder: (BuildContext context) => ElevatedButton(
-                      onPressed: () {
-                        if (controller == null) {
-                          controller = showBottomSheet(
-                              context: context,
-                              builder: (_) => Container(
-                                    key: bottomSheetKey,
-                                    height: 200,
-                                  ));
-                        } else {
-                          controller!.close();
-                          controller = null;
-                        }
-                      },
-                      child: const Text('BottomSheet'),
-                    )),
+                  onPressed: () {
+                    if (controller == null) {
+                      controller = showBottomSheet(
+                        context: context,
+                        builder: (_) => Container(
+                        key: bottomSheetKey,
+                        height: 200,
+                      ));
+                    } else {
+                      controller!.close();
+                      controller = null;
+                    }
+                  },
+                  child: const Text('BottomSheet'),
+                )),
+            ),
+            floatingActionButton: show
+            ? FloatingActionButton(
+                onPressed: () => setState(() => show = false),
+              )
+            : null,
           ),
-          floatingActionButton: show
-              ? FloatingActionButton(
-                  onPressed: () => setState(() => show = false),
-                )
-              : null,
         ),
-      ),
-    ));
+      ));
 
-    // Open bottom sheet
-    await tester.tap(find.byType(ElevatedButton));
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.byKey(bottomSheetKey), findsOneWidget);
+      // Show bottom sheet.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    // Close bottom sheet while hiding FAB
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pump(); // start animation
-    await tester.tap(find.byType(ElevatedButton));
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.byType(FloatingActionButton), findsNothing);
-    expect(find.byKey(bottomSheetKey), findsNothing);
+      // Bottom sheet and FAB are visible.
+      expect(find.byType(FloatingActionButton), findsOneWidget);
+      expect(find.byKey(bottomSheetKey), findsOneWidget);
+
+      // Close bottom sheet while removing FAB.
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pump(); // start animation
+      await tester.tap(find.byType(ElevatedButton));
+      // Let the animation finish.
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      // Bottom sheet and FAB are gone.
+      expect(find.byType(FloatingActionButton), findsNothing);
+      expect(find.byKey(bottomSheetKey), findsNothing);
+
+      // No exception is thrown.
+      expect(tester.takeException(), isNull);
   });
+
 }
 
 class _GeometryListener extends StatefulWidget {
