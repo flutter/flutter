@@ -1295,7 +1295,7 @@ class PipelineOwner {
     return true;
   }
 
-  String get _debugRootSuffixForTimelineEventNames => _debugParent == null ? '' : ' (root)';
+  String get _debugRootSuffixForTimelineEventNames => _debugParent == null ? ' (root)' : '';
 
   /// Mark this [PipelineOwner] as attached to the given [PipelineManifold].
   ///
@@ -1364,6 +1364,7 @@ class PipelineOwner {
     if (_manifold != null) {
       child.attach(_manifold!);
     }
+    print('  $this$_debugRootSuffixForTimelineEventNames adopted $child');
   }
 
   /// Removes a child [PipelineOwner] previously added via [adoptChild].
@@ -1374,7 +1375,7 @@ class PipelineOwner {
   /// No children may be removed after the [PipelineOwner] has started calling
   /// [flushLayout] on any of its children until the end of the current frame.
   void dropChild(PipelineOwner child) {
-    assert(child._debugParent == this);
+    assert(child._debugParent == this, '${child._debugParent} == $this');
     assert(_children.contains(child));
     assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.remove(child);
@@ -1384,6 +1385,7 @@ class PipelineOwner {
     if (_manifold != null) {
       child.detach();
     }
+    print('  $this$_debugRootSuffixForTimelineEventNames dropped $child');
   }
 
   /// Calls `visitor` for each immediate child of this [PipelineOwner].

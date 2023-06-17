@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -22,32 +23,32 @@ void main() {
     ));
   });
 
-  // testWidgets('Moving a RenderObjectWidget to the RootWidget via GlobalKey fails', (WidgetTester tester) async {
-  //   final Widget globalKeyedWidget = ColoredBox(
-  //     key: GlobalKey(),
-  //     color: Colors.red,
-  //   );
-  //
-  //   await pumpWidgetWithoutViewWrapper(
-  //     tester: tester,
-  //     widget: View(
-  //       view: tester.view,
-  //       child: globalKeyedWidget,
-  //     ),
-  //   );
-  //   expect(tester.takeException(), isNull);
-  //
-  //   await pumpWidgetWithoutViewWrapper(
-  //     tester: tester,
-  //     widget: globalKeyedWidget,
-  //   );
-  //
-  //   expect(tester.takeException(), isFlutterError.having(
-  //     (FlutterError error) => error.message,
-  //     'message',
-  //     contains('cannot find ancestor RenderObject to attach to.'),
-  //   ));
-  // });
+  testWidgets('Moving a RenderObjectWidget to the RootWidget via GlobalKey fails', (WidgetTester tester) async {
+    final Widget globalKeyedWidget = ColoredBox(
+      key: GlobalKey(),
+      color: Colors.red,
+    );
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: View(
+        view: tester.view,
+        child: globalKeyedWidget,
+      ),
+    );
+    expect(tester.takeException(), isNull);
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: globalKeyedWidget,
+    );
+
+    expect(tester.takeException(), isFlutterError.having(
+      (FlutterError error) => error.message,
+      'message',
+      contains('cannot find ancestor RenderObject to attach to.'),
+    ));
+  });
 
   testWidgets('A View cannot be a child of a render object widget', (WidgetTester tester) async {
     await tester.pumpWidget(Center(
@@ -81,50 +82,30 @@ void main() {
     ));
   });
 
+  // TODO(goderbauer): There's some hope that this test will work once we migrate to direct dependencies.
   // testWidgets('A View can not be moved via GlobalKey to be a child of a RenderObject', (WidgetTester tester) async {
   //   final Widget globalKeyedView = View(
-  //     key: GlobalKey(debugLabel: 'ViewKey'),
+  //     key: GlobalKey(),
   //     view: FakeView(tester.view),
   //     child: const ColoredBox(color: Colors.red),
   //   );
+  //   final Key otherViewKey = UniqueKey();
   //
   //   await pumpWidgetWithoutViewWrapper(
   //     tester: tester,
-  //     widget: ViewCollection(
-  //       views: <Widget>[
-  //         View(
-  //           view: tester.view,
-  //           child: const SizedBox(),
-  //         ),
-  //         globalKeyedView,
-  //       ],
-  //     ),
+  //     widget: globalKeyedView,
   //   );
   //   expect(tester.takeException(), isNull);
   //
-  //   await pumpWidgetWithoutViewWrapper(
-  //     tester: tester,
-  //     widget: ViewCollection(
-  //       views: <Widget>[
-  //         View(
-  //           view: tester.view,
-  //           child: SizedBox(
-  //             child: globalKeyedView,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
+  //   await tester.pumpWidget(SizedBox(
+  //     child: globalKeyedView,
+  //   ));
   //
   //   expect(tester.takeException(), isFlutterError.having(
   //     (FlutterError error) => error.message,
   //     'message',
   //     contains('cannot maintain an independent render tree at its current location.'),
   //   ));
-  //   // Clean-up some cascading failures resulting from the error above to make
-  //   // sure the test passes.
-  //   await tester.pumpWidget(Container());
-  //   expect(tester.takeException(), isNotNull);
   // });
 
   testWidgets('The view property of a ViewAnchor cannot be a render object widget', (WidgetTester tester) async {
@@ -142,32 +123,32 @@ void main() {
     ));
   });
 
-  // testWidgets('A RenderObject cannot be moved into the view property of a ViewAnchor via GlobalKey', (WidgetTester tester) async {
-  //   final Widget globalKeyedWidget = ColoredBox(
-  //     key: GlobalKey(),
-  //     color: Colors.red,
-  //   );
-  //
-  //   await tester.pumpWidget(
-  //     ViewAnchor(
-  //       child: globalKeyedWidget,
-  //     ),
-  //   );
-  //   expect(tester.takeException(), isNull);
-  //
-  //   await tester.pumpWidget(
-  //     ViewAnchor(
-  //       view: globalKeyedWidget,
-  //       child: const SizedBox(),
-  //     ),
-  //   );
-  //
-  //   expect(tester.takeException(), isFlutterError.having(
-  //     (FlutterError error) => error.message,
-  //     'message',
-  //     contains('cannot find ancestor RenderObject to attach to.'),
-  //   ));
-  // });
+  testWidgets('A RenderObject cannot be moved into the view property of a ViewAnchor via GlobalKey', (WidgetTester tester) async {
+    final Widget globalKeyedWidget = ColoredBox(
+      key: GlobalKey(),
+      color: Colors.red,
+    );
+
+    await tester.pumpWidget(
+      ViewAnchor(
+        child: globalKeyedWidget,
+      ),
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      ViewAnchor(
+        view: globalKeyedWidget,
+        child: const SizedBox(),
+      ),
+    );
+
+    expect(tester.takeException(), isFlutterError.having(
+      (FlutterError error) => error.message,
+      'message',
+      contains('cannot find ancestor RenderObject to attach to.'),
+    ));
+  });
 
   testWidgets('ViewAnchor cannot be used at the top of the widget tree (outside of View)', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
@@ -184,32 +165,32 @@ void main() {
     ));
   });
 
-  // testWidgets('ViewAnchor cannot be moved to the top of the widget tree (outside of View) via GlobalKey', (WidgetTester tester) async {
-  //   final Widget globalKeyedViewAnchor = ViewAnchor(
-  //     key: GlobalKey(),
-  //     child: const SizedBox(),
-  //   );
-  //
-  //   await pumpWidgetWithoutViewWrapper(
-  //     tester: tester,
-  //     widget: View(
-  //       view: tester.view,
-  //       child: globalKeyedViewAnchor,
-  //     ),
-  //   );
-  //   expect(tester.takeException(), isNull);
-  //
-  //   await pumpWidgetWithoutViewWrapper(
-  //     tester: tester,
-  //     widget: globalKeyedViewAnchor,
-  //   );
-  //
-  //   expect(tester.takeException(), isFlutterError.having(
-  //     (FlutterError error) => error.message,
-  //     'message',
-  //     contains('cannot find ancestor RenderObject to attach to.'),
-  //   ));
-  // });
+  testWidgets('ViewAnchor cannot be moved to the top of the widget tree (outside of View) via GlobalKey', (WidgetTester tester) async {
+    final Widget globalKeyedViewAnchor = ViewAnchor(
+      key: GlobalKey(),
+      child: const SizedBox(),
+    );
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: View(
+        view: tester.view,
+        child: globalKeyedViewAnchor,
+      ),
+    );
+    expect(tester.takeException(), isNull);
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: globalKeyedViewAnchor,
+    );
+
+    expect(tester.takeException(), isFlutterError.having(
+      (FlutterError error) => error.message,
+      'message',
+      contains('cannot find ancestor RenderObject to attach to.'),
+    ));
+  });
 
   testWidgets('View can be used at the top of the widget tree', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
@@ -223,34 +204,50 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  // testWidgets('View can be moved to the top of the widget tree view GlobalKey', (WidgetTester tester) async {
-  //   final Widget globalKeyView = View(
-  //     view: FakeView(tester.view),
-  //     child: const ColoredBox(color: Colors.red),
-  //   );
-  //
-  //   await pumpWidgetWithoutViewWrapper(
-  //     tester: tester,
-  //     widget: View(
-  //       view: tester.view,
-  //       child: ViewAnchor(
-  //         view: globalKeyView,
-  //         child: const SizedBox(),
-  //       ),
-  //     ),
-  //   );
-  //   expect(tester.takeException(), isNull);
-  //   expect(find.byType(SizedBox), findsOneWidget);
-  //   expect(find.byType(ColoredBox), findsOneWidget);
-  //
-  //   await pumpWidgetWithoutViewWrapper(
-  //     tester: tester,
-  //     widget: globalKeyView,
-  //   );
-  //   expect(tester.takeException(), isNull);
-  //   expect(find.byType(SizedBox), findsNothing);
-  //   expect(find.byType(ColoredBox), findsOneWidget);
-  // });
+  testWidgets('View can be moved to the top of the widget tree view GlobalKey', (WidgetTester tester) async {
+    print('----- first part----');
+    final Widget globalKeyView = View(
+      view: FakeView(tester.view),
+      child: const ColoredBox(color: Colors.red),
+    );
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: View(
+        view: tester.view,
+        child: ViewAnchor(
+          view: globalKeyView, // This one has trouble when deactivating
+          child: const SizedBox(),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SizedBox), findsOneWidget);
+    expect(find.byType(ColoredBox), findsOneWidget);
+
+    print('\n\n');
+    debugDumpPipelineOwnerTree();
+    print('\n\n');
+
+    // debugDumpRenderTree();
+    print('----- second part----');
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: globalKeyView,
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SizedBox), findsNothing);
+    expect(find.byType(ColoredBox), findsOneWidget);
+
+    print('\n\n');
+    debugDumpPipelineOwnerTree();
+    print('\n\n');
+
+    // debugDumpRenderTree();
+    // debugDumpApp();
+    print('--TEST END--');
+  });
 
   testWidgets('ViewCollection can be used at the top of the widget tree', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
@@ -322,50 +319,154 @@ void main() {
     ));
   });
 
-  // testWidgets('Views can be moved in and out of ViewCollections via GlobalKey', (WidgetTester tester) async {
-  //   final Widget greenView = View(
-  //     key: GlobalKey(),
-  //     view: tester.view,
-  //     child: const ColoredBox(color: Colors.green),
-  //   );
-  //   final Widget redView = View(
-  //     key: GlobalKey(),
-  //     view: FakeView(tester.view),
-  //     child: const ColoredBox(color: Colors.red),
-  //   );
-  //
-  //   await pumpWidgetWithoutViewWrapper(
-  //     tester: tester,
-  //     widget: ViewCollection(
-  //       views: <Widget>[
-  //         greenView,
-  //         ViewCollection(
-  //           views: <Widget>[
-  //             redView,
-  //           ],
-  //         ),
-  //       ]
-  //     ),
-  //   );
-  //   expect(tester.takeException(), isNull);
-  //   expect(find.byType(ColoredBox), findsNWidgets(2));
-  //
-  //   await pumpWidgetWithoutViewWrapper(
-  //     tester: tester,
-  //     widget: ViewCollection(
-  //         views: <Widget>[
-  //           redView,
-  //           ViewCollection(
-  //             views: <Widget>[
-  //               greenView,
-  //             ],
-  //           ),
-  //         ]
-  //     ),
-  //   );
-  //   expect(tester.takeException(), isNull);
-  //   expect(find.byType(ColoredBox), findsNWidgets(2));
-  // });
+  testWidgets('Views can be moved in and out of ViewCollections via GlobalKey', (WidgetTester tester) async {
+    final Widget greenView = View(
+      key: GlobalKey(debugLabel: 'green'),
+      view: tester.view,
+      child: const ColoredBox(color: Colors.green),
+    );
+    final Widget redView = View(
+      key: GlobalKey(debugLabel: 'red'),
+      view: FakeView(tester.view),
+      child: const ColoredBox(color: Colors.red),
+    );
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          greenView,
+          ViewCollection(
+            views: <Widget>[
+              redView,
+            ],
+          ),
+        ]
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byType(ColoredBox), findsNWidgets(2));
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+          views: <Widget>[
+            redView,
+            ViewCollection(
+              views: <Widget>[
+                greenView,
+              ],
+            ),
+          ]
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byType(ColoredBox), findsNWidgets(2));
+  });
+
+  testWidgets('Can move stuff between views via global key', (WidgetTester tester) async {
+    final FlutterView greenView = tester.view;
+    final FlutterView redView = FakeView(tester.view);
+    final Widget globalKeyChild = SizedBox(
+      key: GlobalKey(),
+    );
+
+    Finder findsColoredBox(Color color) {
+      return find.byWidgetPredicate((Widget widget) => widget is ColoredBox && widget.color == color);
+    }
+
+    Map<int, RenderObject> collectLeafRenderObjects() {
+      final Map<int, RenderObject> result = <int, RenderObject>{};
+      for (final RenderView renderView in RendererBinding.instance.renderViews) {
+        void visit(RenderObject object) {
+          result[renderView.flutterView.viewId] = object;
+          object.visitChildren(visit);
+        }
+        visit(renderView);
+      }
+      return result;
+    }
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          View(
+            view: greenView,
+            child: ColoredBox(
+              color: Colors.green,
+              child: globalKeyChild,
+            ),
+          ),
+          View(
+            view: redView,
+            child: const ColoredBox(
+              color: Colors.red,
+            ),
+          ),
+        ],
+      ),
+    );
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.green),
+        matching: find.byType(SizedBox),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.red),
+        matching: find.byType(SizedBox),
+      ),
+      findsNothing,
+    );
+
+    Map<int, RenderObject> leafRenderObject = collectLeafRenderObjects();
+    expect(leafRenderObject[greenView.viewId], isA<RenderConstrainedBox>());
+    expect(leafRenderObject[redView.viewId], isNot(isA<RenderConstrainedBox>()));
+
+    // Move the child.
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          View(
+            view: greenView,
+            child: const ColoredBox(
+              color: Colors.green,
+            ),
+          ),
+          View(
+            view: redView,
+            child: ColoredBox(
+              color: Colors.red,
+              child: globalKeyChild,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.green),
+        matching: find.byType(SizedBox),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.red),
+        matching: find.byType(SizedBox),
+      ),
+      findsOneWidget,
+    );
+
+    leafRenderObject = collectLeafRenderObjects();
+    expect(leafRenderObject[greenView.viewId], isNot(isA<RenderConstrainedBox>()));
+    expect(leafRenderObject[redView.viewId], isA<RenderConstrainedBox>());
+  });
 }
 
 Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {

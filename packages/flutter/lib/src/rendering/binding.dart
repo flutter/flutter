@@ -700,6 +700,20 @@ void debugDumpSemanticsTree([DebugSemanticsDumpOrder childOrder = DebugSemantics
   debugPrint(_debugCollectSemanticsTrees(childOrder));
 }
 
+///
+void debugDumpPipelineOwnerTree() {
+  final StringBuffer result = StringBuffer();
+  int indent = 0;
+  void visit(PipelineOwner owner) {
+    result.writeln('${'    ' * indent}$owner (${owner.rootNode})');
+    indent++;
+    owner.visitChildren(visit);
+    indent--;
+  }
+  visit(RendererBinding.instance.rootPipelineOwner);
+  debugPrint(result.toString());
+}
+
 /// A concrete binding for applications that use the Rendering framework
 /// directly. This is the glue that binds the framework to the Flutter engine.
 ///

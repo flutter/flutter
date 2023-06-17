@@ -227,7 +227,9 @@ class _RawViewElement extends RenderTreeRootElement {
 
   @override
   void mount(Element? parent, Object? newSlot) {
+    print('MOUNT $this');
     super.mount(parent, newSlot); // calls attachRenderObject(), updates slot member.
+    _effectivePipelineOwner.rootNode = renderObject;
     _updateChild();
     renderObject.prepareInitialFrame();
     if (_effectivePipelineOwner.semanticsOwner != null) {
@@ -235,42 +237,72 @@ class _RawViewElement extends RenderTreeRootElement {
     }
   }
 
-  bool _attached = false;
+  // bool _attached = false;
 
   @override
   void attachRenderObject(Object? newSlot) {
+    print('ATTACH RO $this');
     super.attachRenderObject(newSlot); // updates slot member
     final RawView viewWidget = widget as RawView;
+    print('>> $this adoptChild $_effectivePipelineOwner');
+    // The widget is not guaranteed to be up to date here (e.g. after a global
+    // key move "update" has not been called yet, see "View can be moved to the
+    // top of the widget tree view GlobalKey" test, second part). So, we are
+    // (temporarily) attaching to the wrong pipelineOwner/viewrepository here.
+    // Once update is called shortly after this method, that will be corrected,
+    // but it is akward. Instead, we should try if we can call dependOnViewHooks
+    // in mount/activate to look up the hooks directly instead of relying on
+    // someone passing them to us. We can then remove the hooks parameter from
+    // the widget. We also need to check if we need to implement
+    // didChangeDependencies to potentially move the pipelineOwner/renderView
+    // over.
+
     viewWidget.hooks.pipelineOwner.adoptChild(_effectivePipelineOwner);
-    assert(_effectivePipelineOwner.rootNode == null);
-    _effectivePipelineOwner.rootNode = renderObject;
     viewWidget.hooks.renderViewRepository.addRenderView(renderObject);
-    _attached = true;
+    // _attached = true;
   }
 
   @override
   void detachRenderObject() {
+    print('DETACH RO $this');
     final RawView viewWidget = widget as RawView;
-    if (!_attached) {
-      // In global key move scenarios `detachRenderObject` is called twice.
-      assert(_effectivePipelineOwner.rootNode == null);
-      return;
-    }
+    // TODO(goderbauer): Figure out if this guard is still needed.
+    // if (!_attached) { // ?
+    //   // In global key move scenarios `detachRenderObject` is called twice.
+    //   assert(_effectivePipelineOwner.rootNode == null);
+    //   return;
+    // }
     viewWidget.hooks.renderViewRepository.removeRenderView(renderObject);
-    assert(_effectivePipelineOwner.rootNode == renderObject);
-    _effectivePipelineOwner.rootNode = null;
+    print('>> $this dropChild $_effectivePipelineOwner');
     viewWidget.hooks.pipelineOwner.dropChild(_effectivePipelineOwner);
-    _attached = false;
+    // _attached = false;
     super.detachRenderObject(); // updates slot member
   }
 
   @override
-  void update(RawView oldWidget) {
-    super.update(oldWidget);
+  void activate() {
+    print('ACTIVATE $this');
+    super.activate();
+    assert(_effectivePipelineOwner.rootNode == null);
+    _effectivePipelineOwner.rootNode = renderObject;
+  }
+
+  @override
+  void deactivate() {
+    print('DEACTIVATE $this');
+    assert(_effectivePipelineOwner.rootNode == renderObject);
+    _effectivePipelineOwner.rootNode = null;
+    super.deactivate();
+  }
+
+  @override
+  void update(RawView newWidget) {
+    print('UPDATE $this');
+    final RawView oldWidget = widget as RawView;
+    super.update(newWidget);
     _updateChild();
-    final RawView viewWidget = widget as RawView;
     final ViewHooks oldHooks = oldWidget.hooks;
-    final ViewHooks newHooks = viewWidget.hooks;
+    final ViewHooks newHooks = newWidget.hooks;
     if (oldHooks.pipelineOwner != newHooks.pipelineOwner) {
       oldHooks.pipelineOwner.dropChild(_effectivePipelineOwner);
       newHooks.pipelineOwner.adoptChild(_effectivePipelineOwner);
