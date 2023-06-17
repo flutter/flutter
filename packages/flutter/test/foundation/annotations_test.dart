@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('test Category constructor', () {
-    const List<String> sections = [
+    const List<String> sections = <String>[
        'First section',
        'Second section',
        'Third section'
