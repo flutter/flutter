@@ -1052,8 +1052,6 @@ mixin TextSelectionDelegate {
 
   /// Whether Live Text input is enabled.
   ///
-  /// Must not be null.
-  ///
   /// See also:
   ///  * [LiveText], where the availability of Live Text input can be obtained.
   ///  * [LiveTextInputStatusNotifier], where the status of Live Text can be listened to.
