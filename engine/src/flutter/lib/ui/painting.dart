@@ -5511,7 +5511,7 @@ abstract class Canvas {
   ///   void paint(Canvas canvas, Size size) {
   ///     Paint paint = Paint();
   ///     canvas.drawAtlas(spriteAtlas, <RSTransform>[
-  ///       for (Sprite sprite in allSprites)
+  ///       for (final Sprite sprite in allSprites)
   ///         RSTransform.fromComponents(
   ///           rotation: 0.0,
   ///           scale: 1.0,
@@ -5523,7 +5523,7 @@ abstract class Canvas {
   ///           translateY: sprite.center.dy,
   ///         ),
   ///     ], <Rect>[
-  ///       for (Sprite sprite in allSprites)
+  ///       for (final Sprite sprite in allSprites)
   ///         Rect.fromLTWH(sprite.index * 10.0, 0.0, 10.0, 10.0),
   ///     ], null, null, null, paint);
   ///   }
@@ -5554,7 +5554,7 @@ abstract class Canvas {
   ///   void paint(Canvas canvas, Size size) {
   ///     Paint paint = Paint();
   ///     canvas.drawAtlas(spriteAtlas, <RSTransform>[
-  ///       for (Sprite sprite in allSprites)
+  ///       for (final Sprite sprite in allSprites)
   ///         RSTransform.fromComponents(
   ///           rotation: sprite.rotation,
   ///           scale: 1.0,
@@ -5566,10 +5566,10 @@ abstract class Canvas {
   ///           translateY: sprite.center.dy,
   ///         ),
   ///     ], <Rect>[
-  ///       for (Sprite sprite in allSprites)
+  ///       for (final Sprite sprite in allSprites)
   ///         Rect.fromLTWH(sprite.index * 10.0, 0.0, 10.0, 10.0),
   ///     ], <Color>[
-  ///       for (Sprite sprite in allSprites)
+  ///       for (final Sprite sprite in allSprites)
   ///         Colors.white.withAlpha(sprite.alpha),
   ///     ], BlendMode.srcIn, null, paint);
   ///   }
