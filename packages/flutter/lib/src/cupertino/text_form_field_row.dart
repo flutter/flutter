@@ -185,7 +185,6 @@ class CupertinoTextFormFieldRow extends FormField<String> {
 
             return CupertinoFormRow(
               prefix: prefix,
-              suffix: suffix,
               padding: padding,
               error: (field.errorText == null) ? null : Text(field.errorText!),
               child: CupertinoTextField.borderless(
@@ -232,6 +231,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                 placeholder: placeholder,
                 placeholderStyle: placeholderStyle,
                 contextMenuBuilder: contextMenuBuilder,
+                suffix: suffix,
               ),
             );
           },
