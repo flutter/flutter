@@ -248,7 +248,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   ///
   /// The [suffix] widget is displayed at the end of the row.
   final Widget? suffix;
-  
+
   /// Content padding for the row.
   ///
   /// The [padding] widget is passed to [CupertinoFormRow]. If the [padding]
