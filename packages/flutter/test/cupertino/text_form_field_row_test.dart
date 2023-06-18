@@ -457,6 +457,24 @@ void main() {
     expect(errorText.data, 'Enter Value');
   });
 
+  testWidgets('Shows suffix', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextFormFieldRow(
+            suffix: const Text('Suffix'),
+          ),
+        ),
+      ),
+    );
+
+    final Finder suffixTextFinder = find.byType(Text);
+    expect(suffixTextFinder, findsOneWidget);
+
+    final Text suffixText = tester.widget(suffixTextFinder);
+    expect(suffixText.data, 'Suffix');
+  });
+
   testWidgets('Passes textDirection to underlying CupertinoTextField', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
