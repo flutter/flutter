@@ -80,7 +80,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 ///  * [CupertinoPageTransitionsBuilder], which is the default page transition
 ///    for iOS and macOS.
 mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
-  TargetPlatform? _prevTargetPlatform;
+  TargetPlatform? _effectiveTargetPlatform;
 
   /// Builds the primary contents of the route.
   @protected
@@ -123,16 +123,13 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
       builder: (BuildContext context, bool useGestureInProgress, Widget? _) {
         final ThemeData themeData = Theme.of(context);
 
-        TargetPlatform platform = themeData.platform;
         if (useGestureInProgress) {
           // The platform should be kept unchanged during an user gesture.
-          if (_prevTargetPlatform != null && _prevTargetPlatform != platform) {
-            platform = _prevTargetPlatform!;
-          }
+          _effectiveTargetPlatform ??= themeData.platform;
         } else {
-          _prevTargetPlatform = platform;
+          _effectiveTargetPlatform = themeData.platform;
         }
-        return themeData.pageTransitionsTheme.buildTransitions<T>(this, context, animation, secondaryAnimation, child, platform);
+        return themeData.pageTransitionsTheme.buildTransitions<T>(this, context, animation, secondaryAnimation, child, _effectiveTargetPlatform!);
       },
     );
   }
