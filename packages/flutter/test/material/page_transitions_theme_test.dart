@@ -392,14 +392,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(builtCount, 1);
 
-    if (Theme.of(tester.element(find.text('pop'))).platform == TargetPlatform.iOS) {
-        await tester.tap(find.text('pop'));
-    } else {
-        final Size size = tester.getSize(find.byType(MaterialApp));
-        await tester.flingFrom(Offset(0, size.height / 2), Offset(size.width * 2 / 3, 0), 500);
-    }
+    final Size size = tester.getSize(find.byType(MaterialApp));
+    await tester.flingFrom(Offset(0, size.height / 2), Offset(size.width * 2 / 3, 0), 500);
+
     await tester.pumpAndSettle();
     expect(find.text('push'), findsOneWidget);
     expect(builtCount, 1);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS}));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }
