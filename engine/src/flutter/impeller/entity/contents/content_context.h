@@ -291,12 +291,12 @@ using UvComputeShaderPipeline = ComputePipelineBuilder<UvComputeShader>;
 /// Flutter application may easily require building hundreds of PSOs in total,
 /// but they shouldn't require e.g. 10s of thousands.
 struct ContentContextOptions {
-  SampleCount sample_count = SampleCount::kCount4;
+  SampleCount sample_count = SampleCount::kCount1;
   BlendMode blend_mode = BlendMode::kSourceOver;
   CompareFunction stencil_compare = CompareFunction::kEqual;
   StencilOperation stencil_operation = StencilOperation::kKeep;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
-  PixelFormat color_attachment_pixel_format = PixelFormat::kUnknown;
+  std::optional<PixelFormat> color_attachment_pixel_format;
   bool has_stencil_attachment = true;
   bool wireframe = false;
 
@@ -820,9 +820,7 @@ class ContentContext {
       return found->second->WaitAndGet();
     }
 
-    auto prototype = container.find(
-        {.color_attachment_pixel_format =
-             context_->GetCapabilities()->GetDefaultColorFormat()});
+    auto prototype = container.find({});
 
     // The prototype must always be initialized in the constructor.
     FML_CHECK(prototype != container.end());
