@@ -52,7 +52,12 @@ f16vec2 IPVec2GaussianIntegral(f16vec2 x, float16_t sigma) {
 }
 
 /// Simpler (but less accurate) approximation of the Gaussian integral.
-f16vec2 IPVec2FastGaussianIntegral(f16vec2 x, float16_t sigma) {
+vec2 IPVec2FastGaussianIntegral(vec2 x, float sigma) {
+  return 1.0 / (1.0 + exp(-kSqrtThree / sigma * x));
+}
+
+/// Simpler (but less accurate) approximation of the Gaussian integral.
+f16vec2 IPHalfVec2FastGaussianIntegral(f16vec2 x, float16_t sigma) {
   return 1.0hf / (1.0hf + exp(float16_t(-kSqrtThree) / sigma * x));
 }
 
