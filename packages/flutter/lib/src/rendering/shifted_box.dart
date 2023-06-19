@@ -614,9 +614,9 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// If enabled, the self size will be as small as its child when the child
   /// does not overflow. If disabled (the default case), the self size will
   /// always be the biggest possible size that the parent constraints allows.
-  bool? get shrinkWrap => _shrinkWrap;
-  bool? _shrinkWrap;
-  set shrinkWrap(bool? value) {
+  bool get shrinkWrap => _shrinkWrap;
+  bool _shrinkWrap;
+  set shrinkWrap(bool value) {
     if (_shrinkWrap == value) {
       return;
     }
@@ -633,8 +633,10 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     );
   }
 
+  // If shrinkWrap, the size will be as small as its child when non-overflowing,
+  // thus is cannot be sizedByParent.
   @override
-  bool get sizedByParent => true;
+  bool get sizedByParent => !shrinkWrap;
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
@@ -645,6 +647,13 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   void performLayout() {
     if (child != null) {
       child?.layout(_getInnerConstraints(constraints), parentUsesSize: true);
+    }
+
+    if (shrinkWrap) {
+      size = child != null ? constraints.constrain(child!.size) : constraints.smallest;
+    }
+
+    if (child != null) {
       alignChild();
     }
   }
