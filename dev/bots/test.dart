@@ -246,7 +246,6 @@ Future<void> main(List<String> args) async {
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
       'tool_tests': _runToolTests,
-      // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
@@ -276,18 +275,21 @@ Future<void> main(List<String> args) async {
   reportSuccessAndExit('${bold}Test successful.$reset');
 }
 
-final String _luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
-final bool _runningInDartHHHBot = _luciBotId.startsWith('luci-dart-');
+final bool _noFlutterEngineVersionCheck =
+    Platform.environment['NO_FLUTTER_ENGINE_VERSION_CHECK'] != null;
+
+// TODO(LongCatIsLooong): flutter/83219, a test fails on some bots.
+final bool _skipRenderingEditableTest =
+    Platform.environment['SKIP_RENDERING_EDITABLE_TEST'] != null;
 
 /// Verify the Flutter Engine is the revision in
 /// bin/cache/internal/engine.version.
 Future<void> _validateEngineHash() async {
-  if (_runningInDartHHHBot) {
-    // The Dart HHH bots intentionally modify the local artifact cache
-    // and then use this script to run Flutter's test suites.
-    // Because the artifacts have been changed, this particular test will return
-    // a false positive and should be skipped.
-    print('${yellow}Skipping Flutter Engine Version Validation for swarming bot $_luciBotId.');
+  if (_noFlutterEngineVersionCheck) {
+    // The Monorepo and try builders use a engine.version that is different from the
+    // commit hash of the flutter/engine source, in order to construct a unique
+    // download path for the engine artifacts in cloud storage.
+    print('${yellow}Skipping Flutter Engine Version Validation');
     return;
   }
   final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
@@ -1732,7 +1734,8 @@ Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, Lis
       '-v',
       '--platform=chrome',
       '--web-renderer=$webRenderer',
-      '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
+      // TODO(LongCatIsLooong): flutter/83219, a test fails on some bots.
+      '--dart-define=SKIP_RENDERING_EDITABLE_TEST=$_skipRenderingEditableTest',
       ...flutterTestArgs,
       ...tests,
     ],

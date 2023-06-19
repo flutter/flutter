@@ -887,9 +887,9 @@ void main() {
 
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
-    // TODO(yjbanov): This test is failing in the Dart HHH-web bot and
-    //                needs additional investigation before it can be reenabled.
-  }, skip: const bool.fromEnvironment('DART_HHH_BOT')); // https://github.com/flutter/flutter/issues/93691
+    // TODO(LongCatIsLooong): This test fails on some bots.
+    // https://github.com/flutter/flutter/issues/83129
+  }, skip: const bool.fromEnvironment('SKIP_RENDERING_EDITABLE_TEST'));
 
   test('getEndpointsForSelection handles empty characters', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
