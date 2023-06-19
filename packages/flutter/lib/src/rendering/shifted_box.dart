@@ -621,7 +621,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
       return;
     }
     _shrinkWrap = value;
-    markNeedsLayout();
+    markNeedsLayoutForSizedByParentChange();
   }
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
