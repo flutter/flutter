@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,7 +29,7 @@ class _ManyRelayoutBoundaries extends StatelessWidget {
 void rebuildLayoutBuilderSubtree(RenderBox descendant) {
   assert(descendant is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>);
 
-  RenderObject? node = descendant.parent;
+  AbstractNode? node = descendant.parent;
   while (node != null) {
     if (node is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>) {
       node = node.parent;
@@ -73,7 +74,7 @@ List<RenderObject> _ancestorRenderTheaters(RenderObject child) {
     if (node.runtimeType.toString() == '_RenderTheater') {
       results.add(node);
     }
-    final RenderObject? parent = node.parent;
+    final AbstractNode? parent = node.parent;
     node = parent is RenderObject? parent : null;
   }
   return results;
@@ -1524,14 +1525,14 @@ void main() {
       final List<RenderObject> childrenVisited = <RenderObject>[];
       theater.visitChildren(childrenVisited.add);
       expect(childrenVisited.length, 3);
-      expect(childrenVisited, containsAllInOrder(<RenderObject>[child1Box.parent!, child2Box.parent!]));
+      expect(childrenVisited, containsAllInOrder(<AbstractNode>[child1Box.parent!, child2Box.parent!]));
       childrenVisited.clear();
 
       setState(() { reparented = true; });
       await tester.pump();
       theater.visitChildren(childrenVisited.add);
       // The child list stays the same.
-      expect(childrenVisited, containsAllInOrder(<RenderObject>[child1Box.parent!, child2Box.parent!]));
+      expect(childrenVisited, containsAllInOrder(<AbstractNode>[child1Box.parent!, child2Box.parent!]));
     });
   });
 }

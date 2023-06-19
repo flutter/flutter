@@ -8,10 +8,6 @@ import 'package:meta/meta.dart';
 // during device lab performance tests. When editing this file, check to make sure
 // that it didn't break that test.
 
-/// Deprecated. Unused by the framework and will be removed in a future version
-/// of Flutter. If needed, inline any required functionality of this class
-/// directly in the subclass.
-///
 /// An abstract node in a tree.
 ///
 /// AbstractNode has as notion of depth, attachment, and parent, but does not
@@ -43,10 +39,6 @@ import 'package:meta/meta.dart';
 /// moved to be a child of A, sibling of B, then the numbers won't change. C's
 /// [depth] will still be 2. The [depth] is automatically maintained by the
 /// [adoptChild] and [dropChild] methods.
-@Deprecated(
-  'If needed, inline any required functionality of AbstractNode in your class directly. '
-  'This feature was deprecated after v3.12.0-4.0.pre.',
-)
 class AbstractNode {
   /// The depth of this node in the tree.
   ///

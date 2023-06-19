@@ -936,14 +936,6 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
   @override
   void redepthChildren() => visitChildren(redepthChild);
 
-  void _adoptDeferredLayoutBoxChild(_RenderDeferredLayoutBox child) {
-    adoptChild(child);
-  }
-
-  void _dropDeferredLayoutBoxChild(_RenderDeferredLayoutBox child) {
-    dropChild(child);
-  }
-
   Alignment? _alignmentCache;
   Alignment get _resolvedAlignment => _alignmentCache ??= AlignmentDirectional.topStart.resolve(textDirection);
 
@@ -1714,13 +1706,13 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   void _activate(_RenderDeferredLayoutBox child) {
     assert(_debugNotDisposed());
     assert(_overlayChildRenderBox == null, '$_overlayChildRenderBox');
-    _theater._adoptDeferredLayoutBoxChild(child);
+    _theater.adoptChild(child);
     _overlayChildRenderBox = child;
   }
 
   void _deactivate(_RenderDeferredLayoutBox child) {
     assert(_debugNotDisposed());
-    _theater._dropDeferredLayoutBoxChild(child);
+    _theater.dropChild(child);
     _overlayChildRenderBox = null;
   }
 
@@ -1988,7 +1980,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
 
   @override
   _RenderTheater get theater {
-    final RenderObject? parent = this.parent;
+    final AbstractNode? parent = this.parent;
     return parent is _RenderTheater
       ? parent
       : throw FlutterError('$parent of $this is not a _RenderTheater');
