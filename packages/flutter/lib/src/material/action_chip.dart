@@ -52,7 +52,7 @@ enum _ChipVariant { flat, elevated }
 /// ### Creating an Assist chip
 ///
 /// Assist chips are used to provide a quick way to perform an action.
-/// To create an Action chip, simply set the icon property to the icon
+/// To create an Action chip, set the icon property to the icon
 /// that represents the action and set the label to the name of the action.
 ///
 ///
@@ -61,7 +61,7 @@ enum _ChipVariant { flat, elevated }
 /// Suggestion chips usually display generated suggestions for the user,
 /// like a suggested response to a message.
 ///
-/// To create a Suggestion chip, simply set the label to the suggestion
+/// To create a Suggestion chip, set the label to the suggestion
 /// and don't set the icon property.
 //
 ///
