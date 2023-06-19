@@ -28,6 +28,9 @@ class ConfigCommand extends FlutterCommand {
       "    3) the directory containing the java binary found in the user's path.");
     argParser.addOption('build-dir', help: 'The relative path to override a projects build directory.',
         valueHelp: 'out/');
+    argParser.addFlag('disable-version-checking',
+      negatable: false,
+      help: 'Disable version checking. This is useful when the flutter installation is provided by a package manager.');
     argParser.addFlag('machine',
       negatable: false,
       hide: !verboseHelp,
@@ -166,6 +169,12 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults!.wasParsed('clear-ios-signing-cert')) {
       _updateConfig('ios-signing-cert', '');
+    }
+
+    if (argResults!.wasParsed('disable-version-checking')) {
+      final bool keyValue = boolArg('disable-version-checking');
+      globals.config.setValue('disable-version-checking', keyValue);
+      globals.printStatus('Setting "disable-version-checking" value to "$keyValue".');
     }
 
     if (argResults!.wasParsed('build-dir')) {

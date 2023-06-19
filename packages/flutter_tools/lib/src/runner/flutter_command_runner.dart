@@ -304,10 +304,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
             (topLevelResults.command?.name ?? '').endsWith('-completion');
         final bool isMachine = machineFlag || ci || redirectedCompletion;
         final bool versionCheckFlag = topLevelResults[FlutterGlobalOptions.kVersionCheckFlag] as bool? ?? false;
+        final bool globalVersionCheckingDisabled = globals.config.getValue('disable-version-checking') as bool? ?? false;
         final bool explicitVersionCheckPassed = topLevelResults.wasParsed(FlutterGlobalOptions.kVersionCheckFlag) && versionCheckFlag;
 
         if (topLevelResults.command?.name != 'upgrade' &&
-            (explicitVersionCheckPassed || (versionCheckFlag && !isMachine))) {
+            (explicitVersionCheckPassed || (versionCheckFlag && !globalVersionCheckingDisabled && !isMachine))) {
           await globals.flutterVersion.checkFlutterVersionFreshness();
         }
 
