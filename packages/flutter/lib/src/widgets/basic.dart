@@ -3057,6 +3057,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
     this.maxWidth,
     this.minHeight,
     this.maxHeight,
+    this.shrinkWrap = false,
     super.child,
   });
 
@@ -3096,6 +3097,12 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// default) to use the constraint from the parent instead.
   final double? maxHeight;
 
+  /// This only affects scenario when the child does not indeed overflow.
+  /// If enabled, the self size will be as small as its child when the child
+  /// does not overflow. If disabled (the default case), the self size will
+  /// always be the biggest possible size that the parent constraints allows.
+  final bool shrinkWrap;
+
   @override
   RenderConstrainedOverflowBox createRenderObject(BuildContext context) {
     return RenderConstrainedOverflowBox(
@@ -3104,6 +3111,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       maxWidth: maxWidth,
       minHeight: minHeight,
       maxHeight: maxHeight,
+      shrinkWrap: shrinkWrap,
       textDirection: Directionality.maybeOf(context),
     );
   }
@@ -3116,6 +3124,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       ..maxWidth = maxWidth
       ..minHeight = minHeight
       ..maxHeight = maxHeight
+      ..shrinkWrap = shrinkWrap
       ..textDirection = Directionality.maybeOf(context);
   }
 
@@ -3127,6 +3136,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
     properties.add(DoubleProperty('maxWidth', maxWidth, defaultValue: null));
     properties.add(DoubleProperty('minHeight', minHeight, defaultValue: null));
     properties.add(DoubleProperty('maxHeight', maxHeight, defaultValue: null));
+    properties.add(FlagProperty('shrinkWrap', value: shrinkWrap, defaultValue: false));
   }
 }
 

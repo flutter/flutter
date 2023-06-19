@@ -553,12 +553,14 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     double? maxWidth,
     double? minHeight,
     double? maxHeight,
+    bool shrinkWrap = false,
     super.alignment,
     super.textDirection,
   }) : _minWidth = minWidth,
        _maxWidth = maxWidth,
        _minHeight = minHeight,
-       _maxHeight = maxHeight;
+       _maxHeight = maxHeight,
+       _shrinkWrap = shrinkWrap;
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -605,6 +607,20 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
       return;
     }
     _maxHeight = value;
+    markNeedsLayout();
+  }
+
+  /// This only affects scenario when the child does not indeed overflow.
+  /// If enabled, the self size will be as small as its child when the child
+  /// does not overflow. If disabled (the default case), the self size will
+  /// always be the biggest possible size that the parent constraints allows.
+  bool? get shrinkWrap => _shrinkWrap;
+  bool? _shrinkWrap;
+  set shrinkWrap(bool? value) {
+    if (_shrinkWrap == value) {
+      return;
+    }
+    _shrinkWrap = value;
     markNeedsLayout();
   }
 
