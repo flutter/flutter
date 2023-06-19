@@ -158,6 +158,7 @@ void main() {
       expect(decoded['FlutterProject.isModule'], false);
       expect(decoded['FlutterProject.isPlugin'], false);
       expect(decoded['FlutterProject.manifest.appname'], 'test_project');
+      expect(decoded['FlutterVersion.frameworkRevision'], '');
 
       expect(decoded['Platform.isAndroid'], false);
       expect(decoded['Platform.isIOS'], false);

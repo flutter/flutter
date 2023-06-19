@@ -136,10 +136,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
     ));
 
     // FlutterVersion
-    final FlutterVersion version = FlutterVersion(
-      flutterRoot: Cache.flutterRoot!,
-      fs: fileSystem,
-    );
+    final FlutterVersion version = FlutterVersion(workingDirectory: project.directory.absolute.path);
     result.add(ProjectValidatorResult(
       name: 'FlutterVersion.frameworkRevision',
       value: _toJsonValue(version.frameworkRevision),
