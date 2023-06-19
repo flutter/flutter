@@ -310,6 +310,36 @@ void main() {
       expect(edgeEvent.globalPosition, const Offset(200.0, 50.0));
     });
 
+  testWidgets(
+    "touch long press cancel doesn't send ClearSelectionEvent",
+    (WidgetTester tester) async {
+      final UniqueKey spy = UniqueKey();
+      await tester.pumpWidget(MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionControls,
+          child: SelectionSpy(key: spy),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      final RenderSelectionSpy renderSelectionSpy =
+          tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
+      renderSelectionSpy.events.clear();
+      final TestGesture gesture =
+          await tester.startGesture(const Offset(200.0, 200.0));
+
+      addTearDown(gesture.removePointer);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.cancel();
+      expect(
+        renderSelectionSpy.events.any((SelectionEvent element) => element is ClearSelectionEvent),
+        isFalse,
+      );
+    },
+  );
+
     testWidgets('mouse long press does not send select-word event', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
