@@ -3136,7 +3136,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
     properties.add(DoubleProperty('maxWidth', maxWidth, defaultValue: null));
     properties.add(DoubleProperty('minHeight', minHeight, defaultValue: null));
     properties.add(DoubleProperty('maxHeight', maxHeight, defaultValue: null));
-    properties.add(FlagProperty('shrinkWrap', value: shrinkWrap, defaultValue: false));
+    properties.add(FlagProperty('shrinkWrap', value: shrinkWrap, defaultValue: false, ifTrue: 'shrink wraps'));
   }
 }
 
