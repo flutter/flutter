@@ -972,8 +972,8 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     }
   });
 
-  testWidgets('Vertical and Horizontal Stepper controller test', (WidgetTester tester) async {
-      ScrollController controller = ScrollController();
+  testWidgets('ScrollController is passed to the stepper listview', (WidgetTester tester) async {
+      final ScrollController controller = ScrollController();
       for (final StepperType type in StepperType.values) {
         await tester.pumpWidget(
           MaterialApp(
@@ -995,7 +995,10 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
           ),
         );
 
-        final ListView listView = tester.widget<ListView>(find.descendant(of: find.byType(Stepper), matching: find.byType(ListView)));
+        final ListView listView = tester.widget<ListView>(
+          find.descendant(of: find.byType(Stepper),
+          matching: find.byType(ListView),
+        ));
         expect(listView.controller, controller);
       }
     });
