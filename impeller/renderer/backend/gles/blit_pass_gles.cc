@@ -42,7 +42,7 @@ void BlitPassGLES::OnSetLabel(std::string label) {
     const ReactorGLES& reactor,
     const std::vector<std::unique_ptr<BlitEncodeGLES>>& commands,
     const std::string& label) {
-  TRACE_EVENT0("impeller", __FUNCTION__);
+  TRACE_EVENT0("impeller", "BlitPassGLES::EncodeCommandsInReactor");
 
   if (commands.empty()) {
     return true;
