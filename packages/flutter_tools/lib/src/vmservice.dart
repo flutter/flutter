@@ -1110,6 +1110,22 @@ class FlutterVmService {
         });
   }
 
+  /// Attempt to retrieve the isolate pause event with id [isolateId], or `null` if it has
+  /// been collected.
+  Future<vm_service.Event?> getIsolatePauseEventOrNull(String isolateId) async {
+    return service.getIsolatePauseEvent(isolateId)
+      .then<vm_service.Event?>(
+        (vm_service.Event event) => event,
+        onError: (Object? error, StackTrace stackTrace) {
+          if (error is vm_service.SentinelException ||
+            error == null ||
+            (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared)) {
+            return null;
+          }
+          return Future<vm_service.Event?>.error(error, stackTrace);
+        });
+  }
+
   /// Create a new development file system on the device.
   Future<vm_service.Response> createDevFS(String fsName) {
     // Call the unchecked version of `callServiceExtension` because the caller

@@ -1298,9 +1298,8 @@ Future<ReassembleResult> _defaultReassembleHelper(
     for (final FlutterView view in views) {
       // Check if the isolate is paused, and if so, don't reassemble. Ignore the
       // PostPauseEvent event - the client requesting the pause will resume the app.
-      final vm_service.Isolate? isolate = await device!.vmService!
-        .getIsolateOrNull(view.uiIsolate!.id!);
-      final vm_service.Event? pauseEvent = isolate?.pauseEvent;
+      final vm_service.Event? pauseEvent = await device!.vmService!
+        .getIsolatePauseEventOrNull(view.uiIsolate!.id!);
       if (pauseEvent != null
         && isPauseEvent(pauseEvent.kind!)
         && pauseEvent.kind != vm_service.EventKind.kPausePostRequest) {
@@ -1364,16 +1363,13 @@ Future<ReassembleResult> _defaultReassembleHelper(
       int postReloadPausedIsolatesFound = 0;
       String? serviceEventKind;
       for (final FlutterView view in reassembleViews.keys) {
-        final vm_service.Isolate? isolate = await reassembleViews[view]!
-          .getIsolateOrNull(view.uiIsolate!.id!);
-        if (isolate == null) {
-          continue;
-        }
-        if (isolate.pauseEvent != null && isPauseEvent(isolate.pauseEvent!.kind!)) {
+        final vm_service.Event? pauseEvent = await reassembleViews[view]!
+          .getIsolatePauseEventOrNull(view.uiIsolate!.id!);
+        if (pauseEvent != null && isPauseEvent(pauseEvent.kind!)) {
           postReloadPausedIsolatesFound += 1;
           if (serviceEventKind == null) {
-            serviceEventKind = isolate.pauseEvent!.kind;
-          } else if (serviceEventKind != isolate.pauseEvent!.kind) {
+            serviceEventKind = pauseEvent.kind;
+          } else if (serviceEventKind != pauseEvent.kind) {
             serviceEventKind = ''; // many kinds
           }
         }
