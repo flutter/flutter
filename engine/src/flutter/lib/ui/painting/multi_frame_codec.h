@@ -53,7 +53,7 @@ class MultiFrameCodec : public Codec {
     // thread.
     int nextFrameIndex_;
     // The last decoded frame that's required to decode any subsequent frames.
-    std::unique_ptr<SkBitmap> lastRequiredFrame_;
+    std::optional<SkBitmap> lastRequiredFrame_;
 
     // The index of the last decoded required frame.
     int lastRequiredFrameIndex_ = -1;
