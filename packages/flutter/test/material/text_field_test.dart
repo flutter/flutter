@@ -15803,7 +15803,7 @@ void main() {
       );
       final TextField textField = TextField(
         magnifierConfiguration: TextMagnifierConfiguration(
-          magnifierBuilder: (_, __, ___) => customMagnifier,
+          magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo>? info) => customMagnifier,
         ),
       );
 
@@ -15901,7 +15901,7 @@ void main() {
             controller: controller,
             magnifierConfiguration: TextMagnifierConfiguration(
               magnifierBuilder: (
-                  _,
+                  BuildContext context,
                   MagnifierController controller,
                   ValueNotifier<MagnifierInfo> localMagnifierInfo
                 ) {
@@ -15965,7 +15965,7 @@ void main() {
                 controller: controller,
                 magnifierConfiguration: TextMagnifierConfiguration(
                   magnifierBuilder: (
-                      _,
+                      BuildContext context,
                       MagnifierController controller,
                       ValueNotifier<MagnifierInfo> localMagnifierInfo
                     ) {
@@ -16067,7 +16067,7 @@ void main() {
                 controller: controller,
                 magnifierConfiguration: TextMagnifierConfiguration(
                   magnifierBuilder: (
-                      _,
+                      BuildContext context,
                       MagnifierController controller,
                       ValueNotifier<MagnifierInfo> localMagnifierInfo
                     ) {
@@ -16118,6 +16118,54 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
+    testWidgets('magnifier does not show when tapping outside field', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/128321
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.all(20),
+              child: TextField(
+                magnifierConfiguration: TextMagnifierConfiguration(
+                  magnifierBuilder: (
+                      BuildContext context,
+                      MagnifierController controller,
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo
+                    ) {
+                      magnifierInfo = localMagnifierInfo;
+                      return fakeMagnifier;
+                    },
+                ),
+                onTapOutside: (PointerDownEvent event) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                }
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tapAt(
+        tester.getCenter(find.byType(TextField)),
+      );
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getBottomLeft(find.byType(TextField)) - const Offset(10.0, 20.0),
+      );
+      await tester.pump();
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+      await gesture.up();
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+    },
+      skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
   });
 
   group('TapRegion integration', () {
@@ -16513,7 +16561,7 @@ class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
     return MaterialApp(
       home: Scaffold(
         body: Builder(
-          builder: (_) {
+          builder: (BuildContext context) {
             return Column(
               children: <Widget>[
                 TextField(
