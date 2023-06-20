@@ -237,14 +237,14 @@ class CupertinoTextFormFieldRow extends FormField<String> {
           },
         );
 
-  /// An optional [Widget] that is displayed at the end of the row.
+  /// A widget that is displayed at the start of the row.
   ///
   /// The [prefix] widget is displayed at the start of the row. Standard iOS
   /// guidelines encourage passing a [Text] widget to [prefix] to detail the
   /// nature of the input.
   final Widget? prefix;
 
-  /// A widget that is displayed at the end of the row.
+  /// An optional [Widget] that is displayed at the end of the row.
   ///
   /// The [suffix] widget is displayed at the end of the row.
   final Widget? suffix;
