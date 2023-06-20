@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'channel_util.dart';
 
-import 'platform_echo_mixin.dart';
 import 'scenario.dart';
 
 /// A blank page with a button that pops the page when tapped.
-class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
+class PoppableScreenScenario extends Scenario {
   /// Creates the PoppableScreenScenario.
-  PoppableScreenScenario(super.view);
+  PoppableScreenScenario(super.view) {
+    channelBuffers.setListener('flutter/platform', _onHandlePlatformMessage);
+  }
 
   // Rect for the pop button. Only defined once onMetricsChanged is called.
   Rect? _buttonRect;
@@ -78,5 +80,15 @@ class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
       // Don't care about the response. If it doesn't go through, the test
       // will fail.
     );
+  }
+
+  void _onHandlePlatformMessage(ByteData? data, PlatformMessageResponseCallback callback) {
+    view.platformDispatcher.sendPlatformMessage('flutter/platform', data, null);
+  }
+
+  @override
+  void unmount() {
+    channelBuffers.clearListener('flutter/platform');
+    super.unmount();
   }
 }
