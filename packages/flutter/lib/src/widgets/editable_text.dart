@@ -2819,7 +2819,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _formatAndSetValue(value, SelectionChangedCause.keyboard);
     }
 
-    if (_cursorActive && _cursorTimer != null) {
+    if (_showBlinkingCursor && _cursorTimer != null) {
       // To keep the cursor from blinking while typing, restart the timer here.
       _stopCursorBlink(resetCharTicks: false);
       _startCursorBlink();
@@ -3415,7 +3415,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // To keep the cursor from blinking while it moves, restart the timer here.
-    if (_cursorActive && _cursorTimer != null) {
+    if (_showBlinkingCursor && _cursorTimer != null) {
       _stopCursorBlink(resetCharTicks: false);
       _startCursorBlink();
     }
