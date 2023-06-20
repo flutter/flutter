@@ -231,6 +231,9 @@ class Stepper extends StatefulWidget {
   /// can be helpful to set this property to [ClampingScrollPhysics].
   final ScrollPhysics? physics;
 
+  /// An object that can be used to control the position to which this scroll
+  /// view is scrolled.
+  ///
   /// To control the initial scroll offset of the scroll view, provide a
   /// [controller] with its [ScrollController.initialScrollOffset] property set.
   final ScrollController? controller;
