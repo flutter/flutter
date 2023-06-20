@@ -1764,17 +1764,20 @@ mixin WidgetInspectorService {
     // TODO(polina-c): start always assuming Diagnosticable, when DevTools stops sending DiagnosticsNode to
     // APIs that invoke this method.
     // https://github.com/flutter/devtools/issues/3951
-    final Object? theObject = toObject(diagnosticsOrDiagnosticableId);
-    if (theObject is DiagnosticsNode) {
-      return theObject;
+    final Object? object = toObject(diagnosticsOrDiagnosticableId);
+    return objectToDiagnosticsNode(object);
+  }
+
+  /// If posiible, returns [DiagnosticsNode] for the object.
+  @visibleForTesting
+  static DiagnosticsNode? objectToDiagnosticsNode(Object? object) {
+    if (object is DiagnosticsNode) {
+      return object;
     }
-    if (theObject is Diagnosticable) {
-      return theObject.toDiagnosticsNode();
+    if (object is Diagnosticable) {
+      return object.toDiagnosticsNode();
     }
-    if (theObject == null) {
-      return null;
-    }
-    throw StateError('Unexpected object type ${theObject.runtimeType}.');
+    return null;
   }
 
   List<Object> _getChildrenSummaryTree(String? diagnosticsOrDiagnosticableId, String groupName) {
