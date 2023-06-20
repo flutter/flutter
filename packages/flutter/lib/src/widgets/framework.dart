@@ -4647,11 +4647,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   void _updateInheritance() {
-    try {
-      print('INHERITANCE $this');
-    } catch (e) {
-      print('INHERITANCE - omitted');
-    }
     assert(_lifecycleState == _ElementLifecycle.active);
     _inheritedElements = _parent?._inheritedElements;
   }

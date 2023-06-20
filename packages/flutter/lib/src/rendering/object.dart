@@ -1364,7 +1364,6 @@ class PipelineOwner {
     if (_manifold != null) {
       child.attach(_manifold!);
     }
-    print('  $this$_debugRootSuffixForTimelineEventNames adopted $child');
   }
 
   /// Removes a child [PipelineOwner] previously added via [adoptChild].
@@ -1385,7 +1384,6 @@ class PipelineOwner {
     if (_manifold != null) {
       child.detach();
     }
-    print('  $this$_debugRootSuffixForTimelineEventNames dropped $child');
   }
 
   /// Calls `visitor` for each immediate child of this [PipelineOwner].

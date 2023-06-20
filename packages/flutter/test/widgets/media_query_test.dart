@@ -1527,7 +1527,6 @@ Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, require
     builder: (BuildContext context) {
       return RawView(
         view: tester.view,
-        hooks: ViewHooks.of(context),
         builder: (_, __) => widget,
       );
     },

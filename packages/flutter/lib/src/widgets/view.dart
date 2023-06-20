@@ -125,17 +125,15 @@ class View extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ViewHooks ancestorHock = ViewHooks.of(context);
     return RawView._deprecated(
       view: view,
-      hooks: ancestorHock,
       deprecatedPipelineOwner: _deprecatedPipelineOwner,
       deprecatedRenderView: _deprecatedRenderView,
       builder: (BuildContext context, PipelineOwner owner) {
         return _ViewScope(
           view: view,
           child: ViewHooksScope(
-            hooks: ancestorHock.copyWith(pipelineOwner: owner),
+            hooks: ViewHooks.of(context).copyWith(pipelineOwner: owner),
             child: MediaQuery.fromView(
               view: view,
               child: child,
@@ -152,7 +150,6 @@ typedef RawViewContentBuilder = Widget Function(BuildContext context, PipelineOw
 class RawView extends RenderObjectWidget {
   RawView({
     required this.view,
-    required this.hooks,
     required this.builder,
   }) : _deprecatedPipelineOwner = null,
        _deprecatedRenderView = null,
@@ -160,7 +157,6 @@ class RawView extends RenderObjectWidget {
 
   RawView._deprecated({
     required this.view,
-    required this.hooks,
     PipelineOwner? deprecatedPipelineOwner,
     RenderView? deprecatedRenderView,
     required this.builder,
@@ -170,7 +166,6 @@ class RawView extends RenderObjectWidget {
        super(key: _DeprecatedRawViewKey(view, deprecatedPipelineOwner, deprecatedRenderView));
 
   final FlutterView view;
-  final ViewHooks hooks;
   final RawViewContentBuilder builder;
 
   final PipelineOwner? _deprecatedPipelineOwner;
@@ -227,7 +222,6 @@ class _RawViewElement extends RenderTreeRootElement {
 
   @override
   void mount(Element? parent, Object? newSlot) {
-    print('MOUNT $this');
     super.mount(parent, newSlot); // calls attachRenderObject(), updates slot member.
     _effectivePipelineOwner.rootNode = renderObject;
     _updateChild();
@@ -237,51 +231,58 @@ class _RawViewElement extends RenderTreeRootElement {
     }
   }
 
-  // bool _attached = false;
-
   @override
   void attachRenderObject(Object? newSlot) {
-    print('ATTACH RO $this');
     super.attachRenderObject(newSlot); // updates slot member
-    final RawView viewWidget = widget as RawView;
-    print('>> $this adoptChild $_effectivePipelineOwner');
-    // The widget is not guaranteed to be up to date here (e.g. after a global
-    // key move "update" has not been called yet, see "View can be moved to the
-    // top of the widget tree view GlobalKey" test, second part). So, we are
-    // (temporarily) attaching to the wrong pipelineOwner/viewrepository here.
-    // Once update is called shortly after this method, that will be corrected,
-    // but it is akward. Instead, we should try if we can call dependOnViewHooks
-    // in mount/activate to look up the hooks directly instead of relying on
-    // someone passing them to us. We can then remove the hooks parameter from
-    // the widget. We also need to check if we need to implement
-    // didChangeDependencies to potentially move the pipelineOwner/renderView
-    // over.
-
-    viewWidget.hooks.pipelineOwner.adoptChild(_effectivePipelineOwner);
-    viewWidget.hooks.renderViewRepository.addRenderView(renderObject);
-    // _attached = true;
+    _attachToViewHooks();
   }
 
   @override
   void detachRenderObject() {
-    print('DETACH RO $this');
-    final RawView viewWidget = widget as RawView;
-    // TODO(goderbauer): Figure out if this guard is still needed.
-    // if (!_attached) { // ?
-    //   // In global key move scenarios `detachRenderObject` is called twice.
-    //   assert(_effectivePipelineOwner.rootNode == null);
-    //   return;
-    // }
-    viewWidget.hooks.renderViewRepository.removeRenderView(renderObject);
-    print('>> $this dropChild $_effectivePipelineOwner');
-    viewWidget.hooks.pipelineOwner.dropChild(_effectivePipelineOwner);
-    // _attached = false;
+    _detachFromViewHooks();
     super.detachRenderObject(); // updates slot member
+  }
+
+  ViewHooks? _attachmentPoint;
+
+  void _attachToViewHooks([ViewHooks? viewHooks]) {
+    assert(_attachmentPoint == null);
+    viewHooks ??= ViewHooks.of(this);
+    viewHooks.pipelineOwner.adoptChild(_effectivePipelineOwner);
+    viewHooks.renderViewRepository.addRenderView(renderObject);
+    _attachmentPoint = viewHooks;
+  }
+
+  void _detachFromViewHooks() {
+    final ViewHooks? viewHooks = _attachmentPoint;
+    if (viewHooks != null) {
+      viewHooks.renderViewRepository.removeRenderView(renderObject);
+      viewHooks.pipelineOwner.dropChild(_effectivePipelineOwner);
+      _attachmentPoint = null;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_attachmentPoint == null) {
+      return;
+    }
+    final ViewHooks newHooks = ViewHooks.of(this);
+    if (newHooks != _attachmentPoint) {
+      _detachFromViewHooks();
+      _attachToViewHooks(newHooks);
+    }
+  }
+
+  @override
+  void performRebuild() {
+    super.performRebuild();
+    _updateChild();
   }
 
   @override
   void activate() {
-    print('ACTIVATE $this');
     super.activate();
     assert(_effectivePipelineOwner.rootNode == null);
     _effectivePipelineOwner.rootNode = renderObject;
@@ -289,7 +290,6 @@ class _RawViewElement extends RenderTreeRootElement {
 
   @override
   void deactivate() {
-    print('DEACTIVATE $this');
     assert(_effectivePipelineOwner.rootNode == renderObject);
     _effectivePipelineOwner.rootNode = null;
     super.deactivate();
@@ -297,20 +297,8 @@ class _RawViewElement extends RenderTreeRootElement {
 
   @override
   void update(RawView newWidget) {
-    print('UPDATE $this');
-    final RawView oldWidget = widget as RawView;
     super.update(newWidget);
     _updateChild();
-    final ViewHooks oldHooks = oldWidget.hooks;
-    final ViewHooks newHooks = newWidget.hooks;
-    if (oldHooks.pipelineOwner != newHooks.pipelineOwner) {
-      oldHooks.pipelineOwner.dropChild(_effectivePipelineOwner);
-      newHooks.pipelineOwner.adoptChild(_effectivePipelineOwner);
-    }
-    if (oldHooks.renderViewRepository != newHooks.renderViewRepository) {
-      oldHooks.renderViewRepository.removeRenderView(renderObject);
-      newHooks.renderViewRepository.addRenderView(renderObject);
-    }
   }
 
   @override
@@ -402,6 +390,15 @@ class ViewHooks {
     return other is ViewHooks
         && renderViewRepository == other.renderViewRepository
         && pipelineOwner == other.pipelineOwner;
+  }
+
+  @override
+  String toString() {
+    return
+      '${objectRuntimeType(this, 'ViewHooks')}('
+        'pipelineOwner: $pipelineOwner, '
+        'renderViewRepository: $renderViewRepository'
+      ')';
   }
 }
 

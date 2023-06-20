@@ -205,7 +205,6 @@ void main() {
   });
 
   testWidgets('View can be moved to the top of the widget tree view GlobalKey', (WidgetTester tester) async {
-    print('----- first part----');
     final Widget globalKeyView = View(
       view: FakeView(tester.view),
       child: const ColoredBox(color: Colors.red),
@@ -225,13 +224,6 @@ void main() {
     expect(find.byType(SizedBox), findsOneWidget);
     expect(find.byType(ColoredBox), findsOneWidget);
 
-    print('\n\n');
-    debugDumpPipelineOwnerTree();
-    print('\n\n');
-
-    // debugDumpRenderTree();
-    print('----- second part----');
-
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: globalKeyView,
@@ -239,14 +231,6 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(SizedBox), findsNothing);
     expect(find.byType(ColoredBox), findsOneWidget);
-
-    print('\n\n');
-    debugDumpPipelineOwnerTree();
-    print('\n\n');
-
-    // debugDumpRenderTree();
-    // debugDumpApp();
-    print('--TEST END--');
   });
 
   testWidgets('ViewCollection can be used at the top of the widget tree', (WidgetTester tester) async {
