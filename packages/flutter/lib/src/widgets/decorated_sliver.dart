@@ -32,7 +32,7 @@ import 'image.dart';
 ///
 /// See also:
 ///
-///  * [DecoratedBox], the version of this class that works with regular widgets.
+///  * [DecoratedBox], the version of this class that works with RenderBox widgets.
 ///  * [Decoration], which you can extend to provide other effects with
 ///    [DecoratedSliver].
 ///  * [CustomPaint], another way to draw custom effects from the widget layer.
