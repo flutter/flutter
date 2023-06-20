@@ -1058,7 +1058,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _effectiveFocusNode.canRequestFocus = _canRequestFocus;
 
     if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
-      if(_effectiveController.selection.isCollapsed) {
+      if (_effectiveController.selection.isCollapsed) {
         _showSelectionHandles = !widget.readOnly;
       }
     }
@@ -1234,7 +1234,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     assert(
-      !(widget.style != null && widget.style!.inherit == false &&
+      !(widget.style != null && !widget.style!.inherit &&
         (widget.style!.fontSize == null || widget.style!.textBaseline == null)),
       'inherit false style must supply fontSize and textBaseline',
     );
@@ -1502,8 +1502,6 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
   if (states.contains(MaterialState.disabled)) {

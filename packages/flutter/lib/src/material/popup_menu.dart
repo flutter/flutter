@@ -339,9 +339,10 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   /// the menu route.
   @protected
   void handleTap() {
-    widget.onTap?.call();
-
+    // Need to pop the navigator first in case onTap may push new route onto navigator.
     Navigator.pop<T>(context, widget.value);
+
+    widget.onTap?.call();
   }
 
   @override
@@ -789,6 +790,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     required this.capturedThemes,
     this.constraints,
     required this.clipBehavior,
+    super.settings,
   }) : itemSizes = List<Size?>.filled(items.length, null),
        // Menus always cycle focus through their items irrespective of the
        // focus traversal edge behavior set in the Navigator.
@@ -949,6 +951,7 @@ Future<T?> showMenu<T>({
   bool useRootNavigator = false,
   BoxConstraints? constraints,
   Clip clipBehavior = Clip.none,
+  RouteSettings? routeSettings,
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -979,6 +982,7 @@ Future<T?> showMenu<T>({
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     constraints: constraints,
     clipBehavior: clipBehavior,
+    settings: routeSettings,
   ));
 }
 
@@ -1011,11 +1015,52 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// If both are null, then a standard overflow icon is created (depending on the
 /// platform).
 ///
+/// /// ## Updating to [MenuAnchor]
+///
+/// There is a Material 3 component,
+/// [MenuAnchor] that is preferred for applications that are configured
+/// for Material 3 (see [ThemeData.useMaterial3]).
+/// The [MenuAnchor] widget's visuals
+/// are a little bit different, see the Material 3 spec at
+/// <https://m3.material.io/components/menus/guidelines> for
+/// more details.
+///
+/// The [MenuAnchor] widget's API is also slightly different.
+/// [MenuAnchor]'s were built to be lower level interface for
+/// creating menus that are displayed from an anchor.
+///
+/// There are a few steps you would take to migrate from
+/// [PopupMenuButton] to [MenuAnchor]:
+///
+/// 1. Instead of using the [PopupMenuButton.itemBuilder] to build
+/// a list of [PopupMenuEntry]s, you would use the [MenuAnchor.menuChildren]
+/// which takes a list of [Widget]s. Usually, you would use a list of
+/// [MenuItemButton]s as shown in the example below.
+///
+/// 2. Instead of using the [PopupMenuButton.onSelected] callback, you would
+/// set individual callbacks for each of the [MenuItemButton]s using the
+/// [MenuItemButton.onPressed] property.
+///
+/// 3. To anchor the [MenuAnchor] to a widget, you would use the [MenuAnchor.builder]
+/// to return the widget of choice - usually a [TextButton] or an [IconButton].
+///
+/// 4. You may want to style the [MenuItemButton]s, see the [MenuItemButton]
+/// documentation for details.
+///
+/// Use the sample below for an example of migrating from [PopupMenuButton] to
+/// [MenuAnchor].
+///
 /// {@tool dartpad}
 /// This example shows a menu with three items, selecting between an enum's
 /// values and setting a `selectedMenu` field based on the selection.
 ///
 /// ** See code in examples/api/lib/material/popup_menu/popup_menu.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to migrate the above to a [MenuAnchor].
+///
+/// ** See code in examples/api/lib/material/menu_anchor/menu_anchor.2.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
@@ -1238,12 +1283,16 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
     final PopupMenuPosition popupMenuPosition = widget.position ?? popupMenuTheme.position ?? PopupMenuPosition.over;
-    final Offset offset;
+    late Offset offset;
     switch (popupMenuPosition) {
       case PopupMenuPosition.over:
         offset = widget.offset;
       case PopupMenuPosition.under:
-        offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2)) + widget.offset;
+        offset = Offset(0.0, button.size.height) + widget.offset;
+        if (widget.child == null) {
+          // Remove the padding of the icon button.
+          offset -= Offset(0.0, widget.padding.vertical / 2);
+        }
     }
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
@@ -1365,8 +1414,6 @@ class _PopupMenuDefaultsM2 extends PopupMenuThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
   _PopupMenuDefaultsM3(this.context)

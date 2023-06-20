@@ -22,6 +22,10 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
+    if (project.android.hasProperty("namespace")) {
+        namespace '{{androidIdentifier}}'
+    }
+
     compileSdkVersion {{compileSdkVersion}}
 
     compileOptions {

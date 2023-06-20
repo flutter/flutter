@@ -123,7 +123,7 @@ abstract final class _UntilNextFrame {
     if (_UntilNextFrame._completer == null) {
       _UntilNextFrame._completer = Completer<void>();
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        _UntilNextFrame._completer!.complete(null);
+        _UntilNextFrame._completer!.complete();
         _UntilNextFrame._completer = null;
       });
     }

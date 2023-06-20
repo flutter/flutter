@@ -380,7 +380,7 @@ void main() {
     await gesture.moveTo(endPos);
     expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 8));
     // Only Android vibrate when dragging the handle.
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         expect(
           log.last,
@@ -766,6 +766,48 @@ void main() {
       expect(clipboardData['text'], 'w are you?Good, and you?Fine');
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+    );
+
+    testWidgets(
+      'can select word when a selectables rect is completely inside of another selectables rect', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/127076.
+      final UniqueKey outerText = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: Scaffold(
+              body: Center(
+                child: Text.rich(
+                  const TextSpan(
+                      children: <InlineSpan>[
+                        TextSpan(
+                          text:
+                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                        ),
+                        WidgetSpan(child: Text('Some text in a WidgetSpan. ')),
+                        TextSpan(text: 'Hello, world.'),
+                      ],
+                  ),
+                  key: outerText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+      // Right click to select word at position.
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 125), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // Should select "Hello".
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 124, extentOffset: 129));
+    },
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
@@ -1273,7 +1315,7 @@ void main() {
 
       final bool alt;
       final bool control;
-      switch(defaultTargetPlatform) {
+      switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -1381,7 +1423,7 @@ void main() {
 
       final bool alt;
       final bool meta;
-      switch(defaultTargetPlatform) {
+      switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -1470,7 +1512,7 @@ void main() {
 
       final bool alt;
       final bool meta;
-      switch(defaultTargetPlatform) {
+      switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -1759,7 +1801,7 @@ void main() {
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
     // In Android copy should clear the selection.
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         expect(regionState.selectionOverlay, isNull);
@@ -1812,7 +1854,7 @@ void main() {
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:

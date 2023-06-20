@@ -39,6 +39,9 @@ Future<void> main() async {
             iosintegrationTestPodspec,
             '--use-libraries',
             '--verbose',
+            // TODO(cyanglaz): remove allow-warnings when https://github.com/flutter/flutter/issues/125812 is fixed.
+            // https://github.com/flutter/flutter/issues/125812
+            '--allow-warnings',
           ],
         );
 
@@ -50,6 +53,9 @@ Future<void> main() async {
             'lint',
             macosintegrationTestPodspec,
             '--verbose',
+            // TODO(cyanglaz): remove allow-warnings when https://github.com/flutter/flutter/issues/125812 is fixed.
+            // https://github.com/flutter/flutter/issues/125812
+            '--allow-warnings',
           ],
         );
       });

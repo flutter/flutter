@@ -45,6 +45,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     TextInput.ensureInitialized();
     readInitialLifecycleStateFromNativeWindow();
+    initializationComplete();
   }
 
   /// The current [ServicesBinding], if one has been created.
@@ -68,8 +69,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void _initKeyboard() {
     _keyboard = HardwareKeyboard();
     _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
-    platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
-    SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+    _keyboard.syncKeyboardState().then((_) {
+      platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
+      SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+    });
   }
 
   /// The default instance of [BinaryMessenger].
@@ -240,26 +243,102 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   /// Once the [lifecycleState] is populated through any means (including this
   /// method), this method will do nothing. This is because the
-  /// [dart:ui.PlatformDispatcher.initialLifecycleState] may already be
-  /// stale and it no longer makes sense to use the initial state at dart vm
-  /// startup as the current state anymore.
+  /// [dart:ui.PlatformDispatcher.initialLifecycleState] may already be stale
+  /// and it no longer makes sense to use the initial state at dart vm startup
+  /// as the current state anymore.
   ///
   /// The latest state should be obtained by subscribing to
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
   @protected
   void readInitialLifecycleStateFromNativeWindow() {
-    if (lifecycleState != null) {
+    if (lifecycleState != null || platformDispatcher.initialLifecycleState.isEmpty) {
       return;
     }
-    final AppLifecycleState? state = _parseAppLifecycleMessage(platformDispatcher.initialLifecycleState);
-    if (state != null) {
-      handleAppLifecycleStateChanged(state);
-    }
+    _handleLifecycleMessage(platformDispatcher.initialLifecycleState);
   }
 
   Future<String?> _handleLifecycleMessage(String? message) async {
-    handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message!)!);
+    final AppLifecycleState? state = _parseAppLifecycleMessage(message!);
+    final List<AppLifecycleState> generated = _generateStateTransitions(lifecycleState, state!);
+    generated.forEach(handleAppLifecycleStateChanged);
     return null;
+  }
+
+  List<AppLifecycleState> _generateStateTransitions(AppLifecycleState? previousState, AppLifecycleState state) {
+    if (previousState == state) {
+      return const <AppLifecycleState>[];
+    }
+    if (previousState == AppLifecycleState.paused && state == AppLifecycleState.detached) {
+      // Handle the wrap-around from paused to detached
+      return const <AppLifecycleState>[
+        AppLifecycleState.detached,
+      ];
+    }
+    final List<AppLifecycleState> stateChanges = <AppLifecycleState>[];
+    if (previousState == null) {
+      // If there was no previous state, just jump directly to the new state.
+      stateChanges.add(state);
+    } else {
+      final int previousStateIndex = AppLifecycleState.values.indexOf(previousState);
+      final int stateIndex = AppLifecycleState.values.indexOf(state);
+      assert(previousStateIndex != -1, 'State $previousState missing in stateOrder array');
+      assert(stateIndex != -1, 'State $state missing in stateOrder array');
+      if (previousStateIndex > stateIndex) {
+        for (int i = stateIndex; i < previousStateIndex; ++i) {
+          stateChanges.insert(0, AppLifecycleState.values[i]);
+        }
+      } else {
+        for (int i = previousStateIndex + 1; i <= stateIndex; ++i) {
+          stateChanges.add(AppLifecycleState.values[i]);
+        }
+      }
+    }
+    assert((){
+      AppLifecycleState? starting = previousState;
+      for (final AppLifecycleState ending in stateChanges) {
+        if (!_debugVerifyLifecycleChange(starting, ending)) {
+          return false;
+        }
+        starting = ending;
+      }
+      return true;
+    }(), 'Invalid lifecycle state transition generated from $previousState to $state (generated $stateChanges)');
+    return stateChanges;
+  }
+
+  static bool _debugVerifyLifecycleChange(AppLifecycleState? starting, AppLifecycleState ending) {
+    if (starting == null) {
+      // Any transition from null is fine, since it is initializing the state.
+      return true;
+    }
+    if (starting == ending) {
+      // Any transition to itself shouldn't happen.
+      return false;
+    }
+    switch (starting) {
+      case AppLifecycleState.detached:
+        if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.paused) {
+          return true;
+        }
+      case AppLifecycleState.resumed:
+        // Can't go from resumed to detached directly (must go through paused).
+        if (ending == AppLifecycleState.inactive) {
+          return true;
+        }
+      case AppLifecycleState.inactive:
+        if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.hidden) {
+          return true;
+        }
+      case AppLifecycleState.hidden:
+        if (ending == AppLifecycleState.inactive || ending == AppLifecycleState.paused) {
+          return true;
+        }
+      case AppLifecycleState.paused:
+        if (ending == AppLifecycleState.hidden || ending == AppLifecycleState.detached) {
+          return true;
+        }
+    }
+    return false;
   }
 
   Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {
@@ -282,6 +361,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         return AppLifecycleState.resumed;
       case 'AppLifecycleState.inactive':
         return AppLifecycleState.inactive;
+      case 'AppLifecycleState.hidden':
+        return AppLifecycleState.hidden;
       case 'AppLifecycleState.paused':
         return AppLifecycleState.paused;
       case 'AppLifecycleState.detached':
@@ -354,7 +435,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   /// * [WidgetsBindingObserver.didRequestAppExit] for a handler you can
   ///   override on a [WidgetsBindingObserver] to receive exit requests.
-  @mustCallSuper
   Future<ui.AppExitResponse> exitApplication(ui.AppExitType exitType, [int exitCode = 0]) async {
     final Map<String, Object?>? result = await SystemChannels.platform.invokeMethod<Map<String, Object?>>(
       'System.exitApplication',
@@ -412,6 +492,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
+  }
+
+  /// Alert the engine that the binding is registered. This instructs the engine to
+  /// register its top level window handler on Windows. This signals that the app
+  /// is able to process "System.requestAppExit" signals from the engine.
+  @protected
+  Future<void> initializationComplete() async {
+    await SystemChannels.platform.invokeMethod('System.initializationComplete');
   }
 }
 

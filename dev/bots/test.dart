@@ -277,7 +277,8 @@ Future<void> main(List<String> args) async {
 }
 
 final String _luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
-final bool _runningInDartHHHBot = _luciBotId.startsWith('luci-dart-');
+final bool _runningInDartHHHBot =
+    _luciBotId.startsWith('luci-dart-') || _luciBotId.startsWith('dart-tests-');
 
 /// Verify the Flutter Engine is the revision in
 /// bin/cache/internal/engine.version.
@@ -543,7 +544,10 @@ Future<void> _runBuildTests() async {
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'hybrid_android_views')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_platform_view_tests')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_app_with_extensions')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'platform_interaction')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'spell_check')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
 
   // The tests are randomly distributed into subshards so as to get a uniform
@@ -806,7 +810,7 @@ Future<void> _runFrameworkTests() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
       .listSync(followLinks: false)
       .whereType<Directory>()
-      .where((Directory dir) => dir.path.endsWith('widgets') == false)
+      .where((Directory dir) => !dir.path.endsWith('widgets'))
       .map<String>((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
       .toList();
     printProgress('${green}Running packages/flutter tests$reset for $cyan${tests.join(", ")}$reset');
@@ -1133,7 +1137,7 @@ Future<void> _runWebUnitTests(String webRenderer) async {
 Future<void> _runWebLongRunningTests() async {
   final String engineVersion = File(engineVersionFile).readAsStringSync().trim();
   final List<ShardRunner> tests = <ShardRunner>[
-    for (String buildMode in _kAllBuildModes) ...<ShardRunner>[
+    for (final String buildMode in _kAllBuildModes) ...<ShardRunner>[
       () => _runFlutterDriverWebTest(
         testAppDirectory: path.join('packages', 'integration_test', 'example'),
         target: path.join('test_driver', 'failure.dart'),

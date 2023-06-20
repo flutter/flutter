@@ -437,10 +437,13 @@ Future<ui.Image> _collateFrames(List<ui.Image> frames, Size frameSize, int cells
       Paint(),
     );
   }
-  return recorder.endRecording().toImage(
+  final ui.Picture picture = recorder.endRecording();
+  final ui.Image image = await picture.toImage(
     (frameSize.width * cellsPerRow).toInt(),
     (frameSize.height * rowNum).toInt(),
   );
+  picture.dispose();
+  return image;
 }
 
 // Layout children in a grid of fixed-sized cells.
