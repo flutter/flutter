@@ -17,12 +17,13 @@ void main() {
   //   FlutterView to the _view property.
   assert(PlatformDispatcher.instance.implicitView != null);
   PlatformDispatcher.instance
-    ..onPlatformMessage = _handlePlatformMessage
     ..onBeginFrame = _onBeginFrame
     ..onDrawFrame = _onDrawFrame
     ..onMetricsChanged = _onMetricsChanged
     ..onPointerDataPacket = _onPointerDataPacket
     ..scheduleFrame();
+  channelBuffers.setListener('driver', _handleDriverMessage);
+  channelBuffers.setListener('write_timeline', _handleWriteTimelineMessage);
 
   final FlutterView view = PlatformDispatcher.instance.implicitView!;
   // Asserting that this is greater than zero since this app runs on different
@@ -41,7 +42,8 @@ void main() {
 /// The FlutterView into which the [Scenario]s will be rendered.
 FlutterView get _view => PlatformDispatcher.instance.implicitView!;
 
-void _handleDriverMessage(Map<String, dynamic> call) {
+void _handleDriverMessage(ByteData? data, PlatformMessageResponseCallback? callback) {
+  final Map<String, dynamic> call = json.decode(utf8.decode(data!.buffer.asUint8List())) as Map<String, dynamic>;
   final String? methodName = call['method'] as String?;
   switch (methodName) {
     case 'set_scenario':
@@ -52,23 +54,9 @@ void _handleDriverMessage(Map<String, dynamic> call) {
   }
 }
 
-Future<void> _handlePlatformMessage(
-    String name, ByteData? data, PlatformMessageResponseCallback? callback) async {
-  if (data != null) {
-    print('$name = ${utf8.decode(data.buffer.asUint8List())}');
-  } else {
-    print(name);
-  }
-
-  switch (name) {
-    case 'driver':
-      _handleDriverMessage(json.decode(utf8.decode(data!.buffer.asUint8List())) as Map<String, dynamic>);
-    case 'write_timeline':
-      final String timelineData = await _getTimelineData();
-      callback!(Uint8List.fromList(utf8.encode(timelineData)).buffer.asByteData());
-    default:
-      currentScenario?.onPlatformMessage(name, data, callback);
-  }
+Future<void> _handleWriteTimelineMessage(ByteData? data, PlatformMessageResponseCallback? callback) async {
+  final String timelineData = await _getTimelineData();
+  callback!(Uint8List.fromList(utf8.encode(timelineData)).buffer.asByteData());
 }
 
 Future<String> _getTimelineData() async {
