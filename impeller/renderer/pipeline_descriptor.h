@@ -133,7 +133,7 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
  private:
   std::string label_;
-  SampleCount sample_count_ = SampleCount::kCount1;
+  SampleCount sample_count_ = SampleCount::kCount4;
   WindingOrder winding_order_ = WindingOrder::kClockwise;
   CullMode cull_mode_ = CullMode::kNone;
   std::map<ShaderStage, std::shared_ptr<const ShaderFunction>> entrypoints_;
