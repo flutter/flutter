@@ -10,6 +10,7 @@ import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -78,6 +79,7 @@ class ChoiceChip extends StatelessWidget
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
+    this.color,
     this.backgroundColor,
     this.padding,
     this.visualDensity,
@@ -116,6 +118,7 @@ class ChoiceChip extends StatelessWidget
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
+    this.color,
     this.backgroundColor,
     this.padding,
     this.visualDensity,
@@ -162,6 +165,8 @@ class ChoiceChip extends StatelessWidget
   final FocusNode? focusNode;
   @override
   final bool autofocus;
+  @override
+  final MaterialStateProperty<Color?>? color;
   @override
   final Color? backgroundColor;
   @override
@@ -218,6 +223,7 @@ class ChoiceChip extends StatelessWidget
       autofocus: autofocus,
       disabledColor: disabledColor,
       selectedColor: selectedColor ?? chipTheme.secondarySelectedColor,
+      color: color,
       backgroundColor: backgroundColor,
       padding: padding,
       visualDensity: visualDensity,
@@ -270,7 +276,27 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
-  Color? get backgroundColor => null;
+  MaterialStateProperty<Color?>? get color =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+        return _chipVariant == _ChipVariant.flat
+          ? _colors.onSurface.withOpacity(0.12)
+          : _colors.onSurface.withOpacity(0.12);
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return _chipVariant == _ChipVariant.flat
+          ? null
+          : _colors.onSurface.withOpacity(0.12);
+      }
+      if (states.contains(MaterialState.selected)) {
+        return _chipVariant == _ChipVariant.flat
+          ? _colors.secondaryContainer
+          : _colors.secondaryContainer;
+      }
+      return _chipVariant == _ChipVariant.flat
+        ? null
+        : null;
+    });
 
   @override
   Color? get shadowColor => _chipVariant == _ChipVariant.flat
@@ -281,23 +307,7 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
-  Color? get selectedColor => _chipVariant == _ChipVariant.flat
-    ? isEnabled
-      ? _colors.secondaryContainer
-      : _colors.onSurface.withOpacity(0.12)
-    : isEnabled
-      ? _colors.secondaryContainer
-      : _colors.onSurface.withOpacity(0.12);
-
-  @override
   Color? get checkmarkColor => _colors.onSecondaryContainer;
-
-  @override
-  Color? get disabledColor => _chipVariant == _ChipVariant.flat
-    ? isSelected
-      ? _colors.onSurface.withOpacity(0.12)
-      : null
-    : _colors.onSurface.withOpacity(0.12);
 
   @override
   Color? get deleteIconColor => _colors.onSecondaryContainer;
