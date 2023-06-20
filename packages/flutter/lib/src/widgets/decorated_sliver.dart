@@ -17,7 +17,8 @@ import 'image.dart';
 /// If the child sliver has infinite [SliverGeometry.scrollExtent], then we only
 /// draw the decoration down to the bottom [SliverGeometry.cacheExtent], and
 /// it is necessary to ensure that the bottom border does not creep
-/// above the top of the bottom cache.
+/// above the top of the bottom cache. This can happen if the bottom has a
+/// border radius larger than the extent of the cache area.
 ///
 /// Commonly used with [BoxDecoration].
 ///

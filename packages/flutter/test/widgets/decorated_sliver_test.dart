@@ -236,6 +236,45 @@ void main() {
     ));
   });
 
+  testWidgets('DecoratedSliver paints its border correctly vertically reverse', (WidgetTester tester) async {
+    const Key key = Key('DecoratedSliver with border');
+    const Color black = Color(0xFF000000);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          height: 300,
+          width: 100,
+          child: CustomScrollView(
+            controller: controller,
+            reverse: true,
+            slivers: <Widget>[
+              DecoratedSliver(
+                key: key,
+                decoration: BoxDecoration(border: Border.all()),
+                sliver: const SliverToBoxAdapter(
+                  child: SizedBox(width: 100, height: 500),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+    controller.jumpTo(200);
+    await tester.pumpAndSettle();
+    expect(find.byKey(key), paints..rect(
+      rect: const Offset(0.5, -199.5) & const Size(99, 499),
+      color: black,
+      style: PaintingStyle.stroke,
+      strokeWidth: 1.0,
+    ));
+  });
+
+
+
   testWidgets('DecoratedSliver paints its border correctly horizontally', (WidgetTester tester) async {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
@@ -273,6 +312,45 @@ void main() {
     ));
   });
 
+  testWidgets('DecoratedSliver paints its border correctly horizontally reverse', (WidgetTester tester) async {
+    const Key key = Key('DecoratedSliver with border');
+    const Color black = Color(0xFF000000);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          height: 100,
+          width: 300,
+          child: CustomScrollView(
+            scrollDirection: Axis.horizontal,
+            reverse: true,
+            controller: controller,
+            slivers: <Widget>[
+              DecoratedSliver(
+                key: key,
+                decoration: BoxDecoration(border: Border.all()),
+                sliver: const SliverToBoxAdapter(
+                  child: SizedBox(width: 500, height: 100),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+    controller.jumpTo(200);
+    await tester.pumpAndSettle();
+    expect(find.byKey(key), paints..rect(
+      rect: const Offset(-199.5, 0.5) & const Size(499, 99),
+      color: black,
+      style: PaintingStyle.stroke,
+      strokeWidth: 1.0,
+    ));
+  });
+
+
   testWidgets('DecoratedSliver works with SliverMainAxisGroup', (WidgetTester tester) async {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
@@ -305,6 +383,44 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(key), paints..rect(
       rect: const Offset(0.5, 0.5) & const Size(299, 199),
+      color: black,
+      style: PaintingStyle.stroke,
+      strokeWidth: 1.0,
+    ));
+  });
+
+  testWidgets('DecoratedSliver works with SliverCrossAxisGroup', (WidgetTester tester) async {
+    const Key key = Key('DecoratedSliver with border');
+    const Color black = Color(0xFF000000);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          height: 100,
+          width: 300,
+          child: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              DecoratedSliver(
+                key: key,
+                decoration: BoxDecoration(border: Border.all()),
+                sliver: const SliverCrossAxisGroup(
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(child: SizedBox(height: 100)),
+                    SliverToBoxAdapter(child: SizedBox(height: 100)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.byKey(key), paints..rect(
+      rect: const Offset(0.5, 0.5) & const Size(299, 99),
       color: black,
       style: PaintingStyle.stroke,
       strokeWidth: 1.0,
