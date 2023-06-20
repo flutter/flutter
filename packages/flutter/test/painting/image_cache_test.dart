@@ -104,7 +104,7 @@ void main() {
     await extractOneFrame(TestImageProvider(2, 2, image: testImage).resolve(ImageConfiguration.empty));
 
     expect(imageCache.currentSize, 2);
-    expect(imageCache.currentSizeBytes, 256 * 2);
+    expect(imageCache.currentSizeBytes, 341 * 2);
 
     imageCache.clear();
 
@@ -118,10 +118,10 @@ void main() {
     await extractOneFrame(TestImageProvider(2, 2, image: testImage).resolve(ImageConfiguration.empty));
 
     expect(imageCache.currentSize, 2);
-    expect(imageCache.currentSizeBytes, 256 * 2);
+    expect(imageCache.currentSizeBytes, 341 * 2);
     expect(imageCache.evict(1), true);
     expect(imageCache.currentSize, 1);
-    expect(imageCache.currentSizeBytes, 256);
+    expect(imageCache.currentSizeBytes, 341);
   });
 
   test('Do not cache large images', () async {
@@ -488,7 +488,7 @@ void main() {
     // this test will fail.
 
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
-    const int testImageSize = 8 * 8 * 4;
+    const int testImageSize = 8 * 8 * 4 * 4 ~/ 3;
 
     final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
 

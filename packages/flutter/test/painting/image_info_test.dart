@@ -15,12 +15,12 @@ Future<void> main() async {
 
   test('ImageInfo sizeBytes', () {
     ImageInfo imageInfo = ImageInfo(image: smallImage);
-    expect(imageInfo.sizeBytes, equals(800));
+    expect(imageInfo.sizeBytes, equals(1066));
 
     imageInfo = ImageInfo(image: middleImage);
-    expect(imageInfo.sizeBytes, equals(8000));
+    expect(imageInfo.sizeBytes, equals(10666));
 
     imageInfo = ImageInfo(image: bigImage);
-    expect(imageInfo.sizeBytes, equals(80000));
+    expect(imageInfo.sizeBytes, equals(106666));
   });
 }
