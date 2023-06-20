@@ -50,6 +50,22 @@ enum _ChipVariant { flat, elevated }
 /// Material Design 3. If [ThemeData.useMaterial3] is true, then [ActionChip]
 /// will be styled to match the Material Design 3 Assist and Suggestion chips.
 ///
+/// ### Creating an Assist chip
+///
+/// Assist chips are used to provide a quick way to perform an action.
+/// To create an Action chip, set the icon property to the icon
+/// that represents the action and set the label to the name of the action.
+///
+///
+/// ### Creating a Suggestion chip
+///
+/// Suggestion chips usually display generated suggestions for the user,
+/// like a suggested response to a message.
+///
+/// To create a Suggestion chip, set the label to the suggestion
+/// and don't set the icon property.
+//
+///
 /// See also:
 ///
 ///  * [Chip], a chip that displays information and can be deleted.
