@@ -1854,7 +1854,12 @@ void main() {
       affinity: TextAffinity.upstream,
     ));
 
-    expect(selection, const TextSelection.collapsed(offset: text.length));
+    if (kIsWeb) {
+      // Web's getWordAtOffset behaves differently for a negative position.
+      expect(selection, const TextSelection.collapsed(offset: 0));
+    } else {
+      expect(selection, const TextSelection.collapsed(offset: text.length));
+    }
   });
 }
 
