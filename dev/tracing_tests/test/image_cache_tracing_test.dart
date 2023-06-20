@@ -69,7 +69,7 @@ void main() {
         <String, dynamic>{
           'name': 'ImageCache.evict',
           'args': <String, dynamic>{
-            'sizeInBytes': 4,
+            'sizeInBytes': 5,
             'isolateId': isolateId,
             'parentId': null,
           },
