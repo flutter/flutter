@@ -91,19 +91,7 @@ Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
 // Analytics instance for package:unified_analytics for telemetry
 // reporting for all Flutter and Dart related tooling
-Analytics get analytics => context.get<Analytics>() ?? getDefaultAnalytics();
-Analytics getDefaultAnalytics() {
-
-  initializeDateFormatting();
-  final Analytics defaultAnalytics = Analytics(
-    tool: DashTool.flutterTool,
-    flutterChannel: flutterVersion.channel,
-    flutterVersion: flutterVersion.frameworkVersion,
-    dartVersion: flutterVersion.dartSdkVersion,
-  );
-
-  return defaultAnalytics;
-}
+Analytics get analytics => context.get<Analytics>()!;
 
 /// Currently active implementation of the file system.
 ///
