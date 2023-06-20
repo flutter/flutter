@@ -422,6 +422,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       disablePortPublication: true,
       enableDds: enableDds,
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
+      usingCISystem: usingCISystem,
     );
 
     Device? integrationTestDevice;
@@ -540,7 +541,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }
 
   bool _needRebuild(Map<String, DevFSContent> entries) {
-    final File manifest = globals.fs.file(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    // TODO(andrewkolos): This logic might fail in the future if we change the
+    // schema of the contents of the asset manifest file and the user does not
+    // perform a `flutter clean` after upgrading.
+    // See https://github.com/flutter/flutter/issues/128563.
+    final File manifest = globals.fs.file(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     if (!manifest.existsSync()) {
       return true;
     }

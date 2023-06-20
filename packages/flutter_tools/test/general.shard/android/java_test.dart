@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -20,12 +21,14 @@ import '../../src/fakes.dart';
 
 void main() {
 
+  late Config config;
   late Logger logger;
   late FileSystem fs;
   late Platform platform;
   late FakeProcessManager processManager;
 
   setUp(() {
+    config = Config.test();
     logger = BufferLogger.test();
     fs = MemoryFileSystem.test();
     platform = FakePlatform(environment: <String, String>{
@@ -54,6 +57,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 '''
         ));
         final Java java = Java.find(
+          config: config,
           androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
@@ -74,6 +78,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         final String expectedJavaBinaryPath = fs.path.join(javaHome, 'bin', 'java');
 
         final Java java = Java.find(
+          config: config,
           androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
@@ -99,6 +104,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         );
 
         final Java java = Java.find(
+          config: config,
           androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
@@ -119,6 +125,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           ),
         );
         final Java? java = Java.find(
+          config: config,
           androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
@@ -126,6 +133,53 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           processManager: processManager,
         );
         expect(java, isNull);
+      });
+
+      testWithoutContext('finds and prefers JDK found at config item "jdk-dir" if it is set', () {
+        const String configuredJdkPath = '/jdk';
+        config.setValue('jdk-dir', configuredJdkPath);
+
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['which', 'java'],
+            stdout: '/fake/which/java/path',
+          ),
+        );
+
+        final _FakeAndroidStudioWithJdk androidStudio = _FakeAndroidStudioWithJdk();
+        final FakePlatform platformWithJavaHome = FakePlatform(
+          environment: <String, String>{
+            'JAVA_HOME': '/old/jdk'
+          },
+        );
+        Java? java = Java.find(
+          config: config,
+          androidStudio: androidStudio,
+          logger: logger,
+          fileSystem: fs,
+          platform: platformWithJavaHome,
+          processManager: processManager,
+        );
+
+        expect(java, isNotNull);
+        expect(java!.javaHome, configuredJdkPath);
+        expect(java.binaryPath, fs.path.join(configuredJdkPath, 'bin', 'java'));
+
+        config.removeValue('jdk-dir');
+
+        java = Java.find(
+          config: config,
+          androidStudio: androidStudio,
+          logger: logger,
+          fileSystem: fs,
+          platform: platformWithJavaHome,
+          processManager: processManager,
+        );
+
+        expect(java, isNotNull);
+        assert(androidStudio.javaPath != configuredJdkPath);
+        expect(java!.javaHome, androidStudio.javaPath);
+        expect(java.binaryPath, fs.path.join(androidStudio.javaPath!, 'bin', 'java'));
       });
     });
 

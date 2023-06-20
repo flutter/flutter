@@ -3080,11 +3080,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
   void _handleTapDown(TapDragDownDetails details) {
@@ -3314,13 +3309,9 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
         update();
       case AppLifecycleState.detached:
       case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
         // Nothing to do.
-        break;
-      // ignore: no_default_cases
-      default:
-        // TODO(gspencergoog): Remove this and replace with real cases once
-        // engine change rolls into framework.
         break;
     }
   }
