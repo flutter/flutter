@@ -277,7 +277,8 @@ Future<void> main(List<String> args) async {
 }
 
 final String _luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
-final bool _runningInDartHHHBot = _luciBotId.startsWith('luci-dart-');
+final bool _runningInDartHHHBot =
+    _luciBotId.startsWith('luci-dart-') || _luciBotId.startsWith('dart-tests-');
 
 /// Verify the Flutter Engine is the revision in
 /// bin/cache/internal/engine.version.
