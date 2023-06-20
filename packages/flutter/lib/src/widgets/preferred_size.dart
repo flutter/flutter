@@ -69,8 +69,8 @@ class PreferredSize extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a widget that has a preferred size that the parent can query.
   const PreferredSize({
     super.key,
-    required this.child,
     required this.preferredSize,
+    required this.child,
   });
 
   /// The widget below this widget in the tree.
