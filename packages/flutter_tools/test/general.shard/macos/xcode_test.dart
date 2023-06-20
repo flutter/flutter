@@ -791,7 +791,7 @@ void main() {
     "available" : true,
     "platform" : "com.apple.platform.iphoneos",
     "modelCode" : "iPhone8,1",
-    "identifier" : "d83d5bc53967baa0ee18626ba87b6254b2ab5418",
+    "identifier" : "43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7",
     "architecture" : "BOGUS",
     "modelName" : "Future iPad",
     "name" : "iPad"
@@ -863,6 +863,190 @@ void main() {
           expect(await devices[2].sdkNameAndVersion,'iOS unknown version');
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
+        });
+
+        testUsingContext('use connected entry when filtering out duplicates', () async {
+          const String devicesOutput = '''
+[
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "13.3 (17C54)",
+    "interface" : "usb",
+    "available" : false,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "c4ca6f7a53027d1b7e4972e28478e7a28e2faee2",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 6s",
+    "name" : "iPhone"
+  },
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "13.3 (17C54)",
+    "interface" : "usb",
+    "available" : false,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "c4ca6f7a53027d1b7e4972e28478e7a28e2faee2",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 6s",
+    "name" : "iPhone",
+    "error" : {
+      "code" : -13,
+      "failureReason" : "",
+      "description" : "iPhone iPad is not connected",
+      "recoverySuggestion" : "Xcode will continue when iPhone is connected and unlocked.",
+      "domain" : "com.apple.platform.iphoneos"
+    }
+  }
+]
+''';
+
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            stdout: devicesOutput,
+          ));
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
+          expect(devices, hasLength(1));
+
+          expect(devices[0].id, 'c4ca6f7a53027d1b7e4972e28478e7a28e2faee2');
+          expect(devices[0].name, 'iPhone');
+          expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
+          expect(devices[0].cpuArchitecture, DarwinArch.arm64);
+          expect(devices[0].connectionInterface, DeviceConnectionInterface.attached);
+          expect(devices[0].isConnected, true);
+
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        }, overrides: <Type, Generator>{
+          Platform: () => macPlatform,
+          Artifacts: () => Artifacts.test(),
+        });
+
+        testUsingContext('use entry with sdk when filtering out duplicates', () async {
+          const String devicesOutput = '''
+[
+  {
+    "simulator" : false,
+    "interface" : "usb",
+    "available" : false,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "c4ca6f7a53027d1b7e4972e28478e7a28e2faee2",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 6s",
+    "name" : "iPhone_1",
+    "error" : {
+      "code" : -13,
+      "failureReason" : "",
+      "description" : "iPhone iPad is not connected",
+      "recoverySuggestion" : "Xcode will continue when iPhone is connected and unlocked.",
+      "domain" : "com.apple.platform.iphoneos"
+    }
+  },
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "13.3 (17C54)",
+    "interface" : "usb",
+    "available" : false,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "c4ca6f7a53027d1b7e4972e28478e7a28e2faee2",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 6s",
+    "name" : "iPhone_2",
+    "error" : {
+      "code" : -13,
+      "failureReason" : "",
+      "description" : "iPhone iPad is not connected",
+      "recoverySuggestion" : "Xcode will continue when iPhone is connected and unlocked.",
+      "domain" : "com.apple.platform.iphoneos"
+    }
+  }
+]
+''';
+
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            stdout: devicesOutput,
+          ));
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
+          expect(devices, hasLength(1));
+
+          expect(devices[0].id, 'c4ca6f7a53027d1b7e4972e28478e7a28e2faee2');
+          expect(devices[0].name, 'iPhone_2');
+          expect(await devices[0].sdkNameAndVersion, 'iOS 13.3 17C54');
+          expect(devices[0].cpuArchitecture, DarwinArch.arm64);
+          expect(devices[0].connectionInterface, DeviceConnectionInterface.attached);
+          expect(devices[0].isConnected, false);
+
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        }, overrides: <Type, Generator>{
+          Platform: () => macPlatform,
+          Artifacts: () => Artifacts.test(),
+        });
+
+        testUsingContext('use entry with higher sdk when filtering out duplicates', () async {
+          const String devicesOutput = '''
+[
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "14.3 (17C54)",
+    "interface" : "usb",
+    "available" : false,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "c4ca6f7a53027d1b7e4972e28478e7a28e2faee2",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 6s",
+    "name" : "iPhone_1",
+    "error" : {
+      "code" : -13,
+      "failureReason" : "",
+      "description" : "iPhone iPad is not connected",
+      "recoverySuggestion" : "Xcode will continue when iPhone is connected and unlocked.",
+      "domain" : "com.apple.platform.iphoneos"
+    }
+  },
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "13.3 (17C54)",
+    "interface" : "usb",
+    "available" : false,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "c4ca6f7a53027d1b7e4972e28478e7a28e2faee2",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 6s",
+    "name" : "iPhone_2",
+    "error" : {
+      "code" : -13,
+      "failureReason" : "",
+      "description" : "iPhone iPad is not connected",
+      "recoverySuggestion" : "Xcode will continue when iPhone is connected and unlocked.",
+      "domain" : "com.apple.platform.iphoneos"
+    }
+  }
+]
+''';
+
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+            stdout: devicesOutput,
+          ));
+          final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
+          expect(devices, hasLength(1));
+
+          expect(devices[0].id, 'c4ca6f7a53027d1b7e4972e28478e7a28e2faee2');
+          expect(devices[0].name, 'iPhone_1');
+          expect(await devices[0].sdkNameAndVersion, 'iOS 14.3 17C54');
+          expect(devices[0].cpuArchitecture, DarwinArch.arm64);
+          expect(devices[0].connectionInterface, DeviceConnectionInterface.attached);
+          expect(devices[0].isConnected, false);
+
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        }, overrides: <Type, Generator>{
+          Platform: () => macPlatform,
+          Artifacts: () => Artifacts.test(),
         });
 
         testUsingContext('handles bad output',()  async {
