@@ -223,7 +223,6 @@ class _RawViewElement extends RenderTreeRootElement {
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot); // calls attachRenderObject(), updates slot member.
-    _effectivePipelineOwner.rootNode = renderObject;
     _updateChild();
     renderObject.prepareInitialFrame();
     if (_effectivePipelineOwner.semanticsOwner != null) {
@@ -234,6 +233,8 @@ class _RawViewElement extends RenderTreeRootElement {
   @override
   void attachRenderObject(Object? newSlot) {
     super.attachRenderObject(newSlot); // updates slot member
+    assert(_effectivePipelineOwner.rootNode == null);
+    _effectivePipelineOwner.rootNode = renderObject;
     _attachToViewHooks();
   }
 
@@ -279,13 +280,6 @@ class _RawViewElement extends RenderTreeRootElement {
   void performRebuild() {
     super.performRebuild();
     _updateChild();
-  }
-
-  @override
-  void activate() {
-    super.activate();
-    assert(_effectivePipelineOwner.rootNode == null);
-    _effectivePipelineOwner.rootNode = renderObject;
   }
 
   @override
