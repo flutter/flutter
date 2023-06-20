@@ -8,6 +8,7 @@ import 'proxy_sliver.dart';
 import 'sliver.dart';
 
 /// Paints a [Decoration] either before or after its child paints.
+///
 /// If the child has infinite scroll extent, then the [Decoration] paints itself up to the
 /// bottom cache extent.
 class RenderDecoratedSliver extends RenderProxySliver {
