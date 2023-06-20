@@ -128,7 +128,7 @@ class APNGImageGenerator : public ImageGenerator {
     // X offset of this image when composited. Only applicable to frames.
     unsigned int x_offset;
 
-    // X offset of this image when composited. Only applicable to frames.
+    // Y offset of this image when composited. Only applicable to frames.
     unsigned int y_offset;
   };
 
