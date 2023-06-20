@@ -34,7 +34,7 @@ abstract final class FlutterTimeline {
   /// Enables metric collection.
   ///
   /// Metric collection can only be enabled in non-release modes. It is most
-  /// useful in the profile mode where application performance is representative
+  /// useful in profile mode where application performance is representative
   /// of a deployed application.
   ///
   /// When disabled, resets collected data by calling [debugReset].
@@ -82,6 +82,8 @@ abstract final class FlutterTimeline {
   }
 
   /// Emit an instant event.
+  ///
+  /// This is a drop-in replacement for [Timeline.instantSync].
   static void instantSync(String name, { Map<String, Object?>? arguments }) {
     Timeline.instantSync(name, arguments: arguments);
   }
@@ -111,8 +113,11 @@ abstract final class FlutterTimeline {
   /// This is a drop-in replacement for [Timeline.now].
   static int get now => impl.performanceTimestamp.toInt();
 
-  /// Returns timings collected since [debugCollectionEnabled] was set to true, or
-  /// since the previous [debugReset], whichever was last.
+  /// Returns timings collected since [debugCollectionEnabled] was set to true,
+  /// since the previous [debugCollect], or since the previous [debugReset],
+  /// whichever was last.
+  ///
+  /// Resets the collected timings.
   ///
   /// This is only meant to be used in non-release modes, typically in profile
   /// mode that provides timings close to release mode timings.
@@ -130,9 +135,9 @@ abstract final class FlutterTimeline {
 
   /// Forgets all previously collected timing data.
   ///
-  /// This method can be used to break up the data by frames. To do that, call
-  /// [debugCollect] at the end of the frame, then call [debugReset] so that the next
-  /// frame collects independent data.
+  /// Use this method to scope metrics to a frame, a pointer event, or any
+  /// other event. To do that, call [debugReset] at the start of the event, then
+  /// call [debugCollect] at the end of the event.
   ///
   /// This is only meant to be used in non-release modes.
   static void debugReset() {
