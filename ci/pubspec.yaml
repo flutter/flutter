@@ -23,15 +23,26 @@ dependencies:
   process_runner: any
   process: any
 
+dev_dependencies:
+  async_helper: any
+  expect: any
+  litetest: any
+
 dependency_overrides:
   args:
     path: ../../third_party/dart/third_party/pkg/args
   async:
     path: ../../third_party/dart/third_party/pkg/async
+  async_helper:
+    path: ../../third_party/dart/pkg/async_helper
   collection:
     path: ../../third_party/dart/third_party/pkg/collection
+  expect:
+    path: ../../third_party/dart/pkg/expect
   file:
     path: ../../third_party/pkg/file/packages/file
+  litetest:
+    path: ../testing/litetest
   meta:
     path: ../../third_party/dart/pkg/meta
   path:
@@ -42,3 +53,5 @@ dependency_overrides:
     path: ../../third_party/pkg/process
   process_runner:
     path: ../../third_party/pkg/process_runner
+  smith:
+    path: ../../third_party/dart/pkg/smith

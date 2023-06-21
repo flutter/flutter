@@ -20,7 +20,16 @@ where /q git || ECHO Error: Unable to find git in your PATH. && EXIT /B 1
 
 SET repo_dir=%SRC_DIR%\flutter
 SET ci_dir=%repo_dir%\ci
-SET dart_sdk_path=%SRC_DIR%\third_party\dart\tools\sdks\dart-sdk
+
+REM Determine which platform we are on and use the right prebuilt Dart SDK
+IF "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+    SET dart_sdk_path=%SRC_DIR%\flutter\prebuilts\windows-x64\dart-sdk
+) ELSE IF "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+    SET dart_sdk_path=%SRC_DIR%\flutter\prebuilts\windows-arm64\dart-sdk
+) ELSE (
+    ECHO "Windows x86 (32-bit) is not supported" && EXIT /B 1
+)
+
 SET dart=%dart_sdk_path%\bin\dart.exe
 
 cd "%ci_dir%"
