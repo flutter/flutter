@@ -4540,8 +4540,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element childElement = tester.element(find.byType(Flexible).first);
         service.setSelection(childElement, group);
 
-        final DiagnosticsNode diagnostic = childElement.toDiagnosticsNode();
-        final String id = service.toId(diagnostic, group)!;
+        final String id = service.toId(childElement, group)!;
         Map<String, Object?> result = (await service.testExtension(
           WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
           <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
