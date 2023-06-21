@@ -4430,8 +4430,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element flexibleElement = tester.element(find.byType(Flexible).first);
         service.setSelection(flexibleElement, group);
 
-        final DiagnosticsNode diagnostic = flexibleElement.toDiagnosticsNode();
-        final String id = service.toId(diagnostic, group)!;
+        final String id = service.toId(flexibleElement, group)!;
         final Map<String, Object?> result = (await service.testExtension(
           WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
           <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
@@ -4472,16 +4471,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         await pumpWidgetForLayoutExplorer(tester);
 
         final Element element = tester.element(find.byType(Directionality).first);
-        Element? root;
+        late Element root;
         element.visitAncestorElements((Element ancestor) {
           root = ancestor;
           return true;
         });
-        expect(root, isNotNull);
         service.setSelection(root, group);
 
-        final DiagnosticsNode diagnostic = root!.toDiagnosticsNode();
-        final String id = service.toId(diagnostic, group)!;
+        final String id = service.toId(root, group)!;
         final Map<String, Object?> result = (await service.testExtension(
           WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
           <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
