@@ -32,13 +32,16 @@ class TestMouseTrackerFlutterBinding extends BindingBase
     postFrameCallbacks = <void Function(Duration)>[];
   }
 
+  late final RenderView _renderView = RenderView(
+    view: platformDispatcher.views.single,
+  );
+
   void setHitTest(BoxHitTest hitTest) {
-    // TODO(goderbauer): Instantiate a new RenderView instead of using deprecated RenderView when mouse tracker has been updated to deal with multiple renderviews.
     if (rootPipelineOwner.rootNode == null) {
-      rootPipelineOwner.rootNode = renderView;
-      addRenderView(renderView);
+      rootPipelineOwner.rootNode = _renderView;
+      addRenderView(_renderView);
     }
-    renderView.child = _TestHitTester(hitTest);
+    _renderView.child = _TestHitTester(hitTest);
   }
 
   SchedulerPhase? _overridePhase;
