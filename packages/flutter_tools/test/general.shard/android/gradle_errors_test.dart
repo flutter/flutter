@@ -51,6 +51,7 @@ void main() {
           zipExceptionHandler,
           incompatibleJavaAndGradleVersionsHandler,
           remoteTerminatedHandshakeHandler,
+          couldNotOpenCacheDirectoryHandler,
         ])
       );
     });
