@@ -425,30 +425,27 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   // _handleMouseExit. The set is cleared in _handleTapToDismiss, typically when
   // a PointerDown event interacts with some other UI component.
   final Set<int> _activeHoveringPointerDevices = <int>{};
+
+  static bool _isTooltipVisible(AnimationStatus status) {
+    return switch (status) {
+      AnimationStatus.completed || AnimationStatus.forward || AnimationStatus.reverse => true,
+      AnimationStatus.dismissed                                                       => false,
+    };
+  }
+
   AnimationStatus _animationStatus = AnimationStatus.dismissed;
   void _handleStatusChanged(AnimationStatus status) {
     assert(mounted);
-    final bool entryNeedsUpdating;
-    switch (status) {
-      case AnimationStatus.dismissed:
-        entryNeedsUpdating = _animationStatus != AnimationStatus.dismissed;
-        if (entryNeedsUpdating) {
-          Tooltip._openedTooltips.remove(this);
-          _overlayController.hide();
-        }
-      case AnimationStatus.completed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        entryNeedsUpdating = _animationStatus == AnimationStatus.dismissed;
-        if (entryNeedsUpdating) {
-          _overlayController.show();
-          Tooltip._openedTooltips.add(this);
-          SemanticsService.tooltip(_tooltipMessage);
-        }
-    }
-
-    if (entryNeedsUpdating) {
-      setState(() { /* Rebuild to update the OverlayEntry */ });
+    switch ((_isTooltipVisible(_animationStatus), _isTooltipVisible(status))) {
+      case (true, false):
+        Tooltip._openedTooltips.remove(this);
+        _overlayController.hide();
+      case (false, true):
+        _overlayController.show();
+        Tooltip._openedTooltips.add(this);
+        SemanticsService.tooltip(_tooltipMessage);
+      case (true, true) || (false, false):
+        break;
     }
     _animationStatus = status;
   }
@@ -753,10 +750,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       decoration: widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration,
       textStyle: widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle,
       textAlign: widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign,
-      animation: CurvedAnimation(
-        parent: _controller,
-        curve: Curves.fastOutSlowIn,
-      ),
+      animation: CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn),
       target: target,
       verticalOffset: widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
       preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
