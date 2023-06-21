@@ -1829,7 +1829,6 @@ Please choose one (or "q" to quit): '''));
 
             targetDevices.waitForWirelessBeforeInput = true;
             targetDevices.deviceSelection.input = '2';
-
             terminal.setPrompt(<String>['1', '2', 'q', 'Q'], '1');
 
             final List<Device>? devices = await targetDevices.findAllTargetDevices();
