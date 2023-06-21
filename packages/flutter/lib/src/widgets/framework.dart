@@ -4188,15 +4188,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             _debugCheckForCycles(newChild);
             return true;
           }());
-          Element? updatedChild;
           try {
             newChild._activateWithParent(this, newSlot);
-            updatedChild = updateChild(newChild, newWidget, newSlot);
-            assert(newChild == updatedChild);
           } catch (_) {
+            // Attempt to do some clean-up if activation fails.
             deactivateChild(newChild);
             rethrow;
           }
+          final Element? updatedChild = updateChild(newChild, newWidget, newSlot);
+          assert(newChild == updatedChild);
           return updatedChild!;
         }
       }
