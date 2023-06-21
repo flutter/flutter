@@ -1513,7 +1513,7 @@ mixin WidgetInspectorService {
   void _sendInspectEvent(Object? object){
     inspect(object);
 
-    final _Location? location = _getSelectedSummaryWidgetLocation(null);
+    final _Location? location = _getSelectedSummaryWidgetLocation();
     if (location != null) {
       postEvent(
         'navigate',
@@ -1939,11 +1939,10 @@ mixin WidgetInspectorService {
   /// If the currently selected [Element] is identical to the [Element]
   /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
   /// reused.
-  // TODO(polina-c): delete [previousSelectionId] when it is not used in DevTools
-  // https://github.com/flutter/devtools/issues/3951
   @protected
   String getSelectedWidget(String? previousSelectionId, String groupName) {
-    return _safeJsonEncode(_getSelectedWidget(previousSelectionId, groupName));
+    assert(previousSelectionId == null, 'previousSelectionId is deprecated');
+    return _safeJsonEncode(_getSelectedWidget(null, groupName));
   }
 
   /// Captures an image of the current state of an [object] that is a
@@ -2211,16 +2210,15 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getSelectedWidget(String? previousSelectionId, String groupName) {
+    assert(previousSelectionId == null, 'previousSelectionId is deprecated');
     return _nodeToJson(
-      _getSelectedWidgetDiagnosticsNode(previousSelectionId),
+      _getSelectedWidgetDiagnosticsNode(),
       InspectorSerializationDelegate(groupName: groupName, service: this),
     );
   }
 
-  DiagnosticsNode? _getSelectedWidgetDiagnosticsNode(String? previousSelectionId) {
-    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
-    final Element? current = selection.currentElement;
-    return current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode();
+  DiagnosticsNode? _getSelectedWidgetDiagnosticsNode() {
+    return selection.currentElement?.toDiagnosticsNode();
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element]
@@ -2231,21 +2229,18 @@ mixin WidgetInspectorService {
   /// If the currently selected [Element] is identical to the [Element]
   /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
   /// reused.
-  // TODO(polina-c): delete paramater [previousSelectionId] when it is not used in DevTools
-  // https://github.com/flutter/devtools/issues/3951
-  String getSelectedSummaryWidget(String previousSelectionId, String groupName) {
+  String getSelectedSummaryWidget(String? previousSelectionId, String groupName) {
     return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
   }
 
-  _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId) {
-     return _getCreationLocation(_getSelectedSummaryDiagnosticsNode(previousSelectionId)?.value);
+  _Location? _getSelectedSummaryWidgetLocation() {
+     return _getCreationLocation(_getSelectedSummaryDiagnosticsNode()?.value);
   }
 
-  DiagnosticsNode? _getSelectedSummaryDiagnosticsNode(String? previousSelectionId) {
+  DiagnosticsNode? _getSelectedSummaryDiagnosticsNode() {
     if (!isWidgetCreationTracked()) {
-      return _getSelectedWidgetDiagnosticsNode(previousSelectionId);
+      return _getSelectedWidgetDiagnosticsNode();
     }
-    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
     Element? current = selection.currentElement;
     if (current != null && !_isValueCreatedByLocalProject(current)) {
       Element? firstLocal;
@@ -2257,11 +2252,12 @@ mixin WidgetInspectorService {
       }
       current = firstLocal;
     }
-    return current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode();
+    return current?.toDiagnosticsNode();
   }
 
   Map<String, Object?>? _getSelectedSummaryWidget(String? previousSelectionId, String groupName) {
-    return _nodeToJson(_getSelectedSummaryDiagnosticsNode(previousSelectionId), InspectorSerializationDelegate(groupName: groupName, service: this));
+    assert(previousSelectionId == null, 'previousSelectionId is deprecated');
+    return _nodeToJson(_getSelectedSummaryDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns whether [Widget] creation locations are available.
