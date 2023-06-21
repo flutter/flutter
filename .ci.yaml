@@ -257,6 +257,7 @@ targets:
         ]
 
   - name: Linux android views
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/129256
     recipe: flutter/android_views
     properties:
       dependencies: >-
