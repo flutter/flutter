@@ -2452,7 +2452,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       List<Object?> alternateChildrenJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-        <String, String>{'arg': rootJson['objectId']! as String, 'objectGroup': group},
+        <String, String>{'arg': rootJson['valueId']! as String, 'objectGroup': group},
       ))! as List<Object?>;
       expect(alternateChildrenJson.length, equals(1));
       Map<String, Object?> childJson = childrenJson[0]! as Map<String, Object?>;
@@ -2464,7 +2464,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       childrenJson = childJson['children']! as List<Object?>;
       alternateChildrenJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-        <String, String>{'arg': childJson['objectId']! as String, 'objectGroup': group},
+        <String, String>{'arg': childJson['valueId']! as String, 'objectGroup': group},
       ))! as List<Object?>;
       expect(alternateChildrenJson.length, equals(1));
       expect(childrenJson.length, equals(1));
@@ -2478,7 +2478,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       childrenJson = childJson['children']! as List<Object?>;
       alternateChildrenJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-        <String, String>{'arg': childJson['objectId']! as String, 'objectGroup': group},
+        <String, String>{'arg': childJson['valueId']! as String, 'objectGroup': group},
       ))! as List<Object?>;
       expect(alternateChildrenJson.length, equals(3));
       expect(childrenJson.length, equals(3));
