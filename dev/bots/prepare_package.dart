@@ -532,7 +532,12 @@ class ArchiveCreator {
     await _runFlutter(<String>['precache']);
     await _runFlutter(<String>['ide-config']);
     if (platform.isWindows) {
-      await _runFlutter(<String>['build', '_preview', '-v']);
+      await _runFlutter(
+        <String>['build', '_preview', '-v'],
+        workingDirectory: Directory(
+          '${flutterRoot.path}\\packages\\flutter_tools',
+        ), // TODO figure this out better
+      );
     }
 
     // Create each of the templates, since they will call 'pub get' on
@@ -619,7 +624,7 @@ class ArchiveCreator {
     List<String> commandLine;
     if (platform.isWindows) {
       commandLine = <String>[
-        '7za',
+        '7z', // TODO
         'x',
         archive.absolute.path,
       ];
@@ -642,7 +647,7 @@ class ArchiveCreator {
         workingDirectory: Directory(source.absolute.path),
       );
       commandLine = <String>[
-        '7za',
+        '7z',
         'a',
         '-tzip',
         '-mx=9',
