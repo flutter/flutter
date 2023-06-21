@@ -896,6 +896,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   bool _pastSlopTolerance = false;
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
+  PointerDownEvent? _localDown;
+  PointerUpEvent? _localUp;
 
   // Primary pointer being tracked by this recognizer.
   int? _primaryPointer;
@@ -966,6 +968,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
+    _localDown = event;
     if (_dragState == _DragState.ready) {
       super.addAllowedPointer(event);
       _primaryPointer = event.pointer;
@@ -999,8 +1002,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     _acceptedActivePointers.add(pointer);
 
     // Called when this recognizer is accepted by the [GestureArena].
-    if (currentDown != null) {
-      _checkTapDown(currentDown!);
+    if (_localDown != null) {
+      _checkTapDown(_localDown!);
     }
 
     _wonArenaForPrimaryPointer = true;
