@@ -2802,9 +2802,7 @@ void main() {
     expect(findModalBarrier(), findsNothing);
   });
 
-  testWidgets(
-    "Closing bottom sheet & removing FAB at the same time doesn't throw assertion",
-    (WidgetTester tester) async {
+  testWidgets("Closing bottom sheet & removing FAB at the same time doesn't throw assertion", (WidgetTester tester) async {
       final Key bottomSheetKey = UniqueKey();
       PersistentBottomSheetController<void>? controller;
       bool show = true;
@@ -2814,28 +2812,27 @@ void main() {
           home: Scaffold(
             body: Center(
             child: Builder(
-                builder: (BuildContext context) => ElevatedButton(
-                  onPressed: () {
-                    if (controller == null) {
-                      controller = showBottomSheet(
-                        context: context,
-                        builder: (_) => Container(
+              builder: (BuildContext context) => ElevatedButton(
+                onPressed: () {
+                  if (controller == null) {
+                    controller = showBottomSheet(
+                      context: context,
+                      builder: (_) => Container(
                         key: bottomSheetKey,
                         height: 200,
-                      ));
-                    } else {
-                      controller!.close();
-                      controller = null;
-                    }
-                  },
-                  child: const Text('BottomSheet'),
-                )),
+                      ),
+                    );
+                  } else {
+                    controller!.close();
+                    controller = null;
+                  }
+                },
+                child: const Text('BottomSheet'),
+              )),
             ),
             floatingActionButton: show
-            ? FloatingActionButton(
-                onPressed: () => setState(() => show = false),
-              )
-            : null,
+              ? FloatingActionButton(onPressed: () => setState(() => show = false))
+              : null,
           ),
         ),
       ));
