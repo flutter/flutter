@@ -1941,14 +1941,9 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element].
-  ///
-  /// If the currently selected [Element] is identical to the [Element]
-  /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
-  /// reused.
-  // TODO(polina-c): delete [previousSelectionId] when it is not used in DevTools
-  // https://github.com/flutter/devtools/issues/3951
   @protected
   String getSelectedWidget(String? previousSelectionId, String groupName) {
+    assert(previousSelectionId == null, 'previousSelectionId is deprecated in API');
     return _safeJsonEncode(_getSelectedWidget(previousSelectionId, groupName));
   }
 
@@ -2233,13 +2228,8 @@ mixin WidgetInspectorService {
   /// if the selected [Element] should be shown in the summary tree otherwise
   /// returns the first ancestor of the selected [Element] shown in the summary
   /// tree.
-  ///
-  /// If the currently selected [Element] is identical to the [Element]
-  /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
-  /// reused.
-  // TODO(polina-c): delete paramater [previousSelectionId] when it is not used in DevTools
-  // https://github.com/flutter/devtools/issues/3951
-  String getSelectedSummaryWidget(String previousSelectionId, String groupName) {
+  String getSelectedSummaryWidget(String? previousSelectionId, String groupName) {
+    assert(previousSelectionId == null, 'previousSelectionId is deprecated in API');
     return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
   }
 
