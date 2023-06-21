@@ -44,6 +44,9 @@ class ImageGenerator {
     /// How this frame should be modified before decoding the next one.
     SkCodecAnimation::DisposalMethod disposal_method;
 
+    /// The region of the frame that is affected by the disposal method.
+    std::optional<SkIRect> disposal_rect;
+
     /// How this frame should be blended with the previous frame.
     SkCodecAnimation::Blend blend_mode;
   };

@@ -94,6 +94,9 @@ MultiFrameCodec::State::GetNextFrameImage(
       // Copy the previous frame's output buffer into the current frame as the
       // starting point.
       bitmap.writePixels(lastRequiredFrame_->pixmap());
+      if (restoreBGColorRect_.has_value()) {
+        bitmap.erase(SK_ColorTRANSPARENT, restoreBGColorRect_.value());
+      }
     }
   }
 
@@ -131,6 +134,13 @@ MultiFrameCodec::State::GetNextFrameImage(
     // starting backdrop for the next frame.
     lastRequiredFrame_ = bitmap;
     lastRequiredFrameIndex_ = nextFrameIndex_;
+  }
+
+  if (frameInfo.disposal_method ==
+      SkCodecAnimation::DisposalMethod::kRestoreBGColor) {
+    restoreBGColorRect_ = frameInfo.disposal_rect;
+  } else {
+    restoreBGColorRect_.reset();
   }
 
 #if IMPELLER_SUPPORTS_RENDERING
