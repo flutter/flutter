@@ -1849,13 +1849,21 @@ void main() {
     // Cause text metrics to be computed.
     editable.computeDistanceToActualBaseline(TextBaseline.alphabetic);
 
-    final TextSelection selection = editable.getWordAtOffset(const TextPosition(
-      offset: -1,
-      affinity: TextAffinity.upstream,
-    ));
+    final TextSelection selection;
+    try {
+      selection = editable.getWordAtOffset(const TextPosition(
+        offset: -1,
+        affinity: TextAffinity.upstream,
+      ));
+    } catch (error) {
+      // In debug mode, negative offsets are caught by an assertion.
+      expect(error, isA<AssertionError>());
+      return;
+    }
 
+    // Web's Paragraph.getWordBoundary behaves differently for a negative
+    // position.
     if (kIsWeb) {
-      // Web's getWordAtOffset behaves differently for a negative position.
       expect(selection, const TextSelection.collapsed(offset: 0));
     } else {
       expect(selection, const TextSelection.collapsed(offset: text.length));

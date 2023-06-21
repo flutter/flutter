@@ -2123,6 +2123,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       case TextAffinity.downstream:
         effectiveOffset = position.offset;
     }
+    assert(effectiveOffset >= 0);
 
     // On iOS, select the previous word if there is a previous word, or select
     // to the end of the next word if there is a next word. Select nothing if
