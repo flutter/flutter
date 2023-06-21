@@ -470,26 +470,6 @@ typedef GestureCancelCallback = void Function();
 mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // Public state available to [OneSequenceGestureRecognizer].
 
-  // The [PointerDownEvent] that was most recently tracked in [addAllowedPointer].
-  //
-  // This value will be null if a [PointerDownEvent] has not been tracked yet in
-  // [addAllowedPointer] or the timer between two taps has elapsed.
-  //
-  // This value is only reset when the timer between a [PointerUpEvent] and the
-  // [PointerDownEvent] times out or when a new [PointerDownEvent] is tracked in
-  // [addAllowedPointer].
-  PointerDownEvent? get currentDown => _down;
-
-  // The [PointerUpEvent] that was most recently tracked in [handleEvent].
-  //
-  // This value will be null if a [PointerUpEvent] has not been tracked yet in
-  // [handleEvent] or the timer between two taps has elapsed.
-  //
-  // This value is only reset when the timer between a [PointerUpEvent] and the
-  // [PointerDownEvent] times out or when a new [PointerDownEvent] is tracked in
-  // [addAllowedPointer].
-  PointerUpEvent? get currentUp => _up;
-
   // The number of consecutive taps that the most recently tracked [PointerDownEvent]
   // in [currentDown] represents.
   //
@@ -1012,12 +992,12 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     // moved a sufficient global distance.
     if (_start != null) {
       assert(_dragState == _DragState.accepted);
-      assert(currentUp == null);
+      assert(_localUp == null);
       _acceptDrag(_start!);
     }
 
-    if (currentUp != null) {
-      _checkTapUp(currentUp!);
+    if (_localUp != null) {
+      _checkTapUp(_localUp!);
     }
   }
 
@@ -1035,12 +1015,12 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
             // If the recognizer has already won the arena for the primary pointer being tracked
             // but the pointer has exceeded the tap tolerance, then the pointer is accepted as a
             // drag gesture.
-            if (currentDown != null) {
+            if (_localDown != null) {
               if (!_acceptedActivePointers.remove(pointer)) {
                 resolvePointer(pointer, GestureDisposition.rejected);
               }
               _dragState = _DragState.accepted;
-              _acceptDrag(currentDown!);
+              _acceptDrag(_localDown!);
               _checkDragEnd();
             }
           } else {
@@ -1049,8 +1029,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
           }
         } else {
           // The pointer is accepted as a tap.
-          if (currentUp != null) {
-            _checkTapUp(currentUp!);
+          if (_localUp != null) {
+            _checkTapUp(_localUp!);
           }
         }
 
@@ -1105,6 +1085,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
         }
       }
     } else if (event is PointerUpEvent) {
+      _localUp = event;
       if (_dragState == _DragState.possible) {
         // The drag has not been accepted before a [PointerUpEvent], therefore the recognizer
         // attempts to recognize a tap.
@@ -1314,8 +1295,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   }
 
   void _didExceedDeadline() {
-    if (currentDown != null) {
-      _checkTapDown(currentDown!);
+    if (_localDown != null) {
+      _checkTapDown(_localDown!);
 
       if (consecutiveTapCount > 1) {
         // If our consecutive tap count is greater than 1, i.e. is a double tap or greater,
@@ -1339,6 +1320,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     _sentTapDown = false;
     _wonArenaForPrimaryPointer = false;
     _primaryPointer = null;
+    _localDown = null;
+    _localUp = null;
   }
 
   void _resetDragUpdateThrottle() {
