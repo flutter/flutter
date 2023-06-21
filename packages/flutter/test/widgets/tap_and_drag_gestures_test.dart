@@ -696,7 +696,6 @@ void main() {
 
   // This is a regression test for https://github.com/flutter/flutter/issues/129161.
   testGesture('Beats TapGestureRecognizer and DoubleTapGestureRecognizer when the pointer has not moved and this recognizer is the first in the arena', (GestureTester tester) {
-    debugPrintGestureArenaDiagnostics = true;
     setUpTapAndPanGestureRecognizer();
 
     final TapGestureRecognizer taps = TapGestureRecognizer()
