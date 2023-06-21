@@ -979,6 +979,32 @@ def gather_api_consistency_tests(build_dir):
     )
 
 
+def gather_ci_tests(build_dir):
+  test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'ci')
+  dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
+
+  run_engine_executable(
+      build_dir,
+      os.path.join('dart-sdk', 'bin', 'dart'),
+      None,
+      flags=['pub', 'get', '--offline'],
+      cwd=test_dir,
+  )
+
+  for dart_test_file in dart_tests:
+    opts = [
+        '--disable-dart-dev', dart_test_file,
+        os.path.join(BUILDROOT_DIR, 'flutter')
+    ]
+    yield EngineExecutableTask(
+        build_dir,
+        os.path.join('dart-sdk', 'bin', 'dart'),
+        None,
+        flags=opts,
+        cwd=test_dir
+    )
+
+
 def run_engine_tasks_in_parallel(tasks):
   # Work around a bug in Python.
   #
@@ -1217,6 +1243,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
     tasks += list(gather_path_ops_tests(build_dir))
     tasks += list(gather_const_finder_tests(build_dir))
     tasks += list(gather_front_end_server_tests(build_dir))
+    tasks += list(gather_ci_tests(build_dir))
     tasks += list(gather_dart_tests(build_dir, dart_filter))
     run_engine_tasks_in_parallel(tasks)
 
