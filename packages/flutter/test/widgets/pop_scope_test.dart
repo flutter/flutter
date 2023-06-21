@@ -183,7 +183,7 @@ void main() {
     lastCallsLength = calls.length;
 
     // When popEnabled is true, can use system back to go back.
-    await systemBack();
+    await simulateSystemBack();
     await tester.pumpAndSettle();
     expect(lastPopSuccess, true);
     expect(find.text('Home Page'), findsOneWidget);
@@ -226,7 +226,7 @@ void main() {
     }
 
     // When popEnabled is false, can't use system back to go back.
-    await systemBack();
+    await simulateSystemBack();
     await tester.pumpAndSettle();
     expect(lastPopSuccess, false);
     expect(find.text('PopScope Page'), findsOneWidget);
@@ -268,7 +268,7 @@ void main() {
     }
     lastCallsLength = calls.length;
 
-    await systemBack();
+    await simulateSystemBack();
     await tester.pumpAndSettle();
     expect(lastPopSuccess, true);
     expect(find.text('Home Page'), findsOneWidget);

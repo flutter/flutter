@@ -3342,7 +3342,8 @@ class _History extends ChangeNotifier {
 
   /// Return a copy of the inner value.
   ///
-  /// This allows read-only access to the value.
+  /// This allows read-only access to `_value`, so that it's not possible to
+  /// mutate `_value` without notifying the listeners.
   List<_RouteEntry> get value => List<_RouteEntry>.from(_value);
 
   void add(_RouteEntry element) {

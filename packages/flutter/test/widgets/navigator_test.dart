@@ -4330,7 +4330,7 @@ void main() {
       expect(calls.last, isTrue);
       lastCallsLength = calls.length;
 
-      await systemBack();
+      await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
@@ -4354,14 +4354,14 @@ void main() {
       expect(calls.last, isTrue);
       expect(calls, hasLength(lastCallsLength));
 
-      await systemBack();
+      await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
       expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
-      await systemBack();
+      await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
@@ -4469,7 +4469,7 @@ void main() {
         Future<void> goBack() async {
           switch (backType) {
             case _BackType.systemBack:
-              return systemBack();
+              return simulateSystemBack();
             case _BackType.navigatorPop:
               if (nestedNav.currentState != null) {
                 if (nestedNav.currentState!.mounted && nestedNav.currentState!.canPop()) {
@@ -4632,7 +4632,7 @@ void main() {
       expect(calls.last, isTrue);
       lastCallsLength = calls.length;
 
-      await systemBack();
+      await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
@@ -4656,7 +4656,7 @@ void main() {
       expect(calls.last, isTrue);
 
       // Going back works because popEnabled is true.
-      await systemBack();
+      await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - home'), findsOneWidget);
@@ -4680,7 +4680,7 @@ void main() {
 
       // Now going back doesn't work because popEnabled is false, but it still
       // has no effect on the system navigator due to all of the other routes.
-      await systemBack();
+      await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - PopScope'), findsOneWidget);
@@ -4696,14 +4696,14 @@ void main() {
       expect(calls.last, isTrue);
 
       // And going back works again after switching popEnabled back to true.
-      await systemBack();
+      await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - home'), findsOneWidget);
       expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
-      await systemBack();
+      await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
@@ -4809,7 +4809,7 @@ void main() {
         expect(calls, hasLength(greaterThan(lastCallsLength)));
         lastCallsLength = calls.length;
 
-        await systemBack();
+        await simulateSystemBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Home page'), findsOneWidget);
@@ -4825,7 +4825,7 @@ void main() {
         expect(calls.last, isTrue);
         lastCallsLength = calls.length;
 
-        await systemBack();
+        await simulateSystemBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Cannot pop page'), findsOneWidget);
@@ -4928,7 +4928,7 @@ void main() {
         expect(calls.last, isTrue);
         expect(calls, hasLength(1));
 
-        await systemBack();
+        await simulateSystemBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Home page'), findsOneWidget);
