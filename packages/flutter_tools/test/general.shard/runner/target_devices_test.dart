@@ -1497,10 +1497,15 @@ Please choose one (or "q" to quit): '''));
             );
             targetDevices.waitForWirelessBeforeInput = true;
 
-            // Having the `0` first is an invalid choice for a device, the second
-            // item in the list, `1` is a valid option though which will return a
-            // valid device
-            targetDevices.deviceSelection.input = <String>['0', '1'];
+            // Having the '0' first is an invalid choice for a device, the second
+            // item in the list is a '2' which is out of range since we only have
+            // one item in the deviceList. The final item in the list, is '1'
+            // which is a valid option though which will return a valid device
+            //
+            // Important: if none of the values in the list are valid, the test will
+            // hang indefinitely since the [userSelectDevice()] method uses a while
+            // loop to listen for valid devices
+            targetDevices.deviceSelection.input = <String>['0', '2', '1'];
             logger.originalStatusText = '''
 Connected devices:
 target-device-9 (mobile) • xxx • ios • iOS 16
