@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:js/js.dart';
+import 'dart:js_interop';
 
 /// Returns the current timestamp in microseconds from a monotonically
 /// increasing clock.
