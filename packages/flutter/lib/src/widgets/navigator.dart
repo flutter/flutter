@@ -335,10 +335,10 @@ abstract class Route<T> {
   /// Called after a route pop was handled.
   ///
   /// Even when the pop is canceled, for example by a [PopScope] widget, this
-  /// will still be called. The `success` parameter indicates whether or not the
+  /// will still be called. The `didPop` parameter indicates whether or not the
   /// back navigation actually happened successfully.
   /// {@endtemplate}
-  void onPopped(bool success) {}
+  void onPopped(bool didPop) {}
 
   /// Whether calling [didPop] would return false.
   bool get willHandlePopInternally => false;

@@ -8,9 +8,9 @@ import 'routes.dart';
 
 /// A callback type for informing that a navigation pop has happened.
 ///
-/// Accepts a success boolean indicating whether or not back navigation
+/// Accepts a didPop boolean indicating whether or not back navigation
 /// succeeded.
-typedef OnPoppedCallback = void Function(bool success);
+typedef OnPoppedCallback = void Function(bool didPop);
 
 /// Manages system back gestures.
 ///
@@ -55,9 +55,11 @@ class PopScope extends StatefulWidget {
   /// method is called; the pop has already happened. Use [popEnabled] to
   /// disable pops in advance.
   ///
-  /// Even when the pop is canceled, such as when [popEnabled] is false, this
-  /// will still be called. The `success` parameter indicates whether or not the
-  /// back navigation actually happened successfully.
+  /// This will still be called even when the pop is canceled. A pop is canceled
+  /// when the relevant [Route.popEnabled] returns false, such as when
+  /// [popEnabled] is set to false on a [PopScope]. The `didPop` parameter
+  /// indicates whether or not the back navigation actually happened
+  /// successfully.
   ///
   /// See also:
   ///

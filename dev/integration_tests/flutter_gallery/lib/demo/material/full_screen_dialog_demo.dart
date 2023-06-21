@@ -110,8 +110,8 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
   bool _hasName = false;
   late String _eventName;
 
-  Future<void> _onPopped(bool success) async {
-    if (success) {
+  Future<void> _onPopped(bool didPop) async {
+    if (didPop) {
       return;
     }
 

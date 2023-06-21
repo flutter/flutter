@@ -159,8 +159,8 @@ class _BottomNavTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopScope(
       popEnabled: _popEnabled,
-      onPopped: (bool success) {
-        if (success) {
+      onPopped: (bool didPop) {
+        if (didPop) {
           return;
         }
         onChangedPages(<_TabPage>[

@@ -326,8 +326,8 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
         bottom: false,
         child: PopScope(
           popEnabled: _category == null,
-          onPopped: (bool success) {
-            if (success) {
+          onPopped: (bool didPop) {
+            if (didPop) {
               return;
             }
             // Pop the category page if Android back button is pressed.

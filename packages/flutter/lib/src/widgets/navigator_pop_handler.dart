@@ -62,8 +62,8 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
     // here, so that it can be manually handled in canPop.
     return PopScope(
       popEnabled: _popEnabled,
-      onPopped: (bool success) {
-        if (success) {
+      onPopped: (bool didPop) {
+        if (didPop) {
           return;
         }
         widget.onPop?.call();

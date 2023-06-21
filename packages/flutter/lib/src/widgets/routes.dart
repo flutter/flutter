@@ -1562,9 +1562,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void onPopped(bool success) {
+  void onPopped(bool didPop) {
     for (final PopScope widget in _popScopes) {
-      widget.onPopped?.call(success);
+      widget.onPopped?.call(didPop);
     }
   }
 

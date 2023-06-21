@@ -68,8 +68,8 @@ class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
   Widget build(BuildContext context) {
     return PopScope(
       popEnabled: popEnabled,
-      onPopped: (bool success) {
-        if (success) {
+      onPopped: (bool didPop) {
+        if (didPop) {
           return;
         }
         _nestedNavigatorKey.currentState!.pop();
