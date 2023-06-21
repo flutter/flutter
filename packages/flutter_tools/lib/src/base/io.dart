@@ -80,7 +80,6 @@ export 'dart:io'
         HttpStatus,
         IOException,
         IOSink,
-        SecurityContext,
         InternetAddress,
         InternetAddressType,
         // Link              NO! Use `file_system.dart`
@@ -94,6 +93,7 @@ export 'dart:io'
         // ProcessSignal     NO! Use [ProcessSignal] below.
         ProcessStartMode,
         // RandomAccessFile  NO! Use `file_system.dart`
+        SecurityContext,
         ServerSocket,
         SignalException,
         Socket,
