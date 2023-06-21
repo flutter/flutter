@@ -345,11 +345,19 @@ class TargetDevices {
 
   Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
     _displayDeviceOptions(devices);
-    final String userInput =  await _readUserInput(devices.length);
-    if (userInput.toLowerCase() == 'q') {
-      throwToolExit('');
+
+    Device? chosenDevice;
+    while (chosenDevice == null) {
+      final String userInputString = await _readUserInput(devices.length);
+      if (userInputString.toLowerCase() == 'q') {
+        throwToolExit('');
+      }
+      final int deviceIndex = int.parse(userInputString) - 1;
+      if (deviceIndex > -1 && deviceIndex < devices.length) {
+        chosenDevice = devices[deviceIndex];
+      }
     }
-    return devices[int.parse(userInput) - 1];
+    return chosenDevice;
   }
 
   void _displayDeviceOptions(List<Device> devices) {
