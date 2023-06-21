@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
 
@@ -603,6 +605,65 @@ void main() {
     await tester.pumpAndSettle();
     expect(renderHeader.geometry!.paintExtent, equals(60.0));
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
+  });
+
+    testWidgets('SliverMainAxisGroup skips painting invisible children', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+
+    const Key key1 = Key('Box 1');
+    const Key key2 = Key('Box 2');
+    const Key key3 = Key('Box 3');
+    const Key key4 = Key('Box 4');
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        controller: controller,
+        slivers: <Widget>[
+          SliverToBoxAdapter(
+            child: Container(
+              key: key1,
+              height: 300,
+              decoration: const BoxDecoration(color: Colors.amber)
+            )
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              key: key2,
+              height: 400,
+              decoration: const BoxDecoration(color: Colors.amber)
+            )
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              key: key3,
+              height: 400,
+              decoration: const BoxDecoration(color: Colors.amber)
+            )
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              key: key4,
+              height: 300,
+              decoration: const BoxDecoration(color: Colors.amber)
+            )
+          ),
+        ],
+      ),
+    );
+
+    expect(find.byKey(key1), paints..rect());
+    expect(find.byKey(key2), paints..rect());
+    expect(find.byKey(key3), paintsNothing);
+    expect(find.byKey(key4), paintsNothing);
+
+    controller.jumpTo(400);
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, 400);
+
+    expect(find.byKey(key1), paintsNothing);
+    expect(find.byKey(key2), paints..rect());
+    expect(find.byKey(key3), paints..rect());
+    expect(find.byKey(key4), paintsNothing);
   });
 }
 
