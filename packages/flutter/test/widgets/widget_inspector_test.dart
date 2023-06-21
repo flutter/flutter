@@ -2175,13 +2175,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         ),
       );
-      final DiagnosticsNode diagnostic = find.byType(Stack).evaluate().first.toDiagnosticsNode();
-      final String id = service.toId(diagnostic, group)!;
+      final Diagnosticable diagnosticable = find.byType(Stack).evaluate().first;
+      final String id = service.toId(diagnosticable, group)!;
       final List<Object?> childrenJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.getChildrenDetailsSubtree.name,
         <String, String>{'arg': id, 'objectGroup': group},
       ))! as List<Object?>;
-      final List<DiagnosticsNode> children = diagnostic.getChildren();
+      final List<DiagnosticsNode> children = diagnosticable.toDiagnosticsNode().getChildren();
       expect(children.length, equals(3));
       expect(childrenJson.length, equals(children.length));
       for (int i = 0; i < childrenJson.length; ++i) {

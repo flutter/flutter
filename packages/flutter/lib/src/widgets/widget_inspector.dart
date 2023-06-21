@@ -1768,7 +1768,7 @@ mixin WidgetInspectorService {
     return objectToDiagnosticsNode(object);
   }
 
-  /// If posiible, returns [DiagnosticsNode] for the object.
+  /// If possible, returns [DiagnosticsNode] for the object.
   @visibleForTesting
   static DiagnosticsNode? objectToDiagnosticsNode(Object? object) {
     if (object is DiagnosticsNode) {
