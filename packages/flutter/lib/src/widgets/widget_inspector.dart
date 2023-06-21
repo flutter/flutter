@@ -1723,7 +1723,7 @@ mixin WidgetInspectorService {
   }
 
   List<Object>  _getProperties(String? diagnosticsOrDiagnosticableId, String groupName) {
-    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    final DiagnosticsNode? node = _diagnosticableIdToDiagnosticsNode(diagnosticsOrDiagnosticableId);
     if (node == null) {
       return const <Object>[];
     }
@@ -1760,11 +1760,8 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getChildrenSummaryTree(diagnosticsNodeId, groupName));
   }
 
-  DiagnosticsNode? _idToDiagnosticsNode(String? diagnosticsOrDiagnosticableId) {
-    // TODO(polina-c): start always assuming Diagnosticable, when DevTools stops sending DiagnosticsNode to
-    // APIs that invoke this method.
-    // https://github.com/flutter/devtools/issues/3951
-    final Object? object = toObject(diagnosticsOrDiagnosticableId);
+  DiagnosticsNode? _diagnosticableIdToDiagnosticsNode(String? diagnosticableId) {
+    final Object? object = toObject(diagnosticableId);
     return objectToDiagnosticsNode(object);
   }
 
@@ -1781,7 +1778,7 @@ mixin WidgetInspectorService {
   }
 
   List<Object> _getChildrenSummaryTree(String? diagnosticsOrDiagnosticableId, String groupName) {
-    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    final DiagnosticsNode? node = _diagnosticableIdToDiagnosticsNode(diagnosticsOrDiagnosticableId);
     if (node == null) {
       return <Object>[];
     }
@@ -1801,7 +1798,7 @@ mixin WidgetInspectorService {
   }
 
   List<Object> _getChildrenDetailsSubtree(String? diagnosticsOrDiagnosticableId, String groupName) {
-    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    final DiagnosticsNode? node = _diagnosticableIdToDiagnosticsNode(diagnosticsOrDiagnosticableId);
     // With this value of minDepth we only expand one extra level of important nodes.
     final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, includeProperties: true, service: this);
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate, parent: node);
@@ -1925,7 +1922,7 @@ mixin WidgetInspectorService {
     String? groupName,
     int subtreeDepth,
   ) {
-    final DiagnosticsNode? root = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    final DiagnosticsNode? root = _diagnosticableIdToDiagnosticsNode(diagnosticsOrDiagnosticableId);
     if (root == null) {
       return null;
     }
@@ -2024,7 +2021,7 @@ mixin WidgetInspectorService {
     final int subtreeDepth = int.parse(parameters['subtreeDepth']!);
     final String? groupName = parameters['groupName'];
     Map<String, dynamic>? result = <String, dynamic>{};
-    final DiagnosticsNode? root = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    final DiagnosticsNode? root = _diagnosticableIdToDiagnosticsNode(diagnosticsOrDiagnosticableId);
     if (root == null) {
       return Future<Map<String, dynamic>>.value(<String, dynamic>{
         'result': result,
