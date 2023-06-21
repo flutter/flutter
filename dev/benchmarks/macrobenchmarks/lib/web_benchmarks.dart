@@ -19,6 +19,7 @@ import 'src/web/bench_draw_rect.dart';
 import 'src/web/bench_dynamic_clip_on_static_picture.dart';
 import 'src/web/bench_image_decoding.dart';
 import 'src/web/bench_material_3.dart';
+import 'src/web/bench_material_3_semantics.dart';
 import 'src/web/bench_mouse_region_grid_hover.dart';
 import 'src/web/bench_mouse_region_grid_scroll.dart';
 import 'src/web/bench_mouse_region_mixed_grid_hover.dart';
@@ -64,6 +65,8 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchPlatformViewInfiniteScroll.benchmarkName: () => BenchPlatformViewInfiniteScroll.forward(),
   BenchPlatformViewInfiniteScroll.benchmarkNameBackward: () => BenchPlatformViewInfiniteScroll.backward(),
   BenchMaterial3Components.benchmarkName: () => BenchMaterial3Components(),
+  BenchMaterial3Semantics.benchmarkName: () => BenchMaterial3Semantics(),
+  BenchMaterial3ScrollSemantics.benchmarkName: () => BenchMaterial3ScrollSemantics(),
 
   // CanvasKit-only benchmarks
   if (isCanvasKit) ...<String, RecorderFactory>{

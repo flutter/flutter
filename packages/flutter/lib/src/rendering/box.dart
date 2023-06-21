@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer' show Timeline;
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
@@ -1396,7 +1395,7 @@ abstract class RenderBox extends RenderObject {
       }());
       if (!kReleaseMode) {
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.startSync(
+          FlutterTimeline.startSync(
             '$runtimeType intrinsics',
             arguments: debugTimelineArguments,
           );
@@ -1411,7 +1410,7 @@ abstract class RenderBox extends RenderObject {
       if (!kReleaseMode) {
         _debugIntrinsicsDepth -= 1;
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.finishSync();
+          FlutterTimeline.finishSync();
         }
       }
       return result;
@@ -1832,7 +1831,7 @@ abstract class RenderBox extends RenderObject {
       }());
       if (!kReleaseMode) {
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.startSync(
+          FlutterTimeline.startSync(
             '$runtimeType.getDryLayout',
             arguments: debugTimelineArguments,
           );
@@ -1844,7 +1843,7 @@ abstract class RenderBox extends RenderObject {
       if (!kReleaseMode) {
         _debugIntrinsicsDepth -= 1;
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.finishSync();
+          FlutterTimeline.finishSync();
         }
       }
       return result;
