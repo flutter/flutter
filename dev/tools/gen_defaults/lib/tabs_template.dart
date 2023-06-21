@@ -25,7 +25,7 @@ class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
   Color? get dividerColor => ${componentColor("md.comp.primary-navigation-tab.divider")};
 
   @override
-  double? get dividerHeight => ${tokens['md.comp.primary-navigation-tab.divider.height']};
+  double? get dividerHeight => ${getToken('md.comp.primary-navigation-tab.divider.height')};
 
   @override
   Color? get indicatorColor => ${componentColor("md.comp.primary-navigation-tab.active-indicator")};
@@ -92,7 +92,7 @@ class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
   Color? get dividerColor => ${componentColor("md.comp.secondary-navigation-tab.divider")};
 
   @override
-  double? get dividerHeight => ${tokens['md.comp.secondary-navigation-tab.divider.height']};
+  double? get dividerHeight => ${getToken('md.comp.primary-navigation-tab.divider.height')};
 
   @override
   Color? get indicatorColor => ${componentColor("md.comp.primary-navigation-tab.active-indicator")};
