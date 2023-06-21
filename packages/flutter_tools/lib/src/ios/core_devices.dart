@@ -24,10 +24,10 @@ class IOSCoreDeviceControl {
     required ProcessUtils processUtils,
     required Xcode xcode,
     required FileSystem fileSystem,
-  }) : _logger = logger,
-      _processUtils = processUtils,
-      _xcode = xcode,
-      _fileSystem = fileSystem;
+  })  : _logger = logger,
+        _processUtils = processUtils,
+        _xcode = xcode,
+        _fileSystem = fileSystem;
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -54,9 +54,8 @@ class IOSCoreDeviceControl {
     Duration validTimeout = timeout;
     if (timeout.inSeconds < _minimumTimeoutInSeconds) {
       _logger.printTrace(
-        'Timeout of ${timeout.inSeconds} seconds is below the minimum timeout value '
-        'for devicectl. Changing the timeout to the minimum value of $_minimumTimeoutInSeconds.'
-      );
+          'Timeout of ${timeout.inSeconds} seconds is below the minimum timeout value '
+          'for devicectl. Changing the timeout to the minimum value of $_minimumTimeoutInSeconds.');
       validTimeout = const Duration(seconds: _minimumTimeoutInSeconds);
     }
 
@@ -121,8 +120,8 @@ class IOSCoreDevice {
   IOSCoreDevice(
     Map<String, Object?> data, {
     required Logger logger,
-  }) : _data = data,
-      _logger = logger;
+  })  : _data = data,
+        _logger = logger;
 
   /// Example:
   /// {
@@ -157,8 +156,8 @@ class IOSCoreDevice {
   @visibleForTesting
   List<IOSCoreDeviceCapability> get capabilities {
     final List<IOSCoreDeviceCapability> capabilitiesList = <IOSCoreDeviceCapability>[];
-    final Object? capabilitiesData = _data['capabilities'];
-    if (capabilitiesData != null && capabilitiesData is List<Object?>) {
+    if (_data['capabilities'] is List<Object?>) {
+      final List<Object?> capabilitiesData = _data['capabilities']! as List<Object?>;
       for (final Object? capabilityData in capabilitiesData) {
         if (capabilityData != null && capabilityData is Map<String, Object?>) {
           capabilitiesList.add(IOSCoreDeviceCapability(capabilityData));
@@ -170,17 +169,20 @@ class IOSCoreDevice {
 
   @visibleForTesting
   IOSCoreDeviceConnectionProperties? get connectionProperties {
-    final Object? connectionPropertiesData = _data['connectionProperties'];
-    if (connectionPropertiesData != null && connectionPropertiesData is Map<String, Object?>) {
-      return IOSCoreDeviceConnectionProperties(connectionPropertiesData, logger: _logger);
+    if (_data['connectionProperties'] is Map<String, Object?>) {
+      final Map<String, Object?> connectionPropertiesData = _data['connectionProperties']! as Map<String, Object?>;
+      return IOSCoreDeviceConnectionProperties(
+        connectionPropertiesData,
+        logger: _logger,
+      );
     }
     return null;
   }
 
   @visibleForTesting
   IOSCoreDeviceProperties? get deviceProperties {
-    final Object? devicePropertiesData = _data['deviceProperties'];
-    if (devicePropertiesData != null && devicePropertiesData is Map<String, Object?>) {
+    if (_data['deviceProperties'] is Map<String, Object?>) {
+      final Map<String, Object?> devicePropertiesData = _data['deviceProperties']! as Map<String, Object?>;
       return IOSCoreDeviceProperties(devicePropertiesData);
     }
     return null;
@@ -188,9 +190,12 @@ class IOSCoreDevice {
 
   @visibleForTesting
   IOSCoreDeviceHardwareProperties? get hardwareProperties {
-    final Object? hardwarePropertiesData = _data['hardwareProperties'];
-    if (hardwarePropertiesData != null && hardwarePropertiesData is Map<String, Object?>) {
-      return IOSCoreDeviceHardwareProperties(hardwarePropertiesData, logger: _logger);
+    if (_data['hardwareProperties'] is Map<String, Object?>) {
+      final Map<String, Object?> hardwarePropertiesData = _data['hardwareProperties']! as Map<String, Object?>;
+      return IOSCoreDeviceHardwareProperties(
+        hardwarePropertiesData,
+        logger: _logger,
+      );
     }
     return null;
   }
@@ -227,8 +232,8 @@ class IOSCoreDeviceConnectionProperties {
   IOSCoreDeviceConnectionProperties(
     Map<String, Object?> data, {
     required Logger logger,
-  }) : _data = data,
-      _logger = logger;
+  })  : _data = data,
+        _logger = logger;
 
   /// Example:
   /// "connectionProperties" : {
@@ -260,6 +265,7 @@ class IOSCoreDeviceConnectionProperties {
     }
     return null;
   }
+
   String? get lastConnectionDate => _data['lastConnectionDate']?.toString();
   List<String>? get localHostnames {
     if (_data['localHostnames'] is List<Object?>) {
@@ -272,6 +278,7 @@ class IOSCoreDeviceConnectionProperties {
     }
     return null;
   }
+
   String? get pairingState => _data['pairingState']?.toString();
   List<String>? get potentialHostnames {
     if (_data['potentialHostnames'] is List<Object?>) {
@@ -284,6 +291,7 @@ class IOSCoreDeviceConnectionProperties {
     }
     return null;
   }
+
   /// When [transportType] is not null, values may be `wired` or `localNetwork`.
   String? get transportType => _data['transportType']?.toString();
   String? get tunnelIPAddress => _data['tunnelIPAddress']?.toString();
@@ -318,6 +326,7 @@ class IOSCoreDeviceProperties {
     }
     return null;
   }
+
   String? get bootedSnapshotName => _data['bootedSnapshotName']?.toString();
   String? get bootState => _data['bootState']?.toString();
   bool? get ddiServicesAvailable {
@@ -326,6 +335,7 @@ class IOSCoreDeviceProperties {
     }
     return null;
   }
+
   String? get developerModeStatus => _data['developerModeStatus']?.toString();
   bool? get hasInternalOSBuild {
     if (_data['hasInternalOSBuild'] is bool?) {
@@ -333,6 +343,7 @@ class IOSCoreDeviceProperties {
     }
     return null;
   }
+
   String? get name => _data['name']?.toString();
   String? get osBuildUpdate => _data['osBuildUpdate']?.toString();
   String? get osVersionNumber => _data['osVersionNumber']?.toString();
@@ -342,6 +353,7 @@ class IOSCoreDeviceProperties {
     }
     return null;
   }
+
   String? get screenViewingURL => _data['screenViewingURL']?.toString();
 }
 
@@ -349,8 +361,8 @@ class IOSCoreDeviceHardwareProperties {
   IOSCoreDeviceHardwareProperties(
     Map<String, Object?> data, {
     required Logger logger,
-  }) : _data = data,
-      _logger = logger;
+  })  : _data = data,
+        _logger = logger;
 
   /// Example:
   /// "hardwareProperties" : {
@@ -395,6 +407,7 @@ class IOSCoreDeviceHardwareProperties {
     }
     return null;
   }
+
   String? get deviceType => _data['deviceType']?.toString();
   int? get ecid {
     if (_data['ecid'] is int?) {
@@ -402,6 +415,7 @@ class IOSCoreDeviceHardwareProperties {
     }
     return null;
   }
+
   String? get hardwareModel => _data['hardwareModel']?.toString();
   int? get internalStorageCapacity {
     if (_data['internalStorageCapacity'] is int?) {
@@ -409,6 +423,7 @@ class IOSCoreDeviceHardwareProperties {
     }
     return null;
   }
+
   String? get marketingName => _data['marketingName']?.toString();
   String? get platform => _data['platform']?.toString();
   String? get productType => _data['productType']?.toString();
@@ -426,6 +441,7 @@ class IOSCoreDeviceHardwareProperties {
     }
     return null;
   }
+
   List<int>? get supportedDeviceFamilies {
     if (_data['supportedDeviceFamilies'] is List<Object?>) {
       final List<Object?> values = _data['supportedDeviceFamilies']! as List<Object?>;
@@ -437,6 +453,7 @@ class IOSCoreDeviceHardwareProperties {
     }
     return null;
   }
+
   String? get thinningProductType => _data['thinningProductType']?.toString();
   String? get udid => _data['udid']?.toString();
 }
@@ -461,6 +478,7 @@ class IOSCoreDeviceCPUType {
     }
     return null;
   }
+
   int? get cpuType {
     if (_data['type'] is int?) {
       return _data['type'] as int?;

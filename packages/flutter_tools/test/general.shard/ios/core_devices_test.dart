@@ -5,17 +5,12 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
-import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
-import 'package:flutter_tools/src/project.dart';
-import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -37,7 +32,10 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      processUtils = ProcessUtils(processManager: fakeProcessManager, logger: logger);
+      processUtils = ProcessUtils(
+        processManager: fakeProcessManager,
+        logger: logger,
+      );
       final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter.test(
         processManager: fakeProcessManager,
         version: Version(14, 0, 0),
@@ -72,7 +70,10 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      processUtils = ProcessUtils(processManager: fakeProcessManager, logger: logger);
+      processUtils = ProcessUtils(
+        processManager: fakeProcessManager,
+        logger: logger,
+      );
       xcode = Xcode.test(processManager: FakeProcessManager.any());
       deviceControl = IOSCoreDeviceControl(
         logger: logger,
@@ -108,7 +109,9 @@ void main() {
 }
     ''';
 
-      final File tempFile = fileSystem.systemTempDirectory.childDirectory('core_devices.rand0').childFile('core_device_list.json');
+      final File tempFile = fileSystem.systemTempDirectory
+          .childDirectory('core_devices.rand0')
+          .childFile('core_device_list.json');
       fakeProcessManager.addCommand(FakeCommand(
         command: <String>[
           'xcrun',
@@ -168,7 +171,9 @@ void main() {
 }
     ''';
 
-    final File tempFile = fileSystem.systemTempDirectory.childDirectory('core_devices.rand0').childFile('core_device_list.json');
+      final File tempFile = fileSystem.systemTempDirectory
+          .childDirectory('core_devices.rand0')
+          .childFile('core_device_list.json');
       fakeProcessManager.addCommand(FakeCommand(
         command: <String>[
           'xcrun',
@@ -229,7 +234,9 @@ void main() {
 }
     ''';
 
-    final File tempFile = fileSystem.systemTempDirectory.childDirectory('core_devices.rand0').childFile('core_device_list.json');
+      final File tempFile = fileSystem.systemTempDirectory
+          .childDirectory('core_devices.rand0')
+          .childFile('core_device_list.json');
       fakeProcessManager.addCommand(FakeCommand(
         command: <String>[
           'xcrun',
@@ -254,7 +261,8 @@ void main() {
       expect(devices[0].connectionProperties, isNull);
       expect(devices[0].deviceProperties, isNull);
       expect(devices[0].hardwareProperties, isNull);
-
+      expect(devices[0].coreDeviceIdentifer, '123456BB5-AEDE-7A22-B890-1234567890DD');
+      expect(devices[0].visibilityClass, 'default');
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(tempFile, isNot(exists));
@@ -282,7 +290,9 @@ void main() {
 }
     ''';
 
-    final File tempFile = fileSystem.systemTempDirectory.childDirectory('core_devices.rand0').childFile('core_device_list.json');
+      final File tempFile = fileSystem.systemTempDirectory
+          .childDirectory('core_devices.rand0')
+          .childFile('core_device_list.json');
       fakeProcessManager.addCommand(FakeCommand(
         command: <String>[
           'xcrun',
@@ -344,7 +354,9 @@ void main() {
 }
     ''';
 
-    final File tempFile = fileSystem.systemTempDirectory.childDirectory('core_devices.rand0').childFile('core_device_list.json');
+      final File tempFile = fileSystem.systemTempDirectory
+          .childDirectory('core_devices.rand0')
+          .childFile('core_device_list.json');
       fakeProcessManager.addCommand(FakeCommand(
         command: <String>[
           'xcrun',
@@ -377,13 +389,10 @@ void main() {
         ],
       );
       expect(devices[0].connectionProperties?.pairingState, 'paired');
-      expect(
-        devices[0].connectionProperties?.potentialHostnames,
-        <String>[
-          '00001234-0001234A3C03401E.coredevice.local',
-          '123456BB5-AEDE-7A22-B890-1234567890DD.coredevice.local',
-        ]
-      );
+      expect(devices[0].connectionProperties?.potentialHostnames, <String>[
+        '00001234-0001234A3C03401E.coredevice.local',
+        '123456BB5-AEDE-7A22-B890-1234567890DD.coredevice.local',
+      ]);
       expect(devices[0].connectionProperties?.transportType, 'wired');
       expect(devices[0].connectionProperties?.tunnelIPAddress, 'fdf1:23c4:cd56::1');
       expect(devices[0].connectionProperties?.tunnelState, 'connected');
@@ -418,7 +427,9 @@ void main() {
 }
     ''';
 
-    final File tempFile = fileSystem.systemTempDirectory.childDirectory('core_devices.rand0').childFile('core_device_list.json');
+      final File tempFile = fileSystem.systemTempDirectory
+          .childDirectory('core_devices.rand0')
+          .childFile('core_device_list.json');
       fakeProcessManager.addCommand(FakeCommand(
         command: <String>[
           'xcrun',
@@ -500,7 +511,9 @@ void main() {
 }
     ''';
 
-    final File tempFile = fileSystem.systemTempDirectory.childDirectory('core_devices.rand0').childFile('core_device_list.json');
+      final File tempFile = fileSystem.systemTempDirectory
+          .childDirectory('core_devices.rand0')
+          .childFile('core_device_list.json');
       fakeProcessManager.addCommand(FakeCommand(
         command: <String>[
           'xcrun',
@@ -525,7 +538,6 @@ void main() {
       expect(devices[0].hardwareProperties?.cpuType?.name, 'arm64e');
       expect(devices[0].hardwareProperties?.cpuType?.subType, 2);
       expect(devices[0].hardwareProperties?.cpuType?.cpuType, 16777228);
-
       expect(devices[0].hardwareProperties?.deviceType, 'iPad');
       expect(devices[0].hardwareProperties?.ecid, 12345678903408542);
       expect(devices[0].hardwareProperties?.hardwareModel, 'J617AP');
@@ -534,8 +546,7 @@ void main() {
       expect(devices[0].hardwareProperties?.platform, 'iOS');
       expect(devices[0].hardwareProperties?.productType, 'iPad14,3');
       expect(devices[0].hardwareProperties?.serialNumber, 'HC123DHCQV');
-
-
+      expect(devices[0].hardwareProperties?.supportedCPUTypes, isNotNull);
       expect(devices[0].hardwareProperties?.supportedCPUTypes?[0].name, 'arm64e');
       expect(devices[0].hardwareProperties?.supportedCPUTypes?[0].subType, 2);
       expect(devices[0].hardwareProperties?.supportedCPUTypes?[0].cpuType, 16777228);
@@ -555,7 +566,9 @@ void main() {
       testWithoutContext('invalid json', () async {
         const String deviceControlOutput = '''Invalid JSON''';
 
-        final File tempFile = fileSystem.systemTempDirectory.childDirectory('core_devices.rand0').childFile('core_device_list.json');
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('core_device_list.json');
         fakeProcessManager.addCommand(FakeCommand(
           command: <String>[
             'xcrun',
@@ -603,7 +616,9 @@ void main() {
 }
     ''';
 
-        final File tempFile = fileSystem.systemTempDirectory.childDirectory('core_devices.rand0').childFile('core_device_list.json');
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('core_device_list.json');
         fakeProcessManager.addCommand(FakeCommand(
           command: <String>[
             'xcrun',
@@ -656,7 +671,9 @@ void main() {
 }
     ''';
 
-        final File tempFile = fileSystem.systemTempDirectory.childDirectory('core_devices.rand0').childFile('core_device_list.json');
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('core_device_list.json');
         fakeProcessManager.addCommand(FakeCommand(
           command: <String>[
             'xcrun',
@@ -674,52 +691,17 @@ void main() {
           },
         ));
 
-        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices(timeout: const Duration(seconds: 2));
+        final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices(
+          timeout: const Duration(seconds: 2),
+        );
         expect(devices.isNotEmpty, isTrue);
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(
           logger.traceText,
-          contains(
-            'Timeout of 2 seconds is below the minimum timeout value '
-            'for devicectl. Changing the timeout to the minimum value of 5.'
-          ),
+          contains('Timeout of 2 seconds is below the minimum timeout value '
+              'for devicectl. Changing the timeout to the minimum value of 5.'),
         );
       });
-
     });
-
-
   });
-
-}
-
-class FakeIosProject extends Fake implements IosProject {
-  @override
-  Future<String> productBundleIdentifier(BuildInfo? buildInfo) async => 'com.example.test';
-
-  @override
-  Future<String> hostAppBundleName(BuildInfo? buildInfo) async => 'My Super Awesome App.app';
-}
-
-class FakeSimControl extends Fake implements SimControl {
-  final List<LaunchRequest> requests = <LaunchRequest>[];
-
-  @override
-  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String>? launchArgs ]) async {
-    requests.add(LaunchRequest(deviceId, appIdentifier, launchArgs));
-    return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
-  }
-
-  @override
-  Future<RunResult> install(String deviceId, String appPath) async {
-    return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
-  }
-}
-
-class LaunchRequest {
-  const LaunchRequest(this.deviceId, this.appIdentifier, this.launchArgs);
-
-  final String deviceId;
-  final String appIdentifier;
-  final List<String>? launchArgs;
 }
