@@ -4,8 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-/// This sample demonstrates using [PopScope] to get the correct behavior from
-/// system back gestures when there are nested [Navigator] widgets.
+/// This sample demonstrates using [PopScope] to handle system back gestures
+/// when there are nested [Navigator] widgets by delegating to the current
+/// [Navigator].
 
 void main() => runApp(const MyApp());
 
@@ -75,7 +76,10 @@ class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
       },
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
-          final bool nextPopEnabled = !notification.canPop;
+          // If this subtree cannot handle pop, then set popEnabled to true so
+          // that our PopScope will allow the Navigator higher in the tree to
+          // handle the pop instead.
+          final bool nextPopEnabled = !notification.canHandlePop;
           if (nextPopEnabled != popEnabled) {
             setState(() {
               popEnabled = nextPopEnabled;

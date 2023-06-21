@@ -3428,7 +3428,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   void _onHistoryChanged() {
     final NavigationNotification notification = NavigationNotification(
-      canPop: _usingPagesAPI
+      canHandlePop: _usingPagesAPI
           ? widget.pages.length > 1
           : canPop(),
     );
@@ -5424,13 +5424,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         onNotification: (NavigationNotification notification) {
           // If the state of this Navigator does not change whether or not the
           // whole framework can pop, propagate the Notification.
-          if (notification.canPop || !canPop()) {
+          if (notification.canHandlePop || !canPop()) {
             return false;
           }
           // Otherwise, dispatch a new Notification with the correct canPop and
           // stop the propagation of the old Notification.
           const NavigationNotification nextNotification = NavigationNotification(
-            canPop: true,
+            canHandlePop: true,
           );
           nextNotification.dispatch(context);
           return true;
@@ -5949,10 +5949,10 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
 class NavigationNotification extends Notification {
   /// Creates a notification that some change in navigation has happened.
   const NavigationNotification({
-    required this.canPop,
+    required this.canHandlePop,
   });
 
   /// Indicates that the originator of this [Notification] is capable of
   /// handling a navigation pop.
-  final bool canPop;
+  final bool canHandlePop;
 }

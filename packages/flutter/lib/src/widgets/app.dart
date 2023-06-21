@@ -1326,10 +1326,10 @@ class WidgetsApp extends StatefulWidget {
 
   /// The default value for [onNavigationNotification].
   ///
-  /// Updates the platform with [NavigationNotification.canPop] and stops
+  /// Updates the platform with [NavigationNotification.canHandlePop] and stops
   /// bubbling.
   static bool defaultOnNavigationNotification(NavigationNotification notification) {
-    SystemNavigator.setFrameworkHandlesBack(notification.canPop);
+    SystemNavigator.setFrameworkHandlesBack(notification.canHandlePop);
     return true;
   }
 

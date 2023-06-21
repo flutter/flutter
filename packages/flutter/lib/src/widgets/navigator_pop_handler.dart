@@ -71,7 +71,10 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
       // Listen to changes in the navigation stack in the widget subtree.
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
-          final bool nextPopEnabled = !notification.canPop;
+          // If this subtree cannot handle pop, then set popEnabled to true so
+          // that our PopScope will allow the Navigator higher in the tree to
+          // handle the pop instead.
+          final bool nextPopEnabled = !notification.canHandlePop;
           if (nextPopEnabled != _popEnabled) {
             setState(() {
               _popEnabled = nextPopEnabled;
