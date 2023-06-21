@@ -4385,8 +4385,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element rowElement = tester.element(find.byType(Row));
         service.setSelection(rowElement, group);
 
-        final DiagnosticsNode diagnostic = rowElement.toDiagnosticsNode();
-        final String id = service.toId(diagnostic, group)!;
+        final String id = service.toId(rowElement, group)!;
         final Map<String, Object?> result = (await service.testExtension(
           WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
           <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
