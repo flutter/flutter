@@ -18,8 +18,13 @@ const String minSdk18 = 'minSdkVersion 18';
 const String flutterMinSdk = 'minSdkVersion flutter.minSdkVersion';
 
 class MinSdkVersionMigration extends ProjectMigrator {
-  MinSdkVersionMigration(AndroidProject project, super.logger,
-      ) : _project = project, _appLevelGradleBuildFile = project.hostAppGradleRoot.childDirectory('app').childFile('build.gradle'); // TODO: make this more robust
+  MinSdkVersionMigration(
+      AndroidProject project,
+      super.logger,
+  ) : _project = project,
+      _appLevelGradleBuildFile = project.hostAppGradleRoot
+          .childDirectory('app')
+          .childFile('build.gradle'); // TODO: make this more robust
 
 
   final AndroidProject _project;
@@ -28,7 +33,8 @@ class MinSdkVersionMigration extends ProjectMigrator {
   @override
   void migrate() {
     // This migrator only applies to app projects, so exit early if we are in
-    // a module or a plugin.
+    // a module or a plugin. TODO: Determine if this enough to confirm this is
+    // in fact an app.
     if (_project.isModule || _project.isPlugin) {
       return;
     }
