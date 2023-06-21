@@ -1,4 +1,4 @@
-Signature: 88911f05d2320cc5f60dd8b31074c0cd
+Signature: 6850feddb66c3476e71a85bd4f7d97d6
 
 ====================================================================================================
 LIBRARY: etc1
@@ -384,21 +384,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
-FILE: ../../../third_party/skia/relnotes/SkPromiseImageTexture.md
-FILE: ../../../third_party/skia/relnotes/ddl_private.md
-FILE: ../../../third_party/skia/relnotes/skblenders_arithmetic_saturate.md
-FILE: ../../../third_party/skia/relnotes/skcolortable.md
-FILE: ../../../third_party/skia/relnotes/skif_legacy_magnifier.md
-FILE: ../../../third_party/skia/relnotes/skif_runtimeshader_sampleradius.md
-FILE: ../../../third_party/skia/relnotes/skimagefilters_alphathreshold_remove.md
-FILE: ../../../third_party/skia/relnotes/skimagefilters_image_remove.md
-FILE: ../../../third_party/skia/relnotes/skimagegenerator_grexternaltexturegenerator.md
-FILE: ../../../third_party/skia/relnotes/skpoint_float.md
-FILE: ../../../third_party/skia/relnotes/sksamplingoptions_implicit.md
-FILE: ../../../third_party/skia/relnotes/skshaders_namespace.md
-FILE: ../../../third_party/skia/relnotes/sksurface_methods.md
-FILE: ../../../third_party/skia/relnotes/sktablecolorfilter.md
-FILE: ../../../third_party/skia/relnotes/yuv-supported-formats.md
+FILE: ../../../third_party/skia/relnotes/canvas_flush.md
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -8953,8 +8939,6 @@ ORIGIN: ../../../third_party/skia/src/core/SkChecksum.cpp + ../../../third_party
 ORIGIN: ../../../third_party/skia/src/core/SkColorTable.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkDrawBase.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkDrawBase.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/core/SkFilterColorProgram.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/core/SkFilterColorProgram.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkFontMetricsPriv.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkFontMetricsPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkMipmapBuilder.cpp + ../../../third_party/skia/LICENSE
@@ -9143,8 +9127,6 @@ FILE: ../../../third_party/skia/src/core/SkChecksum.cpp
 FILE: ../../../third_party/skia/src/core/SkColorTable.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawBase.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawBase.h
-FILE: ../../../third_party/skia/src/core/SkFilterColorProgram.cpp
-FILE: ../../../third_party/skia/src/core/SkFilterColorProgram.h
 FILE: ../../../third_party/skia/src/core/SkFontMetricsPriv.cpp
 FILE: ../../../third_party/skia/src/core/SkFontMetricsPriv.h
 FILE: ../../../third_party/skia/src/core/SkMipmapBuilder.cpp
