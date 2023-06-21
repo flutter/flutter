@@ -252,6 +252,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/systemchannels/AccessibilityChannel.java",
   "io/flutter/embedding/engine/systemchannels/DeferredComponentChannel.java",
   "io/flutter/embedding/engine/systemchannels/KeyEventChannel.java",
+  "io/flutter/embedding/engine/systemchannels/KeyboardChannel.java",
   "io/flutter/embedding/engine/systemchannels/LifecycleChannel.java",
   "io/flutter/embedding/engine/systemchannels/LocalizationChannel.java",
   "io/flutter/embedding/engine/systemchannels/MouseCursorChannel.java",
