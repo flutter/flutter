@@ -669,20 +669,20 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// {@template flutter.widgets.AndroidPredictiveBack}
   /// ## Handling backs ahead of time
   ///
-  /// Not all system backs will result in a call to this method.  Some are
+  /// Not all system backs will result in a call to this method. Some are
   /// handled entirely by the system without informing the Flutter framework.
   ///
   /// Android API 33+ introduced a feature called predictive back, which allows
   /// the user to peek behind the current app or route during a back gesture and
-  /// then decide to cancel or commit the back.  Flutter enables or disables
-  /// this feature ahead of time, before a back gesture occurs, and back
-  /// gestures that trigger predictive back are handled entirely by the system
-  /// and do not trigger this method here in the framework.
+  /// then decide to cancel or commit the back. Flutter enables or disables this
+  /// feature ahead of time, before a back gesture occurs, and back gestures
+  /// that trigger predictive back are handled entirely by the system and do not
+  /// trigger this method here in the framework.
   ///
   /// By default, the framework communicates when it would like to handle system
   /// back gestures using [SystemNavigator.setFrameworkHandlesBack]. This is
   /// done automatically based on the status of the [Navigator] stack and the
-  /// state of any [PopScope] widgets present.  Developers can manually set this
+  /// state of any [PopScope] widgets present. Developers can manually set this
   /// by calling the method directly or by using [NavigationNotification].
   /// {@endtemplate}
   @protected

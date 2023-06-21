@@ -42,10 +42,10 @@ class NavigatorPopHandler extends StatefulWidget {
   /// Called when a handleable pop event happens.
   ///
   /// For example, a pop is handleable when a [Navigator] in [child] has
-  /// multiple routes on its stack.  It's not handleable when it has only a
+  /// multiple routes on its stack. It's not handleable when it has only a
   /// single route, and so [onPop] will not be called.
   ///
-  /// Typically this is used to pop the [Navigator] in [child].  See the sample
+  /// Typically this is used to pop the [Navigator] in [child]. See the sample
   /// code on [NavigatorPopHandler] for a full example of this.
   final VoidCallback? onPop;
 

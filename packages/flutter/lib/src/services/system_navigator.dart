@@ -9,7 +9,7 @@ import 'system_channels.dart';
 /// Controls specific aspects of the system navigation stack.
 abstract final class SystemNavigator {
   // This defaults to null because it can't be assumed that the engine is in a
-  // certain state when the app starts.  After a hot reload, for example, the
+  // certain state when the app starts. After a hot reload, for example, the
   // platform will retain its state while this boolean will be reset.
   static bool? _frameworkHandlesBack;
 
