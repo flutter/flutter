@@ -686,7 +686,7 @@ void main() {
       ),
       findsNothing,
     );
-    final RenderObject boxWithGlobalKey = tester.renderObject(find.byKey(globalKeyChild.key!));;
+    final RenderObject boxWithGlobalKey = tester.renderObject(find.byKey(globalKeyChild.key!));
 
     // Move the child and remove its view.
     await pumpWidgetWithoutViewWrapper(
