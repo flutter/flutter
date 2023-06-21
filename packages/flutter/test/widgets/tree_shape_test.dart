@@ -82,7 +82,6 @@ void main() {
     ));
   });
 
-  // TODO(goderbauer): There's some hope that this test will work once we migrate to direct dependencies.
   testWidgets('A View can not be moved via GlobalKey to be a child of a RenderObject', (WidgetTester tester) async {
     final Widget globalKeyedView = View(
       key: GlobalKey(),
@@ -351,16 +350,12 @@ void main() {
     expect(find.byType(ColoredBox), findsNWidgets(2));
   });
 
-  testWidgets('Can move stuff between views via global key', (WidgetTester tester) async {
+  testWidgets('Can move stuff between views via global key: viewA -> viewB', (WidgetTester tester) async {
     final FlutterView greenView = tester.view;
     final FlutterView redView = FakeView(tester.view);
     final Widget globalKeyChild = SizedBox(
       key: GlobalKey(),
     );
-
-    Finder findsColoredBox(Color color) {
-      return find.byWidgetPredicate((Widget widget) => widget is ColoredBox && widget.color == color);
-    }
 
     Map<int, RenderObject> collectLeafRenderObjects() {
       final Map<int, RenderObject> result = <int, RenderObject>{};
@@ -408,6 +403,7 @@ void main() {
       ),
       findsNothing,
     );
+    final RenderObject boxWithGlobalKey = tester.renderObject(find.byKey(globalKeyChild.key!));
 
     Map<int, RenderObject> leafRenderObject = collectLeafRenderObjects();
     expect(leafRenderObject[greenView.viewId], isA<RenderConstrainedBox>());
@@ -449,11 +445,434 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(
+      tester.renderObject(find.byKey(globalKeyChild.key!)),
+      equals(boxWithGlobalKey),
+    );
 
     leafRenderObject = collectLeafRenderObjects();
     expect(leafRenderObject[greenView.viewId], isNot(isA<RenderConstrainedBox>()));
     expect(leafRenderObject[redView.viewId], isA<RenderConstrainedBox>());
   });
+
+  testWidgets('Can move stuff between views via global key: viewB -> viewA', (WidgetTester tester) async {
+    final FlutterView greenView = tester.view;
+    final FlutterView redView = FakeView(tester.view);
+    final Widget globalKeyChild = SizedBox(
+      key: GlobalKey(),
+    );
+
+    Map<int, RenderObject> collectLeafRenderObjects() {
+      final Map<int, RenderObject> result = <int, RenderObject>{};
+      for (final RenderView renderView in RendererBinding.instance.renderViews) {
+        void visit(RenderObject object) {
+          result[renderView.flutterView.viewId] = object;
+          object.visitChildren(visit);
+        }
+        visit(renderView);
+      }
+      return result;
+    }
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          View(
+            view: greenView,
+            child: const ColoredBox(
+              color: Colors.green,
+            ),
+          ),
+          View(
+            view: redView,
+            child: ColoredBox(
+              color: Colors.red,
+              child: globalKeyChild,
+            ),
+          ),
+        ],
+      ),
+    );
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.red),
+        matching: find.byType(SizedBox),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.green),
+        matching: find.byType(SizedBox),
+      ),
+      findsNothing,
+    );
+    final RenderObject boxWithGlobalKey = tester.renderObject(find.byKey(globalKeyChild.key!));
+
+    Map<int, RenderObject> leafRenderObject = collectLeafRenderObjects();
+    expect(leafRenderObject[redView.viewId], isA<RenderConstrainedBox>());
+    expect(leafRenderObject[greenView.viewId], isNot(isA<RenderConstrainedBox>()));
+
+    // Move the child.
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          View(
+            view: greenView,
+            child: ColoredBox(
+              color: Colors.green,
+              child: globalKeyChild,
+            ),
+          ),
+          View(
+            view: redView,
+            child: const ColoredBox(
+              color: Colors.red,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.red),
+        matching: find.byType(SizedBox),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.green),
+        matching: find.byType(SizedBox),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester.renderObject(find.byKey(globalKeyChild.key!)),
+      equals(boxWithGlobalKey),
+    );
+
+    leafRenderObject = collectLeafRenderObjects();
+    expect(leafRenderObject[redView.viewId], isNot(isA<RenderConstrainedBox>()));
+    expect(leafRenderObject[greenView.viewId], isA<RenderConstrainedBox>());
+  });
+
+  testWidgets('Can move stuff out of a view that is going away, viewA -> ViewB', (WidgetTester tester) async {
+    final FlutterView greenView = tester.view;
+    final Key greenKey = UniqueKey();
+    final FlutterView redView = FakeView(tester.view);
+    final Key redKey = UniqueKey();
+    final Widget globalKeyChild = SizedBox(
+      key: GlobalKey(),
+    );
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          View(
+            key: greenKey,
+            view: greenView,
+            child: const ColoredBox(
+              color: Colors.green,
+            ),
+          ),
+          View(
+            key: redKey,
+            view: redView,
+            child: ColoredBox(
+              color: Colors.red,
+              child: globalKeyChild,
+            ),
+          ),
+        ],
+      ),
+    );
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.red),
+        matching: find.byType(SizedBox),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.green),
+        matching: find.byType(SizedBox),
+      ),
+      findsNothing,
+    );
+    final RenderObject boxWithGlobalKey = tester.renderObject(find.byKey(globalKeyChild.key!));
+
+    // Move the child and remove its view.
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          View(
+            key: greenKey,
+            view: greenView,
+            child: ColoredBox(
+              color: Colors.green,
+              child: globalKeyChild,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      findsColoredBox(Colors.red),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.green),
+        matching: find.byType(SizedBox),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester.renderObject(find.byKey(globalKeyChild.key!)),
+      equals(boxWithGlobalKey),
+    );
+  });
+
+  testWidgets('Can move stuff out of a view that is going away, viewB -> ViewA', (WidgetTester tester) async {
+    final FlutterView greenView = tester.view;
+    final Key greenKey = UniqueKey();
+    final FlutterView redView = FakeView(tester.view);
+    final Key redKey = UniqueKey();
+    final Widget globalKeyChild = SizedBox(
+      key: GlobalKey(),
+    );
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          View(
+            key: greenKey,
+            view: greenView,
+            child: ColoredBox(
+              color: Colors.green,
+              child: globalKeyChild,
+            ),
+          ),
+          View(
+            key: redKey,
+            view: redView,
+            child: const ColoredBox(
+              color: Colors.red,
+            ),
+          ),
+        ],
+      ),
+    );
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.green),
+        matching: find.byType(SizedBox),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.red),
+        matching: find.byType(SizedBox),
+      ),
+      findsNothing,
+    );
+    final RenderObject boxWithGlobalKey = tester.renderObject(find.byKey(globalKeyChild.key!));;
+
+    // Move the child and remove its view.
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          View(
+            key: redKey,
+            view: redView,
+            child: ColoredBox(
+              color: Colors.red,
+              child: globalKeyChild,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      findsColoredBox(Colors.green),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.red),
+        matching: find.byType(SizedBox),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester.renderObject(find.byKey(globalKeyChild.key!)),
+      equals(boxWithGlobalKey),
+    );
+  });
+
+  testWidgets('Can globalkey move down the tree from a view that is going away', (WidgetTester tester) async {
+    final FlutterView anchorView = FakeView(tester.view);
+    final Widget globalKeyChild = SizedBox(
+      key: GlobalKey(),
+    );
+
+    await tester.pumpWidget(
+      ColoredBox(
+        color: Colors.green,
+        child: ViewAnchor(
+          view: View(
+            view: anchorView,
+            child: ColoredBox(
+              color: Colors.yellow,
+              child: globalKeyChild,
+            ),
+          ),
+          child: const ColoredBox(color: Colors.red),
+        ),
+      ),
+    );
+
+    expect(findsColoredBox(Colors.green), findsOneWidget);
+    expect(findsColoredBox(Colors.yellow), findsOneWidget);
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.yellow),
+        matching: find.byType(SizedBox),
+      ),
+      findsOneWidget,
+    );
+    expect(findsColoredBox(Colors.red), findsOneWidget);
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.red),
+        matching: find.byType(SizedBox),
+      ),
+      findsNothing,
+    );
+    expect(find.byType(SizedBox), findsOneWidget);
+    final RenderObject boxWithGlobalKey = tester.renderObject(find.byKey(globalKeyChild.key!));
+
+    await tester.pumpWidget(
+      ColoredBox(
+        color: Colors.green,
+        child: ViewAnchor(
+          child: ColoredBox(
+            color: Colors.red,
+            child: globalKeyChild,
+          ),
+        ),
+      ),
+    );
+    expect(findsColoredBox(Colors.green), findsOneWidget);
+    expect(findsColoredBox(Colors.yellow), findsNothing);
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.yellow),
+        matching: find.byType(SizedBox),
+      ),
+      findsNothing,
+    );
+    expect(findsColoredBox(Colors.red), findsOneWidget);
+    expect(
+      find.descendant(
+        of: findsColoredBox(Colors.red),
+        matching: find.byType(SizedBox),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byType(SizedBox), findsOneWidget);
+    expect(
+      tester.renderObject(find.byKey(globalKeyChild.key!)),
+      boxWithGlobalKey,
+    );
+  });
+
+  testWidgets('RenderObjects are disposed when a view goes away from a ViewAnchor', (WidgetTester tester) async {
+    final FlutterView anchorView = FakeView(tester.view);
+
+    await tester.pumpWidget(
+      ColoredBox(
+        color: Colors.green,
+        child: ViewAnchor(
+          view: View(
+            view: anchorView,
+            child: const ColoredBox(color: Colors.yellow),
+          ),
+          child: const ColoredBox(color: Colors.red),
+        ),
+      ),
+    );
+
+    final RenderObject box = tester.renderObject(findsColoredBox(Colors.yellow));
+
+    await tester.pumpWidget(
+      const ColoredBox(
+        color: Colors.green,
+        child: ViewAnchor(
+          child: ColoredBox(color: Colors.red),
+        ),
+      ),
+    );
+
+    expect(box.debugDisposed, isTrue);
+  });
+
+  testWidgets('RenderObjects are disposed when a view goes away from a ViewCollection', (WidgetTester tester) async {
+    final FlutterView redView = tester.view;
+    final FlutterView greenView = FakeView(tester.view);
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          View(
+            view: redView,
+            child: const ColoredBox(color: Colors.red),
+          ),
+          View(
+            view: greenView,
+            child: const ColoredBox(color: Colors.green),
+          ),
+        ],
+      ),
+    );
+
+    expect(findsColoredBox(Colors.green), findsOneWidget);
+    expect(findsColoredBox(Colors.red), findsOneWidget);
+    final RenderObject box = tester.renderObject(findsColoredBox(Colors.green));
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          View(
+            view: redView,
+            child: const ColoredBox(color: Colors.red),
+          ),
+        ],
+      ),
+    );
+
+    expect(findsColoredBox(Colors.green), findsNothing);
+    expect(findsColoredBox(Colors.red), findsOneWidget);
+    expect(box.debugDisposed, isTrue);
+  });
+}
+
+Finder findsColoredBox(Color color) {
+  return find.byWidgetPredicate((Widget widget) => widget is ColoredBox && widget.color == color);
 }
 
 Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
