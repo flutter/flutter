@@ -103,7 +103,6 @@ targets:
     timeout: 60
 
   - name: Linux linux_android_emulator_tests
-    bringup: true
     enabled_branches:
       - main
     recipe: engine_v2/builder
@@ -113,6 +112,7 @@ targets:
     timeout: 60
 
   - name: Linux Android Emulator Tests
+    bringup: true
     recipe: engine/scenarios
     enabled_branches:
       - main
