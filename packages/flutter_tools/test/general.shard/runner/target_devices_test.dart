@@ -1830,11 +1830,6 @@ Please choose one (or "q" to quit): '''));
             targetDevices.waitForWirelessBeforeInput = true;
             targetDevices.deviceSelection.input = '2';
 
-            // Adding this additional prompt demonstrates that selecting
-            // `0` for the first option won't crash the tool, we will instead
-            // need to simulate typing into stdin again with the correct value
-            // which is `1` in this case
-            terminal.setPrompt(<String>['1', '2', 'q', 'Q'], '0');
             terminal.setPrompt(<String>['1', '2', 'q', 'Q'], '1');
 
             final List<Device>? devices = await targetDevices.findAllTargetDevices();
