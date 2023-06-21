@@ -1,4 +1,4 @@
-Signature: 3c8ddfa27c3c54c252dc45af0b3f982f
+Signature: 87d1a5e9bfbe86bb94f6ce4f3862893b
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9082,6 +9082,7 @@ ORIGIN: ../../../third_party/skia/src/text/gpu/SlugImpl.cpp + ../../../third_par
 ORIGIN: ../../../third_party/skia/src/text/gpu/SlugImpl.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/text/gpu/VertexFiller.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/text/gpu/VertexFiller.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/utils/SkTestCanvas.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/toolchain/android_trampolines/gen_trampolines/gen_trampolines.go + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/FuzzCubicRoots.cpp
@@ -9270,6 +9271,7 @@ FILE: ../../../third_party/skia/src/text/gpu/SlugImpl.cpp
 FILE: ../../../third_party/skia/src/text/gpu/SlugImpl.h
 FILE: ../../../third_party/skia/src/text/gpu/VertexFiller.cpp
 FILE: ../../../third_party/skia/src/text/gpu/VertexFiller.h
+FILE: ../../../third_party/skia/src/utils/SkTestCanvas.cpp
 FILE: ../../../third_party/skia/toolchain/android_trampolines/gen_trampolines/gen_trampolines.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2023 Google LLC
