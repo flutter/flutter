@@ -888,6 +888,8 @@ void main() {
         // if this is any other value, we will do a real ip lookup
         hostname: 'any',
         port: 0,
+        tlsCertPath: null,
+        tlsCertKeyPath: null,
         packagesFilePath: '.packages',
         urlTunneller: null,
         useSseForDebugProxy: true,
