@@ -1722,8 +1722,8 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getProperties(diagnosticsNodeId, groupName));
   }
 
-  List<Object>  _getProperties(String? diagnosticsOrDiagnosticableId, String groupName) {
-    final DiagnosticsNode? node = _diagnosticableIdToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+  List<Object>  _getProperties(String? diagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _diagnosticableIdToDiagnosticsNode(diagnosticableId);
     if (node == null) {
       return const <Object>[];
     }
@@ -1774,8 +1774,8 @@ mixin WidgetInspectorService {
     return null;
   }
 
-  List<Object> _getChildrenSummaryTree(String? diagnosticsOrDiagnosticableId, String groupName) {
-    final DiagnosticsNode? node = _diagnosticableIdToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+  List<Object> _getChildrenSummaryTree(String? diagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _diagnosticableIdToDiagnosticsNode(diagnosticableId);
     if (node == null) {
       return <Object>[];
     }
@@ -1785,17 +1785,17 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
-  /// object that [diagnosticsOrDiagnosticableId] references providing information needed
+  /// object that [diagnosticableId] references providing information needed
   /// for the details subtree view.
   ///
   /// The details subtree shows properties inline and includes all children
   /// rather than a filtered set of important children.
-  String getChildrenDetailsSubtree(String diagnosticsOrDiagnosticableId, String groupName) {
-    return _safeJsonEncode(_getChildrenDetailsSubtree(diagnosticsOrDiagnosticableId, groupName));
+  String getChildrenDetailsSubtree(String diagnosticableId, String groupName) {
+    return _safeJsonEncode(_getChildrenDetailsSubtree(diagnosticableId, groupName));
   }
 
-  List<Object> _getChildrenDetailsSubtree(String? diagnosticsOrDiagnosticableId, String groupName) {
-    final DiagnosticsNode? node = _diagnosticableIdToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+  List<Object> _getChildrenDetailsSubtree(String? diagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _diagnosticableIdToDiagnosticsNode(diagnosticableId);
     // With this value of minDepth we only expand one extra level of important nodes.
     final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, includeProperties: true, service: this);
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate, parent: node);
@@ -1907,19 +1907,19 @@ mixin WidgetInspectorService {
   ///  * [getChildrenDetailsSubtree], a method to get children of a node
   ///    in the details subtree.
   String getDetailsSubtree(
-    String diagnosticsOrDiagnosticableId,
+    String diagnosticableId,
     String groupName, {
     int subtreeDepth = 2,
   }) {
-    return _safeJsonEncode(_getDetailsSubtree(diagnosticsOrDiagnosticableId, groupName, subtreeDepth));
+    return _safeJsonEncode(_getDetailsSubtree(diagnosticableId, groupName, subtreeDepth));
   }
 
   Map<String, Object?>? _getDetailsSubtree(
-    String? diagnosticsOrDiagnosticableId,
+    String? diagnosticableId,
     String? groupName,
     int subtreeDepth,
   ) {
-    final DiagnosticsNode? root = _diagnosticableIdToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    final DiagnosticsNode? root = _diagnosticableIdToDiagnosticsNode(diagnosticableId);
     if (root == null) {
       return null;
     }
@@ -2014,11 +2014,11 @@ mixin WidgetInspectorService {
   Future<Map<String, Object?>> _getLayoutExplorerNode(
     Map<String, String> parameters,
   ) {
-    final String? diagnosticsOrDiagnosticableId = parameters['id'];
+    final String? diagnosticableId = parameters['id'];
     final int subtreeDepth = int.parse(parameters['subtreeDepth']!);
     final String? groupName = parameters['groupName'];
     Map<String, dynamic>? result = <String, dynamic>{};
-    final DiagnosticsNode? root = _diagnosticableIdToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    final DiagnosticsNode? root = _diagnosticableIdToDiagnosticsNode(diagnosticableId);
     if (root == null) {
       return Future<Map<String, dynamic>>.value(<String, dynamic>{
         'result': result,
