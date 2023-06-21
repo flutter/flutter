@@ -16,7 +16,7 @@ class LiveTextInputTester {
 
   Future<Object?> _handler(MethodCall methodCall) async {
     // Need to set Clipboard.hasStrings method handler because when showing the tool bar,
-    // the Clipboard.hasStrings will also be invoked. If we doesn't handle this,
+    // the Clipboard.hasStrings will also be invoked. If this isn't handled,
     // an exception will be thrown.
     if (methodCall.method == 'Clipboard.hasStrings') {
       return <String, bool>{'value': true};
