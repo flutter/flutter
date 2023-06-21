@@ -1937,8 +1937,10 @@ mixin WidgetInspectorService {
   /// Returns a [DiagnosticsNode] representing the currently selected [Element].
   @protected
   String getSelectedWidget(String? previousSelectionId, String groupName) {
-    assert(previousSelectionId == null, 'previousSelectionId is deprecated in API');
-    return _safeJsonEncode(_getSelectedWidget(previousSelectionId, groupName));
+    if (previousSelectionId != null) {
+      debugPrint('previousSelectionId is deprecated in API');
+    }
+    return _safeJsonEncode(_getSelectedWidget(null, groupName));
   }
 
   /// Captures an image of the current state of an [object] that is a
@@ -2223,8 +2225,10 @@ mixin WidgetInspectorService {
   /// returns the first ancestor of the selected [Element] shown in the summary
   /// tree.
   String getSelectedSummaryWidget(String? previousSelectionId, String groupName) {
-    assert(previousSelectionId == null, 'previousSelectionId is deprecated in API');
-    return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
+    if (previousSelectionId != null) {
+      debugPrint('previousSelectionId is deprecated in API');
+    }
+    return _safeJsonEncode(_getSelectedSummaryWidget(null, groupName));
   }
 
   _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId) {
