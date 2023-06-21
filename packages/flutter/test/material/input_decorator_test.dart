@@ -1643,6 +1643,37 @@ void main() {
     expect(tester.getBottomLeft(find.text(kHelper1)), const Offset(12.0, 76.0));
   });
 
+  testWidgets('InputDecorator shows error widget', (WidgetTester tester) async {
+    // When error is defined.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        decoration: const InputDecoration(
+          error: Text(
+            'error',
+            style: TextStyle(fontSize: 20.0),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('error'), findsOneWidget);
+    expect(find.text('errorText'), findsNothing);
+
+    // when errorText is defined
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        decoration: const InputDecoration(
+          errorText: 'errorText'
+        ),
+      ),
+    );
+
+    expect(find.text('error'), findsNothing);
+    expect(find.text('errorText'), findsOneWidget);
+  });
+
   testWidgets('InputDecorator prefix/suffix texts', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -5217,7 +5248,6 @@ void main() {
         useMaterial3: useMaterial3,
         // isFocused: false (default)
         decoration: const InputDecoration(
-          // errorText: false (default)
           enabled: false,
           errorBorder: errorBorder,
           focusedBorder: focusedBorder,
