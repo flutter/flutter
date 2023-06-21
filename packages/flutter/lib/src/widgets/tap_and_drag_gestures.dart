@@ -471,7 +471,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // Public state available to [OneSequenceGestureRecognizer].
 
   // The number of consecutive taps that the most recently tracked [PointerDownEvent]
-  // in [currentDown] represents.
+  // in [_down] represents.
   //
   // This value defaults to zero, meaning a tap series is not currently being tracked.
   //
@@ -948,9 +948,9 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    _localDown = event;
     if (_dragState == _DragState.ready) {
       super.addAllowedPointer(event);
+      _localDown = event;
       _primaryPointer = event.pointer;
       _globalDistanceMoved = 0.0;
       _globalDistanceMovedAllAxes = 0.0;
