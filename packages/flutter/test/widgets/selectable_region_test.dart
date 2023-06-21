@@ -311,7 +311,7 @@ void main() {
     });
 
   testWidgets(
-    "touch long press cancel doesn't send ClearSelectionEvent",
+    'touch long press cancel does not send ClearSelectionEvent',
     (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(MaterialApp(
@@ -339,6 +339,56 @@ void main() {
       );
     },
   );
+
+    testWidgets(
+      'scrolling after the selection does not send ClearSelectionEvent',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/128765
+        final UniqueKey spy = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SizedBox(
+              height: 750,
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  height: 2000,
+                  child: SelectableRegion(
+                    focusNode: FocusNode(),
+                    selectionControls: materialTextSelectionControls,
+                    child: SelectionSpy(key: spy),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final RenderSelectionSpy renderSelectionSpy =
+            tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
+        final TestGesture selectGesture =
+            await tester.startGesture(const Offset(200.0, 200.0));
+        addTearDown(selectGesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+
+        await selectGesture.moveTo(const Offset(200.0, 50.0));
+        await selectGesture.up();
+
+         final TestGesture scrollGesture =
+            await tester.startGesture(const Offset(250.0, 850.0));
+        await tester.pump(const Duration(milliseconds: 500));
+
+        await scrollGesture.moveTo(Offset.zero);
+        await scrollGesture.up();
+        await tester.pumpAndSettle();
+
+        expect(
+          renderSelectionSpy.events
+              .any((SelectionEvent element) => element is ClearSelectionEvent),
+          isFalse,
+        );
+      },
+    );
 
     testWidgets('mouse long press does not send select-word event', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
