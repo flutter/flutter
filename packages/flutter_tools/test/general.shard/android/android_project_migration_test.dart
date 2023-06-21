@@ -260,6 +260,39 @@ tasks.register("clean", Delete) {
         expect(bufferLogger.traceText, contains(optOutFlagEnabled));
       });
     });
+
+    group('migrate min sdk versions less than 19 to flutter.minSdkVersion '
+        'when in a FlutterProject that is an app', ()
+    {
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger bufferLogger;
+      late FakeAndroidProject project;
+      late File gradleWrapperPropertiesFile;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem.test();
+        bufferLogger = BufferLogger.test();
+        project = FakeAndroidProject(
+          root: memoryFileSystem.currentDirectory.childDirectory('android')
+            ..createSync(),
+        );
+        project.hostAppGradleRoot.childDirectory(gradleDirectoryName)
+            .childDirectory(gradleWrapperDirectoryName)
+            .createSync(recursive: true);
+        gradleWrapperPropertiesFile = project.hostAppGradleRoot
+            .childDirectory(gradleDirectoryName)
+            .childDirectory(gradleWrapperDirectoryName)
+            .childFile(gradleWrapperPropertiesFilename);
+      });
+
+      testWithoutContext('api 16 test', () {});
+      testWithoutContext('api 17 test', () {});
+      testWithoutContext('api 18 test', () {});
+      testWithoutContext('module test', () {});
+      testWithoutContext('plugin test', () {});
+      testWithoutContext('no migration test', () {});
+
+    });
   });
 }
 
