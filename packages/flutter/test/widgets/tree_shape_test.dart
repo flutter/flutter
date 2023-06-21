@@ -83,30 +83,33 @@ void main() {
   });
 
   // TODO(goderbauer): There's some hope that this test will work once we migrate to direct dependencies.
-  // testWidgets('A View can not be moved via GlobalKey to be a child of a RenderObject', (WidgetTester tester) async {
-  //   final Widget globalKeyedView = View(
-  //     key: GlobalKey(),
-  //     view: FakeView(tester.view),
-  //     child: const ColoredBox(color: Colors.red),
-  //   );
-  //   final Key otherViewKey = UniqueKey();
-  //
-  //   await pumpWidgetWithoutViewWrapper(
-  //     tester: tester,
-  //     widget: globalKeyedView,
-  //   );
-  //   expect(tester.takeException(), isNull);
-  //
-  //   await tester.pumpWidget(SizedBox(
-  //     child: globalKeyedView,
-  //   ));
-  //
-  //   expect(tester.takeException(), isFlutterError.having(
-  //     (FlutterError error) => error.message,
-  //     'message',
-  //     contains('cannot maintain an independent render tree at its current location.'),
-  //   ));
-  // });
+  testWidgets('A View can not be moved via GlobalKey to be a child of a RenderObject', (WidgetTester tester) async {
+    final Widget globalKeyedView = View(
+      key: GlobalKey(),
+      view: FakeView(tester.view),
+      child: const ColoredBox(color: Colors.red),
+    );
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: globalKeyedView,
+    );
+    expect(tester.takeException(), isNull);
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: View(
+        view: tester.view,
+        child: globalKeyedView,
+      ),
+    );
+
+    expect(tester.takeException(), isFlutterError.having(
+      (FlutterError error) => error.message,
+      'message',
+      contains('cannot maintain an independent render tree at its current location.'),
+    ));
+  });
 
   testWidgets('The view property of a ViewAnchor cannot be a render object widget', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -469,5 +472,3 @@ class FakeView extends TestFlutterView{
   @override
   final int viewId;
 }
-
-// TODO(goderbauer):  slot updates?
