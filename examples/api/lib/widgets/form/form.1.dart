@@ -14,19 +14,27 @@ class _MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: _HomePage(),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Confirmation Dialog Example'),
+        ),
+        body: Center(
+          child: _SaveableForm(),
+        ),
+      ),
     );
   }
 }
 
-class _HomePage extends StatefulWidget {
+class _SaveableForm extends StatefulWidget {
   @override
-  State<_HomePage> createState() => _HomePageState();
+  State<_SaveableForm> createState() => _SaveableFormState();
 }
 
-class _HomePageState extends State<_HomePage> {
+class _SaveableFormState extends State<_SaveableForm> {
   final TextEditingController _controller = TextEditingController();
   String _savedValue = '';
+  bool _isDirty = false;
 
   @override
   void initState() {
@@ -41,7 +49,13 @@ class _HomePageState extends State<_HomePage> {
   }
 
   void _onChanged() {
-    setState(() {});
+    final bool nextIsDirty = _savedValue != _controller.text;
+    if (nextIsDirty == _isDirty) {
+      return;
+    }
+    setState(() {
+      _isDirty = nextIsDirty;
+    });
   }
 
   Future<void> _showDialog() async {
@@ -80,67 +94,60 @@ class _HomePageState extends State<_HomePage> {
     });
   }
 
-  bool get _isDirty => _savedValue != _controller.text;
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Confirmation Dialog Example'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('If the field below is unsaved, a confirmation dialog will be shown on back.'),
-            const SizedBox(height: 20.0),
-            Form(
-              popEnabled: !_isDirty,
-              onPopped: (bool success) {
-                if (success) {
-                  return;
-                }
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text('If the field below is unsaved, a confirmation dialog will be shown on back.'),
+          const SizedBox(height: 20.0),
+          Form(
+            popEnabled: !_isDirty,
+            onPopped: (bool success) {
+              if (success) {
+                return;
+              }
+              _showDialog();
+            },
+            autovalidateMode: AutovalidateMode.always,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                TextFormField(
+                  controller: _controller,
+                  onFieldSubmitted: (String? value) {
+                    _save(value);
+                  },
+                ),
+                TextButton(
+                  onPressed: () {
+                    _save(_controller.text);
+                  },
+                  child: Row(
+                    children: <Widget>[
+                      const Text('Save'),
+                      if (_controller.text.isNotEmpty)
+                        Icon(
+                          _isDirty ? Icons.warning : Icons.check,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              if (_isDirty) {
                 _showDialog();
-              },
-              autovalidateMode: AutovalidateMode.always,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  TextFormField(
-                    controller: _controller,
-                    onFieldSubmitted: (String? value) {
-                      _save(value);
-                    },
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      _save(_controller.text);
-                    },
-                    child: Row(
-                      children: <Widget>[
-                        const Text('Save'),
-                        if (_controller.text.isNotEmpty)
-                          Icon(
-                            _isDirty ? Icons.warning : Icons.check,
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                if (_isDirty) {
-                  _showDialog();
-                  return;
-                }
-                SystemNavigator.pop();
-              },
-              child: const Text('Go back'),
-            ),
-          ],
-        ),
+                return;
+              }
+              SystemNavigator.pop();
+            },
+            child: const Text('Go back'),
+          ),
+        ],
       ),
     );
   }
