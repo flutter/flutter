@@ -276,16 +276,17 @@ tasks.register("clean", Delete) {
           root: memoryFileSystem.currentDirectory.childDirectory('android')
             ..createSync(),
         );
-        project.hostAppGradleRoot.childDirectory(gradleDirectoryName)
-            .childDirectory(gradleWrapperDirectoryName)
+        project.hostAppGradleRoot.childDirectory('app')
             .createSync(recursive: true);
         gradleWrapperPropertiesFile = project.hostAppGradleRoot
-            .childDirectory(gradleDirectoryName)
-            .childDirectory(gradleWrapperDirectoryName)
-            .childFile(gradleWrapperPropertiesFilename);
+            .childDirectory('app')
+            .childFile('build.gradle'); // TODO: use constants here
       });
 
-      testWithoutContext('api 16 test', () {});
+      testWithoutContext('api 16 test', () {
+
+      });
+
       testWithoutContext('api 17 test', () {});
       testWithoutContext('api 18 test', () {});
       testWithoutContext('module test', () {});
@@ -297,10 +298,19 @@ tasks.register("clean", Delete) {
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {
-  FakeAndroidProject({required Directory root}) : hostAppGradleRoot = root;
+  FakeAndroidProject({required Directory root, this.module, this.plugin}) : hostAppGradleRoot = root;
 
   @override
   Directory hostAppGradleRoot;
+
+  final bool? module;
+  final bool? plugin;
+
+  @override
+  bool get isPlugin => plugin ?? false;
+
+  @override
+  bool get isModule => module ?? false;
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
