@@ -54,9 +54,12 @@ class MultiFrameCodec : public Codec {
     int nextFrameIndex_;
     // The last decoded frame that's required to decode any subsequent frames.
     std::optional<SkBitmap> lastRequiredFrame_;
-
     // The index of the last decoded required frame.
     int lastRequiredFrameIndex_ = -1;
+
+    // The rectangle that should be cleared if the previous frame's disposal
+    // method was kRestoreBGColor.
+    std::optional<SkIRect> restoreBGColorRect_;
 
     std::pair<sk_sp<DlImage>, std::string> GetNextFrameImage(
         fml::WeakPtr<GrDirectContext> resourceContext,
