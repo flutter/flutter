@@ -204,8 +204,6 @@ void main() {
   });
 
   test('Animated apng alpha type handling', () async {
-    // https://github.com/flutter/engine/pull/42153
-
     final Uint8List data = File(
       path.join('flutter', 'lib', 'ui', 'fixtures', 'alpha_animated.apng'),
     ).readAsBytesSync();
@@ -219,6 +217,29 @@ void main() {
     image = (await codec.getNextFrame()).image;
     imageData = (await image.toByteData())!;
     expect(imageData.getUint32(0), 0x99000099);
+  });
+
+  test('Animated apng background color restore', () async {
+    final Uint8List data = File(
+      path.join('flutter', 'lib', 'ui', 'fixtures', 'dispose_op_background.apng'),
+    ).readAsBytesSync();
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+
+    // First frame is solid red
+    ui.Image image = (await codec.getNextFrame()).image;
+    ByteData imageData = (await image.toByteData())!;
+    expect(imageData.getUint32(0), 0xFF0000FF);
+
+    // Third frame is blue in the lower right corner.
+    await codec.getNextFrame();
+    image = (await codec.getNextFrame()).image;
+    imageData = (await image.toByteData())!;
+    expect(imageData.getUint32(imageData.lengthInBytes - 4), 0x0000FFFF);
+
+    // Fourth frame is transparent in the lower right corner
+    image = (await codec.getNextFrame()).image;
+    imageData = (await image.toByteData())!;
+    expect(imageData.getUint32(imageData.lengthInBytes - 4), 0x00000000);
   });
 }
 

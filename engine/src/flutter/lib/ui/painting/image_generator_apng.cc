@@ -404,6 +404,10 @@ APNGImageGenerator::DemuxNextImage(const void* buffer_p,
       default:
         return std::make_pair(std::nullopt, nullptr);
     }
+
+    SkIRect frame_rect = SkIRect::MakeXYWH(
+        control_data->get_x_offset(), control_data->get_y_offset(),
+        control_data->get_width(), control_data->get_height());
     switch (control_data->get_dispose_op()) {
       case 0:  // APNG_DISPOSE_OP_NONE
         frame_info.disposal_method = SkCodecAnimation::DisposalMethod::kKeep;
@@ -411,6 +415,7 @@ APNGImageGenerator::DemuxNextImage(const void* buffer_p,
       case 1:  // APNG_DISPOSE_OP_BACKGROUND
         frame_info.disposal_method =
             SkCodecAnimation::DisposalMethod::kRestoreBGColor;
+        frame_info.disposal_rect = frame_rect;
         break;
       case 2:  // APNG_DISPOSE_OP_PREVIOUS
         frame_info.disposal_method =
@@ -547,8 +552,10 @@ bool APNGImageGenerator::DemuxNextImageInternal() {
   }
 
   if (images_.size() > first_frame_index_ &&
-      last_frame_info->disposal_method ==
-          SkCodecAnimation::DisposalMethod::kKeep) {
+      (last_frame_info->disposal_method ==
+           SkCodecAnimation::DisposalMethod::kKeep ||
+       last_frame_info->disposal_method ==
+           SkCodecAnimation::DisposalMethod::kRestoreBGColor)) {
     // Mark the required frame as the previous frame in all cases.
     image->frame_info->required_frame = images_.size() - 1;
   } else if (images_.size() > (first_frame_index_ + 1) &&
