@@ -146,6 +146,28 @@ class Xcode {
     return _isSimctlInstalled ?? false;
   }
 
+  bool? _isDevicectlInstalled;
+
+  /// Verifies that `devicectl` is installed by checking Xcode version and trying
+  /// to run it. `devicectl` is made available in Xcode 15.
+  bool get isDevicectlInstalled {
+    if (_isDevicectlInstalled == null) {
+      try {
+        if (currentVersion == null || currentVersion!.major < 15) {
+          _isDevicectlInstalled = false;
+          return _isDevicectlInstalled!;
+        }
+        final RunResult result = _processUtils.runSync(
+          <String>[...xcrunCommand(), 'devicectl', '--version'],
+        );
+        _isDevicectlInstalled = result.exitCode == 0;
+      } on ProcessException {
+        _isDevicectlInstalled = false;
+      }
+    }
+    return _isDevicectlInstalled ?? false;
+  }
+
   bool get isRequiredVersionSatisfactory {
     final Version? version = currentVersion;
     if (version == null) {

@@ -4,14 +4,17 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException;
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -75,7 +78,7 @@ void main() {
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('isSimctlInstalled is true when simctl list fails', () {
+      testWithoutContext('isSimctlInstalled is false when simctl list fails', () {
         fakeProcessManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -94,6 +97,58 @@ void main() {
         );
 
         expect(xcode.isSimctlInstalled, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('isDevicectlInstalled is true when Xcode is 15+ and devicectl succeeds', () {
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              '--version',
+            ],
+          ),
+        );
+        xcodeProjectInterpreter.version = Version(15, 0, 0);
+        final Xcode xcode = Xcode.test(
+          processManager: fakeProcessManager,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        );
+
+        expect(xcode.isDevicectlInstalled, isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('isDevicectlInstalled is false when devicectl fails', () {
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              '--version',
+            ],
+            exitCode: 1,
+          ),
+        );
+        xcodeProjectInterpreter.version = Version(15, 0, 0);
+        final Xcode xcode = Xcode.test(
+          processManager: fakeProcessManager,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        );
+
+        expect(xcode.isDevicectlInstalled, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('isDevicectlInstalled is false when Xcode is less than 15', () {
+        xcodeProjectInterpreter.version = Version(14, 0, 0);
+        final Xcode xcode = Xcode.test(
+          processManager: fakeProcessManager,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        );
+
+        expect(xcode.isDevicectlInstalled, isFalse);
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
@@ -283,6 +338,7 @@ void main() {
     group('xcdevice not installed', () {
       late XCDevice xcdevice;
       late Xcode xcode;
+      late MemoryFileSystem fileSystem;
 
       setUp(() {
         xcode = Xcode.test(
@@ -292,6 +348,7 @@ void main() {
             version: null, // Not installed.
           ),
         );
+        fileSystem = MemoryFileSystem.test();
         xcdevice = XCDevice(
           processManager: fakeProcessManager,
           logger: logger,
@@ -300,6 +357,7 @@ void main() {
           artifacts: Artifacts.test(),
           cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
+          fileSystem: fileSystem,
         );
       });
 
@@ -315,12 +373,14 @@ void main() {
     });
 
     group('xcdevice', () {
-      late XCDevice xcdevice;
+      late XCDeviceWithFakeIOSCoreDeviceControl xcdevice;
       late Xcode xcode;
+      late MemoryFileSystem fileSystem;
 
       setUp(() {
         xcode = Xcode.test(processManager: FakeProcessManager.any());
-        xcdevice = XCDevice(
+        fileSystem = MemoryFileSystem.test();
+        xcdevice = XCDeviceWithFakeIOSCoreDeviceControl(
           processManager: fakeProcessManager,
           logger: logger,
           xcode: xcode,
@@ -328,6 +388,7 @@ void main() {
           artifacts: Artifacts.test(),
           cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
+          fileSystem: fileSystem,
         );
       });
 
@@ -1061,6 +1122,98 @@ void main() {
         }, overrides: <Type, Generator>{
           Platform: () => macPlatform,
         });
+
+        group('using CoreDeviceControl', () {
+          testUsingContext('Core devices connection interface set by devicectl', () async {
+            const String xcdeviceOutput = '''
+[
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "17.0 (17C54)",
+    "interface" : "usb",
+    "available" : false,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 6s",
+    "name" : "iPhone"
+  }
+]
+''';
+
+            xcdevice.coreDeviceControl.coreDevices = <FakeIOSCoreDevice>[
+              FakeIOSCoreDevice(
+                udid: '43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7',
+                connectionInterface: DeviceConnectionInterface.wireless,
+              ),
+            ];
+
+            fakeProcessManager.addCommand(const FakeCommand(
+              command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+              stdout: xcdeviceOutput,
+            ));
+
+            final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
+            expect(devices, hasLength(1));
+            expect(devices[0].id, '43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7');
+            expect(devices[0].name, 'iPhone');
+            expect(await devices[0].sdkNameAndVersion, 'iOS 17.0 17C54');
+            expect(devices[0].cpuArchitecture, DarwinArch.arm64);
+            expect(devices[0].connectionInterface, DeviceConnectionInterface.wireless);
+            expect(devices[0].isConnected, true);
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          }, overrides: <Type, Generator>{
+            Platform: () => macPlatform,
+            Artifacts: () => Artifacts.test(),
+          });
+
+          testUsingContext('When Core devices throws error, does not crash', () async {
+            const String xcdeviceOutput = '''
+[
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "17.0 (17C54)",
+    "interface" : "usb",
+    "available" : false,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 6s",
+    "name" : "iPhone"
+  }
+]
+''';
+
+            xcdevice.coreDeviceControl.coreDevices = <FakeIOSCoreDevice>[
+              FakeIOSCoreDevice(
+                udid: '43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7',
+                connectionInterface: DeviceConnectionInterface.wireless,
+                throwError: true,
+              ),
+            ];
+
+            fakeProcessManager.addCommand(const FakeCommand(
+              command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+              stdout: xcdeviceOutput,
+            ));
+
+            final List<IOSDevice> devices = await xcdevice.getAvailableIOSDevices();
+            expect(devices, hasLength(1));
+            expect(devices[0].id, '43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7');
+            expect(devices[0].name, 'iPhone');
+            expect(await devices[0].sdkNameAndVersion, 'iOS 17.0 17C54');
+            expect(devices[0].cpuArchitecture, DarwinArch.arm64);
+            expect(devices[0].connectionInterface, DeviceConnectionInterface.attached);
+            expect(devices[0].isConnected, true);
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+            expect(logger.traceText, contains('Exception: Test exception'));
+          }, overrides: <Type, Generator>{
+            Platform: () => macPlatform,
+            Artifacts: () => Artifacts.test(),
+          });
+        });
       });
 
       group('diagnostics', () {
@@ -1255,4 +1408,61 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
+}
+
+class XCDeviceWithFakeIOSCoreDeviceControl extends XCDevice {
+  XCDeviceWithFakeIOSCoreDeviceControl({
+    required super.artifacts,
+    required super.cache,
+    required super.processManager,
+    required super.logger,
+    required super.xcode,
+    required super.platform,
+    required super.iproxy,
+    required super.fileSystem,
+  });
+
+  @override
+  FakeIOSCoreDeviceControl coreDeviceControl = FakeIOSCoreDeviceControl();
+}
+
+class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
+  List<FakeIOSCoreDevice> coreDevices = <FakeIOSCoreDevice>[];
+
+  @override
+  Future<List<FakeIOSCoreDevice>> getCoreDevices({
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
+    return coreDevices;
+  }
+}
+
+class FakeIOSCoreDevice extends Fake implements IOSCoreDevice {
+  FakeIOSCoreDevice({
+    String? udid,
+    DeviceConnectionInterface? connectionInterface,
+    bool throwError = false,
+  })  : _udid = udid,
+        _connectionInterface = connectionInterface,
+        _throwError = throwError;
+
+  final String? _udid;
+  final DeviceConnectionInterface? _connectionInterface;
+  final bool _throwError;
+
+  @override
+  String? get udid {
+    if (_throwError) {
+      throw Exception('Test exception');
+    }
+    return _udid;
+  }
+
+  @override
+  DeviceConnectionInterface? get connectionInterface {
+    if (_throwError) {
+      throw Exception('Test exception');
+    }
+    return _connectionInterface;
+  }
 }

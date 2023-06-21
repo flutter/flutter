@@ -368,6 +368,7 @@ Future<T> runInContext<T>(
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
+        fileSystem: globals.fs,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,

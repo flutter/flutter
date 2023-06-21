@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -18,6 +19,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../ios/core_devices.dart';
 import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
 import '../ios/iproxy.dart';
@@ -65,6 +67,7 @@ class XCDevice {
     required Xcode xcode,
     required Platform platform,
     required IProxy iproxy,
+    required FileSystem fileSystem,
   }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _logger = logger,
       _iMobileDevice = IMobileDevice(
@@ -81,6 +84,7 @@ class XCDevice {
         processManager: processManager,
       ),
       _iProxy = iproxy,
+      _fileSystem = fileSystem,
       _xcode = xcode {
 
     _setupDeviceIdentifierByEventStream();
@@ -99,6 +103,7 @@ class XCDevice {
   final IOSDeploy _iosDeploy;
   final Xcode _xcode;
   final IProxy _iProxy;
+  final FileSystem _fileSystem;
 
   List<Object>? _cachedListResults;
 
@@ -441,6 +446,19 @@ class XCDevice {
     _wifiDeviceWaitProcess?.kill();
   }
 
+  IOSCoreDeviceControl? _coreDeviceControl;
+
+  @visibleForTesting
+  IOSCoreDeviceControl get coreDeviceControl {
+    _coreDeviceControl ??= IOSCoreDeviceControl(
+      logger: _logger,
+      processUtils: _processUtils,
+      xcode: _xcode,
+      fileSystem: _fileSystem,
+    );
+    return _coreDeviceControl!;
+  }
+
   /// A list of [IOSDevice]s. This list includes connected devices and
   /// disconnected wireless devices.
   ///
@@ -456,6 +474,8 @@ class XCDevice {
     if (allAvailableDevices == null) {
       return const <IOSDevice>[];
     }
+
+    final Future<List<IOSCoreDevice>> futureCoreDevices = coreDeviceControl.getCoreDevices();
 
     // [
     //  {
@@ -493,6 +513,8 @@ class XCDevice {
     //    "name" : "Apple Watch Series 5 - 44mm"
     //  },
     // ...
+
+    bool containsCoreDevices = false;
 
     final Map<String, IOSDevice> deviceMap = <String, IOSDevice>{};
     for (final Object device in allAvailableDevices) {
@@ -541,6 +563,13 @@ class XCDevice {
           }
         }
 
+        final Version? sdkVersion = Version.parse(sdkVersionString);
+
+        // iOS 17 and above are CoreDevices.
+        if (sdkVersion != null && sdkVersion.major >= 17) {
+          containsCoreDevices = true;
+        }
+
         // Duplicate entries started appearing in Xcode 15, possibly due to
         // Xcode's new device connectivity stack.
         // If a duplicate entry is found in `xcdevice list`, don't overwrite
@@ -551,14 +580,11 @@ class XCDevice {
         // connected and the existing entry has a higher sdkVersion.
         if (deviceMap.containsKey(identifier)) {
           final IOSDevice deviceInMap = deviceMap[identifier]!;
-          if ((deviceInMap.isConnected && !isConnected) || sdkVersionString == null) {
+          if ((deviceInMap.isConnected && !isConnected) || sdkVersion == null) {
             continue;
           }
-
-          final Version? sdkVersion = Version.parse(sdkVersionString);
           if (!deviceInMap.isConnected &&
               !isConnected &&
-              sdkVersion != null &&
               deviceInMap.sdkVersion != null &&
               deviceInMap.sdkVersion!.compareTo(sdkVersion) > 0) {
             continue;
@@ -580,6 +606,32 @@ class XCDevice {
           platform: globals.platform,
           devModeEnabled: devModeEnabled,
         );
+      }
+    }
+
+    // CoreDevices (devices with iOS 17 and greater) no longer reflect the
+    // correct connection interface in `xcdevice`. Use `devicectl` to get
+    // connection interface for CoreDevices.
+    if (containsCoreDevices) {
+      for (final IOSCoreDevice coreDevice in await futureCoreDevices) {
+        // `devicectl` was introduced in Xcode 15 in a preview format. Since it's not
+        // yet stable and may be prone to change, catch any errors to prevent any crashes.
+        try {
+          final String? udid = coreDevice.udid;
+          if (udid == null) {
+            continue;
+          }
+          final IOSDevice? device = deviceMap[udid];
+          if (device == null) {
+            continue;
+          }
+          if (coreDevice.connectionInterface != null) {
+            device.connectionInterface = coreDevice.connectionInterface!;
+            device.isConnected = true;
+          }
+        } catch (err) { // ignore: avoid_catches_without_on_clauses
+          _logger.printTrace(err.toString());
+        }
       }
     }
     return deviceMap.values.toList();
