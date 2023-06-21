@@ -3593,7 +3593,6 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     final Map<String, Object?> result = <String, Object?>{};
     final Object? value = node.value;
     if (_interactive) {
-      result['objectId'] = service.toId(node, groupName!);
       result['valueId'] = service.toId(value, groupName!);
     }
     if (summaryTree) {
