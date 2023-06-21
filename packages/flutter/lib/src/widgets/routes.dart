@@ -1494,7 +1494,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
-  final Set<PopScope> _popScopes = <PopScope>{};
+  final Set<PopInterface> _popInterfaces = <PopInterface>{};
 
   /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
   /// [addScopedWillPopCallback] returns either false or null. If they all
@@ -1531,7 +1531,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   /// Returns [RoutePopDisposition.doNotPop] if any of the [PopScope] widgets
-  /// registered with [registerPopScope] have [PopScope.popEnabled] set to
+  /// registered with [registerPopInterface] have [PopScope.popEnabled] set to
   /// false.
   ///
   /// Typically this method is not overridden because applications usually
@@ -1543,16 +1543,16 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// See also:
   ///
   ///  * [Form], which provides an `onPopped` callback that is similar.
-  ///  * [registerPopScope], which adds a [PopScope] to the list this method
+  ///  * [registerPopInterface], which adds a [PopScope] to the list this method
   ///    checks.
-  ///  * [unregisterPopScope], which removes a [PopScope] from the list this
+  ///  * [unregisterPopInterface], which removes a [PopScope] from the list this
   ///    method checks.
   @override
   RoutePopDisposition popEnabled() {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
-    final bool popEnabled = _popScopes.every((PopScope widget) {
-      return widget.popEnabled;
+    final bool popEnabled = _popInterfaces.every((PopInterface popInterface) {
+      return popInterface.popEnabled;
     });
 
     if (!popEnabled) {
@@ -1563,8 +1563,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void onPopped(bool didPop) {
-    for (final PopScope widget in _popScopes) {
-      widget.onPopped?.call(didPop);
+    for (final PopInterface popInterface in _popInterfaces) {
+      popInterface.onPopped?.call(didPop);
     }
   }
 
@@ -1620,9 +1620,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  ///  * [unregisterPopScope], which performs the opposite operation.
-  void registerPopScope(PopScope widget) {
-    _popScopes.add(widget);
+  ///  * [unregisterPopInterface], which performs the opposite operation.
+  void registerPopInterface(PopInterface popInterface) {
+    _popInterfaces.add(popInterface);
     _updateSystemNavigator();
   }
 
@@ -1630,9 +1630,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  ///  * [registerPopScope], which performs the opposite operation.
-  void unregisterPopScope(PopScope widget) {
-    _popScopes.remove(widget);
+  ///  * [registerPopInterface], which performs the opposite operation.
+  void unregisterPopInterface(PopInterface popInterface) {
+    _popInterfaces.remove(popInterface);
     _updateSystemNavigator();
   }
 

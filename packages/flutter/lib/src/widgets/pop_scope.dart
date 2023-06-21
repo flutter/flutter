@@ -32,9 +32,9 @@ typedef OnPoppedCallback = void Function(bool didPop);
 ///    gestures in the case of nested [Navigator]s.
 ///  * [Form.popEnabled] and [Form.onPopped], which can be used to handle system
 ///    back gestures in the case of a form with unsaved data.
-///  * [ModalRoute.registerPopScope] and [ModalRoute.unregisterPopScope],
+///  * [ModalRoute.registerPopInterface] and [ModalRoute.unregisterPopInterface],
 ///    which this widget uses to integrate with Flutter's navigation system.
-class PopScope extends StatefulWidget {
+class PopScope extends StatefulWidget implements PopInterface {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
   ///
@@ -66,6 +66,7 @@ class PopScope extends StatefulWidget {
   /// See also:
   ///
   ///  * [Route.onPopped], which is similar.
+  @override
   final OnPoppedCallback? onPopped;
 
   /// {@template flutter.widgets.PopScope.popEnabled}
@@ -81,6 +82,7 @@ class PopScope extends StatefulWidget {
   /// [Android's predictive back](https://developer.android.com/guide/navigation/predictive-back-gesture)
   /// feature will not animate when this boolean is false.
   /// {@endtemplate}
+  @override
   final bool popEnabled;
 
   @override
@@ -94,23 +96,47 @@ class _PopScopeState extends State<PopScope> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _route = ModalRoute.of(context);
-    _route?.registerPopScope(widget);
+    _route?.registerPopInterface(widget);
   }
 
   @override
   void didUpdateWidget(PopScope oldWidget) {
     super.didUpdateWidget(oldWidget);
     _route = ModalRoute.of(context);
-    _route?.unregisterPopScope(oldWidget);
-    _route?.registerPopScope(widget);
+    _route?.unregisterPopInterface(oldWidget);
+    _route?.registerPopInterface(widget);
   }
 
   @override
   void dispose() {
-    _route?.unregisterPopScope(widget);
+    _route?.unregisterPopInterface(widget);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+/// An interface to into navigation pop events.
+///
+/// Can be registered in [ModalRoute] to listen to pops with [onPopped] or to
+/// enable/disable them with [popEnabled].
+///
+/// See also:
+///
+///  * [PopScope], which provides similar functionality in a widget.
+///  * [ModalRoute.registerPopInterface], which unregisters instances of this.
+///  * [ModalRoute.unregisterPopInterface], which unregisters instances of this.
+sealed class PopInterface {
+  /// Creates an instance of [PopInterface].
+  const PopInterface({
+    required this.popEnabled,
+    required this.onPopped,
+  });
+
+  /// {@macro flutter.widgets.PopScope.popEnabled}
+  final OnPoppedCallback? onPopped;
+
+  /// {@macro flutter.widgets.PopScope.popEnabled}
+  final bool popEnabled;
 }
