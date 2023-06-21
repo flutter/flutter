@@ -2214,15 +2214,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         ),
       );
-      final DiagnosticsNode diagnostic = find.byType(Stack).evaluate().first.toDiagnosticsNode();
-      final String id = service.toId(diagnostic, group)!;
+      final Diagnosticable diagnosticable = find.byType(Stack).evaluate().first;
+      final String id = service.toId(diagnosticable, group)!;
       final Map<String, Object?> subtreeJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.getDetailsSubtree.name,
         <String, String>{'arg': id, 'objectGroup': group},
       ))! as Map<String, Object?>;
-      expect(subtreeJson['objectId'], equals(id));
+      expect(subtreeJson['valueId'], equals(id));
       final List<Object?> childrenJson = subtreeJson['children']! as List<Object?>;
-      final List<DiagnosticsNode> children = diagnostic.getChildren();
+      final List<DiagnosticsNode> children = diagnosticable.toDiagnosticsNode().getChildren();
       expect(children.length, equals(3));
       expect(childrenJson.length, equals(children.length));
       for (int i = 0; i < childrenJson.length; ++i) {
@@ -2263,13 +2263,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       a.children.add(b.toDiagnosticsNode());
       b.related = a;
 
-      final DiagnosticsNode diagnostic = a.toDiagnosticsNode();
-      final String id = service.toId(diagnostic, group)!;
+      final String id = service.toId(a, group)!;
       final Map<String, Object?> subtreeJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.getDetailsSubtree.name,
         <String, String>{'arg': id, 'objectGroup': group},
       ))! as Map<String, Object?>;
-      expect(subtreeJson['objectId'], equals(id));
+      expect(subtreeJson['valueId'], equals(id));
       expect(subtreeJson, contains('children'));
       final List<Object?> propertiesJson = subtreeJson['properties']! as List<Object?>;
       expect(propertiesJson.length, equals(1));
