@@ -1620,7 +1620,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  /// [unregisterPopScope], which performs the opposite operation.
+  ///  * [unregisterPopScope], which performs the opposite operation.
   void registerPopScope(PopScope widget) {
     _popScopes.add(widget);
     _updateSystemNavigator();
@@ -1630,7 +1630,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  /// [registerPopScope], which performs the opposite operation.
+  ///  * [registerPopScope], which performs the opposite operation.
   void unregisterPopScope(PopScope widget) {
     _popScopes.remove(widget);
     _updateSystemNavigator();

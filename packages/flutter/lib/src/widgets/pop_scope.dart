@@ -14,8 +14,10 @@ typedef OnPoppedCallback = void Function(bool didPop);
 
 /// Manages system back gestures.
 ///
-/// [popEnabled] can be used to disable system back gestures, while [onPopped]
-/// reports when they occur.
+/// The [popEnabled] parameter can be used to disable system back gestures.
+///
+/// The [onPopped] parameter reports when system back gestures occur, regardless
+/// of whether or not they were successful.
 ///
 /// {@tool dartpad}
 /// This sample demonstrates how to use this widget to properly handle system
@@ -76,10 +78,8 @@ class PopScope extends StatefulWidget {
   /// each and every `popEnabled` must be `true` in order for the route to be
   /// able to pop.
   ///
-  /// This may have implications for route transitions that allow some
-  /// interaction before committing to popping the route. For example,
   /// [Android's predictive back](https://developer.android.com/guide/navigation/predictive-back-gesture)
-  /// feature will not animate at all when this boolean is true.
+  /// feature will not animate when this boolean is false.
   /// {@endtemplate}
   final bool popEnabled;
 
