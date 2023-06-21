@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:ui';
 
@@ -15,6 +16,7 @@ void main() {
   testWidgets("BackdropFilter's cull rect does not shrink", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Stack(
             fit: StackFit.expand,
@@ -52,6 +54,7 @@ void main() {
   testWidgets('BackdropFilter blendMode on saveLayer', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Opacity(
             opacity: 0.9,

@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:ui' as ui;
 
@@ -69,8 +70,8 @@ ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
 Size getChildSize(WidgetTester tester, {int child = 0}) {
   // Using dynamic so the test can access private classes.
   // ignore: avoid_dynamic_calls
-  return ((getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
-      .getChildrenAsList()[child]).size;
+  return (getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+      .getChildrenAsList()[child].size;
 }
 
 Color getBorderColor(WidgetTester tester) {

@@ -8,6 +8,9 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+// The FlutterView into which this example will draw; set in the main method.
+late final ui.FlutterView view;
+
 // A paragraph represents a rectangular region that contains some text.
 late ui.Paragraph paragraph;
 
@@ -15,8 +18,8 @@ ui.Picture paint(ui.Rect paintBounds) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder, paintBounds);
 
-  final double devicePixelRatio = ui.window.devicePixelRatio;
-  final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
+  final double devicePixelRatio = view.devicePixelRatio;
+  final ui.Size logicalSize = view.physicalSize / devicePixelRatio;
 
   canvas.translate(logicalSize.width / 2.0, logicalSize.height / 2.0);
   canvas.drawRect(
@@ -32,7 +35,7 @@ ui.Picture paint(ui.Rect paintBounds) {
 }
 
 ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
-  final double devicePixelRatio = ui.window.devicePixelRatio;
+  final double devicePixelRatio = view.devicePixelRatio;
   final Float64List deviceTransform = Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
@@ -46,13 +49,17 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  final ui.Rect paintBounds = ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
+  final ui.Rect paintBounds = ui.Offset.zero & (view.physicalSize / view.devicePixelRatio);
   final ui.Picture picture = paint(paintBounds);
   final ui.Scene scene = composite(picture, paintBounds);
-  ui.window.render(scene);
+  view.render(scene);
 }
 
 void main() {
+  // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
+  assert(ui.PlatformDispatcher.instance.implicitView != null);
+  view = ui.PlatformDispatcher.instance.implicitView!;
+
   // To create a paragraph of text, we use ParagraphBuilder.
   final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
     // The text below has a primary direction of left-to-right.

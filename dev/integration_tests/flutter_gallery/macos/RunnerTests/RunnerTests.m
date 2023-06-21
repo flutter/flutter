@@ -13,7 +13,7 @@
 - (void)testMenu {
   NSMenu *applicationMenu = ((FlutterAppDelegate *)NSApplication.sharedApplication.delegate).applicationMenu;
   XCTAssertEqual(applicationMenu.numberOfItems, 11);
-  XCTAssertEqualObjects([applicationMenu itemAtIndex:0].title, @"About flutter_gallery");
+  XCTAssertEqualObjects([applicationMenu itemAtIndex:0].title, @"About Flutter Gallery");
 
   NSMenu *mainMenu = NSApplication.sharedApplication.mainMenu;
   XCTAssertEqual([mainMenu indexOfItemWithSubmenu:applicationMenu], 0);

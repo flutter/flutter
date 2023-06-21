@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/project.dart';
 
 class ThrowingPub implements Pub {
   @override
@@ -12,8 +12,6 @@ class ThrowingPub implements Pub {
     String? directory,
     MessageFilter? filter,
     String? failureMessage = 'pub failed',
-    bool? retry,
-    bool? showTraceForErrors,
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
@@ -21,17 +19,17 @@ class ThrowingPub implements Pub {
   @override
   Future<void> get({
     PubContext? context,
-    String? directory,
-    bool skipIfAbsent = false,
+    required FlutterProject project,
     bool upgrade = false,
     bool offline = false,
     bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
     bool generateSyntheticPackage = false,
+    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
@@ -39,10 +37,12 @@ class ThrowingPub implements Pub {
   @override
   Future<void> interactively(
     List<String> arguments, {
-    String? directory,
-    required Stdio stdio,
+    FlutterProject? project,
+    required PubContext context,
+    required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }

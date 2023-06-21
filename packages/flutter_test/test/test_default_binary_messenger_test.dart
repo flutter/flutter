@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
@@ -68,6 +67,32 @@ void main() {
 
     final ByteData? result = await binaryMessenger.send('', null);
     expect(result?.buffer.asUint8List(), Uint8List.fromList(<int>[2, 3, 4]));
+  });
+
+  test('Mock StreamHandler is set correctly', () async {
+    const EventChannel channel = EventChannel('');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
+      channel,
+      MockStreamHandler.inline(onListen: (Object? arguments, MockStreamHandlerEventSink events) {
+        events.success(arguments);
+        events.error(code: 'code', message: 'message', details: 'details');
+        events.endOfStream();
+      })
+    );
+
+    expect(
+      channel.receiveBroadcastStream('argument'),
+      emitsInOrder(<Object?>[
+        'argument',
+        emitsError(
+          isA<PlatformException>()
+            .having((PlatformException e) => e.code, 'code', 'code')
+            .having((PlatformException e) => e.message, 'message', 'message')
+            .having((PlatformException e) => e.details, 'details', 'details'),
+        ),
+        emitsDone,
+      ]),
+    );
   });
 
   testWidgets('Mock AllMessagesHandler is set correctly',

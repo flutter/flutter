@@ -54,8 +54,7 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   const ScrollAwareImageProvider({
     required this.context,
     required this.imageProvider,
-  }) : assert(context != null),
-       assert(imageProvider != null);
+  });
 
   /// The context that may or may not be enclosed by a [Scrollable].
   ///
@@ -102,7 +101,7 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
       return;
     }
     // We are in the tree, we're not scrolling too fast, the cache doesn't
-    // have our image, and no one has otherwise completed the stream.  Go.
+    // have our image, and no one has otherwise completed the stream. Go.
     imageProvider.resolveStreamForKey(configuration, stream, key, handleError);
   }
 
@@ -111,6 +110,9 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
 
   @override
   ImageStreamCompleter loadBuffer(T key, DecoderBufferCallback decode) => imageProvider.loadBuffer(key, decode);
+
+  @override
+  ImageStreamCompleter loadImage(T key, ImageDecoderCallback decode) => imageProvider.loadImage(key, decode);
 
   @override
   Future<T> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);

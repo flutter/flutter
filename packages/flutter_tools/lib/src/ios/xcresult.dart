@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../../src/base/process.dart';
 import '../../src/convert.dart' show json;
 import '../../src/macos/xcode.dart';
@@ -112,6 +114,20 @@ class XCResult {
     );
   }
 
+  /// Create a [XCResult] with constructed [XCResultIssue]s for testing.
+  @visibleForTesting
+  factory XCResult.test({
+    List<XCResultIssue>? issues,
+    bool? parseSuccess,
+    String? parsingErrorMessage,
+  }) {
+    return XCResult._(
+      issues: issues ?? const <XCResultIssue>[],
+      parseSuccess: parseSuccess ?? true,
+      parsingErrorMessage: parsingErrorMessage,
+    );
+  }
+
   XCResult._({
     this.issues = const <XCResultIssue>[],
     this.parseSuccess = true,
@@ -180,6 +196,24 @@ class XCResultIssue {
       }
     }
 
+    return XCResultIssue._(
+      type: type,
+      subType: subType,
+      message: message,
+      location: location,
+      warnings: warnings,
+    );
+  }
+
+  /// Create a [XCResultIssue] without JSON parsing for testing.
+  @visibleForTesting
+  factory XCResultIssue.test({
+    XCResultIssueType type = XCResultIssueType.error,
+    String? subType,
+    String? message,
+    String? location,
+    List<String> warnings = const <String>[],
+  }) {
     return XCResultIssue._(
       type: type,
       subType: subType,

@@ -19,6 +19,7 @@ abstract class DapTestServer {
   Future<void> stop();
   StreamSink<List<int>> get sink;
   Stream<List<int>> get stream;
+  Function(String message)? onStderrOutput;
 }
 
 /// An instance of a DAP server running in-process (to aid debugging).
@@ -73,22 +74,27 @@ class OutOfProcessDapTestServer extends DapTestServer {
     this._process,
     Logger? logger,
   ) {
-    // Treat anything written to stderr as the DAP crashing and fail the test
-    // unless it's "Waiting for another flutter command to release the startup
-    // lock" or we're tearing down.
+    // Unless we're given an error handler, treat anything written to stderr as
+    // the DAP crashing and fail the test unless it's "Waiting for another
+    // flutter command to release the startup lock" or we're tearing down.
     _process.stderr
         .transform(utf8.decoder)
         .where((String error) => !error.contains('Waiting for another flutter command to release the startup lock'))
         .listen((String error) {
       logger?.call(error);
       if (!_isShuttingDown) {
-        throw Exception(error);
+        final Function(String message)? stderrHandler = onStderrOutput;
+        if (stderrHandler != null) {
+          stderrHandler(error);
+        } else {
+          throw Exception(error);
+        }
       }
     });
     unawaited(_process.exitCode.then((int code) {
       final String message = 'Out-of-process DAP server terminated with code $code';
       logger?.call(message);
-      if (!_isShuttingDown && code != 0) {
+      if (!_isShuttingDown && code != 0 && onStderrOutput == null) {
         throw Exception(message);
       }
     }));
@@ -96,6 +102,8 @@ class OutOfProcessDapTestServer extends DapTestServer {
 
   bool _isShuttingDown = false;
   final Process _process;
+
+  Future<int> get exitCode => _process.exitCode;
 
   @override
   StreamSink<List<int>> get sink => _process.stdin;

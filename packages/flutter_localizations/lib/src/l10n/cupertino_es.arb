@@ -18,8 +18,9 @@
   "cutButtonLabel": "Cortar",
   "copyButtonLabel": "Copiar",
   "pasteButtonLabel": "Pegar",
-  "selectAllButtonLabel": "Seleccionar todos",
+  "selectAllButtonLabel": "Seleccionar todo",
   "tabSemanticsLabel": "Pestaña $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Cerrar",
-  "searchTextFieldPlaceholderLabel": "Buscar"
+  "searchTextFieldPlaceholderLabel": "Buscar",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

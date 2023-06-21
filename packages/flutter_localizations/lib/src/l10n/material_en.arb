@@ -71,6 +71,22 @@
     "description": "The tooltip for the button that shows a popup menu."
   },
 
+  "scrimLabel": "Scrim",
+  "@scrimLabel": {
+    "description": "The label for the scrim rendered underneath the content of a modal route."
+  },
+
+  "bottomSheetLabel": "Bottom Sheet",
+  "@bottomSheetLabel": {
+    "description": "The label for a BottomSheet."
+  },
+
+  "scrimOnTapHint": "Close $modalRouteContentName",
+  "@scrimOnTapHint": {
+    "description": "The onTapHint for the scrim rendered underneath the content of a modal route which users can tap to dismiss the content",
+    "parameters": "modalRouteContentName"
+  },
+
   "aboutListTileTitle": "About $applicationName",
   "@aboutListTileTitle": {
     "description": "The default title for the drawer item that shows an about page for the application. The value of $applicationName is the name of the application, like GMail or Chrome.",
@@ -151,17 +167,17 @@
     "plural": "selectedRowCount"
   },
 
-  "cancelButtonLabel": "CANCEL",
+  "cancelButtonLabel": "Cancel",
   "@cancelButtonLabel": {
     "description": "The label for cancel buttons and menu items."
   },
 
-  "closeButtonLabel": "CLOSE",
+  "closeButtonLabel": "Close",
   "@closeButtonLabel": {
     "description": "The label for close buttons and menu items."
   },
 
-  "continueButtonLabel": "CONTINUE",
+  "continueButtonLabel": "Continue",
   "@continueButtonLabel": {
     "description": "The label for continue buttons and menu items."
   },
@@ -191,7 +207,7 @@
     "description": "The label for select-all buttons and menu items."
   },
 
-  "viewLicensesButtonLabel": "VIEW LICENSES",
+  "viewLicensesButtonLabel": "View licenses",
   "@viewLicensesButtonLabel": {
     "description": "The label for the button in the about box that leads the user to a list of all licenses that apply to the application."
   },
@@ -288,17 +304,17 @@
     "description": "Error message displayed to the user when they have entered a date that is outside the valid range for the date picker."
   },
 
-  "saveButtonLabel": "SAVE",
+  "saveButtonLabel": "Save",
   "@saveButtonLabel": {
-    "description": "Label for a 'SAVE' button used in full screen dialogs."
+    "description": "Label for a 'Save' button used in full screen dialogs."
   },
 
-  "datePickerHelpText": "SELECT DATE",
+  "datePickerHelpText": "Select date",
   "@datePickerHelpText": {
     "description": "Label used in the header of the date picker dialog"
   },
 
-  "dateRangePickerHelpText": "SELECT RANGE",
+  "dateRangePickerHelpText": "Select range",
   "@dateRangePickerHelpText": {
     "description": "Label used in the header of the date range picker dialog."
   },
@@ -313,12 +329,12 @@
     "description": "Tooltip used for the text input mode button of the date pickers."
   },
 
-  "timePickerDialHelpText": "SELECT TIME",
+  "timePickerDialHelpText": "Select time",
   "@timePickerDialHelpText": {
     "description": "Label used in the header of the time picker dialog when using the clock dial to select a time."
   },
 
-  "timePickerInputHelpText": "ENTER TIME",
+  "timePickerInputHelpText": "Enter time",
   "@timePickerInputHelpText": {
     "description": "Label used in the header of the time picker dialog when using the text input to enter a time."
   },
@@ -393,6 +409,11 @@
     "description": "Label indicating that a text field is a search field. This will be used as a hint text in the text field."
   },
 
+  "currentDateLabel": "Today",
+  "@currentDateLabel": {
+    "description": "Label indicating that the focused date is the current date."
+  },
+
   "reorderItemToStart": "Move to the start",
   "@reorderItemToStart": {
     "description": "The audio announcement to move an item in a Reorderable List to the start of the list."
@@ -431,6 +452,36 @@
   "collapsedIconTapHint": "Expand",
   "@collapsedIconTapHint": {
     "description": "The verb which describes what happens when a collapsed ExpandIcon toggle button is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to expand.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expansionTileExpandedHint": "double tap to collapse",
+  "@expansionTileExpandedHint": {
+    "description": "The verb which describes the tap action on an expanded ExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the collapsedHint string which describes the action to be performed on an expanded ExpansionTile. In the case of US english, this would be 'Expanded\n double tap to collapse.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expansionTileCollapsedHint": "double tap to expand",
+  "@expansionTileCollapsedHint": {
+    "description": "The verb which describes the tap action on a collapsed ExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the expandedHint string which describes the action to be performed on a collapsed ExpansionTile. In the case of US english, this would be 'Collapsed\n double tap to expand.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expansionTileExpandedTapHint": "Collapse",
+  "@expansionTileExpandedTapHint": {
+    "description": "The verb which describes what happens when an expanded ExpansionTile is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to collapse.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "@expansionTileCollapsedTapHint": {
+    "description": "The verb which describes what happens when an expanded ExpansionTile is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to expand for more details.' The exact phrasing of the hint will vary based on locale"
+  },
+
+  "expandedHint": "Collapsed",
+  "@expandedHint": {
+    "description": "The verb which describes the ExpansionTile state when an expanded ExpansionTile is pressed."
+  },
+
+  "collapsedHint": "Expanded",
+  "@collapsedHint": {
+    "description": "The verb which describes the ExpansionTile state when a collapsed ExpansionTile is pressed."
   },
 
   "remainingTextFieldCharacterCountZero": "No characters remaining",
@@ -684,6 +735,11 @@
   "keyboardKeySelect": "Select",
   "@keyboardKeySelect": {
     "description": "Part of a keyboard shortcut label for the keyboard key 'Select' (select) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyShift": "Shift",
+  "@keyboardKeyShift": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Shift' (shift) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is the shift modifier key on the left or right sides of the keyboard."
   },
 
   "keyboardKeySpace": "Space",

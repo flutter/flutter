@@ -6,7 +6,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -57,6 +56,42 @@ void main() {
       ignoreRect: true,
       ignoreId: true,
     ));
+    semantics.dispose();
+  }, semanticsEnabled: false);
+
+  testWidgets('Semantics tag only applies to immediate child', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+        Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListView(
+              children: <Widget>[
+                SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      Container(padding: const EdgeInsets.only(top: 20.0)),
+                      const Text('label'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(
+      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+      tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics},
+    )));
+
+    await tester.pump();
+    // Semantics should stay the same after a frame update.
+    expect(semantics, isNot(includesNodeWith(
+      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+      tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics},
+    )));
+
     semantics.dispose();
   }, semanticsEnabled: false);
 
@@ -484,7 +519,7 @@ void main() {
       ),
     );
 
-    final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
+    final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
       ..remove(SemanticsAction.moveCursorForwardByWord)
       ..remove(SemanticsAction.moveCursorBackwardByWord)
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
@@ -510,16 +545,13 @@ void main() {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:
           semanticsOwner.performAction(expectedId, action, true);
-          break;
         case SemanticsAction.setSelection:
           semanticsOwner.performAction(expectedId, action, <dynamic, dynamic>{
             'base': 4,
             'extent': 5,
           });
-          break;
         case SemanticsAction.setText:
           semanticsOwner.performAction(expectedId, action, 'text');
-          break;
         case SemanticsAction.copy:
         case SemanticsAction.customAction:
         case SemanticsAction.cut:
@@ -539,7 +571,6 @@ void main() {
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
           semanticsOwner.performAction(expectedId, action);
-          break;
       }
       expect(performedActions.length, expectedLength);
       expect(performedActions.last, action);
@@ -551,7 +582,7 @@ void main() {
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    // Note: checked state and toggled state are mutually exclusive.
+    // Checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(
         Semantics(
           key: const Key('a'),
@@ -580,11 +611,12 @@ void main() {
           liveRegion: true,
         ),
     );
-    final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
+    final List<SemanticsFlag> flags = SemanticsFlag.values.toList();
     flags
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled)
-      ..remove(SemanticsFlag.hasImplicitScrolling);
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isCheckStateMixed);
 
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -631,7 +663,49 @@ void main() {
     );
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
+
+    await tester.pumpWidget(
+        Semantics(
+          key: const Key('a'),
+          container: true,
+          explicitChildNodes: true,
+          // flags
+          enabled: true,
+          hidden: true,
+          checked: false,
+          mixed: true,
+          selected: true,
+          button: true,
+          slider: true,
+          keyboardKey: true,
+          link: true,
+          textField: true,
+          readOnly: true,
+          focused: true,
+          focusable: true,
+          inMutuallyExclusiveGroup: true,
+          header: true,
+          obscured: true,
+          multiline: true,
+          scopesRoute: true,
+          namesRoute: true,
+          image: true,
+          liveRegion: true,
+        ),
+    );
+    flags
+      ..remove(SemanticsFlag.isChecked)
+      ..add(SemanticsFlag.isCheckStateMixed);
     semantics.dispose();
+    expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          rect: TestSemantics.fullScreen,
+          flags: flags,
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
   });
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
@@ -958,14 +1032,14 @@ void main() {
       },
     );
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
           children: <Widget>[
-            const Text('Label 1'),
-            const Text('Label 2'),
+            Text('Label 1'),
+            Text('Label 2'),
             Row(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Label 3'),
                 Text('Label 4'),
                 Text('Label 5'),
@@ -1027,8 +1101,8 @@ void main() {
             const Text('Label 2'),
             Transform.rotate(
               angle: pi / 2.0,
-              child: Row(
-                children: const <Widget>[
+              child: const Row(
+                children: <Widget>[
                   Text('Label 3'),
                   Text('Label 4'),
                   Text('Label 5'),
@@ -1588,6 +1662,145 @@ void main() {
       label: 'foo',
       textDirection: TextDirection.ltr,
     ));
+  });
+
+  testWidgets('Semantics with zero transform gets dropped', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110671.
+    // Construct a widget tree that will end up with a fitted box that applies
+    // a zero transform because it does not actually draw its children.
+    // Assert that this subtree gets dropped (the root node has no children).
+    await tester.pumpWidget(const Column(
+      children: <Widget>[
+        SizedBox(
+          height: 0,
+          width: 500,
+          child: FittedBox(
+            child: SizedBox(
+              height: 55,
+              width: 266,
+              child: SingleChildScrollView(child: Column()),
+            ),
+          ),
+        ),
+      ],
+    ));
+
+    final SemanticsNode node = RendererBinding.instance.renderView.debugSemantics!;
+
+    expect(node.transform, null); // Make sure the zero transform didn't end up on the root somehow.
+    expect(node.childrenCount, 0);
+  });
+
+  testWidgets('blocking user interaction works on explicit child node.', (WidgetTester tester) async {
+    final UniqueKey key1 = UniqueKey();
+    final UniqueKey key2 = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Semantics(
+          blockUserActions: true,
+          explicitChildNodes: true,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                key: key1,
+                label: 'label1',
+                onTap: () {},
+                child: const SizedBox(width: 10, height: 10),
+              ),
+              Semantics(
+                key: key2,
+                label: 'label2',
+                onTap: () {},
+                child: const SizedBox(width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byKey(key1)),
+      // Tap action is blocked.
+      matchesSemantics(
+        label: 'label1',
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byKey(key2)),
+      // Tap action is blocked.
+      matchesSemantics(
+        label: 'label2',
+      ),
+    );
+  });
+
+  testWidgets('blocking user interaction on a merged child', (WidgetTester tester) async {
+    final UniqueKey key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Semantics(
+          key: key,
+          container: true,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                blockUserActions: true,
+                label: 'label1',
+                onTap: () { },
+                child: const SizedBox(width: 10, height: 10),
+              ),
+              Semantics(
+                label: 'label2',
+                onLongPress: () { },
+                child: const SizedBox(width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byKey(key)),
+      // Tap action in label1 is blocked,
+      matchesSemantics(
+        label: 'label1\nlabel2',
+        hasLongPressAction: true,
+      ),
+    );
+  });
+
+  testWidgets('does not merge conflicting actions even if one of them is blocked', (WidgetTester tester) async {
+    final UniqueKey key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Semantics(
+          key: key,
+          container: true,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                blockUserActions: true,
+                label: 'label1',
+                onTap: () { },
+                child: const SizedBox(width: 10, height: 10),
+              ),
+              Semantics(
+                label: 'label2',
+                onTap: () { },
+                child: const SizedBox(width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+    expect(
+      node,
+      matchesSemantics(
+        children: <Matcher>[containsSemantics(label: 'label1'), containsSemantics(label: 'label2')],
+      ),
+    );
   });
 }
 

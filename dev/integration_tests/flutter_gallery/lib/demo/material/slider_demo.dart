@@ -86,26 +86,20 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
         switch (thumb) {
           case Thumb.start:
             thumbPath = _rightTriangle(size, center);
-            break;
           case Thumb.end:
             thumbPath = _leftTriangle(size, center);
-            break;
           case null:
             break;
         }
-        break;
       case TextDirection.ltr:
         switch (thumb) {
           case Thumb.start:
             thumbPath = _leftTriangle(size, center);
-            break;
           case Thumb.end:
             thumbPath = _rightTriangle(size, center);
-            break;
           case null:
             break;
         }
-        break;
       case null:
         break;
     }
@@ -296,9 +290,9 @@ class _SlidersState extends State<_Sliders> {
               const Text('Continuous with Editable Numerical Value'),
             ],
           ),
-          Column(
+          const Column(
             mainAxisSize: MainAxisSize.min,
-            children: const <Widget>[
+            children: <Widget>[
               Slider.adaptive(value: 0.25, onChanged: null),
               Text('Disabled'),
             ],
@@ -334,7 +328,7 @@ class _SlidersState extends State<_Sliders> {
                   valueIndicatorColor: Colors.deepPurpleAccent,
                   thumbShape: _CustomThumbShape(),
                   valueIndicatorShape: _CustomValueIndicatorShape(),
-                  valueIndicatorTextStyle: theme.textTheme.bodyText1!.copyWith(color: theme.colorScheme.onSurface),
+                  valueIndicatorTextStyle: theme.textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onSurface),
                 ),
                 child: Slider(
                   value: _discreteCustomValue,

@@ -39,13 +39,14 @@ void main() {
       watch.stop();
       final int elapsed = watch.elapsedMicroseconds;
       final double averagePerIteration = elapsed / iteration;
-      if (addResult)
+      if (addResult) {
         printer.addResult(
           description: '$name ($listenerCount listeners)',
           value: averagePerIteration * _kScale,
           unit: 'ns per iteration',
           name: '$name$listenerCount',
         );
+      }
     }
   }
 
@@ -65,13 +66,14 @@ void main() {
       watch.stop();
       final int elapsed = watch.elapsedMicroseconds;
       final double averagePerIteration = elapsed / iteration;
-      if (addResult)
+      if (addResult) {
         printer.addResult(
           description: '$name ($listenerCount listeners)',
           value: averagePerIteration * _kScale,
           unit: 'ns per iteration',
           name: '$name$listenerCount',
         );
+      }
     }
   }
 
@@ -107,13 +109,14 @@ void main() {
       watch.stop();
       final int elapsed = watch.elapsedMicroseconds;
       final double averagePerIteration = elapsed / iteration;
-      if (addResult)
+      if (addResult) {
         printer.addResult(
           description: '$name ($listenerCount listeners)',
           value: averagePerIteration * _kScale,
           unit: 'ns per iteration',
           name: '$name$listenerCount',
         );
+      }
     }
   }
 
@@ -156,13 +159,14 @@ void main() {
       watch.stop();
       final int elapsed = watch.elapsedMicroseconds;
       final double averagePerIteration = elapsed / iteration;
-      if (addResult)
+      if (addResult) {
         printer.addResult(
           description: '$name ($listenerCount listeners)',
           value: averagePerIteration * _kScale,
           unit: 'ns per iteration',
           name: '$name$listenerCount',
         );
+      }
     }
   }
 

@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -120,7 +119,7 @@ Future<void> main() async {
   runApp(MyApp(port));
 }
 
-const int IMAGES = 50;
+const int images = 50;
 
 @immutable
 class MyApp extends StatelessWidget {
@@ -160,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   Widget createImage(final int index, final Completer<bool> completer) {
     return Image.network(
-        'https://localhost:${widget.port}/${_counter * IMAGES + index}',
+        'https://localhost:${widget.port}/${_counter * images + index}',
         frameBuilder: (
           BuildContext context,
           Widget child,
@@ -178,14 +177,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final List<AnimationController> controllers = <AnimationController>[
-      for (int i = 0; i < IMAGES; i++)
+      for (int i = 0; i < images; i++)
         AnimationController(
           duration: const Duration(milliseconds: 3600),
           vsync: this,
         )..repeat(),
     ];
     final List<Completer<bool>> completers = <Completer<bool>>[
-      for (int i = 0; i < IMAGES; i++)
+      for (int i = 0; i < images; i++)
         Completer<bool>(),
     ];
     final List<Future<bool>> futures = completers.map(
@@ -205,13 +204,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Row(children: createImageList(IMAGES, completers, controllers)),
+            Row(children: createImageList(images, completers, controllers)),
             const Text(
               'You have pushed the button this many times:',
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),

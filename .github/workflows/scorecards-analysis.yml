@@ -18,15 +18,17 @@ jobs:
       security-events: write
       actions: read
       contents: read
+      # Needed to access OIDC token.
+      id-token: write
 
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
         with:
           persist-credentials: false
 
       - name: "Run analysis"
-        uses: ossf/scorecard-action@3e15ea8318eee9b333819ec77a36aca8d39df13e
+        uses: ossf/scorecard-action@80e868c13c90f172d68d1f4501dee99e2479f7af
         with:
           results_file: results.sarif
           results_format: sarif
@@ -41,7 +43,7 @@ jobs:
 
       # Upload the results as artifacts (optional).
       - name: "Upload artifact"
-        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
         with:
           name: SARIF file
           path: results.sarif
@@ -49,6 +51,6 @@ jobs:
 
       # Upload the results to GitHub's code scanning dashboard.
       - name: "Upload to code-scanning"
-        uses: github/codeql-action/upload-sarif@41a4ada31ba866a7f1196b9602703a89edd69e22
+        uses: github/codeql-action/upload-sarif@04df1262e6247151b5ac09cd2c303ac36ad3f62b
         with:
           sarif_file: results.sarif

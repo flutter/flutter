@@ -29,7 +29,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 
 /// An iOS style scrollbar.
 ///
-/// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
+/// To add a scrollbar to a [ScrollView], wrap the scroll view widget in
 /// a [CupertinoScrollbar] widget.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=DbkIQSvwnZc}
@@ -53,8 +53,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// {@tool dartpad}
 /// When [thumbVisibility] is true, the scrollbar thumb will remain visible without the
 /// fade animation. This requires that a [ScrollController] is provided to controller,
-/// or that the [PrimaryScrollController] is available. [isAlwaysShown] is
-/// deprecated in favor of `thumbVisibility`.
+/// or that the [PrimaryScrollController] is available.
 ///
 /// ** See code in examples/api/lib/cupertino/scrollbar/cupertino_scrollbar.1.dart **
 /// {@end-tool}
@@ -82,24 +81,10 @@ class CupertinoScrollbar extends RawScrollbar {
     this.radiusWhileDragging = defaultRadiusWhileDragging,
     ScrollNotificationPredicate? notificationPredicate,
     super.scrollbarOrientation,
-    @Deprecated(
-      'Use thumbVisibility instead. '
-      'This feature was deprecated after v2.9.0-1.0.pre.',
-    )
-    bool? isAlwaysShown,
-  }) : assert(thickness != null),
-       assert(thickness < double.infinity),
-       assert(thicknessWhileDragging != null),
+  }) : assert(thickness < double.infinity),
        assert(thicknessWhileDragging < double.infinity),
-       assert(radius != null),
-       assert(radiusWhileDragging != null),
-       assert(
-         isAlwaysShown == null || thumbVisibility == null,
-         'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
-         'isAlwaysShown is deprecated.'
-       ),
        super(
-         thumbVisibility: isAlwaysShown ?? thumbVisibility ?? false,
+         thumbVisibility: thumbVisibility ?? false,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: const Duration(milliseconds: 100),
@@ -171,7 +156,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       ..mainAxisMargin = _kScrollbarMainAxisMargin
       ..crossAxisMargin = _kScrollbarCrossAxisMargin
       ..radius = _radius
-      ..padding = MediaQuery.of(context).padding
+      ..padding = MediaQuery.paddingOf(context)
       ..minLength = _kScrollbarMinLength
       ..minOverscrollLength = _kScrollbarMinOverscrollLength
       ..scrollbarOrientation = widget.scrollbarOrientation;
@@ -185,14 +170,15 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   @override
   void handleThumbPressStart(Offset localPosition) {
     super.handleThumbPressStart(localPosition);
-    final Axis direction = getScrollbarDirection()!;
+    final Axis? direction = getScrollbarDirection();
+    if (direction == null) {
+      return;
+    }
     switch (direction) {
       case Axis.vertical:
         _pressStartAxisPosition = localPosition.dy;
-        break;
       case Axis.horizontal:
         _pressStartAxisPosition = localPosition.dx;
-        break;
     }
   }
 
@@ -215,19 +201,17 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
     }
     _thicknessAnimationController.reverse();
     super.handleThumbPressEnd(localPosition, velocity);
-    switch(direction) {
+    switch (direction) {
       case Axis.vertical:
         if (velocity.pixelsPerSecond.dy.abs() < 10 &&
           (localPosition.dy - _pressStartAxisPosition).abs() > 0) {
           HapticFeedback.mediumImpact();
         }
-        break;
       case Axis.horizontal:
         if (velocity.pixelsPerSecond.dx.abs() < 10 &&
           (localPosition.dx - _pressStartAxisPosition).abs() > 0) {
           HapticFeedback.mediumImpact();
         }
-        break;
     }
   }
 

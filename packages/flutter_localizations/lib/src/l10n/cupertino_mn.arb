@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Бүгдийг сонгох",
   "tabSemanticsLabel": "$tabCount-н $tabIndex-р таб",
   "modalBarrierDismissLabel": "Үл хэрэгсэх",
-  "searchTextFieldPlaceholderLabel": "Хайх"
+  "searchTextFieldPlaceholderLabel": "Хайх",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

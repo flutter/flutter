@@ -8,7 +8,8 @@ updates:
     schedule:
       interval: "weekly"
     reviewers:
-      - "jmagman"
+      - "christopherfujino"
+      - "vashworth"
       - "keyonghan"
       - "yusuf-goog"
     labels:
@@ -32,7 +33,6 @@ updates:
     schedule:
       interval: "daily"
     reviewers:
-      - "hixie"
       - "godofredoc"
     labels:
       - "team"

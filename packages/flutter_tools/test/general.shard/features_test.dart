@@ -20,7 +20,7 @@ void main() {
       testConfig = Config.test();
       platform = FakePlatform(environment: <String, String>{});
 
-      for (final Feature feature in allFeatures) {
+      for (final Feature feature in allConfigurableFeatures) {
         testConfig.setValue(feature.configSetting!, false);
       }
 
@@ -33,7 +33,7 @@ void main() {
 
     FeatureFlags createFlags(String channel) {
       return FlutterFeatureFlags(
-        flutterVersion: FakeFlutterVersion(channel: channel),
+        flutterVersion: FakeFlutterVersion(branch: channel),
         config: testConfig,
         platform: platform,
       );
@@ -81,28 +81,30 @@ void main() {
       expect(featureFlags.isWebEnabled, true);
     });
 
+    testWithoutContext('Flutter web wasm only enable on master', () {
+      expect(flutterWebWasm.getSettingForChannel('master').enabledByDefault, isTrue);
+      expect(flutterWebWasm.getSettingForChannel('beta').enabledByDefault, isFalse);
+      expect(flutterWebWasm.getSettingForChannel('stable').enabledByDefault, isFalse);
+    });
+
     testWithoutContext('Flutter web help string', () {
       expect(flutterWebFeature.generateHelpMessage(),
-      'Enable or disable Flutter for web. '
-      'This setting will take effect on the master, beta, and stable channels.');
+      'Enable or disable Flutter for web.');
     });
 
     testWithoutContext('Flutter macOS desktop help string', () {
       expect(flutterMacOSDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on macOS. '
-      'This setting will take effect on the master, beta, and stable channels.');
+      'Enable or disable support for desktop on macOS.');
     });
 
     testWithoutContext('Flutter Linux desktop help string', () {
       expect(flutterLinuxDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on Linux. '
-      'This setting will take effect on the master, beta, and stable channels.');
+      'Enable or disable support for desktop on Linux.');
     });
 
     testWithoutContext('Flutter Windows desktop help string', () {
       expect(flutterWindowsDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on Windows. '
-      'This setting will take effect on the master, beta, and stable channels.');
+      'Enable or disable support for desktop on Windows.');
     });
 
     testWithoutContext('help string on multiple channels', () {
@@ -114,8 +116,7 @@ void main() {
         configSetting: 'foo',
       );
 
-      expect(testWithoutContextFeature.generateHelpMessage(), 'Enable or disable example. '
-          'This setting will take effect on the master, beta, and stable channels.');
+      expect(testWithoutContextFeature.generateHelpMessage(), 'Enable or disable example.');
     });
 
     /// Flutter Web
@@ -381,6 +382,21 @@ void main() {
       test('${feature.name} available and enabled by default on stable', () {
         expect(feature.stable.enabledByDefault, true);
         expect(feature.stable.available, true);
+      });
+    }
+
+    // Custom devices on all channels
+    for (final String channel in <String>['master', 'beta', 'stable']) {
+      testWithoutContext('Custom devices are enabled with flag on $channel', () {
+        final FeatureFlags featureFlags = createFlags(channel);
+        testConfig.setValue('enable-custom-devices', true);
+        expect(featureFlags.areCustomDevicesEnabled, true);
+      });
+
+      testWithoutContext('Custom devices are enabled with environment variable on $channel', () {
+        final FeatureFlags featureFlags = createFlags(channel);
+        platform.environment = <String, String>{'FLUTTER_CUSTOM_DEVICES': 'true'};
+        expect(featureFlags.areCustomDevicesEnabled, true);
       });
     }
 

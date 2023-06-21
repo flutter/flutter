@@ -24,7 +24,7 @@ Future<bool> run(List<String> arguments) async {
     ..addOption(
       'repeat',
       defaultsTo: '1',
-      help: 'How many times to run each test. Set to a high value to look for flakes.',
+      help: 'How many times to run each test. Set to a high value to look for flakes. If a test specifies a number of iterations, the lower of the two values is used.',
       valueHelp: 'count',
     )
     ..addOption(
@@ -92,8 +92,9 @@ Future<bool> run(List<String> arguments) async {
   if (help || repeat == null || files.isEmpty || numberShards == null || numberShards <= 0 || shardIndex == null || shardIndex < 0) {
     printHelp();
     if (verbose) {
-      if (repeat == null)
+      if (repeat == null) {
         print('Error: Could not parse repeat count ("${parsedArguments['repeat']}")');
+      }
       if (numberShards == null) {
         print('Error: Could not parse shards count ("${parsedArguments['shards']}")');
       } else if (numberShards < 1) {
@@ -121,8 +122,9 @@ Future<bool> run(List<String> arguments) async {
     return false;
   }
 
-  if (files.length < numberShards)
+  if (files.length < numberShards) {
     print('Warning: There are more shards than tests. Some shards will not run any tests.');
+  }
 
   return runTests(
     repeat: repeat,

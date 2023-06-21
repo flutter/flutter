@@ -169,7 +169,7 @@ void main() {
   test('switching layer link of an attached leader layer should not crash', () {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), view: RendererBinding.instance.platformDispatcher.views.single);
     leaderLayer.attach(view);
     final LayerLink link2 = LayerLink();
     leaderLayer.link = link2;
@@ -182,7 +182,7 @@ void main() {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
     final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
-    final RenderView view = RenderView(configuration: const ViewConfiguration(), window: RendererBinding.instance.window);
+    final RenderView view = RenderView(configuration: const ViewConfiguration(), view: RendererBinding.instance.platformDispatcher.views.single);
     leaderLayer1.attach(view);
     leaderLayer2.attach(view);
     leaderLayer2.detach();
@@ -512,29 +512,6 @@ void main() {
     });
   });
 
-  test('mutating PhysicalModelLayer fields triggers needsAddToScene', () {
-    final PhysicalModelLayer layer = PhysicalModelLayer(
-      clipPath: Path(),
-      elevation: 0,
-      color: const Color(0x00000000),
-      shadowColor: const Color(0x00000000),
-    );
-    checkNeedsAddToScene(layer, () {
-      final Path newPath = Path();
-      newPath.addRect(unitRect);
-      layer.clipPath = newPath;
-    });
-    checkNeedsAddToScene(layer, () {
-      layer.elevation = 1;
-    });
-    checkNeedsAddToScene(layer, () {
-      layer.color = const Color(0x00000001);
-    });
-    checkNeedsAddToScene(layer, () {
-      layer.shadowColor = const Color(0x00000001);
-    });
-  });
-
   test('ContainerLayer.toImage can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();
     final OffsetLayer child = OffsetLayer();
@@ -547,6 +524,24 @@ void main() {
 
     // Causes grandChild to pass its engine layer as `oldLayer`
     grandChild.toImage(const Rect.fromLTRB(0, 0, 10, 10));
+
+    // Ensure we can render the same scene again after rendering an interior
+    // layer.
+    parent.buildScene(SceneBuilder());
+  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
+
+  test('ContainerLayer.toImageSync can render interior layer', () {
+    final OffsetLayer parent = OffsetLayer();
+    final OffsetLayer child = OffsetLayer();
+    final OffsetLayer grandChild = OffsetLayer();
+    child.append(grandChild);
+    parent.append(child);
+
+    // This renders the layers and generates engine layers.
+    parent.buildScene(SceneBuilder());
+
+    // Causes grandChild to pass its engine layer as `oldLayer`
+    grandChild.toImageSync(const Rect.fromLTRB(0, 0, 10, 10));
 
     // Ensure we can render the same scene again after rendering an interior
     // layer.
@@ -904,8 +899,7 @@ void main() {
       expect(() => layer.markNeedsAddToScene(), throwsAssertionError);
       expect(() => layer.debugMarkClean(), throwsAssertionError);
       expect(() => layer.updateSubtreeNeedsAddToScene(), throwsAssertionError);
-      expect(() => layer.dropChild(ContainerLayer()), throwsAssertionError);
-      expect(() => layer.adoptChild(ContainerLayer()), throwsAssertionError);
+      expect(() => layer.remove(), throwsAssertionError);
       expect(() => (layer as ContainerLayer).append(ContainerLayer()), throwsAssertionError);
       expect(() => layer.engineLayer = null, throwsAssertionError);
       compositedB1 = true;
@@ -979,6 +973,33 @@ void main() {
     final VoidCallback callback = root.addCompositionCallback((_) { });
     root.dispose();
     expect(() => callback(), returnsNormally);
+  });
+
+  test('Layer types that support rasterization', () {
+    // Supported.
+    final OffsetLayer offsetLayer = OffsetLayer();
+    final OpacityLayer opacityLayer = OpacityLayer();
+    final ClipRectLayer clipRectLayer = ClipRectLayer();
+    final ClipRRectLayer clipRRectLayer = ClipRRectLayer();
+    final ImageFilterLayer imageFilterLayer = ImageFilterLayer();
+    final BackdropFilterLayer backdropFilterLayer = BackdropFilterLayer();
+    final ColorFilterLayer colorFilterLayer = ColorFilterLayer();
+    final ShaderMaskLayer shaderMaskLayer = ShaderMaskLayer();
+    final TextureLayer textureLayer = TextureLayer(rect: Rect.zero, textureId: 1);
+    expect(offsetLayer.supportsRasterization(), true);
+    expect(opacityLayer.supportsRasterization(), true);
+    expect(clipRectLayer.supportsRasterization(), true);
+    expect(clipRRectLayer.supportsRasterization(), true);
+    expect(imageFilterLayer.supportsRasterization(), true);
+    expect(backdropFilterLayer.supportsRasterization(), true);
+    expect(colorFilterLayer.supportsRasterization(), true);
+    expect(shaderMaskLayer.supportsRasterization(), true);
+    expect(textureLayer.supportsRasterization(), true);
+
+    // Unsupported.
+    final PlatformViewLayer platformViewLayer = PlatformViewLayer(rect: Rect.zero, viewId: 1);
+
+    expect(platformViewLayer.supportsRasterization(), false);
   });
 }
 

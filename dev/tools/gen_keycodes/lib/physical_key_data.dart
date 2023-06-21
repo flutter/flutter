@@ -76,18 +76,21 @@ class PhysicalKeyData {
     return outputMap;
   }
 
-  /// Parses entries from Androids Generic.kl scan code data file.
+  /// Parses entries from Android's `Generic.kl` scan code data file.
   ///
   /// Lines in this file look like this (without the ///):
+  ///
+  /// ```
   /// key 100   ALT_RIGHT
   /// # key 101 "KEY_LINEFEED"
   /// key 477   F12               FUNCTION
+  /// ```
   ///
   /// We parse the commented out lines as well as the non-commented lines, so
   /// that we can get names for all of the available scan codes, not just ones
   /// defined for the generic profile.
   ///
-  /// Also, note that some keys (notably MEDIA_EJECT) can be mapped to more than
+  /// Some keys (notably `MEDIA_EJECT`) can be mapped to more than
   /// one scan code, so the mapping can't just be 1:1, it has to be 1:many.
   static Map<String, List<int>> _readAndroidScanCodes(String keyboardLayout, String nameMap) {
     final RegExp keyEntry = RegExp(
@@ -313,7 +316,7 @@ class PhysicalKeyEntry {
   String get commentName => getCommentName(constantName);
 
   /// Gets the named used for the key constant in the definitions in
-  /// keyboard_key.dart.
+  /// keyboard_key.g.dart.
   ///
   /// If set by the constructor, returns the name set, but otherwise constructs
   /// the name from the various different names available, making sure that the

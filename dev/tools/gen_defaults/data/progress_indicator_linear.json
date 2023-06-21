@@ -1,0 +1,14 @@
+{
+  "version": "v0_162",
+
+  "md.comp.linear-progress-indicator.active-indicator.color": "primary",
+  "md.comp.linear-progress-indicator.active-indicator.height": 4.0,
+  "md.comp.linear-progress-indicator.active-indicator.shape": "md.sys.shape.corner.none",
+  "md.comp.linear-progress-indicator.four-color.active-indicator.four.color": "tertiaryContainer",
+  "md.comp.linear-progress-indicator.four-color.active-indicator.one.color": "primary",
+  "md.comp.linear-progress-indicator.four-color.active-indicator.three.color": "tertiary",
+  "md.comp.linear-progress-indicator.four-color.active-indicator.two.color": "primaryContainer",
+  "md.comp.linear-progress-indicator.track.color": "surfaceVariant",
+  "md.comp.linear-progress-indicator.track.height": 4.0,
+  "md.comp.linear-progress-indicator.track.shape": "md.sys.shape.corner.none"
+}

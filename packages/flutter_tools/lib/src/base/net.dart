@@ -14,6 +14,7 @@ import 'logger.dart';
 import 'platform.dart';
 
 const int kNetworkProblemExitCode = 50;
+const String kFlutterStorageBaseUrl = 'FLUTTER_STORAGE_BASE_URL';
 
 typedef HttpClientFactory = HttpClient Function();
 
@@ -106,15 +107,16 @@ class Net {
       }
       response = await request.close();
     } on ArgumentError catch (error) {
-      final String? overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+      final String? overrideUrl = _platform.environment[kFlutterStorageBaseUrl];
       if (overrideUrl != null && url.toString().contains(overrideUrl)) {
         _logger.printError(error.toString());
         throwToolExit(
-          'The value of FLUTTER_STORAGE_BASE_URL ($overrideUrl) could not be '
+          'The value of $kFlutterStorageBaseUrl ($overrideUrl) could not be '
           'parsed as a valid url. Please see https://flutter.dev/community/china '
           'for an example of how to use it.\n'
           'Full URL: $url',
-          exitCode: kNetworkProblemExitCode,);
+          exitCode: kNetworkProblemExitCode,
+        );
       }
       _logger.printError(error.toString());
       rethrow;
@@ -133,7 +135,6 @@ class Net {
       _logger.printTrace('Download error: $error');
       return false;
     }
-    assert(response != null);
 
     // If we're making a HEAD request, we're only checking to see if the URL is
     // valid.

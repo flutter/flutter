@@ -19,9 +19,7 @@ class _ChildEntry {
     required this.animation,
     required this.transition,
     required this.widgetChild,
-  }) : assert(animation != null),
-       assert(transition != null),
-       assert(controller != null);
+  });
 
   // The animation controller for the child's transition.
   final AnimationController controller;
@@ -117,11 +115,7 @@ class AnimatedSwitcher extends StatefulWidget {
     this.switchOutCurve = Curves.linear,
     this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
     this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
-  }) : assert(duration != null),
-       assert(switchInCurve != null),
-       assert(switchOutCurve != null),
-       assert(transitionBuilder != null),
-       assert(layoutBuilder != null);
+  });
 
   /// The current child widget to display. If there was a previous child, then
   /// that child will be faded out using the [switchOutCurve], while the new
@@ -222,6 +216,7 @@ class AnimatedSwitcher extends StatefulWidget {
   /// This is an [AnimatedSwitcherTransitionBuilder] function.
   static Widget defaultTransitionBuilder(Widget child, Animation<double> animation) {
     return FadeTransition(
+      key: ValueKey<Key?>(child.key),
       opacity: animation,
       child: child,
     );
@@ -394,6 +389,6 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   @override
   Widget build(BuildContext context) {
     _rebuildOutgoingWidgetsIfNeeded();
-    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!);
+    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!.where((Widget outgoing) => outgoing.key != _currentEntry?.transition.key).toSet().toList());
   }
 }

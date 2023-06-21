@@ -9,10 +9,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// Tuple-like test class for storing a [stream] and [eventKind].
+///
+/// Used to store the [stream] and [eventKind] that a dispatched event would be
+/// sent on.
+@immutable
+class DispatchedEventKey {
+  const DispatchedEventKey({required this.stream, required this.eventKind});
+
+  final String stream;
+  final String eventKind;
+
+  @override
+  String toString() {
+    return '[DispatchedEventKey]($stream, $eventKind)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is DispatchedEventKey &&
+        stream == other.stream &&
+        eventKind == other.eventKind;
+  }
+
+  @override
+  int get hashCode => Object.hash(stream, eventKind);
+}
+
 class TestWidgetInspectorService extends Object with WidgetInspectorService {
   final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
 
-  final Map<String, List<Map<Object, Object?>>> eventsDispatched = <String, List<Map<Object, Object?>>>{};
+  final Map<DispatchedEventKey, List<Map<Object, Object?>>> eventsDispatched =
+      <DispatchedEventKey, List<Map<Object, Object?>>>{};
+  final  List<Object?> objectsInspected = <Object?>[];
 
   @override
   void registerServiceExtension({
@@ -24,16 +53,35 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   }
 
   @override
-  void postEvent(String eventKind, Map<Object, Object?> eventData) {
-    getEventsDispatched(eventKind).add(eventData);
+  void postEvent(
+    String eventKind,
+    Map<Object, Object?> eventData, {
+    String stream = 'Extension',
+  }) {
+    dispatchedEvents(eventKind, stream: stream).add(eventData);
   }
 
-  List<Map<Object, Object?>> getEventsDispatched(String eventKind) {
-    return eventsDispatched.putIfAbsent(eventKind, () => <Map<Object, Object?>>[]);
+  @override
+  void inspect(Object? object) {
+    objectsInspected.add(object);
+  }
+
+  List<Map<Object, Object?>> dispatchedEvents(
+    String eventKind, {
+    String stream = 'Extension',
+  }) {
+    return eventsDispatched.putIfAbsent(
+      DispatchedEventKey(stream: stream, eventKind: eventKind),
+      () => <Map<Object, Object?>>[],
+    );
+  }
+
+  List<Object?> inspectedObjects(){
+    return objectsInspected;
   }
 
   Iterable<Map<Object, Object?>> getServiceExtensionStateChangedEvents(String extensionName) {
-    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
+    return dispatchedEvents('Flutter.ServiceExtensionStateChanged')
       .where((Map<Object, Object?> event) => event['extension'] == extensionName);
   }
 
@@ -58,8 +106,8 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     rebuildCount++;
     final WidgetsBinding binding = WidgetsBinding.instance;
 
-    if (binding.renderViewElement != null) {
-      binding.buildOwner!.reassemble(binding.renderViewElement!, null);
+    if (binding.rootElement != null) {
+      binding.buildOwner!.reassemble(binding.rootElement!, null);
     }
   }
 
@@ -67,6 +115,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   void resetAllState() {
     super.resetAllState();
     eventsDispatched.clear();
+    objectsInspected.clear();
     rebuildCount = 0;
   }
 }

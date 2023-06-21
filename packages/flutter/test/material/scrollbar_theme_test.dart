@@ -25,14 +25,21 @@ void main() {
     expect(const ScrollbarThemeData().hashCode, const ScrollbarThemeData().copyWith().hashCode);
   });
 
+  test('ScrollbarThemeData lerp special cases', () {
+    expect(ScrollbarThemeData.lerp(null, null, 0), const ScrollbarThemeData());
+    const ScrollbarThemeData data = ScrollbarThemeData();
+    expect(identical(ScrollbarThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Passing no ScrollbarTheme returns defaults', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: ScrollConfiguration(
           behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             showTrackOnHover: true,
             controller: scrollController,
             child: SingleChildScrollView(
@@ -125,7 +132,7 @@ void main() {
       home: ScrollConfiguration(
         behavior: const NoScrollbarBehavior(),
         child: Scrollbar(
-          isAlwaysShown: true,
+          thumbVisibility: true,
           controller: scrollController,
           child: SingleChildScrollView(
             controller: scrollController,
@@ -179,12 +186,12 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(770.0, 10.0, 800.0, 590.0),
+          rect: const Rect.fromLTRB(770.0, 0.0, 800.0, 600.0),
           color: const Color(0xff000000),
         )
         ..line(
-          p1: const Offset(770.0, 10.0),
-          p2: const Offset(770.0, 590.0),
+          p1: const Offset(770.0, 00.0),
+          p2: const Offset(770.0, 600.0),
           strokeWidth: 1.0,
           color: const Color(0xffffeb3b),
         )
@@ -206,12 +213,56 @@ void main() {
     }),
   );
 
+  testWidgets(
+    'Scrollbar uses values from ScrollbarTheme if exists instead of values from Theme',
+    (WidgetTester tester) async {
+      final ScrollbarThemeData scrollbarTheme = _scrollbarTheme();
+      final ScrollController scrollController = ScrollController();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            scrollbarTheme: scrollbarTheme,
+          ),
+          home: ScrollConfiguration(
+            behavior: const NoScrollbarBehavior(),
+            child: ScrollbarTheme(
+              data: _scrollbarTheme().copyWith(
+                thumbColor: MaterialStateProperty.all(const Color(0xFF000000)),
+              ),
+              child: Scrollbar(
+                thumbVisibility: true,
+                controller: scrollController,
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: const SizedBox(width: 4000.0, height: 4000.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // Idle scrollbar behavior
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTRB(785.0, 10.0, 795.0, 97.0),
+              const Radius.circular(6.0),
+            ),
+            color: const Color(0xFF000000),
+          ),
+      );
+    },
+  );
+
   testWidgets('ScrollbarTheme can disable gestures', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(interactive: false)),
+      theme: ThemeData(useMaterial3: false, scrollbarTheme: const ScrollbarThemeData(interactive: false)),
       home: Scrollbar(
-        isAlwaysShown: true,
+        thumbVisibility: true,
         controller: scrollController,
         child: SingleChildScrollView(
           controller: scrollController,
@@ -256,10 +307,10 @@ void main() {
   testWidgets('Scrollbar.interactive takes priority over ScrollbarTheme', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(interactive: false)),
+      theme: ThemeData(useMaterial3: false, scrollbarTheme: const ScrollbarThemeData(interactive: false)),
       home: Scrollbar(
         interactive: true,
-        isAlwaysShown: true,
+        thumbVisibility: true,
         controller: scrollController,
         child: SingleChildScrollView(
           controller: scrollController,
@@ -303,7 +354,6 @@ void main() {
 
   testWidgets('Scrollbar widget properties take priority over theme', (WidgetTester tester) async {
     const double thickness = 4.0;
-    const double hoverThickness = 4.0;
     const bool showTrackOnHover = true;
     const Radius radius = Radius.circular(3.0);
     final ScrollController scrollController = ScrollController();
@@ -317,7 +367,6 @@ void main() {
           behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
             thickness: thickness,
-            hoverThickness: hoverThickness,
             thumbVisibility: true,
             showTrackOnHover: showTrackOnHover,
             radius: radius,
@@ -376,19 +425,18 @@ void main() {
       find.byType(Scrollbar),
       paints
         ..rect(
-          rect: const Rect.fromLTRB(792.0, 0.0, 800.0, 600.0),
+          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
           color: const Color(0x08000000),
         )
         ..line(
-          p1: const Offset(792.0, 0.0),
-          p2: const Offset(792.0, 600.0),
+          p1: const Offset(784.0, 0.0),
+          p2: const Offset(784.0, 600.0),
           strokeWidth: 1.0,
           color: const Color(0x1a000000),
         )
         ..rrect(
           rrect: RRect.fromRectAndRadius(
-            // Scrollbar thumb is larger
-            const Rect.fromLTRB(794.0, 10.0, 798.0, 100.0),
+            const Rect.fromLTRB(786.0, 10.0, 798.0, 100.0),
             const Radius.circular(3.0),
           ),
           // Hover color
@@ -411,7 +459,7 @@ void main() {
         home: ScrollConfiguration(
           behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             showTrackOnHover: true,
             controller: scrollController,
             child: SingleChildScrollView(
@@ -578,7 +626,7 @@ void main() {
     }
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData().copyWith(
+        theme: ThemeData(useMaterial3: false).copyWith(
           scrollbarTheme: _scrollbarTheme(
             trackVisibility: MaterialStateProperty.resolveWith(getTrackVisibility),
           ),
@@ -586,7 +634,7 @@ void main() {
         home: ScrollConfiguration(
           behavior: const NoScrollbarBehavior(),
           child: Scrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             showTrackOnHover: true,
             controller: scrollController,
             child: SingleChildScrollView(

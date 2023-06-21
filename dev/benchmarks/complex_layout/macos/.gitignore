@@ -1,0 +1,10 @@
+# Flutter-related
+**/Flutter/ephemeral/
+**/Pods/
+
+# Xcode-related
+**/dgph
+**/xcuserdata/
+
+# Portable Network Graphics
+*.png

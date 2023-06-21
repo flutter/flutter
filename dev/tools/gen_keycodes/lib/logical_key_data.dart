@@ -327,8 +327,9 @@ class LogicalKeyData {
   static void _readFuchsiaKeyCodes(Map<String, LogicalKeyEntry> data, PhysicalKeyData physicalData) {
     for (final LogicalKeyEntry entry in data.values) {
       final int? value = (() {
-        if (entry.value == 0) // "None" key
+        if (entry.value == 0) {
           return 0;
+        }
         final String? keyLabel = printable[entry.constantName];
         if (keyLabel != null && !entry.constantName.startsWith('numpad')) {
           return toPlane(keyLabel.codeUnitAt(0), kUnicodePlane.value);
@@ -339,8 +340,9 @@ class LogicalKeyData {
           }
         }
       })();
-      if (value != null)
+      if (value != null) {
         entry.fuchsiaValues.add(value);
+      }
     }
   }
 
@@ -429,8 +431,9 @@ class LogicalKeyData {
   })();
 
   static int _sourceToPlane(String source, bool isPrintable) {
-    if (isPrintable)
+    if (isPrintable) {
       return kUnicodePlane.value;
+    }
     switch (source) {
       case 'DOM':
         return kUnprintablePlane.value;
@@ -569,7 +572,7 @@ class LogicalKeyEntry {
 
   /// A string indicating the letter on the keycap of a letter key.
   ///
-  /// This is only used to generate the key label mapping in keyboard_map.dart.
+  /// This is only used to generate the key label mapping in keyboard_maps.g.dart.
   /// [LogicalKeyboardKey.keyLabel] uses a different definition and is generated
   /// differently.
   final String? keyLabel;
@@ -607,7 +610,7 @@ class LogicalKeyEntry {
   }
 
   /// Gets the named used for the key constant in the definitions in
-  /// keyboard_key.dart.
+  /// keyboard_key.g.dart.
   ///
   /// If set by the constructor, returns the name set, but otherwise constructs
   /// the name from the various different names available, making sure that the

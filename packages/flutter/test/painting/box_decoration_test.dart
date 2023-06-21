@@ -8,6 +8,12 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  test('BoxDecoration.lerp identical a,b', () {
+    expect(BoxDecoration.lerp(null, null, 0), null);
+    const BoxDecoration decoration = BoxDecoration();
+    expect(identical(BoxDecoration.lerp(decoration, decoration, 0.5), decoration), true);
+  });
+
   test('BoxDecoration with BorderRadiusDirectional', () {
     const BoxDecoration decoration = BoxDecoration(
       color: Color(0xFF000000),

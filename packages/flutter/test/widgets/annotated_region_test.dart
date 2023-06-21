@@ -29,13 +29,13 @@ void main() {
       ),
     );
     int? result = RendererBinding.instance.renderView.debugLayer!.find<int>(Offset(
-      10.0 * RendererBinding.instance.window.devicePixelRatio,
-      10.0 * RendererBinding.instance.window.devicePixelRatio,
+      10.0 * tester.view.devicePixelRatio,
+      10.0 * tester.view.devicePixelRatio,
     ));
     expect(result, null);
     result = RendererBinding.instance.renderView.debugLayer!.find<int>(Offset(
-      50.0 * RendererBinding.instance.window.devicePixelRatio,
-      50.0 * RendererBinding.instance.window.devicePixelRatio,
+      50.0 * tester.view.devicePixelRatio,
+      50.0 * tester.view.devicePixelRatio,
     ));
     expect(result, 1);
   });

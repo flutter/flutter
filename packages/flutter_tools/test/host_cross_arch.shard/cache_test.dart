@@ -31,6 +31,12 @@ HostPlatform _identifyMacBinaryArch(String path) {
   final ProcessResult result = processManager.runSync(
     <String>['file', _dartBinary.path],
   );
+  expect(
+    result,
+    ProcessResultMatcher(
+      stdoutPattern: '${_dartBinary.path}: Mach-O 64-bit executable',
+    ),
+  );
   final RegExpMatch? match = pattern.firstMatch(result.stdout as String);
   if (match == null) {
     fail('Unrecognized STDOUT from `file`: "${result.stdout}"');
@@ -39,7 +45,7 @@ HostPlatform _identifyMacBinaryArch(String path) {
     case 'x86_64':
       return HostPlatform.darwin_x64;
     case 'arm64':
-      return HostPlatform.darwin_arm;
+      return HostPlatform.darwin_arm64;
     default:
       fail('Unexpected architecture ${match.group(1)}');
   }

@@ -6,7 +6,7 @@ import 'dart:ui' show TextAffinity, TextPosition, TextRange;
 
 import 'package:flutter/foundation.dart';
 
-export 'dart:ui' show TextAffinity, TextPosition, TextRange;
+export 'dart:ui' show TextAffinity, TextPosition;
 
 /// A range of text that represents a selection.
 @immutable
@@ -199,7 +199,7 @@ class TextSelection extends TextRange {
   /// ## Difference with [extendTo]
   /// In contrast with this method, [extendTo] is a pivot; it holds
   /// [TextSelection.baseOffset] fixed while moving [TextSelection.extentOffset]
-  /// to the given [TextPosition].  It doesn't strictly grow the selection and
+  /// to the given [TextPosition]. It doesn't strictly grow the selection and
   /// may collapse it or flip its order.
   TextSelection expandTo(TextPosition position, [bool extentAtIndex = false]) {
     // If position is already within in the selection, there's nothing to do.

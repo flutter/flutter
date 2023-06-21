@@ -82,9 +82,7 @@ class MaterialButton extends StatelessWidget {
     this.height,
     this.enableFeedback = true,
     this.child,
-  }) : assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(elevation == null || elevation >= 0.0),
+  }) : assert(elevation == null || elevation >= 0.0),
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
@@ -130,7 +128,7 @@ class MaterialButton extends StatelessWidget {
   /// The color to use for this button's text.
   ///
   /// The button's [Material.textStyle] will be the current theme's button text
-  /// style, [TextTheme.button] of [ThemeData.textTheme], configured with this
+  /// style, [TextTheme.labelLarge] of [ThemeData.textTheme], configured with this
   /// color.
   ///
   /// The default text color depends on the button theme's text theme,
@@ -148,7 +146,7 @@ class MaterialButton extends StatelessWidget {
   /// The color to use for this button's text when the button is disabled.
   ///
   /// The button's [Material.textStyle] will be the current theme's button text
-  /// style, [TextTheme.button] of [ThemeData.textTheme], configured with this
+  /// style, [TextTheme.labelLarge] of [ThemeData.textTheme], configured with this
   /// color.
   ///
   /// The default value is the theme's disabled color,
@@ -395,7 +393,7 @@ class MaterialButton extends StatelessWidget {
       onHighlightChanged: onHighlightChanged,
       mouseCursor: mouseCursor,
       fillColor: buttonTheme.getFillColor(this),
-      textStyle: theme.textTheme.button!.copyWith(color: buttonTheme.getTextColor(this)),
+      textStyle: theme.textTheme.labelLarge!.copyWith(color: buttonTheme.getTextColor(this)),
       focusColor: focusColor ?? buttonTheme.getFocusColor(this),
       hoverColor: hoverColor ?? buttonTheme.getHoverColor(this),
       highlightColor: highlightColor ?? theme.highlightColor,

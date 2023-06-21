@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 const TextStyle testStyle = TextStyle(
-  fontFamily: 'Ahem',
   fontSize: 10.0,
   letterSpacing: 0.0,
 );

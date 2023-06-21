@@ -14,15 +14,15 @@ void main() {
           appBar: AppBar(
             title: const Text('RenderFlex OverFlow'),
           ),
-          body: SizedBox(
+          body: const SizedBox(
             width: 400.0,
             child: Row(
               children: <Widget>[
-                const Icon(Icons.message),
+                Icon(Icons.message),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const <Widget>[
+                  children: <Widget>[
                     Text('Title'),
                     Text(
                       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed '

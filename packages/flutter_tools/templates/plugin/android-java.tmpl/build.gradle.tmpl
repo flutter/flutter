@@ -22,6 +22,10 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
+    if (project.android.hasProperty("namespace")) {
+        namespace '{{androidIdentifier}}'
+    }
+
     compileSdkVersion {{compileSdkVersion}}
 
     compileOptions {
@@ -31,5 +35,20 @@ android {
 
     defaultConfig {
         minSdkVersion {{minSdkVersion}}
+    }
+
+    dependencies {
+        testImplementation 'junit:junit:4.13.2'
+        testImplementation 'org.mockito:mockito-core:5.0.0'
+    }
+
+    testOptions {
+        unitTests.all {
+            testLogging {
+               events "passed", "skipped", "failed", "standardOut", "standardError"
+               outputs.upToDateWhen {false}
+               showStandardStreams = true
+            }
+        }
     }
 }

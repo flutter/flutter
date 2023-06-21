@@ -140,7 +140,7 @@ void main() {
     expect(events.length, 1);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[0].timeStamp, binding.frameTime! + samplingOffset);
-    expect(events[0].position, Offset(0.0 / GestureBinding.instance.window.devicePixelRatio, 0.0));
+    expect(events[0].position, Offset(0.0 / _devicePixelRatio, 0.0));
 
     // Second frame callback should have been requested.
     callback = binding.postFrameCallback;
@@ -155,8 +155,8 @@ void main() {
     expect(events.length, 2);
     expect(events[1], isA<PointerMoveEvent>());
     expect(events[1].timeStamp, binding.frameTime! + samplingOffset);
-    expect(events[1].position, Offset(10.0 / GestureBinding.instance.window.devicePixelRatio, 0.0));
-    expect(events[1].delta, Offset(10.0 / GestureBinding.instance.window.devicePixelRatio, 0.0));
+    expect(events[1].position, Offset(10.0 / _devicePixelRatio, 0.0));
+    expect(events[1].delta, Offset(10.0 / _devicePixelRatio, 0.0));
 
     // Verify that resampling continues without a frame callback.
     async.elapse(frameInterval * 1.5);
@@ -183,3 +183,5 @@ void main() {
     GestureBinding.instance.resamplingEnabled = false;
   });
 }
+
+double get _devicePixelRatio => GestureBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;

@@ -18,8 +18,7 @@ const String extensionMarketplaceUrl =
   'https://marketplace.visualstudio.com/items?itemName=$extensionIdentifier';
 
 class VsCode {
-  VsCode._(this.directory, this.extensionDirectory, { Version? version, this.edition, required FileSystem fileSystem})
-      : version = version ?? Version.unknown {
+  VsCode._(this.directory, this.extensionDirectory, { this.version, this.edition, required FileSystem fileSystem}) {
 
     if (!fileSystem.isDirectorySync(directory)) {
       _validationMessages.add(ValidationMessage.error('VS Code not found at $directory'));
@@ -76,7 +75,7 @@ class VsCode {
 
   final String directory;
   final String extensionDirectory;
-  final Version version;
+  final Version? version;
   final String? edition;
 
   Version? _extensionVersion;
@@ -284,7 +283,7 @@ class VsCode {
 
   @override
   String toString() =>
-      'VS Code ($version)${_extensionVersion != Version.unknown ? ', Flutter ($_extensionVersion)' : ''}';
+      'VS Code ($version)${_extensionVersion != null ? ', Flutter ($_extensionVersion)' : ''}';
 
   static String? _getVersionFromPackageJson(String packageJsonPath, FileSystem fileSystem) {
     if (!fileSystem.isFileSync(packageJsonPath)) {

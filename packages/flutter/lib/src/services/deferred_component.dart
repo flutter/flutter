@@ -6,6 +6,10 @@ import 'dart:async';
 
 import 'system_channels.dart';
 
+// Examples can assume:
+// // so that we can import the fake "split_component.dart" in an example below:
+// // ignore_for_file: uri_does_not_exist
+
 /// Manages the installation and loading of deferred components.
 ///
 /// Deferred components allow Flutter applications to download precompiled AOT
@@ -20,11 +24,7 @@ import 'system_channels.dart';
 /// Deferred components are currently an Android-only feature. The methods in
 /// this class are a no-op and all assets and dart code are already available
 /// without installation if called on other platforms.
-class DeferredComponent {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  DeferredComponent._();
-
+abstract final class DeferredComponent {
   // TODO(garyq): We should eventually expand this to install components by loadingUnitId
   // as well as componentName, but currently, loadingUnitId is opaque to the dart code
   // so this is not possible. The API has been left flexible to allow adding
@@ -41,13 +41,17 @@ class DeferredComponent {
   /// the assets from a component with both dart code and assets. Deferred components
   /// containing dart code should call `loadLibrary()` on a deferred imported
   /// library's prefix to ensure that the dart code is properly loaded as
-  /// `loadLibrary()` will provide the loading unit id needed for the dart
+  /// `loadLibrary()` will provide the loading unit ID needed for the Dart
   /// library loading process. For example:
   ///
   /// ```dart
-  /// import 'split_component.dart' deferred as SplitComponent;
-  /// ...
-  /// SplitComponent.loadLibrary();
+  /// import 'split_component.dart' deferred as split_component;
+  /// // ...
+  /// void _showSplit() {
+  ///   // ...
+  ///   split_component.loadLibrary();
+  ///   // ...
+  /// }
   /// ```
   ///
   /// This method will not load associated dart libraries contained in the component,
@@ -60,9 +64,9 @@ class DeferredComponent {
   /// See also:
   ///
   ///  * [uninstallDeferredComponent], a method to request the uninstall of a component.
-  ///  * [loadLibrary](https://api.dart.dev/dart-mirrors/LibraryDependencyMirror/loadLibrary.html),
-  ///    the dart method to trigger the installation of the corresponding deferred component that
-  ///    contains the dart library.
+  ///  * [loadLibrary](https://dart.dev/guides/language/language-tour#lazily-loading-a-library),
+  ///    the Dart method to trigger the installation of the corresponding deferred component that
+  ///    contains the Dart library.
   static Future<void> installDeferredComponent({required String componentName}) async {
     await SystemChannels.deferredComponent.invokeMethod<void>(
       'installDeferredComponent',

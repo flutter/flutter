@@ -5,8 +5,11 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
-
 @TestOn('!chrome')
+library;
+
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -68,7 +71,7 @@ void main() {
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: FocusNode(),
-          style: Typography.material2018().black.subtitle1!,
+          style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
@@ -123,7 +126,7 @@ void main() {
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: FocusNode(),
-          style: Typography.material2018().black.subtitle1!,
+          style: Typography.material2018().black.titleMedium!,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
@@ -458,6 +461,37 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
 
+  testWidgets('Cursor does not show when not focused', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/106512 .
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(focusNode: focusNode, autofocus: true),
+        ),
+      ),
+    );
+    assert(focusNode.hasFocus);
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    focusNode.unfocus();
+    await tester.pump();
+
+    for (int i = 0; i < 10; i += 10) {
+      // Make sure it does not paint for a period of time.
+      expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+      expect(tester.hasRunningAnimations, isFalse);
+      await tester.pump(const Duration(milliseconds: 29));
+    }
+
+    // Refocus and it should paint the caret.
+    focusNode.requestFocus();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable, isNot(paintsExactlyCountTimes(#drawRect, 0)));
+  });
+
   testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
       home: Material(
@@ -670,6 +704,121 @@ void main() {
     expect(tester.takeException(), null);
   });
 
+  testWidgets("Drag the floating cursor, it won't blink.", (WidgetTester tester) async {
+    const String text = 'hello world this is fun and cool and awesome!';
+    controller.text = text;
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+
+    // Check that the cursor visibility toggles after each blink interval.
+    // Or if it's not blinking at all, it stays on.
+    Future<void> checkCursorBlinking({ bool isBlinking = true }) async {
+      bool initialShowCursor = true;
+      if (isBlinking) {
+        initialShowCursor = editableText.cursorCurrentlyVisible;
+      }
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(isBlinking ? !initialShowCursor : initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval ~/ 10);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(isBlinking ? !initialShowCursor : initialShowCursor));
+      await tester.pump(editableText.cursorBlinkInterval);
+      expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
+    }
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(EditableText));
+
+    await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
+    await tester.pumpAndSettle();
+
+    // Before dragging, the cursor should blink.
+    await checkCursorBlinking();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+
+    // When drag cursor, the cursor shouldn't blink.
+    await checkCursorBlinking(isBlinking: false);
+
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    await tester.pumpAndSettle();
+
+    // After dragging, the cursor should blink.
+    await checkCursorBlinking();
+  });
+
+  testWidgets('Turning showCursor off stops the cursor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/108187.
+    final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;
+    // This doesn't really matter.
+    EditableText.debugDeterministicCursor = false;
+    addTearDown(() { EditableText.debugDeterministicCursor = debugDeterministicCursor; });
+    const Key key = Key('EditableText');
+
+    Widget buildEditableText({ required bool showCursor }) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            key: key,
+            backgroundCursorColor: Colors.grey,
+            // Use animation controller to animate cursor blink for testing.
+            cursorOpacityAnimates: true,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            showCursor: showCursor,
+          ),
+        ),
+      );
+    }
+    late final EditableTextState editableTextState = tester.state(find.byKey(key));
+    await tester.pumpWidget(buildEditableText(showCursor: false));
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    // No cursor even when focused.
+    expect(editableTextState.cursorCurrentlyVisible, false);
+
+    // The EditableText still has focus, so the cursor should starts blinking.
+    await tester.pumpWidget(buildEditableText(showCursor: true));
+    expect(editableTextState.cursorCurrentlyVisible, true);
+    await tester.pump();
+    expect(editableTextState.cursorCurrentlyVisible, true);
+
+    // readOnly disables blinking cursor.
+    await tester.pumpWidget(buildEditableText(showCursor: false));
+    expect(editableTextState.cursorCurrentlyVisible, false);
+    await tester.pump();
+    expect(editableTextState.cursorCurrentlyVisible, false);
+  });
+
   // Regression test for https://github.com/flutter/flutter/pull/30475.
   testWidgets('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
@@ -864,7 +1013,7 @@ void main() {
               key: editableTextKey,
               controller: TextEditingController(),
               focusNode: FocusNode(),
-              style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1!,
+              style: Typography.material2018(platform: TargetPlatform.iOS).black.titleMedium!,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
               keyboardType: TextInputType.text,
@@ -925,7 +1074,7 @@ void main() {
               key: editableTextKey,
               controller: TextEditingController(),
               focusNode: FocusNode(),
-              style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1!,
+              style: Typography.material2018(platform: TargetPlatform.iOS).black.titleMedium!,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
               keyboardType: TextInputType.text,
@@ -1006,4 +1155,137 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
   });
+
+  testWidgets('getLocalRectForCaret with empty text', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    addTearDown(() { EditableText.debugDeterministicCursor = false; });
+    const String text = '12';
+
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      ),
+    );
+
+    final Widget widget = EditableText(
+      autofocus: true,
+      backgroundCursorColor: Colors.grey,
+      controller: controller,
+      focusNode: FocusNode(),
+      style: const TextStyle(fontSize: 20),
+      textAlign: TextAlign.center,
+      keyboardType: TextInputType.text,
+      cursorColor: cursorColor,
+      maxLines: null,
+    );
+    await tester.pumpWidget(MaterialApp(home: widget));
+
+    final EditableTextState editableTextState = tester.firstState(find.byWidget(widget));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+    final Rect initialLocalCaretRect = renderEditable.getLocalRectForCaret(const TextPosition(offset: text.length));
+
+    for (int i = 0; i < 3; i++) {
+      Actions.invoke(primaryFocus!.context!, const DeleteCharacterIntent(forward: false));
+      await tester.pump();
+      expect(controller.text.length, math.max(0, text.length - 1 - i));
+      final Rect localRect = renderEditable.getLocalRectForCaret(
+        TextPosition(offset: controller.text.length),
+      );
+
+      expect(localRect.size, initialLocalCaretRect.size);
+      expect(localRect.top, initialLocalCaretRect.top);
+      expect(localRect.left, lessThan(initialLocalCaretRect.left));
+    }
+
+    expect(controller.text, isEmpty);
+  });
+
+  testWidgets('Caret center space test', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    addTearDown(() { EditableText.debugDeterministicCursor = false; });
+    final String text = 'test${' ' * 1000}';
+
+    final Widget widget = EditableText(
+      autofocus: true,
+      backgroundCursorColor: Colors.grey,
+      controller: TextEditingController.fromValue(
+        TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: text.length, affinity: TextAffinity.upstream),
+        ),
+      ),
+      focusNode: FocusNode(),
+      style: const TextStyle(),
+      textAlign: TextAlign.center,
+      keyboardType: TextInputType.text,
+      cursorColor: cursorColor,
+      cursorWidth: 13.0,
+      cursorHeight: 17.0,
+      maxLines: null,
+    );
+    await tester.pumpWidget(MaterialApp(home: widget));
+
+    final EditableTextState editableTextState = tester.firstState(find.byWidget(widget));
+    final Rect editableTextRect = tester.getRect(find.byWidget(widget));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+    // The trailing whitespaces are not line break opportunities.
+    expect(renderEditable.getLineAtOffset(TextPosition(offset: text.length)).start, 0);
+
+    // The caretRect shouldn't be outside of the RenderEditable.
+    final Rect caretRect = Rect.fromLTWH(
+      editableTextRect.right - 13.0 - 1.0,
+      editableTextRect.top,
+      13.0,
+      17.0,
+    );
+    expect(
+      renderEditable,
+      paints..rect(color: cursorColor, rect: caretRect),
+    );
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  testWidgets('getLocalRectForCaret reports the real caret Rect', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    addTearDown(() { EditableText.debugDeterministicCursor = false; });
+    final String text = 'test${' ' * 50}\n'
+                        '2nd line\n'
+                        '\n';
+
+    final TextEditingController controller = TextEditingController.fromValue(TextEditingValue(
+      text: text,
+      selection: const TextSelection.collapsed(offset: 0),
+    ));
+
+    final Widget widget = EditableText(
+      autofocus: true,
+      backgroundCursorColor: Colors.grey,
+      controller: controller,
+      focusNode: FocusNode(),
+      style: const TextStyle(fontSize: 20),
+      textAlign: TextAlign.center,
+      keyboardType: TextInputType.text,
+      cursorColor: cursorColor,
+      maxLines: null,
+    );
+    await tester.pumpWidget(MaterialApp(home: widget));
+
+    final EditableTextState editableTextState = tester.firstState(find.byWidget(widget));
+    final Rect editableTextRect = tester.getRect(find.byWidget(widget));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    final Iterable<TextPosition> positions = List<int>
+      .generate(text.length + 1, (int index) => index)
+      .expand((int i) => <TextPosition>[TextPosition(offset: i, affinity: TextAffinity.upstream), TextPosition(offset: i)]);
+    for (final TextPosition position in positions) {
+      controller.selection = TextSelection.fromPosition(position);
+      await tester.pump();
+
+      final Rect localRect = renderEditable.getLocalRectForCaret(position);
+      expect(
+        renderEditable,
+        paints..rect(color: cursorColor, rect: localRect.shift(editableTextRect.topLeft)),
+      );
+    }
+  }, variant: TargetPlatformVariant.all());
 }

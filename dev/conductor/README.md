@@ -39,8 +39,7 @@ Releases are initialized with the `start` sub-command, like:
 conductor start \
   --candidate-branch=flutter-2.2-candidate.10 \
   --release-channel=beta \
-  --framework-mirror=git@github.com:username/flutter.git \
-  --engine-mirror=git@github.com:username/engine.git \
+  --github-username=kingOfDevelopers \
   --engine-cherrypicks=72114dafe28c8700f1d5d629c6ae9d34172ba395 \
   --framework-cherrypicks=a3e66b396746f6581b2b7efd1b0d0f0074215128,d8d853436206e86f416236b930e97779b143a100 \
   --dart-revision=4511eb2a779a612d9d6b2012123575013e0aef12 \

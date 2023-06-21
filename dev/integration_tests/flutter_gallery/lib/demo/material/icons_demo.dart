@@ -112,7 +112,7 @@ class _IconsDemoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle textStyle = theme.textTheme.subtitle1!.copyWith(color: theme.textTheme.caption!.color);
+    final TextStyle textStyle = theme.textTheme.titleMedium!.copyWith(color: theme.textTheme.bodySmall!.color);
     return Card(
       child: DefaultTextStyle(
         style: textStyle,

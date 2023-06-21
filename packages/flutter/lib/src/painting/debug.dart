@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
-import 'dart:ui' show Size, Picture, Image;
+import 'dart:ui' show Image, Picture, Size;
 
 import 'package:flutter/foundation.dart';
 
@@ -185,7 +185,7 @@ bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOv
     if (debugDisableShadows != debugDisableShadowsOverride ||
         debugNetworkImageHttpClientProvider != null ||
         debugOnPaintImage != null ||
-        debugInvertOversizedImages == true ||
+        debugInvertOversizedImages ||
         debugImageOverheadAllowance != _imageOverheadAllowanceDefault) {
       throw FlutterError(reason);
     }

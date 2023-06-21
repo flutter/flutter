@@ -4,6 +4,7 @@
 
 import 'dart:convert' show jsonDecode;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -57,6 +58,47 @@ void main() {
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });
+
+    test('Verify invalid TextEditingDeltaInsertion fails to apply', () {
+      const TextEditingDeltaInsertion delta =
+              TextEditingDeltaInsertion(
+                oldText: 'hello worl',
+                textInserted: 'd',
+                insertionOffset: 11,
+                selection: TextSelection.collapsed(offset: 11),
+                composing: TextRange.empty,
+              );
+
+      expect(() { delta.apply(TextEditingValue.empty); }, throwsAssertionError);
+    });
+
+    test('Verify TextEditingDeltaInsertion debugFillProperties', () {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      const TextEditingDeltaInsertion insertionDelta = TextEditingDeltaInsertion(
+          oldText: 'hello worl',
+          textInserted: 'd',
+          insertionOffset: 10,
+          selection: TextSelection.collapsed(offset: 11),
+          composing: TextRange.empty,
+      );
+
+      insertionDelta.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+
+      expect(
+        description,
+        <String>[
+          'oldText: hello worl',
+          'textInserted: d',
+          'insertionOffset: 10',
+          'selection: TextSelection.collapsed(offset: 11, affinity: TextAffinity.downstream, isDirectional: false)',
+          'composing: TextRange(start: -1, end: -1)',
+        ],
+      );
+    });
   });
 
   group('TextEditingDeltaDeletion', () {
@@ -108,6 +150,45 @@ void main() {
       expect(delta.deletedRange, expectedDeletedRange);
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
+    });
+
+    test('Verify invalid TextEditingDeltaDeletion fails to apply', () {
+      const TextEditingDeltaDeletion delta =
+              TextEditingDeltaDeletion(
+                oldText: 'hello world',
+                deletedRange: TextRange(start: 5, end: 12),
+                selection: TextSelection.collapsed(offset: 5),
+                composing: TextRange.empty,
+              );
+
+      expect(() { delta.apply(TextEditingValue.empty); }, throwsAssertionError);
+    });
+
+    test('Verify TextEditingDeltaDeletion debugFillProperties', () {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      const TextEditingDeltaDeletion deletionDelta = TextEditingDeltaDeletion(
+        oldText: 'hello world',
+        deletedRange: TextRange(start: 6, end: 10),
+        selection: TextSelection.collapsed(offset: 6),
+        composing: TextRange.empty,
+      );
+
+      deletionDelta.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+
+      expect(
+        description,
+        <String>[
+          'oldText: hello world',
+          'textDeleted: worl',
+          'deletedRange: TextRange(start: 6, end: 10)',
+          'selection: TextSelection.collapsed(offset: 6, affinity: TextAffinity.downstream, isDirectional: false)',
+          'composing: TextRange(start: -1, end: -1)',
+        ],
+      );
     });
   });
 
@@ -189,6 +270,48 @@ void main() {
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
     });
+
+    test('Verify invalid TextEditingDeltaReplacement fails to apply', () {
+      const TextEditingDeltaReplacement delta =
+              TextEditingDeltaReplacement(
+                oldText: 'hello worl',
+                replacementText: 'world',
+                replacedRange: TextRange(start: 5, end: 11),
+                selection: TextSelection.collapsed(offset: 11),
+                composing: TextRange.empty,
+              );
+
+      expect(() { delta.apply(TextEditingValue.empty); }, throwsAssertionError);
+    });
+
+    test('Verify TextEditingDeltaReplacement debugFillProperties', () {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      const TextEditingDeltaReplacement replacementDelta = TextEditingDeltaReplacement(
+        oldText: 'hello world',
+        replacementText: 'h',
+        replacedRange: TextRange(start: 6, end: 11),
+        selection: TextSelection.collapsed(offset: 7),
+        composing: TextRange(start: 6, end: 7),
+      );
+
+      replacementDelta.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+
+      expect(
+        description,
+        <String>[
+          'oldText: hello world',
+          'textReplaced: world',
+          'replacementText: h',
+          'replacedRange: TextRange(start: 6, end: 11)',
+          'selection: TextSelection.collapsed(offset: 7, affinity: TextAffinity.downstream, isDirectional: false)',
+          'composing: TextRange(start: 6, end: 7)',
+        ],
+      );
+    });
   });
 
   group('TextEditingDeltaNonTextUpdate', () {
@@ -212,6 +335,41 @@ void main() {
       expect(delta.oldText, 'hello world');
       expect(delta.selection, expectedSelection);
       expect(delta.composing, expectedComposing);
+    });
+
+    test('Verify invalid TextEditingDeltaNonTextUpdate fails to apply', () {
+      const TextEditingDeltaNonTextUpdate delta =
+              TextEditingDeltaNonTextUpdate(
+                oldText: 'hello world',
+                selection: TextSelection.collapsed(offset: 12),
+                composing: TextRange.empty,
+              );
+
+      expect(() { delta.apply(TextEditingValue.empty); }, throwsAssertionError);
+    });
+
+    test('Verify TextEditingDeltaNonTextUpdate debugFillProperties', () {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      const TextEditingDeltaNonTextUpdate nonTextUpdateDelta = TextEditingDeltaNonTextUpdate(
+        oldText: 'hello world',
+        selection: TextSelection.collapsed(offset: 7),
+        composing: TextRange(start: 6, end: 7),
+      );
+
+      nonTextUpdateDelta.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+
+      expect(
+        description,
+        <String>[
+          'oldText: hello world',
+          'selection: TextSelection.collapsed(offset: 7, affinity: TextAffinity.downstream, isDirectional: false)',
+          'composing: TextRange(start: 6, end: 7)',
+        ],
+      );
     });
   });
 }

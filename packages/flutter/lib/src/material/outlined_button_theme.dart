@@ -8,12 +8,15 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A [ButtonStyle] that overrides the default appearance of
 /// [OutlinedButton]s when it's used with [OutlinedButtonTheme] or with the
 /// overall [Theme]'s [ThemeData.outlinedButtonTheme].
 ///
 /// The [style]'s properties override [OutlinedButton]'s default style,
-/// i.e.  the [ButtonStyle] returned by [OutlinedButton.defaultStyleOf]. Only
+/// i.e. the [ButtonStyle] returned by [OutlinedButton.defaultStyleOf]. Only
 /// the style's non-null property values or resolved non-null
 /// [MaterialStateProperty] values are used.
 ///
@@ -46,9 +49,8 @@ class OutlinedButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two outlined button themes.
   static OutlinedButtonThemeData? lerp(OutlinedButtonThemeData? a, OutlinedButtonThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return OutlinedButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
@@ -95,7 +97,7 @@ class OutlinedButtonTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The configuration of this theme.
   final OutlinedButtonThemeData data;

@@ -11,6 +11,7 @@ void main() {
   macroPerfTest(
     'textfield_perf',
     kTextRouteName,
+    pageDelay: const Duration(seconds: 1),
     driverOps: (FlutterDriver driver) async {
       final SerializableFinder textfield = find.byValueKey('basic-textfield');
       driver.tap(textfield);

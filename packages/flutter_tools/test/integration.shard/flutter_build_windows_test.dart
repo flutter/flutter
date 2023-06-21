@@ -26,16 +26,18 @@ void main() {
         'bin',
         'flutter',
       );
-      processManager.runSync(<String>[flutterBin, 'config',
+      ProcessResult result = processManager.runSync(<String>[flutterBin, 'config',
         '--enable-windows-desktop',
       ]);
+      expect(result, const ProcessResultMatcher());
 
-      processManager.runSync(<String>[
+      result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'create',
         'hello',
       ], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
 
       projectRoot = tempDir.childDirectory('hello');
 
@@ -65,17 +67,57 @@ void main() {
         'windows',
         '--no-pub',
       ], workingDirectory: projectRoot.path);
+      expect(result, const ProcessResultMatcher());
 
-      expect(result.exitCode, 0);
       expect(releaseDir, exists);
       expect(exeFile, exists);
 
-      // Default exe has version 1.0.0
+      // Default exe has build name 1.0.0 and build number 1.
       final String fileVersion = _getFileVersion(exeFile);
       final String productVersion = _getProductVersion(exeFile);
 
-      expect(fileVersion, equals('1.0.0.0'));
-      expect(productVersion, equals('1.0.0'));
+      expect(fileVersion, equals('1.0.0.1'));
+      expect(productVersion, equals('1.0.0+1'));
+    });
+
+    testWithoutContext('flutter build windows sets build name', () {
+      final ProcessResult result = processManager.runSync(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'build',
+        'windows',
+        '--no-pub',
+        '--build-name',
+        '1.2.3',
+      ], workingDirectory: projectRoot.path);
+      expect(result, const ProcessResultMatcher());
+
+      final String fileVersion = _getFileVersion(exeFile);
+      final String productVersion = _getProductVersion(exeFile);
+
+      expect(fileVersion, equals('1.2.3.0'));
+      expect(productVersion, equals('1.2.3'));
+    });
+
+    testWithoutContext('flutter build windows sets build name and build number', () {
+      final ProcessResult result = processManager.runSync(<String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'build',
+        'windows',
+        '--no-pub',
+        '--build-name',
+        '1.2.3',
+        '--build-number',
+        '4',
+      ], workingDirectory: projectRoot.path);
+      expect(result, const ProcessResultMatcher());
+
+      final String fileVersion = _getFileVersion(exeFile);
+      final String productVersion = _getProductVersion(exeFile);
+
+      expect(fileVersion, equals('1.2.3.4'));
+      expect(productVersion, equals('1.2.3+4'));
     });
   }, skip: !io.Platform.isWindows); // [intended] Windows integration build.
 }
@@ -91,9 +133,7 @@ String _getFileVersion(File file) {
     <String>[]
   );
 
-  if (result.exitCode != 0) {
-    throw Exception('GetVersionInfo failed.');
-  }
+  expect(result, const ProcessResultMatcher());
 
   // Trim trailing new line.
   final String output = result.stdout as String;
@@ -106,9 +146,7 @@ String _getProductVersion(File file) {
     <String>[]
   );
 
-  if (result.exitCode != 0) {
-    throw Exception('GetVersionInfo failed.');
-  }
+  expect(result, const ProcessResultMatcher());
 
   // Trim trailing new line.
   final String output = result.stdout as String;

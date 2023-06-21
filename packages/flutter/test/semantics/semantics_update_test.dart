@@ -4,7 +4,6 @@
 
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -176,7 +175,9 @@ class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
   }
 }
 
-class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
+class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilder {
+  final SemanticsUpdateBuilder _builder = ui.SemanticsUpdateBuilder();
+
   static Map<int, SemanticsNodeUpdateObservation> observations = <int, SemanticsNodeUpdateObservation>{};
 
   @override
@@ -198,15 +199,15 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
     required double thickness,
     required Rect rect,
     required String label,
-    List<ui.StringAttribute>? labelAttributes,
+    List<StringAttribute>? labelAttributes,
     required String value,
-    List<ui.StringAttribute>? valueAttributes,
+    List<StringAttribute>? valueAttributes,
     required String increasedValue,
-    List<ui.StringAttribute>? increasedValueAttributes,
+    List<StringAttribute>? increasedValueAttributes,
     required String decreasedValue,
-    List<ui.StringAttribute>? decreasedValueAttributes,
+    List<StringAttribute>? decreasedValueAttributes,
     required String hint,
-    List<ui.StringAttribute>? hintAttributes,
+    List<StringAttribute>? hintAttributes,
     String? tooltip,
     TextDirection? textDirection,
     required Float64List transform,
@@ -250,6 +251,13 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
       additionalActions: additionalActions,
     );
   }
+
+  @override
+  void updateCustomAction({required int id, String? label, String? hint, int overrideId = -1}) =>
+    _builder.updateCustomAction(id: id, label: label, hint: hint, overrideId: overrideId);
+
+  @override
+  ui.SemanticsUpdate build() => _builder.build();
 }
 
 class SemanticsNodeUpdateObservation {
@@ -304,15 +312,15 @@ class SemanticsNodeUpdateObservation {
   final double thickness;
   final Rect rect;
   final String label;
-  final List<ui.StringAttribute>? labelAttributes;
+  final List<StringAttribute>? labelAttributes;
   final String value;
-  final List<ui.StringAttribute>? valueAttributes;
+  final List<StringAttribute>? valueAttributes;
   final String increasedValue;
-  final List<ui.StringAttribute>? increasedValueAttributes;
+  final List<StringAttribute>? increasedValueAttributes;
   final String decreasedValue;
-  final List<ui.StringAttribute>? decreasedValueAttributes;
+  final List<StringAttribute>? decreasedValueAttributes;
   final String hint;
-  final List<ui.StringAttribute>? hintAttributes;
+  final List<StringAttribute>? hintAttributes;
   final TextDirection? textDirection;
   final Float64List transform;
   final Int32List childrenInTraversalOrder;

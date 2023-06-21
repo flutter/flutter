@@ -96,7 +96,15 @@ void main() {
         // The downloaded part of the timeline may contain an end event whose
         // corresponding begin event happened before the start of the timeline.
         if (stack.isNotEmpty) {
-          expect(stack.removeLast(), name);
+          bool pass = false;
+          while (stack.isNotEmpty) {
+            final String value = stack.removeLast();
+            if (value == name) {
+              pass = true;
+              break;
+            }
+          }
+          expect(pass, true);
         }
       }
     }

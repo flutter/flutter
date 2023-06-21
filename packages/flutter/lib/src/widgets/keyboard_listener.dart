@@ -32,7 +32,7 @@ export 'package:flutter/services.dart' show KeyEvent;
 ///  * [RawKeyboardListener], a similar widget based on the old [RawKeyboard]
 ///    API.
 class KeyboardListener extends StatelessWidget {
-  /// Creates a widget that receives  keyboard events.
+  /// Creates a widget that receives keyboard events.
   ///
   /// For text entry, consider using a [EditableText], which integrates with
   /// on-screen keyboards and input method editors (IMEs).
@@ -50,10 +50,7 @@ class KeyboardListener extends StatelessWidget {
     this.includeSemantics = true,
     this.onKeyEvent,
     required this.child,
-  }) : assert(focusNode != null),
-       assert(autofocus != null),
-       assert(includeSemantics != null),
-       assert(child != null);
+  });
 
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;

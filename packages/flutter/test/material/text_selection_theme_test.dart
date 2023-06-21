@@ -14,6 +14,12 @@ void main() {
     expect(const TextSelectionThemeData().hashCode, const TextSelectionThemeData().copyWith().hashCode);
   });
 
+  test('TextSelectionThemeData lerp special cases', () {
+    expect(TextSelectionThemeData.lerp(null, null, 0), null);
+    const TextSelectionThemeData data = TextSelectionThemeData();
+    expect(identical(TextSelectionThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('TextSelectionThemeData null fields by default', () {
     const TextSelectionThemeData theme = TextSelectionThemeData();
     expect(theme.cursorColor, null);
@@ -54,9 +60,11 @@ void main() {
   });
 
   testWidgets('Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
-    const Color defaultCursorColor = Color(0xff2196f3);
-    const Color defaultSelectionColor = Color(0x662196f3);
-    const Color defaultSelectionHandleColor = Color(0xff2196f3);
+    final ThemeData theme = ThemeData();
+    final bool material3 = theme.useMaterial3;
+    final Color defaultCursorColor = material3 ? theme.colorScheme.primary : const Color(0xff2196f3);
+    final Color defaultSelectionColor = material3 ? theme.colorScheme.primary.withOpacity(0.40) : const Color(0x662196f3);
+    final Color defaultSelectionHandleColor = material3 ? theme.colorScheme.primary : const Color(0xff2196f3);
 
     EditableText.debugDeterministicCursor = true;
     addTearDown(() {
@@ -64,8 +72,9 @@ void main() {
     });
     // Test TextField's cursor & selection color.
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
+      MaterialApp(
+        theme: theme,
+        home: const Material(
           child: TextField(autofocus: true),
         ),
       ),
@@ -76,7 +85,7 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
     expect(renderEditable.cursorColor, defaultCursorColor);
-    expect(renderEditable.selectionColor?.value, defaultSelectionColor.value);
+    expect(renderEditable.selectionColor, defaultSelectionColor);
 
     // Test the selection handle color.
     await tester.pumpWidget(

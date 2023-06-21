@@ -34,8 +34,8 @@ void main() {
       ),
     );
 
-    final Size windowCenter = tester.binding.window.physicalSize /
-        tester.binding.window.devicePixelRatio /
+    final Size windowCenter = tester.view.physicalSize /
+        tester.view.devicePixelRatio /
         2;
     final double windowCenterX = windowCenter.width;
     final double windowCenterY = windowCenter.height;
@@ -126,7 +126,7 @@ class _MockLiveTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding {
     // real devices touches sends event in the global coordinate system.
     // See the documentation of [handlePointerEventForSource] for details.
     if (source == TestBindingEventSource.test) {
-      final PointerEvent globalEvent = event.copyWith(position: localToGlobal(event.position));
+      final PointerEvent globalEvent = event.copyWith(position: localToGlobal(event.position, renderView));
       return super.handlePointerEventForSource(globalEvent);
     }
     return super.handlePointerEventForSource(event, source: source);

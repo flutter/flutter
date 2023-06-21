@@ -99,7 +99,6 @@ class ImageCache {
   /// returning it to its original value will therefore immediately clear the
   /// cache.
   set maximumSize(int value) {
-    assert(value != null);
     assert(value >= 0);
     if (value == maximumSize) {
       return;
@@ -139,7 +138,6 @@ class ImageCache {
   /// returning it to its original value will therefore immediately clear the
   /// cache.
   set maximumSizeBytes(int value) {
-    assert(value != null);
     assert(value >= 0);
     if (value == _maximumSizeBytes) {
       return;
@@ -195,6 +193,9 @@ class ImageCache {
       image.dispose();
     }
     _cache.clear();
+    for (final _PendingImage pendingImage in _pendingImages.values) {
+      pendingImage.removeListener();
+    }
     _pendingImages.clear();
     _currentSizeBytes = 0;
   }
@@ -237,7 +238,6 @@ class ImageCache {
   ///
   ///  * [ImageProvider], for providing images to the [Image] widget.
   bool evict(Object key, { bool includeLive = true }) {
-    assert(includeLive != null);
     if (includeLive) {
       // Remove from live images - the cache will not be able to mark
       // it as complete, and it might be getting evicted because it
@@ -320,11 +320,11 @@ class ImageCache {
   /// `onError` is also provided. When an exception is caught resolving an image,
   /// no completers are cached and `null` is returned instead of a new
   /// completer.
+  ///
+  /// Images that are larger than [maximumSizeBytes] are not cached, and do not
+  /// cause other images in the cache to be evicted.
   ImageStreamCompleter? putIfAbsent(Object key, ImageStreamCompleter Function() loader, { ImageErrorListener? onError }) {
-    assert(key != null);
-    assert(loader != null);
     TimelineTask? timelineTask;
-    TimelineTask? listenerTask;
     if (!kReleaseMode) {
       timelineTask = TimelineTask()..start(
         'ImageCache.putIfAbsent',
@@ -397,7 +397,7 @@ class ImageCache {
     }
 
     if (!kReleaseMode) {
-      listenerTask = TimelineTask(parent: timelineTask)..start('listener');
+      timelineTask!.start('listener');
     }
     // A multi-frame provider may call the listener more than once. We need do make
     // sure that some cleanup works won't run multiple times, such as finishing the
@@ -424,7 +424,7 @@ class ImageCache {
 
       // Only touch if the cache was enabled when resolve was initially called.
       if (trackPendingImage) {
-        _touch(key, image, listenerTask);
+        _touch(key, image, timelineTask);
       } else {
         image.dispose();
       }
@@ -434,14 +434,15 @@ class ImageCache {
         pendingImage.removeListener();
       }
       if (!kReleaseMode && !listenedOnce) {
-        listenerTask!.finish(arguments: <String, dynamic>{
-          'syncCall': syncCall,
-          'sizeInBytes': sizeBytes,
-        });
-        timelineTask!.finish(arguments: <String, dynamic>{
-          'currentSizeBytes': currentSizeBytes,
-          'currentSize': currentSize,
-        });
+        timelineTask!
+          ..finish(arguments: <String, dynamic>{
+            'syncCall': syncCall,
+            'sizeInBytes': sizeBytes,
+          })
+          ..finish(arguments: <String, dynamic>{
+            'currentSizeBytes': currentSizeBytes,
+            'currentSize': currentSize,
+          });
       }
       listenedOnce = true;
     }
@@ -503,9 +504,8 @@ class ImageCache {
   // maximum, or the cache is empty.
   void _checkCacheSize(TimelineTask? timelineTask) {
     final Map<String, dynamic> finishArgs = <String, dynamic>{};
-    TimelineTask? checkCacheTask;
     if (!kReleaseMode) {
-      checkCacheTask = TimelineTask(parent: timelineTask)..start('checkCacheSize');
+      timelineTask!.start('checkCacheSize');
       finishArgs['evictedKeys'] = <String>[];
       finishArgs['currentSize'] = currentSize;
       finishArgs['currentSizeBytes'] = currentSizeBytes;
@@ -523,7 +523,7 @@ class ImageCache {
     if (!kReleaseMode) {
       finishArgs['endSize'] = currentSize;
       finishArgs['endSizeBytes'] = currentSizeBytes;
-      checkCacheTask!.finish(arguments: finishArgs);
+      timelineTask!.finish(arguments: finishArgs);
     }
     assert(_currentSizeBytes >= 0);
     assert(_cache.length <= maximumSize);
@@ -610,8 +610,7 @@ abstract class _CachedImageBase {
   _CachedImageBase(
     this.completer, {
     this.sizeBytes,
-  }) : assert(completer != null),
-       handle = completer.keepAlive();
+  }) : handle = completer.keepAlive();
 
   final ImageStreamCompleter completer;
   int? sizeBytes;

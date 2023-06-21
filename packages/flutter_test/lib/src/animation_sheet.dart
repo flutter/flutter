@@ -89,8 +89,7 @@ class AnimationSheetBuilder {
   AnimationSheetBuilder({
     required this.frameSize,
     this.allLayers = false,
-  }) : assert(!kIsWeb), // Does not support Web. See [AnimationSheetBuilder].
-       assert(frameSize != null);
+  }) : assert(!kIsWeb);
 
   /// The size of the child to be recorded.
   ///
@@ -102,7 +101,7 @@ class AnimationSheetBuilder {
   /// subtree of [record].
   ///
   /// If [allLayers] is false, then the [record] widget will capture the image
-  /// composited by its subtree.  If [allLayers] is true, then the [record] will
+  /// composited by its subtree. If [allLayers] is true, then the [record] will
   /// capture the entire tree composited and clipped by [record]'s region.
   ///
   /// The two modes are identical if there is nothing in front of [record].
@@ -150,7 +149,6 @@ class AnimationSheetBuilder {
     Key? key,
     bool recording = true,
   }) {
-    assert(child != null);
     return _AnimationSheetRecorder(
       key: key,
       size: frameSize,
@@ -439,10 +437,13 @@ Future<ui.Image> _collateFrames(List<ui.Image> frames, Size frameSize, int cells
       Paint(),
     );
   }
-  return recorder.endRecording().toImage(
+  final ui.Picture picture = recorder.endRecording();
+  final ui.Image image = await picture.toImage(
     (frameSize.width * cellsPerRow).toInt(),
     (frameSize.height * rowNum).toInt(),
   );
+  picture.dispose();
+  return image;
 }
 
 // Layout children in a grid of fixed-sized cells.
@@ -454,8 +455,7 @@ class _CellSheet extends StatelessWidget {
     super.key,
     required this.cellSize,
     required this.children,
-  }) : assert(cellSize != null),
-       assert(children != null && children.isNotEmpty);
+  }) : assert(children.isNotEmpty);
 
   final Size cellSize;
   final List<Widget> children;

@@ -119,7 +119,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
 
   @override
   String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
-      'shell', 'platform', 'darwin', 'macos', 'framework', 'Source', 'KeyCodeMap.mm');
+      'shell', 'platform', 'darwin', 'macos', 'framework', 'Source', 'KeyCodeMap.g.mm');
 
   @override
   Map<String, String> mappings() {

@@ -48,6 +48,9 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
 
   @override
+  bool get isFlutterWebWasmEnabled => isEnabled(flutterWebWasm);
+
+  @override
   bool isEnabled(Feature feature) {
     final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);

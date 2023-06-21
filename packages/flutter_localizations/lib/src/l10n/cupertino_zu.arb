@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Khetha konke",
   "tabSemanticsLabel": "Ithebhu $tabIndex kwangu-$tabCount",
   "modalBarrierDismissLabel": "Cashisa",
-  "searchTextFieldPlaceholderLabel": "Sesha"
+  "searchTextFieldPlaceholderLabel": "Sesha",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

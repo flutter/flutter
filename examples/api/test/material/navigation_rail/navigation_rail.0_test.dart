@@ -11,7 +11,7 @@ void main() {
   testWidgets('Navigation rail updates destination on tap',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.NavigationRailExampleApp(),
     );
     final NavigationRail navigationRailWidget =
         tester.firstWidget(find.byType(NavigationRail));
@@ -37,7 +37,7 @@ void main() {
 
   testWidgets('Navigation rail updates label type', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.NavigationRailExampleApp(),
     );
 
     // initial label type set to all.
@@ -56,7 +56,7 @@ void main() {
 
   testWidgets('Navigation rail updates group alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.NavigationRailExampleApp(),
     );
 
     // initial group alignment set top top.
@@ -75,7 +75,7 @@ void main() {
 
   testWidgets('Navigation rail shows leading/trailing widgets', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.NavigationRailExampleApp(),
     );
 
     // Initially leading/trailing widgets are hidden.

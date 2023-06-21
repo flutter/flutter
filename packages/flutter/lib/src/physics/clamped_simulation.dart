@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 
 import 'simulation.dart';
 
+export 'simulation.dart' show Simulation;
+
 /// A simulation that applies limits to another simulation.
 ///
 /// The limits are only applied to the other simulation's outputs. For example,
@@ -34,8 +36,7 @@ class ClampedSimulation extends Simulation {
     this.xMax = double.infinity,
     this.dxMin = double.negativeInfinity,
     this.dxMax = double.infinity,
-  }) : assert(simulation != null),
-       assert(xMax >= xMin),
+  }) : assert(xMax >= xMin),
        assert(dxMax >= dxMin);
 
   /// The simulation being clamped. Calls to [x], [dx], and [isDone] are

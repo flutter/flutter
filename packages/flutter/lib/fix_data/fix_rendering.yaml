@@ -1,0 +1,113 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/docs/development/tools/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are from the Rendering library. *
+version: 1
+transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/66305
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-09-22
+    element:
+      uris: [ 'rendering.dart' ]
+      field: 'overflow'
+      inClass: 'RenderStack'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66305
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-09-22
+    element:
+      uris: [ 'rendering.dart' ]
+      constructor: ''
+      inClass: 'RenderStack'
+    oneOf:
+      - if: "overflow == 'Overflow.clip'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.hardEdge'
+              requiredIf: "overflow == 'Overflow.clip'"
+          - kind: 'removeParameter'
+            name: 'overflow'
+      - if: "overflow == 'Overflow.visible'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.none'
+              requiredIf: "overflow == 'Overflow.visible'"
+          - kind: 'removeParameter'
+            name: 'overflow'
+    variables:
+      overflow:
+        kind: 'fragment'
+        value: 'arguments[overflow]'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'rendering.dart' ]
+      field: 'clipToSize'
+      inClass: 'RenderListWheelViewport'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'rendering.dart' ]
+      constructor: ''
+      inClass: 'RenderListWheelViewport'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.hardEdge'
+            requiredIf: "clipToSize == 'true'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+        - kind: 'addParameter'
+          index: 13
+          name: 'clipBehavior'
+          style: optional_named
+          argumentValue:
+            expression: 'Clip.none'
+            requiredIf: "clipToSize == 'false'"
+        - kind: 'removeParameter'
+          name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+# Before adding a new fix: read instructions at the top of this file.

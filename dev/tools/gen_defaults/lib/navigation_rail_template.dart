@@ -5,24 +5,23 @@
 import 'template.dart';
 
 class NavigationRailTemplate extends TokenTemplate {
-  const NavigationRailTemplate(super.fileName, super.tokens)
-    : super(colorSchemePrefix: '_colors.',
-        textThemePrefix: '_textTheme.',
-      );
+  const NavigationRailTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.',
+  });
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-class _TokenDefaultsM3 extends NavigationRailThemeData {
-  _TokenDefaultsM3(this.context)
-      : super(
-          elevation: ${elevation("md.comp.navigation-rail.container")},
-          groupAlignment: -1,
-          labelType: NavigationRailLabelType.none,
-          useIndicator: true,
-          minWidth: ${tokens["md.comp.navigation-rail.container.width"]},
-          minExtendedWidth: 256,
-        );
+class _${blockName}DefaultsM3 extends NavigationRailThemeData {
+  _${blockName}DefaultsM3(this.context)
+    : super(
+        elevation: ${elevation("md.comp.navigation-rail.container")},
+        groupAlignment: -1,
+        labelType: NavigationRailLabelType.none,
+        useIndicator: true,
+        minWidth: ${getToken('md.comp.navigation-rail.container.width')},
+        minExtendedWidth: 256,
+      );
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -40,20 +39,21 @@ class _TokenDefaultsM3 extends NavigationRailThemeData {
 
   @override IconThemeData? get unselectedIconTheme {
     return IconThemeData(
-      size: ${tokens["md.comp.navigation-rail.icon.size"]},
+      size: ${getToken("md.comp.navigation-rail.icon.size")},
       color: ${componentColor("md.comp.navigation-rail.inactive.icon")},
     );
   }
 
   @override IconThemeData? get selectedIconTheme {
     return IconThemeData(
-      size: ${tokens["md.comp.navigation-rail.icon.size"]},
+      size: ${getToken("md.comp.navigation-rail.icon.size")},
       color: ${componentColor("md.comp.navigation-rail.active.icon")},
     );
   }
 
   @override Color? get indicatorColor => ${componentColor("md.comp.navigation-rail.active-indicator")};
 
+  @override ShapeBorder? get indicatorShape => ${shape("md.comp.navigation-rail.active-indicator")};
 }
 ''';
 }

@@ -147,7 +147,7 @@ class _BackAppBar extends StatelessWidget {
     return IconTheme.merge(
       data: theme.primaryIconTheme,
       child: DefaultTextStyle(
-        style: theme.primaryTextTheme.headline6!,
+        style: theme.primaryTextTheme.titleLarge!,
         child: SizedBox(
           height: _kBackAppBarHeight,
           child: Row(
@@ -241,16 +241,18 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (_controller!.isAnimating || _controller!.status == AnimationStatus.completed)
+    if (_controller!.isAnimating || _controller!.status == AnimationStatus.completed) {
       return;
+    }
 
     final double flingVelocity = details.velocity.pixelsPerSecond.dy / _backdropHeight;
-    if (flingVelocity < 0.0)
+    if (flingVelocity < 0.0) {
       _controller!.fling(velocity: math.max(2.0, -flingVelocity));
-    else if (flingVelocity > 0.0)
+    } else if (flingVelocity > 0.0) {
       _controller!.fling(velocity: math.min(-2.0, -flingVelocity));
-    else
+    } else {
       _controller!.fling(velocity: _controller!.value < 0.5 ? -2.0 : 2.0);
+    }
   }
 
   void _toggleFrontLayer() {

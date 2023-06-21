@@ -50,7 +50,7 @@ class CupertinoTabView extends StatefulWidget {
     this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.restorationScopeId,
-  }) : assert(navigatorObservers != null);
+  });
 
   /// The widget builder for the default route of the tab view
   /// ([Navigator.defaultRouteName], which is `/`).
@@ -175,13 +175,13 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
 
   Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
     final String? name = settings.name;
-    WidgetBuilder? routeBuilder;
+    final WidgetBuilder? routeBuilder;
     String? title;
     if (name == Navigator.defaultRouteName && widget.builder != null) {
       routeBuilder = widget.builder;
       title = widget.defaultTitle;
-    } else if (widget.routes != null) {
-      routeBuilder = widget.routes![name];
+    } else {
+      routeBuilder = widget.routes?[name];
     }
     if (routeBuilder != null) {
       return CupertinoPageRoute<dynamic>(
@@ -190,10 +190,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
         settings: settings,
       );
     }
-    if (widget.onGenerateRoute != null) {
-      return widget.onGenerateRoute!(settings);
-    }
-    return null;
+    return widget.onGenerateRoute?.call(settings);
   }
 
   Route<dynamic>? _onUnknownRoute(RouteSettings settings) {

@@ -153,7 +153,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   int _calculateLeadingGarbage(int firstIndex) {
     RenderBox? walker = firstChild;
     int leadingGarbage = 0;
-    while(walker != null && indexOf(walker) < firstIndex) {
+    while (walker != null && indexOf(walker) < firstIndex) {
       leadingGarbage += 1;
       walker = childAfter(walker);
     }
@@ -163,7 +163,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   int _calculateTrailingGarbage(int targetLastIndex) {
     RenderBox? walker = lastChild;
     int trailingGarbage = 0;
-    while(walker != null && indexOf(walker) > targetLastIndex) {
+    while (walker != null && indexOf(walker) > targetLastIndex) {
       trailingGarbage += 1;
       walker = childBefore(walker);
     }
@@ -257,7 +257,6 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         child.layout(childConstraints);
       }
       trailingChildWithLayout = child;
-      assert(child != null);
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, childParentData.index!);
@@ -351,7 +350,6 @@ class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   double get itemExtent => _itemExtent;
   double _itemExtent;
   set itemExtent(double value) {
-    assert(value != null);
     if (_itemExtent == value) {
       return;
     }
