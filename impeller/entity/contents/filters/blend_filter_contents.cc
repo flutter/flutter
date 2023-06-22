@@ -168,8 +168,15 @@ static std::optional<Entity> AdvancedBlend(
     return true;
   };
 
-  auto out_texture = renderer.MakeSubpass("Advanced Blend Filter",
-                                          ISize(coverage.size), callback);
+  auto subpass_size = ISize(coverage.size);
+  if (entity.GetContents()) {
+    auto coverage_hint = entity.GetContents()->GetCoverageHint();
+    if (coverage_hint.has_value()) {
+      subpass_size = subpass_size.Min(ISize(coverage_hint->size));
+    }
+  }
+  auto out_texture =
+      renderer.MakeSubpass("Advanced Blend Filter", subpass_size, callback);
   if (!out_texture) {
     return std::nullopt;
   }
@@ -531,7 +538,8 @@ static std::optional<Entity> PipelineBlend(
 
       VS::FrameInfo frame_info;
       frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                       Matrix::MakeTranslation(-coverage.origin) *
+                       Matrix::MakeTranslation(
+                           -input->GetCoverage().value_or(coverage).origin) *
                        input->transform;
       frame_info.texture_sampler_y_coord_scale =
           input->texture->GetYCoordScale();
@@ -587,8 +595,16 @@ static std::optional<Entity> PipelineBlend(
     return true;
   };
 
-  auto out_texture = renderer.MakeSubpass("Pipeline Blend Filter",
-                                          ISize(coverage.size), callback);
+  auto subpass_size = ISize(coverage.size);
+  if (entity.GetContents()) {
+    auto coverage_hint = entity.GetContents()->GetCoverageHint();
+    if (coverage_hint.has_value()) {
+      subpass_size = subpass_size.Min(ISize(coverage_hint->size));
+    }
+  }
+  auto out_texture =
+      renderer.MakeSubpass("Pipeline Blend Filter", subpass_size, callback);
+
   if (!out_texture) {
     return std::nullopt;
   }

@@ -154,6 +154,11 @@ bool Entity::Render(const ContentContext& renderer,
     return true;
   }
 
+  if (!contents_->GetCoverageHint().has_value()) {
+    contents_->SetCoverageHint(
+        Rect::MakeSize(parent_pass.GetRenderTargetSize()));
+  }
+
   return contents_->Render(renderer, *this, parent_pass);
 }
 
