@@ -25,6 +25,11 @@ ShellTest::ShellTest()
                    ThreadHost::Type::Platform | ThreadHost::Type::IO |
                        ThreadHost::Type::UI | ThreadHost::Type::RASTER) {}
 
+void ShellTest::SendPlatformMessage(Shell* shell,
+                                    std::unique_ptr<PlatformMessage> message) {
+  shell->OnPlatformViewDispatchPlatformMessage(std::move(message));
+}
+
 void ShellTest::SendEnginePlatformMessage(
     Shell* shell,
     std::unique_ptr<PlatformMessage> message) {

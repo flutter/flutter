@@ -899,6 +899,7 @@ ORIGIN: ../../../flutter/fml/memory/ref_ptr.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/memory/ref_ptr_internal.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/memory/task_runner_checker.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/memory/task_runner_checker.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/memory/thread_checker.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/memory/thread_checker.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/memory/weak_ptr.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/memory/weak_ptr_internal.cc + ../../../flutter/LICENSE
@@ -3577,6 +3578,7 @@ FILE: ../../../flutter/fml/memory/ref_ptr.h
 FILE: ../../../flutter/fml/memory/ref_ptr_internal.h
 FILE: ../../../flutter/fml/memory/task_runner_checker.cc
 FILE: ../../../flutter/fml/memory/task_runner_checker.h
+FILE: ../../../flutter/fml/memory/thread_checker.cc
 FILE: ../../../flutter/fml/memory/thread_checker.h
 FILE: ../../../flutter/fml/memory/weak_ptr.h
 FILE: ../../../flutter/fml/memory/weak_ptr_internal.cc

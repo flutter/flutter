@@ -72,61 +72,78 @@ LogMessage::LogMessage(LogSeverity severity,
   }
 }
 
+// static
+thread_local std::ostringstream* LogMessage::capture_next_log_stream_ = nullptr;
+
+void CaptureNextLog(std::ostringstream* stream) {
+  LogMessage::CaptureNextLog(stream);
+}
+
+// static
+void LogMessage::CaptureNextLog(std::ostringstream* stream) {
+  LogMessage::capture_next_log_stream_ = stream;
+}
+
 LogMessage::~LogMessage() {
 #if !defined(OS_FUCHSIA)
   stream_ << std::endl;
 #endif
 
+  if (capture_next_log_stream_) {
+    *capture_next_log_stream_ << stream_.str();
+    capture_next_log_stream_ = nullptr;
+  } else {
 #if defined(FML_OS_ANDROID)
-  android_LogPriority priority =
-      (severity_ < 0) ? ANDROID_LOG_VERBOSE : ANDROID_LOG_UNKNOWN;
-  switch (severity_) {
-    case LOG_INFO:
-      priority = ANDROID_LOG_INFO;
-      break;
-    case LOG_WARNING:
-      priority = ANDROID_LOG_WARN;
-      break;
-    case LOG_ERROR:
-      priority = ANDROID_LOG_ERROR;
-      break;
-    case LOG_FATAL:
-      priority = ANDROID_LOG_FATAL;
-      break;
-  }
-  __android_log_write(priority, "flutter", stream_.str().c_str());
+    android_LogPriority priority =
+        (severity_ < 0) ? ANDROID_LOG_VERBOSE : ANDROID_LOG_UNKNOWN;
+    switch (severity_) {
+      case LOG_INFO:
+        priority = ANDROID_LOG_INFO;
+        break;
+      case LOG_WARNING:
+        priority = ANDROID_LOG_WARN;
+        break;
+      case LOG_ERROR:
+        priority = ANDROID_LOG_ERROR;
+        break;
+      case LOG_FATAL:
+        priority = ANDROID_LOG_FATAL;
+        break;
+    }
+    __android_log_write(priority, "flutter", stream_.str().c_str());
 #elif defined(FML_OS_IOS)
-  syslog(LOG_ALERT, "%s", stream_.str().c_str());
+    syslog(LOG_ALERT, "%s", stream_.str().c_str());
 #elif defined(OS_FUCHSIA)
-  fx_log_severity_t fx_severity;
-  switch (severity_) {
-    case LOG_INFO:
-      fx_severity = FX_LOG_INFO;
-      break;
-    case LOG_WARNING:
-      fx_severity = FX_LOG_WARNING;
-      break;
-    case LOG_ERROR:
-      fx_severity = FX_LOG_ERROR;
-      break;
-    case LOG_FATAL:
-      fx_severity = FX_LOG_FATAL;
-      break;
-    default:
-      if (severity_ < 0) {
-        fx_severity = fx_log_severity_from_verbosity(-severity_);
-      } else {
-        // Unknown severity. Use INFO.
+    fx_log_severity_t fx_severity;
+    switch (severity_) {
+      case LOG_INFO:
         fx_severity = FX_LOG_INFO;
-      }
-  }
-  fx_logger_log_with_source(fx_log_get_logger(), fx_severity, nullptr, file_,
-                            line_, stream_.str().c_str());
+        break;
+      case LOG_WARNING:
+        fx_severity = FX_LOG_WARNING;
+        break;
+      case LOG_ERROR:
+        fx_severity = FX_LOG_ERROR;
+        break;
+      case LOG_FATAL:
+        fx_severity = FX_LOG_FATAL;
+        break;
+      default:
+        if (severity_ < 0) {
+          fx_severity = fx_log_severity_from_verbosity(-severity_);
+        } else {
+          // Unknown severity. Use INFO.
+          fx_severity = FX_LOG_INFO;
+        }
+    }
+    fx_logger_log_with_source(fx_log_get_logger(), fx_severity, nullptr, file_,
+                              line_, stream_.str().c_str());
 #else
-  // Don't use std::cerr here, because it may not be initialized properly yet.
-  fprintf(stderr, "%s", stream_.str().c_str());
-  fflush(stderr);
+    // Don't use std::cerr here, because it may not be initialized properly yet.
+    fprintf(stderr, "%s", stream_.str().c_str());
+    fflush(stderr);
 #endif
+  }
 
   if (severity_ >= LOG_FATAL) {
     KillProcess();
