@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <strstream>
 #define FML_USED_ON_EMBEDDER
 
 #include <algorithm>
@@ -4229,6 +4230,48 @@ TEST_F(ShellTest, NotifyDestroyed) {
 
   DestroyShell(std::move(shell), task_runners);
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(ShellTest, PrintsErrorWhenPlatformMessageSentFromWrongThread) {
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG || OS_FUCHSIA
+  GTEST_SKIP() << "Test is for debug mode only on non-fuchsia targets.";
+#endif
+  Settings settings = CreateSettingsForFixture();
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::Platform);
+  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+  auto shell = CreateShell(settings, task_runners);
+
+  auto stream = std::make_shared<std::ostringstream>();
+  fml::CaptureNextLog(stream.get());
+
+  // The next call will result in a thread checker violation.
+  fml::ThreadChecker::DisableNextThreadCheckFailure();
+  SendPlatformMessage(shell.get(), std::make_unique<PlatformMessage>(
+                                       "com.test.plugin", nullptr));
+
+  EXPECT_THAT(stream->str(),
+              ::testing::EndsWith(
+                  "The 'com.test.plugin' channel sent a message from native to "
+                  "Flutter on a non-platform thread. Platform channel messages "
+                  "must be sent on the platform thread. Failure to do so may "
+                  "result in data loss or crashes, and must be fixed in the "
+                  "plugin or application code creating that channel.\nSee "
+                  "https://docs.flutter.dev/platform-integration/"
+                  "platform-channels#channels-and-platform-threading for more "
+                  "information.\n"));
+
+  stream = std::make_shared<std::ostringstream>();
+  fml::CaptureNextLog(stream.get());
+
+  // The next call will result in a thread checker violation.
+  fml::ThreadChecker::DisableNextThreadCheckFailure();
+  SendPlatformMessage(shell.get(), std::make_unique<PlatformMessage>(
+                                       "com.test.plugin", nullptr));
+
+  EXPECT_EQ(stream->str(), "");
 }
 
 }  // namespace testing

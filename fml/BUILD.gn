@@ -47,6 +47,7 @@ source_set("fml") {
     "memory/ref_ptr_internal.h",
     "memory/task_runner_checker.cc",
     "memory/task_runner_checker.h",
+    "memory/thread_checker.cc",
     "memory/thread_checker.h",
     "memory/weak_ptr.h",
     "memory/weak_ptr_internal.cc",
