@@ -470,6 +470,26 @@ typedef GestureCancelCallback = void Function();
 mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // Public state available to [OneSequenceGestureRecognizer].
 
+  // The [PointerDownEvent] that was most recently tracked in [addAllowedPointer].
+  //
+  // This value will be null if a [PointerDownEvent] has not been tracked yet in
+  // [addAllowedPointer] or the timer between two taps has elapsed.
+  //
+  // This value is only reset when the timer between a [PointerUpEvent] and the
+  // [PointerDownEvent] times out or when a new [PointerDownEvent] is tracked in
+  // [addAllowedPointer].
+  PointerDownEvent? get currentDown => _down;
+
+  // The [PointerUpEvent] that was most recently tracked in [handleEvent].
+  //
+  // This value will be null if a [PointerUpEvent] has not been tracked yet in
+  // [handleEvent] or the timer between two taps has elapsed.
+  //
+  // This value is only reset when the timer between a [PointerUpEvent] and the
+  // [PointerDownEvent] times out or when a new [PointerDownEvent] is tracked in
+  // [addAllowedPointer].
+  PointerUpEvent? get currentUp => _up;
+
   // The number of consecutive taps that the most recently tracked [PointerDownEvent]
   // in [_down] represents.
   //
@@ -513,12 +533,17 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // For timing taps.
   Timer? _consecutiveTapTimer;
   Offset? _lastTapOffset;
+  bool _consecutiveTapTimerHasElapsed = false;
 
   // When tracking a tap, the [consecutiveTapCount] is incremented if the given tap
   // falls under the tolerance specifications and reset to 1 if not.
   @override
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
+    if (_consecutiveTapTimerHasElapsed) {
+      _tapTrackerReset();
+      _consecutiveTapTimerHasElapsed = false;
+    }
     if (maxConsecutiveTap == _consecutiveTapCount) {
       _tapTrackerReset();
     }
@@ -603,7 +628,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   }
 
   void _consecutiveTapTimerStart() {
-    _consecutiveTapTimer ??= Timer(kDoubleTapTimeout, _tapTrackerReset);
+    _consecutiveTapTimer ??= Timer(kDoubleTapTimeout, _consecutiveTapTimerTimeout);
   }
 
   void _consecutiveTapTimerStop() {
@@ -611,6 +636,14 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
       _consecutiveTapTimer!.cancel();
       _consecutiveTapTimer = null;
     }
+  }
+
+  void _consecutiveTapTimerTimeout() {
+    // The consecutive tap timer may time out before a tap down/tap up event
+    // is fired. In this case we should not reset the tap tracker state immediately.
+    // Instead the `_consecutiveTapTimerHasElapsed` flag is used to determine
+    // if we should reset the tap tracker on the next call to [addAllowedPointer].
+    _consecutiveTapTimerHasElapsed = true;
   }
 
   void _tapTrackerReset() {
@@ -876,8 +909,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   bool _pastSlopTolerance = false;
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
-  PointerDownEvent? _localDown;
-  PointerUpEvent? _localUp;
 
   // Primary pointer being tracked by this recognizer.
   int? _primaryPointer;
@@ -950,7 +981,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   void addAllowedPointer(PointerDownEvent event) {
     if (_dragState == _DragState.ready) {
       super.addAllowedPointer(event);
-      _localDown = event;
       _primaryPointer = event.pointer;
       _globalDistanceMoved = 0.0;
       _globalDistanceMovedAllAxes = 0.0;
@@ -982,8 +1012,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     _acceptedActivePointers.add(pointer);
 
     // Called when this recognizer is accepted by the [GestureArena].
-    if (_localDown != null) {
-      _checkTapDown(_localDown!);
+    if (currentDown != null) {
+      _checkTapDown(currentDown!);
     }
 
     _wonArenaForPrimaryPointer = true;
@@ -992,12 +1022,12 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     // moved a sufficient global distance.
     if (_start != null) {
       assert(_dragState == _DragState.accepted);
-      assert(_localUp == null);
+      assert(currentUp == null);
       _acceptDrag(_start!);
     }
 
-    if (_localUp != null) {
-      _checkTapUp(_localUp!);
+    if (currentUp != null) {
+      _checkTapUp(currentUp!);
     }
   }
 
@@ -1015,12 +1045,12 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
             // If the recognizer has already won the arena for the primary pointer being tracked
             // but the pointer has exceeded the tap tolerance, then the pointer is accepted as a
             // drag gesture.
-            if (_localDown != null) {
+            if (currentDown != null) {
               if (!_acceptedActivePointers.remove(pointer)) {
                 resolvePointer(pointer, GestureDisposition.rejected);
               }
               _dragState = _DragState.accepted;
-              _acceptDrag(_localDown!);
+              _acceptDrag(currentDown!);
               _checkDragEnd();
             }
           } else {
@@ -1029,8 +1059,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
           }
         } else {
           // The pointer is accepted as a tap.
-          if (_localUp != null) {
-            _checkTapUp(_localUp!);
+          if (currentUp != null) {
+            _checkTapUp(currentUp!);
           }
         }
 
@@ -1085,7 +1115,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
         }
       }
     } else if (event is PointerUpEvent) {
-      _localUp = event;
       if (_dragState == _DragState.possible) {
         // The drag has not been accepted before a [PointerUpEvent], therefore the recognizer
         // attempts to recognize a tap.
@@ -1295,8 +1324,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   }
 
   void _didExceedDeadline() {
-    if (_localDown != null) {
-      _checkTapDown(_localDown!);
+    if (currentDown != null) {
+      _checkTapDown(currentDown!);
 
       if (consecutiveTapCount > 1) {
         // If our consecutive tap count is greater than 1, i.e. is a double tap or greater,
@@ -1320,8 +1349,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     _sentTapDown = false;
     _wonArenaForPrimaryPointer = false;
     _primaryPointer = null;
-    _localDown = null;
-    _localUp = null;
   }
 
   void _resetDragUpdateThrottle() {
