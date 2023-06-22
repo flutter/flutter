@@ -5956,4 +5956,9 @@ class NavigationNotification extends Notification {
   /// Indicates that the originator of this [Notification] is capable of
   /// handling a navigation pop.
   final bool canHandlePop;
+
+  @override
+  String toString() {
+    return 'NavigationNotification canHandlePop: $canHandlePop';
+  }
 }
