@@ -162,16 +162,6 @@ struct TRect {
     return std::max(origin.y, origin.y + size.height);
   }
 
-  constexpr TPoint<T> GetLeftTop() const { return {GetLeft(), GetTop()}; }
-
-  constexpr TPoint<T> GetRightTop() const { return {GetRight(), GetTop()}; }
-
-  constexpr TPoint<T> GetLeftBottom() const { return {GetLeft(), GetBottom()}; }
-
-  constexpr TPoint<T> GetRightBottom() const {
-    return {GetRight(), GetBottom()};
-  }
-
   constexpr std::array<T, 4> GetLTRB() const {
     return {GetLeft(), GetTop(), GetRight(), GetBottom()};
   }
