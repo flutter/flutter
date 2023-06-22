@@ -542,7 +542,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     super.addAllowedPointer(event);
     if (_consecutiveTapTimerHasElapsed) {
       _tapTrackerReset();
-      _consecutiveTapTimerHasElapsed = false;
     }
     if (maxConsecutiveTap == _consecutiveTapCount) {
       _tapTrackerReset();
@@ -659,6 +658,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     _keysPressedOnDown = null;
     _down = null;
     _up = null;
+    _consecutiveTapTimerHasElapsed = false;
   }
 }
 
