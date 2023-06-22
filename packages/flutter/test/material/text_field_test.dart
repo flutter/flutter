@@ -2178,7 +2178,7 @@ void main() {
     await gesture.up();
     // This is to allow the GestureArena to decide a winner between TapGestureRecognizer,
     // DoubleTapGestureRecognizer, and BaseTapAndDragGestureRecognizer.
-    await tester.pumpAndSettle(Duration(milliseconds: 500));
+    await tester.pumpAndSettle(Duration(milliseconds: 300));
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
 
