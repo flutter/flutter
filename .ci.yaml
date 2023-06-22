@@ -262,7 +262,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "android_virtual_device", "version": "33"}
+          {"dependency": "android_virtual_device", "version": "33"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
         ["framework","hostonly","linux"]
