@@ -215,6 +215,13 @@ class EncodableValue : public internal::EncodableValueVariant {
     }
     return std::get<int64_t>(*this);
   }
+
+  // Explicitly provide operator<, delegating to std::variant's operator<.
+  // There are issues with with the way the standard library-provided
+  // < and <=> comparisons interact with classes derived from variant.
+  friend bool operator<(const EncodableValue& lhs, const EncodableValue& rhs) {
+    return static_cast<const super&>(lhs) < static_cast<const super&>(rhs);
+  }
 };
 
 }  // namespace flutter
