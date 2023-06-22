@@ -1335,6 +1335,14 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
     final bool flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
     final Matrix4 paragraphToFragmentTransform = getTransformToParagraph()..invert();
+    final TextSelection selection = TextSelection(
+      baseOffset: selectionStart,
+      extentOffset: selectionEnd,
+    );
+    final List<Rect> selectionRects = <Rect>[];
+    for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
+      selectionRects.add(textBox.toRect());
+    }
     return SelectionGeometry(
       startSelectionPoint: SelectionPoint(
         localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, startOffsetInParagraphCoordinates),
@@ -1346,6 +1354,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         lineHeight: paragraph._textPainter.preferredLineHeight,
         handleType: flipHandles ? TextSelectionHandleType.left : TextSelectionHandleType.right,
       ),
+      selectionRects: selectionRects,
       status: _textSelectionStart!.offset == _textSelectionEnd!.offset
         ? SelectionStatus.collapsed
         : SelectionStatus.uncollapsed,
