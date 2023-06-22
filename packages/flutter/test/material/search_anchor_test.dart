@@ -270,6 +270,30 @@ void main() {
     expect(changeCount, 2);
   });
 
+  testWidgets('SearchBar respects onSubmitted property', (WidgetTester tester) async {
+    String submittedQuery = '';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: SearchBar(
+                  onSubmitted: (String text) {
+                    submittedQuery = text;
+                  },
+                ),
+              );
+            }
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(SearchBar), 'query');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+
+    expect(submittedQuery, equals('query'));
+  });
+
   testWidgets('SearchBar respects constraints property', (WidgetTester tester) async {
     const BoxConstraints constraints = BoxConstraints(maxWidth: 350.0, minHeight: 80);
     await tester.pumpWidget(
