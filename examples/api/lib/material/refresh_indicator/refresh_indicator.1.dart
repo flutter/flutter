@@ -47,10 +47,10 @@ class RefreshIndicatorExample extends StatelessWidget {
         notificationPredicate: (ScrollNotification notification) {
           return notification.depth == 1;
         },
-        child: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Container(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: Container(
                 height: 100,
                 alignment: Alignment.center,
                 color: Colors.pink[100],
@@ -65,10 +65,12 @@ class RefreshIndicatorExample extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
+            ),
+            SliverToBoxAdapter(
+              child: Container(
                 color: Colors.green[100],
+                height: 300,
                 child: ListView.builder(
-                  shrinkWrap: true,
                   itemCount: 25,
                   itemBuilder: (BuildContext context, int index) {
                     return const ListTile(
@@ -78,8 +80,17 @@ class RefreshIndicatorExample extends StatelessWidget {
                   },
                 ),
               ),
-            ],
-          ),
+            ),
+            SliverList.builder(
+              itemCount: 20,
+              itemBuilder: (BuildContext context, int index) {
+                return const ListTile(
+                  title: Text('Pull down here'),
+                  subtitle: Text("Refresh indicator won't trigger"),
+                );
+              }
+            )
+          ],
         ),
       ),
     );
