@@ -1045,7 +1045,8 @@ class SearchBar extends StatefulWidget {
   /// Invoked upon user input.
   final ValueChanged<String>? onChanged;
 
-  /// {@macro flutter.widgets.editableText.onSubmitted}
+  /// Called when the user indicates that they are done editing the text in the
+  /// field.
   final ValueChanged<String>? onSubmitted;
 
   /// Optional size constraints for the search bar.
