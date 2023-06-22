@@ -489,7 +489,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   }
 
   void updateTweens(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
+    final RenderBox navigator = Navigator.of(context).context.findRenderObject()! as RenderBox;
+    final Size screenSize = navigator.size;
     final Rect anchorRect = getRect() ?? Rect.zero;
 
     final BoxConstraints effectiveConstraints = viewConstraints ?? viewTheme.constraints ?? viewDefaults.constraints!;
