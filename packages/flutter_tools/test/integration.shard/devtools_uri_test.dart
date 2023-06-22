@@ -28,7 +28,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/126691
   testWithoutContext('flutter run --start-paused prints DevTools URI', () async {
     final Completer<void> completer = Completer<void>();
-    final RegExp matcher = RegExp(r'The Flutter DevTools debugger and profiler on');
+    final String matcher = 'The Flutter DevTools debugger and profiler on';
 
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final Process process = await processManager.start(<String>[
@@ -39,14 +39,14 @@ void main() {
       'flutter-tester',
     ], workingDirectory: tempDir.path);
 
-    late final StreamSubscription<String> sub;
+    final StreamSubscription<String> sub;
     sub = process.stdout.transform(utf8.decoder).listen((String message) {
       if (message.contains(matcher)) {
         completer.complete();
-        sub.cancel();
       }
     });
     await completer.future;
+    sub.cancel();
     process.kill();
     await process.exitCode;
   });
