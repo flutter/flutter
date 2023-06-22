@@ -90,10 +90,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       assert(!_readyToAnnounce);
       return;
     }
-    if (_shutdown) {
-      // If we're shutting down, no point reporting the debugger list.
-      return;
-    }
 
     final Uri? devToolsUrl = _devToolsLauncher!.devToolsUrl;
     if (devToolsUrl != null) {
@@ -123,6 +119,14 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     // them until after we've output the DevTools connection details.
     if (!isStartPaused) {
       await callServiceExtensions();
+    }
+
+    // This check needs to happen after the possible asynchronous call above,
+    // otherwise a shutdown event might be missed and the DevTools launcher may
+    // no longer be initialized.
+    if (_shutdown) {
+      // If we're shutting down, no point reporting the debugger list.
+      return;
     }
 
     _readyToAnnounce = true;
