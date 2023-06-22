@@ -94,10 +94,7 @@ struct TRect {
                  {size.width - r.size.width, size.height - r.size.height});
   }
 
-  constexpr TRect operator*(Type scale) const {
-    return TRect({origin.x * scale, origin.y * scale},
-                 {size.width * scale, size.height * scale});
-  }
+  constexpr TRect operator*(Type scale) const { return Scale(scale); }
 
   constexpr TRect operator*(const TRect& r) const {
     return TRect({origin.x * r.origin.x, origin.y * r.origin.y},
@@ -106,6 +103,20 @@ struct TRect {
 
   constexpr bool operator==(const TRect& r) const {
     return origin == r.origin && size == r.size;
+  }
+
+  constexpr TRect Scale(Type scale) const {
+    return TRect({origin.x * scale, origin.y * scale},
+                 {size.width * scale, size.height * scale});
+  }
+
+  constexpr TRect Scale(TPoint<T> scale) const {
+    return TRect({origin.x * scale.x, origin.y * scale.y},
+                 {size.width * scale.x, size.height * scale.y});
+  }
+
+  constexpr TRect Scale(TSize<T> scale) const {
+    return Scale(TPoint<T>(scale));
   }
 
   constexpr bool Contains(const TPoint<Type>& p) const {
@@ -255,7 +266,7 @@ struct TRect {
 
   /// @brief  Returns a rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  constexpr TRect<T> Expand(T left, T top, T right, T bottom) {
+  constexpr TRect<T> Expand(T left, T top, T right, T bottom) const {
     return TRect(origin.x - left,            //
                  origin.y - top,             //
                  size.width + left + right,  //
@@ -264,11 +275,21 @@ struct TRect {
 
   /// @brief  Returns a rectangle with expanded edges in all directions.
   ///         Negative expansion results in shrinking.
-  constexpr TRect<T> Expand(T amount) {
+  constexpr TRect<T> Expand(T amount) const {
     return TRect(origin.x - amount,        //
                  origin.y - amount,        //
                  size.width + amount * 2,  //
                  size.height + amount * 2);
+  }
+
+  /// @brief  Returns a new rectangle that represents the projection of the
+  ///         source rectangle onto this rectangle. In other words, the source
+  ///         rectangle is redefined in terms of the corrdinate space of this
+  ///         rectangle.
+  constexpr TRect<T> Project(TRect<T> source) const {
+    return source.Shift(-origin).Scale(
+        TSize<T>(1.0 / static_cast<Scalar>(size.width),
+                 1.0 / static_cast<Scalar>(size.height)));
   }
 };
 
