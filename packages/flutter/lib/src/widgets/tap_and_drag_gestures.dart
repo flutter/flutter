@@ -491,7 +491,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   PointerUpEvent? get currentUp => _up;
 
   // The number of consecutive taps that the most recently tracked [PointerDownEvent]
-  // in [_down] represents.
+  // in [currentDown] represents.
   //
   // This value defaults to zero, meaning a tap series is not currently being tracked.
   //
