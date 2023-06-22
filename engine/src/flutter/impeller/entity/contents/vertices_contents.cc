@@ -57,8 +57,10 @@ bool VerticesContents::Render(const ContentContext& renderer,
     return true;
   }
   std::shared_ptr<Contents> src_contents = src_contents_;
+  src_contents->SetCoverageHint(GetCoverageHint());
   if (geometry_->HasTextureCoordinates()) {
     auto contents = std::make_shared<VerticesUVContents>(*this);
+    contents->SetCoverageHint(GetCoverageHint());
     if (!geometry_->HasVertexColors()) {
       contents->SetAlpha(alpha_);
       return contents->Render(renderer, entity, pass);
@@ -67,6 +69,7 @@ bool VerticesContents::Render(const ContentContext& renderer,
   }
 
   auto dst_contents = std::make_shared<VerticesColorContents>(*this);
+  dst_contents->SetCoverageHint(GetCoverageHint());
 
   std::shared_ptr<Contents> contents;
   if (blend_mode_ == BlendMode::kDestination) {
@@ -76,9 +79,11 @@ bool VerticesContents::Render(const ContentContext& renderer,
         blend_mode_, {FilterInput::Make(dst_contents, false),
                       FilterInput::Make(src_contents, false)});
     color_filter_contents->SetAlpha(alpha_);
+    color_filter_contents->SetCoverageHint(GetCoverageHint());
     contents = color_filter_contents;
   }
 
+  FML_DCHECK(contents->GetCoverageHint() == GetCoverageHint());
   return contents->Render(renderer, entity, pass);
 }
 
@@ -108,11 +113,11 @@ bool VerticesUVContents::Render(const ContentContext& renderer,
   auto src_contents = parent_.GetSourceContents();
 
   auto snapshot =
-      src_contents->RenderToSnapshot(renderer,      // renderer
-                                     entity,        // entity
-                                     std::nullopt,  // coverage_limit
-                                     std::nullopt,  // sampler_descriptor
-                                     true,          // msaa_enabled
+      src_contents->RenderToSnapshot(renderer,           // renderer
+                                     entity,             // entity
+                                     GetCoverageHint(),  // coverage_limit
+                                     std::nullopt,       // sampler_descriptor
+                                     true,               // msaa_enabled
                                      "VerticesUVContents Snapshot");  // label
   if (!snapshot.has_value()) {
     return false;

@@ -198,4 +198,29 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   return true;
 }
 
+std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
+    const ContentContext& renderer,
+    const Entity& entity,
+    std::optional<Rect> coverage_limit,
+    const std::optional<SamplerDescriptor>& sampler_descriptor,
+    bool msaa_enabled,
+    const std::string& label) const {
+  if (GetInverseMatrix().IsIdentity()) {
+    return Snapshot{
+        .texture = texture_,
+        .transform = entity.GetTransformation(),
+        .sampler_descriptor = sampler_descriptor.value_or(sampler_descriptor_),
+        .opacity = GetOpacity(),
+    };
+  }
+
+  return Contents::RenderToSnapshot(
+      renderer,                                          // renderer
+      entity,                                            // entity
+      std::nullopt,                                      // coverage_limit
+      sampler_descriptor.value_or(sampler_descriptor_),  // sampler_descriptor
+      true,                                              // msaa_enabled
+      label);                                            // label
+}
+
 }  // namespace impeller
