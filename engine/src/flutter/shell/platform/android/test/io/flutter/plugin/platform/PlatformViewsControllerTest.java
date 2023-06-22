@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.robolectric.Shadows.shadowOf;
 
+import android.app.Presentation;
 import android.content.Context;
 import android.content.MutableContextWrapper;
 import android.content.res.AssetManager;
@@ -57,6 +58,7 @@ import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.shadows.ShadowDialog;
 import org.robolectric.shadows.ShadowSurfaceView;
 
 @Config(manifest = Config.NONE)
@@ -570,7 +572,8 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
-  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  @Config(
+      shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class, ShadowPresentation.class})
   public void onDetachedFromJNI_clearsPlatformViewContext() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
 
@@ -601,7 +604,8 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
-  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  @Config(
+      shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class, ShadowPresentation.class})
   public void onPreEngineRestart_clearsPlatformViewContext() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
 
@@ -1518,6 +1522,34 @@ public class PlatformViewsControllerTest {
     @Implementation
     public void dispatch(Runnable runnable) {
       runnable.run();
+    }
+  }
+
+  /**
+   * The shadow class of {@link Presentation} to simulate Presentation showing logic.
+   *
+   * <p>Robolectric doesn't support VirtualDisplay creating correctly now, so this shadow class is
+   * used to simulate custom logic for Presentation.
+   */
+  @Implements(Presentation.class)
+  public static class ShadowPresentation extends ShadowDialog {
+    private boolean isShowing = false;
+
+    public ShadowPresentation() {}
+
+    @Implementation
+    protected void show() {
+      isShowing = true;
+    }
+
+    @Implementation
+    protected void dismiss() {
+      isShowing = false;
+    }
+
+    @Implementation
+    protected boolean isShowing() {
+      return isShowing;
     }
   }
 
