@@ -95,6 +95,7 @@ class _PopScopeState extends State<PopScope> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _route?.unregisterPopInterface(widget);
     _route = ModalRoute.of(context);
     _route?.registerPopInterface(widget);
   }
