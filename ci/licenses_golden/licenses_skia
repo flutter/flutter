@@ -1,4 +1,4 @@
-Signature: 917551591f118136901d8d372af78b84
+Signature: 58ea8ee21adb9a9c4ddfdc55b4c079a5
 
 ====================================================================================================
 LIBRARY: etc1
@@ -6832,7 +6832,6 @@ ORIGIN: ../../../third_party/skia/src/base/SkASAN.h + ../../../third_party/skia/
 ORIGIN: ../../../third_party/skia/src/base/SkBlockAllocator.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkBlockAllocator.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkIDChangeListener.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/core/SkMatrixProvider.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRuntimeEffectPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkYUVAInfo.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkYUVAPixmaps.cpp + ../../../third_party/skia/LICENSE
@@ -6971,7 +6970,6 @@ FILE: ../../../third_party/skia/src/base/SkASAN.h
 FILE: ../../../third_party/skia/src/base/SkBlockAllocator.cpp
 FILE: ../../../third_party/skia/src/base/SkBlockAllocator.h
 FILE: ../../../third_party/skia/src/core/SkIDChangeListener.cpp
-FILE: ../../../third_party/skia/src/core/SkMatrixProvider.h
 FILE: ../../../third_party/skia/src/core/SkRuntimeEffectPriv.h
 FILE: ../../../third_party/skia/src/core/SkYUVAInfo.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVAPixmaps.cpp
