@@ -607,7 +607,7 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
   });
 
-    testWidgets('SliverMainAxisGroup skips painting invisible children', (WidgetTester tester) async {
+  testWidgets('SliverMainAxisGroup skips painting invisible children', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
 
     const Key key1 = Key('Box 1');
@@ -619,29 +619,29 @@ void main() {
         controller: controller,
         slivers: <Widget>[
           SliverToBoxAdapter(
+            key: key1,
             child: Container(
-              key: key1,
               height: 300,
               decoration: const BoxDecoration(color: Colors.amber)
             )
           ),
           SliverToBoxAdapter(
+            key: key2,
             child: Container(
-              key: key2,
               height: 400,
               decoration: const BoxDecoration(color: Colors.amber)
             )
           ),
           SliverToBoxAdapter(
+            key: key3,
             child: Container(
-              key: key3,
               height: 500,
               decoration: const BoxDecoration(color: Colors.amber)
             )
           ),
           SliverToBoxAdapter(
+            key: key4,
             child: Container(
-              key: key4,
               height: 300,
               decoration: const BoxDecoration(color: Colors.amber)
             )
