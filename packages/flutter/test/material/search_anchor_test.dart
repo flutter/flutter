@@ -274,16 +274,12 @@ void main() {
     String submittedQuery = '';
     await tester.pumpWidget(
       MaterialApp(
-        home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: SearchBar(
-                  onSubmitted: (String text) {
-                    submittedQuery = text;
-                  },
-                ),
-              );
-            }
+        home: Material(
+          child: SearchBar(
+            onSubmitted: (String text) {
+              submittedQuery = text;
+            },
+          ),
         ),
       ),
     );
