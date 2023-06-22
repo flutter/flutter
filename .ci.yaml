@@ -424,7 +424,7 @@ targets:
       task_name: abstract_method_smoke_test
       physical_devices: >-
         ["--device", "model=oriole,version=33"]
-      virtual_device: >-
+      virtual_devices: >-
         []
 
   - name: Linux firebase_abstract_method_smoke_test
@@ -439,6 +439,20 @@ targets:
       tags: >
         ["firebaselab"]
       task_name: abstract_method_smoke_test
+      physical_devices: >-
+        [
+          "--device", "model=redfin,version=30",
+          "--device", "model=griffin,version=24"
+        ]
+      virtual_devices: >-
+        [
+          "--device", "model=Nexus5,version=21",
+          "--device", "model=Nexus5,version=22",
+          "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus6P,version=26",
+          "--device", "model=Nexus6P,version=27",
+          "--device", "model=NexusLowRes,version=29"
+        ]
 
   - name: Linux firebase_android_embedding_v2_smoke_test
     recipe: firebaselab/firebaselab
@@ -451,6 +465,20 @@ targets:
       tags: >
         ["firebaselab"]
       task_name: android_embedding_v2_smoke_test
+      physical_devices: >-
+        [
+          "--device", "model=redfin,version=30",
+          "--device", "model=griffin,version=24"
+        ]
+      virtual_devices: >-
+        [
+          "--device", "model=Nexus5,version=21",
+          "--device", "model=Nexus5,version=22",
+          "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus6P,version=26",
+          "--device", "model=Nexus6P,version=27",
+          "--device", "model=NexusLowRes,version=29"
+        ]
 
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
@@ -463,6 +491,20 @@ targets:
       tags: >
         ["firebaselab"]
       task_name: release_smoke_test
+      physical_devices: >-
+        [
+          "--device", "model=redfin,version=30",
+          "--device", "model=griffin,version=24"
+        ]
+      virtual_devices: >-
+        [
+          "--device", "model=Nexus5,version=21",
+          "--device", "model=Nexus5,version=22",
+          "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus6P,version=26",
+          "--device", "model=Nexus6P,version=27",
+          "--device", "model=NexusLowRes,version=29"
+        ]
 
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
