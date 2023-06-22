@@ -728,7 +728,7 @@ void main() {
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
     // Wait for GestureArena to resolve itself.
-    tester.async.elapse(const Duration(milliseconds: 300));
+    tester.async.elapse(kDoubleTapTimeout);
     expect(events, <String>['down#1', 'up#1']);
   });
 
