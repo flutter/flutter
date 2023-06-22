@@ -36,6 +36,7 @@ Widget buildInputDecorator({
   ),
 }) {
   return MaterialApp(
+    theme: ThemeData(useMaterial3: false),
     home: Material(
       child: Builder(
         builder: (BuildContext context) {
@@ -787,6 +788,7 @@ void main() {
         final TextEditingController controller = TextEditingController();
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
+            theme: ThemeData(useMaterial3: false),
             home: Material(
               child: Directionality(
                 textDirection: TextDirection.ltr,
@@ -837,6 +839,7 @@ void main() {
         final TextEditingController controller = TextEditingController();
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
+            theme: ThemeData(useMaterial3: false),
             home: Material(
               child: Directionality(
                 textDirection: TextDirection.ltr,
@@ -888,6 +891,7 @@ void main() {
         final TextEditingController controller = TextEditingController();
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
+            theme: ThemeData(useMaterial3: false),
             home: Material(
               child: Directionality(
                 textDirection: TextDirection.ltr,
@@ -939,6 +943,7 @@ void main() {
         final TextEditingController controller = TextEditingController();
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
+            theme: ThemeData(useMaterial3: false),
             home: Material(
               child: Directionality(
                 textDirection: TextDirection.ltr,
@@ -3919,6 +3924,108 @@ void main() {
     expect(copy.fillColor, Colors.blue);
   });
 
+  test('InputDecorationTheme merge', () {
+    const InputDecorationTheme overrideTheme = InputDecorationTheme(
+      labelStyle: TextStyle(color: Color(0x000000f0)),
+      floatingLabelStyle: TextStyle(color: Color(0x000000f1)),
+      helperStyle: TextStyle(color: Color(0x000000f2)),
+      helperMaxLines: 1,
+      hintStyle: TextStyle(color: Color(0x000000f3)),
+      errorStyle: TextStyle(color: Color(0x000000f4)),
+      errorMaxLines: 1,
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      floatingLabelAlignment: FloatingLabelAlignment.center,
+      isDense: true,
+      contentPadding: EdgeInsets.all(1.0),
+      isCollapsed: true,
+      iconColor: Color(0x000000f5),
+      prefixStyle: TextStyle(color: Color(0x000000f6)),
+      prefixIconColor: Color(0x000000f7),
+      suffixStyle: TextStyle(color: Color(0x000000f8)),
+      suffixIconColor: Color(0x000000f9),
+      counterStyle: TextStyle(color: Color(0x00000f10)),
+      filled: true,
+      fillColor: Color(0x00000f11),
+      activeIndicatorBorder: BorderSide(
+        color: Color(0x00000f12),
+      ),
+      outlineBorder: BorderSide(
+        color: Color(0x00000f13),
+      ),
+      focusColor: Color(0x00000f14),
+      hoverColor: Color(0x00000f15),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(2.0)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Color(0x00000f16),
+        ),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Color(0x00000f17),
+        ),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Color(0x00000f18),
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Color(0x00000f19),
+        ),
+      ),
+      border: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Color(0x00000f20),
+        ),
+      ),
+      alignLabelWithHint: true,
+      constraints: BoxConstraints(
+        minHeight: 1.0,
+        minWidth: 1.0,
+      ),
+    );
+
+    final InputDecorationTheme inputDecorationTheme = ThemeData().inputDecorationTheme;
+    final InputDecorationTheme merged = inputDecorationTheme.merge(overrideTheme);
+
+    expect(merged.labelStyle, overrideTheme.labelStyle);
+    expect(merged.floatingLabelStyle, overrideTheme.floatingLabelStyle);
+    expect(merged.helperStyle, overrideTheme.helperStyle);
+    expect(merged.helperMaxLines, overrideTheme.helperMaxLines);
+    expect(merged.hintStyle, overrideTheme.hintStyle);
+    expect(merged.errorStyle, overrideTheme.errorStyle);
+    expect(merged.errorMaxLines, overrideTheme.errorMaxLines);
+    expect(merged.floatingLabelBehavior, isNot(overrideTheme.floatingLabelBehavior));
+    expect(merged.floatingLabelAlignment, isNot(overrideTheme.floatingLabelAlignment));
+    expect(merged.isDense, isNot(overrideTheme.isDense));
+    expect(merged.contentPadding, overrideTheme.contentPadding);
+    expect(merged.isCollapsed, isNot(overrideTheme.isCollapsed));
+    expect(merged.iconColor, overrideTheme.iconColor);
+    expect(merged.prefixStyle, overrideTheme.prefixStyle);
+    expect(merged.prefixIconColor, overrideTheme.prefixIconColor);
+    expect(merged.suffixStyle, overrideTheme.suffixStyle);
+    expect(merged.suffixIconColor, overrideTheme.suffixIconColor);
+    expect(merged.counterStyle, overrideTheme.counterStyle);
+    expect(merged.filled, isNot(overrideTheme.filled));
+    expect(merged.fillColor, overrideTheme.fillColor);
+    expect(merged.activeIndicatorBorder, overrideTheme.activeIndicatorBorder);
+    expect(merged.outlineBorder, overrideTheme.outlineBorder);
+    expect(merged.focusColor, overrideTheme.focusColor);
+    expect(merged.hoverColor, overrideTheme.hoverColor);
+    expect(merged.errorBorder, overrideTheme.errorBorder);
+    expect(merged.focusedBorder, overrideTheme.focusedBorder);
+    expect(merged.focusedErrorBorder, overrideTheme.focusedErrorBorder);
+    expect(merged.disabledBorder, overrideTheme.disabledBorder);
+    expect(merged.enabledBorder, overrideTheme.enabledBorder);
+    expect(merged.border, overrideTheme.border);
+    expect(merged.alignLabelWithHint, isNot(overrideTheme.alignLabelWithHint));
+    expect(merged.constraints, overrideTheme.constraints);
+  });
+
   testWidgets('InputDecorationTheme outline border', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -4184,24 +4291,50 @@ void main() {
   });
 
   testWidgets('InputDecorationTheme.inputDecoration', (WidgetTester tester) async {
-    const TextStyle themeStyle = TextStyle(color: Colors.green);
-    const TextStyle decorationStyle = TextStyle(color: Colors.blue);
+    const TextStyle themeStyle = TextStyle(color: Color(0xFF00FFFF));
+    const Color themeColor = Color(0xFF00FF00);
+    const InputBorder themeInputBorder = OutlineInputBorder(
+      borderSide: BorderSide(
+        color: Color(0xFF0000FF),
+      ),
+    );
+    const TextStyle decorationStyle = TextStyle(color: Color(0xFFFFFF00));
+    const Color decorationColor = Color(0xFF0000FF);
+    const InputBorder decorationInputBorder = OutlineInputBorder(
+      borderSide: BorderSide(
+        color: Color(0xFFFF00FF),
+      ),
+    );
 
     // InputDecorationTheme arguments define InputDecoration properties.
     InputDecoration decoration = const InputDecoration().applyDefaults(
       const InputDecorationTheme(
         labelStyle: themeStyle,
+        floatingLabelStyle: themeStyle,
         helperStyle: themeStyle,
+        helperMaxLines: 2,
         hintStyle: themeStyle,
         errorStyle: themeStyle,
+        errorMaxLines: 2,
+        floatingLabelBehavior: FloatingLabelBehavior.never,
+        floatingLabelAlignment: FloatingLabelAlignment.center,
         isDense: true,
         contentPadding: EdgeInsets.all(1.0),
+        iconColor: themeColor,
         prefixStyle: themeStyle,
+        prefixIconColor: themeColor,
         suffixStyle: themeStyle,
+        suffixIconColor: themeColor,
         counterStyle: themeStyle,
         filled: true,
-        fillColor: Colors.red,
-        focusColor: Colors.blue,
+        fillColor: themeColor,
+        focusColor: themeColor,
+        hoverColor: themeColor,
+        errorBorder: themeInputBorder,
+        focusedBorder: themeInputBorder,
+        focusedErrorBorder: themeInputBorder,
+        disabledBorder: themeInputBorder,
+        enabledBorder: themeInputBorder,
         border: InputBorder.none,
         alignLabelWithHint: true,
         constraints: BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
@@ -4209,16 +4342,31 @@ void main() {
     );
 
     expect(decoration.labelStyle, themeStyle);
+    expect(decoration.floatingLabelStyle, themeStyle);
     expect(decoration.helperStyle, themeStyle);
+    expect(decoration.helperMaxLines, 2);
     expect(decoration.hintStyle, themeStyle);
     expect(decoration.errorStyle, themeStyle);
+    expect(decoration.errorMaxLines, 2);
+    expect(decoration.floatingLabelBehavior, FloatingLabelBehavior.never);
+    expect(decoration.floatingLabelAlignment, FloatingLabelAlignment.center);
     expect(decoration.isDense, true);
     expect(decoration.contentPadding, const EdgeInsets.all(1.0));
+    expect(decoration.iconColor, themeColor);
     expect(decoration.prefixStyle, themeStyle);
+    expect(decoration.prefixIconColor, themeColor);
     expect(decoration.suffixStyle, themeStyle);
+    expect(decoration.suffixIconColor, themeColor);
     expect(decoration.counterStyle, themeStyle);
     expect(decoration.filled, true);
-    expect(decoration.fillColor, Colors.red);
+    expect(decoration.fillColor, themeColor);
+    expect(decoration.focusColor, themeColor);
+    expect(decoration.hoverColor, themeColor);
+    expect(decoration.errorBorder, themeInputBorder);
+    expect(decoration.focusedBorder, themeInputBorder);
+    expect(decoration.focusedErrorBorder, themeInputBorder);
+    expect(decoration.disabledBorder, themeInputBorder);
+    expect(decoration.enabledBorder, themeInputBorder);
     expect(decoration.border, InputBorder.none);
     expect(decoration.alignLabelWithHint, true);
     expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
@@ -4226,57 +4374,97 @@ void main() {
     // InputDecoration (baseDecoration) defines InputDecoration properties
     decoration = const InputDecoration(
       labelStyle: decorationStyle,
+      floatingLabelStyle: decorationStyle,
       helperStyle: decorationStyle,
+      helperMaxLines: 3,
       hintStyle: decorationStyle,
       errorStyle: decorationStyle,
+      errorMaxLines: 3,
+      floatingLabelBehavior: FloatingLabelBehavior.always,
+      floatingLabelAlignment: FloatingLabelAlignment.start,
       isDense: false,
       contentPadding: EdgeInsets.all(4.0),
+      iconColor: decorationColor,
       prefixStyle: decorationStyle,
+      prefixIconColor: decorationColor,
       suffixStyle: decorationStyle,
+      suffixIconColor: decorationColor,
       counterStyle: decorationStyle,
       filled: false,
-      fillColor: Colors.blue,
+      fillColor: decorationColor,
+      focusColor: decorationColor,
+      hoverColor: decorationColor,
+      errorBorder: decorationInputBorder,
+      focusedBorder: decorationInputBorder,
+      focusedErrorBorder: decorationInputBorder,
+      disabledBorder: decorationInputBorder,
+      enabledBorder: decorationInputBorder,
       border: OutlineInputBorder(),
       alignLabelWithHint: false,
-      constraints: BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
+      constraints: BoxConstraints(minWidth: 40, maxWidth: 50, minHeight: 60, maxHeight: 70),
     ).applyDefaults(
       const InputDecorationTheme(
         labelStyle: themeStyle,
+        floatingLabelStyle: themeStyle,
         helperStyle: themeStyle,
-        helperMaxLines: 5,
+        helperMaxLines: 2,
         hintStyle: themeStyle,
         errorStyle: themeStyle,
-        errorMaxLines: 4,
+        errorMaxLines: 2,
+        floatingLabelBehavior: FloatingLabelBehavior.never,
+        floatingLabelAlignment: FloatingLabelAlignment.center,
         isDense: true,
         contentPadding: EdgeInsets.all(1.0),
+        iconColor: themeColor,
         prefixStyle: themeStyle,
+        prefixIconColor: themeColor,
         suffixStyle: themeStyle,
+        suffixIconColor: themeColor,
         counterStyle: themeStyle,
         filled: true,
-        fillColor: Colors.red,
-        focusColor: Colors.blue,
+        fillColor: themeColor,
+        focusColor: themeColor,
+        hoverColor: themeColor,
+        errorBorder: themeInputBorder,
+        focusedBorder: themeInputBorder,
+        focusedErrorBorder: themeInputBorder,
+        disabledBorder: themeInputBorder,
+        enabledBorder: themeInputBorder,
         border: InputBorder.none,
         alignLabelWithHint: true,
-        constraints: BoxConstraints(minWidth: 40, maxWidth: 30, minHeight: 20, maxHeight: 10),
+        constraints: BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
       ),
     );
 
     expect(decoration.labelStyle, decorationStyle);
+    expect(decoration.floatingLabelStyle, decorationStyle);
     expect(decoration.helperStyle, decorationStyle);
-    expect(decoration.helperMaxLines, 5);
+    expect(decoration.helperMaxLines, 3);
     expect(decoration.hintStyle, decorationStyle);
     expect(decoration.errorStyle, decorationStyle);
-    expect(decoration.errorMaxLines, 4);
+    expect(decoration.errorMaxLines, 3);
+    expect(decoration.floatingLabelBehavior, FloatingLabelBehavior.always);
+    expect(decoration.floatingLabelAlignment, FloatingLabelAlignment.start);
     expect(decoration.isDense, false);
     expect(decoration.contentPadding, const EdgeInsets.all(4.0));
+    expect(decoration.iconColor, decorationColor);
     expect(decoration.prefixStyle, decorationStyle);
+    expect(decoration.prefixIconColor, decorationColor);
     expect(decoration.suffixStyle, decorationStyle);
+    expect(decoration.suffixIconColor, decorationColor);
     expect(decoration.counterStyle, decorationStyle);
     expect(decoration.filled, false);
-    expect(decoration.fillColor, Colors.blue);
+    expect(decoration.fillColor, decorationColor);
+    expect(decoration.focusColor, decorationColor);
+    expect(decoration.hoverColor, decorationColor);
+    expect(decoration.errorBorder, decorationInputBorder);
+    expect(decoration.focusedBorder, decorationInputBorder);
+    expect(decoration.focusedErrorBorder, decorationInputBorder);
+    expect(decoration.disabledBorder, decorationInputBorder);
+    expect(decoration.enabledBorder, decorationInputBorder);
     expect(decoration.border, const OutlineInputBorder());
     expect(decoration.alignLabelWithHint, false);
-    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
+    expect(decoration.constraints, const BoxConstraints(minWidth: 40, maxWidth: 50, minHeight: 60, maxHeight: 70));
   });
 
   testWidgets('InputDecorationTheme.inputDecoration with MaterialState', (WidgetTester tester) async {
@@ -4483,6 +4671,7 @@ void main() {
       // This is a regression test for https://github.com/flutter/flutter/issues/82321
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: Container(
               padding: const EdgeInsets.all(16.0),
@@ -4531,6 +4720,7 @@ void main() {
 
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: Container(
               padding: const EdgeInsets.all(16.0),
@@ -5692,8 +5882,18 @@ void main() {
 
     expect(
       find.text(longStringB),
-      // 133.3 is approximately 100 / 0.75 (_kFinalLabelScale)
-      paints..clipRect(rect: const Rect.fromLTWH(0, 0, 133.0, 16.0)),
+      paints..something((Symbol methodName, List<dynamic> arguments) {
+        if (methodName != #clipRect) {
+          return false;
+        }
+        final Rect clipRect = arguments[0] as Rect;
+        // _kFinalLabelScale = 0.75
+        const double width = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+          ? 100 / 0.75
+          : 133.0;
+        expect(clipRect, rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, width, 16.0), epsilon: 1e-5));
+        return true;
+      }),
     );
   }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
 
@@ -5704,6 +5904,7 @@ void main() {
     late StateSetter setState;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setter) {
             setState = setter;

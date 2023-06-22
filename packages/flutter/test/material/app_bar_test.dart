@@ -62,6 +62,15 @@ TextStyle? iconStyle(WidgetTester tester, IconData icon) {
   return iconRichText.text.style;
 }
 
+void _verifyTextNotClipped(Finder textFinder, WidgetTester tester) {
+  final Rect clipRect = tester.getRect(find.ancestor(of: textFinder, matching: find.byType(ClipRect)).first);
+  final Rect textRect = tester.getRect(textFinder);
+  expect(textRect.top, inInclusiveRange(clipRect.top, clipRect.bottom));
+  expect(textRect.bottom, inInclusiveRange(clipRect.top, clipRect.bottom));
+  expect(textRect.left, inInclusiveRange(clipRect.left, clipRect.right));
+  expect(textRect.right, inInclusiveRange(clipRect.left, clipRect.right));
+}
+
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
 double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar, skipOffstage: false)).dy;
 double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar, skipOffstage: false)).dy;
@@ -700,6 +709,7 @@ void main() {
         theme: themeData,
         home: Scaffold(
           appBar: AppBar(
+            leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
             title: const Text('X'),
           ),
           drawer: const Column(), // Doesn't really matter. Triggers a hamburger regardless.
@@ -1138,7 +1148,9 @@ void main() {
     // Test the expanded title is positioned correctly.
     final Offset titleOffset = tester.getBottomLeft(expandedTitle);
     expect(titleOffset.dx, 16.0);
-    expect(titleOffset.dy, closeTo(96.0, 0.1));
+    expect(titleOffset.dy, 96.0);
+
+    _verifyTextNotClipped(expandedTitle, tester);
 
     // Test the expanded title default color.
     expect(
@@ -1223,8 +1235,14 @@ void main() {
     // Test the expanded title is positioned correctly.
     final Offset titleOffset = tester.getBottomLeft(expandedTitle);
     expect(titleOffset.dx, 16.0);
-    expect(titleOffset.dy, closeTo(128.0, 0.1));
-
+    final RenderSliver renderSliverAppBar = tester.renderObject(find.byType(SliverAppBar));
+    // The expanded title and the bottom padding fits in the flexible space.
+    expect(
+      titleOffset.dy,
+      renderSliverAppBar.geometry!.scrollExtent - 28.0,
+      reason: 'bottom padding of a large expanded title should be 28.',
+    );
+    _verifyTextNotClipped(expandedTitle, tester);
 
     // Test the expanded title default color.
     expect(
@@ -1366,13 +1384,19 @@ void main() {
   group('SliverAppBar elevation', () {
     Widget buildSliverAppBar(bool forceElevated, {double? elevation, double? themeElevation}) {
       return MaterialApp(
-        theme: ThemeData(appBarTheme: AppBarTheme(elevation: themeElevation)),
+        theme: ThemeData(
+          appBarTheme: AppBarTheme(
+            elevation: themeElevation,
+            scrolledUnderElevation: themeElevation,
+          ),
+        ),
         home: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
               title: const Text('Title'),
               forceElevated: forceElevated,
               elevation: elevation,
+              scrolledUnderElevation: elevation,
             ),
           ],
         ),
@@ -1391,8 +1415,10 @@ void main() {
 
       // Default elevation should be used by the material, but
       // the AppBar's elevation should not be specified by SliverAppBar.
+      // When useMaterial3 is true, and forceElevated is true, the default elevation
+      // should be the value of `scrolledUnderElevation` which is 3.0
       await tester.pumpWidget(buildSliverAppBar(true));
-      expect(getMaterial().elevation, useMaterial3 ? 0.0 : 4.0);
+      expect(getMaterial().elevation, useMaterial3 ? 3.0 : 4.0);
       expect(getAppBar().elevation, null);
 
       // SliverAppBar should use the specified elevation.
@@ -1790,7 +1816,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         // Test was designed against InkSplash so need to make sure that is used.
-        theme: ThemeData(splashFactory: InkSplash.splashFactory),
+        theme: ThemeData(
+          useMaterial3: false,
+          splashFactory: InkSplash.splashFactory
+        ),
         home: Center(
           child: AppBar(
             title: const Text('Abc'),
@@ -2445,7 +2474,7 @@ void main() {
   });
 
   testWidgets('AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
-    final ThemeData darkTheme = ThemeData.dark();
+    final ThemeData darkTheme = ThemeData.dark(useMaterial3: false);
     await tester.pumpWidget(MaterialApp(
       theme: darkTheme,
       home: Scaffold(
@@ -2455,7 +2484,6 @@ void main() {
       ),
     ));
 
-    expect(darkTheme.primaryColorBrightness, Brightness.dark);
     expect(darkTheme.colorScheme.brightness, Brightness.dark);
     expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
       statusBarBrightness: Brightness.dark,
@@ -2464,7 +2492,7 @@ void main() {
   });
 
   testWidgets('AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData(primarySwatch: Colors.lightBlue);
+    final ThemeData lightTheme = ThemeData(primarySwatch: Colors.lightBlue, useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: lightTheme,
@@ -2476,7 +2504,6 @@ void main() {
       ),
     );
 
-    expect(lightTheme.primaryColorBrightness, Brightness.light);
     expect(lightTheme.colorScheme.brightness, Brightness.light);
     expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
       statusBarBrightness: Brightness.light,
@@ -2496,7 +2523,7 @@ void main() {
 
     // Using a light theme.
     {
-      await tester.pumpWidget(buildAppBar(ThemeData.from(colorScheme: const ColorScheme.light())));
+      await tester.pumpWidget(buildAppBar(ThemeData(useMaterial3: false)));
       final Material appBarMaterial = tester.widget<Material>(
         find.descendant(
           of: find.byType(AppBar),
@@ -2516,7 +2543,7 @@ void main() {
 
     // Using a dark theme.
     {
-      await tester.pumpWidget(buildAppBar(ThemeData.from(colorScheme: const ColorScheme.dark())));
+      await tester.pumpWidget(buildAppBar(ThemeData.dark(useMaterial3: false)));
       final Material appBarMaterial = tester.widget<Material>(
         find.descendant(
           of: find.byType(AppBar),
@@ -3803,7 +3830,7 @@ void main() {
                 title: const Text('AppBar'),
               ),
               body: Scrollbar(
-                isAlwaysShown: true,
+                thumbVisibility: true,
                 controller: controller,
                 child: ListView(
                   controller: controller,
@@ -4240,7 +4267,7 @@ void main() {
     // By default, title widget should be to the right of the
     // leading widget and title spacing should be respected.
     Offset titleOffset = tester.getTopLeft(collapsedTitle);
-    Offset iconButtonOffset = tester.getTopRight(find.widgetWithIcon(IconButton, Icons.menu));
+    Offset iconButtonOffset = tester.getTopRight(find.ancestor(of: find.widgetWithIcon(IconButton, Icons.menu), matching: find.byType(ConstrainedBox)));
     expect(titleOffset.dx, iconButtonOffset.dx + titleSpacing);
 
     await tester.pumpWidget(buildWidget(centerTitle: true));
@@ -4265,7 +4292,7 @@ void main() {
     // The title widget should be to the right of the leading
     // widget with no spacing.
     titleOffset = tester.getTopLeft(collapsedTitle);
-    iconButtonOffset = tester.getTopRight(find.widgetWithIcon(IconButton, Icons.menu));
+    iconButtonOffset = tester.getTopRight(find.ancestor(of: find.widgetWithIcon(IconButton, Icons.menu), matching: find.byType(ConstrainedBox)));
     expect(titleOffset.dx, iconButtonOffset.dx);
 
     // Set centerTitle to true so the end of the title can reach
@@ -4333,7 +4360,7 @@ void main() {
     // By default, title widget should be to the right of the leading
     // widget and title spacing should be respected.
     Offset titleOffset = tester.getTopLeft(collapsedTitle);
-    Offset iconButtonOffset = tester.getTopRight(find.widgetWithIcon(IconButton, Icons.menu));
+    Offset iconButtonOffset = tester.getTopRight(find.ancestor(of: find.widgetWithIcon(IconButton, Icons.menu), matching: find.byType(ConstrainedBox)));
     expect(titleOffset.dx, iconButtonOffset.dx + titleSpacing);
 
     await tester.pumpWidget(buildWidget(centerTitle: true));
@@ -4357,7 +4384,7 @@ void main() {
     // The title widget should be to the right of the leading
     // widget with no spacing.
     titleOffset = tester.getTopLeft(collapsedTitle);
-    iconButtonOffset = tester.getTopRight(find.widgetWithIcon(IconButton, Icons.menu));
+    iconButtonOffset = tester.getTopRight(find.ancestor(of: find.widgetWithIcon(IconButton, Icons.menu), matching: find.byType(ConstrainedBox)));
     expect(titleOffset.dx, iconButtonOffset.dx);
 
     // Set centerTitle to true so the end of the title can reach
@@ -4706,13 +4733,16 @@ void main() {
     await tester.pumpWidget(buildAppBar());
 
     final Finder expandedTitle = find.text(title).first;
-    expect(tester.getRect(expandedTitle).height, closeTo(31.9, 0.1));
+    expect(tester.getRect(expandedTitle).height, 32.0);
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
-    expect(tester.getRect(expandedTitle).height, closeTo(43.0, 0.1));
+    expect(tester.getRect(expandedTitle).height, 43.0);
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
-    expect(tester.getRect(expandedTitle).height, closeTo(43.0, 0.1));
+    expect(tester.getRect(expandedTitle).height, 43.0);
+    _verifyTextNotClipped(expandedTitle, tester);
   });
 
   testWidgets('SliverAppBar.large expanded title has upper limit on text scaling', (WidgetTester tester) async {
@@ -4726,7 +4756,7 @@ void main() {
             child: CustomScrollView(
               slivers: <Widget>[
                 const SliverAppBar.large(
-                  title: Text(title),
+                  title: Text(title, maxLines: 1),
                 ),
                 SliverToBoxAdapter(
                   child: Container(
@@ -4771,7 +4801,7 @@ void main() {
             child: CustomScrollView(
               slivers: <Widget>[
                 const SliverAppBar.medium(
-                  title: Text(title),
+                  title: Text(title, maxLines: 1),
                 ),
                 SliverToBoxAdapter(
                   child: Container(
@@ -4789,24 +4819,16 @@ void main() {
     await tester.pumpWidget(buildAppBar());
 
     final Finder expandedTitle = find.text(title).first;
-    Offset titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, 64.0);
-    Offset titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(96.0, 0.1));
+    expect(tester.getBottomLeft(expandedTitle).dy, 96.0);
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
-
-    titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(57.0, 0.1));
-    titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(100.0, 0.1));
+    expect(tester.getBottomLeft(expandedTitle).dy, 107.0);
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
-
-    titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(57.0, 0.1));
-    titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(100.0, 0.1));
+    expect(tester.getBottomLeft(expandedTitle).dy, 107.0);
+    _verifyTextNotClipped(expandedTitle, tester);
   });
 
   testWidgets('SliverAppBar.large expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
@@ -4820,7 +4842,7 @@ void main() {
             child: CustomScrollView(
               slivers: <Widget>[
                 const SliverAppBar.large(
-                  title: Text(title),
+                  title: Text(title, maxLines: 1),
                 ),
                 SliverToBoxAdapter(
                   child: Container(
@@ -4836,29 +4858,28 @@ void main() {
     }
 
     await tester.pumpWidget(buildAppBar());
-    // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
-    // A bug in the HTML renderer and/or Chrome 96+ causes a
-    // discrepancy in the paragraph height.
-    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
     final Finder expandedTitle = find.text(title).first;
-    Offset titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(hasIssue99933 ? 91.0 : 92.0, 0.1));
-    Offset titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(128.0, 0.1));
+    final RenderSliver renderSliverAppBar = tester.renderObject(find.byType(SliverAppBar));
+    expect(
+      tester.getBottomLeft(expandedTitle).dy,
+      renderSliverAppBar.geometry!.scrollExtent - 28.0,
+      reason: 'bottom padding of a large expanded title should be 28.',
+    );
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
+    expect(
+      tester.getBottomLeft(expandedTitle).dy,
+      renderSliverAppBar.geometry!.scrollExtent - 28.0,
+      reason: 'bottom padding of a large expanded title should be 28.',
+    );
+    _verifyTextNotClipped(expandedTitle, tester);
 
-    titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(86.1, 0.1));
-    titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(134.1, 0.1));
-
+    // The bottom padding of the expanded title needs to be reduced for it to be
+    // fully visible.
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
-
-    titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(86.1, 0.1));
-    titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(134.1, 0.1));
+    expect(tester.getBottomLeft(expandedTitle).dy, 124.0);
+    _verifyTextNotClipped(expandedTitle, tester);
   });
 
   group('AppBar.forceMaterialTransparency', () {
@@ -4937,8 +4958,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('SliverAppBar.medium defaults', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
