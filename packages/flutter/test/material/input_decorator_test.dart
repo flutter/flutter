@@ -3999,18 +3999,18 @@ void main() {
     expect(merged.hintStyle, overrideTheme.hintStyle);
     expect(merged.errorStyle, overrideTheme.errorStyle);
     expect(merged.errorMaxLines, overrideTheme.errorMaxLines);
-    expect(merged.floatingLabelBehavior, overrideTheme.floatingLabelBehavior);
-    expect(merged.floatingLabelAlignment, overrideTheme.floatingLabelAlignment);
-    expect(merged.isDense, overrideTheme.isDense);
+    expect(merged.floatingLabelBehavior, isNot(overrideTheme.floatingLabelBehavior));
+    expect(merged.floatingLabelAlignment, isNot(overrideTheme.floatingLabelAlignment));
+    expect(merged.isDense, isNot(overrideTheme.isDense));
     expect(merged.contentPadding, overrideTheme.contentPadding);
-    expect(merged.isCollapsed, overrideTheme.isCollapsed);
+    expect(merged.isCollapsed, isNot(overrideTheme.isCollapsed));
     expect(merged.iconColor, overrideTheme.iconColor);
     expect(merged.prefixStyle, overrideTheme.prefixStyle);
     expect(merged.prefixIconColor, overrideTheme.prefixIconColor);
     expect(merged.suffixStyle, overrideTheme.suffixStyle);
     expect(merged.suffixIconColor, overrideTheme.suffixIconColor);
     expect(merged.counterStyle, overrideTheme.counterStyle);
-    expect(merged.filled, overrideTheme.filled);
+    expect(merged.filled, isNot(overrideTheme.filled));
     expect(merged.fillColor, overrideTheme.fillColor);
     expect(merged.activeIndicatorBorder, overrideTheme.activeIndicatorBorder);
     expect(merged.outlineBorder, overrideTheme.outlineBorder);
@@ -4022,7 +4022,7 @@ void main() {
     expect(merged.disabledBorder, overrideTheme.disabledBorder);
     expect(merged.enabledBorder, overrideTheme.enabledBorder);
     expect(merged.border, overrideTheme.border);
-    expect(merged.alignLabelWithHint, overrideTheme.alignLabelWithHint);
+    expect(merged.alignLabelWithHint, isNot(overrideTheme.alignLabelWithHint));
     expect(merged.constraints, overrideTheme.constraints);
   });
 
