@@ -1,4 +1,4 @@
-Signature: f537068b96e59e89e1a3b9ff035082ed
+Signature: 9e110762776afa21d2853db77c39f2e4
 
 ====================================================================================================
 LIBRARY: etc1
@@ -5833,7 +5833,6 @@ ORIGIN: ../../../third_party/skia/src/core/SkEffectPriv.h + ../../../third_party
 ORIGIN: ../../../third_party/skia/src/core/SkEnumerate.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkPathMakers.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkStrikeSpec.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/core/SkVMBlitter.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkYUVMath.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkYUVMath.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/GrAHardwareBufferUtils.h + ../../../third_party/skia/LICENSE
@@ -5978,7 +5977,6 @@ FILE: ../../../third_party/skia/src/core/SkEffectPriv.h
 FILE: ../../../third_party/skia/src/core/SkEnumerate.h
 FILE: ../../../third_party/skia/src/core/SkPathMakers.h
 FILE: ../../../third_party/skia/src/core/SkStrikeSpec.h
-FILE: ../../../third_party/skia/src/core/SkVMBlitter.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVMath.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVMath.h
 FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferUtils.h
@@ -7491,7 +7489,6 @@ ORIGIN: ../../../third_party/skia/src/core/SkMatrixInvert.cpp + ../../../third_p
 ORIGIN: ../../../third_party/skia/src/core/SkMatrixInvert.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkMesh.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkMeshPriv.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/core/SkVMBlitter.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/effects/SkBlenders.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/effects/imagefilters/SkCropImageFilter.cpp + ../../../third_party/skia/LICENSE
@@ -7712,7 +7709,6 @@ FILE: ../../../third_party/skia/src/core/SkMatrixInvert.cpp
 FILE: ../../../third_party/skia/src/core/SkMatrixInvert.h
 FILE: ../../../third_party/skia/src/core/SkMesh.cpp
 FILE: ../../../third_party/skia/src/core/SkMeshPriv.h
-FILE: ../../../third_party/skia/src/core/SkVMBlitter.h
 FILE: ../../../third_party/skia/src/core/SkYUVAInfoLocation.h
 FILE: ../../../third_party/skia/src/effects/SkBlenders.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkCropImageFilter.cpp
