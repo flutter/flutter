@@ -296,6 +296,10 @@ class MediaQueryData {
     'This feature was deprecated after v3.12.0-2.0.pre.',
   )
   double get textScaleFactor => textScaler.textScaleFactor;
+  // TODO(LongCatIsLooong): remove this after textScaleFactor is removed. To
+  // maintain backward compatibility and also keep the const constructor this
+  // has to be kept as a private field.
+  // https://github.com/flutter/flutter/issues/128825
   final double _textScaleFactor;
 
   /// The font scaling strategy to use for laying out textual contents.
@@ -312,7 +316,7 @@ class MediaQueryData {
   ///  * [TextPainter], a class that lays out and paints text.
   TextScaler get textScaler {
     // The constructor was called with an explicitly specified textScaler value,
-    // we assume the caller is unmigrated and ignore _textScaleFactor.
+    // we assume the caller is migrated and ignore _textScaleFactor.
     if (!identical(_kUnspecifiedTextScaler, _textScaler)) {
       return _textScaler;
     }
@@ -535,8 +539,8 @@ class MediaQueryData {
   /// Creates a copy of this media query data but with the given fields replaced
   /// with the new values.
   ///
-  /// The `textScaler` parameter and `textScaleFactor` parameter can not be both
-  /// specified.
+  /// The `textScaler` parameter and `textScaleFactor` parameter must not be
+  /// both specified.
   MediaQueryData copyWith({
     Size? size,
     double? devicePixelRatio,

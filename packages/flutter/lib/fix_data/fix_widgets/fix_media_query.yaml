@@ -40,16 +40,6 @@ transforms:
         kind: 'fragment'
         value: 'arguments[textScaleFactor]'
 
-  - title: "Migrate to 'textScaler'"
-    date: 2023-06-09
-    element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
-      getter: 'textScaleFactor'
-      inClass: 'MediaQueryData'
-    changes:
-      - kind: 'rename'
-        newName: 'textScaler.textScaleFactor'
-
   # Change made in https://github.com/flutter/flutter/pull/128522
   - title: "Migrate to 'textScaler'"
     date: 2023-06-09

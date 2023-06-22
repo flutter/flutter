@@ -46,6 +46,7 @@ const Size _inputRangeLandscapeDialogSize = Size(496, 164.0);
 const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 const double _inputFormPortraitHeight = 98.0;
 const double _inputFormLandscapeHeight = 108.0;
+const double _kMaxTextScaleFactor = 1.3;
 
 /// Shows a dialog containing a Material Design date picker.
 ///
@@ -640,7 +641,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     // Constrain the textScaleFactor to the largest supported value to prevent
     // layout issues.
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3).textScaleFactor;
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).textScaleFactor;
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     final DialogTheme dialogTheme = theme.dialogTheme;
     return Dialog(
@@ -663,7 +664,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         child: MediaQuery.withClampedTextScaling(
           // Constrain the textScaleFactor to the largest supported value to prevent
           // layout issues.
-          maxScaleFactor: 1.3,
+          maxScaleFactor: _kMaxTextScaleFactor,
           child: Builder(builder: (BuildContext context) {
             switch (orientation) {
               case Orientation.portrait:
@@ -1533,7 +1534,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         duration: _dialogSizeAnimationDuration,
         curve: Curves.easeIn,
         child: MediaQuery.withClampedTextScaling(
-          maxScaleFactor: 1.3,
+          maxScaleFactor: _kMaxTextScaleFactor,
           child: Builder(builder: (BuildContext context) {
             return contents;
           }),
