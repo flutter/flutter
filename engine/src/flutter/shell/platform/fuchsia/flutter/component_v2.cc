@@ -182,8 +182,7 @@ ComponentV2::ComponentV2(
     return;
   }
 
-  // Setup /tmp to be mapped to a process-local virtual filesystem.
-  dart_utils::RunnerTemp::SetupComponent(fdio_ns_.get());
+  dart_utils::BindTemp(fdio_ns_.get());
 
   // ComponentStartInfo::ns (optional)
   if (start_info.has_ns()) {
