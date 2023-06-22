@@ -291,7 +291,7 @@ using UvComputeShaderPipeline = ComputePipelineBuilder<UvComputeShader>;
 /// Flutter application may easily require building hundreds of PSOs in total,
 /// but they shouldn't require e.g. 10s of thousands.
 struct ContentContextOptions {
-  SampleCount sample_count = SampleCount::kCount4;
+  SampleCount sample_count = SampleCount::kCount1;
   BlendMode blend_mode = BlendMode::kSourceOver;
   CompareFunction stencil_compare = CompareFunction::kEqual;
   StencilOperation stencil_operation = StencilOperation::kKeep;

@@ -151,7 +151,8 @@ static std::unique_ptr<PipelineT> CreateDefaultPipeline(
   // Apply default ContentContextOptions to the descriptor.
   const auto default_color_fmt =
       context.GetCapabilities()->GetDefaultColorFormat();
-  ContentContextOptions{.color_attachment_pixel_format = default_color_fmt}
+  ContentContextOptions{.sample_count = SampleCount::kCount4,
+                        .color_attachment_pixel_format = default_color_fmt}
       .ApplyToPipelineDescriptor(*desc);
   return std::make_unique<PipelineT>(context, desc);
 }
@@ -166,6 +167,7 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
     return;
   }
   default_options_ = ContentContextOptions{
+      .sample_count = SampleCount::kCount4,
       .color_attachment_pixel_format =
           context_->GetCapabilities()->GetDefaultColorFormat()};
 
@@ -352,11 +354,21 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
   if (context->GetCapabilities()->SupportsOffscreenMSAA() && msaa_enabled) {
     subpass_target = RenderTarget::CreateOffscreenMSAA(
         *context, texture_size, SPrintF("%s Offscreen", label.c_str()),
-        RenderTarget::kDefaultColorAttachmentConfigMSAA, std::nullopt);
+        RenderTarget::kDefaultColorAttachmentConfigMSAA  //
+#ifndef FML_OS_ANDROID  // Reduce PSO variants for Vulkan.
+        ,
+        std::nullopt  // stencil_attachment_config
+#endif                // FML_OS_ANDROID
+    );
   } else {
     subpass_target = RenderTarget::CreateOffscreen(
         *context, texture_size, SPrintF("%s Offscreen", label.c_str()),
-        RenderTarget::kDefaultColorAttachmentConfig, std::nullopt);
+        RenderTarget::kDefaultColorAttachmentConfig  //
+#ifndef FML_OS_ANDROID  // Reduce PSO variants for Vulkan.
+        ,
+        std::nullopt  // stencil_attachment_config
+#endif                // FML_OS_ANDROID
+    );
   }
   auto subpass_texture = subpass_target.GetRenderTargetTexture();
   if (!subpass_texture) {
