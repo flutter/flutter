@@ -1769,7 +1769,7 @@ void main() {
     expect(searchViewRect.topLeft, equals(const Offset(rootSpacing, rootSpacing)));
   });
 
-  testWidgets('Docked search should with nested navigator does not go off the screen', (WidgetTester tester) async {
+  testWidgets('Docked search view with nested navigator does not go off the screen', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(400.0, 400.0);
     tester.view.devicePixelRatio = 1.0;
