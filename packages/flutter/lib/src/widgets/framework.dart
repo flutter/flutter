@@ -5040,7 +5040,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
   _ElementDiagnosticableTreeNode({
     super.name,
-    required Element super.value,
+    required super.value,
     required super.style,
     this.stateful = false,
   });
