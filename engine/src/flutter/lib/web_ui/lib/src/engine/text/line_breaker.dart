@@ -84,8 +84,6 @@ List<LineBreakFragment> breakLinesUsingV8BreakIterator(String text, JSString jsT
   iterator.adoptText(jsText);
   iterator.first();
   while (iterator.next() != -1) {
-    final LineBreakType type = _getV8BreakType(text, iterator);
-
     final int fragmentEnd = iterator.current().toInt();
     int trailingNewlines = 0;
     int trailingSpaces = 0;
@@ -115,6 +113,15 @@ List<LineBreakFragment> breakLinesUsingV8BreakIterator(String text, JSString jsT
       }
     }
 
+    final LineBreakType type;
+    if (trailingNewlines > 0) {
+      type = LineBreakType.mandatory;
+    } else if (fragmentEnd == text.length) {
+      type = LineBreakType.endOfText;
+    } else {
+      type = LineBreakType.opportunity;
+    }
+
     breaks.add(LineBreakFragment(
       fragmentStart,
       fragmentEnd,
@@ -130,20 +137,6 @@ List<LineBreakFragment> breakLinesUsingV8BreakIterator(String text, JSString jsT
   }
 
   return breaks;
-}
-
-/// Gets break type from v8BreakIterator.
-LineBreakType _getV8BreakType(String text, DomV8BreakIterator iterator) {
-  final int fragmentEnd = iterator.current().toInt();
-
-  // I don't know why v8BreakIterator uses the type "none" to mean "soft break".
-  if (iterator.breakType() != 'none') {
-    return LineBreakType.mandatory;
-  }
-  if (fragmentEnd == text.length) {
-    return LineBreakType.endOfText;
-  }
-  return LineBreakType.opportunity;
 }
 
 class LineBreakFragment extends TextFragment {
