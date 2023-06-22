@@ -40,9 +40,6 @@ int main(int argc, char const* argv[]) {
         &already_started);
   }
 
-  // Set up the process-wide /tmp virtual filesystem.
-  dart_utils::RunnerTemp runner_temp;
-
   fml::MessageLoop& loop = fml::MessageLoop::GetCurrent();
   flutter_runner::Runner runner(loop.GetTaskRunner(), context.get());
 
