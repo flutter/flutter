@@ -410,6 +410,46 @@ void testMain() {
       }
     });
   });
+
+  group('v8BreakIterator hard line breaks', () {
+    List<Line> split(String text) {
+      return V8LineBreakFragmenter(text)
+          .fragment()
+          .map((LineBreakFragment fragment) => Line.fromLineBreakFragment(text, fragment))
+          .toList();
+    }
+
+    test('thai text with hard line breaks', () {
+      const String thaiText = '\u0E1A\u0E38\u0E1C\u0E25\u0E01\u0E32\u0E23';
+      expect(split(thaiText), <Line>[
+        Line('\u0E1A\u0E38', opportunity),
+        Line('\u0E1C\u0E25', opportunity),
+        Line('\u0E01\u0E32\u0E23', endOfText),
+      ]);
+      expect(split('$thaiText\n'), <Line>[
+        Line('\u0E1A\u0E38', opportunity),
+        Line('\u0E1C\u0E25', opportunity),
+        Line('\u0E01\u0E32\u0E23\n', mandatory, nl: 1, sp: 1),
+        Line('', endOfText),
+      ]);
+    });
+
+    test('khmer text with hard line breaks', () {
+      const String khmerText =
+          '\u179B\u1792\u17D2\u179C\u17BE\u17B2\u17D2\u1799';
+      expect(split(khmerText), <Line>[
+        Line('\u179B', opportunity),
+        Line('\u1792\u17D2\u179C\u17BE', opportunity),
+        Line('\u17B2\u17D2\u1799', endOfText),
+      ]);
+      expect(split('$khmerText\n'), <Line>[
+        Line('\u179B', opportunity),
+        Line('\u1792\u17D2\u179C\u17BE', opportunity),
+        Line('\u17B2\u17D2\u1799\n', mandatory, nl: 1, sp: 1),
+        Line('', endOfText),
+      ]);
+    });
+  }, skip: domIntl.v8BreakIterator == null);
 }
 
 typedef CreateLineBreakFragmenter = LineBreakFragmenter Function(String text);
