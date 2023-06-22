@@ -1639,6 +1639,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // Tells the SystemNavigator whether or not a system pop should have an
   // effect.
   void _updateSystemNavigator() {
+    if (!isCurrent) {
+      return;
+    }
     final NavigationNotification notification = NavigationNotification(
       // canPop indicates that the originator of the Notification can handle a
       // pop. In the case of PopScope, it handles pops when popEnabled is
