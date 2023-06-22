@@ -412,6 +412,12 @@ class Shell final : public PlatformView::Delegate,
       std::function<bool(const ServiceProtocol::Handler::ServiceProtocolMap&,
                          rapidjson::Document*)>;
 
+  /// A collection of message channels (by name) that have sent at least one
+  /// message from a non-platform thread. Used to prevent printing the error log
+  /// more than once per channel, as a badly behaving plugin may send multiple
+  /// messages per second indefinitely.
+  std::mutex misbehaving_message_channels_mutex_;
+  std::set<std::string> misbehaving_message_channels_;
   const TaskRunners task_runners_;
   const fml::RefPtr<fml::RasterThreadMerger> parent_raster_thread_merger_;
   std::shared_ptr<ResourceCacheLimitCalculator>

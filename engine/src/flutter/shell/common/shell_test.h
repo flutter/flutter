@@ -56,6 +56,9 @@ class ShellTest : public FixtureTest {
 
   fml::TimePoint GetLatestFrameTargetTime(Shell* shell) const;
 
+  void SendPlatformMessage(Shell* shell,
+                           std::unique_ptr<PlatformMessage> message);
+
   void SendEnginePlatformMessage(Shell* shell,
                                  std::unique_ptr<PlatformMessage> message);
 
