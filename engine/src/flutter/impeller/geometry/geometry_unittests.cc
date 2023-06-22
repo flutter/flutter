@@ -2115,6 +2115,48 @@ TEST(GeometryTest, RectGetPositive) {
   }
 }
 
+TEST(GeometryTest, RectScale) {
+  {
+    auto r = Rect::MakeLTRB(-100, -100, 100, 100);
+    auto actual = r.Scale(0);
+    auto expected = Rect::MakeLTRB(0, 0, 0, 0);
+    ASSERT_RECT_NEAR(expected, actual);
+  }
+  {
+    auto r = Rect::MakeLTRB(-100, -100, 100, 100);
+    auto actual = r.Scale(-2);
+    auto expected = Rect::MakeLTRB(200, 200, -200, -200);
+    ASSERT_RECT_NEAR(expected, actual);
+  }
+  {
+    auto r = Rect::MakeLTRB(-100, -100, 100, 100);
+    auto actual = r.Scale(Point{0, 0});
+    auto expected = Rect::MakeLTRB(0, 0, 0, 0);
+    ASSERT_RECT_NEAR(expected, actual);
+  }
+  {
+    auto r = Rect::MakeLTRB(-100, -100, 100, 100);
+    auto actual = r.Scale(Size{-1, -2});
+    auto expected = Rect::MakeLTRB(100, 200, -100, -200);
+    ASSERT_RECT_NEAR(expected, actual);
+  }
+}
+
+TEST(GeometryTest, RectProject) {
+  {
+    auto r = Rect::MakeLTRB(-100, -100, 100, 100);
+    auto actual = r.Project(r);
+    auto expected = Rect::MakeLTRB(0, 0, 1, 1);
+    ASSERT_RECT_NEAR(expected, actual);
+  }
+  {
+    auto r = Rect::MakeLTRB(-100, -100, 100, 100);
+    auto actual = r.Project(Rect::MakeLTRB(0, 0, 100, 100));
+    auto expected = Rect::MakeLTRB(0.5, 0.5, 1, 1);
+    ASSERT_RECT_NEAR(expected, actual);
+  }
+}
+
 TEST(GeometryTest, CubicPathComponentPolylineDoesNotIncludePointOne) {
   CubicPathComponent component({10, 10}, {20, 35}, {35, 20}, {40, 40});
   auto polyline = component.CreatePolyline(1.0f);
