@@ -5956,7 +5956,7 @@ void main() {
     // Test default TabAlignment when isScrollable is false.
     await tester.pumpWidget(MaterialApp(
       theme: theme,
-      home: buildFrame(tabs: tabs,  value: 'B', useMaterial3: true),
+      home: buildFrame(tabs: tabs,  value: 'B', useMaterial3: theme.useMaterial3),
     ));
 
     final Rect tabBar = tester.getRect(find.byType(TabBar));
@@ -5972,7 +5972,12 @@ void main() {
     // Test default TabAlignment when isScrollable is true.
     await tester.pumpWidget(MaterialApp(
       theme: theme,
-      home: buildFrame(tabs: tabs,  value: 'B', isScrollable: true, useMaterial3: true),
+      home: buildFrame(
+        tabs: tabs,
+        value: 'B',
+        isScrollable: true,
+        useMaterial3: theme.useMaterial3,
+      ),
     ));
 
     tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6089,7 +6094,12 @@ void main() {
     // Test TabAlignment.startOffset (default) when isScrollable is true.
     await tester.pumpWidget(MaterialApp(
       theme: theme,
-      home: buildFrame(tabs: tabs, value: 'B', isScrollable: true, useMaterial3: true),
+      home: buildFrame(
+        tabs: tabs,
+        value: 'B',
+        isScrollable: true,
+        useMaterial3: theme.useMaterial3,
+      ),
     ));
 
     final Rect tabBar = tester.getRect(find.byType(TabBar));
@@ -6112,7 +6122,7 @@ void main() {
         value: 'B',
         isScrollable: true,
         tabAlignment: TabAlignment.start,
-        useMaterial3: true,
+        useMaterial3: theme.useMaterial3,
       ),
     ));
     await tester.pumpAndSettle();
@@ -6134,7 +6144,7 @@ void main() {
         value: 'B',
         isScrollable: true,
         tabAlignment: TabAlignment.center,
-        useMaterial3: true,
+        useMaterial3: theme.useMaterial3,
       ),
     ));
     await tester.pumpAndSettle();
@@ -6156,7 +6166,7 @@ void main() {
         value: 'B',
         isScrollable: true,
         tabAlignment: TabAlignment.startOffset,
-        useMaterial3: true,
+        useMaterial3: theme.useMaterial3,
       ),
     ));
     await tester.pumpAndSettle();
@@ -6186,7 +6196,7 @@ void main() {
         value: 'B',
         isScrollable: true,
         textDirection: TextDirection.rtl,
-        useMaterial3: true,
+        useMaterial3: theme.useMaterial3,
       ),
     ));
 
@@ -6211,7 +6221,7 @@ void main() {
         isScrollable: true,
         tabAlignment: TabAlignment.start,
         textDirection: TextDirection.rtl,
-        useMaterial3: true,
+        useMaterial3: theme.useMaterial3,
       ),
     ));
     await tester.pumpAndSettle();
@@ -6235,7 +6245,7 @@ void main() {
         isScrollable: true,
         tabAlignment: TabAlignment.startOffset,
         textDirection: TextDirection.rtl,
-        useMaterial3: true,
+        useMaterial3: theme.useMaterial3,
       ),
     ));
     await tester.pumpAndSettle();
