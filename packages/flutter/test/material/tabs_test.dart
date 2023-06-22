@@ -5956,7 +5956,7 @@ void main() {
     // Test default TabAlignment when isScrollable is false.
     await tester.pumpWidget(MaterialApp(
       theme: theme,
-      home: buildFrame(tabs: tabs,  value: 'B'),
+      home: buildFrame(tabs: tabs,  value: 'B', useMaterial3: true),
     ));
 
     final Rect tabBar = tester.getRect(find.byType(TabBar));
@@ -5972,7 +5972,7 @@ void main() {
     // Test default TabAlignment when isScrollable is true.
     await tester.pumpWidget(MaterialApp(
       theme: theme,
-      home: buildFrame(tabs: tabs,  value: 'B', isScrollable: true),
+      home: buildFrame(tabs: tabs,  value: 'B', isScrollable: true, useMaterial3: true),
     ));
 
     tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6089,7 +6089,7 @@ void main() {
     // Test TabAlignment.startOffset (default) when isScrollable is true.
     await tester.pumpWidget(MaterialApp(
       theme: theme,
-      home: buildFrame(tabs: tabs, value: 'B', isScrollable: true),
+      home: buildFrame(tabs: tabs, value: 'B', isScrollable: true, useMaterial3: true),
     ));
 
     final Rect tabBar = tester.getRect(find.byType(TabBar));
@@ -6107,7 +6107,13 @@ void main() {
     // Test TabAlignment.start when isScrollable is true.
     await tester.pumpWidget(MaterialApp(
       theme: theme,
-      home: buildFrame(tabs: tabs, value: 'B', isScrollable: true, tabAlignment: TabAlignment.start),
+      home: buildFrame(
+        tabs: tabs,
+        value: 'B',
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        useMaterial3: true,
+      ),
     ));
     await tester.pumpAndSettle();
 
@@ -6123,7 +6129,13 @@ void main() {
     // Test TabAlignment.center when isScrollable is true.
     await tester.pumpWidget(MaterialApp(
       theme: theme,
-      home: buildFrame(tabs: tabs, value: 'B', isScrollable: true, tabAlignment: TabAlignment.center),
+      home: buildFrame(
+        tabs: tabs,
+        value: 'B',
+        isScrollable: true,
+        tabAlignment: TabAlignment.center,
+        useMaterial3: true,
+      ),
     ));
     await tester.pumpAndSettle();
 
@@ -6139,7 +6151,13 @@ void main() {
     // Test TabAlignment.startOffset when isScrollable is true.
     await tester.pumpWidget(MaterialApp(
       theme: theme,
-      home: buildFrame(tabs: tabs, value: 'B', isScrollable: true, tabAlignment: TabAlignment.startOffset),
+      home: buildFrame(
+        tabs: tabs,
+        value: 'B',
+        isScrollable: true,
+        tabAlignment: TabAlignment.startOffset,
+        useMaterial3: true,
+      ),
     ));
     await tester.pumpAndSettle();
 
@@ -6163,7 +6181,13 @@ void main() {
     // Test TabAlignment.startOffset (default) when isScrollable is true.
     await tester.pumpWidget(MaterialApp(
       theme: theme,
-      home: buildFrame(tabs: tabs, value: 'B', isScrollable: true, textDirection: TextDirection.rtl),
+      home: buildFrame(
+        tabs: tabs,
+        value: 'B',
+        isScrollable: true,
+        textDirection: TextDirection.rtl,
+        useMaterial3: true,
+      ),
     ));
 
     final Rect tabBar = tester.getRect(find.byType(TabBar));
@@ -6187,6 +6211,7 @@ void main() {
         isScrollable: true,
         tabAlignment: TabAlignment.start,
         textDirection: TextDirection.rtl,
+        useMaterial3: true,
       ),
     ));
     await tester.pumpAndSettle();
@@ -6210,6 +6235,7 @@ void main() {
         isScrollable: true,
         tabAlignment: TabAlignment.startOffset,
         textDirection: TextDirection.rtl,
+        useMaterial3: true,
       ),
     ));
     await tester.pumpAndSettle();
