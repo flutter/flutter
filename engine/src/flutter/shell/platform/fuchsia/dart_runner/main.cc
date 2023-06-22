@@ -62,7 +62,6 @@ int main(int argc, const char** argv) {
 #endif  // defined(AOT_RUNTIME)
 #endif  // !defined(DART_PRODUCT)
 
-  dart_utils::RunnerTemp runner_temp;
   dart_runner::DartRunner runner(context.get());
 
   // Wait to serve until we have finished all of our setup.
