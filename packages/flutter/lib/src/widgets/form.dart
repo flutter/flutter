@@ -178,7 +178,7 @@ class Form extends StatefulWidget {
   ///  * [popEnabled], which also comes from [PopScope] and is often used in
   ///    conjunction with this parameter.
   ///  * [PopScope.onPopped], which is what [Form] delegates to internally.
-  final OnPoppedCallback? onPopped;
+  final PoppedCallback? onPopped;
 
   /// Called when one of the form fields changes.
   ///

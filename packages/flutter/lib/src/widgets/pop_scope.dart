@@ -10,7 +10,7 @@ import 'routes.dart';
 ///
 /// Accepts a didPop boolean indicating whether or not back navigation
 /// succeeded.
-typedef OnPoppedCallback = void Function(bool didPop);
+typedef PoppedCallback = void Function(bool didPop);
 
 /// Manages system back gestures.
 ///
@@ -67,7 +67,7 @@ class PopScope extends StatefulWidget implements PopInterface {
   ///
   ///  * [Route.onPopped], which is similar.
   @override
-  final OnPoppedCallback? onPopped;
+  final PoppedCallback? onPopped;
 
   /// {@template flutter.widgets.PopScope.popEnabled}
   /// When false, blocks the current route from being popped.
@@ -135,7 +135,7 @@ sealed class PopInterface {
   });
 
   /// {@macro flutter.widgets.PopScope.popEnabled}
-  final OnPoppedCallback? onPopped;
+  final PoppedCallback? onPopped;
 
   /// {@macro flutter.widgets.PopScope.popEnabled}
   final bool popEnabled;
