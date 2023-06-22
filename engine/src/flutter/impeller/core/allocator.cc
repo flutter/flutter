@@ -49,9 +49,8 @@ std::shared_ptr<Texture> Allocator::CreateTexture(
     const TextureDescriptor& desc) {
   const auto max_size = GetMaxTextureSizeSupported();
   if (desc.size.width > max_size.width || desc.size.height > max_size.height) {
-    VALIDATION_LOG
-        << "Requested texture size exceeds maximum supported size of "
-        << desc.size;
+    VALIDATION_LOG << "Requested texture size " << desc.size
+                   << " exceeds maximum supported size of " << max_size;
     return nullptr;
   }
 

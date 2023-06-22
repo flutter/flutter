@@ -2415,6 +2415,26 @@ TEST_P(EntityTest, PointFieldGeometryDivisions) {
   ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(20000.0, true), 140u);
 }
 
+TEST_P(EntityTest, ColorFilterContentsWithLargeGeometry) {
+  Entity entity;
+  entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
+  auto src_contents = std::make_shared<SolidColorContents>();
+  src_contents->SetGeometry(
+      Geometry::MakeRect(Rect::MakeLTRB(-300, -500, 30000, 50000)));
+  src_contents->SetColor(Color::Red());
+
+  auto dst_contents = std::make_shared<SolidColorContents>();
+  dst_contents->SetGeometry(
+      Geometry::MakeRect(Rect::MakeLTRB(300, 500, 20000, 30000)));
+  dst_contents->SetColor(Color::Blue());
+
+  auto contents = ColorFilterContents::MakeBlend(
+      BlendMode::kSourceOver, {FilterInput::Make(dst_contents, false),
+                               FilterInput::Make(src_contents, false)});
+  entity.SetContents(std::move(contents));
+  ASSERT_TRUE(OpenPlaygroundHere(entity));
+}
+
 }  // namespace testing
 }  // namespace impeller
 
