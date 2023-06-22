@@ -1,4 +1,4 @@
-Signature: 565714310059ba13a925ddfd0b79c27d
+Signature: 59280efac318ee6f9a18277e983429cc
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9018,6 +9018,7 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/VelloComputeSteps.h +
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/VelloRenderer.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/VelloRenderer.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/geom/EdgeAAQuad.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/render/GraphiteVertexFiller.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorPool.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorPool.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorSet.cpp + ../../../third_party/skia/LICENSE
@@ -9208,6 +9209,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/compute/VelloComputeSteps.h
 FILE: ../../../third_party/skia/src/gpu/graphite/compute/VelloRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/compute/VelloRenderer.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/EdgeAAQuad.h
+FILE: ../../../third_party/skia/src/gpu/graphite/render/GraphiteVertexFiller.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorPool.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorPool.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorSet.cpp
