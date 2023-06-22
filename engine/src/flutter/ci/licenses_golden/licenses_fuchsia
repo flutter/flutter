@@ -1,4 +1,4 @@
-Signature: a66de0ea78fe60b0155565e23d6c22cd
+Signature: fa635c46e1f4ad1ae5a112f800311643
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -355,7 +355,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/lib/src/fakes/handle_disposition.dart
-FILE: ../../../fuchsia/sdk/linux/data/config/symbol-index/config.json
+FILE: ../../../fuchsia/sdk/linux/data/config/symbol_index/config.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
@@ -2039,7 +2039,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/lib/src/fakes/handle_disposition.dart
-FILE: ../../../fuchsia/sdk/linux/data/config/symbol-index/config.json
+FILE: ../../../fuchsia/sdk/linux/data/config/symbol_index/config.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
@@ -4323,7 +4323,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/lib/src/fakes/handle_disposition.dart
-FILE: ../../../fuchsia/sdk/linux/data/config/symbol-index/config.json
+FILE: ../../../fuchsia/sdk/linux/data/config/symbol_index/config.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json

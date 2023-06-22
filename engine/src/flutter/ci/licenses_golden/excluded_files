@@ -456,7 +456,7 @@
 ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/meta.json
 ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
 ../../../fuchsia/sdk/linux/dart/zircon/meta.json
-../../../fuchsia/sdk/linux/data/config/symbol-index/meta.json
+../../../fuchsia/sdk/linux/data/config/symbol_index/meta.json
 ../../../fuchsia/sdk/linux/docs
 ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.gesture/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/meta.json
