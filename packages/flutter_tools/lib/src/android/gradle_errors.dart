@@ -83,6 +83,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   zipExceptionHandler,
   incompatibleJavaAndGradleVersionsHandler,
   remoteTerminatedHandshakeHandler,
+  couldNotOpenCacheDirectoryHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -714,4 +715,23 @@ final GradleHandledError remoteTerminatedHandshakeHandler = GradleHandledError(
     return GradleBuildStatus.retry;
   },
   eventLabel: 'remote-terminated-handshake',
+);
+
+@visibleForTesting
+final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
+  test: (String line) => line.contains('> Could not open cache directory '),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while resolving dependencies.'
+    );
+
+    return GradleBuildStatus.retry;
+  },
+  eventLabel: 'could-not-open-cache-directory',
 );
