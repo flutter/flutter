@@ -2043,7 +2043,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
 // center it within its (NavigationToolbar) parent, and allow the
 // parent to constrain the title's actual height.
 class _AppBarTitleBox extends SingleChildRenderObjectWidget {
-  const _AppBarTitleBox({ required Widget super.child });
+  const _AppBarTitleBox({ required super.child });
 
   @override
   _RenderAppBarTitleBox createRenderObject(BuildContext context) {
