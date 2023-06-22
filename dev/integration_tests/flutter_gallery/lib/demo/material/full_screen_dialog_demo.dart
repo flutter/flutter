@@ -110,7 +110,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
   bool _hasName = false;
   late String _eventName;
 
-  Future<void> _onPopped(bool didPop) async {
+  Future<void> _handlePopped(bool didPop) async {
     if (didPop) {
       return;
     }
@@ -171,7 +171,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
       ),
       body: Form(
         popEnabled: !_saveNeeded && !_hasLocation && !_hasName,
-        onPopped: _onPopped,
+        onPopped: _handlePopped,
         child: Scrollbar(
           child: ListView(
             primary: true,
