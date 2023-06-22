@@ -42,6 +42,7 @@ std::shared_ptr<Contents> PaintPassDelegate::CreateContentsForSubpassTarget(
     const Matrix& effect_transform) {
   auto contents = TextureContents::MakeRect(Rect::MakeSize(target->GetSize()));
   contents->SetTexture(target);
+  contents->SetLabel("Subpass");
   contents->SetSourceRect(Rect::MakeSize(target->GetSize()));
   contents->SetOpacity(paint_.color.alpha);
   contents->SetDeferApplyingOpacity(true);
@@ -134,6 +135,7 @@ OpacityPeepholePassDelegate::CreateContentsForSubpassTarget(
     std::shared_ptr<Texture> target,
     const Matrix& effect_transform) {
   auto contents = TextureContents::MakeRect(Rect::MakeSize(target->GetSize()));
+  contents->SetLabel("Subpass");
   contents->SetTexture(target);
   contents->SetSourceRect(Rect::MakeSize(target->GetSize()));
   contents->SetOpacity(paint_.color.alpha);

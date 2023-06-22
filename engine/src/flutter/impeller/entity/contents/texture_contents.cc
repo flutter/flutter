@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "texture_contents.h"
+#include "impeller/entity/contents/texture_contents.h"
 
 #include <memory>
 #include <optional>
@@ -105,13 +105,13 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
 }
 
 static TextureFillVertexShader::PerVertexData ComputeVertexData(
-    const Point& vtx,
+    const Point& position,
     const Rect& coverage_rect,
     const ISize& texture_size,
     const Rect& source_rect) {
   TextureFillVertexShader::PerVertexData data;
-  data.position = vtx;
-  auto coverage_coords = (vtx - coverage_rect.origin) / coverage_rect.size;
+  data.position = position;
+  auto coverage_coords = (position - coverage_rect.origin) / coverage_rect.size;
   data.texture_coords =
       (source_rect.origin + source_rect.size * coverage_coords) / texture_size;
   return data;
@@ -131,9 +131,9 @@ bool TextureContents::Render(const ContentContext& renderer,
   }
 
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
-  for (const auto vtx : rect_.GetPoints()) {
+  for (const auto position : rect_.GetPoints()) {
     vertex_builder.AppendVertex(ComputeVertexData(
-        vtx, coverage_rect, texture_->GetSize(), source_rect_));
+        position, coverage_rect, texture_->GetSize(), source_rect_));
   }
 
   auto& host_buffer = pass.GetTransientsBuffer();

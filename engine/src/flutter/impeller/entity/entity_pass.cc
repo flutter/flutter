@@ -283,6 +283,7 @@ bool EntityPass::Render(ContentContext& renderer,
         contents->SetTexture(
             offscreen_target.GetRenderTarget().GetRenderTargetTexture());
         contents->SetSourceRect(size_rect);
+        contents->SetLabel("Root pass blit");
 
         Entity entity;
         entity.SetContents(contents);
