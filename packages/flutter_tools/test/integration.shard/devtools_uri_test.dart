@@ -39,7 +39,7 @@ void main() {
       'flutter-tester',
     ], workingDirectory: tempDir.path);
 
-    late StreamSubscription<String> sub;
+    late final StreamSubscription<String> sub;
     sub = process.stdout.transform(utf8.decoder).listen((String message) {
       if (message.contains(matcher)) {
         completer.complete();
