@@ -331,11 +331,25 @@ class PaintingContext extends ClipContext {
     return _canvas!;
   }
 
+  /// Replaces construction of [ui.PictureRecorder].
+  ///
+  /// This can be used, for example, when you want to spy the method calls
+  /// of the [ui.PictureRecorder]. In that case, you can create a
+  /// proxy (delegate) class.
+  static ui.PictureRecorder Function()? createPictureRecorder;
+
+  /// Replaces construction of [Canvas].
+  ///
+  /// This can be used, for example, when you want to spy the method calls
+  /// of the [Canvas]. In that case, you can create a
+  /// proxy (delegate) class.
+  static Canvas Function(ui.PictureRecorder)? createCanvas;
+
   void _startRecording() {
     assert(!_isRecording);
     _currentLayer = PictureLayer(estimatedBounds);
-    _recorder = ui.PictureRecorder();
-    _canvas = Canvas(_recorder!);
+    _recorder = (createPictureRecorder ?? ui.PictureRecorder.new)();
+    _canvas = (createCanvas ?? Canvas.new)(_recorder!);
     _containerLayer.append(_currentLayer!);
   }
 

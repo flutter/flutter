@@ -1520,8 +1520,15 @@ class OffsetLayer extends ContainerLayer {
     properties.add(DiagnosticsProperty<Offset>('offset', offset));
   }
 
+  /// Replaces construction of [ui.SceneBuilder].
+  ///
+  /// This can be used, for example, when you want to spy the method calls
+  /// of the [ui.SceneBuilder]. In that case, you can create a
+  /// proxy (delegate) class.
+  static ui.SceneBuilder Function()? createSceneBuilder;
+
   ui.Scene _createSceneForImage(Rect bounds, { double pixelRatio = 1.0 }) {
-    final ui.SceneBuilder builder = ui.SceneBuilder();
+    final ui.SceneBuilder builder = (createSceneBuilder ?? ui.SceneBuilder.new)();
     final Matrix4 transform = Matrix4.diagonal3Values(pixelRatio, pixelRatio, 1);
     transform.translate(-(bounds.left + offset.dx), -(bounds.top + offset.dy));
     builder.pushTransform(transform.storage);

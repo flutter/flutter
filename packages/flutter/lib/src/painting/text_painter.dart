@@ -1024,10 +1024,17 @@ class TextPainter {
     return _layoutCache!.paragraph.didExceedMaxLines;
   }
 
+  /// Replaces construction of [ui.ParagraphBuilder].
+  ///
+  /// This can be used, for example, when you want to spy the method calls
+  /// of the [ui.ParagraphBuilder]. In that case, you can create a
+  /// proxy (delegate) class.
+  static ui.ParagraphBuilder Function(ui.ParagraphStyle)? paragraphBuilderCreator;
+
   // Creates a ui.Paragraph using the current configurations in this class and
   // assign it to _paragraph.
   ui.Paragraph _createParagraph(InlineSpan text) {
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(_createParagraphStyle());
+    final ui.ParagraphBuilder builder = (paragraphBuilderCreator ?? ui.ParagraphBuilder.new)(_createParagraphStyle());
     text.build(builder, textScaleFactor: textScaleFactor, dimensions: _placeholderDimensions);
     assert(() {
       _debugMarkNeedsLayoutCallStack = null;
