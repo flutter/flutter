@@ -231,29 +231,12 @@ class FlutterManifest {
         _logger.printError('Expected deferred component manifest to be a map.');
         continue;
       }
-      List<Uri> assetsUri = <Uri>[];
-      final List<Object?>? assets = component['assets'] as List<Object?>?;
-      if (assets == null) {
-        assetsUri = const <Uri>[];
-      } else {
-        for (final Object? asset in assets) {
-          if (asset is! String || asset == '') {
-            _logger.printError('Deferred component asset manifest contains a null or empty uri.');
-            continue;
-          }
-          try {
-            assetsUri.add(Uri.parse(asset));
-          } on FormatException {
-            _logger.printError('Asset manifest contains invalid uri: $asset.');
-          }
-        }
-      }
       components.add(
         DeferredComponent(
           name: component['name'] as String,
           libraries: component['libraries'] == null ?
               <String>[] : (component['libraries'] as List<dynamic>).cast<String>(),
-          assets: assetsUri,
+          assets: _computeAssets(component['assets']),
         )
       );
     }
@@ -311,26 +294,7 @@ class FlutterManifest {
         : fontList.map<Map<String, Object?>?>(castStringKeyedMap).whereType<Map<String, Object?>>().toList();
   }
 
-  late final List<Uri> assets = _computeAssets();
-  List<Uri> _computeAssets() {
-    final List<Object?>? assets = _flutterDescriptor['assets'] as List<Object?>?;
-    if (assets == null) {
-      return const <Uri>[];
-    }
-    final List<Uri> results = <Uri>[];
-    for (final Object? asset in assets) {
-      if (asset is! String || asset == '') {
-        _logger.printError('Asset manifest contains a null or empty uri.');
-        continue;
-      }
-      try {
-        results.add(Uri(pathSegments: asset.split('/')));
-      } on FormatException {
-        _logger.printError('Asset manifest contains invalid uri: $asset.');
-      }
-    }
-    return results;
-  }
+  late final List<AssetsEntry> assets = _computeAssets(_flutterDescriptor['assets']);
 
   late final List<Font> fonts = _extractFonts();
 
@@ -521,15 +485,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           errors.add('Expected "$yamlKey" to be a bool, but got $yamlValue (${yamlValue.runtimeType}).');
         }
       case 'assets':
-        if (yamlValue is! YamlList) {
-          errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
-        } else if (yamlValue.isEmpty) {
-          break;
-        } else if (yamlValue[0] is! String) {
-          errors.add(
-            'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
-          );
-        }
+        _validateAssets(yamlValue, errors);
       case 'shaders':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -640,16 +596,47 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
         }
       }
       if (valueMap.containsKey('assets')) {
-        final Object? assets = valueMap['assets'];
-        if (assets is! YamlList) {
-          errors.add('Expected "assets" to be a list, but got $assets (${assets.runtimeType}).');
-        } else {
-          _validateListType<String>(assets, errors, '"assets" key in the $i element of "${kvp.key}"', 'file paths');
-        }
+        _validateAssets(valueMap['assets'], errors);
       }
     }
   }
 }
+
+bool _validateAssets(Object? yaml, List<String> errors) {
+  final List<String> assetsErrors = <String>[];
+  _computeAssetsSafe(yaml, assetsErrors);
+  errors.addAll(assetsErrors);
+  return assetsErrors.isEmpty;
+}
+
+List<AssetsEntry> _computeAssetsSafe(Object? yaml, List<String> errors) {
+  if (yaml == null) {
+    return const <AssetsEntry>[];
+  }
+  if (yaml is! YamlList) {
+    errors.add('Expected "assets" to be a list, but got $yaml (${yaml.runtimeType})');
+    return const <AssetsEntry>[];
+  }
+  final List<AssetsEntry> results = <AssetsEntry>[];
+  for (final Object? rawAssetEntry in yaml) {
+    final AssetsEntry? parsed = AssetsEntry.parseFromYamlSafe(rawAssetEntry, errors: errors);
+    if (parsed != null) {
+      results.add(parsed);
+    }
+  }
+  return results;
+}
+
+List<AssetsEntry> _computeAssets(Object? assetsSection) {
+  final List<String> errors = <String>[];
+  final List<AssetsEntry> result = _computeAssetsSafe(assetsSection, errors);
+  if (errors.isNotEmpty) {
+    throw Exception('Uncaught error(s) in assets section: '
+      '${errors.join('\n')}');
+  }
+  return result;
+}
+
 
 void _validateFonts(YamlList fonts, List<String> errors) {
   const Set<int> fontWeights = <int>{
@@ -703,3 +690,104 @@ void _validateFonts(YamlList fonts, List<String> errors) {
     }
   }
 }
+
+/// Represents an entry under the `assets` section of a pubspec.
+@immutable
+class AssetsEntry {
+  const AssetsEntry({
+    required this.uri,
+    this.flavor,
+  });
+
+  final Uri uri;
+  final String? flavor;
+
+  static const String _pathKey = 'path';
+  static const String _flavorKey = 'flavor';
+
+  static AssetsEntry? parseFromYaml(Object? yaml) {
+    final List<String> errors = <String>[];
+    final AssetsEntry? value = parseFromYamlSafe(
+      yaml,
+      errors: errors,
+    );
+    if (errors.isNotEmpty) {
+      throw Exception('Unexpected error when parsing assets entry');
+    }
+    return value!;
+  }
+
+  static AssetsEntry? parseFromYamlSafe(Object? yaml, {
+    required List<String> errors,
+  }) {
+    Uri? tryParseUri(String uri) {
+      try {
+        return Uri(pathSegments: uri.split('/'));
+      } on FormatException {
+        errors.add('Asset manifest contains invalid uri: $uri.');
+        return null;
+      }
+    }
+
+    if (yaml == null || yaml == '') {
+      errors.add('Asset manifest contains a null or empty uri.');
+      return null;
+    }
+
+    if (yaml is String) {
+      final Uri? uri = tryParseUri(yaml);
+      return uri == null ? null : AssetsEntry(uri: uri);
+    } else if (yaml is Map) {
+      if (yaml.keys.isEmpty) {
+        return null;
+      }
+      final Object? path = yaml[_pathKey];
+      final Object? flavor = yaml[_flavorKey];
+
+      if (path == null || path is! String) {
+        errors.add('Asset manifest entry is malformed. '
+          'Expected asset entry to be either a string or a map '
+          'containing a "$_pathKey" entry. Got ${path.runtimeType} instead.');
+        return null;
+      }
+
+      if (flavor != null && flavor is! String) {
+        errors.add('Asset manifest entry is malformed. '
+          'Expected "$_flavorKey" entry to be a string. Got ${flavor.runtimeType} instead.');
+        return null;
+      }
+
+      return AssetsEntry(
+        uri: Uri(pathSegments: path.split('/')),
+        flavor: flavor as String?,
+      );
+    }
+
+    errors.add('Assets entry had unexpected shape. '
+      'Expected a string or an object. Got ${yaml.runtimeType} instead.');
+    return null;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! AssetsEntry) {
+      return false;
+    }
+
+    if (uri != other.uri) {
+        return false;
+      }
+
+    return true;
+  }
+
+  @override
+  int get hashCode => uri.hashCode;
+}
+
+// class AssetsEntryParseResult {
+//   AssetsEntryParseResult({required this.errors, required this.value});
+
+//   final List<String> errors;
+//   final AssetsEntry value;
+// }

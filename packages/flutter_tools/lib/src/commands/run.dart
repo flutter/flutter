@@ -638,6 +638,7 @@ class RunCommand extends RunCommandBase {
         ipv6: ipv6 ?? false,
         multidexEnabled: boolArg('multidex'),
         analytics: globals.analytics,
+        flavor: stringArg('flavor'),
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -713,6 +714,7 @@ class RunCommand extends RunCommandBase {
           multidexEnabled: boolArg('multidex'),
           userIdentifier: userIdentifier,
           enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
+          flavor: stringArg('flavor'),
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());

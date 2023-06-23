@@ -9,11 +9,15 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
@@ -23,7 +27,9 @@ const String shaderLibDir = '/./shader_lib';
 
 void main() {
   group('AssetBundle.build', () {
+    late Logger logger;
     late FileSystem testFileSystem;
+    late Platform platform;
 
     setUp(() async {
       testFileSystem = MemoryFileSystem(
@@ -32,6 +38,8 @@ void main() {
           : FileSystemStyle.posix,
       );
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      logger = BufferLogger.test();
+      platform = FakePlatform(operatingSystem: globals.platform.operatingSystem);
     });
 
     testUsingContext('nonempty', () async {
@@ -322,6 +330,181 @@ flutter:
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    group('flavors feature', () {
+
+      Future<void> buildBundleWithFlavor(ManifestAssetBundle bundle, String? flavor) {
+        return bundle.build(
+          packagesPath: '.packages',
+          flutterProject: FlutterProject.fromDirectoryTest(testFileSystem.currentDirectory),
+          flavor: flavor,
+        );
+      }
+
+      setUp(() {
+        Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform, fileSystem: testFileSystem, userMessages: UserMessages());
+      });
+
+      testWithoutContext('correctly bundles assets given a simple asset manifest with flavors', () async {
+        testFileSystem.file('.packages').createSync();
+        testFileSystem.file(testFileSystem.path.join('assets', 'common', 'image.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('assets', 'vanilla', 'ice-cream.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('assets', 'strawberry', 'ice-cream.png')).createSync(recursive: true);
+        testFileSystem.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    assets:
+      - assets/common/
+      - path: assets/vanilla/
+        flavor: vanilla
+      - path: assets/strawberry/
+        flavor: strawberry
+  ''');
+        final ManifestAssetBundle bundle = ManifestAssetBundle(
+          logger: logger,
+          fileSystem: testFileSystem,
+          platform: platform,
+          splitDeferredAssets: true,
+        );
+        await buildBundleWithFlavor(bundle, null);
+
+        expect(bundle.entries.keys, contains('assets/common/image.png'));
+        expect(bundle.entries.keys, isNot(contains('assets/vanilla/ice-cream.png')));
+        expect(bundle.entries.keys, isNot(contains('assets/strawberry/ice-cream.png')));
+
+        await buildBundleWithFlavor(bundle, 'strawberry');
+
+        expect(bundle.entries.keys, contains('assets/common/image.png'));
+        expect(bundle.entries.keys, isNot(contains('assets/vanilla/ice-cream.png')));
+        expect(bundle.entries.keys, contains('assets/strawberry/ice-cream.png'));
+      });
+
+      testWithoutContext('correctly bundles assets when a non-flavored folder contains a flavored asset', () async {
+        testFileSystem.file('.packages').createSync();
+        testFileSystem.file(testFileSystem.path.join('assets', 'unflavored.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('assets', 'vanilla.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('assets', 'strawberry.png')).createSync(recursive: true);
+
+        testFileSystem.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    assets:
+      - assets/
+      - path: assets/vanilla.png
+        flavor: vanilla
+      - path: assets/strawberry.png
+        flavor: strawberry
+  ''');
+        final ManifestAssetBundle bundle = ManifestAssetBundle(
+          logger: logger,
+          fileSystem: testFileSystem,
+          platform: platform,
+          splitDeferredAssets: true,
+        );
+
+        await buildBundleWithFlavor(bundle, null);
+        expect(bundle.entries.keys, contains('assets/unflavored.png'));
+        expect(bundle.entries.keys, isNot(contains('assets/vanilla.png')));
+        expect(bundle.entries.keys, isNot(contains('assets/strawberry.png')));
+
+        await buildBundleWithFlavor(bundle, 'vanilla');
+        expect(bundle.entries.keys, contains('assets/unflavored.png'));
+        expect(bundle.entries.keys, contains('assets/vanilla.png'));
+        expect(bundle.entries.keys, isNot(contains('assets/strawberry.png')));
+      });
+
+      testWithoutContext('correctly bundles assets when a flavored folder contains a flavorless asset', () async {
+        testFileSystem.file('.packages').createSync();
+        testFileSystem.file(testFileSystem.path.join('vanilla', 'vanilla.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('vanilla', 'flavorless.png')).createSync(recursive: true);
+
+        testFileSystem.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    assets:
+      - path: vanilla/
+        flavor: vanilla
+      - vanilla/flavorless.png
+  ''');
+        final ManifestAssetBundle bundle = ManifestAssetBundle(
+          logger: logger,
+          fileSystem: testFileSystem,
+          platform: platform,
+          splitDeferredAssets: true,
+        );
+
+        await buildBundleWithFlavor(bundle, null);
+        expect(bundle.entries.keys, isNot(contains('vanilla/vanilla.png')));
+        expect(bundle.entries.keys, contains('vanilla/flavorless.png'));
+
+        await buildBundleWithFlavor(bundle, 'vanilla');
+        expect(bundle.entries.keys, contains('vanilla/vanilla.png'));
+        expect(bundle.entries.keys, contains('vanilla/flavorless.png'));
+      });
+
+      testWithoutContext('tool exits when two file-explicit entries give the same asset different flavors', () {
+        testFileSystem.file('.packages').createSync();
+        testFileSystem.file('orange.png').createSync(recursive: true);
+        testFileSystem.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    assets:
+      - path: orange.png
+        flavor: orange
+      - path: orange.png
+        flavor: mango
+  ''');
+        final ManifestAssetBundle bundle = ManifestAssetBundle(
+          logger: logger,
+          fileSystem: testFileSystem,
+          platform: platform,
+          splitDeferredAssets: true,
+        );
+
+        expect(
+          buildBundleWithFlavor(bundle, null),
+          throwsToolExit(message: 'Asset "orange.png" belongs to multiple flavors.\n'
+            'An entry with the path "orange.png" gives it a flavor of "orange".\n'
+            'An entry with the path "orange.png" gives it a flavor of "mango".'),
+        );
+      });
+
+      testWithoutContext('flavor from file-level declaration overrides flavor from folder-level declaration', () async {
+        testFileSystem.file('.packages').createSync();
+        testFileSystem.file(testFileSystem.path.join('vanilla', 'actually-strawberry.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('vanilla', 'vanilla.png')).createSync(recursive: true);
+
+        testFileSystem.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+  name: example
+  flutter:
+    assets:
+      - path: vanilla/
+        flavor: vanilla
+      - path: vanilla/actually-strawberry.png
+        flavor: strawberry
+  ''');
+        final ManifestAssetBundle bundle = ManifestAssetBundle(
+          logger: logger,
+          fileSystem: testFileSystem,
+          platform: platform,
+          splitDeferredAssets: true,
+        );
+
+        await buildBundleWithFlavor(bundle, 'vanilla');
+        expect(bundle.entries.keys, contains('vanilla/vanilla.png'));
+        expect(bundle.entries.keys, isNot(contains('vanilla/actually-strawberry.png')));
+      });
     });
   });
 

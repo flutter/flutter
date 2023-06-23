@@ -117,6 +117,7 @@ class AssembleCommand extends FlutterCommand {
         'files will be written. Must be either absolute or relative from the '
         'root of the current Flutter project.',
     );
+    usesFlavorOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     usesDartDefineOption();
     argParser.addOption(
