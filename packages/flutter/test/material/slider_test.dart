@@ -1945,6 +1945,7 @@ void main() {
     double value = 0.5;
     final ThemeData theme = ThemeData(useMaterial3: true);
     final Key sliderKey = UniqueKey();
+    final FocusNode focusNode = FocusNode();
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -1953,8 +1954,9 @@ void main() {
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Slider(
-                value: value,
                 key: sliderKey,
+                value: value,
+                focusNode: focusNode,
                 onChanged: enabled
                   ? (double newValue) {
                       setState(() {
@@ -1994,7 +1996,18 @@ void main() {
     await drag.up();
     await tester.pumpAndSettle();
 
-    // Slider still has overlay when stopped dragging.
+    // Slider without focus doesn't have overlay when enabled and dragged.
+    expect(focusNode.hasFocus, false);
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+    );
+
+    // Slider has overlay when enabled, dragged and focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasFocus, true);
     expect(
       Material.of(tester.element(find.byType(Slider))),
       paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
@@ -2005,6 +2018,7 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     final Key sliderKey = UniqueKey();
+    final FocusNode focusNode = FocusNode();
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -2012,8 +2026,9 @@ void main() {
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Slider(
-                value: value,
                 key: sliderKey,
+                value: value,
+                focusNode: focusNode,
                 overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
                   if (states.contains(MaterialState.dragged)) {
                     return Colors.lime[500]!;
@@ -2060,10 +2075,11 @@ void main() {
     await drag.up();
     await tester.pumpAndSettle();
 
-    // Slider still has overlay when stopped dragging.
+    // Slider without focus doesn't have overlay when enabled and dragged.
+    expect(focusNode.hasFocus, false);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: Colors.lime[500]),
+      isNot(paints..circle(color: Colors.lime[500])),
     );
   });
 
@@ -3495,14 +3511,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, true);
-    expect(
-      Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: overlayColor),
-    );
-
-    focusNode.unfocus();
-    await tester.pumpAndSettle();
-    expect(focusNode.hasFocus, false);
+    // Overlay is removed when adjusted with a tap.
     expect(
       Material.of(tester.element(find.byType(Slider))),
       isNot(paints..circle(color: overlayColor)),
@@ -3796,6 +3805,7 @@ void main() {
       double value = 0.5;
       final ThemeData theme = ThemeData();
       final Key sliderKey = UniqueKey();
+      final FocusNode focusNode = FocusNode();
 
       Widget buildApp({bool enabled = true}) {
         return MaterialApp(
@@ -3803,8 +3813,9 @@ void main() {
             child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
                 return Slider(
-                  value: value,
                   key: sliderKey,
+                  value: value,
+                  focusNode: focusNode,
                   onChanged: enabled
                     ? (double newValue) {
                         setState(() {
@@ -3844,10 +3855,11 @@ void main() {
       await drag.up();
       await tester.pumpAndSettle();
 
-      // Slider still has overlay when stopped dragging.
+      // Slider without focus doesn't have overlay when enabled and dragged.
+      expect(focusNode.hasFocus, false);
       expect(
         Material.of(tester.element(find.byType(Slider))),
-        paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+        isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
       );
     });
   });
