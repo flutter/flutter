@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui;
 
-import 'package:web/web.dart' as web;
+import '../services/dom.dart';
 
 import 'platform.dart' as platform;
 
@@ -40,7 +40,7 @@ final platform.TargetPlatform? _testPlatform = () {
 // 0.20ms. As `defaultTargetPlatform` is routinely called dozens of times per
 // frame this value should be cached.
 final platform.TargetPlatform _browserPlatform = () {
-  final String navigatorPlatform = web.window.navigator.platform.toLowerCase();
+  final String navigatorPlatform = domWindow.navigator.platform?.toLowerCase() ?? '';
   if (navigatorPlatform.startsWith('mac')) {
     return platform.TargetPlatform.macOS;
   }
@@ -60,7 +60,7 @@ final platform.TargetPlatform _browserPlatform = () {
   // indicates that a device has a "fine pointer" (mouse) as the primary
   // pointing device, then we'll assume desktop linux, and otherwise we'll
   // assume Android.
-  if (web.window.matchMedia('only screen and (pointer: fine)').matches) {
+  if (domWindow.matchMedia('only screen and (pointer: fine)').matches) {
     return platform.TargetPlatform.linux;
   }
   return platform.TargetPlatform.android;
