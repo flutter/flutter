@@ -393,29 +393,21 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
         fileSystem.path.join(homeDirPath, 'Applications'),
     ];
 
-    bool checkForJetBrainsToolboxWrapper(String installPath) {
-      final Map<String, dynamic> plistValues = plistParser.parseFile(
-          fileSystem.path.join(installPath, 'Contents', 'Info.plist'));
-      return plistValues.containsKey('JetBrainsToolboxApp');
-    }
-
     void checkForIntelliJ(Directory dir) {
       final String name = fileSystem.path.basename(dir.path);
       _dirNameToId.forEach((String dirName, String id) {
         if (name == dirName) {
           assert(IntelliJValidator._idToTitle.containsKey(id));
           final String title = IntelliJValidator._idToTitle[id]!;
-          if (!checkForJetBrainsToolboxWrapper(dir.path)) {
-            validators.add(IntelliJValidatorOnMac(
-              title,
-              id,
-              dir.path,
-              fileSystem: fileSystem,
-              userMessages: userMessages,
-              plistParser: plistParser,
-              homeDirPath: homeDirPath,
-            ));
-          }
+          validators.add(IntelliJValidatorOnMac(
+            title,
+            id,
+            dir.path,
+            fileSystem: fileSystem,
+            userMessages: userMessages,
+            plistParser: plistParser,
+            homeDirPath: homeDirPath,
+          ));
         }
       });
     }
@@ -490,6 +482,13 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
           ]),
       ));
     }
+
+    // Remove duplicated validator
+    validators.removeWhere((DoctorValidator validator) {
+      validator = validator as IntelliJValidatorOnMac;
+      return validator.installPath.contains('JetBrains Toolbox');
+    });
+
     return validators;
   }
 
