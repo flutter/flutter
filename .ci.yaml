@@ -445,6 +445,8 @@ targets:
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
         ]
+      # TODO(flutter/flutter#123331): This device is flaking.
+      # "--device", "model=Nexus6P,version=25",
       virtual_devices: >-
         [
           "--device", "model=Nexus5,version=21",
@@ -471,6 +473,8 @@ targets:
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
         ]
+      # TODO(flutter/flutter#123331): This device is flaking.
+      # "--device", "model=Nexus6P,version=25",
       virtual_devices: >-
         [
           "--device", "model=Nexus5,version=21",
@@ -497,6 +501,8 @@ targets:
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
         ]
+      # TODO(flutter/flutter#123331): This device is flaking.
+      # "--device", "model=Nexus6P,version=25",
       virtual_devices: >-
         [
           "--device", "model=Nexus5,version=21",
