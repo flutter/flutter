@@ -1133,7 +1133,7 @@ class RenderListWheelViewport
     // `child` will be the last RenderObject before the viewport when walking up from `target`.
     RenderObject child = target;
     while (child.parent != this) {
-      child = child.parent! as RenderObject;
+      child = child.parent!;
     }
 
     final ListWheelParentData parentData = child.parentData! as ListWheelParentData;

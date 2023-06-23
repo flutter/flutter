@@ -13,6 +13,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -336,12 +338,25 @@ class FakeFlutterVersion implements FlutterVersion {
     this.frameworkAge = '0 hours ago',
     this.frameworkCommitDate = '12/01/01',
     this.gitTagVersion = const GitTagVersion.unknown(),
+    this.flutterRoot = '/path/to/flutter',
+    this.nextFlutterVersion,
   });
 
   final String branch;
 
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
   bool _didFetchTagsAndUpdate = false;
+
+  /// Will be returned by [fetchTagsAndGetVersion] if not null.
+  final FlutterVersion? nextFlutterVersion;
+
+  @override
+    FlutterVersion fetchTagsAndGetVersion({
+      SystemClock clock = const SystemClock(),
+    }) {
+    _didFetchTagsAndUpdate = true;
+    return nextFlutterVersion ?? this;
+  }
 
   bool get didCheckFlutterVersionFreshness => _didCheckFlutterVersionFreshness;
   bool _didCheckFlutterVersionFreshness = false;
@@ -353,6 +368,9 @@ class FakeFlutterVersion implements FlutterVersion {
     }
     return kUserBranch;
   }
+
+  @override
+  final String flutterRoot;
 
   @override
   final String devToolsVersion;
@@ -385,15 +403,10 @@ class FakeFlutterVersion implements FlutterVersion {
   final String frameworkCommitDate;
 
   @override
-  String get frameworkDate => frameworkCommitDate;
-
-  @override
   final GitTagVersion gitTagVersion;
 
   @override
-  void fetchTagsAndUpdate() {
-    _didFetchTagsAndUpdate = true;
-  }
+  FileSystem get fs => throw UnimplementedError('FakeFlutterVersion.fs is not implemented');
 
   @override
   Future<void> checkFlutterVersionFreshness() async {
@@ -619,15 +632,12 @@ class FakeJava extends Fake implements Java {
   FakeJava({
     this.javaHome = '/android-studio/jbr',
     String binary = '/android-studio/jbr/bin/java',
-    JavaVersion? version,
+    Version? version,
     bool canRun = true,
   }): binaryPath = binary,
-      version = version ?? JavaVersion(
-       longText: 'openjdk 19.0.2 2023-01-17',
-       number: '19.0.2',
-      ),
+      version = version ?? const Version.withText(19, 0, 2, 'openjdk 19.0.2 2023-01-17'),
       _environment = <String, String>{
-        if (javaHome != null) 'JAVA_HOME': javaHome,
+        if (javaHome != null) Java.javaHomeEnvironmentVariable: javaHome,
         'PATH': '/android-studio/jbr/bin',
       },
       _canRun = canRun;
@@ -645,7 +655,7 @@ class FakeJava extends Fake implements Java {
   Map<String, String> get environment => _environment;
 
   @override
-  JavaVersion? version;
+  Version? version;
 
   @override
   bool canRun() {

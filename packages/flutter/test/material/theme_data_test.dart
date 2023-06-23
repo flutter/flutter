@@ -23,7 +23,7 @@ void main() {
 
   test('Defaults to the default typography for the platform', () {
     for (final TargetPlatform platform in TargetPlatform.values) {
-      final ThemeData theme = ThemeData(platform: platform);
+      final ThemeData theme = ThemeData(platform: platform, useMaterial3: false);
       final Typography typography = Typography.material2018(platform: platform);
       expect(
         theme.textTheme,
@@ -34,8 +34,8 @@ void main() {
   });
 
   test('Default text theme contrasts with brightness', () {
-    final ThemeData lightTheme = ThemeData(brightness: Brightness.light);
-    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark);
+    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, useMaterial3: false);
+    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, useMaterial3: false);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.textTheme.titleLarge!.color, typography.black.titleLarge!.color);
@@ -43,8 +43,8 @@ void main() {
   });
 
   test('Default primary text theme contrasts with primary brightness', () {
-    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
-    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black);
+    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white, useMaterial3: false);
+    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black, useMaterial3: false);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.primaryTextTheme.titleLarge!.color, typography.black.titleLarge!.color);
@@ -52,8 +52,8 @@ void main() {
   });
 
   test('Default icon theme contrasts with brightness', () {
-    final ThemeData lightTheme = ThemeData(brightness: Brightness.light);
-    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark);
+    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, useMaterial3: false);
+    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, useMaterial3: false);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.textTheme.titleLarge!.color, typography.black.titleLarge!.color);
@@ -61,8 +61,8 @@ void main() {
   });
 
   test('Default primary icon theme contrasts with primary brightness', () {
-    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
-    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black);
+    final ThemeData lightTheme = ThemeData(primaryColor: Colors.white, useMaterial3: false);
+    final ThemeData darkTheme = ThemeData(primaryColor: Colors.black, useMaterial3: false);
     final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
     expect(lightTheme.primaryTextTheme.titleLarge!.color, typography.black.titleLarge!.color);

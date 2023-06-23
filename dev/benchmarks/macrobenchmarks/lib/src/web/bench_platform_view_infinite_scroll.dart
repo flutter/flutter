@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
+import 'package:web/web.dart' as web;
 
 import 'recorder.dart';
 
@@ -14,16 +14,17 @@ const String benchmarkViewType = 'benchmark_element';
 
 void _registerFactory() {
   ui_web.platformViewRegistry.registerViewFactory(benchmarkViewType, (int viewId) {
-    final html.Element htmlElement = html.DivElement();
+    final web.HTMLElement htmlElement =
+      web.document.createElement('div') as web.HTMLDivElement;
     htmlElement.id = '${benchmarkViewType}_$viewId';
     htmlElement.innerText = 'Google';
     htmlElement.style
-      ..width = '100%'
-      ..height = '100%'
-      ..color = 'black'
-      ..backgroundColor = 'rgba(0, 255, 0, .5)'
-      ..textAlign = 'center'
-      ..border = '1px solid black';
+      ..setProperty('width', '100%')
+      ..setProperty('height', '100%')
+      ..setProperty('color', 'black')
+      ..setProperty('backgroundColor', 'rgba(0, 255, 0, .5)')
+      ..setProperty('textAlign', 'center')
+      ..setProperty('border', '1px solid black');
     return htmlElement;
   });
 }

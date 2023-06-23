@@ -47,7 +47,20 @@ export 'package:matcher/expect.dart' hide expect, isInstanceOf;
 // that doesn't apply here.
 export 'package:test_api/hooks.dart' show TestFailure;
 export 'package:test_api/scaffolding.dart'
-    hide group, setUp, setUpAll, tearDown, tearDownAll, test;
+    show
+        OnPlatform,
+        Retry,
+        Skip,
+        Tags,
+        TestOn,
+        Timeout,
+        addTearDown,
+        markTestSkipped,
+        printOnFailure,
+        pumpEventQueue,
+        registerException,
+        spawnHybridCode,
+        spawnHybridUri;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
@@ -130,6 +143,7 @@ void testWidgets(
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
+  int? retry,
 }) {
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -174,6 +188,7 @@ void testWidgets(
       skip: skip,
       timeout: timeout ?? binding.defaultTestTimeout,
       tags: tags,
+      retry: retry,
     );
   }
 }
@@ -832,7 +847,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   HitTestResult hitTestOnBinding(Offset location) {
-    location = binding.localToGlobal(location);
+    location = binding.localToGlobal(location, binding.renderView);
     return super.hitTestOnBinding(location);
   }
 
