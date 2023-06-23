@@ -28,6 +28,11 @@ class DeviceBufferVK final : public DeviceBuffer,
 
   vk::Buffer GetBuffer() const;
 
+  // If the contents of this buffer have been written to with
+  // `OnGetContents`, then calling flush may be necessary if the memory is
+  // non-coherent.
+  void Flush() override;
+
  private:
   friend class AllocatorVK;
 

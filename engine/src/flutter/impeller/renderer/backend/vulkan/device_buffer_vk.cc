@@ -53,6 +53,10 @@ bool DeviceBufferVK::OnCopyHostBuffer(const uint8_t* source,
   return true;
 }
 
+void DeviceBufferVK::Flush() {
+  ::vmaFlushAllocation(allocator_, allocation_, 0, VK_WHOLE_SIZE);
+}
+
 bool DeviceBufferVK::SetLabel(const std::string& label) {
   auto context = context_.lock();
   if (!context || !buffer_) {
