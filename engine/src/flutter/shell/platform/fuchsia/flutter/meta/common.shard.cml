@@ -13,6 +13,12 @@
         },
     ],
     use: [
+	// This is used by the Dart VM to communicate from Dart code to C++ code.
+        {
+            storage: "tmp",
+            path: "/tmp",
+        },
+        // This is used by the Dart VM to load i18n data.
         {
             directory: "config-data",
             rights: [ "r*" ],
