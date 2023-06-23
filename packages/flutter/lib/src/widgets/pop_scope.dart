@@ -140,4 +140,9 @@ sealed class PopInterface {
 
   /// {@macro flutter.widgets.PopScope.popEnabled}
   final bool popEnabled;
+
+  @override
+  String toString() {
+    return 'PopInterface popEnabled: $popEnabled, onPopped: $onPopped';
+  }
 }
