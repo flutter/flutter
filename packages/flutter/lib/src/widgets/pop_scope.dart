@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'framework.dart';
 import 'navigator.dart';
 import 'routes.dart';
@@ -34,7 +36,7 @@ typedef PopInvokedCallback = void Function(bool didPop);
 ///    back gestures in the case of a form with unsaved data.
 ///  * [ModalRoute.registerPopInterface] and [ModalRoute.unregisterPopInterface],
 ///    which this widget uses to integrate with Flutter's navigation system.
-class PopScope extends StatefulWidget implements PopInterface {
+class PopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
   ///
@@ -66,7 +68,6 @@ class PopScope extends StatefulWidget implements PopInterface {
   /// See also:
   ///
   ///  * [Route.onPopInvoked], which is similar.
-  @override
   final PopInvokedCallback? onPopInvoked;
 
   /// {@template flutter.widgets.PopScope.popEnabled}
@@ -82,35 +83,47 @@ class PopScope extends StatefulWidget implements PopInterface {
   /// [Android's predictive back](https://developer.android.com/guide/navigation/predictive-back-gesture)
   /// feature will not animate when this boolean is false.
   /// {@endtemplate}
-  @override
   final bool popEnabled;
 
   @override
   State<PopScope> createState() => _PopScopeState();
 }
 
-class _PopScopeState extends State<PopScope> {
+class _PopScopeState extends State<PopScope> implements PopInterface {
   ModalRoute<dynamic>? _route;
+
+  @override
+  PopInvokedCallback? get onPopInvoked => widget.onPopInvoked;
+
+  @override
+  late final ValueNotifier<bool> popEnabledNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    popEnabledNotifier = ValueNotifier<bool>(widget.popEnabled);
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _route?.unregisterPopInterface(widget);
+    _route?.unregisterPopInterface(this);
     _route = ModalRoute.of(context);
-    _route?.registerPopInterface(widget);
+    _route?.registerPopInterface(this);
   }
 
   @override
   void didUpdateWidget(PopScope oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _route = ModalRoute.of(context);
-    _route?.unregisterPopInterface(oldWidget);
-    _route?.registerPopInterface(widget);
+    if (widget.popEnabled != oldWidget.popEnabled) {
+      popEnabledNotifier.value = widget.popEnabled;
+    }
   }
 
   @override
   void dispose() {
-    _route?.unregisterPopInterface(widget);
+    _route?.unregisterPopInterface(this);
+    popEnabledNotifier.dispose();
     super.dispose();
   }
 
@@ -121,7 +134,7 @@ class _PopScopeState extends State<PopScope> {
 /// An interface to into navigation pop events.
 ///
 /// Can be registered in [ModalRoute] to listen to pops with [onPopInvoked] or to
-/// enable/disable them with [popEnabled].
+/// enable/disable them with [popEnabledNotifier].
 ///
 /// See also:
 ///
@@ -130,8 +143,7 @@ class _PopScopeState extends State<PopScope> {
 ///  * [ModalRoute.unregisterPopInterface], which unregisters instances of this.
 sealed class PopInterface {
   /// Creates an instance of [PopInterface].
-  const PopInterface({
-    required this.popEnabled,
+  PopInterface({
     required this.onPopInvoked,
   });
 
@@ -139,10 +151,10 @@ sealed class PopInterface {
   final PopInvokedCallback? onPopInvoked;
 
   /// {@macro flutter.widgets.PopScope.popEnabled}
-  final bool popEnabled;
+  late final ValueNotifier<bool> popEnabledNotifier;
 
   @override
   String toString() {
-    return 'PopInterface popEnabled: $popEnabled, onPopInvoked: $onPopInvoked';
+    return 'PopInterface popEnabled: ${popEnabledNotifier.value}, onPopInvoked: $onPopInvoked';
   }
 }

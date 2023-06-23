@@ -1552,7 +1552,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
     final bool popEnabled = _popInterfaces.every((PopInterface popInterface) {
-      return popInterface.popEnabled;
+      return popInterface.popEnabledNotifier.value;
     });
 
     if (!popEnabled) {
@@ -1623,6 +1623,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [unregisterPopInterface], which performs the opposite operation.
   void registerPopInterface(PopInterface popInterface) {
     _popInterfaces.add(popInterface);
+    popInterface.popEnabledNotifier.addListener(_updateSystemNavigator);
     _updateSystemNavigator();
   }
 
@@ -1633,6 +1634,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [registerPopInterface], which performs the opposite operation.
   void unregisterPopInterface(PopInterface popInterface) {
     _popInterfaces.remove(popInterface);
+    popInterface.popEnabledNotifier.removeListener(_updateSystemNavigator);
     _updateSystemNavigator();
   }
 

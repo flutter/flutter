@@ -384,18 +384,18 @@ void main() {
     });
     await tester.pump();
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
+      expect(calls, hasLength(lastCallsLength));
+      expect(calls.last, isTrue);
       lastCallsLength = calls.length;
     }
-    expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.bubble);
+    expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.doNotPop);
 
     setState(() {
       usePopScope2 = false;
     });
     await tester.pump();
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(lastCallsLength));
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isFalse);
     }
     expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.bubble);
