@@ -510,6 +510,9 @@ ImpellerAllocator::ImpellerAllocator(
 
 std::optional<std::shared_ptr<impeller::DeviceBuffer>>
 ImpellerAllocator::GetDeviceBuffer() const {
+  if (buffer_.has_value()) {
+    buffer_.value()->Flush();
+  }
   return buffer_;
 }
 
