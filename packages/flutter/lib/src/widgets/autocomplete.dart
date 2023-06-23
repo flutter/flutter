@@ -497,9 +497,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   void _updateActions() {
-    _setActionsEnabled(
-      _focusNode.hasFocus && _noSelection && _options.isNotEmpty,
-    );
+    _setActionsEnabled(_focusNode.hasFocus && _noSelection && _options.isNotEmpty);
   }
 
   bool _floatingOptionsUpdateScheduled = false;
