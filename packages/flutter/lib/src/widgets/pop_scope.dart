@@ -53,7 +53,9 @@ class PopScope extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
+  /// {@template flutter.widgets.PopScope.onPopInvoked}
   /// Called after a route pop was handled.
+  /// {@endtemplate}
   ///
   /// It's not possible to prevent the pop from happening at the time that this
   /// method is called; the pop has already happened. Use [canPop] to
