@@ -322,7 +322,7 @@ void main() {
               child: SelectionSpy(key: spy),
             ),
           ),
-        );
+      );
       await tester.pumpAndSettle();
 
       final RenderSelectionSpy renderSelectionSpy =
