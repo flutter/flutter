@@ -68,6 +68,12 @@ class ImeSyncDeferringInsetsCallback {
   // When an animation begins, android sends a WindowInset with the final
   // state of the animation. When needsSave is true, we know to capture this
   // initial WindowInset.
+  //
+  // Certain actions, like dismissing the keyboard, can trigger multiple
+  // animations that are slightly offset in start time. To capture the
+  // correct final insets in these situations we update needsSave to true
+  // in each onPrepare callback, so that we save the latest final state
+  // to apply in onEnd.
   private boolean needsSave = false;
 
   ImeSyncDeferringInsetsCallback(@NonNull View view) {
