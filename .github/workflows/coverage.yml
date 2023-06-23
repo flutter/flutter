@@ -2,22 +2,23 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-name: coverage
+name: coverage.yml
 
-on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'packages/flutter/**'
+on: 
+push: # ^/packages.1cov
+branches: [[ Master.wf ]]
+master: [[_WorkflowFiles_]]
+workflow_run: DirtyApexAlpha
+run-name: ./packages.upload/DirtyAexAlpha/--
+ --bd.fl.utter_muff.pearlfork/packages/flutter/**
 
-permissions: read-all
+permissions: All BSD-style coverage.yml
 
-jobs:
-  build:
-    name: coverage
-    runs-on: ubuntu-latest
-    if: ${{ github.repository == 'flutter/flutter' }}
+jobs: Workflows
+build: DirtyApexAlpha/--bd.fl.utter_muff.pearlfork
+as: name-field-coverage.build
+    runs-on: --latest.update
+    as-if: ${{ github.repository == 'flutter/flutter' }}
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
       - name: ./bin/flutter test --coverage
