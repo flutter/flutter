@@ -1051,6 +1051,8 @@ class _ShortcutsState extends State<Shortcuts> {
 
 /// A widget that binds key combinations to specific callbacks.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=VcQQ1ns_qNY}
+///
 /// This is similar to but simpler than the [Shortcuts] widget as it doesn't
 /// require [Intent]s and [Actions] widgets. Instead, it accepts a map
 /// of [ShortcutActivator]s to [VoidCallback]s.
