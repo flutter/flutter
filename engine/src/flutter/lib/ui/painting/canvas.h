@@ -191,12 +191,6 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
  private:
   explicit Canvas(sk_sp<DisplayListBuilder> builder);
 
-  // A copy of the recorder used by the SkCanvas->DisplayList adapter for cases
-  // where we cannot record the SkCanvas method call through the various OnOp()
-  // virtual methods or where we can be more efficient by talking directly in
-  // the DisplayList operation lexicon. The recorder has a method for recording
-  // paint attributes from an SkPaint and an operation type as well as access
-  // to the raw DisplayListBuilder for emitting custom rendering operations.
   sk_sp<DisplayListBuilder> display_list_builder_;
 };
 
