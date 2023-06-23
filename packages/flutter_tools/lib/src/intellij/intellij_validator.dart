@@ -485,8 +485,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
     // Remove duplicated validator
     validators.removeWhere((DoctorValidator validator) {
-      validator = validator as IntelliJValidatorOnMac;
-      return validator.installPath.contains('JetBrains Toolbox');
+      return (validator as IntelliJValidatorOnMac)
+          .installPath
+          .contains('JetBrains Toolbox');
     });
 
     return validators;
