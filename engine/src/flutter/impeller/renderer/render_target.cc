@@ -313,7 +313,7 @@ RenderTarget RenderTarget::CreateOffscreenMSAA(
   // Color attachment.
 
   ColorAttachment color0;
-  color0.clear_color = Color::BlackTransparent();
+  color0.clear_color = color_attachment_config.clear_color;
   color0.load_action = color_attachment_config.load_action;
   color0.store_action = color_attachment_config.store_action;
   color0.texture = color0_msaa_tex;
