@@ -48,6 +48,14 @@ void main() {
     expect(identical(ShapeDecoration.lerp(shape, shape, 0.5), shape), true);
   });
 
+  test('ShapeDecoration.lerp null a,b', () {
+    const Decoration a = ShapeDecoration(shape: CircleBorder());
+    const Decoration b = ShapeDecoration(shape: RoundedRectangleBorder());
+    expect(Decoration.lerp(a, null, 0.0), a);
+    expect(Decoration.lerp(null, b, 0.0), b);
+    expect(Decoration.lerp(null, null, 0.0), null);
+  });
+
   test('ShapeDecoration.lerp and hit test', () {
     const Decoration a = ShapeDecoration(shape: CircleBorder());
     const Decoration b = ShapeDecoration(shape: RoundedRectangleBorder());

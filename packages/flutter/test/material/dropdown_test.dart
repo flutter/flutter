@@ -16,6 +16,7 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -161,39 +162,43 @@ Widget buildFrame({
   double? menuMaxHeight,
   EdgeInsetsGeometry? padding,
   Alignment dropdownAlignment = Alignment.center,
+  bool? useMaterial3,
 }) {
-  return TestApp(
-    textDirection: textDirection,
-    mediaSize: mediaSize,
-    child: Material(
-      child: Align(
-        alignment: dropdownAlignment,
-        child: RepaintBoundary(
-          child: buildDropdown(
-            isFormField: isFormField,
-            buttonKey: buttonKey,
-            value: value,
-            hint: hint,
-            disabledHint: disabledHint,
-            onChanged: onChanged,
-            onTap: onTap,
-            icon: icon,
-            iconSize: iconSize,
-            iconDisabledColor: iconDisabledColor,
-            iconEnabledColor: iconEnabledColor,
-            isDense: isDense,
-            isExpanded: isExpanded,
-            underline: underline,
-            focusNode: focusNode,
-            autofocus: autofocus,
-            focusColor: focusColor,
-            dropdownColor: dropdownColor,
-            items: items,
-            selectedItemBuilder: selectedItemBuilder,
-            itemHeight: itemHeight,
-            alignment: alignment,
-            menuMaxHeight: menuMaxHeight,
-            padding: padding,
+  return Theme(
+    data: ThemeData(useMaterial3: useMaterial3),
+    child: TestApp(
+      textDirection: textDirection,
+      mediaSize: mediaSize,
+      child: Material(
+        child: Align(
+          alignment: dropdownAlignment,
+          child: RepaintBoundary(
+            child: buildDropdown(
+              isFormField: isFormField,
+              buttonKey: buttonKey,
+              value: value,
+              hint: hint,
+              disabledHint: disabledHint,
+              onChanged: onChanged,
+              onTap: onTap,
+              icon: icon,
+              iconSize: iconSize,
+              iconDisabledColor: iconDisabledColor,
+              iconEnabledColor: iconEnabledColor,
+              isDense: isDense,
+              isExpanded: isExpanded,
+              underline: underline,
+              focusNode: focusNode,
+              autofocus: autofocus,
+              focusColor: focusColor,
+              dropdownColor: dropdownColor,
+              items: items,
+              selectedItemBuilder: selectedItemBuilder,
+              itemHeight: itemHeight,
+              alignment: alignment,
+              menuMaxHeight: menuMaxHeight,
+              padding: padding,
+            ),
           ),
         ),
       ),
@@ -207,6 +212,7 @@ Widget buildDropdownWithHint({
   bool enableSelectedItemBuilder = false,
 }){
   return buildFrame(
+    useMaterial3: false,
     mediaSize: const Size(800, 600),
     itemHeight: 100.0,
     alignment: alignment,
@@ -286,6 +292,7 @@ Future<void> checkDropdownColor(WidgetTester tester, {Color? color, bool isFormF
   const String text = 'foo';
   await tester.pumpWidget(
     MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Material(
         child: isFormField
             ? Form(
@@ -335,7 +342,7 @@ Future<void> checkDropdownColor(WidgetTester tester, {Color? color, bool isFormF
 void main() {
   testWidgets('Default dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    Widget build() => buildFrame(buttonKey: buttonKey, onChanged: onChanged);
+    Widget build() => buildFrame(buttonKey: buttonKey, onChanged: onChanged, useMaterial3: false);
     await tester.pumpWidget(build());
     final Finder buttonFinder = find.byKey(buttonKey);
     assert(tester.renderObject(buttonFinder).attached);
@@ -347,7 +354,7 @@ void main() {
 
   testWidgets('Expanded dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    Widget build() => buildFrame(buttonKey: buttonKey, isExpanded: true, onChanged: onChanged);
+    Widget build() => buildFrame(buttonKey: buttonKey, isExpanded: true, onChanged: onChanged, useMaterial3: false);
     await tester.pumpWidget(build());
     final Finder buttonFinder = find.byKey(buttonKey);
     assert(tester.renderObject(buttonFinder).attached);
@@ -609,6 +616,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/66870
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           appBar: AppBar(),
           body: Column(
@@ -697,7 +705,7 @@ void main() {
     testWidgets('Dropdown button aligns selected menu item ($textDirection)', (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
 
-      Widget build() => buildFrame(buttonKey: buttonKey, textDirection: textDirection, onChanged: onChanged);
+      Widget build() => buildFrame(buttonKey: buttonKey, textDirection: textDirection, onChanged: onChanged, useMaterial3: false);
 
       await tester.pumpWidget(build());
       final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
@@ -2382,12 +2390,12 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
-    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true, useMaterial3: false));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(find.byType(Material), paints..rect(rect: const Rect.fromLTRB(348.0, 276.0, 452.0, 324.0), color: const Color(0x1f000000)));
 
-    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00)));
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00), useMaterial3: false));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(find.byType(Material), paints..rect(rect: const Rect.fromLTRB(348.0, 276.0, 452.0, 324.0), color: const Color(0x1f00ff00)));
   });
@@ -2696,6 +2704,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: StatefulBuilder(
@@ -3169,6 +3178,7 @@ void main() {
     final UniqueKey itemKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: DropdownButton<String>(
@@ -3504,8 +3514,9 @@ void main() {
     await tester.pumpAndSettle(); // finish the menu animation
 
     // The inherited ScrollBehavior should not apply Scrollbars since they are
-    // already built in to the widget.
-    expect(find.byType(CupertinoScrollbar), findsNothing);
+    // already built in to the widget. For iOS platform, ScrollBar directly returns
+    // CupertinoScrollbar
+    expect(find.byType(CupertinoScrollbar), debugDefaultTargetPlatformOverride == TargetPlatform.iOS ? findsOneWidget : findsNothing);
     expect(find.byType(Scrollbar), findsOneWidget);
     expect(find.byType(RawScrollbar), findsNothing);
 
@@ -3516,6 +3527,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: DropdownButton<String>(

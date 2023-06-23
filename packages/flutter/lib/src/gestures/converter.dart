@@ -53,10 +53,10 @@ abstract final class PointerEventConverter {
   /// Expand the given packet of pointer data into a sequence of framework
   /// pointer events.
   ///
-  /// The `devicePixelRatio` argument (usually given the value from
-  /// [dart:ui.FlutterView.devicePixelRatio]) is used to convert the incoming data
-  /// from physical coordinates to logical pixels. See the discussion at
-  /// [PointerEvent] for more details on the [PointerEvent] coordinate space.
+  /// The `devicePixelRatioForView` is used to obtain the device pixel ratio for
+  /// the view a particular event occurred in to convert its data from physical
+  /// coordinates to logical pixels. See the discussion at [PointerEvent] for
+  /// more details on the [PointerEvent] coordinate space.
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, DevicePixelRatioGetter devicePixelRatioForView) {
     return data
         .where((ui.PointerData datum) => datum.signalKind != ui.PointerSignalKind.unknown)
@@ -304,11 +304,6 @@ abstract final class PointerEventConverter {
                 scale: datum.scale,
               );
             case ui.PointerSignalKind.unknown:
-            default: // ignore: no_default_cases, to allow adding a new [PointerSignalKind] - PointerStylusAuxiliaryAction
-            // TODO(louisehsu): remove after landing engine PR https://github.com/flutter/engine/pull/39637
-              // This branch should already have 'unknown' filtered out, but
-              // we don't want to return anything or miss if someone adds a new
-              // enumeration to PointerSignalKind.
               throw StateError('Unreachable');
           }
         }).whereType<PointerEvent>();
