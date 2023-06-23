@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_interop';
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/rendering.dart';
-import 'package:web/web.dart' as web;
 
+import '../services/dom.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'platform_view.dart';
@@ -28,7 +27,7 @@ const String _kClassRule = '''
 ''';
 const int _kRightClickButton = 2;
 
-typedef _WebSelectionCallBack = void Function(web.HTMLElement, web.MouseEvent);
+typedef _WebSelectionCallBack = void Function(DomHTMLElement, DomMouseEvent);
 
 /// Function signature for `ui_web.platformViewRegistry.registerViewFactory`.
 @visibleForTesting
@@ -81,11 +80,11 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   // Registers the view factories for the interceptor widgets.
   static void _register() {
     assert(_registeredViewType == null);
-    _registeredViewType = _registerWebSelectionCallback((web.HTMLElement element, web.MouseEvent event) {
+    _registeredViewType = _registerWebSelectionCallback((DomHTMLElement element, DomMouseEvent event) {
       final SelectionContainerDelegate? client = _activeClient;
       if (client != null) {
         // Converts the html right click event to flutter coordinate.
-        final Offset localOffset = Offset(event.offsetX, event.offsetY);
+        final Offset localOffset = Offset(event.offsetX.toDouble(), event.offsetY.toDouble());
         final Matrix4 transform = client.getTransformTo(null);
         final Offset globalOffset = MatrixUtils.transformPoint(transform, localOffset);
         client.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: globalOffset));
@@ -94,9 +93,9 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
         element.innerText = client.getSelectedContent()?.plainText ?? '';
 
         // Programmatically select the dom element in browser.
-        final web.Range range = web.document.createRange();
+        final DomRange range = domDocument.createRange();
         range.selectNode(element);
-        final web.Selection? selection = web.window.getSelection();
+        final DomSelection? selection = domWindow.getSelection();
         if (selection != null) {
           selection.removeAllRanges();
           selection.addRange(range);
@@ -107,26 +106,26 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
 
   static String _registerWebSelectionCallback(_WebSelectionCallBack callback) {
     _registerViewFactory(_viewType, (int viewId) {
-      final web.HTMLElement htmlElement = web.document.createElement('div') as web.HTMLElement;
+      final DomHTMLElement htmlElement = createDomHTMLDivElement();
       htmlElement
         ..style.width = '100%'
         ..style.height = '100%'
         ..classList.add(_kClassName);
 
       // Create css style for _kClassName.
-      final web.HTMLStyleElement styleElement = web.document.createElement('style') as web.HTMLStyleElement;
-      web.document.head!.append(styleElement);
-      final web.CSSStyleSheet sheet = styleElement.sheet!;
+      final DomHTMLStyleElement styleElement = createDomHTMLStyleElement();
+      domDocument.head!.append(styleElement);
+      final DomCSSStyleSheet sheet = styleElement.sheet! as DomCSSStyleSheet;
       sheet.insertRule(_kClassRule, 0);
       sheet.insertRule(_kClassSelectionRule, 1);
 
-      htmlElement.addEventListener('mousedown', (web.Event event) {
-        final web.MouseEvent mouseEvent = event as web.MouseEvent;
+      htmlElement.addEventListener('mousedown', createDomEventListener((DomEvent event) {
+        final DomMouseEvent mouseEvent = event as DomMouseEvent;
         if (mouseEvent.button != _kRightClickButton) {
           return;
         }
         callback(htmlElement, mouseEvent);
-      }.toJS);
+      }));
       return htmlElement;
     }, isVisible: false);
     return _viewType;
