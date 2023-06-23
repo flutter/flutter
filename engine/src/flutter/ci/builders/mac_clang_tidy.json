@@ -60,6 +60,9 @@
                 "host_debug",
                 "ios_debug_sim"
             ],
+            "contexts": [
+                "osx_sdk"
+            ],
             "tasks": [
                 {
                     "name": "test: lint host_debug",
@@ -89,6 +92,9 @@
             "dependencies": [
                 "host_debug",
                 "ios_debug_sim"
+            ],
+            "contexts": [
+                "osx_sdk"
             ],
             "tasks": [
                 {
