@@ -4282,6 +4282,49 @@ class InputDecorationTheme with Diagnosticable {
     );
   }
 
+  /// Returns a copy of this InputDecorationTheme where the non-null fields in
+  /// the given InputDecorationTheme override the corresponding nullable fields
+  /// in this InputDecorationTheme.
+  ///
+  /// The non-nullable fields of InputDecorationTheme, such as [floatingLabelBehavior],
+  /// [isDense], [isCollapsed], [filled], and [alignLabelWithHint] cannot be overridden.
+  ///
+  /// In other words, the fields of the provided [InputDecorationTheme] are used to
+  /// fill in the unspecified and nullable fields of this InputDecorationTheme.
+  InputDecorationTheme merge(InputDecorationTheme? inputDecorationTheme) {
+    if (inputDecorationTheme == null) {
+      return this;
+    }
+    return copyWith(
+      labelStyle: labelStyle ?? inputDecorationTheme.labelStyle,
+      floatingLabelStyle: floatingLabelStyle ?? inputDecorationTheme.floatingLabelStyle,
+      helperStyle: helperStyle ?? inputDecorationTheme.helperStyle,
+      helperMaxLines: helperMaxLines ?? inputDecorationTheme.helperMaxLines,
+      hintStyle: hintStyle ?? inputDecorationTheme.hintStyle,
+      errorStyle: errorStyle ?? inputDecorationTheme.errorStyle,
+      errorMaxLines: errorMaxLines ?? inputDecorationTheme.errorMaxLines,
+      contentPadding: contentPadding ?? inputDecorationTheme.contentPadding,
+      iconColor: iconColor ?? inputDecorationTheme.iconColor,
+      prefixStyle: prefixStyle ?? inputDecorationTheme.prefixStyle,
+      prefixIconColor: prefixIconColor ?? inputDecorationTheme.prefixIconColor,
+      suffixStyle: suffixStyle ?? inputDecorationTheme.suffixStyle,
+      suffixIconColor: suffixIconColor ?? inputDecorationTheme.suffixIconColor,
+      counterStyle: counterStyle ?? inputDecorationTheme.counterStyle,
+      fillColor: fillColor ?? inputDecorationTheme.fillColor,
+      activeIndicatorBorder: activeIndicatorBorder ?? inputDecorationTheme.activeIndicatorBorder,
+      outlineBorder: outlineBorder ?? inputDecorationTheme.outlineBorder,
+      focusColor: focusColor ?? inputDecorationTheme.focusColor,
+      hoverColor: hoverColor ?? inputDecorationTheme.hoverColor,
+      errorBorder: errorBorder ?? inputDecorationTheme.errorBorder,
+      focusedBorder: focusedBorder ?? inputDecorationTheme.focusedBorder,
+      focusedErrorBorder: focusedErrorBorder ?? inputDecorationTheme.focusedErrorBorder,
+      disabledBorder: disabledBorder ?? inputDecorationTheme.disabledBorder,
+      enabledBorder: enabledBorder ?? inputDecorationTheme.enabledBorder,
+      border: border ?? inputDecorationTheme.border,
+      constraints: constraints ?? inputDecorationTheme.constraints,
+    );
+  }
+
   @override
   int get hashCode => Object.hash(
     labelStyle,

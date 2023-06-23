@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer';
 import 'dart:ui' as ui show PictureRecorder;
 import 'dart:ui';
 
@@ -1000,7 +999,7 @@ class PipelineOwner {
         }
         return true;
       }());
-      Timeline.startSync(
+      FlutterTimeline.startSync(
         'LAYOUT',
         arguments: debugTimelineArguments,
       );
@@ -1049,7 +1048,7 @@ class PipelineOwner {
         return true;
       }());
       if (!kReleaseMode) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
     }
   }
@@ -1088,7 +1087,7 @@ class PipelineOwner {
   /// [flushPaint].
   void flushCompositingBits() {
     if (!kReleaseMode) {
-      Timeline.startSync('UPDATING COMPOSITING BITS');
+      FlutterTimeline.startSync('UPDATING COMPOSITING BITS');
     }
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (final RenderObject node in _nodesNeedingCompositingBitsUpdate) {
@@ -1102,7 +1101,7 @@ class PipelineOwner {
     }
     assert(_nodesNeedingCompositingBitsUpdate.isEmpty, 'Child PipelineOwners must not dirty nodes in their parent.');
     if (!kReleaseMode) {
-      Timeline.finishSync();
+      FlutterTimeline.finishSync();
     }
   }
 
@@ -1136,7 +1135,7 @@ class PipelineOwner {
         }
         return true;
       }());
-      Timeline.startSync(
+      FlutterTimeline.startSync(
         'PAINT',
         arguments: debugTimelineArguments,
       );
@@ -1175,7 +1174,7 @@ class PipelineOwner {
         return true;
       }());
       if (!kReleaseMode) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
     }
   }
@@ -1264,7 +1263,7 @@ class PipelineOwner {
       return;
     }
     if (!kReleaseMode) {
-      Timeline.startSync('SEMANTICS');
+      FlutterTimeline.startSync('SEMANTICS');
     }
     assert(_semanticsOwner != null);
     assert(() {
@@ -1291,7 +1290,7 @@ class PipelineOwner {
         return true;
       }());
       if (!kReleaseMode) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
     }
   }
@@ -2393,7 +2392,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         }
         return true;
       }());
-      Timeline.startSync(
+      FlutterTimeline.startSync(
         '$runtimeType',
         arguments: debugTimelineArguments,
       );
@@ -2457,7 +2456,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }
 
       if (!kReleaseMode && debugProfileLayoutsEnabled) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
       return;
     }
@@ -2524,7 +2523,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     markNeedsPaint();
 
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
-      Timeline.finishSync();
+      FlutterTimeline.finishSync();
     }
   }
 
@@ -3096,7 +3095,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         }
         return true;
       }());
-      Timeline.startSync(
+      FlutterTimeline.startSync(
         '$runtimeType',
         arguments: debugTimelineArguments,
       );
@@ -3180,7 +3179,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return true;
     }());
     if (!kReleaseMode && debugProfilePaintsEnabled) {
-      Timeline.finishSync();
+      FlutterTimeline.finishSync();
     }
   }
 
@@ -3542,14 +3541,24 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       // The subtree is probably being kept alive by a viewport but not laid out.
       return;
     }
+    if (!kReleaseMode) {
+      FlutterTimeline.startSync('Semantics.GetFragment');
+    }
     final _SemanticsFragment fragment = _getSemanticsForParent(
       mergeIntoParent: _semantics?.parent?.isPartOfNodeMerging ?? false,
       blockUserActions: _semantics?.areUserActionsBlocked ?? false,
     );
+    if (!kReleaseMode) {
+      FlutterTimeline.finishSync();
+    }
     assert(fragment is _InterestingSemanticsFragment);
     final _InterestingSemanticsFragment interestingFragment = fragment as _InterestingSemanticsFragment;
     final List<SemanticsNode> result = <SemanticsNode>[];
     final List<SemanticsNode> siblingNodes = <SemanticsNode>[];
+
+    if (!kReleaseMode) {
+      FlutterTimeline.startSync('Semantics.compileChildren');
+    }
     interestingFragment.compileChildren(
       parentSemanticsClipRect: _semantics?.parentSemanticsClipRect,
       parentPaintClipRect: _semantics?.parentPaintClipRect,
@@ -3557,6 +3566,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       result: result,
       siblingNodes: siblingNodes,
     );
+    if (!kReleaseMode) {
+      FlutterTimeline.finishSync();
+    }
     // Result may contain sibling nodes that are irrelevant for this update.
     assert(interestingFragment.config == null && result.any((SemanticsNode node) => node == _semantics));
   }
