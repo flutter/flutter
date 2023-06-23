@@ -1024,7 +1024,7 @@ class TextPainter {
     return _layoutCache!.paragraph.didExceedMaxLines;
   }
 
-  /// Replaces construction of [ui.ParagraphBuilder].
+  /// Replaces the construction of [ui.ParagraphBuilder].
   ///
   /// This can be used, for example, when you want to spy the method calls
   /// of the [ui.ParagraphBuilder]. In that case, you can create a
