@@ -70,6 +70,8 @@ test_fixtures("file_fixtures") {
     "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf",
     "airplane.jpg",
     "bay_bridge.jpg",
+    "blend_mode_dst.png",
+    "blend_mode_src.png",
     "blue_noise.png",
     "boston.jpg",
     "embarcadero.jpg",
