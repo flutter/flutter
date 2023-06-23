@@ -216,6 +216,38 @@ void main() {
     expect(box.size.width, customWidth);
   });
 
+  testWidgets('The width of MenuAnchor is the same as its parent width if MenuAnchor.isExpanded is true', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
+
+    for (final ShortMenu value in ShortMenu.values) {
+      final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
+      shortMenuItems.add(entry);
+    }
+
+    const double parentWidth = 666.0;
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: SizedBox(
+          width: parentWidth,
+          child: DropdownMenu<ShortMenu>(
+            isExpanded: true,
+            dropdownMenuEntries: shortMenuItems,
+          ),
+        ),
+      ),
+    ));
+    final RenderBox box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
+    expect(box.size.width, parentWidth);
+
+    await tester.tap(find.byType(DropdownMenu<ShortMenu>));
+    await tester.pumpAndSettle();
+    expect(find.byType(MenuItemButton), findsNWidgets(3));
+    final Size buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+    expect(buttonSize.width, parentWidth);
+  });
+
   testWidgets('The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();

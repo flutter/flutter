@@ -139,6 +139,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.initialSelection,
     this.onSelected,
     this.requestFocusOnTap,
+    this.isExpanded = false,
     required this.dropdownMenuEntries,
   });
 
@@ -276,6 +277,8 @@ class DropdownMenu<T> extends StatefulWidget {
   /// is provided. If this is an empty list, the menu will be empty and only
   /// contain space for padding.
   final List<DropdownMenuEntry<T>> dropdownMenuEntries;
+
+  final bool isExpanded;
 
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
@@ -584,59 +587,65 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               child: widget.leadingIcon ?? const SizedBox()
             );
 
+            final Widget textField = TextField(
+                key: _anchorKey,
+                mouseCursor: effectiveMouseCursor,
+                canRequestFocus: canRequestFocus(),
+                enableInteractiveSelection: canRequestFocus(),
+                textAlignVertical: TextAlignVertical.center,
+                style: effectiveTextStyle,
+                controller: _textEditingController,
+                onEditingComplete: () {
+                  if (currentHighlight != null) {
+                    final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
+                    if (entry.enabled) {
+                      _textEditingController.text = entry.label;
+                      _textEditingController.selection =
+                          TextSelection.collapsed(offset: _textEditingController.text.length);
+                      widget.onSelected?.call(entry.value);
+                    }
+                  } else {
+                    widget.onSelected?.call(null);
+                  }
+                  if (!widget.enableSearch) {
+                    currentHighlight = null;
+                  }
+                  if (_textEditingController.text.isNotEmpty) {
+                    controller.close();
+                  }
+                },
+                onTap: () {
+                  handlePressed(controller);
+                },
+                onChanged: (String text) {
+                  controller.open();
+                  setState(() {
+                    filteredEntries = widget.dropdownMenuEntries;
+                    _enableFilter = widget.enableFilter;
+                  });
+                },
+                decoration: InputDecoration(
+                  enabled: widget.enabled,
+                  label: widget.label,
+                  hintText: widget.hintText,
+                  helperText: widget.helperText,
+                  errorText: widget.errorText,
+                  prefixIcon: widget.leadingIcon != null ? Container(
+                      key: _leadingKey,
+                      child: widget.leadingIcon
+                  ) : null,
+                  suffixIcon: trailingButton,
+                ).applyDefaults(effectiveInputDecorationTheme)
+            );
+
+            if (widget.isExpanded) {
+              return textField;
+            }
+
             return _DropdownMenuBody(
               width: widget.width,
               children: <Widget>[
-                TextField(
-                  key: _anchorKey,
-                  mouseCursor: effectiveMouseCursor,
-                  canRequestFocus: canRequestFocus(),
-                  enableInteractiveSelection: canRequestFocus(),
-                  textAlignVertical: TextAlignVertical.center,
-                  style: effectiveTextStyle,
-                  controller: _textEditingController,
-                  onEditingComplete: () {
-                    if (currentHighlight != null) {
-                      final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
-                      if (entry.enabled) {
-                        _textEditingController.text = entry.label;
-                        _textEditingController.selection =
-                            TextSelection.collapsed(offset: _textEditingController.text.length);
-                        widget.onSelected?.call(entry.value);
-                      }
-                    } else {
-                      widget.onSelected?.call(null);
-                    }
-                    if (!widget.enableSearch) {
-                      currentHighlight = null;
-                    }
-                    if (_textEditingController.text.isNotEmpty) {
-                      controller.close();
-                    }
-                  },
-                  onTap: () {
-                    handlePressed(controller);
-                  },
-                  onChanged: (String text) {
-                    controller.open();
-                    setState(() {
-                      filteredEntries = widget.dropdownMenuEntries;
-                      _enableFilter = widget.enableFilter;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    enabled: widget.enabled,
-                    label: widget.label,
-                    hintText: widget.hintText,
-                    helperText: widget.helperText,
-                    errorText: widget.errorText,
-                    prefixIcon: widget.leadingIcon != null ? Container(
-                      key: _leadingKey,
-                      child: widget.leadingIcon
-                    ) : null,
-                    suffixIcon: trailingButton,
-                  ).applyDefaults(effectiveInputDecorationTheme)
-                ),
+                textField,
                 for (final Widget c in _initialMenu!) c,
                 trailingButton,
                 leadingButton,
