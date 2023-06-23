@@ -1,4 +1,4 @@
-Signature: a3ebf94e564b7ff5fec2ab829f3b9939
+Signature: 7ae1f1e2f2e3ee2d6dd9311684634f08
 
 ====================================================================================================
 LIBRARY: etc1
@@ -384,7 +384,6 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
-FILE: ../../../third_party/skia/relnotes/canvas_flush.md
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
