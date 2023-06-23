@@ -522,6 +522,23 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
     super.dispose();
   }
 
+  Widget _createChevron({required bool isLeft}) {
+    final Color color = _kToolbarTextColor.resolveFrom(context);
+
+    return IgnorePointer(
+      child: Center(
+        // If widthFactor is not set to 0, the button is given unbounded width.
+        widthFactor: 0,
+        child: CustomPaint(
+          painter: isLeft
+            ? _LeftCupertinoChevronPainter(color: color)
+            : _RightCupertinoChevronPainter(color: color),
+          size: const Size.square(_kToolbarChevronSize),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return widget.toolbarBuilder(context, widget.anchor, widget.isAbove, FadeTransition(
@@ -536,30 +553,13 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
             page: _page,
             backButton: CupertinoTextSelectionToolbarButton(
               onPressed: _handlePreviousPage,
-              child: CustomPaint(
-                  painter: _CupertinoChevronPainter(
-                    color: _kToolbarTextColor.resolveFrom(context),
-                    iconSize: _kToolbarChevronSize,
-                    isLeft: true,
-                  ),
-                  size: const Size.fromWidth(_kToolbarChevronSize),
-              ),
+              child: _createChevron(isLeft: true),
             ),
             dividerColor: _kToolbarDividerColor.resolveFrom(context),
             dividerWidth: 1.0 / MediaQuery.devicePixelRatioOf(context),
             nextButton: CupertinoTextSelectionToolbarButton(
               onPressed: _handleNextPage,
-              child: SizedBox(
-                height: double.infinity,
-                child: CustomPaint(
-                  painter: _CupertinoChevronPainter(
-                    color: _kToolbarTextColor.resolveFrom(context),
-                    iconSize: _kToolbarChevronSize,
-                    isLeft: false,
-                  ),
-                  size: const Size.fromWidth(_kToolbarChevronSize),
-                ),
-              ),
+              child: _createChevron(isLeft: false),
             ),
             children: widget.children,
           ),
@@ -569,42 +569,47 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
   }
 }
 
+// These classes help to test the chevrons. As _CupertinoChevronPainter must be
+// private, it's possible to check the runtimeType of each chevron to know if
+// they should be pointing left or right.
+class _LeftCupertinoChevronPainter extends _CupertinoChevronPainter {
+  _LeftCupertinoChevronPainter({required super.color}) : super(isLeft: true);
+}
+class _RightCupertinoChevronPainter extends _CupertinoChevronPainter {
+  _RightCupertinoChevronPainter({required super.color}) : super(isLeft: false);
+}
 class _CupertinoChevronPainter extends CustomPainter {
   _CupertinoChevronPainter({
     required this.color,
-    required this.iconSize,
     required this.isLeft,
   });
 
   final Color color;
-  final double iconSize;
 
   /// If this is true the chevron will point left, else it will point right.
   final bool isLeft;
 
   @override
   void paint(Canvas canvas, Size size) {
+    assert(size.height == size.width, 'size must have the same height and width');
+
+    // Height and width should always be the same.
+    final double iconSize = size.height;
+
     // The chevron is half of a square rotated 45˚, so it needs a margin of 1/4
     // its size on each side to be centered horizontally.
     //
     // If pointing left, it means the left half of a square is being used and
     // the offset is positive. If pointing right, the right half is being used
     // and the offset is negative.
-    final double horizontalOffset = iconSize / 4 * (isLeft ? 1 : -1);
-
-    // The size of the canvas is not necessarily the same as iconSize, so it's
-    // needed to offset the whole Path to center it.
-    final Offset sizeOffset = Offset(
-      (size.width - iconSize) / 2 + horizontalOffset,
-      (size.height - iconSize) / 2,
+    final Offset centerOffset = Offset(
+      iconSize / 4 * (isLeft ? 1 : -1),
+      0,
     );
 
-    // Here's the actual path to draw the chevron. The shift by sizeOffset is
-    // done when calling drawPath.
-    final Path chevronPath = Path()
-      ..moveTo(iconSize / 2, 0)
-      ..lineTo(isLeft ? 0 : iconSize, iconSize / 2)
-      ..lineTo(iconSize / 2, iconSize);
+    final Offset firstPoint = Offset(iconSize / 2, 0) + centerOffset;
+    final Offset middlePoint = Offset(isLeft ? 0 : iconSize, iconSize / 2) + centerOffset;
+    final Offset lowerPoint = Offset(iconSize / 2, iconSize) + centerOffset;
 
     final Paint paint = Paint()
       ..color = color
@@ -613,12 +618,15 @@ class _CupertinoChevronPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    canvas.drawPath(chevronPath.shift(sizeOffset), paint);
+    // `drawLine` is used here because it's testable. When using `drawPath`,
+    // there's no way to test that the chevron points to the correct side.
+    canvas.drawLine(firstPoint, middlePoint, paint);
+    canvas.drawLine(middlePoint, lowerPoint, paint);
   }
 
   @override
   bool shouldRepaint(_CupertinoChevronPainter oldDelegate) =>
-    oldDelegate.color != color || oldDelegate.iconSize != iconSize;
+    oldDelegate.color != color || oldDelegate.isLeft != isLeft;
 }
 
 // The custom RenderObjectWidget that, together with

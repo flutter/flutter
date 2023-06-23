@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 // These constants are copied from cupertino/text_selection_toolbar.dart.
@@ -81,8 +82,65 @@ void main() {
   // visible part of the toolbar for use in measurements.
   Finder findToolbar() => findPrivate('_CupertinoTextSelectionToolbarContent');
 
-  Finder findOverflowNextButton() => find.byIcon(CupertinoIcons.chevron_right);
-  Finder findOverflowBackButton() => find.byIcon(CupertinoIcons.chevron_left);
+  // Check if the middle point of the chevron is pointing left or right.
+  //
+  // Offset.dx: a right or left margin (_kToolbarChevronSize / 4 => 2.5) to center the icon horizontally
+  // Offset.dy: always in the exact vertical center (_kToolbarChevronSize / 2 => 5)
+  PaintPattern overflowNextPaintPattern() => paints
+    ..line(p1: const Offset(2.5, 0), p2: const Offset(7.5, 5))
+    ..line(p1: const Offset(7.5, 5), p2: const Offset(2.5, 10));
+  PaintPattern overflowBackPaintPattern() => paints
+    ..line(p1: const Offset(7.5, 0), p2: const Offset(2.5, 5))
+    ..line(p1: const Offset(2.5, 5), p2: const Offset(7.5, 10));
+
+  Finder findOverflowNextButton() => find.byWidgetPredicate((Widget widget) =>
+    widget is CustomPaint &&
+    '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+  );
+  Finder findOverflowBackButton() => find.byWidgetPredicate((Widget widget) =>
+    widget is CustomPaint &&
+    '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
+  );
+
+  testWidgets('chevrons point to the correct side', (WidgetTester tester) async {
+    // Add enough TestBoxes to need 3 pages.
+    final List<Widget> children = List<Widget>.generate(15, (int i) => const TestBox());
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextSelectionToolbar(
+            anchorAbove: const Offset(50.0, 100.0),
+            anchorBelow: const Offset(50.0, 200.0),
+            children: children,
+          ),
+        ),
+      ),
+    );
+
+    expect(findOverflowBackButton(), findsNothing);
+    expect(findOverflowNextButton(), findsOneWidget);
+
+    expect(findOverflowNextButton(), overflowNextPaintPattern());
+
+    // Tap the overflow next button to show the next page of children.
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+    await tester.pumpAndSettle();
+
+    expect(findOverflowBackButton(), findsOneWidget);
+    expect(findOverflowNextButton(), findsOneWidget);
+
+    expect(findOverflowBackButton(), overflowBackPaintPattern());
+    expect(findOverflowNextButton(), overflowNextPaintPattern());
+
+    // Tap the overflow next button to show the last page of children.
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+    await tester.pumpAndSettle();
+
+    expect(findOverflowBackButton(), findsOneWidget);
+    expect(findOverflowNextButton(), findsNothing);
+
+    expect(findOverflowBackButton(), overflowBackPaintPattern());
+  });
 
   testWidgets('paginates children if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
@@ -122,14 +180,14 @@ void main() {
 
     // Tap the overflow next button to show the next page of children.
     // The next button is hidden as there's no next page.
-    await tester.tap(findOverflowNextButton());
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(1));
     expect(findOverflowNextButton(), findsNothing);
     expect(findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow back button to go back to the first page.
-    await tester.tap(findOverflowBackButton());
+    await tester.tapAt(tester.getCenter(findOverflowBackButton()));
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(7));
     expect(findOverflowNextButton(), findsOneWidget);
@@ -150,7 +208,7 @@ void main() {
     expect(findOverflowBackButton(), findsNothing);
 
     // Tap the overflow next button to show the second page of children.
-    await tester.tap(findOverflowNextButton());
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
     await tester.pumpAndSettle();
     // With the back button, only six children fit on this page.
     expect(find.byType(TestBox), findsNWidgets(6));
@@ -158,21 +216,21 @@ void main() {
     expect(findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow next button again to show the third page of children.
-    await tester.tap(findOverflowNextButton());
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(1));
     expect(findOverflowNextButton(), findsNothing);
     expect(findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow back button to go back to the second page.
-    await tester.tap(findOverflowBackButton());
+    await tester.tapAt(tester.getCenter(findOverflowBackButton()));
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(6));
     expect(findOverflowNextButton(), findsOneWidget);
     expect(findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow back button to go back to the first page.
-    await tester.tap(findOverflowBackButton());
+    await tester.tapAt(tester.getCenter(findOverflowBackButton()));
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(7));
     expect(findOverflowNextButton(), findsOneWidget);

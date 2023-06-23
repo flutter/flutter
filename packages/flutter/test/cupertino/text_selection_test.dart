@@ -179,6 +179,15 @@ void main() {
   });
 
   group('Text selection menu overflow (iOS)', () {
+    Finder findOverflowNextButton() => find.byWidgetPredicate((Widget widget) =>
+      widget is CustomPaint &&
+      '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+    );
+    Finder findOverflowBackButton() => find.byWidgetPredicate((Widget widget) =>
+      widget is CustomPaint &&
+      '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
+    );
+
     testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(CupertinoApp(
@@ -204,8 +213,8 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+      expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsNothing);
 
       // Long press on an empty space to show the selection menu.
       await tester.longPressAt(textOffsetToPosition(tester, 4));
@@ -214,8 +223,8 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsOneWidget);
       expect(find.text('Select All'), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+      expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsNothing);
 
       // Double tap to select a word and show the full selection menu.
       final Offset textOffset = textOffsetToPosition(tester, 1);
@@ -229,8 +238,8 @@ void main() {
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsOneWidget);
       expect(find.text('Select All'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+      expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsNothing);
     },
       skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
@@ -261,8 +270,8 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+      expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsNothing);
 
       // Double tap to select a word and show the selection menu.
       final Offset textOffset = textOffsetToPosition(tester, 1);
@@ -277,28 +286,28 @@ void main() {
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
       expect(find.byWidgetPredicate((Widget w) => w is Icon && w.icon == CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsOneWidget);
+      expect(findOverflowNextButton(), findsOneWidget);
 
       // Tapping the next button shows the overflowing button and the next
       // button is hidden as the last page is shown.
-      await tester.tap(find.byIcon(CupertinoIcons.chevron_right));
+      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
       await tester.pumpAndSettle();
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsOneWidget);
       expect(find.text('Select All'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+      expect(findOverflowBackButton(), findsOneWidget);
+      expect(findOverflowNextButton(), findsNothing);
 
       // Tapping the back button shows the first page again with the next button.
-      await tester.tap(find.byIcon(CupertinoIcons.chevron_left));
+      await tester.tapAt(tester.getCenter(findOverflowBackButton()));
       await tester.pumpAndSettle();
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsOneWidget);
+      expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsOneWidget);
     },
       skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
@@ -331,8 +340,8 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+      expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsNothing);
 
       // Double tap to select a word and show the selection menu.
       final Offset textOffset = textOffsetToPosition(tester, 1);
@@ -347,53 +356,53 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsOneWidget);
+      expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsOneWidget);
 
       // Tapping the next button shows Copy.
-      await tester.tap(find.byIcon(CupertinoIcons.chevron_right));
+      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
       await tester.pumpAndSettle();
       expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(3));
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsOneWidget);
+      expect(findOverflowBackButton(), findsOneWidget);
+      expect(findOverflowNextButton(), findsOneWidget);
 
       // Tapping the next button again shows Paste and hides the next button as
       // the last page is shown.
-      await tester.tap(find.byIcon(CupertinoIcons.chevron_right));
+      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
       await tester.pumpAndSettle();
       expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(2));
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsOneWidget);
       expect(find.text('Select All'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+      expect(findOverflowBackButton(), findsOneWidget);
+      expect(findOverflowNextButton(), findsNothing);
 
       // Tapping the back button shows the second page again with the next button.
-      await tester.tap(find.byIcon(CupertinoIcons.chevron_left));
+      await tester.tapAt(tester.getCenter(findOverflowBackButton()));
       await tester.pumpAndSettle();
       expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(3));
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsOneWidget);
+      expect(findOverflowBackButton(), findsOneWidget);
+      expect(findOverflowNextButton(), findsOneWidget);
 
       // Tapping the back button again shows the first page again.
-      await tester.tap(find.byIcon(CupertinoIcons.chevron_left));
+      await tester.tapAt(tester.getCenter(findOverflowBackButton()));
       await tester.pumpAndSettle();
       expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(2));
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsOneWidget);
+      expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsOneWidget);
     },
       skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
@@ -430,8 +439,8 @@ void main() {
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+      expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsNothing);
 
       // Long press on an empty space to show the selection menu, with only the
       // paste button visible.
@@ -441,18 +450,18 @@ void main() {
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsOneWidget);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsOneWidget);
+      expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsOneWidget);
 
       // Tap next to go to the second and final page.
-      await tester.tap(find.byIcon(CupertinoIcons.chevron_right));
+      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
       await tester.pumpAndSettle();
       expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+      expect(findOverflowBackButton(), findsOneWidget);
+      expect(findOverflowNextButton(), findsNothing);
 
       // Tap select all to show the full selection menu.
       await tester.tap(find.text(_longLocalizations.selectAllButtonLabel));
@@ -463,48 +472,48 @@ void main() {
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsOneWidget);
+      expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsOneWidget);
 
       // Tap next to go to the second page.
-      await tester.tap(find.byIcon(CupertinoIcons.chevron_right));
+      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
       await tester.pumpAndSettle();
       expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.copyButtonLabel), findsOneWidget);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsOneWidget);
+      expect(findOverflowBackButton(), findsOneWidget);
+      expect(findOverflowNextButton(), findsOneWidget);
 
       // Tap next to go to the third and final page.
-      await tester.tap(find.byIcon(CupertinoIcons.chevron_right));
+      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
       await tester.pumpAndSettle();
       expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsOneWidget);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+      expect(findOverflowBackButton(), findsOneWidget);
+      expect(findOverflowNextButton(), findsNothing);
 
       // Tap back to go to the second page again.
-      await tester.tap(find.byIcon(CupertinoIcons.chevron_left));
+      await tester.tapAt(tester.getCenter(findOverflowBackButton()));
       await tester.pumpAndSettle();
       expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.copyButtonLabel), findsOneWidget);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsOneWidget);
+      expect(findOverflowBackButton(), findsOneWidget);
+      expect(findOverflowNextButton(), findsOneWidget);
 
       // Tap back to go to the first page again.
-      await tester.tap(find.byIcon(CupertinoIcons.chevron_left));
+      await tester.tapAt(tester.getCenter(findOverflowBackButton()));
       await tester.pumpAndSettle();
       expect(find.text(_longLocalizations.cutButtonLabel), findsOneWidget);
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-      expect(find.byIcon(CupertinoIcons.chevron_right), findsOneWidget);
+      expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsOneWidget);
     },
       skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
@@ -539,8 +548,8 @@ void main() {
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsNothing);
         expect(find.text('Select All'), findsNothing);
-        expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-        expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+        expect(findOverflowBackButton(), findsNothing);
+        expect(findOverflowNextButton(), findsNothing);
 
         // Long press on an space to show the selection menu.
         await tester.longPressAt(textOffsetToPosition(tester, 1));
@@ -549,8 +558,8 @@ void main() {
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select All'), findsOneWidget);
-        expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-        expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+        expect(findOverflowBackButton(), findsNothing);
+        expect(findOverflowNextButton(), findsNothing);
 
         // Tap to select all.
         await tester.tap(find.text('Select All'));
@@ -561,8 +570,8 @@ void main() {
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select All'), findsNothing);
-        expect(find.byIcon(CupertinoIcons.chevron_left), findsNothing);
-        expect(find.byIcon(CupertinoIcons.chevron_right), findsNothing);
+        expect(findOverflowBackButton(), findsNothing);
+        expect(findOverflowNextButton(), findsNothing);
 
         // The menu appears at the top of the visible selection.
         final Offset selectionOffset = tester
