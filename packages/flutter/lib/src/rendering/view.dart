@@ -229,7 +229,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// This can be used, for example, when you want to spy the method calls
   /// of the [ui.SceneBuilder]. In that case, you can create a
   /// proxy (delegate) class.
-  static ui.SceneBuilder Function()? createSceneBuilder;
+  static ui.SceneBuilder Function()? sceneBuilderCreator;
 
   /// Uploads the composited layer tree to the engine.
   ///
@@ -239,7 +239,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       Timeline.startSync('COMPOSITING');
     }
     try {
-      final ui.SceneBuilder builder = (createSceneBuilder ?? ui.SceneBuilder.new)();
+      final ui.SceneBuilder builder = (sceneBuilderCreator ?? ui.SceneBuilder.new)();
       final ui.Scene scene = layer!.buildScene(builder);
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
