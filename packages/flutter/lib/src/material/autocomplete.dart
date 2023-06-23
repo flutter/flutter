@@ -67,6 +67,13 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
     this.initialValue,
+    this.clearOnUnfocus = false,
+    this.clearOnSelection = false,
+    this.alwaysShowOptionsWhenFocused = false,
+    this.selectHighlightedOptionOnSubmit = true,
+    this.allowSubmissionWhenEmpty = true,
+    this.optionsOffset = Offset.zero,
+    this.onFieldChanged,
   });
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
@@ -101,6 +108,31 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
+  /// {@macro flutter.widgets.RawAutocomplete.clearOnUnfocus}
+  /// 
+  /// {@macro flutter.widgets.RawAutocomplete.clearOnUnfocus.warning}
+  final bool clearOnUnfocus;
+
+  /// {@macro flutter.widgets.RawAutocomplete.clearOnSelection}
+  /// 
+  /// {@macro flutter.widgets.RawAutocomplete.clearOnUnfocus.warning}
+  final bool clearOnSelection;
+
+  /// {@macro flutter.widgets.RawAutocomplete.alwaysShowOptionsWhenFocused}
+  final bool alwaysShowOptionsWhenFocused;
+
+  /// {@macro flutter.widgets.RawAutocomplete.selectHighlightedOptionOnSubmit}
+  final bool selectHighlightedOptionOnSubmit;
+
+  /// {@macro flutter.widgets.RawAutocomplete.allowSubmissionWhenEmpty}
+  final bool allowSubmissionWhenEmpty;
+
+  /// {@macro flutter.widgets.RawAutocomplete.optionsOffset}
+  final Offset optionsOffset;
+
+  /// {@macro flutter.widgets.editableText.onChanged}
+  final ValueChanged<String>? onFieldChanged;
+
   static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
     return _AutocompleteField(
       focusNode: focusNode,
@@ -125,6 +157,13 @@ class Autocomplete<T extends Object> extends StatelessWidget {
         );
       },
       onSelected: onSelected,
+      clearOnUnfocus: clearOnUnfocus,
+      clearOnSelection: clearOnSelection,
+      alwaysShowOptionsWhenFocused: alwaysShowOptionsWhenFocused,
+      selectHighlightedOptionOnSubmit: selectHighlightedOptionOnSubmit,
+      allowSubmissionWhenEmpty: allowSubmissionWhenEmpty,
+      optionsOffset: optionsOffset,
+      onFieldChanged: onFieldChanged,
     );
   }
 }

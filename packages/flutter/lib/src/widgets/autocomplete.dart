@@ -134,6 +134,13 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.onSelected,
     this.textEditingController,
     this.initialValue,
+    this.clearOnUnfocus = false,
+    this.clearOnSelection = false,
+    this.alwaysShowOptionsWhenFocused = false,
+    this.selectHighlightedOptionOnSubmit = true,
+    this.allowSubmissionWhenEmpty = true,
+    this.optionsOffset = Offset.zero,
+    this.onFieldChanged,
   }) : assert(
          fieldViewBuilder != null
             || (key != null && focusNode != null && textEditingController != null),
@@ -239,6 +246,75 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// This parameter is ignored if [textEditingController] is defined.
   final TextEditingValue? initialValue;
 
+  /// {@template flutter.widgets.RawAutocomplete.clearOnUnfocus}
+  /// Setting this parameter to `true` will enable the field to clear the 
+  /// [textEditingController] and `selection` when it leaves the focus.
+  /// 
+  /// This can be useful while building temporary selectors in which selected value
+  /// is retained in some other state and this field don't need to keep it after
+  /// leaving the focus.
+  /// 
+  /// Defaults to `false`.
+  /// {@endtemplate}
+  /// 
+  /// {@template flutter.widgets.RawAutocomplete.clearOnUnfocus.warning}
+  /// Keep in mind that when [clearOnUnfocus] is `true`, Submission of the field 
+  /// will also trigger the clear as the field leaves the focus when submitted.
+  /// {@endtemplate}
+  final bool clearOnUnfocus;
+
+  /// {@template flutter.widgets.RawAutocomplete.clearOnSelection}
+  /// Setting this parameter to `true` will enable the field to clear the 
+  /// [textEditingController] when an option is selected or field is submitted.
+  /// 
+  /// This can be useful while building stack of multiple options in which any
+  /// selected item is being pushed and you don't need the text field to
+  /// highlight the selected option.
+  /// 
+  /// Defaults to `false`.
+  /// {@endtemplate}
+  /// 
+  /// {@macro flutter.widgets.RawAutocomplete.clearOnUnfocus.warning}
+  final bool clearOnSelection;
+
+  /// {@template flutter.widgets.RawAutocomplete.alwaysShowOptionsWhenFocused}
+  /// Setting this parameter to `true` will enable the field to show the 
+  /// options while focused even when the selection is already made.
+  /// 
+  /// Defaults to `false`.
+  /// {@endtemplate}
+  final bool alwaysShowOptionsWhenFocused;
+
+  /// {@template flutter.widgets.RawAutocomplete.selectHighlightedOptionOnSubmit}
+  /// Setting this parameter to `true` will enable the field to select the 
+  /// highlighted option on field submission.
+  /// 
+  /// Defaults to `true`.
+  /// {@endtemplate}
+  final bool selectHighlightedOptionOnSubmit;
+
+  /// {@template flutter.widgets.RawAutocomplete.allowSubmissionWhenEmpty}
+  /// Setting this parameter to `true` will enable the field to select the 
+  /// highlighted option on field submission even when the 
+  /// [textEditingController] is empty.
+  /// 
+  /// It will be effective only when [selectHighlightedOptionOnSubmit] is
+  /// set to `true`.
+  /// 
+  /// Defaults to `true`.
+  /// {@endtemplate}
+  final bool allowSubmissionWhenEmpty;
+
+  /// {@template flutter.widgets.RawAutocomplete.optionsOffset}
+  /// Offset for the options view overlay.
+  /// 
+  /// Defaults to `Offset.zero`
+  /// {@endtemplate}
+  final Offset optionsOffset;
+
+  /// {@macro flutter.widgets.editableText.onChanged}
+  final ValueChanged<String>? onFieldChanged;
+
   /// Calls [AutocompleteFieldViewBuilder]'s onFieldSubmitted callback for the
   /// RawAutocomplete widget indicated by the given [GlobalKey].
   ///
@@ -292,21 +368,30 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // The OverlayEntry containing the options.
   OverlayEntry? _floatingOptions;
 
+  bool get _noSelection => widget.alwaysShowOptionsWhenFocused || _selection == null;
+
   // True iff the state indicates that the options should be visible.
   bool get _shouldShowOptions {
-    return !_userHidOptions && _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
+    return !_userHidOptions &&
+        _focusNode.hasFocus &&
+        _noSelection &&
+        _options.isNotEmpty;
+  }
+
+  Future<void> _updateOptions([TextEditingValue? value]) async {
+    _options = await widget.optionsBuilder(
+      value ?? _textEditingController.value,
+    );
+    _updateHighlight(_highlightedOptionIndex.value);
   }
 
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
     final TextEditingValue value = _textEditingController.value;
-    final Iterable<T> options = await widget.optionsBuilder(
-      value,
-    );
-    _options = options;
-    _updateHighlight(_highlightedOptionIndex.value);
-    if (_selection != null
-        && value.text != widget.displayStringForOption(_selection!)) {
+    widget.onFieldChanged?.call(value.text);
+    await _updateOptions(value);
+    if (_selection != null &&
+        value.text != widget.displayStringForOption(_selection!)) {
       _selection = null;
     }
 
@@ -322,6 +407,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   // Called when the field's FocusNode changes.
   void _onChangedFocus() {
+    if (widget.clearOnUnfocus && !_focusNode.hasFocus) {
+      _textEditingController.clear();
+      _selection = null;
+    }
     // Options should no longer be hidden when the field is re-focused.
     _userHidOptions = !_focusNode.hasFocus;
     _updateActions();
@@ -333,20 +422,31 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     if (_options.isEmpty || _userHidOptions) {
       return;
     }
-    _select(_options.elementAt(_highlightedOptionIndex.value));
+    if (widget.selectHighlightedOptionOnSubmit) {
+      if (!widget.allowSubmissionWhenEmpty &&
+          _textEditingController.text.isEmpty) {
+        return;
+      }
+      _select(_options.elementAt(_highlightedOptionIndex.value));
+    }
   }
 
   // Select the given option and update the widget.
   void _select(T nextSelection) {
-    if (nextSelection == _selection) {
-      return;
+    if (widget.clearOnSelection) {
+      _textEditingController.clear();
+      _selection = nextSelection;
+    } else {
+      if (nextSelection == _selection) {
+        return;
+      }
+      _selection = nextSelection;
+      final String selectionString = widget.displayStringForOption(nextSelection);
+      _textEditingController.value = TextEditingValue(
+        selection: TextSelection.collapsed(offset: selectionString.length),
+        text: selectionString,
+      );
     }
-    _selection = nextSelection;
-    final String selectionString = widget.displayStringForOption(nextSelection);
-    _textEditingController.value = TextEditingValue(
-      selection: TextSelection.collapsed(offset: selectionString.length),
-      text: selectionString,
-    );
     _updateActions();
     _updateOverlay();
     widget.onSelected?.call(_selection!);
@@ -397,7 +497,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   void _updateActions() {
-    _setActionsEnabled(_focusNode.hasFocus && _selection == null && _options.isNotEmpty);
+    _setActionsEnabled(
+      _focusNode.hasFocus && _noSelection && _options.isNotEmpty,
+    );
   }
 
   bool _floatingOptionsUpdateScheduled = false;
@@ -421,6 +523,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
           return CompositedTransformFollower(
             link: _optionsLayerLink,
             showWhenUnlinked: false,
+            offset: widget.optionsOffset,
             targetAnchor: Alignment.bottomLeft,
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
@@ -464,8 +567,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   // Handle a potential change in focusNode by properly disposing of the old one
   // and setting up the new one, if needed.
-  void _updateFocusNode(FocusNode? old, FocusNode? current) {
+  void _updateFocusNode(FocusNode? old, FocusNode? current, bool updateRequired) {
     if ((old == null && current == null) || old == current) {
+      if(updateRequired && current != null) {
+        _focusNode.removeListener(_onChangedFocus);
+        _focusNode.addListener(_onChangedFocus);
+      }
       return;
     }
     if (old == null) {
@@ -508,7 +615,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       oldWidget.textEditingController,
       widget.textEditingController,
     );
-    _updateFocusNode(oldWidget.focusNode, widget.focusNode);
+    _updateFocusNode(oldWidget.focusNode, widget.focusNode, oldWidget.clearOnUnfocus != widget.clearOnUnfocus);
     _updateActions();
     _updateOverlay();
   }
