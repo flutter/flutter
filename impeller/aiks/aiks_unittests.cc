@@ -2081,20 +2081,94 @@ TEST_P(AiksTest, SrgbToLinearFilterSubpassCollapseOptimization) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-static Picture BlendModeSaveLayerTest(BlendMode blend_mode) {
+static Picture BlendModeTest(BlendMode blend_mode,
+                             const std::shared_ptr<Image>& src_image,
+                             const std::shared_ptr<Image>& dst_image) {
+  Color destination_color = Color::CornflowerBlue().WithAlpha(0.75);
+  auto source_colors =
+      std::vector<Color>({Color::White(), Color::LimeGreen(), Color::Black()});
+
   Canvas canvas;
-  canvas.DrawPaint({.color = Color::CornflowerBlue().WithAlpha(0.75)});
-  canvas.SaveLayer({.blend_mode = blend_mode});
-  for (auto& color : {Color::White(), Color::LimeGreen(), Color::Black()}) {
-    canvas.DrawRect({100, 100, 200, 200}, {.color = color.WithAlpha(0.75)});
-    canvas.Translate(Vector2(150, 100));
+
+  canvas.DrawPaint({.color = Color::Black()});
+
+  //----------------------------------------------------------------------------
+  /// 1. Save layer blending (top left).
+  ///
+
+  canvas.Save();
+  for (auto& color : source_colors) {
+    canvas.Save();
+    {
+      canvas.ClipRect(Rect::MakeXYWH(50, 50, 100, 100));
+      // Perform the blend in a SaveLayer so that the initial backdrop color is
+      // fully transparent black. SourceOver blend the result onto the parent
+      // pass.
+      canvas.SaveLayer({});
+      {
+        canvas.DrawPaint({.color = destination_color});
+        // Draw the source color in an offscreen pass and blend it to the parent
+        // pass.
+        canvas.SaveLayer({.blend_mode = blend_mode});
+        {  //
+          canvas.DrawRect({50, 50, 100, 100}, {.color = color.WithAlpha(0.75)});
+        }
+        canvas.Restore();
+      }
+      canvas.Restore();
+    }
+    canvas.Restore();
+    canvas.Translate(Vector2(100, 0));
   }
+  canvas.RestoreToCount(0);
+
+  //----------------------------------------------------------------------------
+  /// 2. CPU blend modes (top left).
+  ///
+
+  canvas.Save();
+  canvas.Translate({0, 100});
+
+  // Perform the blend in a SaveLayer so that the initial backdrop color is
+  // fully transparent black. SourceOver blend the result onto the parent pass.
+  canvas.SaveLayer({});
+  // canvas.DrawPaint({.color = destination_color});
+  for (auto& color : source_colors) {
+    // Simply write the CPU blended color to the pass.
+    canvas.DrawRect({50, 50, 100, 100}, {.color = destination_color.Blend(
+                                             color.WithAlpha(0.75), blend_mode),
+                                         .blend_mode = BlendMode::kSource});
+    canvas.Translate(Vector2(100, 0));
+  }
+  canvas.RestoreToCount(0);
+
+  //----------------------------------------------------------------------------
+  /// 3. Image blending (top right).
+  ///
+  /// Compare these results with the images in the Flutter blend mode
+  /// documentation: https://api.flutter.dev/flutter/dart-ui/BlendMode.html
+  ///
+
+  canvas.Save();
+  // canvas.ClipRect(Rect::MakeXYWH(500, 0, 500, 500));
+  canvas.SaveLayer({.blend_mode = BlendMode::kSourceOver});
+  {
+    canvas.DrawImage(dst_image, {400, 50}, {.blend_mode = BlendMode::kSource});
+    canvas.DrawImage(src_image, {400, 50}, {.blend_mode = blend_mode});
+  }
+  canvas.RestoreToCount(0);
+
   return canvas.EndRecordingAsPicture();
 }
 
-#define BLEND_MODE_TEST(blend_mode)                                       \
-  TEST_P(AiksTest, BlendModeSaveLayer##blend_mode) {                      \
-    OpenPlaygroundHere(BlendModeSaveLayerTest(BlendMode::k##blend_mode)); \
+#define BLEND_MODE_TEST(blend_mode)                                     \
+  TEST_P(AiksTest, BlendMode##blend_mode) {                             \
+    auto src_image = std::make_shared<Image>(                           \
+        CreateTextureForFixture("blend_mode_src.png"));                 \
+    auto dst_image = std::make_shared<Image>(                           \
+        CreateTextureForFixture("blend_mode_dst.png"));                 \
+    OpenPlaygroundHere(                                                 \
+        BlendModeTest(BlendMode::k##blend_mode, src_image, dst_image)); \
   }
 IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TEST)
 
