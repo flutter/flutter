@@ -439,8 +439,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         instance
           ..onLongPressStart = _handleTouchLongPressStart
           ..onLongPressMoveUpdate = _handleTouchLongPressMoveUpdate
-          ..onLongPressEnd = _handleTouchLongPressEnd
-          ..onLongPressCancel = _clearSelection;
+          ..onLongPressEnd = _handleTouchLongPressEnd;
       },
     );
   }
