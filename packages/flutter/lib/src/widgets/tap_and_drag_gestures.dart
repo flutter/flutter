@@ -539,6 +539,9 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
+    if (_consecutiveTapTimer != null && !_consecutiveTapTimer!.isActive) {
+      _tapTrackerReset();
+    }
     if (maxConsecutiveTap == _consecutiveTapCount) {
       _tapTrackerReset();
     }
@@ -623,7 +626,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   }
 
   void _consecutiveTapTimerStart() {
-    _consecutiveTapTimer ??= Timer(kDoubleTapTimeout, _tapTrackerReset);
+    _consecutiveTapTimer ??= Timer(kDoubleTapTimeout, _consecutiveTapTimerTimeout);
   }
 
   void _consecutiveTapTimerStop() {
@@ -631,6 +634,13 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
       _consecutiveTapTimer!.cancel();
       _consecutiveTapTimer = null;
     }
+  }
+
+  void _consecutiveTapTimerTimeout() {
+    // The consecutive tap timer may time out before a tap down/tap up event is
+    // fired. In this case we should not reset the tap tracker state immediately.
+    // Instead we should reset the tap tracker on the next call to [addAllowedPointer],
+    // if the timer is no longer active.
   }
 
   void _tapTrackerReset() {

@@ -2147,6 +2147,52 @@ void main() {
       variant: TargetPlatformVariant.mobile(),
   );
 
+  testWidgets('Can select text with a mouse when wrapped in a GestureDetector with tap/double tap callbacks', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/129161.
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: GestureDetector(
+            onTap: () {},
+            onDoubleTap: () {},
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.up();
+    // This is to allow the GestureArena to decide a winner between TapGestureRecognizer,
+    // DoubleTapGestureRecognizer, and BaseTapAndDragGestureRecognizer.
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+
+    await gesture.down(ePos);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('g'));
+  }, variant: TargetPlatformVariant.desktop());
+
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
