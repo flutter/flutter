@@ -46,7 +46,7 @@ void main() {
       }
     });
     await completer.future;
-    sub.cancel();
+    await sub.cancel();
     process.kill();
     await process.exitCode;
   });
