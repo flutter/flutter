@@ -331,14 +331,14 @@ abstract class Route<T> {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
 
-  /// {@template flutter.widgets.navigator.onPopped}
+  /// {@template flutter.widgets.navigator.onPopInvoked}
   /// Called after a route pop was handled.
   ///
   /// Even when the pop is canceled, for example by a [PopScope] widget, this
   /// will still be called. The `didPop` parameter indicates whether or not the
   /// back navigation actually happened successfully.
   /// {@endtemplate}
-  void onPopped(bool didPop) {}
+  void onPopInvoked(bool didPop) {}
 
   /// Whether calling [didPop] would return false.
   bool get willHandlePopInternally => false;
@@ -3055,7 +3055,7 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(isPresent);
     pendingResult = result;
     currentState = _RouteLifecycle.pop;
-    route.onPopped(true);
+    route.onPopInvoked(true);
   }
 
   bool _reportRemovalToObserver = true;
@@ -5126,7 +5126,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         pop(result);
         return true;
       case RoutePopDisposition.doNotPop:
-        lastEntry.route.onPopped(false);
+        lastEntry.route.onPopInvoked(false);
         return true;
     }
   }

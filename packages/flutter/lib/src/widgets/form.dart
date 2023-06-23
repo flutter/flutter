@@ -54,16 +54,16 @@ class Form extends StatefulWidget {
     super.key,
     required this.child,
     this.popEnabled,
-    this.onPopped,
+    this.onPopInvoked,
     @Deprecated(
-      'Use popEnabled and/or onPopped instead. '
+      'Use popEnabled and/or onPopInvoked instead. '
       'This feature was deprecated after v3.12.0-1.0.pre.',
     )
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
   }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
-       assert((onPopped == null && popEnabled == null) || onWillPop == null, 'onWillPop is deprecated; use popEnabled and/or onPopped.');
+       assert((onPopInvoked == null && popEnabled == null) || onWillPop == null, 'onWillPop is deprecated; use popEnabled and/or onPopInvoked.');
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
   /// given context, or null if none is found.
@@ -143,7 +143,7 @@ class Form extends StatefulWidget {
   ///  * [WillPopScope], another widget that provides a way to intercept the
   ///    back button.
   @Deprecated(
-    'Use popEnabled and/or onPopped instead. '
+    'Use popEnabled and/or onPopInvoked instead. '
     'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   final WillPopCallback? onWillPop;
@@ -159,12 +159,12 @@ class Form extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [onPopped], which also comes from [PopScope] and is often used in
+  ///  * [onPopInvoked], which also comes from [PopScope] and is often used in
   ///    conjunction with this parameter.
   ///  * [PopScope.popEnabled], which is what [Form] delegates to internally.
   final bool? popEnabled;
 
-  /// {@macro flutter.widgets.navigator.onPopped}
+  /// {@macro flutter.widgets.navigator.onPopInvoked}
   ///
   /// {@tool dartpad}
   /// This sample demonstrates how to use this parameter to show a confirmation
@@ -177,8 +177,8 @@ class Form extends StatefulWidget {
   ///
   ///  * [popEnabled], which also comes from [PopScope] and is often used in
   ///    conjunction with this parameter.
-  ///  * [PopScope.onPopped], which is what [Form] delegates to internally.
-  final PoppedCallback? onPopped;
+  ///  * [PopScope.onPopInvoked], which is what [Form] delegates to internally.
+  final PopInvokedCallback? onPopInvoked;
 
   /// Called when one of the form fields changes.
   ///
@@ -247,7 +247,7 @@ class FormState extends State<Form> {
     if (widget.popEnabled != null) {
       return PopScope(
         popEnabled: widget.popEnabled!,
-        onPopped: widget.onPopped,
+        onPopInvoked: widget.onPopInvoked,
         child: _FormScope(
           formState: this,
           generation: _generation,

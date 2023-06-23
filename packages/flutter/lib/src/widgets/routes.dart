@@ -1542,7 +1542,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  ///  * [Form], which provides an `onPopped` callback that is similar.
+  ///  * [Form], which provides an `onPopInvoked` callback that is similar.
   ///  * [registerPopInterface], which adds a [PopScope] to the list this method
   ///    checks.
   ///  * [unregisterPopInterface], which removes a [PopScope] from the list this
@@ -1562,9 +1562,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void onPopped(bool didPop) {
+  void onPopInvoked(bool didPop) {
     for (final PopInterface popInterface in _popInterfaces) {
-      popInterface.onPopped?.call(didPop);
+      popInterface.onPopInvoked?.call(didPop);
     }
   }
 
@@ -1614,7 +1614,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Registers the existence of a [PopScope] widget in the route.
   ///
   /// [PopScope] widgets registered in this way will have their
-  /// [PopScope.onPopped] callbacks called when a route is popped or a pop is
+  /// [PopScope.onPopInvoked] callbacks called when a route is popped or a pop is
   /// attempted. They will also be able to block pop operations with
   /// [PopScope.popEnabled] through this route's [popEnabled] method.
   ///

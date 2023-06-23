@@ -121,7 +121,7 @@ void main() {
                 setState = stateSetter;
                 return PopScope(
                   popEnabled: popEnabled,
-                  onPopped: (bool didPop) {
+                  onPopInvoked: (bool didPop) {
                     lastPopSuccess = didPop;
                   },
                   child: const Center(

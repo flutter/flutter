@@ -10,13 +10,13 @@ import 'routes.dart';
 ///
 /// Accepts a didPop boolean indicating whether or not back navigation
 /// succeeded.
-typedef PoppedCallback = void Function(bool didPop);
+typedef PopInvokedCallback = void Function(bool didPop);
 
 /// Manages system back gestures.
 ///
 /// The [popEnabled] parameter can be used to disable system back gestures.
 ///
-/// The [onPopped] parameter reports when system back gestures occur, regardless
+/// The [onPopInvoked] parameter reports when system back gestures occur, regardless
 /// of whether or not they were successful.
 ///
 /// {@tool dartpad}
@@ -30,7 +30,7 @@ typedef PoppedCallback = void Function(bool didPop);
 ///
 ///  * [NavigatorPopHandler], which is a less verbose way to handle system back
 ///    gestures in the case of nested [Navigator]s.
-///  * [Form.popEnabled] and [Form.onPopped], which can be used to handle system
+///  * [Form.popEnabled] and [Form.onPopInvoked], which can be used to handle system
 ///    back gestures in the case of a form with unsaved data.
 ///  * [ModalRoute.registerPopInterface] and [ModalRoute.unregisterPopInterface],
 ///    which this widget uses to integrate with Flutter's navigation system.
@@ -43,7 +43,7 @@ class PopScope extends StatefulWidget implements PopInterface {
     super.key,
     required this.child,
     this.popEnabled = true,
-    this.onPopped,
+    this.onPopInvoked,
   });
 
   /// The widget below this widget in the tree.
@@ -65,9 +65,9 @@ class PopScope extends StatefulWidget implements PopInterface {
   ///
   /// See also:
   ///
-  ///  * [Route.onPopped], which is similar.
+  ///  * [Route.onPopInvoked], which is similar.
   @override
-  final PoppedCallback? onPopped;
+  final PopInvokedCallback? onPopInvoked;
 
   /// {@template flutter.widgets.PopScope.popEnabled}
   /// When false, blocks the current route from being popped.
@@ -120,7 +120,7 @@ class _PopScopeState extends State<PopScope> {
 
 /// An interface to into navigation pop events.
 ///
-/// Can be registered in [ModalRoute] to listen to pops with [onPopped] or to
+/// Can be registered in [ModalRoute] to listen to pops with [onPopInvoked] or to
 /// enable/disable them with [popEnabled].
 ///
 /// See also:
@@ -132,17 +132,17 @@ sealed class PopInterface {
   /// Creates an instance of [PopInterface].
   const PopInterface({
     required this.popEnabled,
-    required this.onPopped,
+    required this.onPopInvoked,
   });
 
   /// {@macro flutter.widgets.PopScope.popEnabled}
-  final PoppedCallback? onPopped;
+  final PopInvokedCallback? onPopInvoked;
 
   /// {@macro flutter.widgets.PopScope.popEnabled}
   final bool popEnabled;
 
   @override
   String toString() {
-    return 'PopInterface popEnabled: $popEnabled, onPopped: $onPopped';
+    return 'PopInterface popEnabled: $popEnabled, onPopInvoked: $onPopInvoked';
   }
 }

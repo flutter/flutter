@@ -4727,7 +4727,7 @@ void main() {
                 builderSetState = setState;
                 return PopScope(
                   popEnabled: popEnabled(),
-                  onPopped: (bool success) {
+                  onPopInvoked: (bool success) {
                     if (success || pages.last == _Page.noPop) {
                       return;
                     }
@@ -4857,7 +4857,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return PopScope(
                   popEnabled: popEnabled(),
-                  onPopped: (bool success) {
+                  onPopInvoked: (bool success) {
                     if (success || pages.last == _Page.noPop) {
                       return;
                     }
