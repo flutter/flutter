@@ -336,4 +336,70 @@ void main() {
   },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('identical PopScopes', (WidgetTester tester) async {
+    bool usePopScope1 = true;
+    bool usePopScope2 = true;
+    late StateSetter setState;
+    late BuildContext context;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext buildContext, StateSetter stateSetter) {
+              context = buildContext;
+              setState = stateSetter;
+              return Column(
+                children: <Widget>[
+                  if (usePopScope1)
+                    const PopScope(
+                      popEnabled: false,
+                      child: Text('hello'),
+                    ),
+                  if (usePopScope2)
+                    const PopScope(
+                      popEnabled: false,
+                      child: Text('hello'),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      expect(calls, hasLength(1));
+      expect(calls.last, isTrue);
+    }
+    int lastCallsLength = calls.length;
+    expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.doNotPop);
+
+    // Despite being in the widget tree twice, the ModalRoute has only ever
+    // registered one PopScopeInterface for it. Removing one makes it think that
+    // both have been removed.
+    setState(() {
+      usePopScope1 = false;
+    });
+    await tester.pump();
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      expect(calls.last, isFalse);
+      lastCallsLength = calls.length;
+    }
+    expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.bubble);
+
+    setState(() {
+      usePopScope2 = false;
+    });
+    await tester.pump();
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      expect(calls, hasLength(lastCallsLength));
+      expect(calls.last, isFalse);
+    }
+    expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.bubble);
+  },
+    variant: TargetPlatformVariant.all(),
+  );
 }
