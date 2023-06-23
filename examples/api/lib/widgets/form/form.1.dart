@@ -103,7 +103,7 @@ class _SaveableFormState extends State<_SaveableForm> {
           const Text('If the field below is unsaved, a confirmation dialog will be shown on back.'),
           const SizedBox(height: 20.0),
           Form(
-            popEnabled: !_isDirty,
+            canPop: !_isDirty,
             onPopInvoked: (bool didPop) {
               if (didPop) {
                 return;

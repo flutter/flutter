@@ -170,7 +170,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         ],
       ),
       body: Form(
-        popEnabled: !_saveNeeded && !_hasLocation && !_hasName,
+        canPop: !_saveNeeded && !_hasLocation && !_hasName,
         onPopInvoked: _handlePopInvoked,
         child: Scrollbar(
           child: ListView(

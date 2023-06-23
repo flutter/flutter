@@ -296,7 +296,7 @@ abstract class Route<T> {
   ///  * [WillPopScope], another widget that provides a way to intercept the
   ///    back button.
   @Deprecated(
-    'Use popEnabled instead. '
+    'Use popDisposition instead. '
     'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   Future<RoutePopDisposition> willPop() async {
@@ -325,9 +325,9 @@ abstract class Route<T> {
   ///
   /// See also:
   ///
-  ///  * [Form], which provides a [Form.popEnabled] boolean that is similar.
+  ///  * [Form], which provides a [Form.canPop] boolean that is similar.
   ///  * [PopScope], a widget that provides a way to intercept the back button.
-  RoutePopDisposition popEnabled() {
+  RoutePopDisposition get popDisposition {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
 
@@ -5082,7 +5082,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return true; // there's at least two routes, so we can pop
   }
 
-  /// Consults the current route's [Route.popEnabled] method, and acts
+  /// Consults the current route's [Route.popDisposition] method, and acts
   /// accordingly, potentially popping the route as a result; returns whether
   /// the pop request should be considered handled.
   ///
@@ -5090,7 +5090,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// See also:
   ///
-  ///  * [Form], which provides a [Form.popEnabled] boolean that enables the
+  ///  * [Form], which provides a [Form.canPop] boolean that enables the
   ///    form to prevent any [pop]s initiated by the app's back button.
   ///  * [ModalRoute], which provides a `scopedOnPopCallback` that can be used
   ///    to define the route's `willPop` method.
@@ -5103,7 +5103,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(lastEntry.route._navigator == this);
 
     // TODO(justinmc): When the deprecated willPop method is removed, delete
-    // this code and use only popEnabled, below.
+    // this code and use only popDisposition, below.
     final RoutePopDisposition willPopDisposition = await lastEntry.route.willPop();
     if (!mounted) {
       // Forget about this pop, we were disposed in the meantime.
@@ -5118,8 +5118,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return true;
     }
 
-    final RoutePopDisposition disposition = lastEntry.route.popEnabled();
-    switch (disposition) {
+    switch (lastEntry.route.popDisposition) {
       case RoutePopDisposition.bubble:
         return false;
       case RoutePopDisposition.pop:

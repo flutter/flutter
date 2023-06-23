@@ -54,14 +54,14 @@ class NavigatorPopHandler extends StatefulWidget {
 }
 
 class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
-  bool _popEnabled = true;
+  bool _canPop = true;
 
   @override
   Widget build(BuildContext context) {
     // When the widget subtree indicates it can handle a pop, disable popping
     // here, so that it can be manually handled in canPop.
     return PopScope(
-      popEnabled: _popEnabled,
+      canPop: _canPop,
       onPopInvoked: (bool didPop) {
         if (didPop) {
           return;
@@ -71,13 +71,13 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
       // Listen to changes in the navigation stack in the widget subtree.
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
-          // If this subtree cannot handle pop, then set popEnabled to true so
+          // If this subtree cannot handle pop, then set canPop to true so
           // that our PopScope will allow the Navigator higher in the tree to
           // handle the pop instead.
-          final bool nextPopEnabled = !notification.canHandlePop;
-          if (nextPopEnabled != _popEnabled) {
+          final bool nextCanPop = !notification.canHandlePop;
+          if (nextCanPop != _canPop) {
             setState(() {
-              _popEnabled = nextPopEnabled;
+              _canPop = nextCanPop;
             });
           }
           return false;

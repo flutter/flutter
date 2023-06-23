@@ -153,12 +153,12 @@ class _BottomNavTab extends StatelessWidget {
   final List<_TabPage> pages;
   final String title;
 
-  bool get _popEnabled => pages.length <= 1;
+  bool get _canPop => pages.length <= 1;
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      popEnabled: _popEnabled,
+      canPop: _canPop,
       onPopInvoked: (bool didPop) {
         if (didPop) {
           return;

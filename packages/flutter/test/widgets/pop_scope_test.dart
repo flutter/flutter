@@ -33,8 +33,8 @@ void main() {
     SystemNavigator.setFrameworkHandlesBack(true);
   });
 
-  testWidgets('toggling popEnabled on root route allows/prevents backs', (WidgetTester tester) async {
-    bool popEnabled = false;
+  testWidgets('toggling canPop on root route allows/prevents backs', (WidgetTester tester) async {
+    bool canPop = false;
     late StateSetter setState;
     late BuildContext context;
     await tester.pumpWidget(
@@ -47,7 +47,7 @@ void main() {
                 context = buildContext;
                 setState = stateSetter;
                 return PopScope(
-                  popEnabled: popEnabled,
+                  canPop: canPop,
                   child: const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -68,24 +68,24 @@ void main() {
       expect(calls, hasLength(1));
     }
     final int lastCallsLength = calls.length;
-    expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.doNotPop);
+    expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.doNotPop);
 
     setState(() {
-      popEnabled = true;
+      canPop = true;
     });
     await tester.pump();
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isFalse);
     }
-    expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.bubble);
+    expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.bubble);
   },
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgets('toggling popEnabled on secondary route allows/prevents backs', (WidgetTester tester) async {
+  testWidgets('toggling canPop on secondary route allows/prevents backs', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
-    bool popEnabled = true;
+    bool canPop = true;
     late StateSetter setState;
     late BuildContext homeContext;
     late BuildContext oneContext;
@@ -120,7 +120,7 @@ void main() {
                 oneContext = context;
                 setState = stateSetter;
                 return PopScope(
-                  popEnabled: popEnabled,
+                  canPop: canPop,
                   onPopInvoked: (bool didPop) {
                     lastPopSuccess = didPop;
                   },
@@ -141,7 +141,7 @@ void main() {
     );
 
     expect(find.text('Home Page'), findsOneWidget);
-    expect(ModalRoute.of(homeContext)!.popEnabled(), RoutePopDisposition.bubble);
+    expect(ModalRoute.of(homeContext)!.popDisposition, RoutePopDisposition.bubble);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls, hasLength(0));
     }
@@ -151,20 +151,20 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('PopScope Page'), findsOneWidget);
     expect(find.text('Home Page'), findsNothing);
-    expect(ModalRoute.of(oneContext)!.popEnabled(), RoutePopDisposition.pop);
+    expect(ModalRoute.of(oneContext)!.popDisposition, RoutePopDisposition.pop);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isTrue);
     }
     lastCallsLength = calls.length;
 
-    // When popEnabled is true, can use pop to go back.
+    // When canPop is true, can use pop to go back.
     nav.currentState!.maybePop();
     await tester.pumpAndSettle();
     expect(lastPopSuccess, true);
     expect(find.text('Home Page'), findsOneWidget);
     expect(find.text('PopScope Page'), findsNothing);
-    expect(ModalRoute.of(homeContext)!.popEnabled(), RoutePopDisposition.bubble);
+    expect(ModalRoute.of(homeContext)!.popDisposition, RoutePopDisposition.bubble);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isFalse);
@@ -175,20 +175,20 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('PopScope Page'), findsOneWidget);
     expect(find.text('Home Page'), findsNothing);
-    expect(ModalRoute.of(oneContext)!.popEnabled(), RoutePopDisposition.pop);
+    expect(ModalRoute.of(oneContext)!.popDisposition, RoutePopDisposition.pop);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isTrue);
     }
     lastCallsLength = calls.length;
 
-    // When popEnabled is true, can use system back to go back.
+    // When canPop is true, can use system back to go back.
     await simulateSystemBack();
     await tester.pumpAndSettle();
     expect(lastPopSuccess, true);
     expect(find.text('Home Page'), findsOneWidget);
     expect(find.text('PopScope Page'), findsNothing);
-    expect(ModalRoute.of(homeContext)!.popEnabled(), RoutePopDisposition.bubble);
+    expect(ModalRoute.of(homeContext)!.popDisposition, RoutePopDisposition.bubble);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isFalse);
@@ -199,7 +199,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('PopScope Page'), findsOneWidget);
     expect(find.text('Home Page'), findsNothing);
-    expect(ModalRoute.of(oneContext)!.popEnabled(), RoutePopDisposition.pop);
+    expect(ModalRoute.of(oneContext)!.popDisposition, RoutePopDisposition.pop);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isTrue);
@@ -207,38 +207,38 @@ void main() {
     lastCallsLength = calls.length;
 
     setState(() {
-      popEnabled = false;
+      canPop = false;
     });
     await tester.pump();
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls, hasLength(lastCallsLength));
     }
 
-    // When popEnabled is false, can't use pop to go back.
+    // When canPop is false, can't use pop to go back.
     nav.currentState!.maybePop();
     await tester.pumpAndSettle();
     expect(lastPopSuccess, false);
     expect(find.text('PopScope Page'), findsOneWidget);
     expect(find.text('Home Page'), findsNothing);
-    expect(ModalRoute.of(oneContext)!.popEnabled(), RoutePopDisposition.doNotPop);
+    expect(ModalRoute.of(oneContext)!.popDisposition, RoutePopDisposition.doNotPop);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls, hasLength(lastCallsLength));
     }
 
-    // When popEnabled is false, can't use system back to go back.
+    // When canPop is false, can't use system back to go back.
     await simulateSystemBack();
     await tester.pumpAndSettle();
     expect(lastPopSuccess, false);
     expect(find.text('PopScope Page'), findsOneWidget);
     expect(find.text('Home Page'), findsNothing);
-    expect(ModalRoute.of(oneContext)!.popEnabled(), RoutePopDisposition.doNotPop);
+    expect(ModalRoute.of(oneContext)!.popDisposition, RoutePopDisposition.doNotPop);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls, hasLength(lastCallsLength));
     }
 
-    // Toggle popEnabled back to true and back works again.
+    // Toggle canPop back to true and back works again.
     setState(() {
-      popEnabled = true;
+      canPop = true;
     });
     await tester.pump();
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
@@ -250,7 +250,7 @@ void main() {
     expect(lastPopSuccess, true);
     expect(find.text('Home Page'), findsOneWidget);
     expect(find.text('PopScope Page'), findsNothing);
-    expect(ModalRoute.of(homeContext)!.popEnabled(), RoutePopDisposition.bubble);
+    expect(ModalRoute.of(homeContext)!.popDisposition, RoutePopDisposition.bubble);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isFalse);
@@ -261,7 +261,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('PopScope Page'), findsOneWidget);
     expect(find.text('Home Page'), findsNothing);
-    expect(ModalRoute.of(oneContext)!.popEnabled(), RoutePopDisposition.pop);
+    expect(ModalRoute.of(oneContext)!.popDisposition, RoutePopDisposition.pop);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isTrue);
@@ -273,7 +273,7 @@ void main() {
     expect(lastPopSuccess, true);
     expect(find.text('Home Page'), findsOneWidget);
     expect(find.text('PopScope Page'), findsNothing);
-    expect(ModalRoute.of(homeContext)!.popEnabled(), RoutePopDisposition.bubble);
+    expect(ModalRoute.of(homeContext)!.popDisposition, RoutePopDisposition.bubble);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       expect(calls.last, isFalse);
       expect(calls, hasLength(greaterThan(lastCallsLength)));
@@ -307,7 +307,7 @@ void main() {
                   return child;
                 }
                 return const PopScope(
-                  popEnabled: false,
+                  canPop: false,
                   child: child,
                 );
               },
@@ -322,7 +322,7 @@ void main() {
       expect(calls.last, isTrue);
     }
     final int lastCallsLength = calls.length;
-    expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.doNotPop);
+    expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.doNotPop);
 
     setState(() {
       usePopScope = false;
@@ -332,7 +332,7 @@ void main() {
       expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isFalse);
     }
-    expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.bubble);
+    expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.bubble);
   },
     variant: TargetPlatformVariant.all(),
   );
@@ -353,12 +353,12 @@ void main() {
                 children: <Widget>[
                   if (usePopScope1)
                     const PopScope(
-                      popEnabled: false,
+                      canPop: false,
                       child: Text('hello'),
                     ),
                   if (usePopScope2)
                     const PopScope(
-                      popEnabled: false,
+                      canPop: false,
                       child: Text('hello'),
                     ),
                 ],
@@ -374,7 +374,7 @@ void main() {
       expect(calls.last, isTrue);
     }
     int lastCallsLength = calls.length;
-    expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.doNotPop);
+    expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.doNotPop);
 
     // Despite being in the widget tree twice, the ModalRoute has only ever
     // registered one PopScopeInterface for it. Removing one makes it think that
@@ -388,7 +388,7 @@ void main() {
       expect(calls.last, isTrue);
       lastCallsLength = calls.length;
     }
-    expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.doNotPop);
+    expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.doNotPop);
 
     setState(() {
       usePopScope2 = false;
@@ -398,7 +398,7 @@ void main() {
       expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isFalse);
     }
-    expect(ModalRoute.of(context)!.popEnabled(), RoutePopDisposition.bubble);
+    expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.bubble);
   },
     variant: TargetPlatformVariant.all(),
   );

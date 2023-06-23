@@ -4374,7 +4374,7 @@ void main() {
     );
 
     testWidgets('a single Navigator with a PopScope that defaults to enabled', (WidgetTester tester) async {
-      bool popEnabled = true;
+      bool canPop = true;
       late StateSetter setState;
       await tester.pumpWidget(
         StatefulBuilder(
@@ -4385,7 +4385,7 @@ void main() {
               routes: <String, WidgetBuilder>{
                 '/': (BuildContext context) => _LinksPage(
                   title: 'Home page',
-                  popEnabled: popEnabled,
+                  canPop: canPop,
                 ),
               },
             );
@@ -4397,7 +4397,7 @@ void main() {
       int lastCallsLength = calls.length;
 
       setState(() {
-        popEnabled = false;
+        canPop = false;
       });
       await tester.pump();
 
@@ -4406,7 +4406,7 @@ void main() {
       lastCallsLength = calls.length;
 
       setState(() {
-        popEnabled = true;
+        canPop = true;
       });
       await tester.pump();
 
@@ -4419,7 +4419,7 @@ void main() {
     );
 
     testWidgets('a single Navigator with a PopScope that defaults to disabled', (WidgetTester tester) async {
-      bool popEnabled = false;
+      bool canPop = false;
       late StateSetter setState;
       await tester.pumpWidget(
         StatefulBuilder(
@@ -4430,7 +4430,7 @@ void main() {
               routes: <String, WidgetBuilder>{
                 '/': (BuildContext context) => _LinksPage(
                   title: 'Home page',
-                  popEnabled: popEnabled,
+                  canPop: canPop,
                 ),
               },
             );
@@ -4442,7 +4442,7 @@ void main() {
       expect(calls.last, isTrue);
 
       setState(() {
-        popEnabled = true;
+        canPop = true;
       });
       await tester.pump();
 
@@ -4450,7 +4450,7 @@ void main() {
       expect(calls.last, isFalse);
 
       setState(() {
-        popEnabled = false;
+        canPop = false;
       });
       await tester.pump();
 
@@ -4574,7 +4574,7 @@ void main() {
     }
 
     testWidgets('nested Navigators with a nested PopScope', (WidgetTester tester) async {
-      bool popEnabled = true;
+      bool canPop = true;
       late StateSetter setState;
       await tester.pumpWidget(
         StatefulBuilder(
@@ -4612,7 +4612,7 @@ void main() {
                   ],
                 ),
                 '/nested': (BuildContext context) => _NestedNavigatorsPage(
-                  popScopePageEnabled: popEnabled,
+                  popScopePageEnabled: canPop,
                 ),
               },
             );
@@ -4655,7 +4655,7 @@ void main() {
       expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
-      // Going back works because popEnabled is true.
+      // Going back works because canPop is true.
       await simulateSystemBack();
       await tester.pumpAndSettle();
 
@@ -4671,14 +4671,14 @@ void main() {
       expect(calls.last, isTrue);
 
       setState(() {
-        popEnabled = false;
+        canPop = false;
       });
       await tester.pumpAndSettle();
 
       expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
-      // Now going back doesn't work because popEnabled is false, but it still
+      // Now going back doesn't work because canPop is false, but it still
       // has no effect on the system navigator due to all of the other routes.
       await simulateSystemBack();
       await tester.pumpAndSettle();
@@ -4688,14 +4688,14 @@ void main() {
       expect(calls.last, isTrue);
 
       setState(() {
-        popEnabled = true;
+        canPop = true;
       });
       await tester.pump();
 
       expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
-      // And going back works again after switching popEnabled back to true.
+      // And going back works again after switching canPop back to true.
       await simulateSystemBack();
       await tester.pumpAndSettle();
 
@@ -4718,7 +4718,7 @@ void main() {
       testWidgets('starting with one route as usual', (WidgetTester tester) async {
         late StateSetter builderSetState;
         final List<_Page> pages = <_Page>[_Page.home];
-        bool popEnabled() => pages.length <= 1;
+        bool canPop() => pages.length <= 1;
 
         await tester.pumpWidget(
           MaterialApp(
@@ -4726,7 +4726,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 builderSetState = setState;
                 return PopScope(
-                  popEnabled: popEnabled(),
+                  canPop: canPop(),
                   onPopInvoked: (bool success) {
                     if (success || pages.last == _Page.noPop) {
                       return;
@@ -4781,7 +4781,7 @@ void main() {
                           return const MaterialPage<void>(
                             child: _LinksPage(
                               title: 'Cannot pop page',
-                              popEnabled: false,
+                              canPop: false,
                             ),
                           );
                       }
@@ -4849,14 +4849,14 @@ void main() {
 
       testWidgets('starting with existing route history', (WidgetTester tester) async {
         final List<_Page> pages = <_Page>[_Page.home, _Page.one];
-        bool popEnabled() => pages.length <= 1;
+        bool canPop() => pages.length <= 1;
 
         await tester.pumpWidget(
           MaterialApp(
             home: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return PopScope(
-                  popEnabled: popEnabled(),
+                  canPop: canPop(),
                   onPopInvoked: (bool success) {
                     if (success || pages.last == _Page.noPop) {
                       return;
@@ -4911,7 +4911,7 @@ void main() {
                           return const MaterialPage<void>(
                             child: _LinksPage(
                               title: 'Cannot pop page',
-                              popEnabled: false,
+                              canPop: false,
                             ),
                           );
                       }
@@ -5238,13 +5238,13 @@ enum _Page {
 class _LinksPage extends StatelessWidget {
   const _LinksPage ({
     this.buttons = const <Widget>[],
-    this.popEnabled,
+    this.canPop,
     required this.title,
     this.onBack,
   });
 
   final List<Widget> buttons;
-  final bool? popEnabled;
+  final bool? canPop;
   final VoidCallback? onBack;
   final String title;
 
@@ -5264,9 +5264,9 @@ class _LinksPage extends StatelessWidget {
                 },
                 child: const Text('Go back'),
               ),
-            if (popEnabled != null)
+            if (canPop != null)
               PopScope(
-                popEnabled: popEnabled!,
+                canPop: canPop!,
                 child: const SizedBox.shrink(),
               ),
           ],
@@ -5360,7 +5360,7 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
               return MaterialPageRoute<void>(
                 builder: (BuildContext context) {
                   return _LinksPage(
-                    popEnabled: widget.popScopePageEnabled,
+                    canPop: widget.popScopePageEnabled,
                     title: 'Nested - PopScope',
                   );
                 },

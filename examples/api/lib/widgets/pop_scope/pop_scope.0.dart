@@ -62,12 +62,12 @@ class NestedNavigatorsPage extends StatefulWidget {
 
 class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
   final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
-  bool popEnabled = true;
+  bool canPop = true;
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      popEnabled: popEnabled,
+      canPop: canPop,
       onPopInvoked: (bool didPop) {
         if (didPop) {
           return;
@@ -76,13 +76,13 @@ class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
       },
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
-          // If this subtree cannot handle pop, then set popEnabled to true so
+          // If this subtree cannot handle pop, then set canPop to true so
           // that our PopScope will allow the Navigator higher in the tree to
           // handle the pop instead.
           final bool nextPopEnabled = !notification.canHandlePop;
-          if (nextPopEnabled != popEnabled) {
+          if (nextPopEnabled != canPop) {
             setState(() {
-              popEnabled = nextPopEnabled;
+              canPop = nextPopEnabled;
             });
           }
           return false;

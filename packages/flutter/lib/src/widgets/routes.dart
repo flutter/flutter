@@ -719,7 +719,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   }
 
   @Deprecated(
-    'Use popEnabled instead. '
+    'Use popDisposition instead. '
     'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   @override
@@ -731,11 +731,11 @@ mixin LocalHistoryRoute<T> on Route<T> {
   }
 
   @override
-  RoutePopDisposition popEnabled() {
+  RoutePopDisposition get popDisposition {
     if (willHandlePopInternally) {
       return RoutePopDisposition.pop;
     }
-    return super.popEnabled();
+    return super.popDisposition;
   }
 
   @override
@@ -1515,7 +1515,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [removeScopedWillPopCallback], which removes a callback from the list
   ///    this method checks.
   @Deprecated(
-    'Use popEnabled instead. '
+    'Use popDisposition instead. '
     'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   @override
@@ -1531,14 +1531,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   /// Returns [RoutePopDisposition.doNotPop] if any of the [PopScope] widgets
-  /// registered with [registerPopInterface] have [PopScope.popEnabled] set to
+  /// registered with [registerPopInterface] have [PopScope.canPop] set to
   /// false.
   ///
   /// Typically this method is not overridden because applications usually
   /// don't create modal routes directly, they use higher level primitives
   /// like [showDialog]. The scoped [PopScope] list makes it possible
   /// for ModalRoute descendants to collectively define the value of
-  /// [popEnabled].
+  /// [popDisposition].
   ///
   /// See also:
   ///
@@ -1548,17 +1548,17 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [unregisterPopInterface], which removes a [PopScope] from the list this
   ///    method checks.
   @override
-  RoutePopDisposition popEnabled() {
+  RoutePopDisposition get popDisposition {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
-    final bool popEnabled = _popInterfaces.every((PopInterface popInterface) {
-      return popInterface.popEnabledNotifier.value;
+    final bool canPop = _popInterfaces.every((PopInterface popInterface) {
+      return popInterface.canPopNotifier.value;
     });
 
-    if (!popEnabled) {
+    if (!canPop) {
       return RoutePopDisposition.doNotPop;
     }
-    return super.popEnabled();
+    return super.popDisposition;
   }
 
   @override
@@ -1616,14 +1616,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// [PopScope] widgets registered in this way will have their
   /// [PopScope.onPopInvoked] callbacks called when a route is popped or a pop is
   /// attempted. They will also be able to block pop operations with
-  /// [PopScope.popEnabled] through this route's [popEnabled] method.
+  /// [PopScope.canPop] through this route's [popDisposition] method.
   ///
   /// See also:
   ///
   ///  * [unregisterPopInterface], which performs the opposite operation.
   void registerPopInterface(PopInterface popInterface) {
     _popInterfaces.add(popInterface);
-    popInterface.popEnabledNotifier.addListener(_updateSystemNavigator);
+    popInterface.canPopNotifier.addListener(_updateSystemNavigator);
     _updateSystemNavigator();
   }
 
@@ -1634,7 +1634,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [registerPopInterface], which performs the opposite operation.
   void unregisterPopInterface(PopInterface popInterface) {
     _popInterfaces.remove(popInterface);
-    popInterface.popEnabledNotifier.removeListener(_updateSystemNavigator);
+    popInterface.canPopNotifier.removeListener(_updateSystemNavigator);
     _updateSystemNavigator();
   }
 
@@ -1646,9 +1646,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     }
     final NavigationNotification notification = NavigationNotification(
       // canPop indicates that the originator of the Notification can handle a
-      // pop. In the case of PopScope, it handles pops when popEnabled is
+      // pop. In the case of PopScope, it handles pops when canPop is
       // false. Hence the seemingly backward logic here.
-      canHandlePop: popEnabled() == RoutePopDisposition.doNotPop,
+      canHandlePop: popDisposition == RoutePopDisposition.doNotPop,
     );
     notification.dispatch(subtreeContext);
   }
@@ -1671,7 +1671,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [willHandlePopInternally], which reports on another reason why
   ///    a pop might be vetoed.
   @Deprecated(
-    'Use popEnabled instead. '
+    'Use popDisposition instead. '
     'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   @protected

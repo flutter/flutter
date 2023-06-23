@@ -16,7 +16,7 @@ typedef PopInvokedCallback = void Function(bool didPop);
 
 /// Manages system back gestures.
 ///
-/// The [popEnabled] parameter can be used to disable system back gestures.
+/// The [canPop] parameter can be used to disable system back gestures.
 ///
 /// The [onPopInvoked] parameter reports when system back gestures occur, regardless
 /// of whether or not they were successful.
@@ -32,7 +32,7 @@ typedef PopInvokedCallback = void Function(bool didPop);
 ///
 ///  * [NavigatorPopHandler], which is a less verbose way to handle system back
 ///    gestures in the case of nested [Navigator]s.
-///  * [Form.popEnabled] and [Form.onPopInvoked], which can be used to handle system
+///  * [Form.canPop] and [Form.onPopInvoked], which can be used to handle system
 ///    back gestures in the case of a form with unsaved data.
 ///  * [ModalRoute.registerPopInterface] and [ModalRoute.unregisterPopInterface],
 ///    which this widget uses to integrate with Flutter's navigation system.
@@ -44,7 +44,7 @@ class PopScope extends StatefulWidget {
   const PopScope({
     super.key,
     required this.child,
-    this.popEnabled = true,
+    this.canPop = true,
     this.onPopInvoked,
   });
 
@@ -56,12 +56,12 @@ class PopScope extends StatefulWidget {
   /// Called after a route pop was handled.
   ///
   /// It's not possible to prevent the pop from happening at the time that this
-  /// method is called; the pop has already happened. Use [popEnabled] to
+  /// method is called; the pop has already happened. Use [canPop] to
   /// disable pops in advance.
   ///
   /// This will still be called even when the pop is canceled. A pop is canceled
-  /// when the relevant [Route.popEnabled] returns false, such as when
-  /// [popEnabled] is set to false on a [PopScope]. The `didPop` parameter
+  /// when the relevant [Route.popDisposition] returns false, such as when
+  /// [canPop] is set to false on a [PopScope]. The `didPop` parameter
   /// indicates whether or not the back navigation actually happened
   /// successfully.
   ///
@@ -70,20 +70,20 @@ class PopScope extends StatefulWidget {
   ///  * [Route.onPopInvoked], which is similar.
   final PopInvokedCallback? onPopInvoked;
 
-  /// {@template flutter.widgets.PopScope.popEnabled}
+  /// {@template flutter.widgets.PopScope.canPop}
   /// When false, blocks the current route from being popped.
   ///
   /// This includes the root route, where upon popping, the Flutter app would
   /// exit.
   ///
   /// If multiple [PopScope] widgets appear in a route's widget subtree, then
-  /// each and every `popEnabled` must be `true` in order for the route to be
+  /// each and every `canPop` must be `true` in order for the route to be
   /// able to pop.
   ///
   /// [Android's predictive back](https://developer.android.com/guide/navigation/predictive-back-gesture)
   /// feature will not animate when this boolean is false.
   /// {@endtemplate}
-  final bool popEnabled;
+  final bool canPop;
 
   @override
   State<PopScope> createState() => _PopScopeState();
@@ -96,12 +96,12 @@ class _PopScopeState extends State<PopScope> implements PopInterface {
   PopInvokedCallback? get onPopInvoked => widget.onPopInvoked;
 
   @override
-  late final ValueNotifier<bool> popEnabledNotifier;
+  late final ValueNotifier<bool> canPopNotifier;
 
   @override
   void initState() {
     super.initState();
-    popEnabledNotifier = ValueNotifier<bool>(widget.popEnabled);
+    canPopNotifier = ValueNotifier<bool>(widget.canPop);
   }
 
   @override
@@ -115,15 +115,15 @@ class _PopScopeState extends State<PopScope> implements PopInterface {
   @override
   void didUpdateWidget(PopScope oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.popEnabled != oldWidget.popEnabled) {
-      popEnabledNotifier.value = widget.popEnabled;
+    if (widget.canPop != oldWidget.canPop) {
+      canPopNotifier.value = widget.canPop;
     }
   }
 
   @override
   void dispose() {
     _route?.unregisterPopInterface(this);
-    popEnabledNotifier.dispose();
+    canPopNotifier.dispose();
     super.dispose();
   }
 
@@ -134,7 +134,7 @@ class _PopScopeState extends State<PopScope> implements PopInterface {
 /// An interface to into navigation pop events.
 ///
 /// Can be registered in [ModalRoute] to listen to pops with [onPopInvoked] or to
-/// enable/disable them with [popEnabledNotifier].
+/// enable/disable them with [canPopNotifier].
 ///
 /// See also:
 ///
@@ -147,14 +147,14 @@ sealed class PopInterface {
     required this.onPopInvoked,
   });
 
-  /// {@macro flutter.widgets.PopScope.popEnabled}
+  /// {@macro flutter.widgets.PopScope.onPopInvoked}
   final PopInvokedCallback? onPopInvoked;
 
-  /// {@macro flutter.widgets.PopScope.popEnabled}
-  late final ValueNotifier<bool> popEnabledNotifier;
+  /// {@macro flutter.widgets.PopScope.canPop}
+  late final ValueNotifier<bool> canPopNotifier;
 
   @override
   String toString() {
-    return 'PopInterface popEnabled: ${popEnabledNotifier.value}, onPopInvoked: $onPopInvoked';
+    return 'PopInterface canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvoked';
   }
 }

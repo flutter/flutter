@@ -325,7 +325,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
       body: SafeArea(
         bottom: false,
         child: PopScope(
-          popEnabled: _category == null,
+          canPop: _category == null,
           onPopInvoked: (bool didPop) {
             if (didPop) {
               return;

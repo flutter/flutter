@@ -62,7 +62,6 @@ class NestedNavigatorsPage extends StatefulWidget {
 
 class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
   final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
-  bool popEnabled = true;
 
   @override
   Widget build(BuildContext context) {
