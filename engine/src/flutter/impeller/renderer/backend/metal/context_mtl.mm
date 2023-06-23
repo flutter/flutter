@@ -343,8 +343,13 @@ bool ContextMTL::UpdateOffscreenLayerPixelFormat(PixelFormat format) {
   return true;
 }
 
-id<MTLCommandBuffer> ContextMTL::CreateMTLCommandBuffer() const {
-  return [command_queue_ commandBuffer];
+id<MTLCommandBuffer> ContextMTL::CreateMTLCommandBuffer(
+    const std::string& label) const {
+  auto buffer = [command_queue_ commandBuffer];
+  if (!label.empty()) {
+    [buffer setLabel:@(label.data())];
+  }
+  return buffer;
 }
 
 }  // namespace impeller
