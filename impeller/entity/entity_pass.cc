@@ -478,7 +478,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
         renderer,                                  // renderer
         subpass_size,                              // size
         subpass->GetTotalPassReads(renderer) > 0,  // readable
-        clear_color_.Premultiply());               // clear_color
+        Color::BlackTransparent());                // clear_color
 
     if (!subpass_target.IsValid()) {
       VALIDATION_LOG << "Subpass render target is invalid.";
