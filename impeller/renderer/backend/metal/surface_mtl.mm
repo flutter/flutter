@@ -262,9 +262,13 @@ bool SurfaceMTL::Present() const {
   }
 
   if (drawable_) {
+    // In certain situations, we need to wait until the command queue has been
+    // flushed before presenting to the onscreen texture. See the comments in
+    // `ShouldWaitForCommandBuffer` for more details.
     if (ShouldWaitForCommandBuffer()) {
       id<MTLCommandBuffer> command_buffer =
-          ContextMTL::Cast(context.get())->CreateMTLCommandBuffer();
+          ContextMTL::Cast(context.get())
+              ->CreateMTLCommandBuffer("Present Waiter Command Buffer");
       [command_buffer commit];
       [command_buffer waitUntilScheduled];
     }
