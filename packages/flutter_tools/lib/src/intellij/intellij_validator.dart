@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:path/path.dart';
 import 'package:process/process.dart';
 
 import '../base/file_system.dart';
@@ -483,11 +484,10 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       ));
     }
 
-    // Remove duplicated validator
+    // Remove duplicate validator based on its title
+    final Set<String> validatorTitles = <String>{};
     validators.removeWhere((DoctorValidator validator) {
-      return (validator as IntelliJValidatorOnMac)
-          .installPath
-          .contains('JetBrains Toolbox');
+      return !validatorTitles.add(validator.title);
     });
 
     return validators;

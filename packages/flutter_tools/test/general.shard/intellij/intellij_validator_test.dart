@@ -371,6 +371,57 @@ void main() {
 
     expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
   });
+
+  testWithoutContext('Remove duplicate validator', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem
+        .directory(
+        '/foo/bar/Applications/JetBrains Toolbox/IntelliJ IDEA Ultimate.app')
+        .createSync(recursive: true);
+
+    final String ceRandomLocation = fileSystem.path.join(
+      '/',
+      'random',
+      'IntelliJ CE (stable).app',
+    );
+    final String ultimateRandomLocation = fileSystem.path.join(
+      '/',
+      'random',
+      'IntelliJ UE (stable).app',
+    );
+
+    final FakeProcessManager processManager =
+    FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>[
+          'mdfind',
+          'kMDItemCFBundleIdentifier="com.jetbrains.intellij.ce"',
+        ],
+        stdout: ceRandomLocation,
+      ),
+      FakeCommand(
+        command: const <String>[
+          'mdfind',
+          'kMDItemCFBundleIdentifier="com.jetbrains.intellij*"',
+        ],
+        stdout: '$ultimateRandomLocation\n$ceRandomLocation',
+      ),
+    ]);
+
+    final Iterable<DoctorValidator> installed =
+    IntelliJValidatorOnMac.installed(
+      fileSystem: fileSystem,
+      fileSystemUtils:
+      FileSystemUtils(fileSystem: fileSystem, platform: macPlatform),
+      userMessages: UserMessages(),
+      plistParser: FakePlistParser(<String, String>{
+        'JetBrainsToolboxApp': '/path/to/JetBrainsToolboxApp',
+      }),
+      processManager: processManager,
+    );
+
+    expect(installed.length, 2);
+  });
 }
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {
