@@ -578,7 +578,7 @@ class _LeftCupertinoChevronPainter extends _CupertinoChevronPainter {
 class _RightCupertinoChevronPainter extends _CupertinoChevronPainter {
   _RightCupertinoChevronPainter({required super.color}) : super(isLeft: false);
 }
-class _CupertinoChevronPainter extends CustomPainter {
+abstract class _CupertinoChevronPainter extends CustomPainter {
   _CupertinoChevronPainter({
     required this.color,
     required this.isLeft,
@@ -593,7 +593,6 @@ class _CupertinoChevronPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     assert(size.height == size.width, 'size must have the same height and width');
 
-    // Height and width should always be the same.
     final double iconSize = size.height;
 
     // The chevron is half of a square rotated 45˚, so it needs a margin of 1/4

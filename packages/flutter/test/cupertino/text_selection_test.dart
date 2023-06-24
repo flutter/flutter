@@ -285,7 +285,7 @@ void main() {
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(find.byWidgetPredicate((Widget w) => w is Icon && w.icon == CupertinoIcons.chevron_left), findsNothing);
+      expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsOneWidget);
 
       // Tapping the next button shows the overflowing button and the next
