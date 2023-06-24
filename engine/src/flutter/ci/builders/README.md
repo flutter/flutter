@@ -297,7 +297,12 @@ default is empty which means no interpreter will be used to run the script
 and it is assumed the script is already an executable with the right
 permissions to run in the target platform.
 * **name** - the name of the step running the script.
-* **parameters** - flags or parameters passed to the script.
+* **parameters** - flags or parameters passed to the script. Parameters
+accept magic environment variables(placeholders replaced before executing
+the test). Magic environment variables have the following limitations:
+only `${FLUTTER_LOGS_DIR}` is currently supported and it needs to be used
+alone within the parameter string(e.g. `["${FLUTTER_LOGS_DIR}"]` is OK
+but `["path=${FLUTTER_LOGS_DIR}"]` is not).
 * **Script** - the path to the script to execute relative to the checkout
 directory.
 * **contexts** - a list of available contexts to add to the text execution step.
