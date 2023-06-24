@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:path/path.dart';
 import 'package:process/process.dart';
 
 import '../base/file_system.dart';
