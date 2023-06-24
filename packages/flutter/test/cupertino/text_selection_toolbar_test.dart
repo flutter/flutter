@@ -140,7 +140,7 @@ void main() {
     expect(findOverflowNextButton(), findsNothing);
 
     expect(findOverflowBackButton(), overflowBackPaintPattern());
-  });
+  }, skip: kIsWeb); // Path.combine is not implemented in the HTML backend https://github.com/flutter/flutter/issues/44572
 
   testWidgets('paginates children if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
