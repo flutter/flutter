@@ -403,17 +403,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     CoverageCollector? collector;
     if (boolArg('coverage') || boolArg('merge-coverage') ||
         boolArg('branch-coverage')) {
-      final String projectName = flutterProject.manifest.appName;
-      final List<String> packagesRegExps = stringsArg('coverage-package');
-      final Iterable<String> packagesToInclude;
-      if (packagesRegExps.isNotEmpty) {
-        final RegExp combinedRegExp = RegExp('(${packagesRegExps.join(")|(")})');
-        packagesToInclude = buildInfo.packageConfig.packages
-            .map((Package e) => e.name)
-            .where((String e) => combinedRegExp.hasMatch(e));
-      } else {
-        packagesToInclude = <String>[projectName];
-      }
+      final Iterable<String> packagesToInclude = _getCoveragePackages(
+        stringsArg('coverage-package'),
+        flutterProject,
+        buildInfo.packageConfig,
+      );
       collector = CoverageCollector(
         verbose: !machine,
         libraryNames: packagesToInclude.toSet(),
@@ -524,6 +518,24 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit(null);
     }
     return FlutterCommandResult.success();
+  }
+
+  Iterable<String> _getCoveragePackages(
+    List<String> packagesRegExps,
+    FlutterProject flutterProject,
+    PackageConfig packageConfig,
+  ) {
+    final String projectName = flutterProject.manifest.appName;
+    final Iterable<String> packagesToInclude;
+    if (packagesRegExps.isNotEmpty) {
+      final RegExp combinedRegExp = RegExp('(${packagesRegExps.join(")|(")})');
+      packagesToInclude = packageConfig.packages
+          .map((Package e) => e.name)
+          .where((String e) => combinedRegExp.hasMatch(e));
+    } else {
+      packagesToInclude = <String>[projectName];
+    }
+    return packagesToInclude;
   }
 
   /// Parses a test file/directory target passed as an argument and returns it
