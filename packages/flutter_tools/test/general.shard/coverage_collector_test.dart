@@ -7,7 +7,6 @@ import 'dart:io' show Directory, File;
 
 import 'package:coverage/src/hitmap.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' show FileSystem;
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/test_device.dart' show TestDevice;
