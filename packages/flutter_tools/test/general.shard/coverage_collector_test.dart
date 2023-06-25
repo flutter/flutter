@@ -524,7 +524,7 @@ void main() {
       tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
       final File packagesFile = writeFooBarPackagesJson(tempDir);
       final Directory fooDir = Directory('${tempDir.path}/foo')..createSync();
-      final File fooFile = File('${fooDir.path}/foo.dart')..createSync();
+      File('${fooDir.path}/foo.dart').createSync();
 
       final String packagesPath = packagesFile.path;
       final CoverageCollector collector = CoverageCollector(
@@ -539,7 +539,7 @@ void main() {
       );
 
       final String? report = await collector.finalizeCoverage();
-      expect(report, contains(fooFile.path));
+      expect(report, contains('foo.dart'));
     } finally {
       tempDir?.deleteSync(recursive: true);
     }
