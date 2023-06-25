@@ -18,12 +18,13 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
+import 'package:flutter_tools/src/test/test_device.dart';
 import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
+import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../general.shard/coverage_collector_test.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
@@ -1071,6 +1072,22 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     }
 
     return exitCode;
+  }
+}
+
+class TestTestDevice extends TestDevice {
+  @override
+  Future<void> get finished => Future<void>.delayed(const Duration(seconds: 1));
+
+  @override
+  Future<void> kill() => Future<void>.value();
+
+  @override
+  Future<Uri?> get vmServiceUri => Future<Uri?>.value(Uri());
+
+  @override
+  Future<StreamChannel<String>> start(String entrypointPath) {
+    throw UnimplementedError();
   }
 }
 
