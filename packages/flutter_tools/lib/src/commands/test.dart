@@ -131,6 +131,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         defaultsTo: 'coverage/lcov.info',
         help: 'Where to store coverage information (if coverage is enabled).',
       )
+      ..addMultiOption('coverage-packages',
+        help: 'A comma-separated list of additional packages '
+              'to include in the coverage report (if coverage is enabled).',
+        valueHelp: 'package-name',
+      )
       ..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -396,9 +401,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (boolArg('coverage') || boolArg('merge-coverage') ||
         boolArg('branch-coverage')) {
       final String projectName = flutterProject.manifest.appName;
+      final List<String> additionalPackages = stringsArg('coverage-packages');
       collector = CoverageCollector(
         verbose: !machine,
-        libraryNames: <String>{projectName},
+        libraryNames: <String>{
+          projectName,
+          ...additionalPackages,
+        },
         packagesPath: buildInfo.packagesPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
         testTimeRecorder: testTimeRecorder,

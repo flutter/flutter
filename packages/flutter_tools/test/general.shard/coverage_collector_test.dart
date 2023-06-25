@@ -6,6 +6,9 @@ import 'dart:convert' show jsonEncode;
 import 'dart:io' show Directory, File;
 
 import 'package:coverage/src/hitmap.dart';
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/file_system.dart' show FileSystem;
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/test_device.dart' show TestDevice;
 import 'package:flutter_tools/src/test/test_time_recorder.dart';
@@ -13,6 +16,7 @@ import 'package:stream_channel/stream_channel.dart' show StreamChannel;
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/fake_vm_services.dart';
 import '../src/logging_logger.dart';
 
@@ -513,6 +517,36 @@ void main() {
     } finally {
       tempDir?.deleteSync(recursive: true);
     }
+  });
+
+  testUsingContext('Coverage collector respects libraryNames in finalized report', () async {
+    Directory? tempDir;
+    try {
+      tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
+      final File packagesFile = writeFooBarPackagesJson(tempDir);
+      final Directory fooDir = Directory('${tempDir.path}/foo')..createSync();
+      final File fooFile = File('${fooDir.path}/foo.dart')..createSync();
+
+      final String packagesPath = packagesFile.path;
+      final CoverageCollector collector = CoverageCollector(
+          libraryNames: <String>{'foo', 'bar'},
+          verbose: false,
+          packagesPath: packagesPath,
+          resolver: await CoverageCollector.getResolver(packagesPath)
+      );
+      await collector.collectCoverage(
+        TestTestDevice(),
+        serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: <String>['package:foo/', 'package:bar/']).vmService,
+      );
+
+      final String? report = await collector.finalizeCoverage();
+      expect(report, contains(fooFile.path));
+    } finally {
+      tempDir?.deleteSync(recursive: true);
+    }
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testWithoutContext('Coverage collector records test timings when provided TestTimeRecorder', () async {
