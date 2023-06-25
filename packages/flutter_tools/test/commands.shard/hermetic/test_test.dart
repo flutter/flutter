@@ -16,14 +16,18 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
+import 'package:vm_service/vm_service.dart';
 
+import '../../general.shard/coverage_collector_test.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
+import '../../src/fake_vm_services.dart';
 import '../../src/logging_logger.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -243,6 +247,145 @@ dev_dependencies:
       '--',
       'test/fake_test.dart',
     ]), throwsA(isA<ToolExit>().having((ToolExit toolExit) => toolExit.message, 'message', isNull)));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext('Coverage provides current library name to Coverage Collector by default', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          method: 'getVM',
+          jsonResponse: (VM.parse(<String, Object>{})!
+            ..isolates = <IsolateRef>[
+              IsolateRef.parse(<String, Object>{
+                'id': '1',
+              })!,
+            ]
+          ).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVersion',
+          jsonResponse: Version(major: 3, minor: 57).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getSourceReport',
+          args: <String, Object>{
+            'isolateId': '1',
+            'reports': <Object>['Coverage'],
+            'forceCompile': true,
+            'reportLines': true,
+            'libraryFilters': <String>['package:/'],
+          },
+          jsonResponse: SourceReport(
+            ranges: <SourceReportRange>[
+              SourceReportRange(
+                scriptIndex: 0,
+                startPos: 0,
+                endPos: 0,
+                compiled: true,
+                coverage: SourceReportCoverage(
+                  hits: <int>[1, 3],
+                  misses: <int>[2],
+                ),
+              ),
+            ],
+            scripts: <ScriptRef>[
+              ScriptRef(
+                uri: 'package:/some.dart',
+                id: '1',
+              ),
+            ],
+          ).toJson(),
+        ),
+      ],
+    );
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--coverage',
+      '--',
+      'test/some_test.dart',
+    ]);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect((testRunner.lastTestWatcher! as CoverageCollector).libraryNames, <String>{''});
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext('Coverage provides library names matching regexps to Coverage Collector', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          method: 'getVM',
+          jsonResponse: (VM.parse(<String, Object>{})!
+            ..isolates = <IsolateRef>[
+              IsolateRef.parse(<String, Object>{
+                'id': '1',
+              })!,
+            ]
+          ).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVersion',
+          jsonResponse: Version(major: 3, minor: 57).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getSourceReport',
+          args: <String, Object>{
+            'isolateId': '1',
+            'reports': <Object>['Coverage'],
+            'forceCompile': true,
+            'reportLines': true,
+            'libraryFilters': <String>['package:test_api/'],
+          },
+          jsonResponse: SourceReport(
+            ranges: <SourceReportRange>[
+              SourceReportRange(
+                scriptIndex: 0,
+                startPos: 0,
+                endPos: 0,
+                compiled: true,
+                coverage: SourceReportCoverage(
+                  hits: <int>[1, 3],
+                  misses: <int>[2],
+                ),
+              ),
+            ],
+            scripts: <ScriptRef>[
+              ScriptRef(
+                uri: 'package:test_api/some.dart',
+                id: '1',
+              ),
+            ],
+          ).toJson(),
+        ),
+      ],
+    );
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner =
+    createTestCommandRunner(testCommand);
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--coverage',
+      '--coverage-package=^test',
+      '--',
+      'test/some_test.dart',
+    ]);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect((testRunner.lastTestWatcher! as CoverageCollector).libraryNames, <String>{'test_api'});
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
@@ -864,7 +1007,7 @@ dev_dependencies:
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
-  FakeFlutterTestRunner(this.exitCode, [this.leastRunTime]);
+  FakeFlutterTestRunner(this.exitCode, [this.leastRunTime, this.fakeVmServiceHost]);
 
   int exitCode;
   Duration? leastRunTime;
@@ -873,6 +1016,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   String? lastFileReporterValue;
   String? lastReporterOption;
   int? lastConcurrency;
+  TestWatcher? lastTestWatcher;
+  FakeVmServiceHost? fakeVmServiceHost;
 
   @override
   Future<int> runTests(
@@ -912,9 +1057,17 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     lastFileReporterValue = fileReporter;
     lastReporterOption = reporter;
     lastConcurrency = concurrency;
+    lastTestWatcher = watcher;
 
     if (leastRunTime != null) {
       await Future<void>.delayed(leastRunTime!);
+    }
+
+    if (watcher is CoverageCollector) {
+      await watcher.collectCoverage(
+        TestTestDevice(),
+        serviceOverride: fakeVmServiceHost?.vmService,
+      );
     }
 
     return exitCode;
