@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 
 import '../asset.dart';
 import '../base/common.dart';
@@ -131,10 +132,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         defaultsTo: 'coverage/lcov.info',
         help: 'Where to store coverage information (if coverage is enabled).',
       )
-      ..addMultiOption('coverage-packages',
-        help: 'A comma-separated list of additional packages '
-              'to include in the coverage report (if coverage is enabled).',
-        valueHelp: 'package-name',
+      ..addMultiOption('coverage-package',
+        help: 'A regular expression matching packages names '
+              'to include in the coverage report (if coverage is enabled). '
+              'By default, the coverage will be collected only for the current package.',
+        valueHelp: 'package-name-regexp',
+        splitCommas: false,
       )
       ..addFlag('machine',
         hide: !verboseHelp,
@@ -401,13 +404,19 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (boolArg('coverage') || boolArg('merge-coverage') ||
         boolArg('branch-coverage')) {
       final String projectName = flutterProject.manifest.appName;
-      final List<String> additionalPackages = stringsArg('coverage-packages');
+      final List<String> packagesRegExps = stringsArg('coverage-package');
+      final Iterable<String> packagesToInclude;
+      if (packagesRegExps.isNotEmpty) {
+        final RegExp combinedRegExp = RegExp('(${packagesRegExps.join(")|(")})');
+        packagesToInclude = buildInfo.packageConfig.packages
+            .map((Package e) => e.name)
+            .where((String e) => combinedRegExp.hasMatch(e));
+      } else {
+        packagesToInclude = <String>[projectName];
+      }
       collector = CoverageCollector(
         verbose: !machine,
-        libraryNames: <String>{
-          projectName,
-          ...additionalPackages,
-        },
+        libraryNames: packagesToInclude.toSet(),
         packagesPath: buildInfo.packagesPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
         testTimeRecorder: testTimeRecorder,
