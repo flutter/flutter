@@ -374,10 +374,16 @@ void main() {
 
   testWithoutContext('Remove duplicate validator', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem
-        .directory(
-        '/foo/bar/Applications/JetBrains Toolbox/IntelliJ IDEA Ultimate.app')
-        .createSync(recursive: true);
+    final List<String> installPaths = <String>[
+      '/foo/bar/Applications/JetBrains Toolbox/IntelliJ IDEA Ultimate.app',
+      '/foo/bar/Applications/JetBrains Toolbox/IntelliJ IDEA Community Edition.app'
+    ];
+
+    for (final String installPath in installPaths) {
+      fileSystem
+          .directory(installPath)
+          .createSync(recursive: true);
+    }
 
     final String ceRandomLocation = fileSystem.path.join(
       '/',

@@ -376,6 +376,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     'IntelliJ IDEA.app': _ultimateEditionId,
     'IntelliJ IDEA Ultimate.app': _ultimateEditionId,
     'IntelliJ IDEA CE.app': _communityEditionId,
+    'IntelliJ IDEA Community Edition.app': _communityEditionId,
   };
 
   static Iterable<DoctorValidator> installed({
