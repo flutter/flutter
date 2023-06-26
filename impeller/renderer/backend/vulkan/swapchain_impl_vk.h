@@ -31,6 +31,7 @@ class SwapchainImplVK final
   static std::shared_ptr<SwapchainImplVK> Create(
       const std::shared_ptr<Context>& context,
       vk::UniqueSurfaceKHR surface,
+      bool was_rotated,
       vk::SwapchainKHR old_swapchain = VK_NULL_HANDLE);
 
   ~SwapchainImplVK();
@@ -46,6 +47,8 @@ class SwapchainImplVK final
     AcquireResult(std::unique_ptr<Surface> p_surface)
         : surface(std::move(p_surface)) {}
   };
+
+  bool GetIsRotated() const { return is_rotated_; }
 
   AcquireResult AcquireNextDrawable();
 
@@ -66,8 +69,12 @@ class SwapchainImplVK final
   size_t current_frame_ = 0u;
   bool is_valid_ = false;
 
+  bool was_rotated_ = false;
+  bool is_rotated_ = false;
+
   SwapchainImplVK(const std::shared_ptr<Context>& context,
                   vk::UniqueSurfaceKHR surface,
+                  bool was_rotated,
                   vk::SwapchainKHR old_swapchain);
 
   bool Present(const std::shared_ptr<SwapchainImageVK>& image, uint32_t index);
