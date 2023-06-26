@@ -6,8 +6,10 @@
 #define FLUTTER_DISPLAY_LIST_GEOMETRY_DL_RTREE_H_
 
 #include <list>
+#include <optional>
 #include <vector>
 
+#include "flutter/display_list/geometry/dl_region.h"
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
@@ -50,7 +52,7 @@ class DlRTree : public SkRefCnt {
   /// If an array of IDs is not specified then all leaf nodes will be
   /// represented by the |invalid_id| (which defaults to -1).
   ///
-  /// Invallid rects that are empty or contain a NaN value will not be
+  /// Invalid rects that are empty or contain a NaN value will not be
   /// stored in the R-Tree. And, if a |predicate| function is provided,
   /// that function will be called to query if the rectangle associated
   /// with the ID should be included.
@@ -73,8 +75,8 @@ class DlRTree : public SkRefCnt {
   /// The returned indices may not themselves be in numerical order,
   /// but they will represent the rectangles and IDs in the order in
   /// which they were passed into the constructor. The actual rectangle
-  /// and ID associated with each index can be retreived using the
-  /// |DlRTree::id| and |DlRTree::bouds| methods.
+  /// and ID associated with each index can be retrieved using the
+  /// |DlRTree::id| and |DlRTree::bounds| methods.
   void search(const SkRect& query, std::vector<int>* results) const;
 
   /// Return the ID for the indicated result of a query or
@@ -123,6 +125,16 @@ class DlRTree : public SkRefCnt {
   std::list<SkRect> searchAndConsolidateRects(const SkRect& query,
                                               bool deband = true) const;
 
+  /// Returns DlRegion that represents the union of all rectangles in the
+  /// R-Tree.
+  const DlRegion& region() const;
+
+  /// Returns DlRegion that represents the union of all rectangles in the
+  /// R-Tree intersected with the query rect.
+  DlRegion region(const SkRect& query) const {
+    return DlRegion::MakeIntersection(region(), DlRegion(query.roundOut()));
+  }
+
  private:
   static constexpr SkRect empty_ = SkRect::MakeEmpty();
 
@@ -133,6 +145,7 @@ class DlRTree : public SkRefCnt {
   std::vector<Node> nodes_;
   int leaf_count_;
   int invalid_id_;
+  mutable std::optional<DlRegion> region_;
 };
 
 }  // namespace flutter
