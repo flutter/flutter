@@ -12,7 +12,6 @@
 #ifndef IMPELLER_TARGET_METAL_IOS
 
 precision mediump sampler2D;
-precision mediump float;
 
 #define float16_t float
 #define f16vec2 vec2

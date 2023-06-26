@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+precision mediump float;
+
 #include <impeller/types.glsl>
 
 uniform FragInfo {
-  float alpha;
+  float16_t alpha;
 }
 frag_info;
 
-in vec4 v_color;
+in f16vec4 v_color;
 
-out vec4 frag_color;
+out f16vec4 frag_color;
 
 void main() {
   frag_color = v_color * frag_info.alpha;
