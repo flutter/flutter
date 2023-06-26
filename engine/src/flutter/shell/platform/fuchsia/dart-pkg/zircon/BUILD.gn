@@ -26,6 +26,7 @@ source_set("zircon") {
   ]
 
   deps = [
+    "$fuchsia_sdk_root/fidl:fuchsia.io",
     "$fuchsia_sdk_root/pkg:async-cpp",
     "$fuchsia_sdk_root/pkg:async-default",
     "$fuchsia_sdk_root/pkg:async-loop-cpp",
