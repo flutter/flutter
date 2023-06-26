@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:core';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
@@ -143,28 +145,56 @@ class LeakCleaner {
 
   final LeakTrackingTestConfig config;
 
+  static Map<(String, LeakType), int> _countByClassAndType(Leaks leaks) {
+    final Map<(String, LeakType), int> result = <(String, LeakType), int>{};
+
+    for (final MapEntry<LeakType, List<LeakReport>> entry in leaks.byType.entries) {
+      for (final LeakReport leak in entry.value) {
+        final (String, LeakType) classAndType = (leak.type, entry.key);
+        result[classAndType] = (result[classAndType] ?? 0) + 1;
+      }
+    }
+    return result;
+  }
+
   Leaks clean(Leaks leaks) {
+    final Map<(String, LeakType), int> countByClassAndType = _countByClassAndType(leaks);
+
     final Leaks result =  Leaks(<LeakType, List<LeakReport>>{
       for (final LeakType leakType in leaks.byType.keys)
-        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak)).toList()
+        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak, countByClassAndType)).toList()
     });
     return result;
   }
 
   /// Returns true if [leak] should be reported as failure.
-  bool _shouldReportLeak(LeakType leakType, LeakReport leak) {
+  bool _shouldReportLeak(LeakType leakType, LeakReport leak, Map<(String, LeakType), int> countByClassAndType) {
     // Tracking for non-GCed is temporarily disabled.
     // TODO(polina-c): turn on tracking for non-GCed after investigating existing leaks.
     if (leakType != LeakType.notDisposed) {
       return false;
     }
 
+    final String leakingClass = leak.type;
+    final (String, LeakType) classAndType = (leakingClass, leakType);
+
+    bool isAllowedForClass(Map<String, int?> allowList) {
+      if (!allowList.containsKey(leakingClass)) {
+        return false;
+      }
+      final int? allowedCount = allowList[leakingClass];
+      if (allowedCount == null) {
+        return true;
+      }
+      return allowedCount >= countByClassAndType[classAndType]!;
+    }
+
     switch (leakType) {
       case LeakType.notDisposed:
-        return !config.notDisposedAllowList.containsKey(leak.type);
+        return !isAllowedForClass(config.notDisposedAllowList);
       case LeakType.notGCed:
       case LeakType.gcedLate:
-        return !config.notGCedAllowList.containsKey(leak.type);
+        return !isAllowedForClass(config.notGCedAllowList);
     }
   }
 }
