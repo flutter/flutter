@@ -649,6 +649,42 @@ void main() {
 
     expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).shrinkWrap, true);
   });
+
+  testWidgets('AnimatedList applies MediaQuery padding', (WidgetTester tester) async {
+    const EdgeInsets padding = EdgeInsets.all(30.0);
+    EdgeInsets? innerMediaQueryPadding;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.all(30.0),
+          ),
+          child: AnimatedList(
+            initialItemCount: 3,
+            itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+              innerMediaQueryPadding = MediaQuery.paddingOf(context);
+              return const Placeholder();
+            },
+          ),
+        ),
+      ),
+    );
+    final Offset topLeft = tester.getTopLeft(find.byType(Placeholder).first);
+    // Automatically apply the top padding into sliver.
+    expect(topLeft, Offset(0.0, padding.top));
+
+    // Scroll to the bottom.
+    await tester.drag(find.byType(AnimatedList), const Offset(0.0, -1000.0));
+    await tester.pumpAndSettle();
+
+    final Offset bottomLeft = tester.getBottomLeft(find.byType(Placeholder).last);
+    // Automatically apply the bottom padding into sliver.
+    expect(bottomLeft, Offset(0.0, 600.0 - padding.bottom));
+
+    // Verify that the left/right padding is not applied.
+    expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
+  });
 }
 
 
