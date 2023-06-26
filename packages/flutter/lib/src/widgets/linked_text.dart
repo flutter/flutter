@@ -24,9 +24,10 @@ typedef LinkBuilder = InlineSpan Function(
 );
 
 // TODO(justinmc): Change name to something link-agnostic?
-/// A widget that displays some text with parts of it made interactive.
+/// A widget that displays text with parts of it made interactive.
 ///
-/// By default, any URLs in the text are made interactive.
+/// By default, any URLs in the text are made interactive, and clicking one
+/// calls [onTap].
 ///
 /// See also:
 ///

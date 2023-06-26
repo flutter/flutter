@@ -30,9 +30,9 @@ class MyHomePage extends StatelessWidget {
   });
 
   final String title;
-  static const String text = 'Check out @FlutterDev on Twitter for the latest.';
+  static const String _text = 'Check out @FlutterDev on Twitter for the latest.';
 
-  void _onTapTwitterHandle(BuildContext context, String linkText) {
+  void _handleTapTwitterHandle(BuildContext context, String linkText) {
     final String handleWithoutAt = linkText.substring(1);
     final String twitterUriString = 'https://www.twitter.com/$handleWithoutAt';
     final Uri? uri = Uri.tryParse(twitterUriString);
@@ -66,9 +66,9 @@ class MyHomePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   LinkedText.regExp(
-                    text: text,
+                    text: _text,
                     regExp: _twitterHandleRegExp,
-                    onTap: (String urlString) => _onTapTwitterHandle(context, urlString),
+                    onTap: (String urlString) => _handleTapTwitterHandle(context, urlString),
                   ),
                 ],
               ),

@@ -31,9 +31,9 @@ class MyHomePage extends StatelessWidget {
   });
 
   final String title;
-  static const String text = 'Check out @FlutterDev on Twitter for the latest, or go to flutter.dev.';
+  static const String _text = 'Check out @FlutterDev on Twitter for the latest, or go to flutter.dev.';
 
-  void _onTapTwitterHandle(BuildContext context, String linkText) {
+  void _handleTapTwitterHandle(BuildContext context, String linkText) {
     final String handleWithoutAt = linkText.substring(1);
     final String twitterUriString = 'https://www.twitter.com/$handleWithoutAt';
     final Uri? uri = Uri.tryParse(twitterUriString);
@@ -43,7 +43,7 @@ class MyHomePage extends StatelessWidget {
     _showDialog(context, uri);
   }
 
-  void _onTapUrl(BuildContext context, String urlString) {
+  void _handleTapUrl(BuildContext context, String urlString) {
     final Uri? uri = Uri.tryParse(urlString);
     if (uri == null) {
       throw Exception('Failed to parse $urlString.');
@@ -78,23 +78,23 @@ class MyHomePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   LinkedText.textLinkers(
-                    text: text,
+                    text: _text,
                     textLinkers: <TextLinker>[
                       TextLinker(
                         rangesFinder: TextLinker.urlRangesFinder,
                         linkBuilder: InlineLinkedText.getDefaultLinkBuilder((String urlString) {
-                          return _onTapUrl(context, urlString);
+                          return _handleTapUrl(context, urlString);
                         }),
                       ),
                       TextLinker(
                         rangesFinder: TextLinker.rangesFinderFromRegExp(_twitterHandleRegExp),
                         linkBuilder: (String displayText, String linkText) {
                           return InlineLink(
-                            text: linkText,
+                            text: displayText,
                             style: const TextStyle(
                               color: Color(0xff00aaaa),
                             ),
-                            onTap: () => _onTapTwitterHandle(context, linkText),
+                            onTap: () => _handleTapTwitterHandle(context, linkText),
                           );
                         },
                       ),

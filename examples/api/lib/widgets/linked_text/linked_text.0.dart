@@ -30,9 +30,9 @@ class MyHomePage extends StatelessWidget {
   });
 
   final String title;
-  static const String text = 'Check out https://www.flutter.dev, or maybe just flutter.dev or www.flutter.dev. Or if not, just google it: https://www.google.com!';
+  static const String _text = 'Check out https://www.flutter.dev, or maybe just flutter.dev or www.flutter.dev.';
 
-  void _onTapUrl(BuildContext context, String urlString) {
+  void _handleTapUri(BuildContext context, String urlString) {
     final Uri? uri = Uri.tryParse(urlString);
     if (uri == null) {
       throw Exception('Failed to parse $urlString.');
@@ -62,8 +62,8 @@ class MyHomePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   LinkedText(
-                    text: text,
-                    onTap: (String urlString) => _onTapUrl(context, urlString),
+                    text: _text,
+                    onTap: (String urlString) => _handleTapUri(context, urlString),
                   ),
                 ],
               ),
