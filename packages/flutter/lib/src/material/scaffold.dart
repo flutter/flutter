@@ -1142,7 +1142,16 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       }
 
       final double snackBarYOffsetBase;
-      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating) {
+      final bool showAboveFab = switch (currentFloatingActionButtonLocation) {
+        FloatingActionButtonLocation.startTop => false,
+        FloatingActionButtonLocation.centerTop => false,
+        FloatingActionButtonLocation.endTop => false,
+        FloatingActionButtonLocation.miniStartTop => false,
+        FloatingActionButtonLocation.miniCenterTop => false,
+        FloatingActionButtonLocation.miniEndTop => false,
+        _ => true,
+      };
+      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating && showAboveFab) {
         snackBarYOffsetBase = floatingActionButtonRect.top;
       } else {
         // SnackBarBehavior.fixed applies a SafeArea automatically.
