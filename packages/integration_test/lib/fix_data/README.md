@@ -2,7 +2,7 @@
 
 The `.yaml` files in these directories are used to
 define the [`dart fix` framework](https://dart.dev/tools/dart-fix) refactorings
-used by `flutter_test`.
+used by `integration_test`.
 
 The number of fix rules defined in a file should not exceed 50 for better
 maintainability. Searching for `title:` in a given `.yaml` file will account
@@ -13,8 +13,8 @@ be for a single class and named `fix_<class>.yaml`. To make sure each file is
 grouped with related classes, a `fix_<filename>` folder will contain all of the
 fix files for the individual classes.
 
-See the flutter/packages/flutter_test/test_fixes directory for the tests that
-validate these fix rules.
+See the flutter/packages/integration_test/test_fixes directory for the tests
+that validate these fix rules.
 
 To run these tests locally, execute this command in the
 flutter/packages/integration_test/test_fixes directory.
@@ -25,7 +25,7 @@ dart fix --compare-to-golden
 For more documentation about Data Driven Fixes, see
 https://dart.dev/go/data-driven-fixes#test-folder.
 
-To learn more about how fixes are authored in package:flutter_test, see
+To learn more about how fixes are authored in package:integration_test, see
 https://github.com/flutter/flutter/wiki/Data-driven-Fixes
 
 ## When making structural changes to this directory

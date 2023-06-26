@@ -10,7 +10,7 @@
 # requiring the fix was made.
 
 # Every fix must be tested. See the
-# flutter/packages/flutter_test/test_fixes/README.md file for instructions
+# flutter/packages/integration_test/test_fixes/README.md file for instructions
 # on testing these data driven fixes.
 
 # For documentation about this file format, see
