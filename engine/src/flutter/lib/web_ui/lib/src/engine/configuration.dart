@@ -312,7 +312,7 @@ extension JsFlutterConfigurationExtension on JsFlutterConfiguration {
 
   @JS('canvasKitMaximumSurfaces')
   external JSNumber? get _canvasKitMaximumSurfaces;
-  double? get canvasKitMaximumSurfaces => _canvasKitMaximumSurfaces?.toDart;
+  double? get canvasKitMaximumSurfaces => _canvasKitMaximumSurfaces?.toDartDouble;
 
   @JS('debugShowSemanticsNodes')
   external JSBoolean? get _debugShowSemanticsNodes;
