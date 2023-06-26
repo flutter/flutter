@@ -996,13 +996,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   void attachRootWidget(Widget rootWidget) {
     attachToBuildOwner(RootWidget(
       debugShortDescription: '[root]',
-      child: ViewHooksScope(
-        hooks: ViewHooks(
-          renderViewRepository: this,
-          pipelineOwner: rootPipelineOwner,
-        ),
-        child: rootWidget,
-      ),
+      child: rootWidget,
     ));
   }
 

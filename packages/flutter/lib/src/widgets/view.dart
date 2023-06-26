@@ -366,7 +366,7 @@ class ViewHooks {
   });
 
   static ViewHooks of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ViewHooksScope>()!.hooks;
+    return context.dependOnInheritedWidgetOfExactType<ViewHooksScope>()?.hooks ?? ViewHooks(renderViewRepository: RendererBinding.instance, pipelineOwner: RendererBinding.instance.rootPipelineOwner);
   }
 
   final RenderViewRepository renderViewRepository;
