@@ -144,14 +144,7 @@ String generateDateFormattingLogic(Message message) {
     .map((Placeholder placeholder) {
       final String? placeholderFormat = placeholder.format;
       if (placeholderFormat == null) {
-        throw L10nException(
-          'The placeholder, ${placeholder.name}, has its "type" resource attribute set to '
-          'the "${placeholder.type}" type. To properly resolve for the right '
-          '${placeholder.type} format, the "format" attribute needs to be set '
-          'to determine which DateFormat to use. \n'
-          "Check the intl library's DateFormat class constructors for allowed "
-          'date formats.'
-        );
+        return '';
       }
       final bool? isCustomDateFormat = placeholder.isCustomDateFormat;
       if (!placeholder.hasValidDateFormat
