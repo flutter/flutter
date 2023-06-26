@@ -124,13 +124,15 @@ static std::optional<vk::Queue> ChoosePresentQueue(
 std::shared_ptr<SwapchainImplVK> SwapchainImplVK::Create(
     const std::shared_ptr<Context>& context,
     vk::UniqueSurfaceKHR surface,
+    bool was_rotated,
     vk::SwapchainKHR old_swapchain) {
-  return std::shared_ptr<SwapchainImplVK>(
-      new SwapchainImplVK(context, std::move(surface), old_swapchain));
+  return std::shared_ptr<SwapchainImplVK>(new SwapchainImplVK(
+      context, std::move(surface), was_rotated, old_swapchain));
 }
 
 SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
                                  vk::UniqueSurfaceKHR surface,
+                                 bool was_rotated,
                                  vk::SwapchainKHR old_swapchain) {
   if (!context) {
     return;
@@ -197,7 +199,7 @@ SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
   );
   swapchain_info.imageArrayLayers = 1u;
   swapchain_info.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
-  swapchain_info.preTransform = caps.currentTransform;
+  swapchain_info.preTransform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
   swapchain_info.compositeAlpha = composite.value();
   // If we set the clipped value to true, Vulkan expects we will never read back
   // from the buffer. This is analogous to [CAMetalLayer framebufferOnly] in
@@ -273,6 +275,8 @@ SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
   synchronizers_ = std::move(synchronizers);
   current_frame_ = synchronizers_.size() - 1u;
   is_valid_ = true;
+  was_rotated_ = was_rotated;
+  is_rotated_ = was_rotated;
 }
 
 SwapchainImplVK::~SwapchainImplVK() {
@@ -314,6 +318,10 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
     return {};
   }
 
+  if (was_rotated_ != is_rotated_) {
+    return AcquireResult{true /* out of date */};
+  }
+
   const auto& context = ContextVK::Cast(*context_strong);
 
   current_frame_ = (current_frame_ + 1u) % synchronizers_.size();
@@ -338,8 +346,12 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
       nullptr                                // fence
   );
 
-  if (acq_result == vk::Result::eSuboptimalKHR ||
-      acq_result == vk::Result::eErrorOutOfDateKHR) {
+  if (acq_result == vk::Result::eSuboptimalKHR) {
+    is_rotated_ = true;
+    return AcquireResult{true /* out of date */};
+  }
+
+  if (acq_result == vk::Result::eErrorOutOfDateKHR) {
     return AcquireResult{true /* out of date */};
   }
 
@@ -448,6 +460,10 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
       // successfully.
       [[fallthrough]];
     case vk::Result::eSuccess:
+      is_rotated_ = false;
+      return true;
+    case vk::Result::eSuboptimalKHR:
+      is_rotated_ = true;
       return true;
     default:
       VALIDATION_LOG << "Could not present queue: " << vk::to_string(result);
