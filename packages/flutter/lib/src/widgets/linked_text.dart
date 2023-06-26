@@ -136,7 +136,7 @@ class LinkedText extends StatelessWidget {
 
   // TODO(justinmc): I need ways to take RegExp, etc. like other constructors, too.
   // TODO(justinmc): Should this take a single span instead of a list? If you
-  // did want to linkify a list, you could wrap then in a single TextSpan.
+  // did want to linkify a list, you could wrap them in a single TextSpan.
   LinkedText.spans({
     super.key,
     // TODO(justinmc): This is a bad name since it seems like it would take widgets. RichText uses `text` for one. Maybe `spans`?
@@ -461,8 +461,8 @@ class InlineLinkedText extends TextSpan {
          children: linkSpans(spans, textLinkers).toList(),
        );
 
-  /// Returns a [LinkBuilder] that simply highlights the given text and provides
-  /// an [onTap] handler.
+  /// Returns a [LinkBuilder] that highlights the given text and sets the given
+  /// [onTap] handler.
   static LinkBuilder getDefaultLinkBuilder([UriStringCallback? onTap]) {
     return (String displayText, String linkText) {
       return InlineLink(
