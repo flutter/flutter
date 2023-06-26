@@ -46,4 +46,4 @@ jobs:
             Thanks for your contribution!
           close-pr-label: "r: timeout"
           operations-per-run: 200
-          any-of-labels: "waiting for customer response", "needs-info"
+          any-of-labels: "waiting for customer response,needs-info"
