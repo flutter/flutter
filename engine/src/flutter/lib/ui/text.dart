@@ -1829,8 +1829,9 @@ class ParagraphStyle {
              'fontFamily: ${    _encoded[0] & 0x080 == 0x080 ? _fontFamily                       : "unspecified"}, '
              'fontSize: ${      _encoded[0] & 0x100 == 0x100 ? _fontSize                         : "unspecified"}, '
              'height: ${        _encoded[0] & 0x200 == 0x200 ? "${_height}x"                     : "unspecified"}, '
-             'ellipsis: ${      _encoded[0] & 0x400 == 0x400 ? '"$_ellipsis"'                    : "unspecified"}, '
-             'locale: ${        _encoded[0] & 0x800 == 0x800 ? _locale                           : "unspecified"}'
+             'strutStyle: ${    _encoded[0] & 0x400 == 0x400 ? _strutStyle                       : "unspecified"}, '
+             'ellipsis: ${      _encoded[0] & 0x800 == 0x800 ? '"$_ellipsis"'                    : "unspecified"}, '
+             'locale: ${        _encoded[0] & 0x1000 == 0x1000 ? _locale                         : "unspecified"}'
            ')';
   }
 }
