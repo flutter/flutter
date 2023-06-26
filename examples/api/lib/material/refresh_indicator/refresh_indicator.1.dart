@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for [RefreshIndicator].
@@ -13,8 +14,9 @@ class RefreshIndicatorExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RefreshIndicatorExample(),
+    return MaterialApp(
+      scrollBehavior: const MaterialScrollBehavior().copyWith(dragDevices: PointerDeviceKind.values.toSet()),
+      home: const RefreshIndicatorExample(),
     );
   }
 }
@@ -40,7 +42,7 @@ class RefreshIndicatorExample extends StatelessWidget {
         // from the widget's children.
         //
         // By default this is set to `notification.depth == 0`, which ensures
-        // the only the scroll notifications from the first child are listened to.
+        // the only the scroll notifications from the first scroll view are listened to.
         //
         // Here setting `notification.depth == 1` triggers the refresh indicator
         // when overscrolling the nested scroll view.
