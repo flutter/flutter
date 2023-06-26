@@ -1,5 +1,5 @@
 ---
-name: My app has some non-speed performance issues.
+name: My app has some non-speed performance issues
 about: You are writing an application but have discovered that it uses too much memory, too much energy (e.g., CPU/GPU usage is high), or its app size is too large.
 title: ''
 labels: 'created via performance template'
