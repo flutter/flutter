@@ -91,7 +91,10 @@ void main() {
         ),
       );
 
-      // Overriding textScaleFactor should work for
+      // Overriding textScaleFactor should work for unmigrated widgets that are
+      // still using MediaQuery.textScaleFactorOf. Also if a unmigrated widget
+      // overrides MediaQuery.textScaleFactor, migrated widgets in the subtree
+      // should get the correct TextScaler.
       expect(outsideTextScaleFactor, 1.0);
       expect(outsideTextScaler.textScaleFactor, 1.0);
       expect(outsideTextScaler, TextScaler.noScaling);

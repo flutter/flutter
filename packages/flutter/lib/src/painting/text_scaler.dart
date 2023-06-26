@@ -86,6 +86,11 @@ final class _LinearTextScaler implements TextScaler {
 
   @override
   TextScaler clamp({ double minScaleFactor = 0, double maxScaleFactor = double.infinity }) {
+    assert(maxScaleFactor >= minScaleFactor);
+    assert(!maxScaleFactor.isNaN);
+    assert(minScaleFactor.isFinite);
+    assert(minScaleFactor >= 0);
+
     final double newScaleFactor = clampDouble(textScaleFactor, minScaleFactor, maxScaleFactor);
     return newScaleFactor == textScaleFactor ? this : _LinearTextScaler(newScaleFactor);
   }

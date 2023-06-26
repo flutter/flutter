@@ -27,10 +27,10 @@ void main() {
       expect(const TextScaler.linear(5.0).clamp(maxScaleFactor: 3.0), const TextScaler.linear(3.0));
       expect(const TextScaler.linear(5.0).clamp(maxScaleFactor: 3.0), const TextScaler.linear(3.0));
       expect(const TextScaler.linear(5.0).clamp(minScaleFactor: 3.0, maxScaleFactor: 3.0), const TextScaler.linear(3.0));
-      // Asserts when min > max
+      // Asserts when min > max.
       expect(
         () => TextScaler.noScaling.clamp(minScaleFactor: 5.0, maxScaleFactor: 4.0),
-        throwsAssertionError,
+        throwsA(isA<AssertionError>().having((AssertionError error) => error.toString(), 'message', contains('maxScaleFactor >= minScaleFactor'))),
       );
     });
   });
