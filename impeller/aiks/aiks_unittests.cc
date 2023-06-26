@@ -2085,8 +2085,9 @@ static Picture BlendModeTest(BlendMode blend_mode,
                              const std::shared_ptr<Image>& src_image,
                              const std::shared_ptr<Image>& dst_image) {
   Color destination_color = Color::CornflowerBlue().WithAlpha(0.75);
-  auto source_colors =
-      std::vector<Color>({Color::White(), Color::LimeGreen(), Color::Black()});
+  auto source_colors = std::vector<Color>({Color::White().WithAlpha(0.75),
+                                           Color::LimeGreen().WithAlpha(0.75),
+                                           Color::Black().WithAlpha(0.75)});
 
   Canvas canvas;
 
@@ -2111,7 +2112,7 @@ static Picture BlendModeTest(BlendMode blend_mode,
         // pass.
         canvas.SaveLayer({.blend_mode = blend_mode});
         {  //
-          canvas.DrawRect({50, 50, 100, 100}, {.color = color.WithAlpha(0.75)});
+          canvas.DrawRect({50, 50, 100, 100}, {.color = color});
         }
         canvas.Restore();
       }
@@ -2135,9 +2136,9 @@ static Picture BlendModeTest(BlendMode blend_mode,
   // canvas.DrawPaint({.color = destination_color});
   for (auto& color : source_colors) {
     // Simply write the CPU blended color to the pass.
-    canvas.DrawRect({50, 50, 100, 100}, {.color = destination_color.Blend(
-                                             color.WithAlpha(0.75), blend_mode),
-                                         .blend_mode = BlendMode::kSource});
+    canvas.DrawRect({50, 50, 100, 100},
+                    {.color = destination_color.Blend(color, blend_mode),
+                     .blend_mode = BlendMode::kSourceOver});
     canvas.Translate(Vector2(100, 0));
   }
   canvas.RestoreToCount(0);
