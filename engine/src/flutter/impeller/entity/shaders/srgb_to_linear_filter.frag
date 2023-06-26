@@ -11,28 +11,28 @@ precision mediump float;
 
 #include <impeller/types.glsl>
 
-uniform sampler2D input_texture;
+uniform f16sampler2D input_texture;
 
 uniform FragInfo {
-  float input_alpha;
+  float16_t input_alpha;
 }
 frag_info;
 
 in highp vec2 v_texture_coords;
-out vec4 frag_color;
+out f16vec4 frag_color;
 
 void main() {
-  vec4 input_color =
+  f16vec4 input_color =
       texture(input_texture, v_texture_coords) * frag_info.input_alpha;
 
-  vec4 color = IPUnpremultiply(input_color);
+  f16vec4 color = IPHalfUnpremultiply(input_color);
   for (int i = 0; i < 3; i++) {
-    if (color[i] <= 0.04045) {
-      color[i] = color[i] / 12.92;
+    if (color[i] <= 0.04045hf) {
+      color[i] = color[i] / 12.92hf;
     } else {
-      color[i] = pow((color[i] + 0.055) / 1.055, 2.4);
+      color[i] = pow((color[i] + 0.055hf) / 1.055hf, 2.4hf);
     }
   }
 
-  frag_color = IPPremultiply(color);
+  frag_color = IPHalfPremultiply(color);
 }
