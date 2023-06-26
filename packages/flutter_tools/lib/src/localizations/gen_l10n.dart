@@ -144,7 +144,14 @@ String generateDateFormattingLogic(Message message) {
     .map((Placeholder placeholder) {
       final String? placeholderFormat = placeholder.format;
       if (placeholderFormat == null) {
-        return '';
+        throw L10nException(
+          'The placeholder, ${placeholder.name}, has its "type" resource attribute set to '
+          'the "${placeholder.type}" type. To properly resolve for the right '
+          '${placeholder.type} format, the "format" attribute needs to be set '
+          'to determine which DateFormat to use. \n'
+          "Check the intl library's DateFormat class constructors for allowed "
+          'date formats.'
+        );
       }
       final bool? isCustomDateFormat = placeholder.isCustomDateFormat;
       if (!placeholder.hasValidDateFormat
@@ -1260,17 +1267,12 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
             assert(node.children[7].type == ST.identifier);
             final String identifierName = node.children[1].value!;
             final String formatType = node.children[7].value!;
-            final ST dateOrTime = node.children[3].children[0].type;
             final String tempVarName = getTempVariableName();
-            if (dateOrTime == ST.date) {
-              tempVariables.add(dateVariableTemplate
-                .replaceAll('@(varName)', tempVarName)
-                .replaceAll('@(formatType)', formatType)
-                .replaceAll('@(argument)', identifierName)
-              );
-            } else if (dateOrTime == ST.time) {
-              // handle later
-            }
+            tempVariables.add(dateVariableTemplate
+              .replaceAll('@(varName)', tempVarName)
+              .replaceAll('@(formatType)', formatType)
+              .replaceAll('@(argument)', identifierName)
+            );
             return '\$$tempVarName';
           // ignore: no_default_cases
           default:
