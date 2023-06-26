@@ -23,7 +23,7 @@ version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/89952
   - title: "Remove timeout"
-    date: 2023-03-30
+    date: 2023-06-26
     element:
       uris: [ 'integration_test.dart' ]
       method: 'runTest'
