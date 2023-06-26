@@ -3,10 +3,6 @@
 
 include: ../analysis_options.yaml
 
-analyzer:
-  exclude:
-    - "test_fixes/**"
-
 linter:
   rules:
     - public_member_api_docs # see https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#documentation-dartdocs-javadocs-etc
