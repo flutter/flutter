@@ -605,6 +605,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
     runIf:
       - dev/**
+      - examples/api/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -2379,6 +2380,26 @@ targets:
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: platform_views_scroll_perf__timeline_summary
 
+  - name: Linux_android platform_views_scroll_perf_impeller__timeline_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: platform_views_scroll_perf_impeller__timeline_summary
+
+  - name: Linux_samsung_s10 platform_views_scroll_perf_impeller__timeline_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "s10"]
+      task_name: platform_views_scroll_perf_impeller__timeline_summary
+
   - name: Linux_android platform_view__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2588,6 +2609,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
     runIf:
       - dev/**
+      - examples/api/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -2621,6 +2643,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      add_recipes_cq: "true"
       dependencies: >-
         [
           {"dependency": "gems", "version": "v3.3.14"}
@@ -2866,6 +2889,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     runIf:
       - dev/**
+      - examples/api/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -4212,6 +4236,7 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
     runIf:
       - dev/**
+      - examples/api/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**

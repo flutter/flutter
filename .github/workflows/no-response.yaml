@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/stale@1160a2240286f5da8ec72b1c0816ce2481aabf84
         with:
-          token: ${{ github.token }}
+          repo-token: ${{ github.token }}
           # Comment to post when closing an Issue for lack of response. Set to `false` to disable
           close-issue-message: >
             Without additional information, we are unfortunately not sure how to
@@ -36,6 +36,7 @@ jobs:
           # Number of days of inactivity before an issue is closed for lack of response.
           days-before-stale: -1
           days-before-close: 21
+          close-issue-label: "r: timeout"
           # Label requiring a response.
           stale-issue-label: "waiting for customer response"
           stale-pr-label: "needs-info"
@@ -43,3 +44,5 @@ jobs:
             Without additional information we're not able to resolve this PR.
             Feel free to add more info or respond to any questions above.
             Thanks for your contribution!
+          close-pr-label: "r: timeout"
+          operations-per-run: 200
