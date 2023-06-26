@@ -301,5 +301,23 @@ TEST(DisplayListRTree, OverlappingRects) {
   EXPECT_EQ(list.front(), SkRect::MakeLTRB(0, 0, 70, 70));
 }
 
+TEST(DisplayListRTree, Region) {
+  SkRect rect[9];
+  for (int i = 0; i < 9; i++) {
+    rect[i] = SkRect::MakeXYWH(i * 10, i * 10, 20, 20);
+  }
+  DlRTree rtree(rect, 9);
+  auto region = rtree.region();
+  auto rects = region.getRects(true);
+  std::vector<SkIRect> expected_rects{
+      SkIRect::MakeLTRB(0, 0, 20, 10),    SkIRect::MakeLTRB(0, 10, 30, 20),
+      SkIRect::MakeLTRB(10, 20, 40, 30),  SkIRect::MakeLTRB(20, 30, 50, 40),
+      SkIRect::MakeLTRB(30, 40, 60, 50),  SkIRect::MakeLTRB(40, 50, 70, 60),
+      SkIRect::MakeLTRB(50, 60, 80, 70),  SkIRect::MakeLTRB(60, 70, 90, 80),
+      SkIRect::MakeLTRB(70, 80, 100, 90), SkIRect::MakeLTRB(80, 90, 100, 100),
+  };
+  EXPECT_EQ(rects.size(), expected_rects.size());
+}
+
 }  // namespace testing
 }  // namespace flutter
