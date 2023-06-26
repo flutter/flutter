@@ -173,7 +173,7 @@ std::list<SkRect> DlRTree::searchAndConsolidateRects(const SkRect& query,
     bounds(index).roundOut(&current_record_rect);
     rects.push_back(current_record_rect);
   }
-  DlRegion region(std::move(rects));
+  DlRegion region(rects);
 
   auto non_overlapping_rects = region.getRects(deband);
   std::list<SkRect> final_results;
@@ -199,6 +199,18 @@ void DlRTree::search(const Node& parent,
       }
     }
   }
+}
+
+const DlRegion& DlRTree::region() const {
+  if (!region_) {
+    std::vector<SkIRect> rects;
+    rects.resize(leaf_count_);
+    for (int i = 0; i < leaf_count_; i++) {
+      nodes_[i].bounds.roundOut(&rects[i]);
+    }
+    region_.emplace(rects);
+  }
+  return *region_;
 }
 
 const SkRect& DlRTree::bounds() const {
