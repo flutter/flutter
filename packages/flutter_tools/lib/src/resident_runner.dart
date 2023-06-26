@@ -36,6 +36,7 @@ import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
+import 'ios/application_package.dart';
 import 'ios/devices.dart';
 import 'project.dart';
 import 'resident_devtools_handler.dart';
@@ -229,9 +230,8 @@ class FlutterDevice {
   FlutterVmService? vmService;
   DevFS? devFS;
   ApplicationPackage? package;
-  @visibleForTesting
   // ignore: cancel_subscriptions
-  StreamSubscription<String>? loggingSubscription;
+  StreamSubscription<String>? _loggingSubscription;
   bool? _isListeningForVmServiceUri;
 
   /// Whether the stream [vmServiceUris] is still open.
@@ -393,27 +393,32 @@ class FlutterDevice {
     return devFS!.create();
   }
 
-  Future<void> startEchoingDeviceLog() async {
-    if (loggingSubscription != null) {
+  Future<void> startEchoingDeviceLog(DebuggingOptions debuggingOptions) async {
+    if (_loggingSubscription != null) {
       return;
     }
-    final DeviceLogReader logReader = await device!.getLogReader(app: package);
-    final Stream<String> logStream = logReader.logLines;
-    // TODO(vashworth): Remove check for IOSDeviceLogReader after
-    // https://github.com/flutter/flutter/issues/121231 is resolved.
-    loggingSubscription = logStream.listen((String line) {
-      if (logReader is! IOSDeviceLogReader && !line.contains(globals.kVMServiceMessageRegExp)) {
+    final Stream<String> logStream;
+    if (device is IOSDevice) {
+      logStream = (device! as IOSDevice).getLogReader(
+        app: package as IOSApp?,
+        usingCISystem: debuggingOptions.usingCISystem,
+      ).logLines;
+    } else {
+      logStream = (await device!.getLogReader(app: package)).logLines;
+    }
+    _loggingSubscription = logStream.listen((String line) {
+      if (!line.contains(globals.kVMServiceMessageRegExp)) {
         globals.printStatus(line, wrap: false);
       }
     });
   }
 
   Future<void> stopEchoingDeviceLog() async {
-    if (loggingSubscription == null) {
+    if (_loggingSubscription == null) {
       return;
     }
-    await loggingSubscription!.cancel();
-    loggingSubscription = null;
+    await _loggingSubscription!.cancel();
+    _loggingSubscription = null;
   }
 
   Future<void> initLogReader() async {
@@ -456,7 +461,7 @@ class FlutterDevice {
       'multidex': hotRunner.multidexEnabled,
     };
 
-    await startEchoingDeviceLog();
+    await startEchoingDeviceLog(hotRunner.debuggingOptions);
 
     // Start the application.
     final Future<LaunchResult> futureResult = device!.startApp(
@@ -524,7 +529,7 @@ class FlutterDevice {
     platformArgs['trace-startup'] = coldRunner.traceStartup;
     platformArgs['multidex'] = coldRunner.multidexEnabled;
 
-    await startEchoingDeviceLog();
+    await startEchoingDeviceLog(coldRunner.debuggingOptions);
 
     final LaunchResult result = await device!.startApp(
       applicationPackage,

@@ -431,6 +431,9 @@ void main() {
     expect(material.surfaceTintColor, datePickerTheme.rangePickerSurfaceTintColor);
     expect(material.shape, datePickerTheme.rangePickerShape);
 
+    final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(appBar.backgroundColor, datePickerTheme.rangePickerHeaderBackgroundColor);
+
     final Text selectRange = tester.widget<Text>(find.text('Select range'));
     expect(selectRange.style?.color, datePickerTheme.rangePickerHeaderForegroundColor);
     expect(selectRange.style?.fontSize, datePickerTheme.rangePickerHeaderHelpStyle?.fontSize);

@@ -246,8 +246,8 @@ void main() {
     );
   });
 
-  testWidgets('NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
-    // Pre-M3 settings that were hand coded.
+  testWidgets('NavigationBar uses proper defaults when no parameters are given - M2', (WidgetTester tester) async {
+    // M2 settings that were hand coded.
     await tester.pumpWidget(
       _buildWidget(
         NavigationBar(
@@ -263,6 +263,7 @@ void main() {
           ],
           onDestinationSelected: (int i) {},
         ),
+        useMaterial3: false,
       ),
     );
 
@@ -272,13 +273,14 @@ void main() {
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
     expect(_getIndicatorDecoration(tester)?.color, const Color(0x3d2196f3));
     expect(_getIndicatorDecoration(tester)?.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)));
+  });
 
+  testWidgets('NavigationBar uses proper defaults when no parameters are given - M3', (WidgetTester tester) async {
     // M3 settings from the token database.
+    final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       _buildWidget(
-        Theme(
-          data: ThemeData.light().copyWith(useMaterial3: true),
-          child: NavigationBar(
+          NavigationBar(
             destinations: const <Widget>[
               NavigationDestination(
                 icon: Icon(Icons.ac_unit),
@@ -291,15 +293,15 @@ void main() {
             ],
             onDestinationSelected: (int i) {},
           ),
-        ),
+          useMaterial3: theme.useMaterial3
       ),
     );
 
-    expect(_getMaterial(tester).color, ThemeData().colorScheme.surface);
-    expect(_getMaterial(tester).surfaceTintColor, ThemeData().colorScheme.surfaceTint);
+    expect(_getMaterial(tester).color, theme.colorScheme.surface);
+    expect(_getMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
     expect(_getMaterial(tester).elevation, 3);
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
-    expect(_getIndicatorDecoration(tester)?.color, const Color(0xff2196f3));
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
     expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
   });
 
@@ -315,9 +317,9 @@ void main() {
             DefaultMaterialLocalizations.delegate,
             DefaultWidgetsLocalizations.delegate,
           ],
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Navigator(
+          child: MaterialApp(
+            theme: ThemeData(useMaterial3: false),
+            home: Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute<void>(
                   builder: (BuildContext context) {
@@ -915,8 +917,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
@@ -1268,9 +1271,9 @@ void main() {
   });
 }
 
-Widget _buildWidget(Widget child) {
+Widget _buildWidget(Widget child, { bool? useMaterial3 }) {
   return MaterialApp(
-    theme: ThemeData.light(),
+    theme: ThemeData(useMaterial3: useMaterial3),
     home: Scaffold(
       bottomNavigationBar: Center(
         child: child,

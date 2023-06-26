@@ -304,7 +304,10 @@ abstract class FlutterCommand extends Command<void> {
   /// Path to the Dart's package config file.
   ///
   /// This can be overridden by some of its subclasses.
-  String? get packagesPath => globalResults?['packages'] as String?;
+  String? get packagesPath => stringArg(FlutterGlobalOptions.kPackagesOption, global: true);
+
+  /// Whether flutter is being run from our CI.
+  bool get usingCISystem => boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
 
   /// The value of the `--filesystem-scheme` argument.
   ///
@@ -1187,7 +1190,7 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
-    final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
+    final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
     WebRendererMode webRenderer = WebRendererMode.auto;
@@ -1320,29 +1323,26 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
-  List<String> extractDartDefines({Map<String, Object>? defineConfigJsonMap}) {
+  List<String> extractDartDefines({required Map<String, Object?> defineConfigJsonMap}) {
     final List<String> dartDefines = <String>[];
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
       dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
     }
 
-    if (defineConfigJsonMap == null) {
-      return dartDefines;
-    }
-    defineConfigJsonMap.forEach((String key, Object value) {
+    defineConfigJsonMap.forEach((String key, Object? value) {
       dartDefines.add('$key=$value');
     });
 
     return dartDefines;
   }
 
-  Map<String, Object>? extractDartDefineConfigJsonMap() {
-    final Map<String, Object> dartDefineConfigJsonMap = <String, Object>{};
+  Map<String, Object?> extractDartDefineConfigJsonMap() {
+    final Map<String, Object?> dartDefineConfigJsonMap = <String, Object?>{};
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
       final List<String> configJsonPaths = stringsArg(
-          FlutterOptions.kDartDefineFromFileOption,
+        FlutterOptions.kDartDefineFromFileOption,
       );
 
       for (final String path in configJsonPaths) {
@@ -1356,8 +1356,8 @@ abstract class FlutterCommand extends Command<void> {
         try {
           // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
           (json.decode(configJsonRaw) as Map<String, dynamic>)
-              .forEach((String key, dynamic value) {
-            dartDefineConfigJsonMap[key] = value as Object;
+              .forEach((String key, Object? value) {
+            dartDefineConfigJsonMap[key] = value;
           });
         } on FormatException catch (err) {
           throwToolExit('Json config define file "--${FlutterOptions
@@ -1634,17 +1634,30 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   ///
   /// If no flag named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
-  bool boolArg(String name) => argResults![name] as bool;
+  bool boolArg(String name, {bool global = false}) {
+    if (global) {
+      return globalResults![name] as bool;
+    }
+    return argResults![name] as bool;
+  }
 
   /// Gets the parsed command-line option named [name] as a `String`.
   ///
   /// If no option named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
-  String? stringArg(String name) => argResults![name] as String?;
+  String? stringArg(String name, {bool global = false}) {
+    if (global) {
+      return globalResults![name] as String?;
+    }
+    return argResults![name] as String?;
+  }
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
-  List<String> stringsArg(String name) {
-    return argResults![name]! as List<String>? ?? <String>[];
+  List<String> stringsArg(String name, {bool global = false}) {
+    if (global) {
+      return globalResults![name] as List<String>;
+    }
+    return argResults![name] as List<String>;
   }
 }
 

@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/scene_importer.dart';
 import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -28,8 +27,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
@@ -44,17 +41,23 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_devices.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/testbed.dart';
 
+final vm_service.Event fakeUnpausedEvent = vm_service.Event(
+  kind: vm_service.EventKind.kResume,
+  timestamp: 0
+);
+
+final vm_service.Event fakePausedEvent = vm_service.Event(
+  kind: vm_service.EventKind.kPauseException,
+  timestamp: 0
+);
+
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kResume,
-    timestamp: 0
-  ),
+  pauseEvent: fakeUnpausedEvent,
   breakpoints: <vm_service.Breakpoint>[],
   extensionRPCs: <String>[],
   libraries: <vm_service.LibraryRef>[
@@ -76,10 +79,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
 
 final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kPauseException,
-    timestamp: 0
-  ),
+  pauseEvent: fakePausedEvent,
   breakpoints: <vm_service.Breakpoint>[
     vm_service.Breakpoint(
       breakpointNumber: 123,
@@ -541,11 +541,11 @@ void main() {
       listViews,
       listViews,
       FakeVmServiceRequest(
-        method: 'getIsolate',
+        method: 'getIsolatePauseEvent',
         args: <String, Object>{
           'isolateId': '1',
         },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
+        jsonResponse: fakeUnpausedEvent.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.reassemble',
@@ -608,11 +608,11 @@ void main() {
         },
       ),
       FakeVmServiceRequest(
-        method: 'getIsolate',
+        method: 'getIsolatePauseEvent',
         args: <String, Object>{
           'isolateId': '1',
         },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
+        jsonResponse: fakeUnpausedEvent.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.reassemble',
@@ -732,11 +732,11 @@ void main() {
         },
       ),
       FakeVmServiceRequest(
-        method: 'getIsolate',
+        method: 'getIsolatePauseEvent',
         args: <String, Object>{
           'isolateId': '1',
         },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
+        jsonResponse: fakeUnpausedEvent.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.reassemble',
@@ -795,11 +795,11 @@ void main() {
         },
       ),
       FakeVmServiceRequest(
-        method: 'getIsolate',
+        method: 'getIsolatePauseEvent',
         args: <String, Object>{
           'isolateId': '1',
         },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
+        jsonResponse: fakeUnpausedEvent.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.fastReassemble',
@@ -886,11 +886,11 @@ void main() {
         },
       ),
       FakeVmServiceRequest(
-        method: 'getIsolate',
+        method: 'getIsolatePauseEvent',
         args: <String, Object>{
           'isolateId': '1',
         },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
+        jsonResponse: fakeUnpausedEvent.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.fastReassemble',
@@ -2442,70 +2442,6 @@ flutter:
     expect(flutterDevice.devFS!.hasSetAssetDirectory, true);
     expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
-
-  group('startEchoingDeviceLog', () {
-    late FakeProcessManager processManager;
-    late Artifacts artifacts;
-    late Cache fakeCache;
-    late BufferLogger logger;
-
-    setUp(() {
-      processManager = FakeProcessManager.empty();
-      fakeCache = Cache.test(processManager: FakeProcessManager.any());
-      artifacts = Artifacts.test();
-      logger = BufferLogger.test();
-    });
-
-    testUsingContext('IOSDeviceLogReader does not print logs', () async {
-      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
-        iMobileDevice: IMobileDevice(
-          artifacts: artifacts,
-          processManager: processManager,
-          cache: fakeCache,
-          logger: logger,
-        ),
-        useSyslog: false,
-      );
-      device = FakeDevice(deviceLogReader: logReader);
-      final TestFlutterDevice flutterDevice = TestFlutterDevice(
-        device,
-      );
-
-      await flutterDevice.startEchoingDeviceLog();
-      final Future<List<String>> linesFromStream = logReader.logLines.toList();
-      logReader.linesController.add('event');
-      await logReader.linesController.close();
-      final List<String> lines = await linesFromStream;
-
-      expect(lines, contains('event'));
-      expect(logger.statusText, isEmpty);
-
-      await flutterDevice.stopEchoingDeviceLog();
-    }, overrides: <Type, Generator>{
-      Logger: () => logger,
-    });
-
-    testUsingContext('Non-IOSDeviceLogReader does print logs', () async {
-      final FakeDeviceLogReader logReader = FakeDeviceLogReader();
-      device = FakeDevice(deviceLogReader: logReader);
-      final TestFlutterDevice flutterDevice = TestFlutterDevice(
-        device,
-      );
-
-      await flutterDevice.startEchoingDeviceLog();
-      final Future<List<String>> linesFromStream = logReader.logLines.toList();
-      logReader.addLine('event');
-      await logReader.dispose();
-      final List<String> lines = await linesFromStream;
-
-      expect(lines, contains('event'));
-      expect(logger.statusText, contains('event'));
-
-      await flutterDevice.stopEchoingDeviceLog();
-    }, overrides: <Type, Generator>{
-      Logger: () => logger,
-    });
-  });
 }
 
 // This implements [dds.DartDevelopmentService], not the [DartDevelopmentService]
@@ -2744,16 +2680,13 @@ class FakeDevice extends Fake implements Device {
     this.supportsHotRestart = true,
     this.supportsScreenshot = true,
     this.supportsFlutterExit = true,
-    DeviceLogReader? deviceLogReader,
   }) : _isLocalEmulator = isLocalEmulator,
        _targetPlatform = targetPlatform,
-       _sdkNameAndVersion = sdkNameAndVersion,
-       _deviceLogReader = deviceLogReader;
+       _sdkNameAndVersion = sdkNameAndVersion;
 
   final bool _isLocalEmulator;
   final TargetPlatform _targetPlatform;
   final String _sdkNameAndVersion;
-  final DeviceLogReader? _deviceLogReader;
 
   bool disposed = false;
   bool appStopped = false;
@@ -2811,12 +2744,7 @@ class FakeDevice extends Fake implements Device {
   FutureOr<DeviceLogReader> getLogReader({
     ApplicationPackage? app,
     bool includePastLogs = false,
-  }) {
-    if (_deviceLogReader != null) {
-      return _deviceLogReader!;
-    }
-    return NoOpDeviceLogReader(name);
-  }
+  }) => NoOpDeviceLogReader(name);
 
   @override
   DevicePortForwarder portForwarder = const NoOpDevicePortForwarder();
