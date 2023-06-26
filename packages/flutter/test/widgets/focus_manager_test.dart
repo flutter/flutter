@@ -1229,7 +1229,7 @@ void main() {
           ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← MediaQuery ←\n'
           ' │   _MediaQueryFromView ← ViewHooksScope ← _ViewScope ←\n'
           ' │   RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
-          ' │   ViewHooksScope ← [root]\n'
+          ' │   [root]\n'
           ' │\n'
           ' └─rootScope: FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
           '   │ IN FOCUS PATH\n'

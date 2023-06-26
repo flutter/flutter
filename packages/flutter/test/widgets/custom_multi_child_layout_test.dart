@@ -375,7 +375,7 @@ void main() {
           '       CustomMultiChildLayout ← Center ← MediaQuery ←\n'
           '       _MediaQueryFromView ← ViewHooksScope ← _ViewScope ←\n'
           '       RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
-          '       ViewHooksScope ← ⋯\n'
+          '       [root]\n'
           '     parentData: offset=Offset(0.0, 0.0); id=null\n'
           '     constraints: MISSING\n'
           '     size: MISSING\n'
