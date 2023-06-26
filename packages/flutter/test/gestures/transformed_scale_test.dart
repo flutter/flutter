@@ -5,8 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
-  testWidgets('gets local coordinates', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('gets local coordinates', (WidgetTester tester) async {
     final List<ScaleStartDetails> startDetails = <ScaleStartDetails>[];
     final List<ScaleUpdateDetails> updateDetails = <ScaleUpdateDetails>[];
 

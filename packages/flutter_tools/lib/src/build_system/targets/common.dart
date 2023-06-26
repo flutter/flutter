@@ -77,11 +77,7 @@ class CopyFlutterBundle extends Target {
       buildMode: buildMode,
       shaderTarget: ShaderTarget.sksl,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       assetDepfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
@@ -210,6 +206,21 @@ class KernelSnapshot extends Target {
         forceLinkPlatform = false;
     }
 
+    final String? targetOS = switch (targetPlatform) {
+      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => 'fuchsia',
+      TargetPlatform.android ||
+      TargetPlatform.android_arm ||
+      TargetPlatform.android_arm64 ||
+      TargetPlatform.android_x64 ||
+      TargetPlatform.android_x86 =>
+        'android',
+      TargetPlatform.darwin => 'macos',
+      TargetPlatform.ios => 'ios',
+      TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
+      TargetPlatform.windows_x64 => 'windows',
+      TargetPlatform.tester || TargetPlatform.web_javascript => null,
+    };
+
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packagesFile,
       logger: environment.logger,
@@ -238,6 +249,7 @@ class KernelSnapshot extends Target {
       dartDefines: decodeDartDefines(environment.defines, kDartDefines),
       packageConfig: packageConfig,
       buildDir: environment.buildDir,
+      targetOS: targetOS,
       checkDartPluginRegistry: environment.generateDartPluginRegistry,
     );
     if (output == null || output.errorCount != 0) {
@@ -411,7 +423,7 @@ abstract final class Lipo {
     environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
 
     Iterable<String> inputPaths = darwinArchs.map(
-      (DarwinArch iosArch) => environment.fileSystem.path.join(inputDir, getNameForDarwinArch(iosArch), relativePath)
+      (DarwinArch iosArch) => environment.fileSystem.path.join(inputDir, iosArch.name, relativePath)
     );
     if (skipMissingInputs) {
       inputPaths = inputPaths.where(environment.fileSystem.isFileSync);

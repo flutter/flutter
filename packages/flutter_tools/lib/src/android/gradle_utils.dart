@@ -59,6 +59,22 @@ const String maxKnownAgpVersion = '8.1';
 final RegExp _androidGradlePluginRegExp =
     RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
+// Expected content format (with lines above and below).
+// Version can have 2 or 3 numbers.
+// 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
+// '^\s*' protects against commented out lines.
+final RegExp distributionUrlRegex =
+    RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiLine: true);
+
+// Modified version of the gradle distribution url match designed to only match
+// gradle.org urls so that we can guarantee any modifications to the url
+// still points to a hosted zip.
+final RegExp gradleOrgVersionMatch =
+RegExp(
+    r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(.*)\.zip',
+    multiLine: true
+);
+
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
 const String gradleVersionFlag = r'--version';
 
@@ -169,42 +185,49 @@ String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
   return getGradleVersionFor(androidPluginVersion ?? 'unknown');
 }
 
+/// Returns the gradle file from the top level directory.
+/// The returned file is not guaranteed to be present.
+File getGradleWrapperFile(Directory directory) {
+  return directory.childDirectory(gradleDirectoryName)
+      .childDirectory(gradleWrapperDirectoryName)
+      .childFile(gradleWrapperPropertiesFilename);
+}
+
+/// Parses the gradle wrapper distribution url to return a string containing
+/// the version number.
+///
+/// Expected input is of the form '...gradle-7.4.2-all.zip', and the output
+/// would be of the form '7.4.2'.
+String? parseGradleVersionFromDistributionUrl(String? distributionUrl) {
+  if (distributionUrl == null) {
+    return null;
+  }
+  final List<String> zipParts = distributionUrl.split('-');
+  if (zipParts.length < 2) {
+    return null;
+  }
+  return zipParts[1];
+}
+
 /// Returns either the gradle-wrapper.properties value from the passed in
 /// [directory] or if not present the version available in local path.
 ///
 /// If gradle version is not found null is returned.
-/// [directory] should be and android directory with a build.gradle file.
+/// [directory] should be an android directory with a build.gradle file.
 Future<String?> getGradleVersion(
     Directory directory, Logger logger, ProcessManager processManager) async {
-  final File propertiesFile = directory
-      .childDirectory(gradleDirectoryName)
-      .childDirectory(gradleWrapperDirectoryName)
-      .childFile(gradleWrapperPropertiesFilename);
+  final File propertiesFile = getGradleWrapperFile(directory);
 
   if (propertiesFile.existsSync()) {
     final String wrapperFileContent = propertiesFile.readAsStringSync();
 
-    // Expected content format (with lines above and below).
-    // Version can have 2 or 3 numbers.
-    // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
-    // '^\s*' protects against commented out lines.
-    final RegExp distributionUrlRegex =
-        RegExp(r'^\s*distributionUrl\s?=\s?.*\.zip', multiLine: true);
-
     final RegExpMatch? distributionUrl =
         distributionUrlRegex.firstMatch(wrapperFileContent);
     if (distributionUrl != null) {
-      // Expected content: 'gradle-7.4.2-all.zip'
-      final String? gradleZip = distributionUrl.group(0);
-      if (gradleZip != null) {
-        final List<String> zipParts = gradleZip.split('-');
-        if (zipParts.length > 2) {
-          final String gradleVersion = zipParts[1];
-          return gradleVersion;
-        } else {
-          // Did not find gradle zip url. Likely this is a bug in our parsing.
-          logger.printWarning(_formatParseWarning(wrapperFileContent));
-        }
+      final String? gradleVersion =
+          parseGradleVersionFromDistributionUrl(distributionUrl.group(0));
+      if (gradleVersion != null) {
+        return gradleVersion;
       } else {
         // Did not find gradle zip url. Likely this is a bug in our parsing.
         logger.printWarning(_formatParseWarning(wrapperFileContent));
@@ -248,7 +271,7 @@ OS:           Mac OS X 13.2.1 aarch64
     final RegExpMatch? version =
         gradleVersionRegex.firstMatch(gradleVersionVerbose);
     if (version == null) {
-      // Most likley a bug in our parse implementation/regex.
+      // Most likely a bug in our parse implementation/regex.
       logger.printWarning(_formatParseWarning(gradleVersionVerbose));
       return null;
     }
@@ -300,7 +323,7 @@ String _formatParseWarning(String content) {
 //
 // Source of truth found here:
 // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-// AGP has a minimim version of gradle required but no max starting at
+// AGP has a minimum version of gradle required but no max starting at
 // AGP version 2.3.0+.
 bool validateGradleAndAgp(Logger logger,
     {required String? gradleV, required String? agpV}) {

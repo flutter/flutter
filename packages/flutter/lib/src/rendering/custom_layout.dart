@@ -127,9 +127,11 @@ abstract class MultiChildLayoutDelegate {
 
   /// True if a non-null LayoutChild was provided for the specified id.
   ///
-  /// Call this from the [performLayout] or [getSize] methods to
-  /// determine which children are available, if the child list might
-  /// vary.
+  /// Call this from the [performLayout] method to determine which children
+  /// are available, if the child list might vary.
+  ///
+  /// This method cannot be called from [getSize] as the size is not allowed
+  /// to depend on the children.
   bool hasChild(Object childId) => _idToChild![childId] != null;
 
   /// Ask the child to update its layout within the limits specified by

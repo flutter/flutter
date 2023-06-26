@@ -995,6 +995,7 @@ void main() {
     const Color secondaryColor = Color(0xff008800);
     final Color glowSecondaryColor = secondaryColor.withOpacity(0.05);
     final ThemeData theme = ThemeData.from(
+      useMaterial3: false,
       colorScheme: const ColorScheme.light().copyWith(secondary: secondaryColor),
     );
     await tester.pumpWidget(
@@ -1264,6 +1265,7 @@ void main() {
 
   testWidgets('ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       scrollBehavior: const MaterialScrollBehavior(),
       home: ListView(
         children: const <Widget>[
@@ -1476,7 +1478,7 @@ void main() {
     );
     final Widget child = Container();
 
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -1522,7 +1524,7 @@ void main() {
     );
     final Widget child = Container();
 
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:

@@ -78,6 +78,7 @@ Future<Depfile> copyAssets(
     logger: environment.logger,
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
+    targetPlatform: targetPlatform,
   );
   final ShaderCompiler shaderCompiler = ShaderCompiler(
     processManager: environment.processManager,
@@ -323,11 +324,7 @@ class CopyAssets extends Target {
       targetPlatform: TargetPlatform.android,
       shaderTarget: ShaderTarget.sksl,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );

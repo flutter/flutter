@@ -64,7 +64,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    binding.onHandleEvent = events.add;
+    TestGestureFlutterBinding.instance.onHandleEvent = events.add;
 
     GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
@@ -175,7 +175,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -191,7 +191,7 @@ void main() {
         ui.PointerData(change: ui.PointerChange.add, device: 24),
       ],
     );
-    List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+    List<PointerEvent> events = PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
 
     expect(events.length, 1);
     expect(events[0], isA<PointerAddedEvent>());
@@ -207,7 +207,7 @@ void main() {
         ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaY: double.negativeInfinity, scrollDeltaX: 10),
       ],
     );
-    events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+    events = PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
     expect(events.length, 0);
 
     // Send packet with a valid scroll event.
@@ -217,12 +217,12 @@ void main() {
       ],
     );
     // Make sure PointerEventConverter can expand when device pixel ratio is valid.
-    events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+    events = PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
     expect(events.length, 1);
     expect(events[0], isA<PointerScrollEvent>());
 
     // Make sure PointerEventConverter returns none when device pixel ratio is invalid.
-    events = PointerEventConverter.expand(packet.data, 0).toList();
+    events = PointerEventConverter.expand(packet.data, (int viewId) => 0).toList();
     expect(events.length, 0);
   });
 
@@ -234,7 +234,7 @@ void main() {
         ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
 
     expect(events.length, 2);
     expect(events[0], isA<PointerAddedEvent>());
@@ -253,7 +253,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -280,7 +280,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -312,7 +312,7 @@ void main() {
         ],
       );
 
-      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());
@@ -341,7 +341,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -371,7 +371,7 @@ void main() {
         ],
       );
 
-      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, (int viewId) => devicePixelRatio).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());
@@ -428,5 +428,34 @@ void main() {
       binding.onHandlePointerEvent = null;
       FlutterError.onError = FlutterError.presentError;
     }
+  });
+
+  test('PointerEventConverter processes view IDs', () {
+    const int startID = 987654;
+    const List<ui.PointerData> data = <ui.PointerData>[
+      ui.PointerData(viewId: startID + 0, change: ui.PointerChange.cancel), // ignore: avoid_redundant_argument_values
+      ui.PointerData(viewId: startID + 1, change: ui.PointerChange.add),
+      ui.PointerData(viewId: startID + 2, change: ui.PointerChange.remove),
+      ui.PointerData(viewId: startID + 3, change: ui.PointerChange.hover),
+      ui.PointerData(viewId: startID + 4, change: ui.PointerChange.down),
+      ui.PointerData(viewId: startID + 5, change: ui.PointerChange.move),
+      ui.PointerData(viewId: startID + 6, change: ui.PointerChange.up),
+      ui.PointerData(viewId: startID + 7, change: ui.PointerChange.panZoomStart),
+      ui.PointerData(viewId: startID + 8, change: ui.PointerChange.panZoomUpdate),
+      ui.PointerData(viewId: startID + 9, change: ui.PointerChange.panZoomEnd),
+    ];
+
+    final List<int> viewIds = <int>[];
+    double devicePixelRatioGetter(int viewId) {
+      viewIds.add(viewId);
+      return viewId / 10.0;
+    }
+
+    final List<PointerEvent> events = PointerEventConverter.expand(data, devicePixelRatioGetter).toList();
+
+    final List<int> expectedViewIds = List<int>.generate(10, (int index) => startID + index);
+    expect(viewIds, expectedViewIds);
+    expect(events, hasLength(10));
+    expect(events.map((PointerEvent event) => event.viewId), expectedViewIds);
   });
 }

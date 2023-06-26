@@ -80,6 +80,7 @@ void main() {
 
   testWidgets('Passing no BottomSheetThemeData returns defaults', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Scaffold(
         body: BottomSheet(
           onClosing: () {},
@@ -256,14 +257,14 @@ void main() {
     const Color darkShadowColor = Colors.purple;
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData.light().copyWith(
+      theme: ThemeData.light(useMaterial3: false).copyWith(
         bottomSheetTheme: const BottomSheetThemeData(
           elevation: lightElevation,
           backgroundColor: lightBackgroundColor,
           shadowColor: lightShadowColor,
         ),
       ),
-      darkTheme: ThemeData.dark().copyWith(
+      darkTheme: ThemeData.dark(useMaterial3: false).copyWith(
         bottomSheetTheme: const BottomSheetThemeData(
           elevation: darkElevation,
           backgroundColor: darkBackgroundColor,
@@ -323,7 +324,7 @@ void main() {
 
 Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
   return MaterialApp(
-    theme: ThemeData(bottomSheetTheme: bottomSheetTheme),
+    theme: ThemeData(bottomSheetTheme: bottomSheetTheme, useMaterial3: false),
     home: Scaffold(
       body: Builder(
         builder: (BuildContext context) {

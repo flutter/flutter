@@ -13,6 +13,25 @@ import 'mock_canvas.dart';
 import 'recording_canvas.dart';
 import 'rendering_tester.dart';
 
+void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
+  int index = 0;
+  RenderBox? previousBox;
+  span.visitChildren((InlineSpan span) {
+    if (span is! WidgetSpan) {
+      return true;
+    }
+
+    final RenderBox box = inlineRenderBoxes[index];
+    box.parentData = TextParentData()
+                      ..span = span
+                      ..previousSibling = previousBox;
+    (previousBox?.parentData as TextParentData?)?.nextSibling = box;
+    index += 1;
+    previousBox = box;
+    return true;
+  });
+}
+
 class _FakeEditableTextState with TextSelectionDelegate {
   @override
   TextEditingValue textEditingValue = TextEditingValue.empty;
@@ -987,7 +1006,7 @@ void main() {
       editable.painter = null;
       editable.paintCount = 0;
 
-      final AbstractNode? parent = editable.parent;
+      final RenderObject? parent = editable.parent;
       if (parent is RenderConstrainedBox) {
         parent.child = null;
       }
@@ -1327,7 +1346,7 @@ void main() {
         selection: const TextSelection.collapsed(offset: 3),
         children: renderBoxes,
       );
-
+      _applyParentData(renderBoxes, editable.text!);
       layout(editable);
       editable.hasFocus = true;
       pumpFrame();
@@ -1370,6 +1389,7 @@ void main() {
         children: renderBoxes,
       );
 
+      _applyParentData(renderBoxes, editable.text!);
       layout(editable);
       editable.hasFocus = true;
       pumpFrame();
@@ -1415,6 +1435,7 @@ void main() {
       );
 
       // Force a line wrap
+      _applyParentData(renderBoxes, editable.text!);
       layout(editable, constraints: const BoxConstraints(maxWidth: 75));
       editable.hasFocus = true;
       pumpFrame();
@@ -1465,6 +1486,7 @@ void main() {
       );
 
       // Force a line wrap
+      _applyParentData(renderBoxes, editable.text!);
       layout(editable, constraints: const BoxConstraints(maxWidth: 75));
       editable.hasFocus = true;
       pumpFrame();
@@ -1520,6 +1542,7 @@ void main() {
         children: renderBoxes,
       );
 
+      _applyParentData(renderBoxes, editable.text!);
       // Force a line wrap
       layout(editable, constraints: const BoxConstraints(maxWidth: 75));
       editable.hasFocus = true;
@@ -1533,6 +1556,45 @@ void main() {
       expect(composingRect, const Rect.fromLTRB(0.0, 14.0, 14.0, 28.0));
       composingRect = editable.getRectForComposingRange(const TextRange(start: 7, end: 8));
       expect(composingRect, null);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
+
+    test('WidgetSpan render box is painted at correct offset when scrolled', () async {
+      final TextSelectionDelegate delegate = _FakeEditableTextState()
+        ..textEditingValue = const TextEditingValue(
+            text: 'test',
+            selection: TextSelection.collapsed(offset: 3),
+          );
+      final List<RenderBox> renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+      ];
+      final ViewportOffset viewportOffset = ViewportOffset.fixed(100.0);
+      final RenderEditable editable = RenderEditable(
+        backgroundCursorColor: Colors.grey,
+        selectionColor: Colors.black,
+        textDirection: TextDirection.ltr,
+        cursorColor: Colors.red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        maxLines: null,
+        text: TextSpan(
+          style: const TextStyle(height: 1.0, fontSize: 10.0),
+          children: <InlineSpan>[
+            const TextSpan(text: 'test'),
+            WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
+          ],
+        ),
+        selection: const TextSelection.collapsed(offset: 3),
+        children: renderBoxes,
+      );
+      _applyParentData(renderBoxes, editable.text!);
+      layout(editable);
+      editable.hasFocus = true;
+      pumpFrame();
+
+      final Rect composingRect = editable.getRectForComposingRange(const TextRange(start: 4, end: 5))!;
+      expect(composingRect, const Rect.fromLTRB(40.0, -100.0, 54.0, -86.0));
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
     test('can compute IntrinsicWidth for WidgetSpans', () {
@@ -1554,6 +1616,7 @@ void main() {
         selectionColor: Colors.black,
         textDirection: TextDirection.ltr,
         cursorColor: Colors.red,
+        cursorWidth: 0.0,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
         startHandleLayerLink: LayerLink(),
@@ -1571,12 +1634,12 @@ void main() {
         textScaleFactor: 2.0,
         children: renderBoxes,
       );
+      _applyParentData(renderBoxes, editable.text!);
       layout(editable, constraints: const BoxConstraints(maxWidth: screenWidth));
-      editable.hasFocus = true;
-      final double maxIntrinsicWidth = editable.computeMaxIntrinsicWidth(fixedHeight);
-      pumpFrame();
-
-      expect(maxIntrinsicWidth, 278);
+      expect(editable.computeMaxIntrinsicWidth(fixedHeight),
+        2.0 * 10.0 * 4 + 14.0 * 7 + 1.0,
+        reason: "intrinsic width = scale factor * width of 'test' + width of 'one two' + _caretMargin",
+      );
     });
 
     test('hits correct WidgetSpan when not scrolled', () {
@@ -1613,6 +1676,7 @@ void main() {
         ),
         children: renderBoxes,
       );
+      _applyParentData(renderBoxes, editable.text!);
       layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
       // Prepare for painting after layout.
       pumpFrame(phase: EnginePhase.compositingBits);
@@ -1758,6 +1822,52 @@ void main() {
       color: cursorColor.withOpacity(0.75),
       rrect: expectedRRect
     ));
+  });
+
+  test('getWordAtOffset with a negative position', () {
+    const String text = 'abc';
+    final _FakeEditableTextState delegate = _FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(height: 1.0, fontSize: 10.0),
+      ),
+    );
+
+    layout(editable, onErrors: expectNoFlutterErrors);
+
+    // Cause text metrics to be computed.
+    editable.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+
+    final TextSelection selection;
+    try {
+      selection = editable.getWordAtOffset(const TextPosition(
+        offset: -1,
+        affinity: TextAffinity.upstream,
+      ));
+    } catch (error) {
+      // In debug mode, negative offsets are caught by an assertion.
+      expect(error, isA<AssertionError>());
+      return;
+    }
+
+    // Web's Paragraph.getWordBoundary behaves differently for a negative
+    // position.
+    if (kIsWeb) {
+      expect(selection, const TextSelection.collapsed(offset: 0));
+    } else {
+      expect(selection, const TextSelection.collapsed(offset: text.length));
+    }
   });
 }
 

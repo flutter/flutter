@@ -930,7 +930,7 @@ class _AdaptiveAlertDialog extends AlertDialog {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    switch(theme.platform) {
+    switch (theme.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -1628,8 +1628,6 @@ class _DialogDefaultsM2 extends DialogTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _DialogDefaultsM3 extends DialogTheme {
   _DialogDefaultsM3(this.context)
     : super(
@@ -1672,8 +1670,6 @@ class _DialogDefaultsM3 extends DialogTheme {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _DialogFullscreenDefaultsM3 extends DialogTheme {
   const _DialogFullscreenDefaultsM3(this.context);

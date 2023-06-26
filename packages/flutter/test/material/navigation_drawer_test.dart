@@ -115,40 +115,37 @@ void main() {
   });
 
   testWidgets(
-      'NavigationDrawer uses proper defaults when no parameters are given',
+      'M3 NavigationDrawer uses proper defaults when no parameters are given',
       (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
-    // M3 settings from the token database.
+    final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       _buildWidget(
         scaffoldKey,
-        Theme(
-          data: ThemeData.light().copyWith(useMaterial3: true),
-          child: NavigationDrawer(
-            children: <Widget>[
-              Text('Headline', style: theme.textTheme.bodyLarge),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.ac_unit, color: theme.iconTheme.color),
-                label: Text('AC', style: theme.textTheme.bodySmall),
-              ),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-                label: Text('Alarm', style: theme.textTheme.bodySmall),
-              ),
-            ],
-            onDestinationSelected: (int i) {},
-          ),
+        NavigationDrawer(
+          children: <Widget>[
+            Text('Headline', style: theme.textTheme.bodyLarge),
+            NavigationDrawerDestination(
+              icon: Icon(Icons.ac_unit, color: theme.iconTheme.color),
+              label: Text('AC', style: theme.textTheme.bodySmall),
+            ),
+            NavigationDrawerDestination(
+              icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
+              label: Text('Alarm', style: theme.textTheme.bodySmall),
+            ),
+          ],
+          onDestinationSelected: (int i) {},
         ),
+        useMaterial3: theme.useMaterial3,
       ),
     );
     scaffoldKey.currentState!.openDrawer();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(_getMaterial(tester).color, ThemeData().colorScheme.surface);
-    expect(_getMaterial(tester).surfaceTintColor, ThemeData().colorScheme.surfaceTint);
+    expect(_getMaterial(tester).color, theme.colorScheme.surface);
+    expect(_getMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
     expect(_getMaterial(tester).elevation, 1);
-    expect(_getIndicatorDecoration(tester)?.color, const Color(0xff2196f3));
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
     expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
   });
 
@@ -160,7 +157,7 @@ void main() {
         scaffoldKey,
         NavigationDrawer(
           children: <Widget>[
-            for(int i = 0; i < 100; i++)
+            for (int i = 0; i < 100; i++)
               NavigationDrawerDestination(
                 icon: const Icon(Icons.ac_unit),
                 label: Text('Label$i'),
@@ -213,7 +210,7 @@ void main() {
             key: scaffoldKey,
             drawer: NavigationDrawer(
                   children: <Widget>[
-                    for(int i = 0; i < 10; i++)
+                    for (int i = 0; i < 10; i++)
                       NavigationDrawerDestination(
                         icon: const Icon(Icons.ac_unit),
                         label: Text('Label$i'),
@@ -360,11 +357,34 @@ void main() {
     // Test that InkWell for hover, focus and pressed use custom shape.
     expect(_getInkWell(tester)?.customBorder, shape);
   });
+
+  testWidgets('NavigationDrawer.tilePadding defaults to EdgeInsets.symmetric(horizontal: 12.0)', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    widgetSetup(tester, 3000, viewHeight: 3000);
+    final Widget widget = _buildWidget(
+      scaffoldKey,
+      NavigationDrawer(
+        children: const <Widget>[
+          NavigationDrawerDestination(
+            icon: Icon(Icons.ac_unit),
+            label: Text('AC'),
+          ),
+        ],
+        onDestinationSelected: (int i) {},
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    scaffoldKey.currentState?.openDrawer();
+    await tester.pump();
+    final NavigationDrawer drawer = tester.widget(find.byType(NavigationDrawer));
+    expect(drawer.tilePadding, const EdgeInsets.symmetric(horizontal: 12.0));
+  });
 }
 
-Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child) {
+Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, { bool? useMaterial3 }) {
   return MaterialApp(
-    theme: ThemeData.light(),
+    theme: ThemeData(useMaterial3: useMaterial3),
     home: Scaffold(
       key: scaffoldKey,
       drawer: child,

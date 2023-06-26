@@ -254,9 +254,17 @@ class GalleryTransitionBuildTest extends BuildTestTask {
 
   @override
   void copyArtifacts() {
-    if(applicationBinaryPath != null) {
+    if (applicationBinaryPath == null) {
+      return;
+    }
+    if (deviceOperatingSystem == DeviceOperatingSystem.android) {
       copy(
         file('${galleryDirectory.path}/build/app/outputs/flutter-apk/app-profile.apk'),
+        Directory(applicationBinaryPath!),
+      );
+    } else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      recursiveCopy(
+        Directory('${galleryDirectory.path}/build/ios/iphoneos'),
         Directory(applicationBinaryPath!),
       );
     }
@@ -264,15 +272,26 @@ class GalleryTransitionBuildTest extends BuildTestTask {
 
   @override
   List<String> getBuildArgs(DeviceOperatingSystem deviceOperatingSystem) {
-    return <String>[
-      'apk',
-      '--no-android-gradle-daemon',
-      '--profile',
-      '-t',
-      'test_driver/$testFile.dart',
-      '--target-platform',
-      'android-arm,android-arm64',
-    ];
+    if (deviceOperatingSystem == DeviceOperatingSystem.android) {
+      return <String>[
+        'apk',
+        '--no-android-gradle-daemon',
+        '--profile',
+        '-t',
+        'test_driver/$testFile.dart',
+        '--target-platform',
+        'android-arm,android-arm64',
+      ];
+    } else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      return <String>[
+        'ios',
+        '--codesign',
+        '--profile',
+        '-t',
+        'test_driver/$testFile.dart',
+      ];
+    }
+    throw Exception('$deviceOperatingSystem has no build configuration');
   }
 
   @override
@@ -286,7 +305,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
       if (needFullTimeline) '--trace-startup',
       '-t',
       'test_driver/$testFile.dart',
-      '--use-application-binary=${getApplicationBinaryPath()}',
+      if (applicationBinaryPath != null) '--use-application-binary=${getApplicationBinaryPath()}',
       '--driver',
       'test_driver/$testDriver.dart',
       '-d',
@@ -362,11 +381,13 @@ class GalleryTransitionBuildTest extends BuildTestTask {
 
   @override
   String getApplicationBinaryPath() {
-    if (applicationBinaryPath != null) {
-      return '${applicationBinaryPath!}/app-profile.apk';
+    if (deviceOperatingSystem == DeviceOperatingSystem.android) {
+      return '$applicationBinaryPath/app-profile.apk';
+    } else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      return '$applicationBinaryPath/Flutter Gallery.app';
+    } else {
+      return applicationBinaryPath!;
     }
-
-    return 'build/app/outputs/flutter-apk/app-profile.apk';
   }
 }
 
