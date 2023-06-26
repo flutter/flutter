@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+precision mediump float;
+
 #define ENABLE_ALPHA_MASK 0
 #define ENABLE_DECAL_SPECIALIZATION 0
 
