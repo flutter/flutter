@@ -123,18 +123,6 @@ Color ColorHSB::ToRGBA() const {
   return Color(0, 0, 0, alpha);
 }
 
-Color Color::operator+(const Color& c) const {
-  return Color(Vector4(*this) + Vector4(c));
-}
-
-Color Color::operator-(const Color& c) const {
-  return Color(Vector4(*this) - Vector4(c));
-}
-
-Color Color::operator*(Scalar value) const {
-  return Color(red * value, green * value, blue * value, alpha * value);
-}
-
 Color::Color(const ColorHSB& hsbColor) : Color(hsbColor.ToRGBA()) {}
 
 Color::Color(const Vector4& value)
@@ -218,47 +206,57 @@ Color Color::Blend(const Color& src, BlendMode blend_mode) const {
       return dst;
     case BlendMode::kSourceOver:
       // r = s + (1-sa)*d
-      return src + dst * (1 - src.alpha);
+      return (src.Premultiply() + dst.Premultiply() * (1 - src.alpha))
+          .Unpremultiply();
     case BlendMode::kDestinationOver:
       // r = d + (1-da)*s
-      return dst + src * (1 - dst.alpha);
+      return (dst.Premultiply() + src.Premultiply() * (1 - dst.alpha))
+          .Unpremultiply();
     case BlendMode::kSourceIn:
       // r = s * da
-      return src * dst.alpha;
+      return (src.Premultiply() * dst.alpha).Unpremultiply();
     case BlendMode::kDestinationIn:
       // r = d * sa
-      return dst * src.alpha;
+      return (dst.Premultiply() * src.alpha).Unpremultiply();
     case BlendMode::kSourceOut:
       // r = s * ( 1- da)
-      return src * (1 - dst.alpha);
+      return (src.Premultiply() * (1 - dst.alpha)).Unpremultiply();
     case BlendMode::kDestinationOut:
       // r = d * (1-sa)
-      return dst * (1 - src.alpha);
+      return (dst.Premultiply() * (1 - src.alpha)).Unpremultiply();
     case BlendMode::kSourceATop:
       // r = s*da + d*(1-sa)
-      return src * dst.alpha + dst * (1 - src.alpha);
+      return (src.Premultiply() * dst.alpha +
+              dst.Premultiply() * (1 - src.alpha))
+          .Unpremultiply();
     case BlendMode::kDestinationATop:
       // r = d*sa + s*(1-da)
-      return dst * src.alpha + src * (1 - dst.alpha);
+      return (dst.Premultiply() * src.alpha +
+              src.Premultiply() * (1 - dst.alpha))
+          .Unpremultiply();
     case BlendMode::kXor:
       // r = s*(1-da) + d*(1-sa)
-      return src * (1 - dst.alpha) + dst * (1 - src.alpha);
+      return (src.Premultiply() * (1 - dst.alpha) +
+              dst.Premultiply() * (1 - src.alpha))
+          .Unpremultiply();
     case BlendMode::kPlus:
       // r = min(s + d, 1)
-      return Min(src + dst, 1);
+      return (Min(src.Premultiply() + dst.Premultiply(), 1)).Unpremultiply();
     case BlendMode::kModulate:
       // r = s*d
-      return src * dst;
+      return (src.Premultiply() * dst.Premultiply()).Unpremultiply();
     case BlendMode::kScreen: {
       // r = s + d - s*d
-      return src + dst - src * dst;
+      auto s = src.Premultiply();
+      auto d = dst.Premultiply();
+      return (s + d - s * d).Unpremultiply();
     }
     case BlendMode::kOverlay:
       return apply_rgb_srcover_alpha([&](auto s, auto d) {
-        if (d * 2 < dst.alpha) {
+        if (d * 2 <= dst.alpha) {
           return 2 * s * d;
         }
-        return src.alpha * dst.alpha - 2 * (dst.alpha - s) * (src.alpha - d);
+        return src.alpha * dst.alpha - 2 * (dst.alpha - d) * (src.alpha - s);
       });
     case BlendMode::kDarken: {
       return apply_rgb_srcover_alpha([&](auto s, auto d) {
@@ -313,13 +311,13 @@ Color Color::Blend(const Color& src, BlendMode blend_mode) const {
                   std::sqrt(dst_rgb.z)),  //
           dst_rgb,                        //
           0.25);
-      Color blended =
-          FromRGB(ComponentChoose(
-                      dst_rgb - (1.0 - 2.0 * src) * dst * (1.0 - dst_rgb),  //
-                      dst_rgb + (2.0 * src_rgb - 1.0) * (d - dst_rgb),      //
-                      src_rgb,                                              //
-                      0.5),
-                  dst.alpha);
+      Color blended = FromRGB(
+          ComponentChoose(
+              dst_rgb - (1.0 - 2.0 * src_rgb) * dst_rgb * (1.0 - dst_rgb),  //
+              dst_rgb + (2.0 * src_rgb - 1.0) * (d - dst_rgb),              //
+              src_rgb,                                                      //
+              0.5),
+          dst.alpha);
       return blended + dst * (1 - blended.alpha);
     }
     case BlendMode::kDifference:
