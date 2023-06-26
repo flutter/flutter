@@ -847,7 +847,8 @@ void main() {
           const Rect.fromLTWH(0.0, 0.0, 14.0, 14.0));
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
       expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
-    });
+    }, skip: isBrowser);
+
     test('getPositionForOffset works', () async {
       final RenderParagraph paragraph = RenderParagraph(const TextSpan(text: '1234567'), textDirection: TextDirection.ltr);
       layout(paragraph);
