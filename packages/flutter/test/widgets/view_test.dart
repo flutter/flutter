@@ -4,8 +4,8 @@
 
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -139,10 +139,218 @@ void main() {
       ),
     );
   });
+
+  testWidgets('ViewHooks tests', (WidgetTester tester) async {
+    final PipelineOwner owner1 = PipelineOwner();
+    final PipelineOwner owner2 = PipelineOwner();
+    final RenderViewRepository repo1 = FakeRenderViewRepository();
+    final RenderViewRepository repo2 = FakeRenderViewRepository();
+
+    final ViewHooks hooks11 = ViewHooks(renderViewRepository: repo1, pipelineOwner: owner1);
+    final ViewHooks hooks12 = ViewHooks(renderViewRepository: repo1, pipelineOwner: owner2);
+    final ViewHooks hooks21 = ViewHooks(renderViewRepository: repo2, pipelineOwner: owner1);
+    final ViewHooks hooks22 = ViewHooks(renderViewRepository: repo2, pipelineOwner: owner2);
+    expect(hooks11, isNot(hooks12));
+    expect(hooks11, isNot(hooks21));
+    expect(hooks11, isNot(hooks22));
+    expect(ViewHooks(renderViewRepository: hooks11.renderViewRepository, pipelineOwner: hooks11.pipelineOwner), hooks11);
+    expect(hooks12.copyWith(pipelineOwner: hooks11.pipelineOwner), hooks11);
+    expect(hooks21.copyWith(renderViewRepository: hooks11.renderViewRepository), hooks11);
+  });
+
+  testWidgets('ViewCollection must have one view', (WidgetTester tester) async {
+    expect(() => ViewCollection(views: const <Widget>[]), throwsAssertionError);
+  });
+
+  testWidgets('ViewAnchor.child does not see surrounding view', (WidgetTester tester) async {
+    FlutterView? inside;
+    FlutterView? outside;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          outside = View.maybeOf(context);
+          return ViewAnchor(
+            view: Builder(
+              builder: (BuildContext context) {
+                inside = View.maybeOf(context);
+                return View(view: FakeView(tester.view), child: const SizedBox());
+              },
+            ),
+            child: const SizedBox(),
+          );
+        },
+      ),
+    );
+    expect(inside, isNull);
+    expect(outside, isNotNull);
+  });
+
+  testWidgets('visitChildren of ViewAnchor visits both children', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ViewAnchor(
+        view: View(
+          view: FakeView(tester.view),
+          child: const ColoredBox(color: Colors.green),
+        ),
+        child: const SizedBox(),
+      ),
+    );
+    final Element viewAnchorElement = tester.element(find.byElementPredicate((Element e) => e.runtimeType.toString() == '_MultiChildComponentElement'));
+    final List<Element> children = <Element>[];
+    viewAnchorElement.visitChildren((Element element) {
+      children.add(element);
+    });
+    expect(children, hasLength(2));
+
+    await tester.pumpWidget(
+      const ViewAnchor(
+        child: SizedBox(),
+      ),
+    );
+    children.clear();
+    viewAnchorElement.visitChildren((Element element) {
+      children.add(element);
+    });
+    expect(children, hasLength(1));
+  });
+
+  testWidgets('visitChildren of ViewCollection visits all children', (WidgetTester tester) async {
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          View(
+            view: tester.view,
+            child: const SizedBox(),
+          ),
+          View(
+            view: FakeView(tester.view),
+            child: const SizedBox(),
+          ),
+          View(
+            view: FakeView(tester.view, viewId: 423),
+            child: const SizedBox(),
+          ),
+        ],
+      ),
+    );
+    final Element viewAnchorElement = tester.element(find.byElementPredicate((Element e) => e.runtimeType.toString() == '_MultiChildComponentElement'));
+    final List<Element> children = <Element>[];
+    viewAnchorElement.visitChildren((Element element) {
+      children.add(element);
+    });
+    expect(children, hasLength(3));
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          View(
+            view: tester.view,
+            child: const SizedBox(),
+          ),
+        ],
+      ),
+    );
+    children.clear();
+    viewAnchorElement.visitChildren((Element element) {
+      children.add(element);
+    });
+    expect(children, hasLength(1));
+  });
+
+  group('renderObject getter', () {
+    testWidgets('ancestors of view see RenderView as renderObject', (WidgetTester tester) async {
+      late BuildContext builderContext;
+      await pumpWidgetWithoutViewWrapper(
+        tester: tester,
+        widget: Builder(
+          builder: (BuildContext context) {
+            builderContext = context;
+            return View(
+              view: tester.view,
+              child: const SizedBox(),
+            );
+          },
+        ),
+      );
+
+      final RenderObject? renderObject = builderContext.findRenderObject();
+      expect(renderObject, isNotNull);
+      expect(renderObject, isA<RenderView>());
+      expect(renderObject, tester.renderObject(find.byType(View)));
+      expect(tester.element(find.byType(Builder)).renderObject, renderObject);
+    });
+
+    testWidgets('ancestors of ViewCollection get null for renderObject', (WidgetTester tester) async {
+      late BuildContext builderContext;
+      await pumpWidgetWithoutViewWrapper(
+        tester: tester,
+        widget: Builder(
+          builder: (BuildContext context) {
+            builderContext = context;
+            return ViewCollection(
+              views: <Widget>[
+                View(
+                  view: tester.view,
+                  child: const SizedBox(),
+                ),
+                View(
+                  view: FakeView(tester.view),
+                  child: const SizedBox(),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+
+      final RenderObject? renderObject = builderContext.findRenderObject();
+      expect(renderObject, isNull);
+      expect(tester.element(find.byType(Builder)).renderObject, isNull);
+    });
+
+    testWidgets('ancestors of a ViewAnchor see the right RenderObject', (WidgetTester tester) async {
+      late BuildContext builderContext;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            builderContext = context;
+            return ViewAnchor(
+              view: View(
+                view: FakeView(tester.view),
+                child: const ColoredBox(color: Colors.green),
+              ),
+              child: const SizedBox(),
+            );
+          },
+        ),
+      );
+
+      final RenderObject? renderObject = builderContext.findRenderObject();
+      expect(renderObject, isNotNull);
+      expect(renderObject, isA<RenderConstrainedBox>());
+      expect(renderObject, tester.renderObject(find.byType(SizedBox)));
+      expect(tester.element(find.byType(Builder)).renderObject, renderObject);
+    });
+  });
 }
 
 Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
   tester.binding.attachRootWidget(widget);
   tester.binding.scheduleFrame();
   return tester.binding.pump();
+}
+
+class FakeRenderViewRepository extends Fake implements RenderViewRepository { }
+
+class FakeView extends TestFlutterView{
+  FakeView(FlutterView view, { this.viewId = 100 }) : super(
+    view: view,
+    platformDispatcher: view.platformDispatcher as TestPlatformDispatcher,
+    display: view.display as TestDisplay,
+  );
+
+  @override
+  final int viewId;
 }
