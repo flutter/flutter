@@ -56,7 +56,7 @@ platform_properties:
       os: Mac-12
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e222b"
+          "sdk_version": "14e300c"
         }
     dimensions:
       mac_model: "Macmini8,1|Macmini9,1"
@@ -515,7 +515,7 @@ targets:
         ]
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e222b"
+          "sdk_version": "14e300c"
         }
     drone_dimensions:
       - os=Mac-12
@@ -533,10 +533,10 @@ targets:
     properties:
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e222b",
+          "sdk_version": "14e300c",
           "runtime_versions":
             [
-              "ios-16-4_14e222b",
+              "ios-16-4_14e300c",
               "ios-16-2_14c18"
             ]
         }
@@ -609,7 +609,7 @@ targets:
         ]
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e222b"
+          "sdk_version": "14e300c"
         }
     drone_dimensions:
       - os=Mac-12
