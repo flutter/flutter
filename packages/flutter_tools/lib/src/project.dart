@@ -458,6 +458,9 @@ class AndroidProject extends FlutterProjectPlatform {
     return ephemeralDirectory;
   }
 
+  /// TODO: DOCUMENTATION
+  File get appGradle => hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
+
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
   /// a Flutter module with an editable host app.
@@ -509,8 +512,6 @@ class AndroidProject extends FlutterProjectPlatform {
     if (plugin.existsSync()) {
       return false;
     }
-    final File appGradle = hostAppGradleRoot.childFile(
-        fileSystem.path.join('app', 'build.gradle'));
     if (!appGradle.existsSync()) {
       return false;
     }
@@ -527,9 +528,8 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-    final bool imperativeMatch = firstMatchInFile(gradleFile, _imperativeKotlinPluginPattern) != null;
-    final bool declarativeMatch = firstMatchInFile(gradleFile, _declarativeKotlinPluginPattern) != null;
+    final bool imperativeMatch = firstMatchInFile(appGradle, _imperativeKotlinPluginPattern) != null;
+    final bool declarativeMatch = firstMatchInFile(appGradle, _declarativeKotlinPluginPattern) != null;
     return imperativeMatch || declarativeMatch;
   }
 
@@ -627,21 +627,18 @@ $javaGradleCompatUrl
   }
 
   String? get applicationId {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _applicationIdPattern)?.group(1);
+    return firstMatchInFile(appGradle, _applicationIdPattern)?.group(1);
   }
 
   /// Get the namespace for newer Android projects,
   /// which replaces the `package` attribute in the Manifest.xml.
   String? get namespace {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-
-    if (!gradleFile.existsSync()) {
+    if (!appGradle.existsSync()) {
       return null;
     }
 
     // firstMatchInFile() reads per line but `_androidNamespacePattern` matches a multiline pattern.
-    return _androidNamespacePattern.firstMatch(gradleFile.readAsStringSync())?.group(1);
+    return _androidNamespacePattern.firstMatch(appGradle.readAsStringSync())?.group(1);
   }
 
   String? get group {
