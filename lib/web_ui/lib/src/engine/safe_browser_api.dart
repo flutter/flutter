@@ -302,7 +302,7 @@ class VideoFrame implements DomCanvasImageSource {}
 extension VideoFrameExtension on VideoFrame {
   @JS('allocationSize')
   external JSNumber _allocationSize();
-  double allocationSize() => _allocationSize().toDartDouble;
+  double allocationSize() => _allocationSize().toDart;
 
   @JS('copyTo')
   external JsPromise _copyTo(JSAny destination);
@@ -314,23 +314,23 @@ extension VideoFrameExtension on VideoFrame {
 
   @JS('codedWidth')
   external JSNumber get _codedWidth;
-  double get codedWidth => _codedWidth.toDartDouble;
+  double get codedWidth => _codedWidth.toDart;
 
   @JS('codedHeight')
   external JSNumber get _codedHeight;
-  double get codedHeight => _codedHeight.toDartDouble;
+  double get codedHeight => _codedHeight.toDart;
 
   @JS('displayWidth')
   external JSNumber get _displayWidth;
-  double get displayWidth => _displayWidth.toDartDouble;
+  double get displayWidth => _displayWidth.toDart;
 
   @JS('displayHeight')
   external JSNumber get _displayHeight;
-  double get displayHeight => _displayHeight.toDartDouble;
+  double get displayHeight => _displayHeight.toDart;
 
   @JS('duration')
   external JSNumber? get _duration;
-  double? get duration => _duration?.toDartDouble;
+  double? get duration => _duration?.toDart;
 
   external VideoFrame clone();
   external JSVoid close();
@@ -364,11 +364,11 @@ class ImageTrack {}
 extension ImageTrackExtension on ImageTrack {
   @JS('repetitionCount')
   external JSNumber get _repetitionCount;
-  double get repetitionCount => _repetitionCount.toDartDouble;
+  double get repetitionCount => _repetitionCount.toDart;
 
   @JS('frameCount')
   external JSNumber get _frameCount;
-  double get frameCount => _frameCount.toDartDouble;
+  double get frameCount => _frameCount.toDart;
 }
 
 void scaleCanvas2D(Object context2d, num x, num y) {

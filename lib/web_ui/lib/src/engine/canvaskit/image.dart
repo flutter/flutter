@@ -205,10 +205,10 @@ Future<Uint8List> readChunked(HttpFetchPayload payload, int contentLength, WebOn
   int position = 0;
   int cumulativeBytesLoaded = 0;
   await payload.read<JSUint8Array1>((JSUint8Array1 chunk) {
-    cumulativeBytesLoaded += chunk.length.toDartInt;
+    cumulativeBytesLoaded += chunk.length.toDart.toInt();
     chunkCallback(cumulativeBytesLoaded, contentLength);
     result.set(chunk, position.toJS);
-    position += chunk.length.toDartInt;
+    position += chunk.length.toDart.toInt();
   });
   return result.toDart;
 }
