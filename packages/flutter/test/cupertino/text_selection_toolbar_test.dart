@@ -6,12 +6,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 // These constants are copied from cupertino/text_selection_toolbar.dart.
 const double _kArrowScreenPadding = 26.0;
 const double _kToolbarContentDistance = 8.0;
-const double _kToolbarHeight = 43.0;
+const double _kToolbarHeight = 45.0;
 
 // A custom text selection menu that just displays a single custom button.
 class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionControls {
@@ -60,9 +61,9 @@ class TestBox extends SizedBox {
   static const double itemWidth = 100.0;
 }
 
-const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xEBF7F7F7),
-  darkColor: Color(0xEB202020),
+const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrightness(
+  color: CupertinoColors.black,
+  darkColor: CupertinoColors.white,
 );
 
 void main() {
@@ -81,8 +82,65 @@ void main() {
   // visible part of the toolbar for use in measurements.
   Finder findToolbar() => findPrivate('_CupertinoTextSelectionToolbarContent');
 
-  Finder findOverflowNextButton() => find.text('▶');
-  Finder findOverflowBackButton() => find.text('◀');
+  // Check if the middle point of the chevron is pointing left or right.
+  //
+  // Offset.dx: a right or left margin (_kToolbarChevronSize / 4 => 2.5) to center the icon horizontally
+  // Offset.dy: always in the exact vertical center (_kToolbarChevronSize / 2 => 5)
+  PaintPattern overflowNextPaintPattern() => paints
+    ..line(p1: const Offset(2.5, 0), p2: const Offset(7.5, 5))
+    ..line(p1: const Offset(7.5, 5), p2: const Offset(2.5, 10));
+  PaintPattern overflowBackPaintPattern() => paints
+    ..line(p1: const Offset(7.5, 0), p2: const Offset(2.5, 5))
+    ..line(p1: const Offset(2.5, 5), p2: const Offset(7.5, 10));
+
+  Finder findOverflowNextButton() => find.byWidgetPredicate((Widget widget) =>
+    widget is CustomPaint &&
+    '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+  );
+  Finder findOverflowBackButton() => find.byWidgetPredicate((Widget widget) =>
+    widget is CustomPaint &&
+    '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
+  );
+
+  testWidgets('chevrons point to the correct side', (WidgetTester tester) async {
+    // Add enough TestBoxes to need 3 pages.
+    final List<Widget> children = List<Widget>.generate(15, (int i) => const TestBox());
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextSelectionToolbar(
+            anchorAbove: const Offset(50.0, 100.0),
+            anchorBelow: const Offset(50.0, 200.0),
+            children: children,
+          ),
+        ),
+      ),
+    );
+
+    expect(findOverflowBackButton(), findsNothing);
+    expect(findOverflowNextButton(), findsOneWidget);
+
+    expect(findOverflowNextButton(), overflowNextPaintPattern());
+
+    // Tap the overflow next button to show the next page of children.
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+    await tester.pumpAndSettle();
+
+    expect(findOverflowBackButton(), findsOneWidget);
+    expect(findOverflowNextButton(), findsOneWidget);
+
+    expect(findOverflowBackButton(), overflowBackPaintPattern());
+    expect(findOverflowNextButton(), overflowNextPaintPattern());
+
+    // Tap the overflow next button to show the last page of children.
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+    await tester.pumpAndSettle();
+
+    expect(findOverflowBackButton(), findsOneWidget);
+    expect(findOverflowNextButton(), findsNothing);
+
+    expect(findOverflowBackButton(), overflowBackPaintPattern());
+  }, skip: kIsWeb); // Path.combine is not implemented in the HTML backend https://github.com/flutter/flutter/issues/44572
 
   testWidgets('paginates children if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
@@ -121,22 +179,15 @@ void main() {
     expect(findOverflowBackButton(), findsNothing);
 
     // Tap the overflow next button to show the next page of children.
-    await tester.tap(findOverflowNextButton());
+    // The next button is hidden as there's no next page.
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(1));
-    expect(findOverflowNextButton(), findsOneWidget);
-    expect(findOverflowBackButton(), findsOneWidget);
-
-    // Tapping the overflow next button again does nothing because it is
-    // disabled and there are no more children to display.
-    await tester.tap(findOverflowNextButton());
-    await tester.pumpAndSettle();
-    expect(find.byType(TestBox), findsNWidgets(1));
-    expect(findOverflowNextButton(), findsOneWidget);
+    expect(findOverflowNextButton(), findsNothing);
     expect(findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow back button to go back to the first page.
-    await tester.tap(findOverflowBackButton());
+    await tester.tapAt(tester.getCenter(findOverflowBackButton()));
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(7));
     expect(findOverflowNextButton(), findsOneWidget);
@@ -157,7 +208,7 @@ void main() {
     expect(findOverflowBackButton(), findsNothing);
 
     // Tap the overflow next button to show the second page of children.
-    await tester.tap(findOverflowNextButton());
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
     await tester.pumpAndSettle();
     // With the back button, only six children fit on this page.
     expect(find.byType(TestBox), findsNWidgets(6));
@@ -165,21 +216,21 @@ void main() {
     expect(findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow next button again to show the third page of children.
-    await tester.tap(findOverflowNextButton());
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(1));
-    expect(findOverflowNextButton(), findsOneWidget);
+    expect(findOverflowNextButton(), findsNothing);
     expect(findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow back button to go back to the second page.
-    await tester.tap(findOverflowBackButton());
+    await tester.tapAt(tester.getCenter(findOverflowBackButton()));
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(6));
     expect(findOverflowNextButton(), findsOneWidget);
     expect(findOverflowBackButton(), findsOneWidget);
 
     // Tap the overflow back button to go back to the first page.
-    await tester.tap(findOverflowBackButton());
+    await tester.tapAt(tester.getCenter(findOverflowBackButton()));
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(7));
     expect(findOverflowNextButton(), findsOneWidget);
@@ -345,13 +396,12 @@ void main() {
         final Finder buttonFinder = find.byType(CupertinoButton);
         expect(buttonFinder, findsOneWidget);
 
-        final Finder decorationFinder = find.descendant(
+        final Finder textFinder = find.descendant(
           of: find.byType(CupertinoButton),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(Text)
         );
-        expect(decorationFinder, findsOneWidget);
-        final DecoratedBox decoratedBox = tester.widget(decorationFinder);
-        final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
+        expect(textFinder, findsOneWidget);
+        final Text text = tester.widget(textFinder);
 
         // Theme brightness is preferred, otherwise MediaQuery brightness is
         // used. If both are null, defaults to light.
@@ -363,10 +413,10 @@ void main() {
         }
 
         expect(
-          boxDecoration.color!.value,
+          text.style!.color!.value,
           effectiveBrightness == Brightness.dark
-              ? _kToolbarBackgroundColor.darkColor.value
-              : _kToolbarBackgroundColor.color.value,
+              ? _kToolbarTextColor.darkColor.value
+              : _kToolbarTextColor.color.value,
         );
       }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
     }
@@ -419,7 +469,7 @@ void main() {
       of: find.byType(CupertinoTextSelectionToolbar),
       matching: find.byType(DecoratedBox),
     );
-    expect(finder, findsNWidgets(2));
+    expect(finder, findsOneWidget);
     DecoratedBox decoratedBox = tester.widget(finder.first);
     BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
     List<BoxShadow>? shadows = boxDecoration.boxShadow;
