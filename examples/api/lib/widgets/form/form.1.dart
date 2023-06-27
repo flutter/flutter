@@ -8,9 +8,13 @@ import 'package:flutter/services.dart';
 /// This sample demonstrates showing a confirmation dialog when the user
 /// attempts to navigate away from a page with unsaved [Form] data.
 
-void main() => runApp(_MyApp());
+void main() => runApp(const FormApp());
 
-class _MyApp extends StatelessWidget {
+class FormApp extends StatelessWidget {
+  const FormApp({
+    super.key,
+  });
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
