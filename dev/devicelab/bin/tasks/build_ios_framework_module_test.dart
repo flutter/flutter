@@ -493,6 +493,59 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       isModule) {
     throw TaskResult.failure('Unexpected GeneratedPluginRegistrant.m.');
   }
+
+  section('Build frameworks without plugins');
+
+  const String noPluginsOutputDir = 'flutter-frameworks-no-plugins';
+
+  await inDirectory(projectDir, () async {
+    await flutter(
+      'build',
+      options: <String>[
+        'ios-framework',
+        '--cocoapods',
+        '--force', // Allow podspec creation on master.
+        '--output=$noPluginsOutputDir',
+        '--no-plugins',
+      ],
+    );
+  });
+
+  for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+    checkFileExists(path.join(
+      noPluginsOutputDir,
+      mode,
+      'Flutter.podspec',
+    ));
+    checkDirectoryExists(path.join(
+      noPluginsOutputDir,
+      mode,
+      'App.xcframework',
+    ));
+    checkDirectoryNotExists(path.join(
+      noPluginsOutputDir,
+      mode,
+      'FlutterPluginRegistrant.xcframework',
+    ));
+
+    checkDirectoryNotExists(path.join(
+      noPluginsOutputDir,
+      mode,
+      'package_info.xcframework',
+    ));
+
+    checkDirectoryNotExists(path.join(
+      noPluginsOutputDir,
+      mode,
+      'connectivity.xcframework',
+    ));
+
+    checkDirectoryNotExists(path.join(
+      noPluginsOutputDir,
+      mode,
+      'Reachability.xcframework',
+    ));
+  }
 }
 
 

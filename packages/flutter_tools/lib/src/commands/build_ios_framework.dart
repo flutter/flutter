@@ -68,8 +68,13 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       ..addFlag('cocoapods',
         help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
       )
+      ..addFlag('plugins',
+        defaultsTo: true,
+        help: 'Whether to produce frameworks for the plugins. '
+              'Consider using "--no-plugins" if frameworks are not required for plugins.',
+      )
       ..addFlag('static',
-        help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
+        help: 'Build plugins as static frameworks (if plugins option is enabled). Link on, but do not embed these frameworks in the existing Xcode project.',
       )
       ..addOption('output',
         abbr: 'o',
@@ -264,7 +269,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
       // Build and copy plugins.
       await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
-      if (hasPlugins(project)) {
+      if (boolArg('plugins') && hasPlugins(project)) {
         await _producePlugins(buildInfo.mode, xcodeBuildConfiguration, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
       }
 
@@ -286,7 +291,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
     globals.printStatus('Frameworks written to ${outputDirectory.path}.');
 
-    if (!project.isModule && hasPlugins(project)) {
+    if (!project.isModule && boolArg('plugins') && hasPlugins(project)) {
       // Apps do not generate a FlutterPluginRegistrant.framework. Users will need
       // to copy the GeneratedPluginRegistrant class to their project manually.
       final File pluginRegistrantHeader = project.ios.pluginRegistrantHeader;
