@@ -509,22 +509,25 @@ class ListTile extends StatelessWidget {
   ///
   /// If this property is null, then [ListTileThemeData.titleTextStyle] is used.
   /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.bodyLarge]
-  /// will be used. Otherwise, If ListTile style is [ListTileStyle.list],
-  /// [TextTheme.titleMedium] will be used and if ListTile style is [ListTileStyle.drawer],
-  /// [TextTheme.bodyLarge] will be used.
+  /// with [ColorScheme.onSurface] will be used. Otherwise, If ListTile style is
+  /// [ListTileStyle.list], [TextTheme.titleMedium] will be used and if ListTile style
+  /// is [ListTileStyle.drawer], [TextTheme.bodyLarge] will be used.
   final TextStyle? titleTextStyle;
 
   /// The text style for ListTile's [subtitle].
   ///
   /// If this property is null, then [ListTileThemeData.subtitleTextStyle] is used.
-  /// If that is also null, [TextTheme.bodyMedium] will be used.
+  /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.bodyMedium]
+  /// with [ColorScheme.onSurfaceVariant] will be used, otherwise [TextTheme.bodyMedium]
+  /// with [TextTheme.bodySmall] color will be used.
   final TextStyle? subtitleTextStyle;
 
   /// The text style for ListTile's [leading] and [trailing].
   ///
   /// If this property is null, then [ListTileThemeData.leadingAndTrailingTextStyle] is used.
   /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.labelSmall]
-  /// will be used, otherwise [TextTheme.bodyMedium] will be used.
+  /// with [ColorScheme.onSurfaceVariant] will be used, otherwise [TextTheme.bodyMedium]
+  /// will be used.
   final TextStyle? leadingAndTrailingTextStyle;
 
   /// Defines the font used for the [title].
@@ -798,7 +801,8 @@ class ListTile extends StatelessWidget {
       subtitleStyle = subtitleTextStyle
         ?? tileTheme.subtitleTextStyle
         ?? defaults.subtitleTextStyle!;
-      final Color? subtitleColor = effectiveColor ?? theme.textTheme.bodySmall!.color;
+      final Color? subtitleColor = effectiveColor
+        ?? (theme.useMaterial3 ? null : theme.textTheme.bodySmall!.color);
       subtitleStyle = subtitleStyle.copyWith(
         color: subtitleColor,
         fontSize: _isDenseLayout(theme, tileTheme) ? 12.0 : null,
@@ -1557,8 +1561,6 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _LisTileDefaultsM3 extends ListTileThemeData {
   _LisTileDefaultsM3(this.context)
     : super(
@@ -1577,13 +1579,13 @@ class _LisTileDefaultsM3 extends ListTileThemeData {
   Color? get tileColor =>  Colors.transparent;
 
   @override
-  TextStyle? get titleTextStyle => _textTheme.bodyLarge;
+  TextStyle? get titleTextStyle => _textTheme.bodyLarge!.copyWith(color: _colors.onSurface);
 
   @override
-  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium;
+  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium!.copyWith(color: _colors.onSurfaceVariant);
 
   @override
-  TextStyle? get leadingAndTrailingTextStyle => _textTheme.labelSmall;
+  TextStyle? get leadingAndTrailingTextStyle => _textTheme.labelSmall!.copyWith(color: _colors.onSurfaceVariant);
 
   @override
   Color? get selectedColor => _colors.primary;

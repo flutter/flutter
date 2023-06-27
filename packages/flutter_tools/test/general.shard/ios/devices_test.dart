@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -175,6 +176,121 @@ void main() {
         isConnected: true,
         devModeEnabled: true,
       ).majorSdkVersion, 0);
+    });
+
+    testWithoutContext('parses sdk version', () {
+      Version? sdkVersion = IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.arm64,
+        sdkVersion: '13.3.1',
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
+        devModeEnabled: true,
+      ).sdkVersion;
+      Version expectedVersion = Version(13, 3, 1, text: '13.3.1');
+      expect(sdkVersion, isNotNull);
+      expect(sdkVersion!.toString(), expectedVersion.toString());
+      expect(sdkVersion.compareTo(expectedVersion), 0);
+
+      sdkVersion = IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.arm64,
+        sdkVersion: '13.3.1 (20ADBC)',
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
+        devModeEnabled: true,
+      ).sdkVersion;
+      expectedVersion = Version(13, 3, 1, text: '13.3.1 (20ADBC)');
+      expect(sdkVersion, isNotNull);
+      expect(sdkVersion!.toString(), expectedVersion.toString());
+      expect(sdkVersion.compareTo(expectedVersion), 0);
+
+      sdkVersion = IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.arm64,
+        sdkVersion: '16.4.1(a) (20ADBC)',
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
+        devModeEnabled: true,
+      ).sdkVersion;
+      expectedVersion = Version(16, 4, 1, text: '16.4.1(a) (20ADBC)');
+      expect(sdkVersion, isNotNull);
+      expect(sdkVersion!.toString(), expectedVersion.toString());
+      expect(sdkVersion.compareTo(expectedVersion), 0);
+
+      sdkVersion = IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.arm64,
+        sdkVersion: '0',
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
+        devModeEnabled: true,
+      ).sdkVersion;
+      expectedVersion = Version(0, 0, 0, text: '0');
+      expect(sdkVersion, isNotNull);
+      expect(sdkVersion!.toString(), expectedVersion.toString());
+      expect(sdkVersion.compareTo(expectedVersion), 0);
+
+      sdkVersion = IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.arm64,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
+        devModeEnabled: true,
+      ).sdkVersion;
+      expect(sdkVersion, isNull);
+
+      sdkVersion = IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.arm64,
+        sdkVersion: 'bogus',
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
+        devModeEnabled: true,
+      ).sdkVersion;
+      expect(sdkVersion, isNull);
     });
 
     testWithoutContext('has build number in sdkNameAndVersion', () async {

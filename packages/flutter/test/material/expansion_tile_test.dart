@@ -167,6 +167,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
+          useMaterial3: false,
           colorScheme: ColorScheme.fromSwatch().copyWith(primary: foregroundColor),
           unselectedWidgetColor: unselectedWidgetColor,
           textTheme: const TextTheme(titleMedium: TextStyle(color: headerColor)),
