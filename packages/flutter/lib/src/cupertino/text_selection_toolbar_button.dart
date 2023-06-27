@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
 import 'debug.dart';
-import 'icons.dart';
 import 'localizations.dart';
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
@@ -16,8 +17,6 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   letterSpacing: -0.15,
   fontWeight: FontWeight.w400,
 );
-
-const double _kToolbarButtonIconSize = 18.0;
 
 // Colors extracted from https://developer.apple.com/design/resources/.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
@@ -117,11 +116,11 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     }
   }
 
-  Icon? _getButtonIcon(BuildContext context) {
+  Widget? _getButtonWidget(BuildContext context) {
     if (buttonItem == null) {
       return null;
     }
-    final IconData iconData;
+    final Widget result;
     switch (buttonItem!.type) {
       case ContextMenuButtonType.cut:
       case ContextMenuButtonType.copy:
@@ -131,16 +130,15 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
       case ContextMenuButtonType.custom:
         return null;
       case ContextMenuButtonType.liveTextInput:
-        // TODO(luckysmg): Use text.viewfinder from the latest SF Icons when it's available.
-        // https://github.com/flutter/flutter/issues/60034
-        iconData = CupertinoIcons.doc_text_viewfinder;
+        result = SizedBox(
+          width: 13,
+          height: 13,
+          child: CustomPaint(
+            painter: _LiveTextIconPainter(),
+          ),
+        );
     }
-
-    return Icon(
-      iconData,
-      size: _kToolbarButtonIconSize,
-      color: _kToolbarTextColor.resolveFrom(context),
-    );
+    return result;
   }
 
   @override
@@ -149,9 +147,9 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     if (this.child != null) {
       child = this.child!;
     } else {
-      // If this button has an icon, only show icon.
-      final Icon? icon = _getButtonIcon(context);
-      if (icon == null) {
+      // If this button has a specific widget, only show widget instead of a text label.
+      final Widget? widget = _getButtonWidget(context);
+      if (widget == null) {
         child = Text(
           text ?? getButtonLabel(context, buttonItem!),
           overflow: TextOverflow.ellipsis,
@@ -162,7 +160,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
           ),
         );
       } else {
-        child = icon;
+        child = widget;
       }
     }
 
@@ -175,5 +173,50 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
       pressedOpacity: onPressed == null ? 1.0 : 0.7,
       child: child,
     );
+  }
+}
+
+
+class _LiveTextIconPainter extends CustomPainter {
+
+  final Paint _painter = Paint()
+    ..color = CupertinoColors.black
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round
+    ..strokeWidth = 1
+    ..style = PaintingStyle.stroke;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+
+    canvas.save();
+    canvas.translate(size.width / 2, size.height / 2);
+
+    final Offset origin = Offset(-size.width / 2.0, -size.height / 2.0);
+    // Path for the one corner.
+    final Path path = Path()
+      ..moveTo(origin.dx, origin.dy + 3.5)
+      ..lineTo(origin.dx, origin.dy + 1)
+      ..arcToPoint(Offset(origin.dx + 1, origin.dy), radius: const Radius.circular(1))
+      ..lineTo(origin.dx + 3.5, origin.dy);
+
+    // Rotate to draw corner four times.
+    final Matrix4 rotationMatrix = Matrix4.identity()..rotateZ(pi / 2);
+    for (int i = 0; i < 4;i ++) {
+      canvas.drawPath(path, _painter);
+      canvas.transform(rotationMatrix.storage);
+    }
+
+    // Draw three lines.
+    canvas.drawLine(const Offset(-3, -3), const Offset(3, -3), _painter);
+    canvas.drawLine(const Offset(-3, 0), const Offset(3, 0), _painter);
+    canvas.drawLine(const Offset(-3, 3), const Offset(1, 3), _painter);
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }

@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import 'editable_text_utils.dart';
+import 'live_text_input_test_util.dart';
 import 'semantics_tester.dart';
 
 Matcher matchesMethodCall(String method, { dynamic args }) => _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
@@ -176,8 +177,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(key), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.doc_text_viewfinder), findsOneWidget);
-      await tester.tap(find.byIcon(CupertinoIcons.doc_text_viewfinder));
+      expect(findLiveTextButton(), findsOneWidget);
+      await tester.tap(findLiveTextButton());
       await tester.pump();
       expect(invokedLiveTextInputSuccessfully, isTrue);
     },

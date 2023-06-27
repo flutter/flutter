@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// A Mock class to control the return result of Live Text input functions.
@@ -32,3 +33,9 @@ class LiveTextInputTester {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   }
 }
+
+// A function to find the live text button. 
+Finder findLiveTextButton() => find.byWidgetPredicate((Widget widget) =>
+widget is CustomPaint &&
+    '${widget.painter?.runtimeType}' == '_LiveTextIconPainter',
+);

@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../foundation/leak_tracking.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
+import '../widgets/live_text_input_test_util.dart';
 
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
@@ -203,7 +204,7 @@ void main() {
         expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(5));
       case TargetPlatform.iOS:
         expect(find.text('Select All'), findsOneWidget);
-        expect(find.byIcon(CupertinoIcons.doc_text_viewfinder), findsOneWidget);
+        expect(findLiveTextButton(), findsOneWidget);
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
       case TargetPlatform.linux:
       case TargetPlatform.windows:

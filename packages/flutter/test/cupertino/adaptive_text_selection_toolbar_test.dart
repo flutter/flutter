@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
+import '../widgets/live_text_input_test_util.dart';
 
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
@@ -184,7 +185,7 @@ void main() {
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
-        expect(find.byIcon(CupertinoIcons.doc_text_viewfinder), findsOneWidget);
+        expect(findLiveTextButton(), findsOneWidget);
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:

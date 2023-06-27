@@ -21,7 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show OverflowWidgetTextEditingController;
-import '../widgets/live_text_input_tester.dart';
+import '../widgets/live_text_input_test_util.dart';
 import '../widgets/semantics_tester.dart';
 
 // On web, the context menu (aka toolbar) is provided by the browser.
@@ -239,14 +239,14 @@ void main() {
       await tester.longPress(textFinder);
       await tester.pumpAndSettle();
       expect(
-        find.byIcon(CupertinoIcons.doc_text_viewfinder),
+        findLiveTextButton(),
         kIsWeb ? findsNothing : findsOneWidget,
       );
 
       liveTextInputTester.mockLiveTextInputEnabled = false;
       await tester.longPress(textFinder);
       await tester.pumpAndSettle();
-      expect(find.byIcon(CupertinoIcons.doc_text_viewfinder), findsNothing);
+      expect(findLiveTextButton(), findsNothing);
     },
   );
 
