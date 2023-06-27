@@ -344,14 +344,9 @@ class SemanticsTester {
     return owner.debugSemanticsTree![id]!;
   }
 
-  /// Locates the role manager of the semantics object with the give [id].
-  RoleManager? getRoleManager(int id, Role role) {
-    return getSemanticsObject(id).debugRoleManagerFor(role);
-  }
-
   /// Locates the [TextField] role manager of the semantics object with the give [id].
   TextField getTextField(int id) {
-    return getRoleManager(id, Role.textField)! as TextField;
+    return getSemanticsObject(id).primaryRole! as TextField;
   }
 }
 

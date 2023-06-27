@@ -22,9 +22,9 @@ import 'package:ui/ui.dart' as ui;
 /// contents is less than the size of the viewport the browser snaps
 /// "scrollTop" back to zero. If there is more content than available in the
 /// viewport "scrollTop" may take positive values.
-class Scrollable extends RoleManager {
+class Scrollable extends PrimaryRoleManager {
   Scrollable(SemanticsObject semanticsObject)
-      : super(Role.scrollable, semanticsObject) {
+      : super.withBasics(PrimaryRole.scrollable, semanticsObject) {
     _scrollOverflowElement.style
       ..position = 'absolute'
       ..transformOrigin = '0 0 0'
@@ -95,6 +95,8 @@ class Scrollable extends RoleManager {
 
   @override
   void update() {
+    super.update();
+
     semanticsObject.owner.addOneTimePostUpdateCallback(() {
       _neutralizeDomScrollPosition();
       semanticsObject.recomputePositionAndSize();

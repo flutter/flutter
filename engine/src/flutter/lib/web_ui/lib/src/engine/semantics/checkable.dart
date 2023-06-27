@@ -49,23 +49,25 @@ _CheckableKind _checkableKindFromSemanticsFlag(
 /// See also [ui.SemanticsFlag.hasCheckedState], [ui.SemanticsFlag.isChecked],
 /// [ui.SemanticsFlag.isInMutuallyExclusiveGroup], [ui.SemanticsFlag.isToggled],
 /// [ui.SemanticsFlag.hasToggledState]
-class Checkable extends RoleManager {
+class Checkable extends PrimaryRoleManager {
   Checkable(SemanticsObject semanticsObject)
       : _kind = _checkableKindFromSemanticsFlag(semanticsObject),
-        super(Role.checkable, semanticsObject);
+        super.withBasics(PrimaryRole.checkable, semanticsObject);
 
   final _CheckableKind _kind;
 
   @override
   void update() {
+    super.update();
+
     if (semanticsObject.isFlagsDirty) {
       switch (_kind) {
         case _CheckableKind.checkbox:
-          semanticsObject.setAriaRole('checkbox', true);
+          semanticsObject.setAriaRole('checkbox');
         case _CheckableKind.radio:
-          semanticsObject.setAriaRole('radio', true);
+          semanticsObject.setAriaRole('radio');
         case _CheckableKind.toggle:
-          semanticsObject.setAriaRole('switch', true);
+          semanticsObject.setAriaRole('switch');
       }
 
       /// Adding disabled and aria-disabled attribute to notify the assistive
@@ -85,14 +87,6 @@ class Checkable extends RoleManager {
   @override
   void dispose() {
     super.dispose();
-    switch (_kind) {
-      case _CheckableKind.checkbox:
-        semanticsObject.setAriaRole('checkbox', false);
-      case _CheckableKind.radio:
-        semanticsObject.setAriaRole('radio', false);
-      case _CheckableKind.toggle:
-        semanticsObject.setAriaRole('switch', false);
-    }
     _removeDisabledAttribute();
   }
 
