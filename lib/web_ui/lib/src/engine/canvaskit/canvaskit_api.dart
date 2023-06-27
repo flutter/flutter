@@ -3501,39 +3501,6 @@ extension SkPartialImageInfoExtension on SkPartialImageInfo {
   double get width => _width.toDartDouble;
 }
 
-/// Helper interop methods for [patchCanvasKitModule].
-@JS()
-external set __flutterWebCachedModule(JSAny? module);
-set _flutterWebCachedModule(Object? module) =>
-    __flutterWebCachedModule = module?.toJSAnyShallow;
-
-@JS()
-external JSAny? get __flutterWebCachedModule;
-Object? get _flutterWebCachedModule =>
-    __flutterWebCachedModule?.toObjectShallow;
-
-@JS()
-external set __flutterWebCachedExports(JSAny? exports);
-set _flutterWebCachedExports(Object? exports) =>
-    __flutterWebCachedExports = exports?.toJSAnyShallow;
-
-@JS()
-external JSAny? get __flutterWebCachedExports;
-Object? get _flutterWebCachedExports =>
-    __flutterWebCachedExports?.toObjectShallow;
-
-@JS('Object')
-external JSAny get _objectConstructor;
-Object get objectConstructor => _objectConstructor.toObjectShallow;
-
-@JS('exports')
-external JSAny? get _exports;
-Object? get exports => _exports?.toObjectShallow;
-
-@JS('module')
-external JSAny? get _module;
-Object? get module => _module?.toObjectShallow;
-
 @JS('window.flutterCanvasKit.RuntimeEffect')
 @anonymous
 @staticInterop
@@ -3556,65 +3523,6 @@ extension SkSkRuntimeEffectExtension on SkRuntimeEffect {
       List<Object> uniforms, List<Object?> children) =>
           _makeShaderWithChildren(uniforms.toJSAnyShallow,
               children.toJSAnyShallow);
-}
-
-/// Monkey-patch the top-level `module` and `exports` objects so that
-/// CanvasKit doesn't attempt to register itself as an anonymous module.
-///
-/// The idea behind making these fake `exports` and `module` objects is
-/// that `canvaskit.js` contains the following lines of code:
-///
-///     if (typeof exports === 'object' && typeof module === 'object')
-///       module.exports = CanvasKitInit;
-///     else if (typeof define === 'function' && define['amd'])
-///       define([], function() { return CanvasKitInit; });
-///
-/// We need to avoid hitting the case where CanvasKit defines an anonymous
-/// module, since this breaks RequireJS, which DDC and some plugins use.
-/// Temporarily removing the `define` function won't work because RequireJS
-/// could load in between this code running and the CanvasKit code running.
-/// Also, we cannot monkey-patch the `define` function because it is
-/// non-configurable (it is a top-level 'var').
-// TODO(hterkelsen): Rather than this monkey-patch hack, we should
-// build CanvasKit ourselves. See:
-// https://github.com/flutter/flutter/issues/52588
-void patchCanvasKitModule(DomHTMLScriptElement canvasKitScript) {
-  // First check if `exports` and `module` are already defined. If so, then
-  // CommonJS is being used, and we shouldn't have any problems.
-  if (exports == null) {
-    final Object? exportsAccessor = js_util.jsify(<String, dynamic>{
-      'get': js_util.allowInterop(() {
-        if (domDocument.currentScript == canvasKitScript) {
-          return js_util.callConstructor(objectConstructor, <Object>[]);
-        } else {
-          return _flutterWebCachedExports;
-        }
-      }),
-      'set': js_util.allowInterop((dynamic value) {
-        _flutterWebCachedExports = value;
-      }),
-      'configurable': true,
-    });
-    js_util.callMethod(objectConstructor,
-        'defineProperty', <dynamic>[domWindow, 'exports', exportsAccessor]);
-  }
-  if (module == null) {
-    final Object? moduleAccessor = js_util.jsify(<String, dynamic>{
-      'get': js_util.allowInterop(() {
-        if (domDocument.currentScript == canvasKitScript) {
-          return js_util.callConstructor(objectConstructor, <Object>[]);
-        } else {
-          return _flutterWebCachedModule;
-        }
-      }),
-      'set': js_util.allowInterop((dynamic value) {
-        _flutterWebCachedModule = value;
-      }),
-      'configurable': true,
-    });
-    js_util.callMethod(objectConstructor,
-        'defineProperty', <dynamic>[domWindow, 'module', moduleAccessor]);
-  }
 }
 
 const String _kFullCanvasKitJsFileName = 'canvaskit.js';
@@ -3711,7 +3619,6 @@ Future<bool> _downloadCanvasKitJs(String url) {
   canvasKitScript.addEventListener('load', loadCallback);
   canvasKitScript.addEventListener('error', errorCallback);
 
-  patchCanvasKitModule(canvasKitScript);
   domDocument.head!.appendChild(canvasKitScript);
 
   return canvasKitLoadCompleter.future;
