@@ -228,6 +228,7 @@ class CupertinoTextField extends StatefulWidget {
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
+    this.clearButtonSemanticLabel = 'Text Field Clear',
     TextInputType? keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
@@ -354,6 +355,7 @@ class CupertinoTextField extends StatefulWidget {
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
+    this.clearButtonSemanticLabel = 'Text Field Clear',
     TextInputType? keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
@@ -507,6 +509,12 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// Defaults to [OverlayVisibilityMode.never].
   final OverlayVisibilityMode clearButtonMode;
+
+  /// The semantic label for the clear button used by screen readers.
+  ///
+  /// This will be used by screen reading software to identify the clear button
+  /// widget. Defaults to "Text Field Clear".
+  final String clearButtonSemanticLabel;
 
   /// {@macro flutter.widgets.editableText.keyboardType}
   final TextInputType keyboardType;
@@ -1116,15 +1124,19 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   Widget _buildClearButton() {
-    return GestureDetector(
-      key: _clearGlobalKey,
-      onTap: widget.enabled ? _onClearButtonTapped : null,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6.0),
-        child: Icon(
-          CupertinoIcons.clear_thick_circled,
-          size: 18.0,
-          color: CupertinoDynamicColor.resolve(_kClearButtonColor, context),
+    return Semantics(
+      button: true,
+      label: widget.clearButtonSemanticLabel ?? localizations.clearButtonLabel,
+      child: GestureDetector(
+        key: _clearGlobalKey,
+        onTap: widget.enabled ? _onClearButtonTapped : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+          child: Icon(
+            CupertinoIcons.clear_thick_circled,
+            size: 18.0,
+            color: CupertinoDynamicColor.resolve(_kClearButtonColor, context),
+          ),
         ),
       ),
     );
