@@ -11,18 +11,9 @@ import 'localizations.dart';
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
-  fontSize: 14.0,
+  fontSize: 15.0,
   letterSpacing: -0.15,
   fontWeight: FontWeight.w400,
-);
-
-// Colors extracted from https://developer.apple.com/design/resources/.
-// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
-const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
-  // This value was extracted from a screenshot of iOS 16.0.3, as light mode
-  // didn't appear in the Apple design resources assets linked above.
-  color: Color(0xEBF7F7F7),
-  darkColor: Color(0xEB202020),
 );
 
 const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrightness(
@@ -30,11 +21,16 @@ const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrigh
   darkColor: CupertinoColors.white,
 );
 
-// Eyeballed value.
-const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 16.0, horizontal: 18.0);
+const CupertinoDynamicColor _kToolbarPressedColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x10000000),
+  darkColor: Color(0x10FFFFFF),
+);
+
+// Value measured from screenshot of iOS 16.0.2
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 18.0, horizontal: 16.0);
 
 /// A button in the style of the iOS text selection toolbar buttons.
-class CupertinoTextSelectionToolbarButton extends StatelessWidget {
+class CupertinoTextSelectionToolbarButton extends StatefulWidget {
   /// Create an instance of [CupertinoTextSelectionToolbarButton].
   ///
   /// [child] cannot be null.
@@ -114,25 +110,64 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final Widget child = this.child ?? Text(
-       text ?? getButtonLabel(context, buttonItem!),
-       overflow: TextOverflow.ellipsis,
-       style: _kToolbarButtonFontStyle.copyWith(
-         color: onPressed != null
-             ? _kToolbarTextColor.resolveFrom(context)
-             : CupertinoColors.inactiveGray,
-       ),
-     );
+  State<StatefulWidget> createState() => _CupertinoTextSelectionToolbarButtonState();
+}
 
-    return CupertinoButton(
+class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelectionToolbarButton> {
+  bool isPressed = false;
+
+  void _onTapDown(TapDownDetails details) {
+    setState(() => isPressed = true);
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    setState(() => isPressed = false);
+    widget.onPressed?.call();
+  }
+
+  void _onTapCancel() {
+    setState(() => isPressed = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget child = CupertinoButton(
+      color: isPressed
+        ? _kToolbarPressedColor.resolveFrom(context)
+        : const Color(0x00000000),
       borderRadius: null,
-      color: _kToolbarBackgroundColor,
-      disabledColor: _kToolbarBackgroundColor,
-      onPressed: onPressed,
+      disabledColor: const Color(0x00000000),
+      // This CupertinoButton does not actually handle the onPressed callback,
+      // this is only here to correctly enable/disable the button (see
+      // GestureDetector comment below).
+      onPressed: widget.onPressed,
       padding: _kToolbarButtonPadding,
-      pressedOpacity: onPressed == null ? 1.0 : 0.7,
-      child: child,
+      // There's no foreground fade on iOS toolbar anymore, just the background
+      // is darkened.
+      pressedOpacity: 1.0,
+      child: widget.child ?? Text(
+         widget.text ?? CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
+         overflow: TextOverflow.ellipsis,
+         style: _kToolbarButtonFontStyle.copyWith(
+           color: widget.onPressed != null
+               ? _kToolbarTextColor.resolveFrom(context)
+               : CupertinoColors.inactiveGray,
+         ),
+       ),
     );
+
+    if (widget.onPressed != null) {
+      // As it's needed to change the CupertinoButton's backgroundColor when
+      // pressed, not its opacity, this GestureDetector handles both the
+      // onPressed callback and the backgroundColor change.
+      return GestureDetector(
+        onTapDown: _onTapDown,
+        onTapUp: _onTapUp,
+        onTapCancel: _onTapCancel,
+        child: child,
+      );
+    } else {
+      return child;
+    }
   }
 }

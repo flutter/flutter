@@ -1545,7 +1545,7 @@ void main() {
 
     Text text = tester.widget<Text>(find.text('Paste'));
     expect(text.style!.color!.value, CupertinoColors.black.value);
-    expect(text.style!.fontSize, 14);
+    expect(text.style!.fontSize, 15);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
 
@@ -1577,7 +1577,7 @@ void main() {
     text = tester.widget<Text>(find.text('Paste'));
     // The toolbar buttons' text are still the same style.
     expect(text.style!.color!.value, CupertinoColors.white.value);
-    expect(text.style!.fontSize, 14);
+    expect(text.style!.fontSize, 15);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
@@ -6537,7 +6537,7 @@ void main() {
             topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
             leftMatcher: moreOrLessEquals(8),
             rightMatcher: lessThanOrEqualTo(400 - 8),
-            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 45, epsilon: 0.01),
           ),
         ),
       );
@@ -6597,7 +6597,7 @@ void main() {
           pathMatcher: PathBoundsMatcher(
             topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
             rightMatcher: moreOrLessEquals(400.0 - 8),
-            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 45, epsilon: 0.01),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
         ),
@@ -6650,7 +6650,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
@@ -6719,7 +6719,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
@@ -6792,7 +6792,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),

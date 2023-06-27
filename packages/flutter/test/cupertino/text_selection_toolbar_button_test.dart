@@ -29,7 +29,7 @@ void main() {
     expect(pressed, true);
   });
 
-  testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
+  testWidgets('background darkens when pressed', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -41,35 +41,38 @@ void main() {
       ),
     );
 
-    // Original at full opacity.
-    FadeTransition opacity = tester.widget(find.descendant(
-      of: find.byType(CupertinoTextSelectionToolbarButton),
-      matching: find.byType(FadeTransition),
+    // Original with transparent background.
+    DecoratedBox decoratedBox = tester.widget(find.descendant(
+      of: find.byType(CupertinoButton),
+      matching: find.byType(DecoratedBox),
     ));
-    expect(opacity.opacity.value, 1.0);
+    BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
+    expect(boxDecoration.color, const Color(0x00000000));
 
     // Make a "down" gesture on the button.
     final Offset center = tester.getCenter(find.byType(CupertinoTextSelectionToolbarButton));
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    // Opacity reduces during the down gesture.
-    opacity = tester.widget(find.descendant(
+    // When pressed, the background darkens.
+    decoratedBox = tester.widget(find.descendant(
       of: find.byType(CupertinoTextSelectionToolbarButton),
-      matching: find.byType(FadeTransition),
+      matching: find.byType(DecoratedBox),
     ));
-    expect(opacity.opacity.value, 0.7);
+    boxDecoration = decoratedBox.decoration as BoxDecoration;
+    expect(boxDecoration.color!.value, const Color(0x10000000).value);
 
     // Release the down gesture.
     await gesture.up();
     await tester.pumpAndSettle();
 
-    // Opacity is back to normal.
-    opacity = tester.widget(find.descendant(
+    // Color is back to transparent.
+    decoratedBox = tester.widget(find.descendant(
       of: find.byType(CupertinoTextSelectionToolbarButton),
-      matching: find.byType(FadeTransition),
+      matching: find.byType(DecoratedBox),
     ));
-    expect(opacity.opacity.value, 1.0);
+    boxDecoration = decoratedBox.decoration as BoxDecoration;
+    expect(boxDecoration.color, const Color(0x00000000));
   });
 
   testWidgets('passing null to onPressed disables the button', (WidgetTester tester) async {
