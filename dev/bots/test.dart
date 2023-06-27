@@ -971,6 +971,7 @@ Future<void> _runFrameworkTests() async {
     await runTracingTests();
     await runFixTests('flutter');
     await runFixTests('flutter_test');
+    await runFixTests('integration_test');
     await runPrivateTests();
   }
 
