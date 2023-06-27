@@ -37,14 +37,12 @@ out vec4 frag_color;
 
 void main() {
   f16vec4 dst_sample = f16vec4(ReadDestination());
-  f16vec4 dst = IPHalfUnpremultiply(dst_sample);
-  f16vec4 src = IPHalfUnpremultiply(
-      f16vec4(texture(texture_sampler_src,  // sampler
-                      v_src_texture_coords  // texture coordinates
-                      )) *
-      frag_info.src_input_alpha);
+  f16vec4 dst = dst_sample;
+  f16vec4 src = f16vec4(texture(texture_sampler_src,  // sampler
+                                v_src_texture_coords  // texture coordinates
+                                )) *
+                frag_info.src_input_alpha;
 
-  f16vec4 blended = f16vec4(Blend(dst.rgb, src.rgb), 1.0hf) * dst.a;
-
-  frag_color = vec4(mix(dst_sample, blended, src.a));
+  f16vec4 blended = mix(src, f16vec4(Blend(dst.rgb, src.rgb), dst.a), dst.a);
+  frag_color = vec4(mix(dst, blended, src.a));
 }
