@@ -201,6 +201,13 @@ Future<TaskResult> runTask(
 
   final Completer<Uri> uri = Completer<Uri>();
 
+  final String? testOutputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'];
+  File? testResultFile;
+  print('testOutputDirectory $testOutputDirectory');
+  if (testOutputDirectory != null) {
+    testResultFile = File('$testOutputDirectory/$taskName.text');
+    assert(!testResultFile.existsSync());
+  }
   final StreamSubscription<String> stdoutSub = runner.stdout
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
@@ -213,6 +220,12 @@ Future<TaskResult> runTask(
     }
     if (!silent) {
       stdout.writeln('[${DateTime.now()}] [STDOUT] $line');
+      if (testResultFile != null ) {
+        if(!testResultFile.existsSync()) {
+          testResultFile.createSync();
+        }
+        testResultFile.writeAsStringSync('[${DateTime.now()}] [STDOUT] $line\n');
+      }
     }
   });
 
