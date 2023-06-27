@@ -41,9 +41,8 @@ Future<void> run(
   );
   parser.addOption(
     kMirrorRemote,
-    help: 'The mirror git remote that the feature branch will be pushed to. '
-        'Required',
-    mandatory: true,
+    help: 'The mirror git remote that the feature branch will be pushed to.',
+    defaultsTo: 'https://github.com/flutter-pub-roller-bot/flutter.git',
   );
   parser.addOption(
     kUpstreamRemote,
@@ -92,6 +91,7 @@ ${parser.usage}
     orgName: _parseOrgName(mirrorUrl),
     token: token,
     processManager: processManager,
+    githubUsername: 'flutter-pub-roller-bot',
   ).roll();
 }
 

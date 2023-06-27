@@ -63,6 +63,7 @@ void main() {
       orgName: orgName,
       processManager: processManager,
       stdio: stdio,
+      githubUsername: 'flutter-pub-roller-bot',
     );
   });
 
@@ -199,7 +200,7 @@ void main() {
         'pr',
         'list',
         '--author',
-        'fluttergithubbot',
+        'flutter-pub-roller-bot',
         '--repo',
         'flutter/flutter',
         '--state',
@@ -216,7 +217,7 @@ void main() {
     await controller.stream.drain();
     await rollFuture;
     expect(processManager, hasNoRemainingExpectations);
-    expect(stdio.stdout, contains('fluttergithubbot already has open tool PRs'));
+    expect(stdio.stdout, contains('flutter-pub-roller-bot already has open tool PRs'));
     expect(stdio.stdout, contains(r'[{number: 123}]'));
   });
 
@@ -239,7 +240,7 @@ void main() {
         'pr',
         'list',
         '--author',
-        'fluttergithubbot',
+        'flutter-pub-roller-bot',
         '--repo',
         'flutter/flutter',
         '--state',
@@ -335,7 +336,7 @@ void main() {
         'pr',
         'list',
         '--author',
-        'fluttergithubbot',
+        'flutter-pub-roller-bot',
         '--repo',
         'flutter/flutter',
         '--state',
@@ -427,7 +428,7 @@ void main() {
         'commit',
         '--message',
         'roll packages',
-        '--author="fluttergithubbot <fluttergithubbot@gmail.com>"',
+        '--author="flutter-pub-roller-bot <flutter-pub-roller-bot@google.com>"',
       ]),
       const FakeCommand(command: <String>[
         'git',
