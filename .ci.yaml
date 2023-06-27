@@ -80,7 +80,7 @@ platform_properties:
       device_type: none
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e222b"
+          "sdk_version": "14e300c"
         }
   mac_arm64:
     properties:
@@ -93,7 +93,7 @@ platform_properties:
       cpu: arm64
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e222b"
+          "sdk_version": "14e300c"
         }
   mac_benchmark:
     properties:
@@ -108,7 +108,7 @@ platform_properties:
         ["devicelab", "hostonly", "mac"]
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e222b"
+          "sdk_version": "14e300c"
         }
   mac_x64:
     properties:
@@ -121,7 +121,7 @@ platform_properties:
       cpu: x86
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e222b"
+          "sdk_version": "14e300c"
         }
   mac_build_test:
     properties:
@@ -135,7 +135,7 @@ platform_properties:
       cpu: x86
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e222b"
+          "sdk_version": "14e300c"
         }
   mac_android:
     properties:
@@ -170,7 +170,7 @@ platform_properties:
       device_os: iOS-16
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e222b"
+          "sdk_version": "14e300c"
         }
   mac_arm64_ios:
     properties:
@@ -184,7 +184,7 @@ platform_properties:
       device_os: iOS-16
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e222b"
+          "sdk_version": "14e300c"
         }
   windows:
     properties:
@@ -2379,6 +2379,26 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: platform_views_scroll_perf__timeline_summary
+
+  - name: Linux_android platform_views_scroll_perf_impeller__timeline_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: platform_views_scroll_perf_impeller__timeline_summary
+
+  - name: Linux_samsung_s10 platform_views_scroll_perf_impeller__timeline_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "s10"]
+      task_name: platform_views_scroll_perf_impeller__timeline_summary
 
   - name: Linux_android platform_view__start_up
     recipe: devicelab/devicelab_drone
