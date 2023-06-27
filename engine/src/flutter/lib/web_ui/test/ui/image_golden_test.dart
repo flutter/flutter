@@ -288,6 +288,7 @@ Future<void> testMain() async {
     final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
       Uri(path: '/test_images/mandrill_128.png')
     );
+    expect(codec.frameCount, 1);
 
     final ui.FrameInfo info = await codec.getNextFrame();
     return info.image;
@@ -300,6 +301,7 @@ Future<void> testMain() async {
       targetWidth: 150,
       targetHeight: 150,
     );
+    expect(codec.frameCount, 1);
 
     final ui.FrameInfo info = await codec.getNextFrame();
     return info.image;
