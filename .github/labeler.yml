@@ -10,8 +10,14 @@
   - '**/*semantics*'
 
 'a: animation':
+<<<<<<< Updated upstream
   - '**/animation/*'
   - '**/*animation*'
+=======
+  - any:
+    - '**/animation/*'
+    - '**/*animation*'
+>>>>>>> Stashed changes
 
 'a: internationalization':
   - packages/flutter_localizations/**/*
