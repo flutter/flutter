@@ -12,7 +12,8 @@ import 'platform_dispatcher.dart';
 import 'safe_browser_api.dart';
 
 @JS('window._flutter_internal_on_benchmark')
-external JSBoxedDartObject? get onBenchmark;
+external JSAny? get _onBenchmark;
+Object? get onBenchmark => _onBenchmark?.toObjectShallow;
 
 /// A function that computes a value of type [R].
 ///
@@ -105,7 +106,7 @@ class Profiler {
   void benchmark(String name, double value) {
     _checkBenchmarkMode();
 
-    final OnBenchmark? callback = onBenchmark?.toDart as OnBenchmark?;
+    final OnBenchmark? callback = onBenchmark as OnBenchmark?;
     if (callback != null) {
       callback(name, value);
     }

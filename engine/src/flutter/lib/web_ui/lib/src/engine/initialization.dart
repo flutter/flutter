@@ -169,8 +169,7 @@ Future<void> initializeEngineServices({
         // milliseconds as a double value, with sub-millisecond information
         // hidden in the fraction. So we first multiply it by 1000 to uncover
         // microsecond precision, and only then convert to `int`.
-        final int highResTimeMicroseconds =
-            (1000 * highResTime.toDartDouble).toInt();
+        final int highResTimeMicroseconds = (1000 * highResTime.toDart).toInt();
 
         // In Flutter terminology "building a frame" consists of "beginning
         // frame" and "drawing frame".
