@@ -473,7 +473,7 @@ class FakeAndroidProject extends Fake implements AndroidProject {
   bool get isModule => module ?? false;
 
   @override
-  File get appGradleFile => hostAppGradleRoot.childDirectory('app').childFile('build.gradle123');
+  File get appGradleFile => hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
