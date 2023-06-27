@@ -421,7 +421,7 @@ tasks.register("clean", Delete) {
             .createSync(recursive: true);
       });
 
-      testWithoutContext('files missing test', () { //TODO: OUTPUT TRACE TEXT, AND THEN EXPECT IT HERE
+      testWithoutContext('files missing test', () {
         final MinSdkVersionMigration migration = MinSdkVersionMigration(
             project,
             bufferLogger
