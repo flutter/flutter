@@ -75,9 +75,9 @@ class SkwasmSurface {
   }
 
   void _callbackHandler(JSNumber jsCallbackId, JSNumber jsPointer) {
-    final int callbackId = jsCallbackId.toDartDouble.toInt();
+    final int callbackId = jsCallbackId.toDart.toInt();
     final Completer<int> completer = _pendingCallbacks.remove(callbackId)!;
-    completer.complete(jsPointer.toDartDouble.toInt());
+    completer.complete(jsPointer.toDart.toInt());
   }
 
   void dispose() {
