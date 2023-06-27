@@ -1268,7 +1268,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
             final String identifierName = node.children[1].value!;
             final Node formatType = node.children[7];
             // Check that formatType is a valid intl.DateFormat.
-            if(!validDateFormats.contains(formatType.value)) {
+            if (!validDateFormats.contains(formatType.value)) {
               throw L10nParserException(
                 'Date format "${formatType.value!}" for placeholder '
                 '$identifierName does not have a corresponding DateFormat '
