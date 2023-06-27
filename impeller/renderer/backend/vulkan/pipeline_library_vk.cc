@@ -4,11 +4,14 @@
 
 #include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 
+#include <chrono>
 #include <optional>
+#include <sstream>
 
 #include "flutter/fml/container.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/promise.h"
+#include "impeller/base/timing.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -138,10 +141,105 @@ constexpr vk::FrontFace ToVKFrontFace(WindingOrder order) {
   FML_UNREACHABLE();
 }
 
+static vk::PipelineCreationFeedbackEXT EmptyFeedback() {
+  vk::PipelineCreationFeedbackEXT feedback;
+  // If the VK_PIPELINE_CREATION_FEEDBACK_VALID_BIT is not set in flags, an
+  // implementation must not set any other bits in flags, and the values of all
+  // other VkPipelineCreationFeedback data members are undefined.
+  feedback.flags = vk::PipelineCreationFeedbackFlagBits::eValid;
+  return feedback;
+}
+
+static void ReportPipelineCreationFeedbackToLog(
+    std::stringstream& stream,
+    const vk::PipelineCreationFeedbackEXT& feedback) {
+  const auto pipeline_cache_hit =
+      feedback.flags &
+      vk::PipelineCreationFeedbackFlagBits::eApplicationPipelineCacheHit;
+  const auto base_pipeline_accl =
+      feedback.flags &
+      vk::PipelineCreationFeedbackFlagBits::eBasePipelineAcceleration;
+  auto duration = std::chrono::duration_cast<MillisecondsF>(
+      std::chrono::nanoseconds{feedback.duration});
+  stream << "Time: " << duration.count() << "ms"
+         << " Cache Hit: " << static_cast<bool>(pipeline_cache_hit)
+         << " Base Accel: " << static_cast<bool>(base_pipeline_accl)
+         << " Thread: " << std::this_thread::get_id();
+}
+
+static void ReportPipelineCreationFeedbackToLog(
+    const PipelineDescriptor& desc,
+    const vk::PipelineCreationFeedbackCreateInfoEXT& feedback) {
+  std::stringstream stream;
+  stream << std::fixed << std::showpoint << std::setprecision(2);
+  stream << std::endl << ">>>>>>" << std::endl;
+  stream << "Pipeline '" << desc.GetLabel() << "' ";
+  ReportPipelineCreationFeedbackToLog(stream,
+                                      *feedback.pPipelineCreationFeedback);
+  if (feedback.pipelineStageCreationFeedbackCount != 0) {
+    stream << std::endl;
+  }
+  for (size_t i = 0, count = feedback.pipelineStageCreationFeedbackCount;
+       i < count; i++) {
+    stream << "\tStage " << i + 1 << ": ";
+    ReportPipelineCreationFeedbackToLog(
+        stream, feedback.pPipelineStageCreationFeedbacks[i]);
+    if (i != count - 1) {
+      stream << std::endl;
+    }
+  }
+  stream << std::endl << "<<<<<<" << std::endl;
+  FML_LOG(ERROR) << stream.str();
+}
+
+static void ReportPipelineCreationFeedbackToTrace(
+    const PipelineDescriptor& desc,
+    const vk::PipelineCreationFeedbackCreateInfoEXT& feedback) {
+  static int64_t gPipelineCacheHits = 0;
+  static int64_t gPipelineCacheMisses = 0;
+  static int64_t gPipelines = 0;
+  if (feedback.pPipelineCreationFeedback->flags &
+      vk::PipelineCreationFeedbackFlagBits::eApplicationPipelineCacheHit) {
+    gPipelineCacheHits++;
+  } else {
+    gPipelineCacheMisses++;
+  }
+  gPipelines++;
+  FML_TRACE_COUNTER("impeller",                                   //
+                    "PipelineCacheHits", gPipelineCacheHits,      //
+                    "PipelineCacheMisses", gPipelineCacheMisses,  //
+                    "TotalPipelines", gPipelines                  //
+  );
+}
+
+static void ReportPipelineCreationFeedback(
+    const PipelineDescriptor& desc,
+    const vk::PipelineCreationFeedbackCreateInfoEXT& feedback) {
+  constexpr bool kReportPipelineCreationFeedbackToLogs = false;
+  constexpr bool kReportPipelineCreationFeedbackToTraces = true;
+  if (kReportPipelineCreationFeedbackToLogs) {
+    ReportPipelineCreationFeedbackToLog(desc, feedback);
+  }
+  if (kReportPipelineCreationFeedbackToTraces) {
+    ReportPipelineCreationFeedbackToTrace(desc, feedback);
+  }
+}
+
 std::unique_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
     const PipelineDescriptor& desc) {
   TRACE_EVENT0("flutter", __FUNCTION__);
-  vk::GraphicsPipelineCreateInfo pipeline_info;
+  vk::StructureChain<vk::GraphicsPipelineCreateInfo,
+                     vk::PipelineCreationFeedbackCreateInfoEXT>
+      chain;
+
+  const auto& supports_pipeline_creation_feedback =
+      pso_cache_->GetCapabilities()->HasOptionalDeviceExtension(
+          OptionalDeviceExtensionVK::kEXTPipelineCreationFeedback);
+  if (!supports_pipeline_creation_feedback) {
+    chain.unlink<vk::PipelineCreationFeedbackCreateInfoEXT>();
+  }
+
+  auto& pipeline_info = chain.get<vk::GraphicsPipelineCreateInfo>();
 
   //----------------------------------------------------------------------------
   /// Dynamic States
@@ -320,12 +418,27 @@ std::unique_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
   pipeline_info.setPDepthStencilState(&depth_stencil_state);
 
   //----------------------------------------------------------------------------
+  /// Setup the optional pipeline creation feedback struct so we can understand
+  /// how Vulkan created the PSO.
+  ///
+  auto& feedback = chain.get<vk::PipelineCreationFeedbackCreateInfoEXT>();
+  auto pipeline_feedback = EmptyFeedback();
+  std::vector<vk::PipelineCreationFeedbackEXT> stage_feedbacks(
+      pipeline_info.stageCount, EmptyFeedback());
+  feedback.setPPipelineCreationFeedback(&pipeline_feedback);
+  feedback.setPipelineStageCreationFeedbacks(stage_feedbacks);
+
+  //----------------------------------------------------------------------------
   /// Finally, all done with the setup info. Create the pipeline itself.
   ///
   auto pipeline = pso_cache_->CreatePipeline(pipeline_info);
   if (!pipeline) {
     VALIDATION_LOG << "Could not create graphics pipeline: " << desc.GetLabel();
     return nullptr;
+  }
+
+  if (supports_pipeline_creation_feedback) {
+    ReportPipelineCreationFeedback(desc, feedback);
   }
 
   ContextVK::SetDebugName(strong_device->GetDevice(), *pipeline_layout.value,
