@@ -1497,7 +1497,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     assert(word.start >= range.start && word.end <= range.end);
     late TextPosition start;
     late TextPosition end;
-    if (position.offset >= word.end) {
+    if (position.offset > word.end) {
       start = end = TextPosition(offset: position.offset);
     } else {
       start = TextPosition(offset: word.start);
