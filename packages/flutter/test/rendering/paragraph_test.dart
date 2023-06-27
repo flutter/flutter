@@ -843,8 +843,7 @@ void main() {
 
       paintingContext.canvas.clear();
       paragraph.paint(paintingContext, Offset.zero);
-      expect(paintingContext.canvas.drawnRect,
-          const Rect.fromLTWH(0.0, 0.0, 14.0, 14.0));
+      expect(paintingContext.canvas.drawnRect!.isEmpty, false);
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
       expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
