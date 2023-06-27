@@ -360,5 +360,5 @@ Future<void> waitUntilExtensionInstalled(async_io.WebDriver driver, Duration? ti
   await waitFor<void>(() =>
       driver.execute(r'return typeof(window.$flutterDriver)', <String>[]),
       matcher: 'function',
-      timeout: timeout ?? const Duration(days: 365));
+      timeout: timeout ?? const Duration(minutes: 1));
 }
