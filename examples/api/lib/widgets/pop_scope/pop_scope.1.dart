@@ -21,10 +21,10 @@ enum _TabPage {
 
 typedef _TabPageCallback = void Function(List<_TabPage> pages);
 
-void main() => runApp(const MyApp());
+void main() => runApp(const PopScopeApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class PopScopeApp extends StatelessWidget {
+  const PopScopeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -61,17 +61,17 @@ class _BottomNavPageState extends State<_BottomNavPage> {
       case _Tab.home:
         return const BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: 'Home',
+          label: 'Go to Home',
         );
       case _Tab.one:
         return const BottomNavigationBarItem(
           icon: Icon(Icons.one_k),
-          label: 'One',
+          label: 'Go to One',
         );
       case _Tab.two:
         return const BottomNavigationBarItem(
           icon: Icon(Icons.two_k),
-          label: 'Two',
+          label: 'Go to Two',
         );
     }
   }
@@ -81,7 +81,7 @@ class _BottomNavPageState extends State<_BottomNavPage> {
       case _Tab.home:
         return _BottomNavTab(
           key: _tabHomeKey,
-          title: 'Home',
+          title: 'Home Tab',
           color: Colors.brown,
           pages: _tabHomePages,
           onChangedPages: (List<_TabPage> pages) {
@@ -93,7 +93,7 @@ class _BottomNavPageState extends State<_BottomNavPage> {
       case _Tab.one:
         return _BottomNavTab(
           key: _tabOneKey,
-          title: 'One',
+          title: 'Tab One',
           color: Colors.deepPurple,
           pages: _tabOnePages,
           onChangedPages: (List<_TabPage> pages) {
@@ -105,7 +105,7 @@ class _BottomNavPageState extends State<_BottomNavPage> {
       case _Tab.two:
         return _BottomNavTab(
           key: _tabTwoKey,
-          title: 'Two',
+          title: 'Tab Two',
           color: Colors.blueGrey,
           pages: _tabTwoPages,
           onChangedPages: (List<_TabPage> pages) {
