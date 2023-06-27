@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' hide LogRecord;
 
@@ -15,8 +14,6 @@ import 'devices.dart';
 import 'host_agent.dart';
 import 'task_result.dart';
 import 'utils.dart';
-
-final Logger logger = Logger.root;
 
 /// Run a list of tasks.
 ///
@@ -52,25 +49,18 @@ Future<void> runTasks(
     final Directory? dumpDirectory = hostAgent.dumpDirectory;
     final File? logFile;
     IOSink? logFileStream;
-    logger.info('logDirectory $dumpDirectory');
     if (dumpDirectory != null && dumpDirectory.existsSync()) {
       final Directory testDir = Directory('${dumpDirectory.absolute.path}/$taskName');
       if (!testDir.existsSync()) {
         testDir.createSync();
       }
-      logFile = File('${testDir.absolute.path}/log.text');
+      logFile = File('${testDir.absolute.path}/log.txt');
       if (!logFile.existsSync()) {
         logFile.createSync();
       }
       logFileStream = logFile.openWrite();
     }
-    final StreamSubscription<LogRecord> stdoutSub = logger.onRecord.listen((LogRecord record) {
-      if (!silent) {
-        stdout.writeln(record.message);
-        logFileStream?.add('${record.message}\n'.codeUnits);
-      }
-    });
-    // try {
+    runZoned<void>(() async {
       TaskResult result = TaskResult.success(null);
       int retry = 0;
       while (retry <= Cocoon.retryNumber) {
@@ -94,13 +84,13 @@ Future<void> runTasks(
         } else {
           section('Flaky status for "$taskName"');
           if (retry > 0) {
-            logger.info('Total ${retry+1} executions: $retry failures and 1 false positive.');
-            logger.info('flaky: true');
+            print('Total ${retry+1} executions: $retry failures and 1 false positive.');
+            print('flaky: true');
             // TODO(ianh): stop ignoring this failure. We should set exitCode=1, and quit
             // if exitOnFirstTestFailure is true.
           } else {
-            logger.info('Test passed on first attempt.');
-            logger.info('flaky: false');
+            print('Test passed on first attempt.');
+            print('flaky: false');
           }
           break;
         }
@@ -108,19 +98,26 @@ Future<void> runTasks(
 
       if (!result.succeeded) {
         section('Flaky status for "$taskName"');
-        logger.info('Consistently failed across all $retry executions.');
-        logger.info('flaky: false');
+        print('Consistently failed across all $retry executions.');
+        print('flaky: false');
         exitCode = 1;
         if (exitOnFirstTestFailure) {
-          await stdoutSub.cancel();
           await logFileStream?.close();
           return;
         }
       }
-    // } finally {
-      await stdoutSub.cancel();
       await logFileStream?.close();
-    // }
+    }, zoneSpecification: ZoneSpecification(
+      print: (
+        Zone self,
+        ZoneDelegate parent,
+        Zone zone,
+        String line,
+      ) {
+        stdout.writeln('$line');
+        logFileStream?.add('$line\n'.codeUnits);
+      },
+    ));
   }
 }
 
@@ -154,8 +151,8 @@ Future<TaskResult> rerunTask(
     useEmulator: useEmulator,
   );
 
-  logger.info('Task result:');
-  logger.info(const JsonEncoder.withIndent('  ').convert(result));
+  print('Task result:');
+  print(const JsonEncoder.withIndent('  ').convert(result));
   section('Finished task "$taskName"');
 
   if (resultsPath != null) {
@@ -192,23 +189,6 @@ Future<TaskResult> runTask(
   bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
-
-  // final Directory? dumpDirectory = hostAgent.dumpDirectory;
-  // final File? logFile;
-  // IOSink? logFileStream;
-  // logger.info('logDirectory $dumpDirectory');
-  // if (dumpDirectory != null && dumpDirectory.existsSync()) {
-  //   final Directory testDir = Directory('${dumpDirectory.absolute.path}/$taskName');
-  //   if (!testDir.existsSync()) {
-  //     testDir.createSync();
-  //   }
-  //   logFile = File('${testDir.absolute.path}/log.text');
-  //   if (!logFile.existsSync()) {
-  //     logFile.createSync();
-  //   }
-  //   logFileStream = logFile.openWrite();
-  // }
-
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync()) {
@@ -222,7 +202,7 @@ Future<TaskResult> runTask(
       ..add('--browser-name=android-chrome');
   }
 
-  logger.info('Starting process for task: [$taskName]');
+  print('Starting process for task: [$taskName]');
 
   final Process runner = await startProcess(
     dartBin,
@@ -261,10 +241,7 @@ Future<TaskResult> runTask(
       }
     }
     if (!silent) {
-      logger.info('[${DateTime.now()}] [STDOUT] $line');
-      // if (logFileStream != null) {
-      //   logFileStream.add('$formattedLine\n'.codeUnits);
-      // }
+      print('[${DateTime.now()}] [STDOUT] $line');
     }
   });
 
@@ -277,7 +254,7 @@ Future<TaskResult> runTask(
 
   try {
     final ConnectionResult result = await _connectToRunnerIsolate(await uri.future);
-    logger.info('[$taskName] Connected to VM server.');
+    print('[$taskName] Connected to VM server.');
     isolateParams = isolateParams == null ? <String, String>{} : Map<String, String>.of(isolateParams);
     isolateParams['runProcessCleanup'] = terminateStrayDartProcesses.toString();
     final Map<String, dynamic> taskResultJson = (await result.vmService.callServiceExtension(
@@ -287,19 +264,18 @@ Future<TaskResult> runTask(
     )).json!;
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     final int exitCode = await runner.exitCode;
-    logger.info('[$taskName] Process terminated with exit code $exitCode.');
+    print('[$taskName] Process terminated with exit code $exitCode.');
     return taskResult;
   } catch (error, stack) {
-    logger.info('[$taskName] Task runner system failed with exception!\n$error\n$stack');
+    print('[$taskName] Task runner system failed with exception!\n$error\n$stack');
     rethrow;
   } finally {
     if (!runnerFinished) {
-      logger.info('[$taskName] Terminating process...');
+      print('[$taskName] Terminating process...');
       runner.kill(ProcessSignal.sigkill);
     }
     await stdoutSub.cancel();
     await stderrSub.cancel();
-    // await logFileStream?.close();
   }
 }
 
@@ -332,7 +308,7 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
       return ConnectionResult(client, isolate);
     } catch (error) {
       if (stopwatch.elapsed > const Duration(seconds: 10)) {
-        logger.info('VM service still not ready after ${stopwatch.elapsed}: $error\nContinuing to retry...');
+        print('VM service still not ready after ${stopwatch.elapsed}: $error\nContinuing to retry...');
       }
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
