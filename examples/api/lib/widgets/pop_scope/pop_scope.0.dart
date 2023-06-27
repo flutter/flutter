@@ -8,10 +8,10 @@ import 'package:flutter/material.dart';
 /// when there are nested [Navigator] widgets by delegating to the current
 /// [Navigator].
 
-void main() => runApp(const MyApp());
+void main() => runApp(const PopScopeApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class PopScopeApp extends StatelessWidget {
+  const PopScopeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
