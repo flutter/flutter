@@ -1810,11 +1810,12 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           setupLocalizations(<String, String>{
             'en': '''
 {
-  "datetime": "{today, date, ::yMMMd}"
+  "datetime": "{today, date, ::yMMMMMd}"
 }'''
           });
+          assert(false);
         } on L10nException {
-          expect(logger.errorText, contains('The provided value "yMMMd" is not a valid date time format.'));
+          expect(logger.errorText, contains('Date format "yMMMMMd" for placeholder today does not have a corresponding DateFormat constructor'));
         }
       });
     });
