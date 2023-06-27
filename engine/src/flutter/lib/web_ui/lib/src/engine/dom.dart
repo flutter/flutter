@@ -60,6 +60,10 @@ extension JSAnyToObjectExtension on JSAny {
   Object get toObjectDeep => js_util.dartify(this)!;
 }
 
+@JS('Object')
+external JSAny get _objectConstructor;
+Object get objectConstructor => _objectConstructor.toObjectShallow;
+
 @JS()
 @staticInterop
 class DomWindow extends DomEventTarget {}
