@@ -41,7 +41,6 @@ class EmbedderSurfaceMetalImpeller final : public EmbedderSurface,
   MetalDispatchTable metal_dispatch_table_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
   std::shared_ptr<impeller::Context> context_;
-  std::shared_ptr<fml::ConcurrentMessageLoop> concurrent_loop_;
 
   // |EmbedderSurface|
   bool IsValid() const override;

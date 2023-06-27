@@ -413,7 +413,6 @@ TEST_F(ShellTest,
                   std::make_unique<VsyncWaiterFallback>(task_runners));
             },
             ShellTestPlatformView::BackendType::kDefaultBackend, nullptr,
-            shell.GetConcurrentWorkerTaskRunner(),
             shell.GetIsGpuDisabledSyncSwitch());
       },
       [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });

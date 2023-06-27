@@ -29,6 +29,7 @@ ConcurrentMessageLoop::ConcurrentMessageLoop(size_t worker_count)
 ConcurrentMessageLoop::~ConcurrentMessageLoop() {
   Terminate();
   for (auto& worker : workers_) {
+    FML_DCHECK(worker.joinable());
     worker.join();
   }
 }
