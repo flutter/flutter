@@ -14,9 +14,7 @@ namespace flutter {
 
 class AndroidContextVulkanImpeller : public AndroidContext {
  public:
-  AndroidContextVulkanImpeller(
-      bool enable_validation,
-      std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner);
+  AndroidContextVulkanImpeller(bool enable_validation);
 
   ~AndroidContextVulkanImpeller();
 

@@ -53,8 +53,6 @@ class IOSContext {
   /// @param[in]  msaa_samples
   ///                       The number of MSAA samples to use. Only supplied to
   ///                       Skia, must be either 0, 1, 2, 4, or 8.
-  /// @param[in]  task_runner
-  ///                       The engine concurrent task runner.
   ///
   /// @return     A valid context on success. `nullptr` on failure.
   ///
@@ -62,7 +60,6 @@ class IOSContext {
       IOSRenderingAPI api,
       IOSRenderingBackend backend,
       MsaaSampleCount msaa_samples,
-      std::shared_ptr<fml::ConcurrentTaskRunner> task_runner,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch);
 
   //----------------------------------------------------------------------------

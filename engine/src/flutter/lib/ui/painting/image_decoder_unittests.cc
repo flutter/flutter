@@ -142,6 +142,8 @@ class TestImpellerContext : public impeller::Context {
     return nullptr;
   }
 
+  void Shutdown() override {}
+
   mutable size_t command_buffer_count_ = 0;
 
  private:

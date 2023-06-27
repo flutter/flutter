@@ -202,32 +202,39 @@ bool CommandBufferMTL::SubmitCommandsAsync(
     return false;
   }
 
-  auto task = fml::MakeCopyable([render_pass, buffer, render_command_encoder,
-                                 weak_context = context_]() {
-    auto context = weak_context.lock();
-    if (!context) {
-      return;
-    }
-    auto is_gpu_disabled_sync_switch =
-        ContextMTL::Cast(*context).GetIsGpuDisabledSyncSwitch();
-    is_gpu_disabled_sync_switch->Execute(fml::SyncSwitch::Handlers().SetIfFalse(
-        [&render_pass, &render_command_encoder, &buffer, &context] {
-          auto mtl_render_pass = static_cast<RenderPassMTL*>(render_pass.get());
-          if (!mtl_render_pass->label_.empty()) {
-            [render_command_encoder
-                setLabel:@(mtl_render_pass->label_.c_str())];
-          }
-
-          auto result = mtl_render_pass->EncodeCommands(
-              context->GetResourceAllocator(), render_command_encoder);
+  auto task = fml::MakeCopyable(
+      [render_pass, buffer, render_command_encoder, weak_context = context_]() {
+        auto context = weak_context.lock();
+        if (!context) {
           [render_command_encoder endEncoding];
-          if (result) {
-            [buffer commit];
-          } else {
-            VALIDATION_LOG << "Failed to encode command buffer";
-          }
-        }));
-  });
+          return;
+        }
+        auto is_gpu_disabled_sync_switch =
+            ContextMTL::Cast(*context).GetIsGpuDisabledSyncSwitch();
+        is_gpu_disabled_sync_switch->Execute(
+            fml::SyncSwitch::Handlers()
+                .SetIfFalse([&render_pass, &render_command_encoder, &buffer,
+                             &context] {
+                  auto mtl_render_pass =
+                      static_cast<RenderPassMTL*>(render_pass.get());
+                  if (!mtl_render_pass->label_.empty()) {
+                    [render_command_encoder
+                        setLabel:@(mtl_render_pass->label_.c_str())];
+                  }
+
+                  auto result = mtl_render_pass->EncodeCommands(
+                      context->GetResourceAllocator(), render_command_encoder);
+                  [render_command_encoder endEncoding];
+                  if (result) {
+                    [buffer commit];
+                  } else {
+                    VALIDATION_LOG << "Failed to encode command buffer";
+                  }
+                })
+                .SetIfTrue([&render_command_encoder] {
+                  [render_command_encoder endEncoding];
+                }));
+      });
   worker_task_runner->PostTask(task);
   return true;
 }

@@ -52,9 +52,7 @@ void PlaygroundImplVK::DestroyWindowHandle(WindowHandle handle) {
 }
 
 PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
-    : PlaygroundImpl(switches),
-      concurrent_loop_(fml::ConcurrentMessageLoop::Create()),
-      handle_(nullptr, &DestroyWindowHandle) {
+    : PlaygroundImpl(switches), handle_(nullptr, &DestroyWindowHandle) {
   if (!::glfwVulkanSupported()) {
 #ifdef TARGET_OS_MAC
     VALIDATION_LOG << "Attempted to initialize a Vulkan playground on macOS "
@@ -86,7 +84,6 @@ PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
           &::glfwGetInstanceProcAddress);
   context_settings.shader_libraries_data = ShaderLibraryMappingsForPlayground();
   context_settings.cache_directory = fml::paths::GetCachesDirectory();
-  context_settings.worker_task_runner = concurrent_loop_->GetTaskRunner();
   context_settings.enable_validation = switches_.enable_vulkan_validation;
 
   auto context = ContextVK::Create(std::move(context_settings));

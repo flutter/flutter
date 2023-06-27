@@ -42,6 +42,10 @@ class Context {
 
   virtual std::shared_ptr<CommandBuffer> CreateCommandBuffer() const = 0;
 
+  /// @brief Force all pending async work to finish by deleting any owned
+  /// concurrent message loops.
+  virtual void Shutdown() = 0;
+
  protected:
   Context();
 

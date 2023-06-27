@@ -73,10 +73,9 @@ PlaygroundImplMTL::PlaygroundImplMTL(PlaygroundSwitches switches)
   if (!window) {
     return;
   }
-  auto worker_task_runner = concurrent_loop_->GetTaskRunner();
-  auto context = ContextMTL::Create(
-      ShaderLibraryMappingsForPlayground(), worker_task_runner,
-      is_gpu_disabled_sync_switch_, "Playground Library");
+  auto context =
+      ContextMTL::Create(ShaderLibraryMappingsForPlayground(),
+                         is_gpu_disabled_sync_switch_, "Playground Library");
   if (!context) {
     return;
   }
