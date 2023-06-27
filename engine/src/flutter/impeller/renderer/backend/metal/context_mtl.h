@@ -35,12 +35,10 @@ class ContextMTL final : public Context,
  public:
   static std::shared_ptr<ContextMTL> Create(
       const std::vector<std::string>& shader_library_paths,
-      std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch);
 
   static std::shared_ptr<ContextMTL> Create(
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
-      std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
       const std::string& label);
 
@@ -48,7 +46,6 @@ class ContextMTL final : public Context,
       id<MTLDevice> device,
       id<MTLCommandQueue> command_queue,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
-      std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
       const std::string& label);
 
@@ -84,9 +81,12 @@ class ContextMTL final : public Context,
   // |Context|
   bool UpdateOffscreenLayerPixelFormat(PixelFormat format) override;
 
+  // |Context|
+  void Shutdown() override;
+
   id<MTLCommandBuffer> CreateMTLCommandBuffer(const std::string& label) const;
 
-  const std::shared_ptr<fml::ConcurrentTaskRunner>& GetWorkerTaskRunner() const;
+  const std::shared_ptr<fml::ConcurrentTaskRunner> GetWorkerTaskRunner() const;
 
   std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() const;
 
@@ -98,7 +98,7 @@ class ContextMTL final : public Context,
   std::shared_ptr<SamplerLibrary> sampler_library_;
   std::shared_ptr<AllocatorMTL> resource_allocator_;
   std::shared_ptr<const Capabilities> device_capabilities_;
-  std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner_;
+  std::shared_ptr<fml::ConcurrentMessageLoop> raster_message_loop_;
   std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch_;
   bool is_valid_ = false;
 
@@ -106,7 +106,6 @@ class ContextMTL final : public Context,
       id<MTLDevice> device,
       id<MTLCommandQueue> command_queue,
       NSArray<id<MTLLibrary>>* shader_libraries,
-      std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch);
 
   std::shared_ptr<CommandBuffer> CreateCommandBufferInQueue(

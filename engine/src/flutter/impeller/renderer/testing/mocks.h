@@ -90,6 +90,8 @@ class MockImpellerContext : public Context {
 
   MOCK_CONST_METHOD0(IsValid, bool());
 
+  MOCK_METHOD0(Shutdown, void());
+
   MOCK_CONST_METHOD0(GetResourceAllocator, std::shared_ptr<Allocator>());
 
   MOCK_CONST_METHOD0(GetShaderLibrary, std::shared_ptr<ShaderLibrary>());

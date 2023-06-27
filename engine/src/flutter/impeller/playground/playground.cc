@@ -139,6 +139,9 @@ void Playground::SetupWindow() {
 }
 
 void Playground::TeardownWindow() {
+  if (context_) {
+    context_->Shutdown();
+  }
   context_.reset();
   renderer_.reset();
   impl_.reset();
