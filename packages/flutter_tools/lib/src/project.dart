@@ -459,7 +459,7 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   /// TODO: DOCUMENTATION
-  File get appGradle => hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
+  File get appGradleFile => hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
 
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
@@ -512,10 +512,10 @@ class AndroidProject extends FlutterProjectPlatform {
     if (plugin.existsSync()) {
       return false;
     }
-    if (!appGradle.existsSync()) {
+    if (!appGradleFile.existsSync()) {
       return false;
     }
-    for (final String line in appGradle.readAsLinesSync()) {
+    for (final String line in appGradleFile.readAsLinesSync()) {
       final bool fileBasedApply = line.contains(RegExp(r'apply from: .*/flutter.gradle'));
       final bool declarativeApply = line.contains('dev.flutter.flutter-gradle-plugin');
       final bool managed = line.contains("def flutterPluginVersion = 'managed'");
@@ -528,8 +528,8 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final bool imperativeMatch = firstMatchInFile(appGradle, _imperativeKotlinPluginPattern) != null;
-    final bool declarativeMatch = firstMatchInFile(appGradle, _declarativeKotlinPluginPattern) != null;
+    final bool imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
+    final bool declarativeMatch = firstMatchInFile(appGradleFile, _declarativeKotlinPluginPattern) != null;
     return imperativeMatch || declarativeMatch;
   }
 
@@ -627,18 +627,18 @@ $javaGradleCompatUrl
   }
 
   String? get applicationId {
-    return firstMatchInFile(appGradle, _applicationIdPattern)?.group(1);
+    return firstMatchInFile(appGradleFile, _applicationIdPattern)?.group(1);
   }
 
   /// Get the namespace for newer Android projects,
   /// which replaces the `package` attribute in the Manifest.xml.
   String? get namespace {
-    if (!appGradle.existsSync()) {
+    if (!appGradleFile.existsSync()) {
       return null;
     }
 
     // firstMatchInFile() reads per line but `_androidNamespacePattern` matches a multiline pattern.
-    return _androidNamespacePattern.firstMatch(appGradle.readAsStringSync())?.group(1);
+    return _androidNamespacePattern.firstMatch(appGradleFile.readAsStringSync())?.group(1);
   }
 
   String? get group {

@@ -16,6 +16,8 @@ const String minSdk17 = 'minSdkVersion 17';
 const String minSdk18 = 'minSdkVersion 18';
 @visibleForTesting
 const String flutterMinSdk = 'minSdkVersion flutter.minSdkVersion';
+@visibleForTesting
+const String appGradleNotFoundWarning = 'Module level build.gradle file not found, skipping minSdkVersion migration.';
 
 class MinSdkVersionMigration extends ProjectMigrator {
   MinSdkVersionMigration(
@@ -29,11 +31,12 @@ class MinSdkVersionMigration extends ProjectMigrator {
   @override
   void migrate() {
     // Skip if we cannot find the app level build.gradle file.
-    if (!_project.appGradle.existsSync()) {
+    if (!_project.appGradleFile.existsSync()) {
+      logger.printTrace(appGradleNotFoundWarning);
       return;
     }
 
-    processFileLines(_project.appGradle);
+    processFileLines(_project.appGradleFile);
   }
 
   @override

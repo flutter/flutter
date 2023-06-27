@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_conflict_migration.dart';
+import 'package:flutter_tools/src/android/migrations/min_sdk_version_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -42,6 +43,146 @@ distributionPath=wrapper/dists
 distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.1-all.zip
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
+''';
+
+const String minSdkAppGradleMigrationIn = r'''
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+android {
+    namespace "com.example.asset_sample"
+    compileSdkVersion flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId "com.example.asset_sample"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        minSdkVersion 16
+        targetSdkVersion flutter.targetSdkVersion
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+    }
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {}
+''';
+
+const String minSdkAppGradleMigrationOut = r'''
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+android {
+    namespace "com.example.asset_sample"
+    compileSdkVersion flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId "com.example.asset_sample"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion flutter.targetSdkVersion
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+    }
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {}
 ''';
 
 final Version androidStudioDolphin = Version(2021, 3, 1);
@@ -267,32 +408,51 @@ tasks.register("clean", Delete) {
       late MemoryFileSystem memoryFileSystem;
       late BufferLogger bufferLogger;
       late FakeAndroidProject project;
-      late File gradleWrapperPropertiesFile;
+      late File appGradleFile;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
+        memoryFileSystem.currentDirectory.childDirectory('android').createSync();
         bufferLogger = BufferLogger.test();
         project = FakeAndroidProject(
-          root: memoryFileSystem.currentDirectory.childDirectory('android')
-            ..createSync(),
+          root: memoryFileSystem.currentDirectory.childDirectory('android'),
         );
         project.hostAppGradleRoot.childDirectory('app')
             .createSync(recursive: true);
-        gradleWrapperPropertiesFile = project.hostAppGradleRoot
-            .childDirectory('app')
-            .childFile('build.gradle'); // TODO: use constants here
+      });
+
+      testWithoutContext('files missing test', () { //TODO: OUTPUT TRACE TEXT, AND THEN EXPECT IT HERE
+        final MinSdkVersionMigration migration = MinSdkVersionMigration(
+            project,
+            bufferLogger
+        );
+        migration.migrate();
+        expect(bufferLogger.traceText, contains(appGradleNotFoundWarning));
       });
 
       testWithoutContext('api 16 test', () {
-
+        final MinSdkVersionMigration migration = MinSdkVersionMigration(
+            project,
+            bufferLogger
+        );
+        project.appGradleFile.writeAsStringSync(minSdkAppGradleMigrationIn);
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), minSdkAppGradleMigrationOut);
       });
 
       testWithoutContext('api 17 test', () {});
       testWithoutContext('api 18 test', () {});
       testWithoutContext('module test', () {});
       testWithoutContext('plugin test', () {});
-      testWithoutContext('no migration test', () {});
-
+      testWithoutContext('no migration test', () {
+        final MinSdkVersionMigration migration = MinSdkVersionMigration(
+            project,
+            bufferLogger
+        );
+        project.appGradleFile.writeAsStringSync(minSdkAppGradleMigrationOut);
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), minSdkAppGradleMigrationOut);
+      });
     });
   });
 }
@@ -311,6 +471,9 @@ class FakeAndroidProject extends Fake implements AndroidProject {
 
   @override
   bool get isModule => module ?? false;
+
+  @override
+  File get appGradleFile => hostAppGradleRoot.childDirectory('app').childFile('build.gradle123');
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
