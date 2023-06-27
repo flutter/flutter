@@ -3924,6 +3924,108 @@ void main() {
     expect(copy.fillColor, Colors.blue);
   });
 
+  test('InputDecorationTheme merge', () {
+    const InputDecorationTheme overrideTheme = InputDecorationTheme(
+      labelStyle: TextStyle(color: Color(0x000000f0)),
+      floatingLabelStyle: TextStyle(color: Color(0x000000f1)),
+      helperStyle: TextStyle(color: Color(0x000000f2)),
+      helperMaxLines: 1,
+      hintStyle: TextStyle(color: Color(0x000000f3)),
+      errorStyle: TextStyle(color: Color(0x000000f4)),
+      errorMaxLines: 1,
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      floatingLabelAlignment: FloatingLabelAlignment.center,
+      isDense: true,
+      contentPadding: EdgeInsets.all(1.0),
+      isCollapsed: true,
+      iconColor: Color(0x000000f5),
+      prefixStyle: TextStyle(color: Color(0x000000f6)),
+      prefixIconColor: Color(0x000000f7),
+      suffixStyle: TextStyle(color: Color(0x000000f8)),
+      suffixIconColor: Color(0x000000f9),
+      counterStyle: TextStyle(color: Color(0x00000f10)),
+      filled: true,
+      fillColor: Color(0x00000f11),
+      activeIndicatorBorder: BorderSide(
+        color: Color(0x00000f12),
+      ),
+      outlineBorder: BorderSide(
+        color: Color(0x00000f13),
+      ),
+      focusColor: Color(0x00000f14),
+      hoverColor: Color(0x00000f15),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(2.0)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Color(0x00000f16),
+        ),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Color(0x00000f17),
+        ),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Color(0x00000f18),
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Color(0x00000f19),
+        ),
+      ),
+      border: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Color(0x00000f20),
+        ),
+      ),
+      alignLabelWithHint: true,
+      constraints: BoxConstraints(
+        minHeight: 1.0,
+        minWidth: 1.0,
+      ),
+    );
+
+    final InputDecorationTheme inputDecorationTheme = ThemeData().inputDecorationTheme;
+    final InputDecorationTheme merged = inputDecorationTheme.merge(overrideTheme);
+
+    expect(merged.labelStyle, overrideTheme.labelStyle);
+    expect(merged.floatingLabelStyle, overrideTheme.floatingLabelStyle);
+    expect(merged.helperStyle, overrideTheme.helperStyle);
+    expect(merged.helperMaxLines, overrideTheme.helperMaxLines);
+    expect(merged.hintStyle, overrideTheme.hintStyle);
+    expect(merged.errorStyle, overrideTheme.errorStyle);
+    expect(merged.errorMaxLines, overrideTheme.errorMaxLines);
+    expect(merged.floatingLabelBehavior, isNot(overrideTheme.floatingLabelBehavior));
+    expect(merged.floatingLabelAlignment, isNot(overrideTheme.floatingLabelAlignment));
+    expect(merged.isDense, isNot(overrideTheme.isDense));
+    expect(merged.contentPadding, overrideTheme.contentPadding);
+    expect(merged.isCollapsed, isNot(overrideTheme.isCollapsed));
+    expect(merged.iconColor, overrideTheme.iconColor);
+    expect(merged.prefixStyle, overrideTheme.prefixStyle);
+    expect(merged.prefixIconColor, overrideTheme.prefixIconColor);
+    expect(merged.suffixStyle, overrideTheme.suffixStyle);
+    expect(merged.suffixIconColor, overrideTheme.suffixIconColor);
+    expect(merged.counterStyle, overrideTheme.counterStyle);
+    expect(merged.filled, isNot(overrideTheme.filled));
+    expect(merged.fillColor, overrideTheme.fillColor);
+    expect(merged.activeIndicatorBorder, overrideTheme.activeIndicatorBorder);
+    expect(merged.outlineBorder, overrideTheme.outlineBorder);
+    expect(merged.focusColor, overrideTheme.focusColor);
+    expect(merged.hoverColor, overrideTheme.hoverColor);
+    expect(merged.errorBorder, overrideTheme.errorBorder);
+    expect(merged.focusedBorder, overrideTheme.focusedBorder);
+    expect(merged.focusedErrorBorder, overrideTheme.focusedErrorBorder);
+    expect(merged.disabledBorder, overrideTheme.disabledBorder);
+    expect(merged.enabledBorder, overrideTheme.enabledBorder);
+    expect(merged.border, overrideTheme.border);
+    expect(merged.alignLabelWithHint, isNot(overrideTheme.alignLabelWithHint));
+    expect(merged.constraints, overrideTheme.constraints);
+  });
+
   testWidgets('InputDecorationTheme outline border', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(

@@ -3,8 +3,6 @@ name: No Response
 # Both `issue_comment` and `scheduled` event types are required for this Action
 # to work properly.
 on:
-  issue_comment:
-    types: [created]
   schedule:
     # Schedule for five minutes after the hour, every hour
     - cron: '5 * * * *'
@@ -13,17 +11,18 @@ on:
 # specified are set to 'none'.
 permissions:
   issues: write
+  pull-requests: write
 
 jobs:
-  noResponse:
+  no-response:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
-      - uses: godofredoc/no-response@0ce2dc0e63e1c7d2b87752ceed091f6d32c9df09
+      - uses: actions/stale@1160a2240286f5da8ec72b1c0816ce2481aabf84
         with:
-          token: ${{ github.token }}
+          repo-token: ${{ github.token }}
           # Comment to post when closing an Issue for lack of response. Set to `false` to disable
-          closeComment: >
+          close-issue-message: >
             Without additional information, we are unfortunately not sure how to
             resolve this issue. We are therefore reluctantly going to close this
             bug for now.
@@ -35,6 +34,16 @@ jobs:
 
             Thanks for your contribution.
           # Number of days of inactivity before an issue is closed for lack of response.
-          daysUntilClose: 21
+          days-before-stale: -1
+          days-before-close: 21
+          close-issue-label: "r: timeout"
           # Label requiring a response.
-          responseRequiredLabel: "waiting for customer response"
+          stale-issue-label: "waiting for customer response"
+          stale-pr-label: "needs-info"
+          close-pr-message: >
+            Without additional information we're not able to resolve this PR.
+            Feel free to add more info or respond to any questions above.
+            Thanks for your contribution!
+          close-pr-label: "r: timeout"
+          operations-per-run: 200
+          any-of-labels: "waiting for customer response,needs-info"
