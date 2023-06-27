@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -207,7 +208,7 @@ void section(String title) {
       output += '═';
     }
   }
-  print('\n\n$output\n');
+  Logger.root.info('\n\n$output\n');
 }
 
 Future<String> getDartVersion() async {
