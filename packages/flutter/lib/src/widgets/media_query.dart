@@ -1066,7 +1066,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// This can be used to prevent, for example, icon fonts from scaling as the
   /// user adjusts the platform's text scaling value.
-  static Widget disableTextScaling({
+  static Widget withNoTextScaling({
     Key? key,
     required Widget child,
   }) {

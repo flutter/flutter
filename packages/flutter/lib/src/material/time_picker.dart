@@ -2062,7 +2062,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
 
     return SizedBox.fromSize(
       size: alwaysUse24HourFormat ? defaultTheme.hourMinuteInputSize24Hour : defaultTheme.hourMinuteInputSize,
-      child: MediaQuery.disableTextScaling(
+      child: MediaQuery.withNoTextScaling(
         child: UnmanagedRestorationScope(
           bucket: bucket,
           child: Semantics(

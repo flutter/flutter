@@ -357,7 +357,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
         children: <Widget>[
           // The main content being at the bottom is added to the stack first.
           content,
-          MediaQuery.disableTextScaling(
+          MediaQuery.withNoTextScaling(
             child: Align(
               alignment: Alignment.bottomCenter,
               // Override the tab bar's currentIndex to the current tab and hook in

@@ -735,7 +735,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       large: true,
     );
 
-    return MediaQuery.disableTextScaling(
+    return MediaQuery.withNoTextScaling(
       child: SliverPersistentHeader(
         pinned: true, // iOS navigation bars are always pinned.
         delegate: _LargeTitleNavigationBarSliverDelegate(
@@ -1760,7 +1760,7 @@ class _NavigationBarTransition extends StatelessWidget {
     // can actually be outside the linearly lerp'ed Rect in the middle of
     // the animation, such as the topLargeTitle. The text scaling is disabled to
     // avoid odd transitions between pages.
-    return MediaQuery.disableTextScaling(
+    return MediaQuery.withNoTextScaling(
       child: SizedBox(
         height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.paddingOf(context).top,
         width: double.infinity,

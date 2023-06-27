@@ -1097,7 +1097,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     final double maxPickerWidth = totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
 
-    return MediaQuery.disableTextScaling(
+    return MediaQuery.withNoTextScaling(
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: CustomMultiChildLayout(
@@ -1486,7 +1486,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
     final double maxPickerWidth = totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
 
-    return MediaQuery.disableTextScaling(
+    return MediaQuery.withNoTextScaling(
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: CustomMultiChildLayout(
@@ -1800,7 +1800,7 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
 
     final double maxPickerWidth = totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
 
-    return MediaQuery.disableTextScaling(
+    return MediaQuery.withNoTextScaling(
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: CustomMultiChildLayout(
@@ -2501,7 +2501,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         final CupertinoThemeData themeData = CupertinoTheme.of(context);
         // The native iOS picker's text scaling is fixed, so we will also fix it
         // as well in our picker.
-        return MediaQuery.disableTextScaling(
+        return MediaQuery.withNoTextScaling(
           child: CupertinoTheme(
             data: themeData.copyWith(
               textTheme: themeData.textTheme.copyWith(

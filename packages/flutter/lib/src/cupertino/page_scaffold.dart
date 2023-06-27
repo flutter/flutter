@@ -177,7 +177,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
               top: 0.0,
               left: 0.0,
               right: 0.0,
-              child: MediaQuery.disableTextScaling(
+              child: MediaQuery.withNoTextScaling(
                 child: widget.navigationBar!,
               ),
             ),

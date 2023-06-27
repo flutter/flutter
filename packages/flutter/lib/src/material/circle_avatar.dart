@@ -254,7 +254,7 @@ class CircleAvatar extends StatelessWidget {
           : Center(
               // Need to disable text scaling here so that the text doesn't
               // escape the avatar when the textScaleFactor is large.
-              child: MediaQuery.disableTextScaling(
+              child: MediaQuery.withNoTextScaling(
                 child: IconTheme(
                   data: theme.iconTheme.copyWith(color: textStyle.color),
                   child: DefaultTextStyle(
