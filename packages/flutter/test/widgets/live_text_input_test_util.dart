@@ -34,7 +34,7 @@ class LiveTextInputTester {
   }
 }
 
-// A function to find the live text button. 
+/// A function to find the live text button.
 Finder findLiveTextButton() => find.byWidgetPredicate((Widget widget) =>
 widget is CustomPaint &&
     '${widget.painter?.runtimeType}' == '_LiveTextIconPainter',
