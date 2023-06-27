@@ -5,7 +5,7 @@ by defining a combination of *sub-builds*, *archives*, *generators* and *depende
 makes it simple to shard sub-builds by mapping build inputs to workflows, and listing
 the sub-build-generated artifacts explicitly. The Build Definition Language, Engine
 Recipes V2 and the generation of artifacts using GN+Ninja set the groundwork
-for efficient builds with dependency reusability.  
+for efficient builds with dependency reusability.
 
 **Author: Godofredo Contreras (godofredoc)**\
 **Go Link: flutter.dev/go/engine-build-definition-language**\
@@ -56,7 +56,7 @@ in the `config_name` under `properties`:
     properties:
       config_name: mac_android_aot_engine
       $flutter/osx_sdk : >-
-        { "sdk_version": "14e222b" }
+        { "sdk_version": "14e300c" }
 
 ```
 
@@ -471,7 +471,7 @@ Engine test example:
             "max_attempts": 1,
             "script": "flutter/ci/lint.sh"
          }
-       ] 
+       ]
     }
   ]
 }
