@@ -13,7 +13,7 @@
 'a: animation':
   - any:
     - '**/animation/*'
-    - '**/*animation*'
+    - '**/*animation*''
 
 'a: internationalization':
   - packages/flutter_localizations/**/*
