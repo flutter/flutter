@@ -28,23 +28,12 @@ class MinSdkVersionMigration extends ProjectMigrator {
 
   @override
   void migrate() {
-    final File appLevelGradleBuildFile = _project.hostAppGradleRoot
-        .childDirectory('app')
-        .childFile('build.gradle');
-
     // Skip if we cannot find the app level build.gradle file.
-    if (!appLevelGradleBuildFile.existsSync()) {
+    if (!_project.appGradle.existsSync()) {
       return;
     }
 
-    // This migrator only applies to app projects, so exit early if we are in
-    // a module or a plugin. TODO: Determine if this enough to confirm this is
-    // in fact an app. Also determine if we need to do this as all?
-    if (_project.isModule || _project.isPlugin) {
-      return;
-    }
-
-    processFileLines(appLevelGradleBuildFile);
+    processFileLines(_project.appGradle);
   }
 
   @override
