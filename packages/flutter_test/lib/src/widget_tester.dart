@@ -135,11 +135,6 @@ void testWidgets(
   WidgetTesterCallback callback, {
   bool? skip,
   test_package.Timeout? timeout,
-  @Deprecated(
-    'This parameter has no effect. Use `timeout` instead. '
-    'This feature was deprecated after v2.6.0-1.0.pre.'
-  )
-  Duration? initialTimeout,
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
@@ -182,7 +177,6 @@ void testWidgets(
           },
           tester._endOfTestVerifications,
           description: combinedDescription,
-          timeout: initialTimeout,
         );
       },
       skip: skip,
@@ -826,8 +820,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///   your widget tree, then await that future inside [callback].
   Future<T?> runAsync<T>(
     Future<T> Function() callback, {
+    @Deprecated(
+      'This is no longer supported and has no effect. '
+      'This feature was deprecated after v3.12.0-1.1.pre.'
+    )
     Duration additionalTime = const Duration(milliseconds: 1000),
-  }) => binding.runAsync<T?>(callback, additionalTime: additionalTime);
+  }) => binding.runAsync<T?>(callback);
 
   /// Whether there are any transient callbacks scheduled.
   ///
