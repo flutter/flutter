@@ -1266,11 +1266,21 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
             assert(node.children[3].type == ST.argType);
             assert(node.children[7].type == ST.identifier);
             final String identifierName = node.children[1].value!;
-            final String formatType = node.children[7].value!;
+            final Node formatType = node.children[7];
+            // Check that formatType is a valid intl.DateFormat.
+            if(!validDateFormats.contains(formatType.value)) {
+              throw L10nParserException(
+                'The provided value "${formatType.value!}" is not a valid date time format.',
+                _inputFileNames[locale]!,
+                message.resourceId,
+                translationForMessage,
+                formatType.positionInMessage,
+              );
+            }
             final String tempVarName = getTempVariableName();
             tempVariables.add(dateVariableTemplate
               .replaceAll('@(varName)', tempVarName)
-              .replaceAll('@(formatType)', formatType)
+              .replaceAll('@(formatType)', formatType.value!)
               .replaceAll('@(argument)', identifierName)
             );
             return '\$$tempVarName';

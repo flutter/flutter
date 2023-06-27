@@ -27,7 +27,7 @@ import 'message_parser.dart';
 // * <https://pub.dev/packages/intl>
 // * <https://pub.dev/documentation/intl/latest/intl/DateFormat-class.html>
 // * <https://api.dartlang.org/stable/2.7.0/dart-core/DateTime-class.html>
-const Set<String> _validDateFormats = <String>{
+const Set<String> validDateFormats = <String>{
   'd',
   'E',
   'EEEE',
@@ -251,7 +251,7 @@ class Placeholder {
   bool get requiresNumFormatting => <String>['int', 'num', 'double'].contains(type) && format != null;
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
-  bool get hasValidDateFormat => _validDateFormats.contains(format);
+  bool get hasValidDateFormat => validDateFormats.contains(format);
 
   static String? _stringAttribute(
     String resourceId,

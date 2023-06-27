@@ -1774,10 +1774,10 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         setupLocalizations(<String, String>{
           'en': '''
 {
-  "datetime": "{current, time, ::jmm}"
+  "datetime": "{current, time, ::jms}"
 }'''
         });
-        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.jmm(localeName).format(current)'));
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.jms(localeName).format(current)'));
       });
 
       testWithoutContext('should not complain when placeholders are explicitly typed to DateTime', () {
@@ -1803,6 +1803,19 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 }'''
         });
         expect(getGeneratedFileContent(locale: 'en'), contains('String datetime(DateTime today) {'));
+      });
+
+      testWithoutContext('should throw on invalid DateFormat', () {
+        try {
+          setupLocalizations(<String, String>{
+            'en': '''
+{
+  "datetime": "{today, date, ::yMMMd}"
+}'''
+          });
+        } on L10nException {
+          expect(logger.errorText, contains('The provided value "yMMMd" is not a valid date time format.'));
+        }
       });
     });
 
