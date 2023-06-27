@@ -8,6 +8,24 @@ import '../dom.dart';
 import '../platform_dispatcher.dart';
 import 'semantics.dart';
 
+/// Sets the "button" ARIA role.
+class Button extends PrimaryRoleManager {
+  Button(SemanticsObject semanticsObject) : super.withBasics(PrimaryRole.button, semanticsObject) {
+    semanticsObject.setAriaRole('button');
+  }
+
+  @override
+  void update() {
+    super.update();
+
+    if (semanticsObject.enabledState() == EnabledState.disabled) {
+      semanticsObject.element.setAttribute('aria-disabled', 'true');
+    } else {
+      semanticsObject.element.removeAttribute('aria-disabled');
+    }
+  }
+}
+
 /// Listens to HTML "click" gestures detected by the browser.
 ///
 /// This gestures is different from the click and tap gestures detected by the
@@ -23,34 +41,18 @@ class Tappable extends RoleManager {
   @override
   void update() {
     final DomElement element = semanticsObject.element;
-
-    semanticsObject.setAriaRole(
-        'button', semanticsObject.hasFlag(ui.SemanticsFlag.isButton));
-
-    // Add `aria-disabled` for disabled buttons.
-    if (semanticsObject.enabledState() == EnabledState.disabled &&
-        semanticsObject.hasFlag(ui.SemanticsFlag.isButton)) {
-      semanticsObject.element.setAttribute('aria-disabled', 'true');
+    if (semanticsObject.enabledState() == EnabledState.disabled || !semanticsObject.isTappable) {
       _stopListening();
     } else {
-      semanticsObject.element.removeAttribute('aria-disabled');
-      // Excluding text fields because text fields have browser-specific logic
-      // for recognizing taps and activating the keyboard.
-      if (semanticsObject.hasAction(ui.SemanticsAction.tap) &&
-          !semanticsObject.hasFlag(ui.SemanticsFlag.isTextField)) {
-        if (_clickListener == null) {
-          _clickListener = createDomEventListener((_) {
-            if (semanticsObject.owner.gestureMode !=
-                GestureMode.browserGestures) {
-              return;
-            }
-            EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-                semanticsObject.id, ui.SemanticsAction.tap, null);
-          });
-          element.addEventListener('click', _clickListener);
-        }
-      } else {
-        _stopListening();
+      if (_clickListener == null) {
+        _clickListener = createDomEventListener((DomEvent event) {
+          if (semanticsObject.owner.gestureMode != GestureMode.browserGestures) {
+            return;
+          }
+          EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+              semanticsObject.id, ui.SemanticsAction.tap, null);
+        });
+        element.addEventListener('click', _clickListener);
       }
     }
   }
@@ -68,6 +70,5 @@ class Tappable extends RoleManager {
   void dispose() {
     super.dispose();
     _stopListening();
-    semanticsObject.setAriaRole('button', false);
   }
 }

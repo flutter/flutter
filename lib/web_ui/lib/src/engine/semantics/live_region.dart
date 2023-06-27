@@ -16,7 +16,7 @@ import 'semantics.dart';
 /// no content will be read.
 class LiveRegion extends RoleManager {
   LiveRegion(SemanticsObject semanticsObject)
-      : super(Role.labelAndValue, semanticsObject);
+      : super(Role.liveRegion, semanticsObject);
 
   String? _lastAnnouncement;
 

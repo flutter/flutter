@@ -10,9 +10,18 @@ import 'semantics.dart';
 /// Uses aria img role to convey this semantic information to the element.
 ///
 /// Screen-readers takes advantage of "aria-label" to describe the visual.
-class ImageRoleManager extends RoleManager {
+class ImageRoleManager extends PrimaryRoleManager {
   ImageRoleManager(SemanticsObject semanticsObject)
-      : super(Role.image, semanticsObject);
+      : super.blank(PrimaryRole.image, semanticsObject) {
+    // The following secondary roles can coexist with images. `LabelAndValue` is
+    // not used because this role manager uses special auxiliary elements to
+    // supply ARIA labels.
+    // TODO(yjbanov): reevaluate usage of aux elements, https://github.com/flutter/flutter/issues/129317
+    addFocusManagement();
+    addLiveRegion();
+    addRouteName();
+    addTappable();
+  }
 
   /// The element with role="img" and aria-label could block access to all
   /// children elements, therefore create an auxiliary element and  describe the
@@ -21,6 +30,8 @@ class ImageRoleManager extends RoleManager {
 
   @override
   void update() {
+    super.update();
+
     if (semanticsObject.isVisualOnly && semanticsObject.hasChildren) {
       if (_auxiliaryImageElement == null) {
         _auxiliaryImageElement = domDocument.createElement('flt-semantics-img');
@@ -44,7 +55,7 @@ class ImageRoleManager extends RoleManager {
       _auxiliaryImageElement!.setAttribute('role', 'img');
       _setLabel(_auxiliaryImageElement);
     } else if (semanticsObject.isVisualOnly) {
-      semanticsObject.setAriaRole('img', true);
+      semanticsObject.setAriaRole('img');
       _setLabel(semanticsObject.element);
       _cleanUpAuxiliaryElement();
     } else {
@@ -67,7 +78,6 @@ class ImageRoleManager extends RoleManager {
   }
 
   void _cleanupElement() {
-    semanticsObject.setAriaRole('img', false);
     semanticsObject.element.removeAttribute('aria-label');
   }
 
