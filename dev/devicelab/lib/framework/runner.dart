@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart' hide LogRecord;
+import 'package:vm_service/vm_service.dart';
 
 import 'cocoon.dart';
 import 'devices.dart';
