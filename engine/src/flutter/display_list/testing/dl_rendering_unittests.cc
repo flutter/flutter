@@ -17,6 +17,7 @@
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
 
+#include "third_party/skia/include/core/SkBBHFactory.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkSurface.h"

@@ -12,6 +12,7 @@
 #include "flutter/display_list/utils/dl_comparable.h"
 #include "gtest/gtest.h"
 
+#include "third_party/skia/include/core/SkSamplingOptions.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 
 namespace flutter {

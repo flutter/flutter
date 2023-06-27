@@ -6,6 +6,7 @@
 
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace flutter {
