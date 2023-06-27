@@ -24,10 +24,10 @@ class ListTileExample extends StatefulWidget {
   const ListTileExample({super.key});
 
   @override
-  State<ListTileExample> createState() => _LisTileExampleState();
+  State<ListTileExample> createState() => _ListTileExampleState();
 }
 
-class _LisTileExampleState extends State<ListTileExample> {
+class _ListTileExampleState extends State<ListTileExample> {
   int _selectedIndex = 0;
 
   @override
