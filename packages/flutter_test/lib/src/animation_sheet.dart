@@ -135,7 +135,7 @@ class AnimationSheetBuilder {
   /// The frame is only recorded if the `recording` argument is true, or during
   /// a procedure that is wrapped within [recording]. In either case, the
   /// painted result of each frame will be stored and later available for
-  /// [display]. If neither condition is met, the frames are not recorded, which
+  /// [collate]. If neither condition is met, the frames are not recorded, which
   /// is useful during setup phases.
   ///
   /// The `child` must not be null.
