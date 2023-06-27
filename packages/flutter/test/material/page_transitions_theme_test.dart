@@ -363,7 +363,7 @@ void main() {
       ),
       '/b': (BuildContext context) => StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-          builtCount++; // Increase [builtCount] each time the widget build
+          builtCount++;
           return TextButton(
             child: const Text('pop'),
             onPressed: () { Navigator.pop(context); },
@@ -454,7 +454,7 @@ void main() {
         routes: routes,
       ),
     );
-    // Now we have to let the theme animation run through.
+    // Now, let the theme animation run through.
     // This takes three frames (including the first one above):
     //  1. Start the Theme animation. It's at t=0 so everything else is identical.
     //  2. Start any animations that are informed by the Theme, for example, the
