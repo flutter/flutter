@@ -344,11 +344,10 @@ abstract class WidgetController {
   }
 
   FlutterView _viewOf(Finder finder) {
-    // TODO(goderbauer): This logic is not correct. Update when we have RawView.
-    return firstWidget<View>(
+    return firstWidget<RawView>(
       find.ancestor(
         of: finder,
-        matching: find.byType(View),
+        matching: find.byType(RawView),
       ),
     ).view;
   }
