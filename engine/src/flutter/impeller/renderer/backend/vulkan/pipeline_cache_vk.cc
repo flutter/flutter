@@ -186,4 +186,8 @@ void PipelineCacheVK::PersistCacheToDisk() const {
   }
 }
 
+const CapabilitiesVK* PipelineCacheVK::GetCapabilities() const {
+  return CapabilitiesVK::Cast(caps_.get());
+}
+
 }  // namespace impeller
