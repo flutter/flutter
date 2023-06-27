@@ -1603,7 +1603,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [addScopedWillPopCallback], which adds callback to the list
   ///    checked by [willPop].
   @Deprecated(
-    'Use registerPopInterface or PopScope instead. '
+    'Use unregisterPopInterface or PopScope instead. '
     'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   void removeScopedWillPopCallback(WillPopCallback callback) {
