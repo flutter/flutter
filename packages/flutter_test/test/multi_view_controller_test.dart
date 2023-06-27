@@ -183,7 +183,13 @@ void main() {
     expect(result.path.map((HitTestEntry h) => h.target).whereType<RenderView>().single.flutterView.viewId, 100);
     result = tester.hitTestOnBinding(Offset.zero, viewId: 102);
     expect(result.path.map((HitTestEntry h) => h.target).whereType<RenderView>().single.flutterView.viewId, 102);
+  });
 
+  testWidgets('hitTestable works in different Views', (WidgetTester tester) async {
+    await pumpViews(tester: tester);
+    expect((find.text('View0Child0').hitTestable().evaluate().single.widget as Text).data, 'View0Child0');
+    expect((find.text('View1Child1').hitTestable().evaluate().single.widget as Text).data, 'View1Child1');
+    expect((find.text('View2Child2').hitTestable().evaluate().single.widget as Text).data, 'View2Child2');
   });
 }
 
