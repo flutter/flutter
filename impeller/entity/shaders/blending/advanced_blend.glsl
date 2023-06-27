@@ -38,16 +38,14 @@ void main() {
                               ) *
                        blend_info.dst_input_alpha;
 
-  f16vec4 dst = IPHalfUnpremultiply(dst_sample);
+  f16vec4 dst = dst_sample;
   f16vec4 src = blend_info.color_factor > 0.0hf
                     ? blend_info.color
-                    : IPHalfUnpremultiply(
-                          Sample(texture_sampler_src,  // sampler
-                                 v_src_texture_coords  // texture coordinates
-                                 ) *
-                          blend_info.src_input_alpha);
+                    : Sample(texture_sampler_src,  // sampler
+                             v_src_texture_coords  // texture coordinates
+                             ) *
+                          blend_info.src_input_alpha;
 
-  f16vec4 blended = f16vec4(Blend(dst.rgb, src.rgb), 1.0hf) * dst.a;
-
+  f16vec4 blended = mix(src, f16vec4(Blend(dst.rgb, src.rgb), dst.a), dst.a);
   frag_color = mix(dst_sample, blended, src.a);
 }
