@@ -33,7 +33,7 @@ void main() {
 
     FeatureFlags createFlags(String channel) {
       return FlutterFeatureFlags(
-        flutterVersion: FakeFlutterVersion(channel: channel),
+        flutterVersion: FakeFlutterVersion(branch: channel),
         config: testConfig,
         platform: platform,
       );

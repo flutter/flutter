@@ -1358,11 +1358,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   void _handlePreviousAnimationStatusChanged(AnimationStatus status) {
     setState(() {
-      if (status == AnimationStatus.dismissed) {
+      if (widget.child != null && status == AnimationStatus.dismissed) {
         assert(widget.currentController.status == AnimationStatus.dismissed);
-        if (widget.child != null) {
-          widget.currentController.forward();
-        }
+        widget.currentController.forward();
       }
     });
   }
@@ -2312,6 +2310,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
       bottomSheetKey.currentState!.close();
       setState(() {
+        _showBodyScrim = false;
+        _bodyScrimColor = Colors.black.withOpacity(0.0);
         _currentBottomSheet = null;
       });
 
@@ -3190,7 +3190,9 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       scaffold.showBodyScrim(false, 0.0);
     }
     // If the Scaffold.bottomSheet != null, we're a persistent bottom sheet.
-    if (notification.extent == notification.minExtent && scaffold.widget.bottomSheet == null) {
+    if (notification.extent == notification.minExtent &&
+        scaffold.widget.bottomSheet == null &&
+        notification.shouldCloseOnMinExtent) {
       close();
     }
     return false;

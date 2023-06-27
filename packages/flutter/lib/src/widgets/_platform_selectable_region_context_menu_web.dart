@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/rendering.dart';
 
@@ -29,7 +29,7 @@ const int _kRightClickButton = 2;
 
 typedef _WebSelectionCallBack = void Function(DomHTMLElement, DomMouseEvent);
 
-/// Function signature for `ui.platformViewRegistry.registerViewFactory`.
+/// Function signature for `ui_web.platformViewRegistry.registerViewFactory`.
 @visibleForTesting
 typedef RegisterViewFactory = void Function(String, Object Function(int viewId), {bool isVisible});
 
@@ -67,10 +67,15 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   // Keeps track if this widget has already registered its view factories or not.
   static String? _registeredViewType;
 
-  /// See `_platform_selectable_region_context_menu_io.dart`.
+  static RegisterViewFactory get _registerViewFactory =>
+      debugOverrideRegisterViewFactory ?? ui_web.platformViewRegistry.registerViewFactory;
+
+  /// Override this to provide a custom implementation of [ui_web.platformViewRegistry.registerViewFactory].
+  ///
+  /// This should only be used for testing.
+  // See `_platform_selectable_region_context_menu_io.dart`.
   @visibleForTesting
-  // ignore: undefined_prefixed_name, invalid_assignment, avoid_dynamic_calls
-  static RegisterViewFactory registerViewFactory = ui.platformViewRegistry.registerViewFactory;
+  static RegisterViewFactory? debugOverrideRegisterViewFactory;
 
   // Registers the view factories for the interceptor widgets.
   static void _register() {
@@ -100,7 +105,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   }
 
   static String _registerWebSelectionCallback(_WebSelectionCallBack callback) {
-    registerViewFactory(_viewType, (int viewId) {
+    _registerViewFactory(_viewType, (int viewId) {
       final DomHTMLElement htmlElement = createDomHTMLDivElement();
       htmlElement
         ..style.width = '100%'

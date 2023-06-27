@@ -42,11 +42,13 @@ class IconTreeShaker {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
+    required TargetPlatform targetPlatform,
   }) : _processManager = processManager,
        _logger = logger,
        _fs = fileSystem,
        _artifacts = artifacts,
-       _fontManifest = fontManifest?.string {
+       _fontManifest = fontManifest?.string,
+       _targetPlatform = targetPlatform {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
       logger.printError('Font subsetting is not supported in debug mode. The '
@@ -82,6 +84,7 @@ class IconTreeShaker {
   final Logger _logger;
   final FileSystem _fs;
   final Artifacts _artifacts;
+  final TargetPlatform _targetPlatform;
 
   /// Whether font subsetting should be used for this [Environment].
   bool get enabled => _fontManifest != null
@@ -129,10 +132,16 @@ class IconTreeShaker {
     }
 
     final Map<String, _IconTreeShakerData> result = <String, _IconTreeShakerData>{};
+    const int kSpacePoint = 32;
     for (final MapEntry<String, String> entry in fonts.entries) {
       final List<int>? codePoints = iconData[entry.key];
       if (codePoints == null) {
         throw IconTreeShakerException._('Expected to font code points for ${entry.key}, but none were found.');
+      }
+      if (_targetPlatform == TargetPlatform.web_javascript) {
+        if (!codePoints.contains(kSpacePoint)) {
+          codePoints.add(kSpacePoint);
+        }
       }
       result[entry.value] = _IconTreeShakerData(
         family: entry.key,
@@ -155,7 +164,6 @@ class IconTreeShaker {
     required String outputPath,
     required String relativePath,
   }) async {
-
     if (!enabled) {
       return false;
     }

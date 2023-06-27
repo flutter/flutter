@@ -202,6 +202,7 @@ class Stepper extends StatefulWidget {
   const Stepper({
     super.key,
     required this.steps,
+    this.controller,
     this.physics,
     this.type = StepperType.vertical,
     this.currentStep = 0,
@@ -229,6 +230,13 @@ class Stepper extends StatefulWidget {
   /// If the stepper is contained within another scrollable it
   /// can be helpful to set this property to [ClampingScrollPhysics].
   final ScrollPhysics? physics;
+
+  /// An object that can be used to control the position to which this scroll
+  /// view is scrolled.
+  ///
+  /// To control the initial scroll offset of the scroll view, provide a
+  /// [controller] with its [ScrollController.initialScrollOffset] property set.
+  final ScrollController? controller;
 
   /// The type of stepper that determines the layout. In the case of
   /// [StepperType.horizontal], the content of the current step is displayed
@@ -765,6 +773,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildVertical() {
     return ListView(
+      controller: widget.controller,
       shrinkWrap: true,
       physics: widget.physics,
       children: <Widget>[
@@ -858,6 +867,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         ),
         Expanded(
           child: ListView(
+            controller: widget.controller,
             physics: widget.physics,
             padding: const EdgeInsets.all(24.0),
             children: <Widget>[
