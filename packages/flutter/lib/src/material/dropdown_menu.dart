@@ -278,6 +278,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// contain space for padding.
   final List<DropdownMenuEntry<T>> dropdownMenuEntries;
 
+  ///
   final bool isScrollableToHighlight;
 
   @override
@@ -365,9 +366,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (currentHighlight != null && buttonItemKeys[currentHighlight!].currentContext != null) {
         Scrollable.ensureVisible(
-          buttonItemKeys[currentHighlight!].currentContext!,
-          // duration: const Duration(milliseconds: 100),
-          // alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd
+          buttonItemKeys[currentHighlight!].currentContext!
         );
       }
     });
