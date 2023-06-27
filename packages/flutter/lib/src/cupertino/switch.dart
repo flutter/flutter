@@ -142,7 +142,8 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use for the accessibility label when the switch is off.
   ///
-  /// Defaults to [Color(0xFFB3B3B3)] when null.
+  /// Defaults to [Color(0xFFB3B3B3)] (or [CupertinoColors.white] in high
+  /// contrast) when null.
   final Color? offLabelColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -369,6 +370,22 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       ?? CupertinoColors.systemGreen,
       context,
     );
+    final (Color onLabelColor, Color offLabelColor)? onOffLabelColors =
+        MediaQuery.onOffSwitchLabelsOf(context)
+            ? (
+                CupertinoDynamicColor.resolve(
+                  widget.onLabelColor ?? CupertinoColors.white,
+                  context,
+                ),
+                CupertinoDynamicColor.resolve(
+                  widget.offLabelColor ??
+                      (MediaQuery.highContrastOf(context)
+                          ? CupertinoColors.white
+                          : const Color(0xFFB3B3B3)),
+                  context,
+                ),
+              )
+            : null;
     if (needsPositionAnimation) {
       _resumePositionAnimation();
     }
@@ -401,9 +418,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             textDirection: Directionality.of(context),
             isFocused: isFocused,
             state: this,
-            onOffSwitchLabels: MediaQuery.onOffSwitchLabelsOf(context),
-            onLabelColor: CupertinoDynamicColor.resolve(widget.onLabelColor ?? CupertinoColors.white, context),
-            offLabelColor: CupertinoDynamicColor.resolve(widget.offLabelColor ?? const Color(0xFFB3B3B3), context),
+            onOffLabelColors: onOffLabelColors,
           ),
         ),
       ),
@@ -432,9 +447,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.textDirection,
     required this.isFocused,
     required this.state,
-    required this.onOffSwitchLabels,
-    required this.onLabelColor,
-    required this.offLabelColor,
+    required this.onOffLabelColors,
   });
 
   final bool value;
@@ -446,9 +459,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final _CupertinoSwitchState state;
   final TextDirection textDirection;
   final bool isFocused;
-  final bool onOffSwitchLabels;
-  final Color onLabelColor;
-  final Color offLabelColor;
+  final (Color onLabelColor, Color offLabelColor)? onOffLabelColors;
 
   @override
   _RenderCupertinoSwitch createRenderObject(BuildContext context) {
@@ -462,9 +473,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: textDirection,
       isFocused: isFocused,
       state: state,
-      onOffSwitchLabels: onOffSwitchLabels,
-      onLabelColor: onLabelColor,
-      offLabelColor: offLabelColor,
+      onOffLabelColors: onOffLabelColors,
     );
   }
 
@@ -516,9 +525,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     required TextDirection textDirection,
     required bool isFocused,
     required _CupertinoSwitchState state,
-    required bool onOffSwitchLabels,
-    required Color onLabelColor,
-    required Color offLabelColor,
+    required (Color onLabelColor, Color offLabelColor)? onOffLabelColors,
   }) : _value = value,
        _activeColor = activeColor,
        _trackColor = trackColor,
@@ -528,9 +535,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _textDirection = textDirection,
        _isFocused = isFocused,
        _state = state,
-       _onOffSwitchLabels = onOffSwitchLabels,
-       _onLabelColor = onLabelColor,
-       _offLabelColor = offLabelColor,
+       _onOffLabelColors = onOffLabelColors,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
          state.position.addListener(markNeedsPaint);
          state._reaction.addListener(markNeedsPaint);
@@ -622,33 +627,13 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  bool get onOffSwitchLabels => _onOffSwitchLabels;
-  bool _onOffSwitchLabels;
-  set onOffSwitchLabels(bool value) {
-    if (value == _onOffSwitchLabels) {
+  (Color onLabelColor, Color offLabelColor)? get onOffLabelColors => _onOffLabelColors;
+  (Color onLabelColor, Color offLabelColor)? _onOffLabelColors;
+  set onOffLabelColors((Color onLabelColor, Color offLabelColor)? value) {
+    if (value == _onOffLabelColors) {
       return;
     }
-    _onOffSwitchLabels = value;
-    markNeedsPaint();
-  }
-
-  Color get onLabelColor => _onLabelColor;
-  Color _onLabelColor;
-  set onLabelColor(Color value) {
-    if (value == _onLabelColor) {
-      return;
-    }
-    _onLabelColor = value;
-    markNeedsPaint();
-  }
-
-  Color get offLabelColor => _offLabelColor;
-  Color _offLabelColor;
-  set offLabelColor(Color value) {
-    if (value == _offLabelColor) {
-      return;
-    }
-    _offLabelColor = value;
+    _onOffLabelColors = value;
     markNeedsPaint();
   }
 
@@ -717,14 +702,14 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       canvas.drawRRect(borderTrackRRect, borderPaint);
     }
 
-    if (_onOffSwitchLabels) {
+    if (_onOffLabelColors != null) {
       final double leftLabelOpacity = visualPosition * (1.0 - currentReactionValue);
       final double rightLabelOpacity = (1.0 - visualPosition) * (1.0 - currentReactionValue);
 
-      late final Offset onLabelOffset;
-      late final double onLabelOpacity;
-      late final Offset offLabelOffset;
-      late final double offLabelOpacity;
+      final Offset onLabelOffset;
+      final double onLabelOpacity;
+      final Offset offLabelOffset;
+      final double offLabelOpacity;
 
       switch (textDirection) {
         case TextDirection.ltr:
@@ -743,23 +728,22 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
           offLabelOpacity = leftLabelOpacity;
       }
 
+      final (Color onLabelColor, Color offLabelColor) = onOffLabelColors!;
+
       final Rect onLabelRect = Rect.fromCenter(
         center: onLabelOffset,
         width: _kOnLabelWidth,
         height: _kOnLabelHeight,
       );
-
       final Paint onLabelPaint = Paint()
         ..color = onLabelColor.withOpacity(onLabelOpacity)
         ..style = PaintingStyle.fill;
-
       canvas.drawRect(onLabelRect, onLabelPaint);
 
       final Paint offLabelPaint = Paint()
         ..color = offLabelColor.withOpacity(offLabelOpacity)
         ..style = PaintingStyle.stroke
         ..strokeWidth = _kOffLabelWidth;
-
       canvas.drawCircle(
         offLabelOffset,
         _kOffLabelRadius,
