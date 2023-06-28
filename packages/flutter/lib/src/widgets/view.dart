@@ -12,26 +12,45 @@ import 'framework.dart';
 import 'lookup_boundary.dart';
 import 'media_query.dart';
 
-/// Injects a [FlutterView] into the tree and makes it available to descendants
-/// within the same [LookupBoundary] via [View.of] and [View.maybeOf].
+/// Bootstraps a render tree that is rendered into the provided [FlutterView].
+///
+/// The content rendered into that view is determined by the provided [child].
+/// Descendants within the same [LookupBoundary] can look up the view they are
+/// rendered into via [View.of] and [View.maybeOf].
 ///
 /// The provided [child] is wrapped in a [MediaQuery] constructed from the given
 /// [view].
-///
-// TODO
-/// In a future version of Flutter, the functionality of this widget will be
-/// extended to actually bootstrap the render tree that is going to be rendered
-/// into the provided [view]. This will enable rendering content into multiple
-/// [FlutterView]s from a single widget tree.
 ///
 /// Each [FlutterView] can be associated with at most one [View] widget in the
 /// widget tree. Two or more [View] widgets configured with the same
 /// [FlutterView] must never exist within the same widget tree at the same time.
 /// Internally, this limitation is enforced by a [GlobalObjectKey] that derives
 /// its identity from the [view] provided to this widget.
+///
+/// Since the [View] widget bootstraps its own independent render tree neither
+/// it not any of its descendants will insert a [RenderObject] into an existing
+/// render tree. Therefore, the [View] widget can only be used in those parts of
+/// the widget tree, where it is not required to participate in the construction
+/// of the surrounding render tree. In practical terms, this means it can
+/// typically be used at the root of the widget tree outside of any other [View]
+/// widget, as a child of a [ViewCollection] widget, or in the [ViewAnchor.view]
+/// slot of a [ViewAnchor] widget. It must not necessarily be a direct child,
+/// though, since other non-[RenderObjectWidget]s (e.g. [InheritedWidget]s) are
+/// allowed to be present between those widgets and the [View] widget.
+///
+/// In technical terms, whether a [View] is allowed to occupy a certain slot of
+/// an element is determined by that element's
+/// [Element.debugMustInsertRenderObjectIntoSlot]
+///
+/// See also:
+///
+///  * [RawView], which is the workhorse behind this widget.
 class View extends StatelessWidget {
-  // TODO
-  /// Injects the provided [view] into the widget tree.
+  /// Create a [View] widget to bootstrap a render tree that is rendered into
+  /// the provided [FlutterView].
+  ///
+  /// The content rendered into that [view] is determined by the given [child]
+  /// widget.
   View({
     super.key,
     required this.view,
@@ -52,9 +71,12 @@ class View extends StatelessWidget {
        _deprecatedRenderView = deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
        assert(deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null || deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView.flutterView == view);
 
-  /// The [FlutterView] to be injected into the tree.
+  /// The [FlutterView] into which [child] is drawn.
   final FlutterView view;
 
+  /// The widget below this widget in the tree, which will be drawn into the
+  /// [view].
+  ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
@@ -145,9 +167,43 @@ class View extends StatelessWidget {
   }
 }
 
+/// A builder for the content [Widget] of a [RawView].
+///
+/// The widget returned by the builder defines the content that is drawn into
+/// the [FlutterView] configured on the [RawView].
+///
+/// The builder is given the [PipelineOwner] that the [RawView] uses to manage
+/// its render tree. Typical builder implementations make that pipeline owner
+/// available as an attachment point for potential child views by inserting
+/// updated [ViewHooks] into the widget tree.
+///
+/// Used by [RawView.builder].
 typedef RawViewContentBuilder = Widget Function(BuildContext context, PipelineOwner owner);
 
+/// The workhorse behind the [View] widget that actually bootstraps the render
+/// tree.
+///
+/// It instantiates the [RenderView] as the root of that render tree and adds it
+/// to the [RenderViewRepository] obtained from the surrounding [ViewHooks] via
+/// [ViewHooks.of] (typically, that is the [RendererBinding]). It also owns the
+/// [PipelineOwner] that manages this render tree and adds it as a child to the
+/// surrounding [ViewHooks.pipelineOwner]. This ensures, that the render tree
+/// bootstrapped by this widget participates properly in frame production and
+/// hit testing.
+///
+/// The [RawView] widget faces the same limitations in terms of where it can
+/// appear in the widget tree as the [View] widget, where those limitations are
+/// documented.
+///
+/// The [RawView] widget is rarely used directly. Instead, consider using the
+/// [View] widget, which also inserts a proper [MediaQuery] for the [view] into
+/// the tree and provides updated [ViewHooks] to potential child views.
 class RawView extends RenderObjectWidget {
+  /// Create a [RawView] widget to bootstrap a render tree that is rendered into
+  /// the provided [FlutterView].
+  ///
+  /// The content rendered into that [view] is determined by the [Widget]
+  /// returned by [builder].
   RawView({
     required this.view,
     required this.builder,
@@ -165,7 +221,15 @@ class RawView extends RenderObjectWidget {
        assert(deprecatedRenderView == null || deprecatedRenderView.flutterView == view),
        super(key: _DeprecatedRawViewKey(view, deprecatedPipelineOwner, deprecatedRenderView));
 
+  /// The [FlutterView] into which [Widget} returned by [builder] is drawn.
   final FlutterView view;
+
+  /// Determines the content [Widget] that is drawn into the [view].
+  ///
+  /// The [builder] is given the [PipelineOwner] responsible for the render tree
+  /// bootstrapped by this widget. Typically, the [builder] inserts updated
+  /// [ViewHooks] into the tree that contain this pipeline owner as an
+  /// attachment point for potential child views.
   final RawViewContentBuilder builder;
 
   final PipelineOwner? _deprecatedPipelineOwner;
@@ -215,9 +279,23 @@ class _RawViewElement extends RenderTreeRootElement {
   Element? _child;
 
   void _updateChild() {
-    // TODO
-    final Widget child = (widget as RawView).builder(this, _effectivePipelineOwner);
-    _child = updateChild(_child, child, null);
+    try {
+      final Widget child = (widget as RawView).builder(this, _effectivePipelineOwner);
+      _child = updateChild(_child, child, null);
+    } catch (e, stack) {
+      final FlutterErrorDetails details = FlutterErrorDetails(
+        exception: e,
+        stack: stack,
+        library: 'widgets library',
+        context: ErrorDescription('building $this'),
+        informationCollector: !kDebugMode ? null : () => <DiagnosticsNode>[
+          DiagnosticsDebugCreator(DebugCreator(this)),
+        ],
+      );
+      FlutterError.reportError(details);
+      final Widget error = ErrorWidget.builder(details);
+      _child = updateChild(null, error, slot);
+    }
   }
 
   @override
@@ -345,33 +423,72 @@ class _ViewScope extends InheritedWidget {
   bool updateShouldNotify(_ViewScope oldWidget) => view != oldWidget.view;
 }
 
+/// Injects [ViewHooks] into the widget tree so that they can be looked up by
+/// descendants via [ViewHooks.of].
 class ViewHooksScope extends InheritedWidget {
+  /// Creates a [ViewHooksScope] that makes the provided [hooks] available to
+  /// [child] and its descendants via [ViewHooks.of].
   const ViewHooksScope({
     super.key,
     required this.hooks,
     required super.child,
   });
 
+  /// The [ViewHooks] made available to descendants via [ViewHooks.of].
   final ViewHooks hooks;
 
   @override
   bool updateShouldNotify(ViewHooksScope oldWidget) => hooks != oldWidget.hooks;
 }
 
+/// Attachment points for a [View] and the render tree that defines its content.
+///
+/// To participate in frame production, the [View] widget (or more specifically
+/// the underlying [RawView] widget) needs to add the [RenderView] root of its
+/// render tree to a [RenderViewRepository] (typically, the [RendererBinding])
+/// and add the [PipelineOwner] managing that tree to the pipeline owner tree.
+/// The [ViewHooks] define these attachment points for the [View]/[RawView]
+/// widget. They are injected into the tree via [ViewHooksScope] and can be
+/// looked up with [ViewHooks.of].
 @immutable
 class ViewHooks {
+  /// Creates a [ViewHooks] instance with the provided [renderViewRepository]
+  /// and [pipelineOwner].
   const ViewHooks({
     required this.renderViewRepository,
     required this.pipelineOwner,
   });
 
+  /// The [ViewHooks] of the closest [ViewHooksScope] instance that encloses the
+  /// given `context`.
+  ///
+  /// Calling this method establishes a dependency and the provided `context`
+  /// and causes it to rebuild whenever the [ViewHooks] change.
+  ///
+  /// When no [ViewHooks] are available in the provided `context`, a default
+  /// ViewHooks instance with [renderViewRepository] set to
+  /// [RendererBinding.instance] and [pipelineOwner] set to
+  /// [RendererBinding.rootPipelineOwner] is returned.
   static ViewHooks of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ViewHooksScope>()?.hooks ?? ViewHooks(renderViewRepository: RendererBinding.instance, pipelineOwner: RendererBinding.instance.rootPipelineOwner);
+    return context.dependOnInheritedWidgetOfExactType<ViewHooksScope>()?.hooks
+        ?? ViewHooks(
+          renderViewRepository: RendererBinding.instance,
+          pipelineOwner: RendererBinding.instance.rootPipelineOwner,
+        );
   }
 
+  /// The [RenderViewRepository] to which the [RawView] widget should add the
+  /// [RenderView] root of its render tree by calling
+  /// [RenderViewRepository.addRenderView].
   final RenderViewRepository renderViewRepository;
+
+  /// The parent [PipelineOwner] to which the [RawView] widget should add the
+  /// [PipelineOwner] managing its render tree by calling
+  /// [PipelineOwner.adoptChild].
   final PipelineOwner pipelineOwner;
 
+  /// Create a clone of the current [ViewHooks] but with provided parameters
+  /// replaced.
   ViewHooks copyWith({
     RenderViewRepository? renderViewRepository,
     PipelineOwner? pipelineOwner,
@@ -418,20 +535,61 @@ class _MultiChildComponentWidget extends Widget {
   Element createElement() => _MultiChildComponentElement(this);
 }
 
+/// A collection of sibling [View]s.
+///
+/// The widget can only be used in places were a [View] widget is legal. In
+/// practical terms, it can be used at the root of the widget tree outside of
+/// any [View] widget, as a child to a another [ViewCollection], or in the
+/// [ViewAnchor.view] slot of a [ViewAnchor] widget. It is not required to be a
+/// direct child of those widgets; other non-[RenderObjectWidget]s may appear
+/// in between the two.
+///
+/// Similarly, the [views] children of this widget must be [View]s, but they
+/// may be wrapped in additional non-[RenderObjectWidget]s (e.g.
+/// [InheritedWidget]s).
 class ViewCollection extends _MultiChildComponentWidget {
+  /// Creates a [ViewCollection] widget.
+  ///
+  /// The provided list of [views] must contain at least one widget.
   const ViewCollection({super.key, required super.views}) : assert(views.length > 0);
 
-  List<Widget> get view => _views;
+  /// The [View] descendants of this widget.
+  ///
+  /// The [View]s may be wrapped in other non-[RenderObjectWidget]s (e.g.
+  /// [InheritedWidget]s). However, no [RenderObjectWidget] is allowed to appear
+  /// between the [ViewCollection] and the next [View] widget.
+  List<Widget> get views => _views;
 }
 
+/// Decorates a [child] widget in a surrounding [View] with a side-[View].
+///
+/// This widget must have a [View] ancestor, into which the [child] widget
+/// is rendered.
+///
+/// Typically, a [View] or [ViewCollection] widget is used in the [view] slot to
+/// define the content of the side view(s). Those widgets may be wrapped in
+/// other non-[RenderObjectWidget]s (e.g. [InheritedWidget]s). However, no
+/// [RenderObjectWidget] is allowed to appear between the [ViewAnchor] and the
+/// next [View] widget in the [view] slot. The widgets in the [view] slot have
+/// access to all [InheritedWidget]s above the [ViewAnchor] in the tree.
 class ViewAnchor extends StatelessWidget {
+  /// Creates a [ViewAnchor] widget.
   const ViewAnchor({
     super.key,
     this.view,
     required this.child,
   });
 
+  /// The widget that defines the view anchored to this widget.
+  ///
+  /// Typically, a [View] or [ViewCollection] widget is used, which may be wrapped
+  /// in other non-[RenderObjectWidget]s (e.g. [InheritedWidget]s).
   final Widget? view;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// It is rendered into the surrounding view, not in the view defined by
+  /// [view].
   final Widget child;
 
   @override
@@ -595,7 +753,6 @@ class _MultiChildComponentElement extends Element {
   bool get debugDoingBuild => false; // This element does not have a concept of "building".
 
   @override
-  // TODO: Update documentation on renderObject getter.
   Element? get renderObjectAttachingChild => _childElement;
 
   @override
@@ -614,7 +771,9 @@ class _MultiChildComponentElement extends Element {
   }
 }
 
-// TODO
+// A special [GlobalKey] to support passing the deprecated
+// [RendererBinding.renderView] and [RendererBinding.pipelineOwner] to the
+// [RawView]. Will be removed when those deprecated properties are removed.
 @optionalTypeArgs
 class _DeprecatedRawViewKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   const _DeprecatedRawViewKey(this.view, this.owner, this.renderView) : super.constructor();

@@ -68,6 +68,24 @@ void main() {
     expect(builderOwner, isNot(tester.binding.rootPipelineOwner));
   });
 
+  testWidgets('RawView.builder throws', (WidgetTester tester) async {
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: RawView(
+        view: tester.view,
+        builder: (BuildContext context, PipelineOwner owner) {
+          throw StateError('Behave!');
+        }
+      ),
+    );
+    expect(
+      tester.takeException(),
+      isStateError.having((StateError e) => e.message, 'message', 'Behave!'),
+    );
+    expect(find.byType(ErrorWidget), findsOneWidget);
+    expect(tester.widget<ErrorWidget>(find.byType(ErrorWidget)).message, startsWith('Bad state: Behave!'));
+  });
+
   testWidgets('RawView attaches/detaches itself to surrounding ViewHooks', (WidgetTester tester) async {
     final PipelineOwner pipelineOwner = PipelineOwner();
     final FakeRenderViewRepository repository = FakeRenderViewRepository();

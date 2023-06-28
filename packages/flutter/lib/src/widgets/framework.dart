@@ -3451,6 +3451,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// If this object is a [RenderObjectElement], the render object is the one at
   /// this location in the tree. Otherwise, this getter will walk down the tree
   /// until it finds a [RenderObjectElement].
+  ///
+  /// Some locations in the tree are not backed a render object. In those cases,
+  /// this getter returns null. This may happen, if the element is located
+  /// outside of a [View] since only the element subtree rooted in a view has a
+  /// render tree associated with it.
   RenderObject? get renderObject {
     Element? current = this;
     while (current != null) {
