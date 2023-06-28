@@ -2019,7 +2019,7 @@ mixin WidgetInspectorService {
   _printEdition() {
     if (_printed) return;
     _printed = true;
-    debugPrint('!!!!!!!!!! debugging flutter 3');
+    debugPrint('!!!!!!!!!! debugging flutter');
   }
 
   Future<Map<String, Object?>> _getLayoutExplorerNode(
@@ -2027,18 +2027,18 @@ mixin WidgetInspectorService {
   ) {
     _printEdition();
 
-    final String? id = parameters['id'];
+    final String? diagnosticableId = parameters['id'];
     final int subtreeDepth = int.parse(parameters['subtreeDepth']!);
     final String? groupName = parameters['groupName'];
     Map<String, dynamic>? result = <String, dynamic>{};
-    final Object? root = toObject(id);
-    if (root is! Diagnosticable) {
+    final DiagnosticsNode? root = _idToDiagnosticsNode(diagnosticableId);
+    if (root == null) {
       return Future<Map<String, dynamic>>.value(<String, dynamic>{
         'result': result,
       });
     }
     result = _nodeToJson(
-      root.toDiagnosticsNode(),
+      root,
       InspectorSerializationDelegate(
         groupName: groupName,
         summaryTree: true,
