@@ -1077,7 +1077,7 @@ targets:
 
   - name: Linux web_benchmarks_canvaskit
     recipe: devicelab/devicelab_drone
-    #presubmit: false TODO: Add this back before submitting
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -1091,7 +1091,7 @@ targets:
 
   - name: Linux web_benchmarks_html
     recipe: devicelab/devicelab_drone
-    #presubmit: false TODO: Add this back before submitting
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -1110,7 +1110,7 @@ targets:
   - name: Linux web_benchmarks_skwasm
     bringup: true
     recipe: devicelab/devicelab_drone
-    #presubmit: false TODO: Add this back before submitting
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
