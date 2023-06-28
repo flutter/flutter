@@ -22,6 +22,7 @@ export 'package:flutter/gestures.dart' show HitTestResult;
 // late BuildContext context;
 
 /// The glue between the render tree and the Flutter engine.
+// TODO
 mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable implements RenderViewRepository {
   @override
   void initInstances() {
@@ -217,7 +218,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// [RenderView] to it if the they want to use this deprecated property.
   ///
   /// Instead of accessing this deprecated property, consider interacting with
-  /// the root of the pipelineOwner tree (exposed in [rootPipelineOwner]) or
+  /// the root of the [PipelineOwner] tree (exposed in [rootPipelineOwner]) or
   /// instead of accessing the [SemanticsOwner] of any [PipelineOwner] consider
   /// interacting with the [SemanticsBinding] (exposed via
   /// [SemanticsBinding.instance]) directly.
@@ -267,7 +268,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     view: platformDispatcher.implicitView!,
   );
 
-  ///
   PipelineOwner createRootPipelineOwner() {
     return PipelineOwner(onSemanticsUpdate: (ui.SemanticsUpdate update) {
       assert(() {
@@ -319,7 +319,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     assert(!_viewIdToRenderView.containsValue(view));
     assert(!_viewIdToRenderView.containsKey(viewId));
     _viewIdToRenderView[viewId] = view;
-    // TODO(goderbauer): if view is [renderView] we may not want to overwrite manually set configs.
+    // TODO: if view is [renderView] we may not want to overwrite manually set configs.
     view.configuration = createViewConfigurationFor(view);
   }
 
@@ -332,7 +332,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     _viewIdToRenderView.remove(viewId);
   }
 
-  ///
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
     final FlutterView view = renderView.flutterView;
     final double devicePixelRatio = view.devicePixelRatio;
@@ -700,7 +699,6 @@ void debugDumpSemanticsTree([DebugSemanticsDumpOrder childOrder = DebugSemantics
   debugPrint(_debugCollectSemanticsTrees(childOrder));
 }
 
-///
 void debugDumpPipelineOwnerTree() {
   final StringBuffer result = StringBuffer();
   int indent = 0;
@@ -732,6 +730,7 @@ void debugDumpPipelineOwnerTree() {
 /// rendering layer directly. If you are writing to a higher-level
 /// library, such as the Flutter Widgets library, then you would use
 /// that layer's binding (see [WidgetsFlutterBinding]).
+// TODO
 class RenderingFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding, ServicesBinding, SemanticsBinding, PaintingBinding, RendererBinding {
   /// Returns an instance of the binding that implements
   /// [RendererBinding]. If no binding has yet been initialized, the
@@ -772,6 +771,7 @@ class _BindingPipelineManifold extends ChangeNotifier implements PipelineManifol
   }
 }
 
+// TODO
 class _ReusableRenderView extends RenderView {
   _ReusableRenderView({required super.view});
 

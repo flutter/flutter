@@ -272,6 +272,7 @@ abstract mixin class WidgetsBindingObserver {
 }
 
 /// The glue between the widgets layer and the Flutter engine.
+// TODO
 mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {
@@ -1000,7 +1001,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     ));
   }
 
-  ///
   void attachToBuildOwner(RootWidget widget) {
     final bool isBootstrapFrame = rootElement == null;
     _readyToProduceFrames = true;
@@ -1119,9 +1119,7 @@ void debugDumpApp() {
   debugPrint(_debugDumpAppString());
 }
 
-///
 class RootWidget extends Widget {
-  ///
   const RootWidget({
     super.key,
     this.child,
@@ -1139,7 +1137,6 @@ class RootWidget extends Widget {
   @override
   RootElement createElement() => RootElement(this);
 
-  ///
   RootElement attach(BuildOwner owner, [ RootElement? element ]) {
     if (element == null) {
       owner.lockState(() {
@@ -1161,9 +1158,7 @@ class RootWidget extends Widget {
   String toStringShort() => debugShortDescription ?? super.toStringShort();
 }
 
-///
 class RootElement extends Element with RootElementMixin {
-  ///
   RootElement(RootWidget super.widget);
 
   Element? _child;

@@ -4429,7 +4429,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _lifecycleState = _ElementLifecycle.defunct;
   }
 
-  ///
   bool debugWantsRenderObjectForSlot(Object? slot) => true;
 
   @override

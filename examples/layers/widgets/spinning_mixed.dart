@@ -100,13 +100,13 @@ void main() {
   addFlexChildSolidColor(flexRoot, const Color(0xFF0000FF), flex: 1);
 
   transformBox = RenderTransform(child: flexRoot, transform: Matrix4.identity(), alignment: Alignment.center);
-  final RenderPadding padding = RenderPadding(padding: const EdgeInsets.all(80.0), child: transformBox);
+  final RenderPadding root = RenderPadding(padding: const EdgeInsets.all(80.0), child: transformBox);
 
   // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
   assert(binding.platformDispatcher.implicitView != null);
   final RenderView view = RenderView(
     view: binding.platformDispatcher.implicitView!,
-    child: padding,
+    child: root,
   );
   binding.rootPipelineOwner.rootNode = view;
   binding.addRenderView(view);

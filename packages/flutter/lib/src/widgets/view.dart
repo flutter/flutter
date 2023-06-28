@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: public_member_api_docs
-
 import 'dart:collection';
 import 'dart:ui' show FlutterView, SemanticsUpdate;
 
@@ -20,6 +18,7 @@ import 'media_query.dart';
 /// The provided [child] is wrapped in a [MediaQuery] constructed from the given
 /// [view].
 ///
+// TODO
 /// In a future version of Flutter, the functionality of this widget will be
 /// extended to actually bootstrap the render tree that is going to be rendered
 /// into the provided [view]. This will enable rendering content into multiple
@@ -31,6 +30,7 @@ import 'media_query.dart';
 /// Internally, this limitation is enforced by a [GlobalObjectKey] that derives
 /// its identity from the [view] provided to this widget.
 class View extends StatelessWidget {
+  // TODO
   /// Injects the provided [view] into the widget tree.
   View({
     super.key,
@@ -157,8 +157,8 @@ class RawView extends RenderObjectWidget {
 
   RawView._deprecated({
     required this.view,
-    PipelineOwner? deprecatedPipelineOwner,
-    RenderView? deprecatedRenderView,
+    required PipelineOwner? deprecatedPipelineOwner,
+    required RenderView? deprecatedRenderView,
     required this.builder,
   }) : _deprecatedPipelineOwner = deprecatedPipelineOwner,
        _deprecatedRenderView = deprecatedRenderView,
@@ -181,7 +181,7 @@ class RawView extends RenderObjectWidget {
     );
   }
 
-  // No need to implement updateRenderObject: The View widget uses the view as a
+  // No need to implement updateRenderObject: RawView uses the view as a
   // GlobalKey, so we never need to update the RenderObject with a new view.
 }
 
@@ -215,7 +215,7 @@ class _RawViewElement extends RenderTreeRootElement {
   Element? _child;
 
   void _updateChild() {
-    // TODO(goderbauer): Error catching around builder.
+    // TODO
     final Widget child = (widget as RawView).builder(this, _effectivePipelineOwner);
     _child = updateChild(_child, child, null);
   }
@@ -449,7 +449,6 @@ class ViewAnchor extends StatelessWidget {
   }
 }
 
-// TODO(goderbauer): consider splitting this in two.
 class _MultiChildComponentElement extends Element {
   _MultiChildComponentElement(super.widget);
 
@@ -596,7 +595,7 @@ class _MultiChildComponentElement extends Element {
   bool get debugDoingBuild => false; // This element does not have a concept of "building".
 
   @override
-  // TODO(window): Update documentation on renderObject getter.
+  // TODO: Update documentation on renderObject getter.
   Element? get renderObjectAttachingChild => _childElement;
 
   @override
@@ -615,6 +614,7 @@ class _MultiChildComponentElement extends Element {
   }
 }
 
+// TODO
 @optionalTypeArgs
 class _DeprecatedRawViewKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   const _DeprecatedRawViewKey(this.view, this.owner, this.renderView) : super.constructor();

@@ -1374,7 +1374,7 @@ class PipelineOwner {
   /// No children may be removed after the [PipelineOwner] has started calling
   /// [flushLayout] on any of its children until the end of the current frame.
   void dropChild(PipelineOwner child) {
-    assert(child._debugParent == this, '${child._debugParent} == $this');
+    assert(child._debugParent == this);
     assert(_children.contains(child));
     assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.remove(child);

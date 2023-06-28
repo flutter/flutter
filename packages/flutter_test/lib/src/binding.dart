@@ -510,7 +510,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// See also [TestFlutterView.physicalSize], which has a similar effect.
   // TODO(pdblasi-google): Deprecate this. https://github.com/flutter/flutter/issues/123881
-  // TODO(goderbauer): Update doc that this only affects [renderView].
+  // TODO: Update doc that this only affects [renderView].
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
@@ -2012,7 +2012,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
-    // TODO(goderbauer): This implementation is somewhat broken, see https://github.com/flutter/flutter/issues/124071
+    // TODO(goderbauer): This implementation is broken, see https://github.com/flutter/flutter/issues/124071
     if (renderView == this.renderView) { // ignore: deprecated_member_use
       return TestViewConfiguration.fromView(
         size: _surfaceSize ?? _kDefaultTestViewportSize,

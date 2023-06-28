@@ -13,6 +13,10 @@ import 'framework.dart';
 /// inserted into. It must be a [RenderObject] that implements the
 /// [RenderObjectWithChildMixin] protocol. The type argument `T` is the kind of
 /// [RenderObject] that the container expects as its child.
+///
+/// The [RenderObjectToWidgetAdapter] is an alternative to [RootWidget] for
+/// bootstrapping the element tree. Unlike [RootWidget] it requires the
+/// existence of a render tree (the [container]) to attach the element tree to.
 class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWidget {
   /// Creates a bridge from a [RenderObject] to an [Element] tree.
   ///
@@ -48,8 +52,6 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   ///
   /// If `element` is null, this function will create a new element. Otherwise,
   /// the given element will have an update scheduled to switch to this widget.
-  ///
-  /// Used by [runApp] to bootstrap applications.
   RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [ RenderObjectToWidgetElement<T>? element ]) {
     if (element == null) {
       owner.lockState(() {
@@ -71,16 +73,14 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   String toStringShort() => debugShortDescription ?? super.toStringShort();
 }
 
-/// The root of the element tree that is hosted by a [RenderObject].
+/// The root of an element tree that is hosted by a [RenderObject].
 ///
 /// This element class is the instantiation of a [RenderObjectToWidgetAdapter]
 /// widget. It can be used only as the root of an [Element] tree (it cannot be
 /// mounted into another [Element]; it's parent must be null).
 ///
 /// In typical usage, it will be instantiated for a [RenderObjectToWidgetAdapter]
-/// whose container is the [RenderView] that connects to the Flutter engine. In
-/// this usage, it is normally instantiated by the bootstrapping logic in the
-/// [WidgetsFlutterBinding] singleton created by [runApp].
+/// whose container is the [RenderView].
 class RenderObjectToWidgetElement<T extends RenderObject> extends RenderTreeRootElement with RootElementMixin {
   /// Creates an element that is hosted by a [RenderObject].
   ///

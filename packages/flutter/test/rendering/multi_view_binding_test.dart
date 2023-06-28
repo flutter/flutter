@@ -199,7 +199,6 @@ class PipelineOwnerSpy extends PipelineOwner {
 }
 
 class SemanticsOwnerSpy extends Fake implements SemanticsOwner {
-
   final List<(int, SemanticsAction, Object?)> performedActions = <(int, SemanticsAction, Object?)>[];
 
   @override

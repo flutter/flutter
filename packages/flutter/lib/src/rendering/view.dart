@@ -434,10 +434,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 /// [RenderView.debugRemovePaintCallback].
 typedef DebugPaintCallback = void Function(PaintingContext context, Offset offset, RenderView renderView);
 
-///
 abstract class RenderViewRepository {
-  ///
   void addRenderView(RenderView view);
-  ///
   void removeRenderView(RenderView view);
 }
