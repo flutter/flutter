@@ -42,12 +42,15 @@ class LinkedText extends StatelessWidget {
   ///  * [InlineLinkedText.new], which is like this, but for inline text.
   LinkedText({
     super.key,
-    required String text,
+    String? text,
+    List<InlineSpan>? spans,
     this.style,
     Iterable<TextRange>? ranges,
     UriStringCallback? onTap,
     LinkBuilder? linkBuilder,
-  }) : textLinkers = <TextLinker>[
+  }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
+       assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
+       textLinkers = <TextLinker>[
          TextLinker(
            rangesFinder: ranges == null
                ? InlineLinkedText.urlRangesFinder
@@ -55,7 +58,7 @@ class LinkedText extends StatelessWidget {
            linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
          ),
        ],
-       spans = <InlineSpan>[
+       spans = spans ?? <InlineSpan>[
          TextSpan(
            text: text,
          ),
@@ -73,18 +76,21 @@ class LinkedText extends StatelessWidget {
   ///  * [InlineLinkedText.regExp], which is like this, but for inline text.
   LinkedText.regExp({
     super.key,
-    required String text,
+    String? text,
+    List<InlineSpan>? spans,
     required RegExp regExp,
     this.style,
     UriStringCallback? onTap,
     LinkBuilder? linkBuilder,
-  }) : textLinkers = <TextLinker>[
+  }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
+       assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
+       textLinkers = <TextLinker>[
          TextLinker(
            rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
            linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
          ),
        ],
-       spans = <InlineSpan>[
+       spans = spans ?? <InlineSpan>[
          TextSpan(
            text: text,
          ),
@@ -109,31 +115,18 @@ class LinkedText extends StatelessWidget {
   ///    text.
   LinkedText.textLinkers({
     super.key,
-    required String text,
+    String? text,
+    List<InlineSpan>? spans,
     required this.textLinkers,
     this.style,
-  }) : spans = <InlineSpan>[
+  }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
+       assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
+       spans = spans ?? <InlineSpan>[
          TextSpan(
            text: text,
          ),
        ],
        assert(textLinkers.isNotEmpty);
-
-  // TODO(justinmc): I need ways to take RegExp, etc. like other constructors, too.
-  // TODO(justinmc): Should this take a single span instead of a list? If you
-  // did want to linkify a list, you could wrap them in a single TextSpan.
-  LinkedText.spans({
-    super.key,
-    required this.spans,
-    UriStringCallback? onTap,
-    this.style,
-    List<TextLinker>? textLinkers,
-  }) : textLinkers = textLinkers ?? <TextLinker>[
-         TextLinker(
-           rangesFinder: InlineLinkedText.urlRangesFinder,
-           linkBuilder: InlineLinkedText.getDefaultLinkBuilder(onTap),
-         ),
-       ];
 
   /// The spans on which to create links by applying [textLinkers].
   final List<InlineSpan> spans;
@@ -149,15 +142,6 @@ class LinkedText extends StatelessWidget {
   /// If not provided, the [DefaultTextStyle] at this point in the tree will be
   /// used.
   final TextStyle? style;
-
-  static List<TextLinker> _getDefaultTextLinkers(UriStringCallback? onTap) {
-    return <TextLinker>[
-      TextLinker(
-        rangesFinder: InlineLinkedText.urlRangesFinder,
-        linkBuilder: InlineLinkedText.getDefaultLinkBuilder(onTap),
-      ),
-    ];
-  }
 
   @override
   Widget build(BuildContext context) {
