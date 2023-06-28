@@ -132,6 +132,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.selectedTrailingIcon,
     this.enableFilter = false,
     this.enableSearch = true,
+    this.enableScrollToHighlight = true,
     this.textStyle,
     this.inputDecorationTheme,
     this.menuStyle,
@@ -139,7 +140,6 @@ class DropdownMenu<T> extends StatefulWidget {
     this.initialSelection,
     this.onSelected,
     this.requestFocusOnTap,
-    this.enableScrollToHighlight = true,
     required this.dropdownMenuEntries,
   });
 
