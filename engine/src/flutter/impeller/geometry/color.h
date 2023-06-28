@@ -222,7 +222,7 @@ struct Color {
 
   /**
    * @brief Return a color that is linearly interpolated between colors a
-   * and b, according to the value of t.
+   *        and b, according to the value of t.
    *
    * @param a The lower color.
    * @param b The upper color.
@@ -230,9 +230,7 @@ struct Color {
    * @return constexpr Color
    */
   constexpr static Color Lerp(Color a, Color b, Scalar t) {
-    Scalar tt = 1.0f - t;
-    return {a.red * tt + b.red * t, a.green * tt + b.green * t,
-            a.blue * tt + b.blue * t, a.alpha * tt + b.alpha * t};
+    return a + (b - a) * t;
   }
 
   constexpr Color Clamp01() const {
@@ -853,7 +851,7 @@ struct Color {
   ///
   ///        If either the source or destination are premultiplied, the result
   ///        will be incorrect.
-  Color Blend(const Color& source, BlendMode blend_mode) const;
+  Color Blend(Color source, BlendMode blend_mode) const;
 
   /// @brief A color filter that transforms colors through a 4x5 color matrix.
   ///

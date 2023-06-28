@@ -2098,7 +2098,7 @@ static Picture BlendModeTest(BlendMode blend_mode,
   ///
 
   canvas.Save();
-  for (auto& color : source_colors) {
+  for (const auto& color : source_colors) {
     canvas.Save();
     {
       canvas.ClipRect(Rect::MakeXYWH(50, 50, 100, 100));
@@ -2134,7 +2134,7 @@ static Picture BlendModeTest(BlendMode blend_mode,
   // fully transparent black. SourceOver blend the result onto the parent pass.
   canvas.SaveLayer({});
   // canvas.DrawPaint({.color = destination_color});
-  for (auto& color : source_colors) {
+  for (const auto& color : source_colors) {
     // Simply write the CPU blended color to the pass.
     canvas.DrawRect({50, 50, 100, 100},
                     {.color = destination_color.Blend(color, blend_mode),

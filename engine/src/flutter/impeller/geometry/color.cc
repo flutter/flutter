@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <sstream>
 #include <type_traits>
 
@@ -128,7 +129,7 @@ Color::Color(const ColorHSB& hsbColor) : Color(hsbColor.ToRGBA()) {}
 Color::Color(const Vector4& value)
     : red(value.x), green(value.y), blue(value.z), alpha(value.w) {}
 
-static constexpr Color Min(Color c, float threshold) {
+static constexpr inline Color Min(Color c, float threshold) {
   return Color(std::min(c.red, threshold), std::min(c.green, threshold),
                std::min(c.blue, threshold), std::min(c.alpha, threshold));
 }
@@ -136,66 +137,90 @@ static constexpr Color Min(Color c, float threshold) {
 // The following HSV utilities correspond to the W3C blend definitions
 // implemented in: impeller/compiler/shader_lib/impeller/blending.glsl
 
-static constexpr Scalar Luminosity(Vector3 color) {
-  return color.x * 0.3 + color.y * 0.59 + color.z * 0.11;
+static constexpr inline Scalar Luminosity(Vector3 color) {
+  return color.x * 0.3f + color.y * 0.59f + color.z * 0.11f;
 }
 
-static constexpr Vector3 ClipColor(Vector3 color) {
+static constexpr inline Vector3 ClipColor(Vector3 color) {
   Scalar lum = Luminosity(color);
   Scalar mn = std::min(std::min(color.x, color.y), color.z);
   Scalar mx = std::max(std::max(color.x, color.y), color.z);
-  if (mn < 0.0) {
+  // `lum - mn` and `mx - lum` will always be >= 0 in the following conditions,
+  // so adding a tiny value is enough to make these divisions safe.
+  if (mn < 0.0f) {
     color = lum + (((color - lum) * lum) / (lum - mn + kEhCloseEnough));
   }
   if (mx > 1.0) {
-    color = lum + (((color - lum) * (1.0 - lum)) / (mx - lum + kEhCloseEnough));
+    color =
+        lum + (((color - lum) * (1.0f - lum)) / (mx - lum + kEhCloseEnough));
   }
-  return Vector3();
+  return color;
 }
 
-static constexpr Vector3 SetLuminosity(Vector3 color, Scalar luminosity) {
+static constexpr inline Vector3 SetLuminosity(Vector3 color,
+                                              Scalar luminosity) {
   Scalar relative_lum = luminosity - Luminosity(color);
   return ClipColor(color + relative_lum);
 }
 
-static constexpr Scalar Saturation(Vector3 color) {
+static constexpr inline Scalar Saturation(Vector3 color) {
   return std::max(std::max(color.x, color.y), color.z) -
          std::min(std::min(color.x, color.y), color.z);
 }
 
-static constexpr Vector3 SetSaturation(Vector3 color, Scalar saturation) {
+static constexpr inline Vector3 SetSaturation(Vector3 color,
+                                              Scalar saturation) {
   Scalar mn = std::min(std::min(color.x, color.y), color.z);
   Scalar mx = std::max(std::max(color.x, color.y), color.z);
   return (mn < mx) ? ((color - mn) * saturation) / (mx - mn) : Vector3();
 }
 
-static constexpr Vector3 ComponentChoose(Vector3 a,
-                                         Vector3 b,
-                                         Vector3 value,
-                                         Scalar cutoff) {
+static constexpr inline Vector3 ComponentChoose(Vector3 a,
+                                                Vector3 b,
+                                                Vector3 value,
+                                                Scalar cutoff) {
   return Vector3(value.x > cutoff ? b.x : a.x,  //
                  value.y > cutoff ? b.y : a.y,  //
                  value.z > cutoff ? b.z : a.z   //
   );
 }
 
-static constexpr Vector3 ToRGB(Color color) {
+static constexpr inline Vector3 ToRGB(Color color) {
   return {color.red, color.green, color.blue};
 }
 
-static constexpr Color FromRGB(Vector3 color, Scalar alpha) {
+static constexpr inline Color FromRGB(Vector3 color, Scalar alpha) {
   return {color.x, color.y, color.z, alpha};
 }
 
-Color Color::Blend(const Color& src, BlendMode blend_mode) const {
-  const Color& dst = *this;
+static constexpr inline Color DoColorBlend(
+    Color d,
+    Color s,
+    const std::function<Vector3(Vector3, Vector3)>& blend_rgb_func) {
+  d = d.Premultiply();
+  s = s.Premultiply();
+  const Vector3 rgb = blend_rgb_func(ToRGB(d), ToRGB(s));
+  const Color blended = Color::Lerp(s, FromRGB(rgb, d.alpha), d.alpha);
+  return Color::Lerp(d, blended, s.alpha).Unpremultiply();
+}
 
-  static auto apply_rgb_srcover_alpha = [&](auto f) -> Color {
-    return Color(f(src.red, dst.red), f(src.green, dst.green),
-                 f(src.blue, dst.blue),
-                 dst.alpha * (1 - src.alpha) + src.alpha  // srcOver alpha
-    );
-  };
+static constexpr inline Color DoColorBlendComponents(
+    Color d,
+    Color s,
+    const std::function<Scalar(Scalar, Scalar)>& blend_func) {
+  d = d.Premultiply();
+  s = s.Premultiply();
+  const Color blended = Color::Lerp(s,
+                                    Color(blend_func(d.red, s.red),      //
+                                          blend_func(d.green, s.green),  //
+                                          blend_func(d.blue, s.blue),    //
+                                          d.alpha),
+                                    d.alpha);
+  return Color::Lerp(d, blended, s.alpha).Unpremultiply();
+}
+
+Color Color::Blend(Color src, BlendMode blend_mode) const {
+  Color dst = *this;
 
   switch (blend_mode) {
     case BlendMode::kClear:
@@ -246,127 +271,95 @@ Color Color::Blend(const Color& src, BlendMode blend_mode) const {
       // r = s*d
       return (src.Premultiply() * dst.Premultiply()).Unpremultiply();
     case BlendMode::kScreen: {
-      // r = s + d - s*d
-      auto s = src.Premultiply();
-      auto d = dst.Premultiply();
-      return (s + d - s * d).Unpremultiply();
+      return DoColorBlend(dst, src, [](Vector3 d, Vector3 s) -> Vector3 {
+        return s + d - s * d;
+      });
     }
     case BlendMode::kOverlay:
-      return apply_rgb_srcover_alpha([&](auto s, auto d) {
-        if (d * 2 <= dst.alpha) {
-          return 2 * s * d;
-        }
-        return src.alpha * dst.alpha - 2 * (dst.alpha - d) * (src.alpha - s);
+      return DoColorBlend(dst, src, [](Vector3 d, Vector3 s) -> Vector3 {
+        // The same as HardLight, but with the source and destination reversed.
+        Vector3 screen_src = 2.0 * d - 1.0;
+        Vector3 screen = screen_src + s - screen_src * s;
+        return ComponentChoose(s * (2.0 * d),  //
+                               screen,         //
+                               d,              //
+                               0.5);
       });
-    case BlendMode::kDarken: {
-      return apply_rgb_srcover_alpha([&](auto s, auto d) {
-        return (1 - dst.alpha) * s + (1 - src.alpha) * d + std::min(s, d);
-      });
-    }
+    case BlendMode::kDarken:
+      return DoColorBlend(
+          dst, src, [](Vector3 d, Vector3 s) -> Vector3 { return d.Min(s); });
     case BlendMode::kLighten:
-      return apply_rgb_srcover_alpha([&](auto s, auto d) {
-        return (1 - dst.alpha) * s + (1 - src.alpha) * d + std::max(s, d);
-      });
+      return DoColorBlend(
+          dst, src, [](Vector3 d, Vector3 s) -> Vector3 { return d.Max(s); });
     case BlendMode::kColorDodge:
-      return apply_rgb_srcover_alpha([&](auto s, auto d) {
-        if (d == 0) {
-          return s * (1 - src.alpha);
+      return DoColorBlendComponents(dst, src, [](Scalar d, Scalar s) -> Scalar {
+        if (d < kEhCloseEnough) {
+          return 0.0f;
         }
-        if (s == src.alpha) {
-          return s + dst.alpha * (1 - src.alpha);
+        if (1.0 - s < kEhCloseEnough) {
+          return 1.0f;
         }
-        return src.alpha *
-                   std::min(dst.alpha, d * src.alpha / (src.alpha - s)) +
-               s * (1 - dst.alpha + dst.alpha * (1 - src.alpha));
+        return std::min(1.0f, d / (1.0f - s));
       });
     case BlendMode::kColorBurn:
-      return apply_rgb_srcover_alpha([&](auto s, auto d) {
-        if (s == 0) {
-          return dst.alpha * (1 - src.alpha);
+      return DoColorBlendComponents(dst, src, [](Scalar d, Scalar s) -> Scalar {
+        if (1.0 - d < kEhCloseEnough) {
+          return 1.0f;
         }
-        if (d == dst.alpha) {
-          return d + s * (1 - dst.alpha);
+        if (s < kEhCloseEnough) {
+          return 0.0f;
         }
-        // s.a * (d.a - min(d.a, (d.a - s) * s.a/s)) + s * (1-d.a) + d.a * (1 -
-        // s.a)
-        return src.alpha *
-                   (dst.alpha -
-                    std::min(dst.alpha, (dst.alpha - d) * src.alpha / s)) +
-               s * (1 - dst.alpha) + dst.alpha * (1 - src.alpha);
+        return 1.0f - std::min(1.0f, (1.0f - d) / s);
       });
     case BlendMode::kHardLight:
-      return apply_rgb_srcover_alpha([&](auto s, auto d) {
-        if (src.alpha >= s * (1 - dst.alpha) + d * (1 - src.alpha) + 2 * s) {
-          return 2 * s * d;
-        }
-        // s.a * d.a - 2 * (d.a - d) * (s.a - s)
-        return src.alpha * dst.alpha - 2 * (dst.alpha - d) * (src.alpha - s);
+      return DoColorBlend(dst, src, [](Vector3 d, Vector3 s) -> Vector3 {
+        Vector3 screen_src = 2.0 * s - 1.0;
+        Vector3 screen = screen_src + d - screen_src * d;
+        return ComponentChoose(d * (2.0 * s),  //
+                               screen,         //
+                               s,              //
+                               0.5);
       });
-    case BlendMode::kSoftLight: {
-      Vector3 dst_rgb = ToRGB(dst);
-      Vector3 src_rgb = ToRGB(src);
-      Vector3 d = ComponentChoose(
-          ((16.0 * dst_rgb - 12.0) * dst_rgb + 4.0) * dst_rgb,  //
-          Vector3(std::sqrt(dst_rgb.x), std::sqrt(dst_rgb.y),
-                  std::sqrt(dst_rgb.z)),  //
-          dst_rgb,                        //
-          0.25);
-      Color blended = FromRGB(
-          ComponentChoose(
-              dst_rgb - (1.0 - 2.0 * src_rgb) * dst_rgb * (1.0 - dst_rgb),  //
-              dst_rgb + (2.0 * src_rgb - 1.0) * (d - dst_rgb),              //
-              src_rgb,                                                      //
-              0.5),
-          dst.alpha);
-      return blended + dst * (1 - blended.alpha);
-    }
+    case BlendMode::kSoftLight:
+      return DoColorBlend(dst, src, [](Vector3 d, Vector3 s) -> Vector3 {
+        Vector3 D = ComponentChoose(((16.0 * d - 12.0) * d + 4.0) * d,  //
+                                    Vector3(std::sqrt(d.x), std::sqrt(d.y),
+                                            std::sqrt(d.z)),  //
+                                    d,                        //
+                                    0.25);
+        return ComponentChoose(d - (1.0 - 2.0 * s) * d * (1.0 - d),  //
+                               d + (2.0 * s - 1.0) * (D - d),        //
+                               s,                                    //
+                               0.5);
+      });
     case BlendMode::kDifference:
-      return apply_rgb_srcover_alpha([&](auto s, auto d) {
-        // s + d - 2 * min(s * d.a, d * s.a);
-        return s + d - 2 * std::min(s * dst.alpha, d * src.alpha);
+      return DoColorBlend(dst, src, [](Vector3 d, Vector3 s) -> Vector3 {
+        return (d - s).Abs();
       });
     case BlendMode::kExclusion:
-      return apply_rgb_srcover_alpha([&](auto s, auto d) {
-        // s + d - 2 * s * d
-        return s + d - 2 * s * d;
+      return DoColorBlend(dst, src, [](Vector3 d, Vector3 s) -> Vector3 {
+        return d + s - 2.0f * d * s;
       });
     case BlendMode::kMultiply:
-      return apply_rgb_srcover_alpha([&](auto s, auto d) {
-        // s * (1 - d.a) + d * (1 - s.a) + (s * d)
-        return s * (1 - dst.alpha) + d * (1 - src.alpha) + (s * d);
-      });
+      return DoColorBlend(
+          dst, src, [](Vector3 d, Vector3 s) -> Vector3 { return d * s; });
     case BlendMode::kHue: {
-      Vector3 dst_rgb = ToRGB(dst);
-      Vector3 src_rgb = ToRGB(src);
-      Color blended =
-          FromRGB(SetLuminosity(SetSaturation(src_rgb, Saturation(dst_rgb)),
-                                Luminosity(dst_rgb)),
-                  dst.alpha);
-      return blended + dst * (1 - blended.alpha);
+      return DoColorBlend(dst, src, [](Vector3 d, Vector3 s) -> Vector3 {
+        return SetLuminosity(SetSaturation(s, Saturation(d)), Luminosity(d));
+      });
     }
-    case BlendMode::kSaturation: {
-      Vector3 dst_rgb = ToRGB(dst);
-      Vector3 src_rgb = ToRGB(src);
-      Color blended =
-          FromRGB(SetLuminosity(SetSaturation(dst_rgb, Saturation(src_rgb)),
-                                Luminosity(dst_rgb)),
-                  dst.alpha);
-      return blended + dst * (1 - blended.alpha);
-    }
-    case BlendMode::kColor: {
-      Vector3 dst_rgb = ToRGB(dst);
-      Vector3 src_rgb = ToRGB(src);
-      Color blended =
-          FromRGB(SetLuminosity(src_rgb, Luminosity(dst_rgb)), dst.alpha);
-      return blended + dst * (1 - blended.alpha);
-    }
-    case BlendMode::kLuminosity: {
-      Vector3 dst_rgb = ToRGB(dst);
-      Vector3 src_rgb = ToRGB(src);
-      Color blended =
-          FromRGB(SetLuminosity(dst_rgb, Luminosity(src_rgb)), dst.alpha);
-      return blended + dst * (1 - blended.alpha);
-    }
+    case BlendMode::kSaturation:
+      return DoColorBlend(dst, src, [](Vector3 d, Vector3 s) -> Vector3 {
+        return SetLuminosity(SetSaturation(d, Saturation(s)), Luminosity(d));
+      });
+    case BlendMode::kColor:
+      return DoColorBlend(dst, src, [](Vector3 d, Vector3 s) -> Vector3 {
+        return SetLuminosity(s, Luminosity(d));
+      });
+    case BlendMode::kLuminosity:
+      return DoColorBlend(dst, src, [](Vector3 d, Vector3 s) -> Vector3 {
+        return SetLuminosity(d, Luminosity(s));
+      });
   }
 }
 
