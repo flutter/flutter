@@ -4,6 +4,8 @@
 
 #include "export.h"
 #include "helpers.h"
+#include "third_party/skia/include/core/SkBBHFactory.h"
+#include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "wrappers.h"
 
