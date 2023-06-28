@@ -93,9 +93,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// `test` package. If set, it should be relatively large (minutes). It defaults
 /// to ten minutes for tests run by `flutter test`, and is unlimited for tests
 /// run by `flutter run`; specifically, it defaults to
-/// [TestWidgetsFlutterBinding.defaultTestTimeout]. (The `initialTimeout`
-/// parameter has no effect. It was previously used with
-/// [TestWidgetsFlutterBinding.addTime] but that feature was removed.)
+/// [TestWidgetsFlutterBinding.defaultTestTimeout].
 ///
 /// If the `semanticsEnabled` parameter is set to `true`,
 /// [WidgetTester.ensureSemantics] will have been called before the tester is
@@ -114,11 +112,6 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 ///
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
-///
-/// See also:
-///
-///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
-///    timeout and how to manually increase timeouts.
 ///
 /// ## Sample code
 ///
