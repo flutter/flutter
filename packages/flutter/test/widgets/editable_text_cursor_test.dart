@@ -927,6 +927,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Padding(
           padding: const EdgeInsets.only(top: 0.25),
           child: Material(

@@ -426,6 +426,7 @@ void main() {
       }
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: CustomScrollView(
               slivers: <Widget> [

@@ -24,6 +24,7 @@ void main() {
     }) {
     return MaterialApp(
       theme:  ThemeData(
+        useMaterial3: false,
         materialTapTargetSize: MaterialTapTargetSize.padded,
       ),
       home: Scaffold(

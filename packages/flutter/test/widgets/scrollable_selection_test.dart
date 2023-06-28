@@ -158,6 +158,7 @@ void main() {
   testWidgets('select to scroll works for small scrollable', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
         child: Scaffold(
