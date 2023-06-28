@@ -984,8 +984,6 @@ mixin WidgetInspectorService {
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
   void initServiceExtensions(RegisterServiceExtensionCallback registerServiceExtensionCallback) {
-    _printEdition();
-
     final FlutterExceptionHandler defaultExceptionHandler = FlutterError.presentError;
 
     if (isStructuredErrorsEnabled()) {
@@ -2015,18 +2013,9 @@ mixin WidgetInspectorService {
     );
   }
 
-  bool _printed = false;
-  _printEdition() {
-    if (_printed) return;
-    _printed = true;
-    debugPrint('!!!!!!!!!! debugging flutter');
-  }
-
   Future<Map<String, Object?>> _getLayoutExplorerNode(
     Map<String, String> parameters,
   ) {
-    _printEdition();
-
     final String? diagnosticableId = parameters['id'];
     final int subtreeDepth = int.parse(parameters['subtreeDepth']!);
     final String? groupName = parameters['groupName'];
