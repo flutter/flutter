@@ -71,10 +71,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       ..addFlag('plugins',
         defaultsTo: true,
         help: 'Whether to produce frameworks for the plugins. '
-              'Consider using "--no-plugins" if frameworks are not required for plugins.',
+              'Consider using "--no-plugins" if plugin frameworks are not required.',
       )
       ..addFlag('static',
-        help: 'Build plugins as static frameworks (if plugins option is enabled). Link on, but do not embed these frameworks in the existing Xcode project.',
+        help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
       )
       ..addOption('output',
         abbr: 'o',
