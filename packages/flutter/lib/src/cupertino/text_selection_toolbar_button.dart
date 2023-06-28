@@ -134,7 +134,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
           width: 13,
           height: 13,
           child: CustomPaint(
-            painter: _LiveTextIconPainter(),
+            painter: _LiveTextIconPainter(color: _kToolbarTextColor.resolveFrom(context)),
           ),
         );
     }
@@ -176,11 +176,12 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   }
 }
 
-
 class _LiveTextIconPainter extends CustomPainter {
+  _LiveTextIconPainter({required this.color});
+
+  final Color color;
 
   final Paint _painter = Paint()
-    ..color = CupertinoColors.black
     ..strokeCap = StrokeCap.round
     ..strokeJoin = StrokeJoin.round
     ..strokeWidth = 1
@@ -188,7 +189,7 @@ class _LiveTextIconPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-
+    _painter.color = color;
     canvas.save();
     canvas.translate(size.width / 2, size.height / 2);
 
@@ -202,7 +203,7 @@ class _LiveTextIconPainter extends CustomPainter {
 
     // Rotate to draw corner four times.
     final Matrix4 rotationMatrix = Matrix4.identity()..rotateZ(pi / 2);
-    for (int i = 0; i < 4;i ++) {
+    for (int i = 0; i < 4; i += 1) {
       canvas.drawPath(path, _painter);
       canvas.transform(rotationMatrix.storage);
     }
@@ -216,7 +217,7 @@ class _LiveTextIconPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+  bool shouldRepaint(covariant _LiveTextIconPainter oldDelegate) {
+    return oldDelegate.color != color;
   }
 }
