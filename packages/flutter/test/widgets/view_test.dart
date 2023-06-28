@@ -185,6 +185,33 @@ void main() {
     expect(outside, isNotNull);
   });
 
+  testWidgets('ViewAnchor layout order', (WidgetTester tester) async {
+    Finder findSpyWidget(int label) {
+      return find.byWidgetPredicate((Widget w) => w is SpyRenderWidget && w.label == label);
+    }
+
+    final List<String> log = <String>[];
+    await tester.pumpWidget(
+      SpyRenderWidget(
+        label: 1,
+        log: log,
+        child: ViewAnchor(
+          view: View(
+            view: FakeView(tester.view),
+            child: SpyRenderWidget(label: 2, log: log),
+          ),
+          child: SpyRenderWidget(label: 3, log: log),
+        ),
+      ),
+    );
+    log.clear();
+    tester.renderObject(findSpyWidget(3)).markNeedsLayout();
+    tester.renderObject(findSpyWidget(2)).markNeedsLayout();
+    tester.renderObject(findSpyWidget(1)).markNeedsLayout();
+    await tester.pump();
+    expect(log, <String>['layout 1', 'layout 3', 'layout 2']);
+  });
+
   testWidgets('visitChildren of ViewAnchor visits both children', (WidgetTester tester) async {
     await tester.pumpWidget(
       ViewAnchor(
@@ -334,6 +361,65 @@ void main() {
       expect(tester.element(find.byType(Builder)).renderObject, renderObject);
     });
   });
+
+  testWidgets('correctly switches between view configurations', (WidgetTester tester) async {
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: View(
+        view: tester.view,
+        deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: tester.binding.pipelineOwner,
+        deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: tester.binding.renderView,
+        child: const SizedBox(),
+      ),
+    );
+    RenderObject renderView = tester.renderObject(find.byType(View));
+    expect(renderView, same(tester.binding.renderView));
+    expect(renderView.owner, same(tester.binding.pipelineOwner));
+    expect(tester.renderObject(find.byType(SizedBox)).owner, same(tester.binding.pipelineOwner));
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: View(
+        view: tester.view,
+        child: const SizedBox(),
+      ),
+    );
+    renderView = tester.renderObject(find.byType(View));
+    expect(renderView, isNot(same(tester.binding.renderView)));
+    expect(renderView.owner, isNot(same(tester.binding.pipelineOwner)));
+    expect(tester.renderObject(find.byType(SizedBox)).owner, isNot(same(tester.binding.pipelineOwner)));
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: View(
+        view: tester.view,
+        deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: tester.binding.pipelineOwner,
+        deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: tester.binding.renderView,
+        child: const SizedBox(),
+      ),
+    );
+    renderView = tester.renderObject(find.byType(View));
+    expect(renderView, same(tester.binding.renderView));
+    expect(renderView.owner, same(tester.binding.pipelineOwner));
+    expect(tester.renderObject(find.byType(SizedBox)).owner, same(tester.binding.pipelineOwner));
+
+    expect(() => View(
+      view: tester.view,
+      deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: tester.binding.pipelineOwner,
+      child: const SizedBox(),
+    ), throwsAssertionError);
+    expect(() => View(
+      view: tester.view,
+      deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: tester.binding.renderView,
+      child: const SizedBox(),
+    ), throwsAssertionError);
+    expect(() => View(
+      view: FakeView(tester.view),
+      deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: tester.binding.renderView,
+      deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: tester.binding.pipelineOwner,
+      child: const SizedBox(),
+    ), throwsAssertionError);
+  });
 }
 
 Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
@@ -353,4 +439,40 @@ class FakeView extends TestFlutterView{
 
   @override
   final int viewId;
+}
+
+class SpyRenderWidget extends SizedBox {
+  const SpyRenderWidget({super.key, required this.label, required this.log, super.child});
+
+  final int label;
+  final List<String> log;
+
+  @override
+  RenderSpy createRenderObject(BuildContext context) {
+    return RenderSpy(
+      additionalConstraints: const BoxConstraints(),
+      label: label,
+      log: log,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSpy renderObject) {
+    renderObject
+      ..label = label
+      ..log = log;
+  }
+}
+
+class RenderSpy extends RenderConstrainedBox {
+  RenderSpy({required super.additionalConstraints, required this.label, required this.log});
+
+  int label;
+  List<String> log;
+
+  @override
+  void performLayout() {
+    log.add('layout $label');
+    super.performLayout();
+  }
 }

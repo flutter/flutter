@@ -69,6 +69,7 @@ class View extends StatelessWidget {
     required this.child,
   }) : _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
        _deprecatedRenderView = deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
+       assert((deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner == null) == (deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null)),
        assert(deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null || deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView.flutterView == view);
 
   /// The [FlutterView] into which [child] is drawn.
