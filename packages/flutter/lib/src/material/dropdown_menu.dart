@@ -139,7 +139,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.initialSelection,
     this.onSelected,
     this.requestFocusOnTap,
-    this.isScrollableToHighlight = true,
+    this.enableScrollToHighlight = true,
     required this.dropdownMenuEntries,
   });
 
@@ -227,6 +227,12 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to true as the search function could be commonly used.
   final bool enableSearch;
 
+  /// Determine whether the menu list can automatically scroll to the first
+  /// matching item. This will be ignored if [enableSearch] is false.
+  ///
+  /// Defaults to true.
+  final bool enableScrollToHighlight;
+
   /// The text style for the [TextField] of the [DropdownMenu];
   ///
   /// Defaults to the overall theme's [TextTheme.labelLarge]
@@ -277,9 +283,6 @@ class DropdownMenu<T> extends StatefulWidget {
   /// is provided. If this is an empty list, the menu will be empty and only
   /// contain space for padding.
   final List<DropdownMenuEntry<T>> dropdownMenuEntries;
-
-  ///
-  final bool isScrollableToHighlight;
 
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
@@ -519,7 +522,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     if (widget.enableSearch) {
       currentHighlight = search(filteredEntries, _textEditingController);
-      if (widget.isScrollableToHighlight) {
+      if (widget.enableScrollToHighlight) {
         scrollToHighlight();
       }
     }

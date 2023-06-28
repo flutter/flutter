@@ -1316,12 +1316,12 @@ void main() {
     expect(find.text(errorText), findsOneWidget);
   });
 
-  testWidgets('Can scroll to highlighted item', (WidgetTester tester) async {
+  testWidgets('Can scroll to the highlighted item', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
           requestFocusOnTap: true,
-          menuHeight: 100,
+          menuHeight: 100, // Give a small number so the list can only show 2 or 3 items.
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -1331,7 +1331,6 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
 
-    // The menu is not long enough to show Item 5.
     expect(find.text('Item 5').hitTestable(), findsNothing);
     await tester.enterText(find.byType(TextField), '5');
     await tester.pumpAndSettle();
