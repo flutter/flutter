@@ -26,6 +26,7 @@ const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
 const Curve _modalBottomSheetCurve = decelerateEasing;
 const double _minFlingVelocity = 700.0;
 const double _closeProgressThreshold = 0.5;
+const double _scrollControlledMaxHeightRatio = 9.0 / 16.0;
 
 /// A callback for when the user begins dragging the bottom sheet.
 ///
@@ -471,17 +472,18 @@ class _DragHandle extends StatelessWidget {
 }
 
 class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
-
   const _BottomSheetLayoutWithSizeListener({
     required this.animationValue,
     required this.isScrollControlled,
     required this.onChildSizeChanged,
+    required this.scrollControlledMaxHeightRatio,
     super.child,
   });
 
   final double animationValue;
   final bool isScrollControlled;
   final _SizeChangeCallback<Size> onChildSizeChanged;
+  final double scrollControlledMaxHeightRatio;
 
   @override
   _RenderBottomSheetLayoutWithSizeListener createRenderObject(BuildContext context) {
@@ -489,6 +491,7 @@ class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
       animationValue: animationValue,
       isScrollControlled: isScrollControlled,
       onChildSizeChanged: onChildSizeChanged,
+      scrollControlledMaxHeightRatio: scrollControlledMaxHeightRatio,
     );
   }
 
@@ -506,10 +509,13 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     required _SizeChangeCallback<Size> onChildSizeChanged,
     required double animationValue,
     required bool isScrollControlled,
+    required this.scrollControlledMaxHeightRatio,
   }) : _animationValue = animationValue,
        _isScrollControlled = isScrollControlled,
        _onChildSizeChanged = onChildSizeChanged,
        super(child);
+
+  final double scrollControlledMaxHeightRatio;
 
   Size _lastSize = Size.zero;
 
@@ -591,13 +597,13 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     return _getSize(constraints);
   }
 
-    BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
+  BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
       maxHeight: isScrollControlled
-        ? constraints.maxHeight
-        : constraints.maxHeight * 9.0 / 16.0,
+          ? constraints.maxHeight
+          : constraints.maxHeight * scrollControlledMaxHeightRatio,
     );
   }
 
@@ -634,12 +640,14 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.clipBehavior,
     this.constraints,
     this.isScrollControlled = false,
+    this.scrollControlledMaxHeightRatio = _scrollControlledMaxHeightRatio,
     this.enableDrag = true,
     this.showDragHandle = false,
   });
 
   final ModalBottomSheetRoute<T> route;
   final bool isScrollControlled;
+  final double scrollControlledMaxHeightRatio;
   final Color? backgroundColor;
   final double? elevation;
   final ShapeBorder? shape;
@@ -730,6 +738,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
               },
               animationValue: animationValue,
               isScrollControlled: widget.isScrollControlled,
+              scrollControlledMaxHeightRatio: widget.scrollControlledMaxHeightRatio,
               child: child,
             ),
           ),
@@ -815,6 +824,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.enableDrag = true,
     this.showDragHandle,
     required this.isScrollControlled,
+    this.scrollControlledMaxHeightRatio = _scrollControlledMaxHeightRatio,
     super.settings,
     this.transitionAnimationController,
     this.anchorPoint,
@@ -841,6 +851,12 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// a scrollable child, such as a [ListView] or a [GridView],
   /// to have the bottom sheet be draggable.
   final bool isScrollControlled;
+
+  /// The max height constraint ratio for the bottom sheet
+  /// when [isScrollControlled] set to true.
+  ///
+  /// Defaults to 9 / 16.
+  final double scrollControlledMaxHeightRatio;
 
   /// The bottom sheet's background color.
   ///
@@ -1026,6 +1042,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
             clipBehavior: clipBehavior,
             constraints: constraints,
             isScrollControlled: isScrollControlled,
+            scrollControlledMaxHeightRatio: scrollControlledMaxHeightRatio,
             enableDrag: enableDrag,
             showDragHandle: showDragHandle ?? (enableDrag && (sheetTheme.showDragHandle ?? false)),
           );
@@ -1192,6 +1209,7 @@ Future<T?> showModalBottomSheet<T>({
   BoxConstraints? constraints,
   Color? barrierColor,
   bool isScrollControlled = false,
+  double scrollControlledMaxHeightRatio = _scrollControlledMaxHeightRatio,
   bool useRootNavigator = false,
   bool isDismissible = true,
   bool enableDrag = true,
@@ -1210,6 +1228,7 @@ Future<T?> showModalBottomSheet<T>({
     builder: builder,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     isScrollControlled: isScrollControlled,
+    scrollControlledMaxHeightRatio: scrollControlledMaxHeightRatio,
     barrierLabel: barrierLabel ?? localizations.scrimLabel,
     barrierOnTapHint: localizations.scrimOnTapHint(localizations.bottomSheetLabel),
     backgroundColor: backgroundColor,
