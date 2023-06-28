@@ -593,8 +593,8 @@ class _AndroidViewState extends State<AndroidView> {
   }
 }
 
-abstract class _DarwinViewState<TPlatformView extends _DarwinView, TController extends DarwinPlatformViewController, TRender extends RenderDarwinPlatformView<TController>, TPrivateView extends _DarwinPlatformView<TController, TRender>> extends State<TPlatformView> {
-  TController? _controller;
+abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT extends DarwinPlatformViewController, RenderT extends RenderDarwinPlatformView<ControllerT>, ViewT extends _DarwinPlatformView<ControllerT, RenderT>> extends State<PlatformViewT> {
+  ControllerT? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
 
@@ -606,7 +606,7 @@ abstract class _DarwinViewState<TPlatformView extends _DarwinView, TController e
 
   @override
   Widget build(BuildContext context) {
-    final TController? controller = _controller;
+    final ControllerT? controller = _controller;
     if (controller == null) {
       return const SizedBox.expand();
     }
@@ -617,7 +617,7 @@ abstract class _DarwinViewState<TPlatformView extends _DarwinView, TController e
     );
   }
 
-  TPrivateView childPlatformView();
+  ViewT childPlatformView();
 
   void _initializeOnce() {
     if (_initialized) {
@@ -643,7 +643,7 @@ abstract class _DarwinViewState<TPlatformView extends _DarwinView, TController e
   }
 
   @override
-  void didUpdateWidget(TPlatformView oldWidget) {
+  void didUpdateWidget(PlatformViewT oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     final TextDirection newLayoutDirection = _findLayoutDirection();
@@ -677,7 +677,7 @@ abstract class _DarwinViewState<TPlatformView extends _DarwinView, TController e
 
   Future<void> _createNewUiKitView() async {
     final int id = platformViewsRegistry.getNextPlatformViewId();
-    final TController controller = await createNewViewController(
+    final ControllerT controller = await createNewViewController(
       id
     );
     if (!mounted) {
@@ -691,9 +691,9 @@ abstract class _DarwinViewState<TPlatformView extends _DarwinView, TController e
     });
   }
 
-  Future<TController> createNewViewController(int id);
+  Future<ControllerT> createNewViewController(int id);
 
-  void _onFocusChange(bool isFocused, TController controller) {
+  void _onFocusChange(bool isFocused, ControllerT controller) {
     if (!isFocused) {
       // Unlike Android, we do not need to send "clearFocus" channel message
       // to the engine, because focusing on another view will automatically

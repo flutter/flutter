@@ -406,6 +406,8 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
     updateGestureRecognizers(gestureRecognizers);
   }
 
+  // TODO(schectman): Add gesture functionality to macOS platform view when implemented.
+  // https://github.com/flutter/flutter/issues/128519
   /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     assert(
