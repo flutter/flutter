@@ -340,6 +340,7 @@ tasks.register("clean", Delete) {
       late MemoryFileSystem memoryFileSystem;
       late BufferLogger bufferLogger;
       late FakeAndroidProject project;
+      late MinSdkVersionMigration migration;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
@@ -349,52 +350,36 @@ tasks.register("clean", Delete) {
           root: memoryFileSystem.currentDirectory.childDirectory('android'),
         );
         project.appGradleFile.parent.createSync(recursive: true);
-      });
-
-      testWithoutContext('do nothing when files missing test', () {
-        final MinSdkVersionMigration migration = MinSdkVersionMigration(
+        migration = MinSdkVersionMigration(
             project,
             bufferLogger
         );
+      });
+
+      testWithoutContext('do nothing when files missing test', () {
         migration.migrate();
         expect(bufferLogger.traceText, contains(appGradleNotFoundWarning));
       });
 
       testWithoutContext('replace when api 16 test', () {
-        final MinSdkVersionMigration migration = MinSdkVersionMigration(
-            project,
-            bufferLogger
-        );
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk16));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
       });
 
       testWithoutContext('replace when api 17 test', () {
-        final MinSdkVersionMigration migration = MinSdkVersionMigration(
-            project,
-            bufferLogger
-        );
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk17));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
       });
 
       testWithoutContext('replace when api 18 test', () {
-        final MinSdkVersionMigration migration = MinSdkVersionMigration(
-            project,
-            bufferLogger
-        );
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk18));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
       });
 
       testWithoutContext('do nothing when >=api 19 test', () {
-        final MinSdkVersionMigration migration = MinSdkVersionMigration(
-            project,
-            bufferLogger
-        );
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(flutterMinSdk));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
