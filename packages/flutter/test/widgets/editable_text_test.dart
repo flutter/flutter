@@ -9719,7 +9719,7 @@ void main() {
       expect(tester.takeException(), isNull);
 
       await tester.pumpWidget(Container());
-      expect(tester.takeException(), isNotNull);
+      expect(tester.takeException(), isAssertionError);
     });
   });
 
