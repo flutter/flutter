@@ -234,7 +234,6 @@ targets:
       task_name: analyzer_benchmark
 
   - name: Linux coverage
-    bringup: true
     recipe: flutter/coverage
     timeout: 120
     properties:
