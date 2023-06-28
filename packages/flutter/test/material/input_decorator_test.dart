@@ -1643,6 +1643,47 @@ void main() {
     expect(tester.getBottomLeft(find.text(kHelper1)), const Offset(12.0, 76.0));
   });
 
+  testWidgets('InputDecorator shows error text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        decoration: const InputDecoration(
+          errorText: 'errorText',
+        ),
+      ),
+    );
+
+    expect(find.text('errorText'), findsOneWidget);
+  });
+
+  testWidgets('InputDecorator shows error widget', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        decoration: const InputDecoration(
+          error: Text('error', style: TextStyle(fontSize: 20.0)),
+        ),
+      ),
+    );
+
+    expect(find.text('error'), findsOneWidget);
+  });
+
+  testWidgets('InputDecorator throws when error text and error widget are provided', (WidgetTester tester) async {
+    expect(
+      () {
+        buildInputDecorator(
+          useMaterial3: useMaterial3,
+          decoration: InputDecoration(
+            errorText: 'errorText',
+            error: const Text('error', style: TextStyle(fontSize: 20.0)),
+          ),
+        );
+      },
+      throwsAssertionError,
+    );
+  });
+
   testWidgets('InputDecorator prefix/suffix texts', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -5217,7 +5258,6 @@ void main() {
         useMaterial3: useMaterial3,
         // isFocused: false (default)
         decoration: const InputDecoration(
-          // errorText: false (default)
           enabled: false,
           errorBorder: errorBorder,
           focusedBorder: focusedBorder,
