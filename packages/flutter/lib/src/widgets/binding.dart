@@ -272,7 +272,13 @@ abstract mixin class WidgetsBindingObserver {
 }
 
 /// The glue between the widgets layer and the Flutter engine.
-// TODO
+///
+/// The [WidgetsBinding] manges a single [Element] tree rooted at [rootElement].
+/// Call [runApp] (which indirectly calls [attachRootWidget]) to bootstrap that
+/// element tree.
+///
+/// Multiple render trees may be associated with that element tree. Those are
+/// managed by the underlying [RendererBinding].
 mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {
@@ -1001,6 +1007,15 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     ));
   }
 
+  /// Called by [attachRootWidget] to attached the provided [RootWidget] to
+  /// the [buildOwner].
+  ///
+  /// This creates the [rootElement], if necessary, or re-uses an existing one.
+  ///
+  /// This method is rarely called directly, but it can be useful in tests to
+  /// restore the element tree to a previous version by providing the
+  /// [RootWidget] of that version (see [WidgetTester.restartAndRestore] for an
+  /// exemplary use case).
   void attachToBuildOwner(RootWidget widget) {
     final bool isBootstrapFrame = rootElement == null;
     _readyToProduceFrames = true;
@@ -1119,7 +1134,15 @@ void debugDumpApp() {
   debugPrint(_debugDumpAppString());
 }
 
+/// A widget for the root of the [WidgetTree].
+///
+/// Exposes an [attach] method to attach the widget tree to a [BuildOwner]. That
+/// method also bootstraps the element tree.
+///
+/// Used by [WidgetsBinding.attachRootWidget] (which is indirectly called by
+/// [runApp]) to bootstrap applications.
 class RootWidget extends Widget {
+  /// Creates a [RootWidget].
   const RootWidget({
     super.key,
     this.child,
@@ -1137,6 +1160,13 @@ class RootWidget extends Widget {
   @override
   RootElement createElement() => RootElement(this);
 
+  /// Inflate this widget and attaches it to the provided [BuildOwner].
+  ///
+  /// If `element` is null, this function will create a new element. Otherwise,
+  /// the given element will have an update scheduled to switch to this widget.
+  ///
+  /// Used by [WidgetsBinding.attachToBuildOwner] (which is indirectly called by
+  /// [runApp]) to bootstrap applications.
   RootElement attach(BuildOwner owner, [ RootElement? element ]) {
     if (element == null) {
       owner.lockState(() {
@@ -1158,7 +1188,18 @@ class RootWidget extends Widget {
   String toStringShort() => debugShortDescription ?? super.toStringShort();
 }
 
+/// The root of the element tree.
+///
+/// This element class is the instantiation of a [RootWidget]. It can be used
+/// only as the root of an [Element] tree (it cannot be mounted into another
+/// [Element]; it's parent must be null).
+///
+/// In typical usage, it will be instantiated for a [RootWidget] by calling
+/// [RootWidget.attach]. In this usage, it is normally instantiated by the
+/// bootstrapping logic in the [WidgetsFlutterBinding] singleton created by
+/// [runApp].
 class RootElement extends Element with RootElementMixin {
+  /// Creates a [RootElement] for the provided [RootWidget].
   RootElement(RootWidget super.widget);
 
   Element? _child;
@@ -1216,6 +1257,10 @@ class RootElement extends Element with RootElementMixin {
 
   @override
   bool get debugDoingBuild => false; // This element doesn't have a build phase.
+
+  @override
+  // There is no ancestor RenderObjectElement that the render object could be attached to.
+  bool debugMustInsertRenderObjectIntoSlot(Object? slot) => false;
 }
 
 /// A concrete binding for applications based on the Widgets framework.

@@ -4429,7 +4429,28 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _lifecycleState = _ElementLifecycle.defunct;
   }
 
-  bool debugWantsRenderObjectForSlot(Object? slot) => true;
+  /// Whether the child in the provided `slot` (or one of its descendants) must
+  /// insert a [RenderObject] into its ancestor [RenderObjectElement] by calling
+  /// [RenderObjectElement.insertRenderObject] on it.
+  ///
+  /// Most branches of the [Element] tree are expected to eventually insert a
+  /// [RenderObject] into their [RenderObjectElement] ancestor to construct the
+  /// render tree. However, there is a notable exception: An [Element] may
+  /// expect that the occupants of certain child slots create a new independent
+  /// render tree and therefore are not allowed to insert a render object
+  /// into the existing render tree. Those elements must return false from this
+  /// method for the slot in question to signal to the child in that slot that
+  /// it must not call [RenderObjectElement.insertRenderObject] on its ancestor.
+  ///
+  /// As an example, the element backing the [ViewAnchor] returns false from
+  /// this method for the [ViewAnchor.view] slot to enforce that it is occupied
+  /// by e.g. a [View] widget, which will ultimately bootstrap a separate
+  /// render tree for that view. Another example is the [ViewCollection] widget,
+  /// which returns false for all its slots for the same reason.
+  ///
+  /// Overriding this method is not common, as elements behaving in the way
+  /// described above are rare.
+  bool debugMustInsertRenderObjectIntoSlot(Object? slot) => true;
 
   @override
   RenderObject? findRenderObject() {
@@ -6121,7 +6142,7 @@ abstract class RenderObjectElement extends Element {
       // debugAcceptsRenderObjectForSlot always returns true) and don't check
       // explicitly.
       assert(() {
-        if (!ancestor!.debugWantsRenderObjectForSlot(slot)) {
+        if (!ancestor!.debugMustInsertRenderObjectIntoSlot(slot)) {
           ancestor = null;
         }
         return true;
@@ -6129,7 +6150,7 @@ abstract class RenderObjectElement extends Element {
       ancestor = ancestor?._parent;
     }
     assert(() {
-      if (ancestor?.debugWantsRenderObjectForSlot(slot) == false) {
+      if (ancestor?.debugMustInsertRenderObjectIntoSlot(slot) == false) {
         ancestor = null;
       }
       return true;

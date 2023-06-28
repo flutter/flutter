@@ -497,7 +497,7 @@ class _MultiChildComponentElement extends Element {
     bool hasAncestorRenderObjectElement = false;
     bool ancestorWantsRenderObject = true;
     visitAncestorElements((Element ancestor) {
-      if (!ancestor.debugWantsRenderObjectForSlot(slot)) {
+      if (!ancestor.debugMustInsertRenderObjectIntoSlot(slot)) {
         ancestorWantsRenderObject = false;
         return false;
       }
@@ -546,7 +546,7 @@ class _MultiChildComponentElement extends Element {
   static const Object _viewSlot = Object();
 
   @override
-  bool debugWantsRenderObjectForSlot(Object? slot) => slot != _viewSlot;
+  bool debugMustInsertRenderObjectIntoSlot(Object? slot) => slot != _viewSlot;
 
   @override
   void performRebuild() {
