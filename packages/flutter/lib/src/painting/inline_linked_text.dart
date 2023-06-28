@@ -44,17 +44,32 @@ class InlineLinkedText extends TextSpan {
   ///    specifying an arbitrary number of [ranges] and [linkBuilders].
   InlineLinkedText({
     super.style,
-    required String text,
-    Iterable<TextRange>? ranges,
+    String? text,
+    List<InlineSpan>? spans,
     UriStringCallback? onTap,
+    Iterable<TextRange>? ranges,
     LinkBuilder? linkBuilder,
-  }) : super(
-         children: TextLinker(
-           rangesFinder: ranges == null
-               ? TextLinker.urlRangesFinder
-               : (String text) => ranges,
-           linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
-         ).getSpans(text),
+  }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
+       assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
+       super(
+         children: text != null
+             ? TextLinker(
+               rangesFinder: ranges != null
+                   ? (String text) => ranges
+                   : urlRangesFinder,
+               linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
+             ).getSpans(text)
+             : linkSpans(
+                 spans!,
+                 <TextLinker>[
+                   TextLinker(
+                     rangesFinder: ranges != null
+                         ? (String text) => ranges
+                         : urlRangesFinder,
+                     linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
+                   ),
+                 ],
+               ).toList(),
        );
 
   /// Create an instance of [InlineLinkedText] where the text matched by the
@@ -69,14 +84,19 @@ class InlineLinkedText extends TextSpan {
   InlineLinkedText.regExp({
     super.style,
     required RegExp regExp,
-    required String text,
+    String? text,
+    List<InlineSpan>? spans,
     UriStringCallback? onTap,
     LinkBuilder? linkBuilder,
-  }) : super(
-         children: TextLinker(
-           rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
-           linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
-         ).getSpans(text),
+  }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
+       assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
+       super(
+         children: text != null
+             ? TextLinker(
+               rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
+               linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
+             ).getSpans(text)
+             : linkSpans(spans!, urlTextLinkers(onTap)).toList(),
        );
 
   /// Create an instance of [InlineLinkedText] with the given [textLinkers]
@@ -92,20 +112,39 @@ class InlineLinkedText extends TextSpan {
   ///    the given [RegExp].
   InlineLinkedText.textLinkers({
     super.style,
-    required String text,
+    String? text,
+    List<InlineSpan>? spans,
     required Iterable<TextLinker> textLinkers,
-  }) : super(
-         children: TextLinker.getSpansForMany(textLinkers, text),
+  }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
+       assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
+       super(
+         children: text != null
+             ? TextLinker.getSpansForMany(textLinkers, text)
+             : linkSpans(spans!, textLinkers).toList(),
        );
 
-  // TODO(justinmc): Docs.
-  InlineLinkedText.spans({
-    super.style,
-    required List<InlineSpan> spans,
-    required Iterable<TextLinker> textLinkers,
-  }) : super(
-         children: linkSpans(spans, textLinkers).toList(),
-       );
+  /// Matches full (https://www.example.com/?q=1) and shortened (example.com)
+  /// URLs.
+  ///
+  /// Excludes:
+  ///
+  ///   * URLs with any protocol other than http or https.
+  ///   * Email addresses.
+  static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
+
+  /// A [RangesFinder] that returns [TextRange]s for URLs.
+  static final RangesFinder urlRangesFinder = TextLinker.rangesFinderFromRegExp(_urlRegExp);
+
+  // TODO(justinmc): Rename defaultTextLinkers?
+  /// Finds urls in text and replaces them with a plain, platform-specific link.
+  static Iterable<TextLinker> urlTextLinkers(UriStringCallback? onTap) {
+    return <TextLinker>[
+      TextLinker(
+        rangesFinder: urlRangesFinder,
+        linkBuilder: getDefaultLinkBuilder(onTap),
+      ),
+    ];
+  }
 
   /// Returns a [LinkBuilder] that highlights the given text and sets the given
   /// [onTap] handler.
@@ -264,6 +303,7 @@ class InlineLinkedText extends TextSpan {
   }
 }
 
+// TODO(justinmc): Private?
 // TODO(justinmc): The clickable area is full-width, should be narrow.
 /// An inline, interactive text link.
 class InlineLink extends TextSpan {
@@ -293,6 +333,7 @@ class InlineLink extends TextSpan {
 }
 
 // TODO(justinmc): _TextLinked, because it's a TextLinker that has been applied to some text? Sounds too much like LinkedText...
+// _TextLinkerMatched?
 class _TextLinkerSingle {
   _TextLinkerSingle({
     required this.textRange,
@@ -366,9 +407,9 @@ class _TextLinkerSingle {
   }
 }
 
-// TODO(justinmc): This isn't ideal for linking arbitrary text to arbitrary urls.
-// That's probably ok; the best way to do that is just with a TextSpan tree, in
-// which case you don't need to linkify it.
+// TODO(justinmc): Would it simplify things if the public class TextLinker
+// actually handled multiple rangesFinders and linkBuilders? Then there was a
+// private single _TextLinker or something?
 // TODO(justinmc): Think about which links need to go here vs. on InlineTextLinker.
 /// Specifies a way to find and style parts of a String.
 class TextLinker {
@@ -385,15 +426,6 @@ class TextLinker {
   // TODO(justinmc): Is it possible to enforce this order by TextRange.start, or should I just assume it's unordered?
   /// Returns [TextRange]s that should be built with [linkBuilder].
   final RangesFinder rangesFinder;
-
-  /// Matches full (https://www.example.com/?q=1) and shortened (example.com)
-  /// URLs.
-  ///
-  /// Excludes:
-  ///
-  ///   * URLs with any protocol other than http or https.
-  ///   * Email addresses.
-  static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
 
   // Turns all matches from the regExp into a list of TextRanges.
   static Iterable<TextRange> _rangesFromText({
@@ -440,9 +472,6 @@ class TextLinker {
       );
     };
   }
-
-  /// A [RangesFinder] that returns [TextRange]s for URLs.
-  static final RangesFinder urlRangesFinder = rangesFinderFromRegExp(_urlRegExp);
 
   /// Apply this [TextLinker] to a [String].
   Iterable<_TextLinkerSingle> _link(String text) {

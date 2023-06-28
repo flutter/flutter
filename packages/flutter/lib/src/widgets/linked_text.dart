@@ -50,7 +50,7 @@ class LinkedText extends StatelessWidget {
   }) : textLinkers = <TextLinker>[
          TextLinker(
            rangesFinder: ranges == null
-               ? TextLinker.urlRangesFinder
+               ? InlineLinkedText.urlRangesFinder
                : (String text) => ranges,
            linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
          ),
@@ -127,9 +127,10 @@ class LinkedText extends StatelessWidget {
     required this.spans,
     UriStringCallback? onTap,
     this.style,
-  }) : textLinkers = <TextLinker>[
+    List<TextLinker>? textLinkers,
+  }) : textLinkers = textLinkers ?? <TextLinker>[
          TextLinker(
-           rangesFinder: TextLinker.urlRangesFinder,
+           rangesFinder: InlineLinkedText.urlRangesFinder,
            linkBuilder: InlineLinkedText.getDefaultLinkBuilder(onTap),
          ),
        ];
@@ -152,7 +153,7 @@ class LinkedText extends StatelessWidget {
   static List<TextLinker> _getDefaultTextLinkers(UriStringCallback? onTap) {
     return <TextLinker>[
       TextLinker(
-        rangesFinder: TextLinker.urlRangesFinder,
+        rangesFinder: InlineLinkedText.urlRangesFinder,
         linkBuilder: InlineLinkedText.getDefaultLinkBuilder(onTap),
       ),
     ];
@@ -164,7 +165,7 @@ class LinkedText extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return Text.rich(
-      InlineLinkedText.spans(
+      InlineLinkedText.textLinkers(
         style: style ?? DefaultTextStyle.of(context).style,
         textLinkers: textLinkers,
         spans: spans,
