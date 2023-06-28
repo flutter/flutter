@@ -380,6 +380,14 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('do nothing when >=api 19 test', () {
+        const String minSdk19 = 'minSdkVersion 19';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk19));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdk19));
+      });
+
+      testWithoutContext('do nothing when already using '
+          'flutter.minSdkVersion test', () {
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(flutterMinSdk));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
