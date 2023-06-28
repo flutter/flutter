@@ -4,26 +4,24 @@
 
 #include <impeller/transform.glsl>
 
-precision highp float;
-
 uniform FrameInfo {
-  highp mat4 mvp;
-  highp mat4 entity_transform;
-  highp vec2 atlas_size;
-  highp vec2 offset;
+  mat4 mvp;
+  mat4 entity_transform;
+  vec2 atlas_size;
+  vec2 offset;
   float is_translation_scale;
 }
 frame_info;
 
 // XYWH.
-in highp vec4 atlas_glyph_bounds;
+in vec4 atlas_glyph_bounds;
 // XYWH
-in highp vec4 glyph_bounds;
+in vec4 glyph_bounds;
 
-in highp vec2 unit_position;
-in highp vec2 glyph_position;
+in vec2 unit_position;
+in vec2 glyph_position;
 
-out highp vec2 v_uv;
+out vec2 v_uv;
 
 mat4 basis(mat4 m) {
   return mat4(m[0][0], m[0][1], m[0][2], 0.0,  //
