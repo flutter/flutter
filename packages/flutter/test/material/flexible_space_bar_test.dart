@@ -801,14 +801,29 @@ void main() {
     ));
 
     expect(RenderRebuildTracker.count, 1);
+    expect(
+      tester.layers.lastWhere((Layer element) => element is OpacityLayer),
+      isA<OpacityLayer>().having((OpacityLayer p0) => p0.alpha, 'alpha', 255),
+    );
 
     // We drag up to fully collapse the space bar.
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 9; i++) {
+      await tester.drag(find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
+      await tester.pumpAndSettle();
+    }
+
+    expect(
+      tester.layers.lastWhere((Layer element) => element is OpacityLayer),
+      isA<OpacityLayer>().having((OpacityLayer p0) => p0.alpha, 'alpha', lessThan(255)),
+    );
+
+    for (int i = 0; i < 11; i++) {
       await tester.drag(find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
       await tester.pumpAndSettle();
     }
 
     expect(RenderRebuildTracker.count, greaterThan(1));
+    expect(tester.layers.whereType<OpacityLayer>(), isEmpty);
   });
 }
 
