@@ -45,7 +45,8 @@ zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 ''';
 
-const String minSdkAppGradleMigrationIn = r'''
+String sampleModuleGradleBuildFile(String minSdkVersionString) {
+  return r'''
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -93,7 +94,7 @@ android {
         applicationId "com.example.asset_sample"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion 16
+        ''' + minSdkVersionString + r'''
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -114,76 +115,7 @@ flutter {
 
 dependencies {}
 ''';
-
-const String minSdkAppGradleMigrationOut = r'''
-plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    id "dev.flutter.flutter-gradle-plugin"
 }
-
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader ->
-        localProperties.load(reader)
-    }
-}
-
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
-}
-
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
-}
-
-android {
-    namespace "com.example.asset_sample"
-    compileSdkVersion flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-    }
-
-    defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.asset_sample"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
-    }
-
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
-        }
-    }
-}
-
-flutter {
-    source '../..'
-}
-
-dependencies {}
-''';
 
 final Version androidStudioDolphin = Version(2021, 3, 1);
 
@@ -408,7 +340,6 @@ tasks.register("clean", Delete) {
       late MemoryFileSystem memoryFileSystem;
       late BufferLogger bufferLogger;
       late FakeAndroidProject project;
-      late File appGradleFile;
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
@@ -417,11 +348,10 @@ tasks.register("clean", Delete) {
         project = FakeAndroidProject(
           root: memoryFileSystem.currentDirectory.childDirectory('android'),
         );
-        project.hostAppGradleRoot.childDirectory('app')
-            .createSync(recursive: true);
+        project.appGradleFile.parent.createSync(recursive: true);
       });
 
-      testWithoutContext('files missing test', () {
+      testWithoutContext('do nothing when files missing test', () {
         final MinSdkVersionMigration migration = MinSdkVersionMigration(
             project,
             bufferLogger
@@ -430,28 +360,44 @@ tasks.register("clean", Delete) {
         expect(bufferLogger.traceText, contains(appGradleNotFoundWarning));
       });
 
-      testWithoutContext('api 16 test', () {
+      testWithoutContext('replace when api 16 test', () {
         final MinSdkVersionMigration migration = MinSdkVersionMigration(
             project,
             bufferLogger
         );
-        project.appGradleFile.writeAsStringSync(minSdkAppGradleMigrationIn);
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk16));
         migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), minSdkAppGradleMigrationOut);
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
       });
 
-      testWithoutContext('api 17 test', () {});
-      testWithoutContext('api 18 test', () {});
-      testWithoutContext('module test', () {});
-      testWithoutContext('plugin test', () {});
-      testWithoutContext('no migration test', () {
+      testWithoutContext('replace when api 17 test', () {
         final MinSdkVersionMigration migration = MinSdkVersionMigration(
             project,
             bufferLogger
         );
-        project.appGradleFile.writeAsStringSync(minSdkAppGradleMigrationOut);
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk17));
         migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), minSdkAppGradleMigrationOut);
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
+      });
+
+      testWithoutContext('replace when api 18 test', () {
+        final MinSdkVersionMigration migration = MinSdkVersionMigration(
+            project,
+            bufferLogger
+        );
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk18));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
+      });
+
+      testWithoutContext('do nothing when >=api 19 test', () {
+        final MinSdkVersionMigration migration = MinSdkVersionMigration(
+            project,
+            bufferLogger
+        );
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(flutterMinSdk));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
       });
     });
   });
