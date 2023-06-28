@@ -134,6 +134,7 @@ class LinkedText extends StatelessWidget {
          ),
        ];
 
+  /// The spans on which to create links by applying [textLinkers].
   final List<InlineSpan> spans;
 
   /// Defines what parts of the text to match and how to link them.
@@ -142,6 +143,10 @@ class LinkedText extends StatelessWidget {
   /// supported.
   final List<TextLinker> textLinkers;
 
+  /// The [TextStyle] to apply to the output [InlineSpan].
+  ///
+  /// If not provided, the [DefaultTextStyle] at this point in the tree will be
+  /// used.
   final TextStyle? style;
 
   static List<TextLinker> _getDefaultTextLinkers(UriStringCallback? onTap) {
@@ -158,14 +163,6 @@ class LinkedText extends StatelessWidget {
     if (spans.isEmpty) {
       return const SizedBox.shrink();
     }
-    /*
-    return Text.rich(
-      TextSpan(
-        style: style,
-        children: linkSpans(TextLinker.urlRangesFinder, spans, onTap).toList(),
-      ),
-    );
-    */
     return Text.rich(
       InlineLinkedText.spans(
         style: style ?? DefaultTextStyle.of(context).style,
@@ -173,14 +170,5 @@ class LinkedText extends StatelessWidget {
         spans: spans,
       ),
     );
-    /*
-    return Text.rich(
-      InlineLinkedText.textLinkers(
-        style: style ?? DefaultTextStyle.of(context).style,
-        text: text,
-        textLinkers: textLinkers,
-      ),
-    );
-    */
   }
 }

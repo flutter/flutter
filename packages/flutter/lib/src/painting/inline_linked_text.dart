@@ -265,16 +265,16 @@ class InlineLinkedText extends TextSpan {
 }
 
 // TODO(justinmc): The clickable area is full-width, should be narrow.
-/// An inline text link.
+/// An inline, interactive text link.
 class InlineLink extends TextSpan {
   /// Create an instance of [InlineLink].
   InlineLink({
     required String text,
+    VoidCallback? onTap,
+    TextStyle style = defaultLinkStyle,
     super.locale,
     // TODO(justinmc): I probably need to identify this as a link in semantics somehow?
     super.semanticsLabel,
-    TextStyle style = defaultLinkStyle,
-    VoidCallback? onTap,
   }) : super(
     style: style,
     mouseCursor: SystemMouseCursors.click,
@@ -283,7 +283,7 @@ class InlineLink extends TextSpan {
   );
 
   @visibleForTesting
-  static const defaultLinkStyle = TextStyle(
+  static const TextStyle defaultLinkStyle = TextStyle(
     // TODO(justinmc): Correct color per-platform. Get it from Theme in
     // Material somehow?
     // And decide underline or no per-platform.
