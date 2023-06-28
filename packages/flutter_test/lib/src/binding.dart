@@ -495,8 +495,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   Size? _surfaceSize;
 
-  /// Artificially changes the surface size to `size` on the Widget binding,
-  /// then flushes microtasks.
+  // ignore: deprecated_member_use
+  /// Artificially changes the logical size of [renderView] to the specified
+  /// size, then flushes microtasks.
   ///
   /// Set to null to use the default surface size.
   ///
@@ -508,9 +509,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///   addTearDown(() => binding.setSurfaceSize(null));
   /// ```
   ///
-  /// See also [TestFlutterView.physicalSize], which has a similar effect.
+  // ignore: deprecated_member_use
+  /// This method only affects the [renderView]. It does not affect any of the
+  /// other [renderViews] managed by this binding.
+  ///
+  /// Instead of this method, consider setting [TestFlutterView.physicalSize],
+  /// which works for any view.
   // TODO(pdblasi-google): Deprecate this. https://github.com/flutter/flutter/issues/123881
-  // TODO: Update doc that this only affects [renderView].
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);

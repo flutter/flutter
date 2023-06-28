@@ -434,7 +434,36 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 /// [RenderView.debugRemovePaintCallback].
 typedef DebugPaintCallback = void Function(PaintingContext context, Offset offset, RenderView renderView);
 
+/// Interface for a manager of [RenderView]s to produce frames for the
+/// [FlutterView]s associated with those [RenderView]s.
+///
+/// Typically, to participate in frame production, hit testing, etc.
+/// [RenderView]s must be added to a [RenderViewRepository].
+///
+/// Implementors of this interface have the following responsibilities:
+///
+/// {@template flutter.rendering.RenderViewRepository}
+///  * setting and updating [RenderView.configuration],
+///  * calling [RenderView.compositeFrame] when it is time to produce a new
+///    frame, and
+///  * forwarding relevant pointer events to the [RenderView] for hit testing.
+/// {@endtemplate}
+///
+/// To add a [RenderView], call [addRenderView]. To remove it, call
+/// [removeRenderView].
+///
+/// The [RendererBinding] implements this interface.
 abstract class RenderViewRepository {
+  /// Adds a [RenderView] to be managed by this repository.
+  ///
+  /// The repository will manage the [RenderView] by
+  ///
+  /// {@macro flutter.rendering.RenderViewRepository}
+  ///
+  /// To remove a [RenderView] from the repository, call [removeRenderView].
   void addRenderView(RenderView view);
+
+  /// Removes a [RenderView] previously added with [addRenderView] from the
+  /// repository.
   void removeRenderView(RenderView view);
 }

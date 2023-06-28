@@ -22,7 +22,17 @@ export 'package:flutter/gestures.dart' show HitTestResult;
 // late BuildContext context;
 
 /// The glue between the render tree and the Flutter engine.
-// TODO
+///
+/// The [RendererBinding] manages multiple render trees. Each render tree is
+/// rooted in a [RenderView] that must be added to the binding via
+/// [addRenderView] to be consider during frame production, hit testing, etc.
+/// Furthermore, the render tree must be managed by a [PipelineOwner] that is
+/// part of the pipeline owner tree rooted at [rootPipelineOwner].
+///
+/// Adding [PipelineOwner]s and [RenderView]s to this binding in the way
+/// described above is left as a responsibility for a higher level abstraction.
+/// The widgets library, for example, introduces the [View] widget, which
+/// registers its [RenderView] and [PipelineOwner] with this binding.
 mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable implements RenderViewRepository {
   @override
   void initInstances() {
@@ -268,6 +278,21 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     view: platformDispatcher.implicitView!,
   );
 
+  /// Creates the [PipelineOwner] that serves as the root of the pipeline owner
+  /// tree ([rootPipelineOwner]).
+  ///
+  /// {@template flutter.rendering.createRootPipelineOwner}
+  /// By default, the root pipeline owner is not setup to manage its own
+  /// [RenderView] and in this configuration nothing must be assigned to
+  /// [PipelineOwner.rootNode] of [rootPipelineOwner]. If necessary,
+  /// [createRootPipelineOwner] may be overridden to create a root pipeline
+  /// owner configured to manage its own [RenderView].
+  ///
+  /// In typical use, children are added to the root pipeline owner (via
+  /// [PipelineOwner.adoptChild]). Those children typically do each manage their
+  /// own [RenderView] and produce distinct render trees which render their
+  /// content into the [FlutterView] associated with that [RenderView].
+  /// {@endtemplate}
   PipelineOwner createRootPipelineOwner() {
     return PipelineOwner(onSemanticsUpdate: (ui.SemanticsUpdate update) {
       assert(() {
@@ -290,10 +315,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// The [PipelineOwner] that is the root of the PipelineOwner tree.
   ///
-  /// While the root PipelineOwner typically does not manage its own
-  /// [RenderView], its child PipelineOwners typically do manage separate
-  /// [RenderView]s and produce distinct render trees which render their content
-  /// into the [FlutterView] associated with the [RenderView].
+  /// {@macro flutter.rendering.createRootPipelineOwner}
   PipelineOwner get rootPipelineOwner => _rootPipelineOwner;
   late PipelineOwner _rootPipelineOwner;
 
@@ -303,28 +325,15 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   Iterable<RenderView> get renderViews => _viewIdToRenderView.values;
   final Map<Object, RenderView> _viewIdToRenderView = <Object, RenderView>{};
 
-  /// Adds a [RenderView] to be managed by the binding.
-  ///
-  /// The binding will manage the [RenderView] by
-  ///
-  ///  * setting and updating [RenderView.configuration],
-  ///  * calling [RenderView.compositeFrame] when it is time to produce a new
-  ///    frame, and
-  ///  * forwarding relevant pointer events to the [RenderView] for hit testing.
-  ///
-  /// To remove a [RenderView] from the binding, call [removeRenderView].
   @override
   void addRenderView(RenderView view) {
     final Object viewId = view.flutterView.viewId;
     assert(!_viewIdToRenderView.containsValue(view));
     assert(!_viewIdToRenderView.containsKey(viewId));
     _viewIdToRenderView[viewId] = view;
-    // TODO: if view is [renderView] we may not want to overwrite manually set configs.
     view.configuration = createViewConfigurationFor(view);
   }
 
-  /// Removes a [RenderView] previously added with [addRenderView] from the
-  /// binding.
   @override
   void removeRenderView(RenderView view) {
     final Object viewId = view.flutterView.viewId;
@@ -332,6 +341,17 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     _viewIdToRenderView.remove(viewId);
   }
 
+  /// Returns a [ViewConfiguration] configured for the provided [RenderView]
+  /// based on the current environment.
+  ///
+  /// This is called during [addRenderView] and also in response to changes to
+  /// the system metrics to update all [renderViews] added to the binding.
+  ///
+  /// Bindings can override this method to change what size or device pixel
+  /// ratio the [RenderView] will use. For example, the testing framework uses
+  /// this to force the display into 800x600 when a test is run on the device
+  /// using `flutter run`.
+  @protected
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
     final FlutterView view = renderView.flutterView;
     final double devicePixelRatio = view.devicePixelRatio;
@@ -699,7 +719,10 @@ void debugDumpSemanticsTree([DebugSemanticsDumpOrder childOrder = DebugSemantics
   debugPrint(_debugCollectSemanticsTrees(childOrder));
 }
 
+/// Prints a textual representation of the [PipelineOwner] tree rooted at
+/// [RendererBinding.rootPipelineOwner].
 void debugDumpPipelineOwnerTree() {
+  // TODO(goderbauer): Turn this tree into a [DiagnosticableTree] for nicer output.
   final StringBuffer result = StringBuffer();
   int indent = 0;
   void visit(PipelineOwner owner) {
@@ -730,7 +753,16 @@ void debugDumpPipelineOwnerTree() {
 /// rendering layer directly. If you are writing to a higher-level
 /// library, such as the Flutter Widgets library, then you would use
 /// that layer's binding (see [WidgetsFlutterBinding]).
-// TODO
+///
+/// The [RenderingFlutterBinding] can manages multiple render trees. Each render
+/// tree is rooted in a [RenderView] that must be added to the binding via
+/// [addRenderView] to be consider during frame production, hit testing, etc.
+/// Furthermore, the render tree must be managed by a [PipelineOwner] that is
+/// part of the pipeline owner tree rooted at [rootPipelineOwner].
+///
+/// Adding [PipelineOwner]s and [RenderView]s to this binding in the way
+/// described above is left as a responsibility for a higher level abstraction.
+/// The binding does not own any [RenderView] directly.
 class RenderingFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding, ServicesBinding, SemanticsBinding, PaintingBinding, RendererBinding {
   /// Returns an instance of the binding that implements
   /// [RendererBinding]. If no binding has yet been initialized, the
@@ -771,7 +803,24 @@ class _BindingPipelineManifold extends ChangeNotifier implements PipelineManifol
   }
 }
 
-// TODO
+// Prior to multi view support, the [RendererBinding] would own a long-lived
+// [RenderView], that was never disposed (see [RendererBinding.renderView]).
+// With multi view support, the [RendererBinding] no longer owns a [RenderView]
+// and instead higher level abstractions (like the [View] widget) can add/remove
+// multiple [RenderView]s to the binding as needed. When the [View] widget is no
+// longer needed, it expects to dispose its [RenderView].
+//
+// This special version of a [RenderView] now exists as a bridge between those
+// worlds to continue supporting the [RendererBinding.renderView] property
+// through its deprecation period. Per the property's contract, it is supposed
+// to be long-lived, but it is also managed by a [View] widget (introduced by
+// [WidgetsBinding.wrapWithDefaultView]), that expects to dispose its render
+// object at the end of the widget's life time. This special version now
+// implements logic to reset the [RenderView] when it is "disposed" so it can be
+// reused by another [View] widget.
+//
+// Once the deprecated [RendererBinding.renderView] property is removed, this
+// class is no longer necessary.
 class _ReusableRenderView extends RenderView {
   _ReusableRenderView({required super.view});
 
