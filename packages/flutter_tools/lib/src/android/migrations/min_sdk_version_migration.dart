@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:meta/meta.dart';
 
 import '../../base/project_migrator.dart';
@@ -29,13 +31,12 @@ class MinSdkVersionMigration extends ProjectMigrator {
 
   @override
   void migrate() {
-    // Skip if we cannot find the app level build.gradle file.
-    if (!_project.appGradleFile.existsSync()) {
+    try {
+      processFileLines(_project.appGradleFile);
+    } on FileSystemException {
+      // Skip if we cannot find the app level build.gradle file.
       logger.printTrace(appGradleNotFoundWarning);
-      return;
     }
-
-    processFileLines(_project.appGradleFile);
   }
 
   @override

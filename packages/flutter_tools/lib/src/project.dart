@@ -509,16 +509,17 @@ class AndroidProject extends FlutterProjectPlatform {
     if (plugin.existsSync()) {
       return false;
     }
-    if (!appGradleFile.existsSync()) {
-      return false;
-    }
-    for (final String line in appGradleFile.readAsLinesSync()) {
-      final bool fileBasedApply = line.contains(RegExp(r'apply from: .*/flutter.gradle'));
-      final bool declarativeApply = line.contains('dev.flutter.flutter-gradle-plugin');
-      final bool managed = line.contains("def flutterPluginVersion = 'managed'");
-      if (fileBasedApply || declarativeApply || managed) {
-        return true;
+    try {
+      for (final String line in appGradleFile.readAsLinesSync()) {
+        final bool fileBasedApply = line.contains(RegExp(r'apply from: .*/flutter.gradle'));
+        final bool declarativeApply = line.contains('dev.flutter.flutter-gradle-plugin');
+        final bool managed = line.contains("def flutterPluginVersion = 'managed'");
+        if (fileBasedApply || declarativeApply || managed) {
+          return true;
+        }
       }
+    } on FileSystemException {
+      return false;
     }
     return false;
   }
@@ -635,12 +636,12 @@ $javaGradleCompatUrl
   /// Get the namespace for newer Android projects,
   /// which replaces the `package` attribute in the Manifest.xml.
   String? get namespace {
-    if (!appGradleFile.existsSync()) {
+    try {
+      // firstMatchInFile() reads per line but `_androidNamespacePattern` matches a multiline pattern.
+      return _androidNamespacePattern.firstMatch(appGradleFile.readAsStringSync())?.group(1);
+    } on FileSystemException {
       return null;
     }
-
-    // firstMatchInFile() reads per line but `_androidNamespacePattern` matches a multiline pattern.
-    return _androidNamespacePattern.firstMatch(appGradleFile.readAsStringSync())?.group(1);
   }
 
   String? get group {
