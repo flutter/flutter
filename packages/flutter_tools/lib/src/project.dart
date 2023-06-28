@@ -458,9 +458,6 @@ class AndroidProject extends FlutterProjectPlatform {
     return ephemeralDirectory;
   }
 
-  /// TODO: DOCUMENTATION
-  File get appGradleFile => hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
   /// a Flutter module with an editable host app.
@@ -532,6 +529,11 @@ class AndroidProject extends FlutterProjectPlatform {
     final bool declarativeMatch = firstMatchInFile(appGradleFile, _declarativeKotlinPluginPattern) != null;
     return imperativeMatch || declarativeMatch;
   }
+
+  /// Gets the module-level build.gradle file.
+  /// See https://developer.android.com/build#module-level.
+  File get appGradleFile => hostAppGradleRoot.childDirectory('app')
+      .childFile('build.gradle');
 
   File get appManifestFile {
     if (isUsingGradle) {
