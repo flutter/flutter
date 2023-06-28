@@ -132,7 +132,6 @@ class DropdownMenu<T> extends StatefulWidget {
     this.selectedTrailingIcon,
     this.enableFilter = false,
     this.enableSearch = true,
-    this.enableScrollToHighlight = true,
     this.textStyle,
     this.inputDecorationTheme,
     this.menuStyle,
@@ -226,12 +225,6 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to true as the search function could be commonly used.
   final bool enableSearch;
-
-  /// Determine whether the scrollable menu list can automatically scroll to the first
-  /// matching item. This will be ignored if [enableSearch] is false.
-  ///
-  /// Defaults to true.
-  final bool enableScrollToHighlight;
 
   /// The text style for the [TextField] of the [DropdownMenu];
   ///
@@ -522,9 +515,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     if (widget.enableSearch) {
       currentHighlight = search(filteredEntries, _textEditingController);
-      if (widget.enableScrollToHighlight) {
-        scrollToHighlight();
-      }
+      scrollToHighlight();
     }
 
     final List<Widget> menu = _buildButtons(filteredEntries, _textEditingController, textDirection, focusedIndex: currentHighlight);
