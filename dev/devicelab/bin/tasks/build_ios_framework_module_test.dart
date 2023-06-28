@@ -511,37 +511,38 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
     );
   });
 
+  final String noPluginsOutputPath = path.join(projectDir.path, noPluginsOutputDir);
   for (final String mode in <String>['Debug', 'Profile', 'Release']) {
     checkFileExists(path.join(
-      noPluginsOutputDir,
+      noPluginsOutputPath,
       mode,
       'Flutter.podspec',
     ));
     checkDirectoryExists(path.join(
-      noPluginsOutputDir,
+      noPluginsOutputPath,
       mode,
       'App.xcframework',
     ));
     checkDirectoryNotExists(path.join(
-      noPluginsOutputDir,
+      noPluginsOutputPath,
       mode,
       'FlutterPluginRegistrant.xcframework',
     ));
 
     checkDirectoryNotExists(path.join(
-      noPluginsOutputDir,
+      noPluginsOutputPath,
       mode,
       'package_info.xcframework',
     ));
 
     checkDirectoryNotExists(path.join(
-      noPluginsOutputDir,
+      noPluginsOutputPath,
       mode,
       'connectivity.xcframework',
     ));
 
     checkDirectoryNotExists(path.join(
-      noPluginsOutputDir,
+      noPluginsOutputPath,
       mode,
       'Reachability.xcframework',
     ));
