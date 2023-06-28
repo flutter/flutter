@@ -227,7 +227,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to true as the search function could be commonly used.
   final bool enableSearch;
 
-  /// Determine whether the menu list can automatically scroll to the first
+  /// Determine whether the scrollable menu list can automatically scroll to the first
   /// matching item. This will be ignored if [enableSearch] is false.
   ///
   /// Defaults to true.
