@@ -52,6 +52,10 @@ struct Vector3 {
     return ((x * other.x) + (y * other.y) + (z * other.z));
   }
 
+  constexpr Vector3 Abs() const {
+    return {std::fabs(x), std::fabs(y), std::fabs(z)};
+  }
+
   constexpr Vector3 Cross(const Vector3& other) const {
     return {
         (y * other.z) - (z * other.y),  //
