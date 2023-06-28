@@ -575,6 +575,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
   Offset localToGlobal(Offset point, RenderView view) => point;
+
   /// The source of the current pointer event.
   ///
   /// The [pointerEventSource] is set as the `source` parameter of
