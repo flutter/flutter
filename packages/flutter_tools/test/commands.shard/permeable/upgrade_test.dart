@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -36,7 +37,8 @@ void main() {
 
     setUp(() {
       fakeCommandRunner = FakeUpgradeCommandRunner();
-      realCommandRunner = UpgradeCommandRunner();
+      realCommandRunner = UpgradeCommandRunner()
+          ..workingDirectory = getFlutterRoot();
       processManager = FakeProcessManager.empty();
       fakeCommandRunner.willHaveUncommittedChanges = false;
       fakePlatform = FakePlatform()..environment = Map<String, String>.unmodifiable(<String, String>{
@@ -327,7 +329,7 @@ void main() {
           environment: <String, String>{'FLUTTER_ALREADY_LOCKED': 'true', ...fakePlatform.environment}
         ),
       );
-      await realCommandRunner.precacheArtifacts();
+      await precacheArtifacts();
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
@@ -408,6 +410,7 @@ void main() {
         late FakeProcessManager fakeProcessManager;
         late Directory tempDir;
         late File flutterToolState;
+        late FileSystem fs;
 
         setUp(() {
           Cache.disableLocking();
@@ -424,7 +427,8 @@ void main() {
               stdout: 'v1.12.16-19-gb45b676af',
             ),
           ]);
-          tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_upgrade_test.');
+          fs = MemoryFileSystem.test();
+          tempDir = fs.systemTempDirectory.createTempSync('flutter_upgrade_test.');
           flutterToolState = tempDir.childFile('.flutter_tool_state');
         });
 
@@ -434,6 +438,7 @@ void main() {
         });
 
         testUsingContext('upgrade continue prints welcome message', () async {
+          fakeProcessManager = FakeProcessManager.any();
           final UpgradeCommand upgradeCommand = UpgradeCommand(
             verboseHelp: false,
             commandRunner: fakeCommandRunner,
@@ -451,6 +456,7 @@ void main() {
             containsPair('redisplay-welcome-message', true),
           );
         }, overrides: <Type, Generator>{
+          FileSystem: () => fs,
           FlutterVersion: () => FakeFlutterVersion(),
           ProcessManager: () => fakeProcessManager,
           PersistentToolState: () => PersistentToolState.test(
@@ -478,9 +484,6 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
 
   @override
   Future<void> attemptReset(String newRevision) async {}
-
-  @override
-  Future<void> precacheArtifacts() async {}
 
   @override
   Future<void> updatePackages(FlutterVersion flutterVersion) async {}
