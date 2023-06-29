@@ -175,13 +175,14 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
       widget.text ?? CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
       overflow: TextOverflow.ellipsis,
       style: _kToolbarButtonFontStyle.copyWith(
-        color: widget.onPressed != null ? _kToolbarTextColor.resolveFrom(context) : CupertinoColors.inactiveGray,
+        color: widget.onPressed != null
+            ? _kToolbarTextColor.resolveFrom(context)
+            : CupertinoColors.inactiveGray,
       ),
     );
     if (widget.buttonItem == null) {
       return textWidget;
     }
-    final Widget result;
     switch (widget.buttonItem!.type) {
       case ContextMenuButtonType.cut:
       case ContextMenuButtonType.copy:
@@ -191,7 +192,7 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
       case ContextMenuButtonType.custom:
         return textWidget;
       case ContextMenuButtonType.liveTextInput:
-        result = SizedBox(
+        return SizedBox(
           width: 13,
           height: 13,
           child: CustomPaint(
@@ -199,7 +200,6 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
           ),
         );
     }
-    return result;
   }
 }
 
