@@ -1410,7 +1410,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         double start = right - _boxSize(icon).width;
         double end = left;
         if (prefixIcon != null) {
-          start += contentPadding.left;
+          start += contentPadding.right;
           start -= centerLayout(prefixIcon!, start - prefixIcon!.size.width);
         }
         if (label != null) {
