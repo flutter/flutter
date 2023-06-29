@@ -101,11 +101,11 @@ void main() {
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
-              return LinkedText.spans(
+              return LinkedText(
                 onTap: (String text) {
                   lastTappedLink = text;
                 },
-                children: <InlineSpan>[
+                spans: <InlineSpan>[
                   TextSpan(
                     text: 'Check out fl',
                     style: DefaultTextStyle.of(context).style,
