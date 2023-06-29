@@ -363,29 +363,31 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('replace when api 16', () {
-        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk16));
+        const String minSdkVersion16 = 'minSdkVersion 16';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion16));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
-        print(project.appGradleFile.readAsStringSync());
       });
 
       testWithoutContext('replace when api 17', () {
-        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk17));
+        const String minSdkVersion17 = 'minSdkVersion 17';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion17));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
       });
 
       testWithoutContext('replace when api 18', () {
-        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk18));
+        const String minSdkVersion18 = 'minSdkVersion 18';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion18));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
       });
 
       testWithoutContext('do nothing when >=api 19', () {
-        const String minSdk19 = 'minSdkVersion 19';
-        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk19));
+        const String minSdkVersion19 = 'minSdkVersion 19';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion19));
         migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdk19));
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdkVersion19));
       });
 
       testWithoutContext('do nothing when already using '
@@ -393,6 +395,14 @@ tasks.register("clean", Delete) {
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(flutterMinSdk));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
+      });
+
+      testWithoutContext('avoid rewriting comments', () {
+        const String code = '// minSdkVersion 16  // old default\n'
+            '        minSdkVersion 23  // new version';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(code));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(code));
       });
     });
   });

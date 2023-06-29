@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../project.dart';
+import '../gradle_utils.dart';
 
 @visibleForTesting
 const String minSdk16 = 'minSdkVersion 16';
@@ -40,8 +41,6 @@ class MinSdkVersionMigration extends ProjectMigrator {
 
   @override
   String migrateFileContents(String fileContents) {
-    return fileContents.replaceAll(minSdk16, flutterMinSdk)
-        .replaceAll(minSdk17, flutterMinSdk)
-        .replaceAll(minSdk18, flutterMinSdk);
+    return fileContents.replaceAll(jellyBeanMinSdkVersions, flutterMinSdk);
   }
 }
