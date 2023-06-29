@@ -95,6 +95,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         ''' + minSdkVersionString + r'''
+
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -356,30 +357,31 @@ tasks.register("clean", Delete) {
         );
       });
 
-      testWithoutContext('do nothing when files missing test', () {
+      testWithoutContext('do nothing when files missing', () {
         migration.migrate();
         expect(bufferLogger.traceText, contains(appGradleNotFoundWarning));
       });
 
-      testWithoutContext('replace when api 16 test', () {
+      testWithoutContext('replace when api 16', () {
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk16));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
+        print(project.appGradleFile.readAsStringSync());
       });
 
-      testWithoutContext('replace when api 17 test', () {
+      testWithoutContext('replace when api 17', () {
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk17));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
       });
 
-      testWithoutContext('replace when api 18 test', () {
+      testWithoutContext('replace when api 18', () {
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk18));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
       });
 
-      testWithoutContext('do nothing when >=api 19 test', () {
+      testWithoutContext('do nothing when >=api 19', () {
         const String minSdk19 = 'minSdkVersion 19';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdk19));
         migration.migrate();
@@ -387,7 +389,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('do nothing when already using '
-          'flutter.minSdkVersion test', () {
+          'flutter.minSdkVersion', () {
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(flutterMinSdk));
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
