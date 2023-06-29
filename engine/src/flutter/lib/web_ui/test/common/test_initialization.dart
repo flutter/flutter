@@ -7,6 +7,7 @@ import 'dart:js_util' as js_util;
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'fake_asset_manager.dart';
 
@@ -17,7 +18,7 @@ void setUpUnitTests({
   late final FakeAssetScope debugFontsScope;
   setUpAll(() async {
     if (emulateTesterEnvironment) {
-      ui.debugEmulateFlutterTesterEnvironment = true;
+      ui_web.debugEmulateFlutterTesterEnvironment = true;
     }
 
     // Some of our tests rely on color emoji

@@ -6,6 +6,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'common.dart';
 
@@ -16,7 +17,7 @@ void main() {
 const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 500, 250);
 
 void testMain() {
-  ui.debugEmulateFlutterTesterEnvironment = true;
+  ui_web.debugEmulateFlutterTesterEnvironment = true;
 
   group('flutter_tester emulation', () {
     setUpCanvasKitTest();

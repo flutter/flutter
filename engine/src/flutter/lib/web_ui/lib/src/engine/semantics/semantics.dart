@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../engine.dart'  show registerHotRestartListener;
 import '../alarm_clock.dart';
@@ -2116,7 +2117,7 @@ class EngineSemanticsOwner {
   /// Updates the semantics tree from data in the [uiUpdate].
   void updateSemantics(ui.SemanticsUpdate uiUpdate) {
     if (!_semanticsEnabled) {
-      if (ui.debugEmulateFlutterTesterEnvironment) {
+      if (ui_web.debugEmulateFlutterTesterEnvironment) {
         // Running Flutter widget tests in a fake environment. Don't enable
         // engine semantics. Test semantics trees violate invariants in ways
         // production implementation isn't built to handle. For example, tests

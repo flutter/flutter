@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../browser_detection.dart';
 import '../dom.dart';
@@ -473,7 +474,7 @@ class EngineTextStyle implements ui.TextStyle {
     // This makes widget tests predictable and less flaky.
     String result = fontFamily;
     assert(() {
-      if (ui.debugEmulateFlutterTesterEnvironment && !_testFonts.contains(fontFamily)) {
+      if (ui_web.debugEmulateFlutterTesterEnvironment && !_testFonts.contains(fontFamily)) {
         result = _testFonts.first;
       }
       return true;
@@ -820,7 +821,7 @@ void applyTextStyleToElement({
   }
   // For test environment use effectiveFontFamily since we need to
   // consistently use the correct test font.
-  if (ui.debugEmulateFlutterTesterEnvironment) {
+  if (ui_web.debugEmulateFlutterTesterEnvironment) {
     cssStyle.fontFamily = canonicalizeFontFamily(style.effectiveFontFamily)!;
   } else {
     cssStyle.fontFamily = canonicalizeFontFamily(style.fontFamily)!;

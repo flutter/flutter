@@ -6,6 +6,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'common.dart';
 
@@ -94,9 +95,9 @@ void testMain() {
     });
 
     group('test fonts in flutterTester environment', () {
-      final bool resetValue = ui.debugEmulateFlutterTesterEnvironment;
-      ui.debugEmulateFlutterTesterEnvironment = true;
-      tearDownAll(() => ui.debugEmulateFlutterTesterEnvironment = resetValue);
+      final bool resetValue = ui_web.debugEmulateFlutterTesterEnvironment;
+      ui_web.debugEmulateFlutterTesterEnvironment = true;
+      tearDownAll(() => ui_web.debugEmulateFlutterTesterEnvironment = resetValue);
       const List<String> testFonts = <String>['FlutterTest', 'Ahem'];
 
       test('The default test font is used when a non-test fontFamily is specified', () {

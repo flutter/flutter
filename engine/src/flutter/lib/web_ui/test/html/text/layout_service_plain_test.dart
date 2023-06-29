@@ -6,6 +6,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/test_initialization.dart';
 import '../paragraph/helper.dart';
@@ -714,7 +715,7 @@ Future<void> testMain() async {
 
   test('does not leak styles across spanometers', () {
     // This prevents the Ahem font from being forced in all paragraphs.
-    ui.debugEmulateFlutterTesterEnvironment = false;
+    ui_web.debugEmulateFlutterTesterEnvironment = false;
 
     final CanvasParagraph p1 = plain(
       EngineParagraphStyle(
@@ -750,6 +751,6 @@ Future<void> testMain() async {
     expect(textContext.font, contains('40px'));
     expect(textContext.font, contains('FontFamily2'));
 
-    ui.debugEmulateFlutterTesterEnvironment = true;
+    ui_web.debugEmulateFlutterTesterEnvironment = true;
   });
 }

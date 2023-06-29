@@ -6,6 +6,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/test_initialization.dart';
 import '../paragraph/helper.dart';
@@ -414,7 +415,7 @@ Future<void> testMain() async {
     // Paragraphs and spans force the FlutterTest font in test mode. We need to
     // trick them into thinking they are not in test mode, so they use the
     // provided font family.
-    debugEmulateFlutterTesterEnvironment = false;
+    ui_web.debugEmulateFlutterTesterEnvironment = false;
     final EngineParagraphStyle style = EngineParagraphStyle(fontSize: 12.0, fontFamily: 'first');
     final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
 
@@ -454,7 +455,7 @@ Future<void> testMain() async {
       // measurements.
       ignorePositions: true,
     );
-    debugEmulateFlutterTesterEnvironment = true;
+    ui_web.debugEmulateFlutterTesterEnvironment = true;
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/108431.

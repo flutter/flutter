@@ -28,89 +28,59 @@ part of ui;
 ///
 /// This is only available on the Web, as native Flutter configures the
 /// environment in the native embedder.
+// TODO(mdebbar): Deprecate this and remove it.
+// https://github.com/flutter/flutter/issues/127395
 Future<void> webOnlyInitializePlatform() async {
   await engine.initializeEngine();
 }
 
-/// Initializes essential bits of the engine before it fully initializes.
-/// When [didCreateEngineInitializer] is set, it delegates engine initialization
-/// and app startup to the programmer.
-/// Else, it immediately triggers the full engine + app bootstrap.
-///
-/// This method is called by the flutter_tools package, from the entrypoint that
-/// it generates around the main method provided by the programmer. See:
-/// * https://github.com/flutter/flutter/blob/2bd3e0d914854aa8c12e933f25c5fd8532ae5571/packages/flutter_tools/lib/src/build_system/targets/web.dart#L135-L163
-/// * https://github.com/flutter/flutter/blob/61fb2de52c7bdac19b7f2f74eaf3f11237e1e91d/packages/flutter_tools/lib/src/isolated/resident_web_runner.dart#L460-L485
-///
-/// This function first calls [engine.initializeEngineServices] so the engine
-/// can prepare the js-interop layer that is used by web apps (instead of the
-/// old `ui.webOnlyFoo` methods/getters).
-///
-/// It then creates a JsObject that is passed to the [didCreateEngineInitializer]
-/// JS callback, to delegate bootstrapping the app to the programmer.
-///
-/// If said callback is not defined, this assumes that the Flutter Web app is
-/// initializing "automatically", as was normal before this feature was
-/// introduced. This will immediately run the initEngine and runApp methods
-/// (via [engine.AppBootstrap.now]).
-///
-/// This is the only bit of `dart:ui` that should be directly called by Flutter
-/// web apps. Everything else should go through the JS-interop layer created in
-/// `engine.warmup`.
-///
-/// This method should NOT trigger the download of any additional resources
-/// (except when the app is in "autoStart" mode).
+// TODO(mdebbar): Deprecate this and remove it.
+// https://github.com/flutter/flutter/issues/127395
 Future<void> webOnlyWarmupEngine({
-  Function? registerPlugins,
-  Function? runApp,
-}) async {
-  // Create the object that knows how to bootstrap an app from JS and Dart.
-  final engine.AppBootstrap bootstrap = engine.AppBootstrap(
-    initializeEngine: ([engine.JsFlutterConfiguration? configuration]) async {
-      await engine.initializeEngineServices(jsConfiguration: configuration);
-    }, runApp: () async {
-      if (registerPlugins != null) {
-        registerPlugins();
-      }
-      await engine.initializeEngineUi();
-      if (runApp != null) {
-        runApp();
-      }
-    },
+  VoidCallback? registerPlugins,
+  VoidCallback? runApp,
+}) {
+  assert(() {
+    engine.printWarning(
+      'The webOnlyWarmupEngine API is deprecated and will be removed in a '
+      'future release. Please use `bootstrapEngine` from `dart:ui_web` instead.',
+    );
+    return true;
+  }());
+  return ui_web.bootstrapEngine(
+    registerPlugins: registerPlugins,
+    runApp: runApp,
   );
-
-  final engine.FlutterLoader? loader = engine.flutter?.loader;
-  if (loader == null || loader.isAutoStart) {
-    // The user does not want control of the app, bootstrap immediately.
-    engine.domWindow.console.debug('Flutter Web Bootstrap: Auto.');
-    await bootstrap.autoStart();
-  } else {
-    // Yield control of the bootstrap procedure to the user.
-    engine.domWindow.console.debug('Flutter Web Bootstrap: Programmatic.');
-    loader.didCreateEngineInitializer(bootstrap.prepareEngineInitializer());
-  }
 }
 
-/// Emulates the `flutter test` environment.
-///
-/// When set to true, the engine will emulate a specific screen size, and always
-/// use the "Ahem" font to reduce test flakiness and dependence on the test
-/// environment.
-bool get debugEmulateFlutterTesterEnvironment =>
-    _debugEmulateFlutterTesterEnvironment;
+// TODO(mdebbar): Deprecate this and remove it.
+// https://github.com/flutter/flutter/issues/127395
+bool get debugEmulateFlutterTesterEnvironment {
+  assert(() {
+    engine.printWarning(
+      'The debugEmulateFlutterTesterEnvironment getter is deprecated and will '
+      'be removed in a future release. Please use '
+      '`debugEmulateFlutterTesterEnvironment` from `dart:ui_web` instead.',
+    );
+    return true;
+  }());
+  return ui_web.debugEmulateFlutterTesterEnvironment;
+}
+
+// TODO(mdebbar): Deprecate this and remove it.
+// https://github.com/flutter/flutter/issues/127395
 set debugEmulateFlutterTesterEnvironment(bool value) {
-  _debugEmulateFlutterTesterEnvironment = value;
-  if (_debugEmulateFlutterTesterEnvironment) {
-    const Size logicalSize = Size(800.0, 600.0);
-    engine.window.webOnlyDebugPhysicalSizeOverride =
-        logicalSize * window.devicePixelRatio;
-  }
-  engine.debugDisableFontFallbacks = value;
+  assert(() {
+    engine.printWarning(
+      'The debugEmulateFlutterTesterEnvironment setter is deprecated and will '
+      'be removed in a future release. Please use '
+      '`debugEmulateFlutterTesterEnvironment` from `dart:ui_web` instead.',
+    );
+    return true;
+  }());
+  ui_web.debugEmulateFlutterTesterEnvironment = value;
 }
 
-bool _debugEmulateFlutterTesterEnvironment = false;
-
-/// Provides the asset manager.
 // TODO(mdebbar): Deprecate this and remove it.
 // https://github.com/flutter/flutter/issues/127395
 ui_web.AssetManager get webOnlyAssetManager {
@@ -124,12 +94,17 @@ ui_web.AssetManager get webOnlyAssetManager {
   return ui_web.assetManager;
 }
 
-/// Sets the handler that forwards platform messages to web plugins.
-///
-/// This function exists because unlike mobile, on the web plugins are also
-/// implemented using Dart code, and that code needs a way to receive messages.
-void webOnlySetPluginHandler(Future<void> Function(String, ByteData?, PlatformMessageResponseCallback?) handler) {
-  engine.pluginMessageCallHandler = handler;
+// TODO(mdebbar): Deprecate this and remove it.
+// https://github.com/flutter/flutter/issues/127395
+void webOnlySetPluginHandler(PlatformMessageCallback handler) {
+  assert(() {
+    engine.printWarning(
+      'The webOnlySetPluginHandler API is deprecated and will be removed in a '
+      'future release. Please use `setPluginHandler` from `dart:ui_web` instead.',
+    );
+    return true;
+  }());
+  ui_web.setPluginHandler(handler);
 }
 
 // TODO(mdebbar): Deprecate this and remove it.

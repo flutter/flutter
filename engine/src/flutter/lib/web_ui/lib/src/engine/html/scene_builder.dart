@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../engine.dart' show kProfileApplyFrame, kProfilePrerollFrame;
 import '../dom.dart';
@@ -111,7 +112,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
       // Top level transform contains view configuration to scale
       // scene to devicepixelratio. Use identity instead since CSS uses
       // logical device pixels.
-      if (!ui.debugEmulateFlutterTesterEnvironment) {
+      if (!ui_web.debugEmulateFlutterTesterEnvironment) {
         assert(matrix4[0] == window.devicePixelRatio &&
             matrix4[5] == window.devicePixelRatio);
       }
@@ -383,7 +384,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   void _addTexture(double dx, double dy, double width, double height,
       int textureId, ui.FilterQuality filterQuality) {
     // In test mode, allow this to be a no-op.
-    if (!ui.debugEmulateFlutterTesterEnvironment) {
+    if (!ui_web.debugEmulateFlutterTesterEnvironment) {
       throw UnimplementedError('Textures are not supported in Flutter Web');
     }
   }
