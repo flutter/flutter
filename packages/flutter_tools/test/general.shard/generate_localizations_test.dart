@@ -1759,6 +1759,67 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       });
     });
 
+    group('argument messages', () {
+      testWithoutContext('should generate proper calls to intl.DateFormat', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "datetime": "{today, date, ::yMd}"
+}'''
+        });
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.yMd(localeName).format(today)'));
+      });
+
+      testWithoutContext('should generate proper calls to intl.DateFormat when using time', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "datetime": "{current, time, ::jms}"
+}'''
+        });
+        expect(getGeneratedFileContent(locale: 'en'), contains('intl.DateFormat.jms(localeName).format(current)'));
+      });
+
+      testWithoutContext('should not complain when placeholders are explicitly typed to DateTime', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "datetime": "{today, date, ::yMd}",
+  "@datetime": {
+    "placeholders": {
+      "today": { "type": "DateTime" }
+    }
+  }
+}'''
+        });
+        expect(getGeneratedFileContent(locale: 'en'), contains('String datetime(DateTime today) {'));
+      });
+
+      testWithoutContext('should automatically infer date time placeholders that are not explicitly defined', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "datetime": "{today, date, ::yMd}"
+}'''
+        });
+        expect(getGeneratedFileContent(locale: 'en'), contains('String datetime(DateTime today) {'));
+      });
+
+      testWithoutContext('should throw on invalid DateFormat', () {
+        try {
+          setupLocalizations(<String, String>{
+            'en': '''
+{
+  "datetime": "{today, date, ::yMMMMMd}"
+}'''
+          });
+          assert(false);
+        } on L10nException {
+          expect(logger.errorText, contains('Date format "yMMMMMd" for placeholder today does not have a corresponding DateFormat constructor'));
+        }
+      });
+    });
+
     // All error handling for messages should collect errors on a per-error
     // basis and log them out individually. Then, it will throw an L10nException.
     group('error handling tests', () {
