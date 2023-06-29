@@ -77,6 +77,28 @@ typedef AutocompleteFieldViewBuilder = Widget Function(
 ///   * [RawAutocomplete.displayStringForOption], which is of this type.
 typedef AutocompleteOptionToString<T extends Object> = String Function(T option);
 
+/// A direction in which to open the options-view overlay.
+///
+/// See also:
+///
+///  * [RawAutocomplete.optionsViewOpenDirection], which is of this type.
+///  * [RawAutocomplete.optionsViewBuilder] to specify how to build the
+///    selectable-options widget.
+///  * [RawAutocomplete.fieldViewBuilder] to optionally specify how to build the
+///    corresponding field widget.
+enum OptionsViewOpenDirection {
+  /// Open upward.
+  ///
+  /// The bottom edge of the options view will align with the top edge
+  /// of the text field built by [RawAutocomplete.fieldViewBuilder].
+  up,
+  /// Open downward.
+  ///
+  /// The top edge of the options view will align with the bottom edge
+  /// of the text field build by [RawAutocomplete.fieldViewBuilder].
+  down,
+}
+
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
 /// {@template flutter.widgets.RawAutocomplete.RawAutocomplete}
 /// A widget for helping the user make a selection by entering some text and
@@ -128,6 +150,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     super.key,
     required this.optionsViewBuilder,
     required this.optionsBuilder,
+    this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.displayStringForOption = defaultStringForOption,
     this.fieldViewBuilder,
     this.focusNode,
@@ -196,6 +219,11 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///
   /// {@endtemplate}
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
+
+  /// The direction in which to open the options-view overlay.
+  ///
+  /// Defaults to [OptionsViewOpenDirection.down].
+  final OptionsViewOpenDirection optionsViewOpenDirection;
 
   /// {@template flutter.widgets.RawAutocomplete.displayStringForOption}
   /// Returns the string to display in the field when the option is selected.
@@ -421,7 +449,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
           return CompositedTransformFollower(
             link: _optionsLayerLink,
             showWhenUnlinked: false,
-            targetAnchor: Alignment.bottomLeft,
+            targetAnchor: widget.optionsViewOpenDirection == OptionsViewOpenDirection.up
+              ? Alignment.topLeft
+              : Alignment.bottomLeft,
+            followerAnchor: widget.optionsViewOpenDirection == OptionsViewOpenDirection.up
+              ? Alignment.bottomLeft
+              : Alignment.topLeft,
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
                 highlightIndexNotifier: _highlightedOptionIndex,
