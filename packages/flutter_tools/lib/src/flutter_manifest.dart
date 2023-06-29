@@ -325,6 +325,7 @@ class FlutterManifest {
         _logger.printError('Asset manifest entry parsing failed.');
       } else {
         results.add(entry);
+        print('@andrewkolos ${entry.transformers?[0].package}');
       }
     }
     return results;
@@ -708,9 +709,11 @@ void _validateFonts(YamlList fonts, List<String> errors) {
 class AssetsEntry {
   const AssetsEntry({
     required this.assetUris,
+    required this.transformers,
   });
 
   final List<Uri> assetUris;
+  final List<AssetsTransformerEntry>? transformers;
 
   // TODO: format this code.
   static AssetsEntry? tryParseFromYaml(Object? yamlObject, {
@@ -725,14 +728,15 @@ class AssetsEntry {
       }
     }
 
-    if (yamlObject == '') {
-      logger.printError('Asset manifest contains a null or empty uri.');
+    if (yamlObject == null || yamlObject == '') {
+      logger.printError('Asset manifest contains a null or empty entry.');
       return null;
     }
     if (yamlObject is String) {
       final Uri? uri = tryParseUri(yamlObject);
       if (uri != null) {
-        return AssetsEntry(assetUris: <Uri>[uri]);
+        // todo should we allow nullable transformers list to indicate that user did not specify transformers
+        return AssetsEntry(assetUris: <Uri>[uri], transformers: null);
       }
     } else if (yamlObject is Map) {
       final List<Uri> uris = <Uri>[];
@@ -763,8 +767,28 @@ class AssetsEntry {
         }
       }
 
+      final Object? transformers = yamlObject['transformers'];
+      final List<AssetsTransformerEntry> parsedTransformers = <AssetsTransformerEntry>[];
+
+      if (transformers != null) {
+        if (transformers is! YamlList) {
+          logger.printError('Expected "transformers" entry in asset group to be a list. \n'
+            'Got ${transformers.runtimeType} instead');
+          return null;
+        }
+        for (final Object? transformer in transformers) {
+          final AssetsTransformerEntry? parsed = AssetsTransformerEntry.tryParse(transformer, logger: logger);
+          if (parsed == null) {
+            // todo probably log here
+            return null;
+          }
+          parsedTransformers.add(parsed);
+        }
+      }
+
       return AssetsEntry(
         assetUris: uris,
+        transformers: parsedTransformers,
       );
     }
 
@@ -793,4 +817,46 @@ class AssetsEntry {
 
   @override
   int get hashCode => assetUris.hashCode;
+}
+
+@immutable
+class AssetsTransformerEntry {
+  const AssetsTransformerEntry({
+    required this.package,
+    required this.args
+  });
+
+  final String package;
+  final String? args;
+
+  static AssetsTransformerEntry? tryParse(Object? yamlObject, {
+    required Logger logger,
+  }) {
+    if (yamlObject == null) {
+      logger.printError('Expected transformers entry to be non-null');
+      return null;
+    }
+    if (yamlObject is! Map) {
+        // todo replace "Asset manifest" with "assets"
+        logger.printError('transformers entry is malformed. '
+          "Expected transformers entry to be an object'.");
+        return null;
+    }
+    final Object? package = yamlObject['package'];
+    if (package == null || package is! String) {
+      logger.printError('transformers entry is malformed. '
+        "Expected entry to have a subentry named 'package' which is a string.\n "
+        'Got ${package.runtimeType} instead.');
+      return null;
+    }
+    final Object? args = yamlObject['args'];
+    if (args is! String) {
+      logger.printError('transformers entry is malformed. '
+        'Expected "args" entry to be a String '
+        ' Got ${args.runtimeType} instead.');
+      return null;
+    }
+
+    return AssetsTransformerEntry(package: package, args: args);
+  }
 }

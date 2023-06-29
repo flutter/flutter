@@ -217,7 +217,6 @@ class ManifestAssetBundle implements AssetBundle {
     TargetPlatform? targetPlatform,
   }) async {
     print('@andrewkolos: AssetBundle.build: $manifestPath');
-    print('@andrewkolos: ${StackTrace.current}');
     if (flutterProject == null) {
       try {
         flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);
