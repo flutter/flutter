@@ -52,13 +52,15 @@ class GoldenPlaygroundTest
   ISize GetWindowSize() const;
 
  private:
+#if FML_OS_MACOSX
+  // This must be placed first so that the autorelease pool is not destroyed
+  // until the GoldenPlaygroundTestImpl has been destructed.
+  fml::ScopedNSAutoreleasePool autorelease_pool_;
+#endif
+
   struct GoldenPlaygroundTestImpl;
   // This is only a shared_ptr so it can work with a forward declared type.
   std::shared_ptr<GoldenPlaygroundTestImpl> pimpl_;
-
-#if FML_OS_MACOSX
-  fml::ScopedNSAutoreleasePool autorelease_pool_;
-#endif
 
   FML_DISALLOW_COPY_AND_ASSIGN(GoldenPlaygroundTest);
 };
