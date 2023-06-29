@@ -10,12 +10,6 @@ import '../../project.dart';
 import '../gradle_utils.dart';
 
 @visibleForTesting
-const String minSdk16 = 'minSdkVersion 16';
-@visibleForTesting
-const String minSdk17 = 'minSdkVersion 17';
-@visibleForTesting
-const String minSdk18 = 'minSdkVersion 18';
-@visibleForTesting
 const String flutterMinSdk = 'minSdkVersion flutter.minSdkVersion';
 @visibleForTesting
 const String appGradleNotFoundWarning = 'Module level build.gradle file not found, skipping minSdkVersion migration.';
