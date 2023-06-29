@@ -552,6 +552,104 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     final MouseCursor effectiveMouseCursor = canRequestFocus() ? SystemMouseCursors.text : SystemMouseCursors.click;
 
+    Widget menuAnchor = MenuAnchor(
+      style: effectiveMenuStyle,
+      controller: _controller,
+      menuChildren: menu,
+      crossAxisUnconstrained: false,
+      builder: (BuildContext context, MenuController controller, Widget? child) {
+        assert(_initialMenu != null);
+        final Widget trailingButton = Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: IconButton(
+            isSelected: controller.isOpen,
+            icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
+            selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
+            onPressed: () {
+              handlePressed(controller);
+            },
+          ),
+        );
+
+        final Widget leadingButton = Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: widget.leadingIcon ?? const SizedBox()
+        );
+
+        final Widget textField = TextField(
+            key: _anchorKey,
+            mouseCursor: effectiveMouseCursor,
+            canRequestFocus: canRequestFocus(),
+            enableInteractiveSelection: canRequestFocus(),
+            textAlignVertical: TextAlignVertical.center,
+            style: effectiveTextStyle,
+            controller: _textEditingController,
+            onEditingComplete: () {
+              if (currentHighlight != null) {
+                final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
+                if (entry.enabled) {
+                  _textEditingController.text = entry.label;
+                  _textEditingController.selection =
+                      TextSelection.collapsed(offset: _textEditingController.text.length);
+                  widget.onSelected?.call(entry.value);
+                }
+              } else {
+                widget.onSelected?.call(null);
+              }
+              if (!widget.enableSearch) {
+                currentHighlight = null;
+              }
+              if (_textEditingController.text.isNotEmpty) {
+                controller.close();
+              }
+            },
+            onTap: () {
+              handlePressed(controller);
+            },
+            onChanged: (String text) {
+              controller.open();
+              setState(() {
+                filteredEntries = widget.dropdownMenuEntries;
+                _enableFilter = widget.enableFilter;
+              });
+            },
+            decoration: InputDecoration(
+              enabled: widget.enabled,
+              label: widget.label,
+              hintText: widget.hintText,
+              helperText: widget.helperText,
+              errorText: widget.errorText,
+              prefixIcon: widget.leadingIcon != null ? Container(
+                  key: _leadingKey,
+                  child: widget.leadingIcon
+              ) : null,
+              suffixIcon: trailingButton,
+            ).applyDefaults(effectiveInputDecorationTheme)
+        );
+
+        if (widget.expandedInsets != null) {
+          return textField;
+        }
+
+        return _DropdownMenuBody(
+          width: widget.width,
+          children: <Widget>[
+            textField,
+            for (final Widget c in _initialMenu!) c,
+            trailingButton,
+            leadingButton,
+          ],
+        );
+      },
+    );
+    if (widget.expandedInsets != null) {
+      menuAnchor = Container(
+        alignment: AlignmentDirectional.topStart,
+        padding: widget.expandedInsets,
+        child: menuAnchor,
+      );
+    }
+
     return Shortcuts(
       shortcuts: _kMenuTraversalShortcuts,
       child: Actions(
@@ -563,100 +661,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             onInvoke: handleDownKeyInvoke,
           ),
         },
-        child: Container(
-          alignment: AlignmentDirectional.topStart,
-          padding: widget.expandedInsets,
-          child: MenuAnchor(
-            style: effectiveMenuStyle,
-            controller: _controller,
-            menuChildren: menu,
-            crossAxisUnconstrained: false,
-            builder: (BuildContext context, MenuController controller, Widget? child) {
-              assert(_initialMenu != null);
-              final Widget trailingButton = Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: IconButton(
-                  isSelected: controller.isOpen,
-                  icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
-                  selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
-                  onPressed: () {
-                    handlePressed(controller);
-                  },
-                ),
-              );
-
-              final Widget leadingButton = Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: widget.leadingIcon ?? const SizedBox()
-              );
-
-              final Widget textField = TextField(
-                  key: _anchorKey,
-                  mouseCursor: effectiveMouseCursor,
-                  canRequestFocus: canRequestFocus(),
-                  enableInteractiveSelection: canRequestFocus(),
-                  textAlignVertical: TextAlignVertical.center,
-                  style: effectiveTextStyle,
-                  controller: _textEditingController,
-                  onEditingComplete: () {
-                    if (currentHighlight != null) {
-                      final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
-                      if (entry.enabled) {
-                        _textEditingController.text = entry.label;
-                        _textEditingController.selection =
-                            TextSelection.collapsed(offset: _textEditingController.text.length);
-                        widget.onSelected?.call(entry.value);
-                      }
-                    } else {
-                      widget.onSelected?.call(null);
-                    }
-                    if (!widget.enableSearch) {
-                      currentHighlight = null;
-                    }
-                    if (_textEditingController.text.isNotEmpty) {
-                      controller.close();
-                    }
-                  },
-                  onTap: () {
-                    handlePressed(controller);
-                  },
-                  onChanged: (String text) {
-                    controller.open();
-                    setState(() {
-                      filteredEntries = widget.dropdownMenuEntries;
-                      _enableFilter = widget.enableFilter;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    enabled: widget.enabled,
-                    label: widget.label,
-                    hintText: widget.hintText,
-                    helperText: widget.helperText,
-                    errorText: widget.errorText,
-                    prefixIcon: widget.leadingIcon != null ? Container(
-                        key: _leadingKey,
-                        child: widget.leadingIcon
-                    ) : null,
-                    suffixIcon: trailingButton,
-                  ).applyDefaults(effectiveInputDecorationTheme)
-              );
-
-              if (widget.expandedInsets != null) {
-                return textField;
-              }
-
-              return _DropdownMenuBody(
-                width: widget.width,
-                children: <Widget>[
-                  textField,
-                  for (final Widget c in _initialMenu!) c,
-                  trailingButton,
-                  leadingButton,
-                ],
-              );
-            },
-          ),
-        ),
+        child: menuAnchor,
       ),
     );
   }
