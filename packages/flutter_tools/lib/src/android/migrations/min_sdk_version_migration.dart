@@ -41,6 +41,6 @@ class MinSdkVersionMigration extends ProjectMigrator {
 
   @override
   String migrateFileContents(String fileContents) {
-    return fileContents.replaceAll(jellyBeanMinSdkVersions, flutterMinSdk);
+    return fileContents.replaceAll(jellyBeanMinSdkVersionMatch, flutterMinSdk);
   }
 }

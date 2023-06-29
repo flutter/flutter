@@ -75,7 +75,7 @@ RegExp(
     multiLine: true
 );
 
-final RegExp jellyBeanMinSdkVersions =
+final RegExp jellyBeanMinSdkVersionMatch =
 RegExp(r'(?<=^\s*)minSdkVersion 1[678](?=\s*(?://|$))', multiLine: true);
 
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
