@@ -1093,6 +1093,7 @@ targets:
 
   - name: Linux web_benchmarks_html
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -1103,6 +1104,25 @@ targets:
       tags: >
         ["devicelab"]
       task_name: web_benchmarks_html
+    runIf:
+      - dev/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux web_benchmarks_skwasm
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:114.0"}
+        ]
+      tags: >
+        ["devicelab"]
+      task_name: web_benchmarks_skwasm
     runIf:
       - dev/**
       - bin/**
