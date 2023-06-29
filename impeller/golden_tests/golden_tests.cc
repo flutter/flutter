@@ -6,6 +6,7 @@
 
 #include <sstream>
 
+#include "flutter/fml/platform/darwin/scoped_nsautorelease_pool.h"
 #include "impeller/aiks/canvas.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/geometry/path_builder.h"
@@ -59,6 +60,10 @@ class GoldenTests : public ::testing::Test {
   }
 
  private:
+  // This must be placed before any other members that may use the
+  // autorelease pool.
+  fml::ScopedNSAutoreleasePool autorelease_pool_;
+
   std::unique_ptr<MetalScreenshoter> screenshoter_;
 };
 
