@@ -14,6 +14,9 @@ class RectGeometry : public Geometry {
 
   ~RectGeometry();
 
+  // |Geometry|
+  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+
  private:
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,

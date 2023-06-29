@@ -36,6 +36,20 @@
 
 namespace impeller {
 
+namespace {
+std::optional<Color> AsBackgroundColor(const EntityPass::Element& element,
+                                       ISize target_size) {
+  if (const Entity* entity = std::get_if<Entity>(&element)) {
+    std::optional<Color> entity_color =
+        entity->GetContents()->AsBackgroundColor(*entity, target_size);
+    if (entity_color.has_value()) {
+      return entity_color.value();
+    }
+  }
+  return {};
+}
+}  // namespace
+
 EntityPass::EntityPass() = default;
 
 EntityPass::~EntityPass() = default;
@@ -235,9 +249,9 @@ bool EntityPass::Render(ContentContext& renderer,
   // and then blit the results onto the onscreen texture. If using this branch,
   // there's no need to set up a stencil attachment on the root render target.
   if (!supports_onscreen_backdrop_reads && reads_from_onscreen_backdrop) {
-    auto offscreen_target =
-        CreateRenderTarget(renderer, root_render_target.GetRenderTargetSize(),
-                           true, clear_color_.Premultiply());
+    auto offscreen_target = CreateRenderTarget(
+        renderer, root_render_target.GetRenderTargetSize(), true,
+        GetClearColor(render_target.GetRenderTargetSize()).Premultiply());
 
     if (!OnRender(renderer,  // renderer
                   offscreen_target.GetRenderTarget()
@@ -342,7 +356,8 @@ bool EntityPass::Render(ContentContext& renderer,
   }
 
   // Set up the clear color of the root pass.
-  color0.clear_color = clear_color_.Premultiply();
+  color0.clear_color =
+      GetClearColor(render_target.GetRenderTargetSize()).Premultiply();
   root_render_target.SetColorAttachment(color0, 0);
 
   EntityPassTarget pass_target(
@@ -478,7 +493,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
         renderer,                                  // renderer
         subpass_size,                              // size
         subpass->GetTotalPassReads(renderer) > 0,  // readable
-        Color::BlackTransparent());                // clear_color
+        subpass->GetClearColor(subpass_size));     // clear_color
 
     if (!subpass_target.IsValid()) {
       VALIDATION_LOG << "Subpass render target is invalid.";
@@ -559,7 +574,7 @@ bool EntityPass::OnRender(
     return false;
   }
 
-  if (!(clear_color_ == Color::BlackTransparent())) {
+  if (!(GetClearColor(root_pass_size) == Color::BlackTransparent())) {
     // Force the pass context to create at least one new pass if the clear color
     // is present. The `EndPass` first ensures that the clear color will get
     // applied even if this EntityPass is getting collapsed into the parent
@@ -704,7 +719,19 @@ bool EntityPass::OnRender(
     render_element(backdrop_entity);
   }
 
+  bool is_collapsing_clear_colors = true;
   for (const auto& element : elements_) {
+    // Skip elements that are incorporated into the clear color.
+    if (is_collapsing_clear_colors) {
+      std::optional<Color> entity_color =
+          AsBackgroundColor(element, root_pass_size);
+      if (entity_color.has_value()) {
+        continue;
+      } else {
+        is_collapsing_clear_colors = false;
+      }
+    }
+
     EntityResult result =
         GetEntityForElement(element,                 // element
                             renderer,                // renderer
@@ -892,12 +919,17 @@ void EntityPass::SetBlendMode(BlendMode blend_mode) {
   flood_clip_ = Entity::IsBlendModeDestructive(blend_mode);
 }
 
-void EntityPass::SetClearColor(Color clear_color) {
-  clear_color_ = clear_color;
-}
-
-Color EntityPass::GetClearColor() const {
-  return clear_color_;
+Color EntityPass::GetClearColor(ISize target_size) const {
+  Color result = Color::BlackTransparent();
+  for (const Element& element : elements_) {
+    std::optional<Color> entity_color = AsBackgroundColor(element, target_size);
+    if (entity_color.has_value()) {
+      result = entity_color.value();
+    } else {
+      break;
+    }
+  }
+  return result;
 }
 
 void EntityPass::SetBackdropFilter(std::optional<BackdropFilterProc> proc) {
