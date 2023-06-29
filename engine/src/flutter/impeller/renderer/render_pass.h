@@ -57,6 +57,13 @@ class RenderPass {
   ///
   bool EncodeCommands() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Accessor for the current Commands.
+  ///
+  /// @details    Visible for testing.
+  ///
+  const std::vector<Command>& GetCommands() const { return commands_; }
+
  protected:
   const std::weak_ptr<const Context> context_;
   const RenderTarget render_target_;

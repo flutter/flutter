@@ -47,4 +47,12 @@ std::optional<Rect> RectGeometry::GetCoverage(const Matrix& transform) const {
   return rect_.TransformBounds(transform);
 }
 
+bool RectGeometry::CoversArea(const Matrix& transform, const Rect& rect) const {
+  if (!transform.IsTranslationScaleOnly()) {
+    return false;
+  }
+  Rect coverage = rect_.TransformBounds(transform);
+  return coverage.Contains(rect);
+}
+
 }  // namespace impeller

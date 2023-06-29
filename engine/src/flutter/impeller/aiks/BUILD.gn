@@ -50,6 +50,9 @@ impeller_component("aiks_unittests") {
   sources = [
     "aiks_unittests.cc",
     "canvas_unittests.cc",
+    "testing/context_mock.h",
+    "testing/context_spy.cc",
+    "testing/context_spy.h",
   ]
   deps = [
     ":aiks",
@@ -69,7 +72,12 @@ impeller_component("aiks_unittests_golden") {
     "IMPELLER_ENABLE_VALIDATION=1",
   ]
 
-  sources = [ "aiks_unittests.cc" ]
+  sources = [
+    "aiks_unittests.cc",
+    "testing/context_mock.h",
+    "testing/context_spy.cc",
+    "testing/context_spy.h",
+  ]
   deps = [
     ":aiks",
     ":aiks_playground",

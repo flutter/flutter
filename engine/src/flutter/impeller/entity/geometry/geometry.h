@@ -87,6 +87,12 @@ class Geometry {
   virtual GeometryVertexType GetVertexType() const = 0;
 
   virtual std::optional<Rect> GetCoverage(const Matrix& transform) const = 0;
+
+  /// @return `true` if this geometry will completely cover all fragments in
+  /// `rect` when the `transform` is applied to it.
+  virtual bool CoversArea(const Matrix& transform, const Rect& rect) const {
+    return false;
+  }
 };
 
 }  // namespace impeller
