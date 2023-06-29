@@ -80,6 +80,8 @@ class ContextMock : public Context {
   MOCK_CONST_METHOD0(GetPipelineLibrary, std::shared_ptr<PipelineLibrary>());
 
   MOCK_CONST_METHOD0(CreateCommandBuffer, std::shared_ptr<CommandBuffer>());
+
+  MOCK_METHOD0(Shutdown, void());
 };
 
 }  // namespace testing
