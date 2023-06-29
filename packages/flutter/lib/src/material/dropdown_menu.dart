@@ -278,6 +278,15 @@ class DropdownMenu<T> extends StatefulWidget {
   /// contain space for padding.
   final List<DropdownMenuEntry<T>> dropdownMenuEntries;
 
+  /// Enables the text field to expand and provides margins.
+  ///
+  /// If this is null, the width of the text field will be determined by the width
+  /// of menu items or [DropdownMenu.width]. If this is not null, the text field
+  /// will be expanded to its parent size. The values of [expandedInsets] are
+  /// margins for the text field. In other words, If this is [EdgeInsets.zero],
+  /// the width of the text field will be the same as its parent's width.
+  ///
+  /// Defaults to null.
   final EdgeInsets? expandedInsets;
 
   @override
