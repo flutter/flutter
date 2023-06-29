@@ -80,7 +80,7 @@ bool OpacityPeepholePassDelegate::CanCollapseIntoParentPass(
   // OpacityPeepholePassDelegate will only get used if the pass's blend mode is
   // SourceOver, so no need to check here.
   if (paint_.color.alpha <= 0.0 || paint_.color.alpha >= 1.0 ||
-      paint_.image_filter.has_value() || paint_.color_filter.has_value()) {
+      paint_.image_filter || paint_.color_filter) {
     return false;
   }
 

@@ -389,11 +389,10 @@ bool AtlasColorContents::Render(const ContentContext& renderer,
   std::vector<Rect> texture_coords;
   std::vector<Matrix> transforms;
   std::vector<Color> colors;
-  if (subatlas_.has_value()) {
-    auto subatlas = subatlas_.value();
-    texture_coords = subatlas->sub_texture_coords;
-    colors = subatlas->sub_colors;
-    transforms = subatlas->sub_transforms;
+  if (subatlas_) {
+    texture_coords = subatlas_->sub_texture_coords;
+    colors = subatlas_->sub_colors;
+    transforms = subatlas_->sub_transforms;
   } else {
     texture_coords = parent_.GetTextureCoordinates();
     transforms = parent_.GetTransforms();

@@ -29,12 +29,11 @@ class ImpellerAllocator : public SkBitmap::Allocator {
   // |Allocator|
   bool allocPixelRef(SkBitmap* bitmap) override;
 
-  std::optional<std::shared_ptr<impeller::DeviceBuffer>> GetDeviceBuffer()
-      const;
+  std::shared_ptr<impeller::DeviceBuffer> GetDeviceBuffer() const;
 
  private:
   std::shared_ptr<impeller::Allocator> allocator_;
-  std::optional<std::shared_ptr<impeller::DeviceBuffer>> buffer_;
+  std::shared_ptr<impeller::DeviceBuffer> buffer_;
 };
 
 struct DecompressResult {

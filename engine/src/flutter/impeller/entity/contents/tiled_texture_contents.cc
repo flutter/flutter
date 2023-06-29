@@ -55,19 +55,16 @@ void TiledTextureContents::SetSamplerDescriptor(SamplerDescriptor desc) {
   sampler_descriptor_ = std::move(desc);
 }
 
-void TiledTextureContents::SetColorFilter(
-    std::optional<ColorFilterProc> color_filter) {
+void TiledTextureContents::SetColorFilter(ColorFilterProc color_filter) {
   color_filter_ = std::move(color_filter);
 }
 
-std::optional<std::shared_ptr<Texture>>
-TiledTextureContents::CreateFilterTexture(
+std::shared_ptr<Texture> TiledTextureContents::CreateFilterTexture(
     const ContentContext& renderer) const {
-  if (!color_filter_.has_value()) {
-    return std::nullopt;
+  if (!color_filter_) {
+    return nullptr;
   }
-  const ColorFilterProc& filter = color_filter_.value();
-  auto color_filter_contents = filter(FilterInput::Make(texture_));
+  auto color_filter_contents = color_filter_(FilterInput::Make(texture_));
   auto snapshot = color_filter_contents->RenderToSnapshot(
       renderer,                          // renderer
       Entity(),                          // entity
@@ -78,7 +75,7 @@ TiledTextureContents::CreateFilterTexture(
   if (snapshot.has_value()) {
     return snapshot.value().texture;
   }
-  return std::nullopt;
+  return nullptr;
 }
 
 SamplerDescriptor TiledTextureContents::CreateDescriptor(
@@ -107,7 +104,7 @@ bool TiledTextureContents::IsOpaque() const {
       y_tile_mode_ == Entity::TileMode::kDecal) {
     return false;
   }
-  if (color_filter_.has_value()) {
+  if (color_filter_) {
     return false;
   }
   return texture_->IsOpaque();
@@ -170,13 +167,13 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
         cmd, host_buffer.EmplaceUniform(frag_info));
   }
 
-  if (color_filter_.has_value()) {
+  if (color_filter_) {
     auto filtered_texture = CreateFilterTexture(renderer);
-    if (!filtered_texture.has_value()) {
+    if (!filtered_texture) {
       return false;
     }
     FS::BindTextureSampler(
-        cmd, filtered_texture.value(),
+        cmd, filtered_texture,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
             CreateDescriptor(renderer.GetDeviceCapabilities())));
   } else {

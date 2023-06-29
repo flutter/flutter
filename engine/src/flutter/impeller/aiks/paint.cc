@@ -74,9 +74,9 @@ std::shared_ptr<Contents> Paint::WithImageFilter(
     std::shared_ptr<Contents> input,
     const Matrix& effect_transform,
     bool is_subpass) const {
-  if (image_filter.has_value()) {
-    const ImageFilterProc& filter = image_filter.value();
-    input = filter(FilterInput::Make(input), effect_transform, is_subpass);
+  if (image_filter) {
+    input =
+        image_filter(FilterInput::Make(input), effect_transform, is_subpass);
   }
   return input;
 }
@@ -89,9 +89,8 @@ std::shared_ptr<Contents> Paint::WithColorFilter(
   if (color_source.GetType() == ColorSource::Type::kImage) {
     return input;
   }
-  if (color_filter.has_value()) {
-    const ColorFilterProc& filter = color_filter.value();
-    auto color_filter_contents = filter(FilterInput::Make(input));
+  if (color_filter) {
+    auto color_filter_contents = color_filter(FilterInput::Make(input));
     if (color_filter_contents) {
       color_filter_contents->SetAbsorbOpacity(absorb_opacity);
     }
@@ -166,7 +165,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
 }
 
 bool Paint::HasColorFilter() const {
-  return color_filter.has_value();
+  return !!color_filter;
 }
 
 }  // namespace impeller

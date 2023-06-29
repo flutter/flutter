@@ -474,10 +474,10 @@ void DlDispatcher::setColorSource(const flutter::DlColorSource* source) {
   }
 }
 
-static std::optional<Paint::ColorFilterProc> ToColorFilterProc(
+static Paint::ColorFilterProc ToColorFilterProc(
     const flutter::DlColorFilter* filter) {
   if (filter == nullptr) {
-    return std::nullopt;
+    return nullptr;
   }
   switch (filter->type()) {
     case flutter::DlColorFilterType::kBlend: {
@@ -507,7 +507,7 @@ static std::optional<Paint::ColorFilterProc> ToColorFilterProc(
         return ColorFilterContents::MakeLinearToSrgbFilter({std::move(input)});
       };
   }
-  return std::nullopt;
+  return nullptr;
 }
 
 // |flutter::DlOpReceiver|
@@ -565,10 +565,10 @@ void DlDispatcher::setMaskFilter(const flutter::DlMaskFilter* filter) {
   }
 }
 
-static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
+static Paint::ImageFilterProc ToImageFilterProc(
     const flutter::DlImageFilter* filter) {
   if (filter == nullptr) {
-    return std::nullopt;
+    return nullptr;
   }
 
   switch (filter->type()) {
@@ -592,7 +592,7 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
       auto dilate = filter->asDilate();
       FML_DCHECK(dilate);
       if (dilate->radius_x() < 0 || dilate->radius_y() < 0) {
-        return std::nullopt;
+        return nullptr;
       }
       auto radius_x = Radius(dilate->radius_x());
       auto radius_y = Radius(dilate->radius_y());
@@ -609,7 +609,7 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
       auto erode = filter->asErode();
       FML_DCHECK(erode);
       if (erode->radius_x() < 0 || erode->radius_y() < 0) {
-        return std::nullopt;
+        return nullptr;
       }
       auto radius_x = Radius(erode->radius_x());
       auto radius_y = Radius(erode->radius_y());
@@ -641,17 +641,16 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
       auto inner = compose->inner();
       auto outer_proc = ToImageFilterProc(outer.get());
       auto inner_proc = ToImageFilterProc(inner.get());
-      if (!outer_proc.has_value()) {
+      if (!outer_proc) {
         return inner_proc;
       }
-      if (!inner_proc.has_value()) {
+      if (!inner_proc) {
         return outer_proc;
       }
-      FML_DCHECK(outer_proc.has_value() && inner_proc.has_value());
-      return [outer_filter = outer_proc.value(),
-              inner_filter = inner_proc.value()](FilterInput::Ref input,
-                                                 const Matrix& effect_transform,
-                                                 bool is_subpass) {
+      FML_DCHECK(outer_proc && inner_proc);
+      return [outer_filter = outer_proc, inner_filter = inner_proc](
+                 FilterInput::Ref input, const Matrix& effect_transform,
+                 bool is_subpass) {
         auto contents =
             inner_filter(std::move(input), effect_transform, is_subpass);
         contents = outer_filter(FilterInput::Make(contents), effect_transform,
@@ -665,10 +664,10 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
       FML_DCHECK(color_filter_image_filter);
       auto color_filter_proc =
           ToColorFilterProc(color_filter_image_filter->color_filter().get());
-      if (!color_filter_proc.has_value()) {
-        return std::nullopt;
+      if (!color_filter_proc) {
+        return nullptr;
       }
-      return [color_filter = color_filter_proc.value()](
+      return [color_filter = color_filter_proc](
                  FilterInput::Ref input, const Matrix& effect_transform,
                  bool is_subpass) { return color_filter(std::move(input)); };
       break;
@@ -680,13 +679,13 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
       FML_DCHECK(internal_filter);
 
       auto image_filter_proc = ToImageFilterProc(internal_filter.get());
-      if (!image_filter_proc.has_value()) {
-        return std::nullopt;
+      if (!image_filter_proc) {
+        return nullptr;
       }
 
       auto matrix = ToMatrix(local_matrix_filter->matrix());
 
-      return [matrix, filter_proc = image_filter_proc.value()](
+      return [matrix, filter_proc = image_filter_proc](
                  FilterInput::Ref input, const Matrix& effect_transform,
                  bool is_subpass) {
         std::shared_ptr<FilterContents> filter =

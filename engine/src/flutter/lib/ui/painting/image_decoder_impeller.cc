@@ -208,10 +208,10 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
 
   if (bitmap->dimensions() == target_size) {
     auto buffer = bitmap_allocator->GetDeviceBuffer();
-    if (!buffer.has_value()) {
+    if (!buffer) {
       return DecompressResult{.decode_error = "Unable to get device buffer"};
     }
-    return DecompressResult{.device_buffer = buffer.value(),
+    return DecompressResult{.device_buffer = buffer,
                             .sk_bitmap = bitmap,
                             .image_info = bitmap->info()};
   }
@@ -240,10 +240,10 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
   scaled_bitmap->setImmutable();
 
   auto buffer = scaled_allocator->GetDeviceBuffer();
-  if (!buffer.has_value()) {
+  if (!buffer) {
     return DecompressResult{.decode_error = "Unable to get device buffer"};
   }
-  return DecompressResult{.device_buffer = buffer.value(),
+  return DecompressResult{.device_buffer = buffer,
                           .sk_bitmap = scaled_bitmap,
                           .image_info = scaled_bitmap->info()};
 }
@@ -508,10 +508,10 @@ ImpellerAllocator::ImpellerAllocator(
     std::shared_ptr<impeller::Allocator> allocator)
     : allocator_(std::move(allocator)) {}
 
-std::optional<std::shared_ptr<impeller::DeviceBuffer>>
-ImpellerAllocator::GetDeviceBuffer() const {
-  if (buffer_.has_value()) {
-    buffer_.value()->Flush();
+std::shared_ptr<impeller::DeviceBuffer> ImpellerAllocator::GetDeviceBuffer()
+    const {
+  if (buffer_) {
+    buffer_->Flush();
   }
   return buffer_;
 }
