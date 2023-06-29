@@ -184,9 +184,10 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// field built by [fieldViewBuilder]. For example, it may be desirable to
   /// place the text field in the AppBar and the options below in the main body.
   ///
-  /// When following this pattern, [fieldViewBuilder] can return
-  /// `SizedBox.shrink()` so that nothing is drawn where the text field would
-  /// normally be. A separate text field can be created elsewhere, and a
+  /// When following this pattern, [fieldViewBuilder] can be omitted;
+  /// in that case, a `SizedBox.shrink()` is built instead,
+  /// so that a text field is not drawn where it would normally be.
+  /// A separate text field can be created elsewhere, and a
   /// FocusNode and TextEditingController can be passed both to that text field
   /// and to RawAutocomplete.
   ///
