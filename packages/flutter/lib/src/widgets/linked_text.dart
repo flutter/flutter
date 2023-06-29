@@ -6,25 +6,25 @@ import 'basic.dart';
 import 'framework.dart';
 import 'text.dart';
 
-// TODO(justinmc): On some platforms, may want to underline link?
-
-// TODO(justinmc): Change name to something link-agnostic?
 /// A widget that displays text with parts of it made interactive.
 ///
 /// By default, any URLs in the text are made interactive, and clicking one
 /// calls [onTap].
+///
+/// Works with either a flat [String] ([text]) or a list of [InlineSpans]
+/// ([spans]).
 ///
 /// See also:
 ///
 ///  * [InlineLinkedText], which is like this but is an inline TextSpan instead
 ///    of a widget.
 class LinkedText extends StatelessWidget {
-  /// Creates an instance of [LinkedText] from the given [text], highlighting
-  /// any URLs by default.
+  /// Creates an instance of [LinkedText] from the given [text] or [spans],
+  /// highlighting any URLs by default.
   ///
   /// {@template flutter.widgets.LinkedText.new}
-  /// By default, highlights URLs in the [text] and makes them tappable with
-  /// [onTap].
+  /// By default, highlights URLs in the [text] or [spans] and makes them
+  /// tappable with [onTap].
   ///
   /// If [ranges] is given, then makes those ranges in the text interactive
   /// instead of URLs.

@@ -13,6 +13,8 @@ import 'inline_span.dart';
 import 'text_span.dart';
 import 'text_style.dart';
 
+// TODO(justinmc): On some platforms, may want to underline link?
+
 /// A callback that passes a [String] representing a URL.
 typedef UriStringCallback = void Function(String urlString);
 
