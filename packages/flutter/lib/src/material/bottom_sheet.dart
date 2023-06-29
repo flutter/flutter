@@ -473,24 +473,24 @@ class _DragHandle extends StatelessWidget {
 
 class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
   const _BottomSheetLayoutWithSizeListener({
+    required this.onChildSizeChanged,
     required this.animationValue,
     required this.isScrollControlled,
-    required this.onChildSizeChanged,
     required this.scrollControlledMaxHeightRatio,
     super.child,
   });
 
+  final _SizeChangeCallback<Size> onChildSizeChanged;
   final double animationValue;
   final bool isScrollControlled;
-  final _SizeChangeCallback<Size> onChildSizeChanged;
   final double scrollControlledMaxHeightRatio;
 
   @override
   _RenderBottomSheetLayoutWithSizeListener createRenderObject(BuildContext context) {
     return _RenderBottomSheetLayoutWithSizeListener(
+      onChildSizeChanged: onChildSizeChanged,
       animationValue: animationValue,
       isScrollControlled: isScrollControlled,
-      onChildSizeChanged: onChildSizeChanged,
       scrollControlledMaxHeightRatio: scrollControlledMaxHeightRatio,
     );
   }
@@ -500,6 +500,7 @@ class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
     renderObject.onChildSizeChanged = onChildSizeChanged;
     renderObject.animationValue = animationValue;
     renderObject.isScrollControlled = isScrollControlled;
+    renderObject.scrollControlledMaxHeightRatio = scrollControlledMaxHeightRatio;
   }
 }
 
@@ -509,13 +510,12 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     required _SizeChangeCallback<Size> onChildSizeChanged,
     required double animationValue,
     required bool isScrollControlled,
-    required this.scrollControlledMaxHeightRatio,
-  }) : _animationValue = animationValue,
+    required double scrollControlledMaxHeightRatio,
+  }) : _onChildSizeChanged = onChildSizeChanged,
+       _animationValue = animationValue,
        _isScrollControlled = isScrollControlled,
-       _onChildSizeChanged = onChildSizeChanged,
+       _scrollControlledMaxHeightRatio = scrollControlledMaxHeightRatio,
        super(child);
-
-  final double scrollControlledMaxHeightRatio;
 
   Size _lastSize = Size.zero;
 
@@ -549,6 +549,17 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     }
 
     _isScrollControlled = newValue;
+    markNeedsLayout();
+  }
+
+  double get scrollControlledMaxHeightRatio => _scrollControlledMaxHeightRatio;
+  double _scrollControlledMaxHeightRatio;
+  set scrollControlledMaxHeightRatio(double newValue) {
+    if (_scrollControlledMaxHeightRatio == newValue) {
+      return;
+    }
+
+    _scrollControlledMaxHeightRatio = newValue;
     markNeedsLayout();
   }
 
