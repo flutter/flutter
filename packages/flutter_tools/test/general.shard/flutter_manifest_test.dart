@@ -885,7 +885,7 @@ flutter:
       manifest,
       logger: logger,
     )!;
-    final List<Uri> assets = flutterManifest.assets;
+    final List<AssetsEntry> assets = flutterManifest.assets;
 
     expect(logger.errorText, contains('Asset manifest contains a null or empty uri.'));
     expect(assets, hasLength(1));
@@ -909,13 +909,13 @@ flutter:
       manifest,
       logger: logger,
     )!;
-    final List<Uri> assets = flutterManifest.assets;
+    final List<AssetsEntry> assets = flutterManifest.assets;
 
     expect(assets, hasLength(3));
-    expect(assets, <Uri>[
-      Uri.parse('lib/gallery/abc%23xyz'),
-      Uri.parse('lib/gallery/abc%3Fxyz'),
-      Uri.parse('lib/gallery/aaa%20bbb'),
+    expect(assets, <AssetsEntry>[
+      AssetsEntry(assetUris: <Uri>[Uri.parse('lib/gallery/abc%23xyz')]),
+      AssetsEntry(assetUris: <Uri>[Uri.parse('lib/gallery/abc%3Fxyz')]),
+      AssetsEntry(assetUris: <Uri>[Uri.parse('lib/gallery/aaa%20bbb')]),
     ]);
   });
 

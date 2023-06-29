@@ -311,22 +311,20 @@ class FlutterManifest {
         : fontList.map<Map<String, Object?>?>(castStringKeyedMap).whereType<Map<String, Object?>>().toList();
   }
 
-  late final List<Uri> assets = _computeAssets();
-  List<Uri> _computeAssets() {
+  late final List<AssetsEntry> assets = _computeAssets();
+  List<AssetsEntry> _computeAssets() {
+
     final List<Object?>? assets = _flutterDescriptor['assets'] as List<Object?>?;
     if (assets == null) {
-      return const <Uri>[];
+      return const <AssetsEntry>[];
     }
-    final List<Uri> results = <Uri>[];
-    for (final Object? asset in assets) {
-      if (asset is! String || asset == '') {
-        _logger.printError('Asset manifest contains a null or empty uri.');
-        continue;
-      }
-      try {
-        results.add(Uri(pathSegments: asset.split('/')));
-      } on FormatException {
-        _logger.printError('Asset manifest contains invalid uri: $asset.');
+    final List<AssetsEntry> results = <AssetsEntry>[];
+    for (final Object? rawAssetEntry in assets) {
+      final AssetsEntry? entry = AssetsEntry.tryParseFromYaml(rawAssetEntry, logger: _logger);
+      if (entry == null) {
+        _logger.printError('Asset manifest entry parsing failed.');
+      } else {
+        results.add(entry);
       }
     }
     return results;
@@ -525,10 +523,11 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
         } else if (yamlValue.isEmpty) {
           break;
-        } else if (yamlValue[0] is! String) {
-          errors.add(
-            'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
-          );
+        // TODO(andrewkolos) update validation code
+        //} else if (yamlValue[0] is! String) {
+          // errors.add(
+          //   'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
+          // );
         }
       case 'shaders':
         if (yamlValue is! YamlList) {
@@ -702,4 +701,96 @@ void _validateFonts(YamlList fonts, List<String> errors) {
       }
     }
   }
+}
+
+/// Represents an entry under the `assets` section of a pubspec.
+@immutable
+class AssetsEntry {
+  const AssetsEntry({
+    required this.assetUris,
+  });
+
+  final List<Uri> assetUris;
+
+  // TODO: format this code.
+  static AssetsEntry? tryParseFromYaml(Object? yamlObject, {
+    required Logger logger,
+  }) {
+    Uri? tryParseUri(String uri) {
+      try {
+        return Uri(pathSegments: uri.split('/'));
+      } on FormatException {
+        logger.printError('Asset manifest contains invalid uri: $uri.');
+        return null;
+      }
+    }
+
+    if (yamlObject == '') {
+      logger.printError('Asset manifest contains a null or empty uri.');
+      return null;
+    }
+    if (yamlObject is String) {
+      final Uri? uri = tryParseUri(yamlObject);
+      if (uri != null) {
+        return AssetsEntry(assetUris: <Uri>[uri]);
+      }
+    } else if (yamlObject is Map) {
+      final List<Uri> uris = <Uri>[];
+      // TODO: should we try printing the object in the error cases?
+      // Should we really be printing errors instead of throwing?
+      final Object? group = yamlObject['group'];
+      if (group == null) {
+        logger.printError('Asset manifest entry is malformed. '
+          "Expected entry to have a subentry named 'group'.");
+        return null;
+      }
+      if (group is! YamlList) {
+        logger.printError('Asset manifest entry is malformed. '
+          'Expected "group" entry to be a list of strings. '
+          ' Got ${group.runtimeType} instead.');
+        return null;
+      }
+      for (final Object? uriString in group) {
+        if (uriString is! String){
+          logger.printError('Asset manifest entry is malformed. '
+          'Expected entry in asset group to be a string. '
+          'Got ${uriString.runtimeType} instead.');
+          return null;
+        }
+        final Uri? uri = tryParseUri(uriString);
+        if (uri != null) {
+          uris.add(uri);
+        }
+      }
+
+      return AssetsEntry(
+        assetUris: uris,
+      );
+    }
+
+    logger.printError('Assets entry had unexpected shape. '
+      'Expected a string or an object. Got ${yamlObject.runtimeType} instead.');
+    return null;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! AssetsEntry) {
+      return false;
+    }
+
+    if (assetUris.length != other.assetUris.length) {
+      return false;
+    }
+    for (int i = 0; i < other.assetUris.length; i++) {
+      if (assetUris[i] != other.assetUris[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  @override
+  int get hashCode => assetUris.hashCode;
 }

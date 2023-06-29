@@ -216,7 +216,8 @@ class ManifestAssetBundle implements AssetBundle {
     bool deferredComponentsEnabled = false,
     TargetPlatform? targetPlatform,
   }) async {
-
+    print('@andrewkolos: AssetBundle.build: $manifestPath');
+    print('@andrewkolos: ${StackTrace.current}');
     if (flutterProject == null) {
       try {
         flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);
@@ -793,30 +794,32 @@ class ManifestAssetBundle implements AssetBundle {
     final Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
     final _AssetDirectoryCache cache = _AssetDirectoryCache(_fileSystem);
-    for (final Uri assetUri in flutterManifest.assets) {
-      if (assetUri.path.endsWith('/')) {
-        wildcardDirectories.add(assetUri);
-        _parseAssetsFromFolder(
-          packageConfig,
-          flutterManifest,
-          assetBase,
-          cache,
-          result,
-          assetUri,
-          packageName: packageName,
-          attributedPackage: attributedPackage,
-        );
-      } else {
-        _parseAssetFromFile(
-          packageConfig,
-          flutterManifest,
-          assetBase,
-          cache,
-          result,
-          assetUri,
-          packageName: packageName,
-          attributedPackage: attributedPackage,
-        );
+    for (final AssetsEntry assetsEntry in flutterManifest.assets) {
+      for (final Uri assetUri in assetsEntry.assetUris) {
+        if (assetUri.path.endsWith('/')) {
+          wildcardDirectories.add(assetUri);
+          _parseAssetsFromFolder(
+            packageConfig,
+            flutterManifest,
+            assetBase,
+            cache,
+            result,
+            assetUri,
+            packageName: packageName,
+            attributedPackage: attributedPackage,
+          );
+        } else {
+          _parseAssetFromFile(
+            packageConfig,
+            flutterManifest,
+            assetBase,
+            cache,
+            result,
+            assetUri,
+            packageName: packageName,
+            attributedPackage: attributedPackage,
+          );
+        }
       }
     }
 
