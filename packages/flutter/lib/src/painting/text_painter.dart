@@ -26,6 +26,11 @@ import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
+class _DebugAssert {
+  const _DebugAssert();
+}
+const _DebugAssert _debugAssert = _DebugAssert();
+
 // The default font size if none is specified. This should be kept in
 // sync with the default values in text_style.dart, as well as the
 // defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
@@ -289,6 +294,7 @@ class _TextLayout {
   /// Whether this layout has been invalidated and disposed.
   ///
   /// Only for use when asserts are enabled.
+  @_debugAssert
   bool get debugDisposed => _paragraph.debugDisposed;
 
   /// The horizontal space required to paint this text.
@@ -595,6 +601,7 @@ class TextPainter {
   }
 
   // Whether textWidthBasis has changed after the most recent `layout` call.
+  @_debugAssert
   bool _debugNeedsRelayout = true;
   // The result of the most recent `layout` call.
   _TextPainterLayoutCacheWithOffset? _layoutCache;
@@ -612,6 +619,7 @@ class TextPainter {
   // the color of the text), on ui.Paragraph or ui.ParagraphBuilder.
   double _inputWidth = double.nan;
 
+  @_debugAssert
   bool get _debugAssertTextLayoutIsValid {
     assert(!debugDisposed);
     if (_layoutCache == null) {
@@ -624,6 +632,7 @@ class TextPainter {
     return true;
   }
 
+  @_debugAssert
   StackTrace? _debugMarkNeedsLayoutCallStack;
 
   /// Marks this text painter's layout information as dirty and removes cached
@@ -1542,6 +1551,7 @@ class TextPainter {
   /// Whether this object has been disposed or not.
   ///
   /// Only for use when asserts are enabled.
+  @_debugAssert
   bool get debugDisposed {
     bool? disposed;
     assert(() {
