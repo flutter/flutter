@@ -20,7 +20,12 @@ import '../framework/utils.dart';
 const int benchmarkServerPort = 9999;
 const int chromeDebugPort = 10000;
 
-Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
+typedef WebBenchmarkOptions = ({
+  String webRenderer,
+  bool useWasm,
+});
+
+Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
   // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
   Logger.root.level = Level.INFO;
   final String macrobenchmarksDirectory = path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks');
@@ -28,8 +33,12 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
     await flutter('clean');
     await evalFlutter('build', options: <String>[
       'web',
+      if (benchmarkOptions.useWasm) ...<String>[
+        '--wasm',
+        '--wasm-opt=debug',
+      ],
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-      '--web-renderer=${useCanvasKit ? 'canvaskit' : 'html'}',
+      '--web-renderer=${benchmarkOptions.webRenderer}',
       '--profile',
       '--no-web-resources-cdn',
       '-t',
@@ -115,7 +124,7 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
         return Response.internalServerError(body: '$error');
       }
     }).add(createBuildDirectoryHandler(
-      path.join(macrobenchmarksDirectory, 'build', 'web'),
+      path.join(macrobenchmarksDirectory, 'build', benchmarkOptions.useWasm ? 'web_wasm' : 'web'),
     ));
 
     server = await io.HttpServer.bind('localhost', benchmarkServerPort);
@@ -137,6 +146,7 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
         userDataDirectory: userDataDir,
         headless: isUncalibratedSmokeTest,
         debugPort: chromeDebugPort,
+        enableWasmGC: benchmarkOptions.useWasm,
       );
 
       print('Launching Chrome.');
@@ -149,7 +159,6 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
       );
 
       print('Waiting for the benchmark to report benchmark profile.');
-      final String backend = useCanvasKit ? 'canvaskit' : 'html';
       final Map<String, dynamic> taskResult = <String, dynamic>{};
       final List<String> benchmarkScoreKeys = <String>[];
       final List<Map<String, dynamic>> profiles = await profileData.future;
@@ -161,7 +170,7 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
           throw 'Benchmark name is empty';
         }
 
-        final String namespace = '$benchmarkName.$backend';
+        final String namespace = '$benchmarkName.${benchmarkOptions.webRenderer}';
         final List<String> scoreKeys = List<String>.from(profile['scoreKeys'] as List<dynamic>);
         if (scoreKeys.isEmpty) {
           throw 'No score keys in benchmark "$benchmarkName"';
