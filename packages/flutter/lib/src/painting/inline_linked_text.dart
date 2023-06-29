@@ -15,8 +15,8 @@ import 'text_style.dart';
 
 // TODO(justinmc): On some platforms, may want to underline link?
 
-/// A callback that passes a [String] representing a URL.
-typedef UriStringCallback = void Function(String urlString);
+/// A callback that passes a [String] representing a link that has been tapped.
+typedef LinkTapCallback = void Function(String linkString);
 
 /// Builds an InlineSpan for displaying [linkText].
 ///
@@ -31,7 +31,6 @@ typedef LinkBuilder = InlineSpan Function(
 /// Finds [TextRange]s in the given [String].
 typedef RangesFinder = Iterable<TextRange> Function(String text);
 
-// TODO(justinmc): Make naming agnostic to URLs, just "links", which could be GitHub PRs, etc.
 /// A [TextSpan] that makes parts of the [text] interactive.
 class InlineLinkedText extends TextSpan {
   /// Create an instance of [InlineLinkedText].
@@ -48,7 +47,7 @@ class InlineLinkedText extends TextSpan {
     super.style,
     String? text,
     List<InlineSpan>? spans,
-    UriStringCallback? onTap,
+    LinkTapCallback? onTap,
     Iterable<TextRange>? ranges,
     LinkBuilder? linkBuilder,
   }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
@@ -88,7 +87,7 @@ class InlineLinkedText extends TextSpan {
     required RegExp regExp,
     String? text,
     List<InlineSpan>? spans,
-    UriStringCallback? onTap,
+    LinkTapCallback? onTap,
     LinkBuilder? linkBuilder,
   }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
        assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
@@ -125,6 +124,10 @@ class InlineLinkedText extends TextSpan {
              : linkSpans(spans!, textLinkers).toList(),
        );
 
+  static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
+
+  /// A [RangesFinder] that returns [TextRange]s for URLs.
+  ///
   /// Matches full (https://www.example.com/?q=1) and shortened (example.com)
   /// URLs.
   ///
@@ -132,14 +135,11 @@ class InlineLinkedText extends TextSpan {
   ///
   ///   * URLs with any protocol other than http or https.
   ///   * Email addresses.
-  static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
-
-  /// A [RangesFinder] that returns [TextRange]s for URLs.
   static final RangesFinder urlRangesFinder = TextLinker.rangesFinderFromRegExp(_urlRegExp);
 
   // TODO(justinmc): Rename defaultTextLinkers?
   /// Finds urls in text and replaces them with a plain, platform-specific link.
-  static Iterable<TextLinker> urlTextLinkers(UriStringCallback? onTap) {
+  static Iterable<TextLinker> urlTextLinkers(LinkTapCallback? onTap) {
     return <TextLinker>[
       TextLinker(
         rangesFinder: urlRangesFinder,
@@ -150,7 +150,7 @@ class InlineLinkedText extends TextSpan {
 
   /// Returns a [LinkBuilder] that highlights the given text and sets the given
   /// [onTap] handler.
-  static LinkBuilder getDefaultLinkBuilder([UriStringCallback? onTap]) {
+  static LinkBuilder getDefaultLinkBuilder([LinkTapCallback? onTap]) {
     return (String displayText, String linkText) {
       return InlineLink(
         onTap: () => onTap?.call(linkText),
