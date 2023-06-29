@@ -315,7 +315,13 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   @override
   void didUpdateWidget(DropdownMenu<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.enableSearch != widget.enableSearch) {
+      if (!widget.enableSearch) {
+        currentHighlight = null;
+      }
+    }
     if (oldWidget.dropdownMenuEntries != widget.dropdownMenuEntries) {
+      currentHighlight = null;
       filteredEntries = widget.dropdownMenuEntries;
       buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
       _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
@@ -360,10 +366,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   void scrollToHighlight() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (currentHighlight != null && buttonItemKeys[currentHighlight!].currentContext != null) {
-        Scrollable.ensureVisible(
-          buttonItemKeys[currentHighlight!].currentContext!
-        );
+      final BuildContext? highlightContext = buttonItemKeys[currentHighlight!].currentContext;
+      if (highlightContext != null) {
+        Scrollable.ensureVisible(highlightContext);
       }
     });
   }
@@ -515,7 +520,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     if (widget.enableSearch) {
       currentHighlight = search(filteredEntries, _textEditingController);
-      scrollToHighlight();
+      if (currentHighlight != null) {
+        scrollToHighlight();
+      }
     }
 
     final List<Widget> menu = _buildButtons(filteredEntries, _textEditingController, textDirection, focusedIndex: currentHighlight);
