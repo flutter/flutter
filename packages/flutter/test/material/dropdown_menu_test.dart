@@ -216,36 +216,67 @@ void main() {
     expect(box.size.width, customWidth);
   });
 
-  testWidgets('The width of MenuAnchor is the same as its parent width if MenuAnchor.isExpanded is true', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+  testWidgets('The width of MenuAnchor respects MenuAnchor.expandedInsets', (WidgetTester tester) async {
+    const double parentWidth = 500.0;
     final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
-
     for (final ShortMenu value in ShortMenu.values) {
       final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
       shortMenuItems.add(entry);
     }
-
-    const double parentWidth = 666.0;
-    await tester.pumpWidget(MaterialApp(
-      theme: themeData,
-      home: Scaffold(
-        body: SizedBox(
-          width: parentWidth,
-          child: DropdownMenu<ShortMenu>(
-            isExpanded: true,
-            dropdownMenuEntries: shortMenuItems,
+    Widget buildMenuAnchor({EdgeInsets? expandedInsets}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: parentWidth,
+            height: parentWidth,
+            child: DropdownMenu<ShortMenu>(
+              expandedInsets: expandedInsets,
+              dropdownMenuEntries: shortMenuItems,
+            ),
           ),
         ),
-      ),
-    ));
-    final RenderBox box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
+      );
+    }
+
+    // By default, the width of the text field is determined by the menu children.
+    await tester.pumpWidget(buildMenuAnchor());
+    RenderBox box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, 136.0);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    Size buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').hitTestable());
+    expect(buttonSize.width, 136.0);
+
+    // If expandedInsets is EdgeInsets.zero, the width should be the same as its parent.
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildMenuAnchor(expandedInsets: EdgeInsets.zero));
+    box = tester.firstRenderObject(find.byType(TextField));
     expect(box.size.width, parentWidth);
 
-    await tester.tap(find.byType(DropdownMenu<ShortMenu>));
+    await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
-    expect(find.byType(MenuItemButton), findsNWidgets(3));
-    final Size buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+
+    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
     expect(buttonSize.width, parentWidth);
+
+    // If expandedInsets is not zero, the position of the text field should be adjusted
+    // based on the value.
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildMenuAnchor(expandedInsets: const EdgeInsets.only(left: 35.0, top: 50.0, right: 20.0)));
+    box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, parentWidth - 35.0 - 20.0);
+    final Rect containerRect = tester.getRect(find.byType(SizedBox).first);
+    final Rect dropdownMenuRect = tester.getRect(find.byType(TextField));
+    expect(dropdownMenuRect.top, containerRect.top + 50.0);
+
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+    expect(buttonSize.width, parentWidth - 35.0 - 20.0);
   });
 
   testWidgets('The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
