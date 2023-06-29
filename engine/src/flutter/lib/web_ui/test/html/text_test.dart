@@ -9,6 +9,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/matchers.dart';
 import '../common/test_initialization.dart';
@@ -236,7 +237,7 @@ Future<void> testMain() async {
 
   test('adds Arial and sans-serif as fallback fonts', () {
     // Set this to false so it doesn't default to the test font.
-    debugEmulateFlutterTesterEnvironment = false;
+    ui_web.debugEmulateFlutterTesterEnvironment = false;
 
     final CanvasParagraph paragraph = plain(EngineParagraphStyle(
       fontFamily: 'SomeFont',
@@ -247,14 +248,14 @@ Future<void> testMain() async {
     expect(paragraph.toDomElement().children.single.style.fontFamily,
         'SomeFont, $fallback, sans-serif');
 
-    debugEmulateFlutterTesterEnvironment = true;
+    ui_web.debugEmulateFlutterTesterEnvironment = true;
   },
       // TODO(mdebbar): https://github.com/flutter/flutter/issues/46638
       skip: browserEngine == BrowserEngine.firefox);
 
   test('does not add fallback fonts to generic families', () {
     // Set this to false so it doesn't default to the default test font.
-    debugEmulateFlutterTesterEnvironment = false;
+    ui_web.debugEmulateFlutterTesterEnvironment = false;
 
     final CanvasParagraph paragraph = plain(EngineParagraphStyle(
       fontFamily: 'serif',
@@ -264,12 +265,12 @@ Future<void> testMain() async {
     paragraph.layout(constrain(double.infinity));
     expect(paragraph.toDomElement().children.single.style.fontFamily, 'serif');
 
-    debugEmulateFlutterTesterEnvironment = true;
+    ui_web.debugEmulateFlutterTesterEnvironment = true;
   });
 
   test('can set font families that need to be quoted', () {
     // Set this to false so it doesn't default to the default test font.
-    debugEmulateFlutterTesterEnvironment = false;
+    ui_web.debugEmulateFlutterTesterEnvironment = false;
 
     final CanvasParagraph paragraph = plain(EngineParagraphStyle(
       fontFamily: 'MyFont 2000',
@@ -280,7 +281,7 @@ Future<void> testMain() async {
     expect(paragraph.toDomElement().children.single.style.fontFamily,
         '"MyFont 2000", $fallback, sans-serif');
 
-    debugEmulateFlutterTesterEnvironment = true;
+    ui_web.debugEmulateFlutterTesterEnvironment = true;
   });
 
   group('TextRange', () {
@@ -360,9 +361,9 @@ Future<void> testMain() async {
   });
 
   group('test fonts in flutterTester environment', () {
-    final bool resetValue = debugEmulateFlutterTesterEnvironment;
-    debugEmulateFlutterTesterEnvironment = true;
-    tearDownAll(() => debugEmulateFlutterTesterEnvironment = resetValue);
+    final bool resetValue = ui_web.debugEmulateFlutterTesterEnvironment;
+    ui_web.debugEmulateFlutterTesterEnvironment = true;
+    tearDownAll(() => ui_web.debugEmulateFlutterTesterEnvironment = resetValue);
     const List<String> testFonts = <String>['FlutterTest', 'Ahem'];
 
     test('The default test font is used when a non-test fontFamily is specified, or fontFamily is not specified', () {

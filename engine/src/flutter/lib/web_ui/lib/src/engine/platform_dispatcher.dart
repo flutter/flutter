@@ -472,7 +472,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // In widget tests we want to bypass processing of platform messages.
     bool returnImmediately = false;
     assert(() {
-      if (ui.debugEmulateFlutterTesterEnvironment) {
+      if (ui_web.debugEmulateFlutterTesterEnvironment) {
         returnImmediately = true;
       }
       return true;

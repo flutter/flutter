@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../browser_detection.dart';
 import '../dom.dart';
@@ -144,7 +145,7 @@ class TextDimensions {
     if (browserEngine == BrowserEngine.firefox &&
       // In the flutter tester environment, we use a predictable-size for font
       // measurement tests.
-      !ui.debugEmulateFlutterTesterEnvironment) {
+      !ui_web.debugEmulateFlutterTesterEnvironment) {
       // See subpixel rounding bug :
       // https://bugzilla.mozilla.org/show_bug.cgi?id=442139
       // This causes bottom of letters such as 'y' to be cutoff and
