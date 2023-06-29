@@ -1944,7 +1944,7 @@ TEST_P(AiksTest, PaintWithFilters) {
 
   ASSERT_TRUE(paint.HasColorFilter());
 
-  paint.color_filter = std::nullopt;
+  paint.color_filter = nullptr;
 
   ASSERT_FALSE(paint.HasColorFilter());
 }
@@ -1963,7 +1963,7 @@ TEST_P(AiksTest, OpacityPeepHoleApplicationTest) {
   auto delegate = std::make_shared<OpacityPeepholePassDelegate>(paint, rect);
   ASSERT_FALSE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
 
-  paint.color_filter = std::nullopt;
+  paint.color_filter = nullptr;
   paint.image_filter = [](const FilterInput::Ref& input,
                           const Matrix& effect_transform, bool is_subpass) {
     return FilterContents::MakeGaussianBlur(
@@ -1975,7 +1975,7 @@ TEST_P(AiksTest, OpacityPeepHoleApplicationTest) {
   delegate = std::make_shared<OpacityPeepholePassDelegate>(paint, rect);
   ASSERT_FALSE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
 
-  paint.image_filter = std::nullopt;
+  paint.image_filter = nullptr;
   paint.color = Color::Red();
 
   // Paint has no alpha, can't elide;
