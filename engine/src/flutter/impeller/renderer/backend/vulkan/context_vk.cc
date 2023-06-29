@@ -332,7 +332,8 @@ void ContextVK::Setup(Settings settings) {
       device_holder,                     //
       device_holder->instance.get(),     //
       dispatcher.vkGetInstanceProcAddr,  //
-      dispatcher.vkGetDeviceProcAddr     //
+      dispatcher.vkGetDeviceProcAddr,    //
+      *caps                              //
       ));
 
   if (!allocator->IsValid()) {

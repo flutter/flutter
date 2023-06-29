@@ -91,6 +91,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsDecalTileMode() const override;
 
   // |Capabilities|
+  bool SupportsMemorylessTextures() const override;
+
+  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
 
   // |Capabilities|
@@ -104,6 +107,7 @@ class CapabilitiesVK final : public Capabilities,
   PixelFormat depth_stencil_format_ = PixelFormat::kUnknown;
   vk::PhysicalDeviceProperties device_properties_;
   bool supports_compute_subgroups_ = false;
+  bool supports_memoryless_textures_ = false;
   bool is_valid_ = false;
 
   bool HasExtension(const std::string& ext) const;
