@@ -130,7 +130,7 @@ void main() {
     final Finder textField = find.byType(TextField);
     final Size anchorSize = tester.getSize(textField);
     expect(anchorSize, useMaterial3 ? const Size(195.0, 60.0) : const Size(180.0, 56.0));
-debugDumpRenderTree();
+
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
 
