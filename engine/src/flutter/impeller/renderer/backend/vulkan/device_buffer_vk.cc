@@ -4,7 +4,8 @@
 
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 
-#include "fml/logging.h"
+#include "flutter/fml/logging.h"
+#include "flutter/fml/trace_event.h"
 #include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
@@ -23,6 +24,7 @@ DeviceBufferVK::DeviceBufferVK(DeviceBufferDescriptor desc,
       buffer_(buffer) {}
 
 DeviceBufferVK::~DeviceBufferVK() {
+  TRACE_EVENT0("impeller", "DestroyDeviceBuffer");
   if (buffer_) {
     ::vmaDestroyBuffer(allocator_,
                        static_cast<decltype(buffer_)::NativeType>(buffer_),
@@ -37,6 +39,7 @@ uint8_t* DeviceBufferVK::OnGetContents() const {
 bool DeviceBufferVK::OnCopyHostBuffer(const uint8_t* source,
                                       Range source_range,
                                       size_t offset) {
+  TRACE_EVENT0("impeller", "CopyToDeviceBuffer");
   uint8_t* dest = OnGetContents();
 
   if (!dest) {
@@ -46,14 +49,16 @@ bool DeviceBufferVK::OnCopyHostBuffer(const uint8_t* source,
   if (source) {
     ::memmove(dest + offset, source + source_range.offset, source_range.length);
   }
-  // See https://github.com/flutter/flutter/issues/128556 . Some devices do not
-  // have support for coherent host memory and require an explicit flush.
+
+  // Some devices do not have support for coherent host memory and require an
+  // explicit flush.
   ::vmaFlushAllocation(allocator_, allocation_, offset, source_range.length);
 
   return true;
 }
 
 void DeviceBufferVK::Flush() {
+  TRACE_EVENT0("impeller", "FlushDeviceBuffer");
   ::vmaFlushAllocation(allocator_, allocation_, 0, VK_WHOLE_SIZE);
 }
 
