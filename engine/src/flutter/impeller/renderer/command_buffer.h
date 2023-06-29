@@ -18,6 +18,10 @@ class Context;
 class RenderPass;
 class RenderTarget;
 
+namespace testing {
+class CommandBufferMock;
+}
+
 //------------------------------------------------------------------------------
 /// @brief      A collection of encoded commands to be submitted to the GPU for
 ///             execution. A command buffer is obtained from a graphics
@@ -38,6 +42,8 @@ class RenderTarget;
 ///             different from the encoding order.
 ///
 class CommandBuffer {
+  friend class testing::CommandBufferMock;
+
  public:
   enum class Status {
     kPending,

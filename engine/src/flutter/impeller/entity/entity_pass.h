@@ -86,9 +86,7 @@ class EntityPass {
 
   void SetBlendMode(BlendMode blend_mode);
 
-  void SetClearColor(Color clear_color);
-
-  Color GetClearColor() const;
+  Color GetClearColor(ISize size = ISize::Infinite()) const;
 
   void SetBackdropFilter(std::optional<BackdropFilterProc> proc);
 
@@ -210,7 +208,6 @@ class EntityPass {
   size_t stencil_depth_ = 0u;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   bool flood_clip_ = false;
-  Color clear_color_ = Color::BlackTransparent();
   bool enable_offscreen_debug_checkerboard_ = false;
 
   /// These values are incremented whenever something is added to the pass that

@@ -117,6 +117,11 @@ class Contents {
   ///        Use of this method is invalid if CanAcceptOpacity returns false.
   virtual void SetInheritedOpacity(Scalar opacity);
 
+  virtual std::optional<Color> AsBackgroundColor(const Entity& entity,
+                                                 ISize target_size) const {
+    return {};
+  }
+
  private:
   std::optional<Rect> coverage_hint_;
   std::optional<Size> color_source_size_;

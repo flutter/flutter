@@ -54,4 +54,9 @@ std::optional<Rect> CoverGeometry::GetCoverage(const Matrix& transform) const {
   return Rect::MakeMaximum();
 }
 
+bool CoverGeometry::CoversArea(const Matrix& transform,
+                               const Rect& rect) const {
+  return true;
+}
+
 }  // namespace impeller
