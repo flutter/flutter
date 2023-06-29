@@ -20,7 +20,6 @@ class MinSdkVersionMigration extends ProjectMigrator {
       super.logger,
   ) : _project = project;
 
-
   final AndroidProject _project;
 
   @override
