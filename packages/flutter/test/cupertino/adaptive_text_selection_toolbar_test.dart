@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
-import '../widgets/live_text_input_test_util.dart';
+import '../widgets/live_text_utils.dart';
 
 void main() {
   final MockClipboard mockClipboard = MockClipboard();

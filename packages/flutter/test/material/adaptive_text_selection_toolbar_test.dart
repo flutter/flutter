@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../foundation/leak_tracking.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
-import '../widgets/live_text_input_test_util.dart';
+import '../widgets/live_text_utils.dart';
 
 void main() {
   final MockClipboard mockClipboard = MockClipboard();

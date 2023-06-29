@@ -15,7 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import 'editable_text_utils.dart';
-import 'live_text_input_test_util.dart';
+import 'live_text_utils.dart';
 import 'semantics_tester.dart';
 
 Matcher matchesMethodCall(String method, { dynamic args }) => _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
