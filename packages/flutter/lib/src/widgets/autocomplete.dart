@@ -173,6 +173,9 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///
   /// Pass the provided [TextEditingController] to the field built here so that
   /// RawAutocomplete can listen for changes.
+  ///
+  /// If this parameter is null, then a [SizedBox.shrink] is built instead.
+  /// For how that pattern can be useful, see [textEditingController].
   /// {@endtemplate}
   final AutocompleteFieldViewBuilder? fieldViewBuilder;
 
