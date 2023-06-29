@@ -61,8 +61,8 @@ struct Paint {
   BlendMode blend_mode = BlendMode::kSourceOver;
   bool invert_colors = false;
 
-  std::optional<ImageFilterProc> image_filter;
-  std::optional<ColorFilterProc> color_filter;
+  ImageFilterProc image_filter = nullptr;
+  ColorFilterProc color_filter = nullptr;
   std::optional<MaskBlurDescriptor> mask_blur_descriptor;
 
   /// @brief      Wrap this paint's configured filters to the given contents.

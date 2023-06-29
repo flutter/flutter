@@ -51,7 +51,7 @@ class TiledTextureContents final : public ColorSourceContents {
   ///
   /// This may not be a performance improvement if the image is tiled into a
   /// much smaller size that its original texture size.
-  void SetColorFilter(std::optional<ColorFilterProc> color_filter);
+  void SetColorFilter(ColorFilterProc color_filter);
 
   // |Contents|
   std::optional<Snapshot> RenderToSnapshot(
@@ -63,7 +63,7 @@ class TiledTextureContents final : public ColorSourceContents {
       const std::string& label = "Tiled Texture Snapshot") const override;
 
  private:
-  std::optional<std::shared_ptr<Texture>> CreateFilterTexture(
+  std::shared_ptr<Texture> CreateFilterTexture(
       const ContentContext& renderer) const;
 
   SamplerDescriptor CreateDescriptor(const Capabilities& capabilities) const;
@@ -74,7 +74,7 @@ class TiledTextureContents final : public ColorSourceContents {
   SamplerDescriptor sampler_descriptor_ = {};
   Entity::TileMode x_tile_mode_ = Entity::TileMode::kClamp;
   Entity::TileMode y_tile_mode_ = Entity::TileMode::kClamp;
-  std::optional<ColorFilterProc> color_filter_;
+  ColorFilterProc color_filter_ = nullptr;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TiledTextureContents);
 };
