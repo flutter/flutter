@@ -118,7 +118,7 @@ void main() {
       brightness: Brightness.dark,
       elevation: 5,
       pressElevation: 6,
-      iconTheme: IconThemeData(color: Color(0xfffffff8)),
+      iconTheme: IconThemeData(color: Color(0xfffffffa)),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
