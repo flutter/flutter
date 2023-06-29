@@ -134,28 +134,7 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
 
   @override
   Widget build(BuildContext context) {
-    final Widget content;
-    if (widget.child != null) {
-      content = widget.child!;
-    } else {
-      // If this button has a specific widget, only show widget instead of a text label.
-      final Widget? buttonWidget = _getButtonWidget(context);
-      if (buttonWidget == null) {
-        content = Text(
-          widget.text ?? CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
-          overflow: TextOverflow.ellipsis,
-          style: _kToolbarButtonFontStyle.copyWith(
-            color: widget.onPressed != null
-                ? _kToolbarTextColor.resolveFrom(context)
-                : CupertinoColors.inactiveGray,
-          ),
-        );
-      } else {
-        content = buttonWidget;
-      }
-    }
-
-
+    final Widget content = _getContentWidget(context);
     final Widget child = CupertinoButton(
       color: isPressed
         ? _kToolbarPressedColor.resolveFrom(context)
@@ -188,9 +167,19 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
     }
   }
 
-  Widget? _getButtonWidget(BuildContext context) {
+  Widget _getContentWidget(BuildContext context) {
+    if (widget.child != null) {
+      return widget.child!;
+    }
+    final Widget textWidget = Text(
+      widget.text ?? CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
+      overflow: TextOverflow.ellipsis,
+      style: _kToolbarButtonFontStyle.copyWith(
+        color: widget.onPressed != null ? _kToolbarTextColor.resolveFrom(context) : CupertinoColors.inactiveGray,
+      ),
+    );
     if (widget.buttonItem == null) {
-      return null;
+      return textWidget;
     }
     final Widget result;
     switch (widget.buttonItem!.type) {
@@ -200,7 +189,7 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
       case ContextMenuButtonType.selectAll:
       case ContextMenuButtonType.delete:
       case ContextMenuButtonType.custom:
-        return null;
+        return textWidget;
       case ContextMenuButtonType.liveTextInput:
         result = SizedBox(
           width: 13,

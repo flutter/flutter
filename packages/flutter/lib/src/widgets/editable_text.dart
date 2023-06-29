@@ -1839,7 +1839,7 @@ class EditableText extends StatefulWidget {
   }) {
     final List<ContextMenuButtonItem> resultButtonItem = <ContextMenuButtonItem>[];
 
-    // Config button items with clip board.
+    // Configure button items with clipboard.
     if (onPaste == null || clipboardStatus != ClipboardStatus.unknown) {
       // If the paste button is enabled, don't render anything until the state
       // of the clipboard is known, since it's used to determine if paste is
