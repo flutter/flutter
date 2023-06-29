@@ -1811,8 +1811,8 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   @override
   TextSelection getLineAtOffset(TextPosition position) {
     final TextRange line = paragraph._getLineAtOffset(position);
-    final int start = line.start.clamp(range.start, range.end); // ignore_clamp_double_lint
-    final int end = line.end.clamp(range.start, range.end); // ignore_clamp_double_lint
+    final int start = line.start.clamp(range.start, range.end);
+    final int end = line.end.clamp(range.start, range.end);
     return TextSelection(baseOffset: start, extentOffset: end);
   }
 
