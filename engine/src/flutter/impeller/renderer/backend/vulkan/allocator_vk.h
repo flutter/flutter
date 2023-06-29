@@ -31,6 +31,7 @@ class AllocatorVK final : public Allocator {
   std::weak_ptr<DeviceHolder> device_holder_;
   ISize max_texture_size_;
   bool is_valid_ = false;
+  bool supports_memoryless_textures_ = false;
 
   AllocatorVK(std::weak_ptr<Context> context,
               uint32_t vulkan_api_version,
@@ -38,7 +39,8 @@ class AllocatorVK final : public Allocator {
               const std::shared_ptr<DeviceHolder>& device_holder,
               const vk::Instance& instance,
               PFN_vkGetInstanceProcAddr get_instance_proc_address,
-              PFN_vkGetDeviceProcAddr get_device_proc_address);
+              PFN_vkGetDeviceProcAddr get_device_proc_address,
+              const CapabilitiesVK& capabilities);
 
   // |Allocator|
   bool IsValid() const;
