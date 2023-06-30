@@ -444,7 +444,7 @@ void main() {
             home: Scaffold(
               body: Center(
                 child: RawAutocomplete<String>(
-                  optionsViewOpenDirection: OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+                  optionsViewOpenDirection: AutocompleteOptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
                   optionsBuilder: (_) => <String>['a'],
                   fieldViewBuilder: (_, TextEditingController controller, FocusNode focusNode, __) {
                     return TextField(controller: controller, focusNode: focusNode);
@@ -461,7 +461,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: RawAutocomplete<String>(
-                optionsViewOpenDirection: OptionsViewOpenDirection.up,
+                optionsViewOpenDirection: AutocompleteOptionsViewOpenDirection.up,
                 optionsBuilder: (_) => <String>['a'],
                 fieldViewBuilder: (_, TextEditingController controller, FocusNode focusNode, __) {
                   return TextField(controller: controller, focusNode: focusNode);
@@ -488,7 +488,7 @@ void main() {
                     key: autocompleteKey,
                     textEditingController: controller,
                     focusNode: focusNode,
-                    optionsViewOpenDirection: OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+                    optionsViewOpenDirection: AutocompleteOptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
                     optionsBuilder: (_) => <String>['a'],
                     optionsViewBuilder: (_, __, ___) => const Text('a')),
                 ]))));
@@ -512,7 +512,7 @@ void main() {
                     key: autocompleteKey,
                     textEditingController: controller,
                     focusNode: focusNode,
-                    optionsViewOpenDirection: OptionsViewOpenDirection.up,
+                    optionsViewOpenDirection: AutocompleteOptionsViewOpenDirection.up,
                     optionsBuilder: (_) => <String>['a'],
                     optionsViewBuilder: (_, __, ___) => const Text('a')),
                   TextField(controller: controller, focusNode: focusNode),
