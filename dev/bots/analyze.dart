@@ -88,8 +88,10 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
-  printProgress('Analyzing code in the framework');
-  await parseFlutterLibAndAnalyze(flutterRoot, [verifyNoDoubleClamp, verifyDebugAssertAccess]);
+  final List<ResolvedUnitVerifier> verifiers = <ResolvedUnitVerifier>[verifyNoDoubleClamp, verifyDebugAssertAccess];
+  final String rules = verifiers.map((ResolvedUnitVerifier verifier) => '\n * $verifier').join();
+  printProgress('Analyzing code in the framework with the following rules:$rules');
+  await runVerifiersInResolvedDirectory(flutterRoot, verifiers);
 
   //printProgress('All tool test files end in _test.dart...');
   //await verifyToolTestsEndInTestDart(flutterRoot);

@@ -9,11 +9,12 @@ import 'package:analyzer/dart/analysis/session.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/source/line_info.dart';
 
 import 'utils.dart';
 
-Future<void> parseFlutterLibAndAnalyze(String workingDirectory, List<ResolvedUnitVerifier> verifiers) async {
+Future<void> runVerifiersInResolvedDirectory(String workingDirectory, List<ResolvedUnitVerifier> verifiers) async {
   final String flutterLibPath = '$workingDirectory/packages/flutter/lib';
   final AnalysisContextCollection collection = AnalysisContextCollection(
     includedPaths: <String>[flutterLibPath],
@@ -22,7 +23,6 @@ Future<void> parseFlutterLibAndAnalyze(String workingDirectory, List<ResolvedUni
 
   final List<String> analyzerErrors = <String>[];
   for (final AnalysisContext context in collection.contexts) {
-    // Normalized paths to all analyzed files.
     final Iterable<String> analyzedFilePaths = context.contextRoot.analyzedFiles();
     final AnalysisSession session = context.currentSession;
 
@@ -32,11 +32,11 @@ Future<void> parseFlutterLibAndAnalyze(String workingDirectory, List<ResolvedUni
       }
       final SomeResolvedUnitResult unit = await session.getResolvedUnit(path);
       if (unit is ResolvedUnitResult) {
-        for (final verifier in verifiers) {
+        for (final ResolvedUnitVerifier verifier in verifiers) {
           verifier.analyzeResolvedUnitResult(unit);
         }
       } else {
-        analyzerErrors.add('analyzer error: file $unit could not be resolved.');
+        analyzerErrors.add('Analyzer error: file $unit could not be resolved.');
       }
     }
   }
@@ -44,18 +44,19 @@ Future<void> parseFlutterLibAndAnalyze(String workingDirectory, List<ResolvedUni
   if (analyzerErrors.isNotEmpty) {
     foundError(analyzerErrors);
   }
-  for (final verifier in verifiers) {
+  for (final ResolvedUnitVerifier verifier in verifiers) {
     verifier.reportError();
   }
 }
 
 abstract class ResolvedUnitVerifier {
   void reportError();
-
   void analyzeResolvedUnitResult(ResolvedUnitResult unit);
 }
 
-final verifyNoDoubleClamp = _NoDoubleClampVerifier();
+// ----------- Verify No double.clamp -----------
+
+final ResolvedUnitVerifier verifyNoDoubleClamp = _NoDoubleClampVerifier();
 class _NoDoubleClampVerifier implements ResolvedUnitVerifier {
   final List<String> errors = <String>[];
 
@@ -66,18 +67,18 @@ class _NoDoubleClampVerifier implements ResolvedUnitVerifier {
     }
     foundError(<String>[
       ...errors,
-      '\n${bold}For performance reasons, we use a custom `clampDouble` function instead of using `Double.clamp`.$reset',
-      '\n${bold}For non-double uses of `clamp`, use `// ignore_clamp_double_lint` on the line to silence this message.$reset',
+      '\n${bold}For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".$reset',
+      '\n${bold}For non-double uses of "clamp", use "// ignore_clamp_double_lint" on the line to silence this message.$reset',
     ]);
   }
 
   @override
   void analyzeResolvedUnitResult(ResolvedUnitResult unit) {
-    final visitor = _DoubleClampVisitor();
+    final _DoubleClampVisitor visitor = _DoubleClampVisitor();
     unit.unit.visitChildren(visitor);
-    for (final MethodInvocation node in visitor.clampInvocationNode) {
+    for (final AstNode node in visitor.clampAccessNodes) {
       final LineInfo lineInfo = unit.lineInfo;
-      final int lineNumber = lineInfo.getLocation(node.function.offset).lineNumber;
+      final int lineNumber = lineInfo.getLocation(node.offset).lineNumber;
       final String lineContent = unit.content.substring(
         lineInfo.getOffsetOfLine(lineNumber - 1),
         lineInfo.getOffsetOfLine(lineNumber) - 1,
@@ -85,55 +86,48 @@ class _NoDoubleClampVerifier implements ResolvedUnitVerifier {
       if (lineContent.contains('// ignore_clamp_double_lint')) {
         continue;
       }
-      errors.add('${unit.path}:$lineNumber: `Double.clamp` method used instead of `clampDouble`.');
+      errors.add('${unit.path}:$lineNumber: "double.clamp" method used instead of "clampDouble".');
     }
   }
 
   @override
-  String toString() => 'No "Double.clamp"';
+  String toString() => 'No "double.clamp"';
 }
 
 class _DoubleClampVisitor extends RecursiveAstVisitor<void> {
-  final List<MethodInvocation> clampInvocationNode = <MethodInvocation>[];
-
-  @override
-  CompilationUnit? visitMethodInvocation(MethodInvocation node) {
-    final bool isNumClampInvocation = node.methodName.name == 'clamp' && (node.target?.staticType?.isDartCoreDouble ?? false);
-    if (isNumClampInvocation) {
-      clampInvocationNode.add(node);
-    }
-    node.visitChildren(this);
-    return null;
-  }
+  final List<AstNode> clampAccessNodes = <AstNode>[];
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
-    if (node.staticElement is FunctionElement) {
-      print('$node | ${node.staticElement} => ${node.staticElement.runtimeType}');
+    switch (node) {
+      case SimpleIdentifier(
+          name: 'clamp',
+          staticElement: MethodElement(),
+          // PropertyAccess matches the tearOff form of num.clamp. In this form
+          parent: PropertyAccess(target:Expression(staticType: DartType(isDartCoreDouble: true) || DartType(isDartCoreNum: true) || DartType(isDartCoreInt: true)))
+              ||  MethodInvocation(target:Expression(staticType: DartType(isDartCoreDouble: true) || DartType(isDartCoreNum: true)))
+        ):
+        // In tearOff forms it's difficult to tell the ???
+        // Example:
+        // final fs = [1.clamp, 2.clamp, 3.clamp, 4.clamp];
+        // fs2.map((f) => f(11.1, 11.2));
+        clampAccessNodes.add(node);
+      case SimpleIdentifier(
+          name: 'clamp',
+          staticElement: MethodElement(),
+          parent: MethodInvocation(target:Expression(staticType: DartType(isDartCoreInt: true)))
+        ):
+        //clampAccessNodes.add(node);
+        print('sus: ${node.tearOffTypeArgumentTypes}');
+      case SimpleIdentifier():
     }
     super.visitSimpleIdentifier(node);
   }
 }
 
+// ----------- Verify No _debugAssert -----------
 
-// Element Helpers
-bool _isDebugAssertAnnotationElement(ElementAnnotation annotation) {
-  final Element? annotationElement = annotation.element;
-  return annotationElement is PropertyAccessorElement && annotationElement.name == '_debugAssert';
-}
-
-bool _hasDebugAnnotation(Element element) => element.metadata.any(_isDebugAssertAnnotationElement);
-
-bool _isDebug(Element element) {
-  return switch (element) {
-    PropertyAccessorElement(:final variable) => _hasDebugAnnotation(element) || _hasDebugAnnotation(variable),
-    MethodElement()                          => _hasDebugAnnotation(element),
-    ExecutableElement()                      => _hasDebugAnnotation(element),
-    _                                        => false,
-  } ;
-}
-
-final verifyDebugAssertAccess = _DebugAssertVerifier();
+final ResolvedUnitVerifier verifyDebugAssertAccess = _DebugAssertVerifier();
 class _DebugAssertVerifier extends ResolvedUnitVerifier {
   final List<String> errors = <String>[];
   @override
@@ -141,26 +135,46 @@ class _DebugAssertVerifier extends ResolvedUnitVerifier {
     if (errors.isEmpty) {
       return;
     }
-    foundError(errors);
+    foundError(<String>[
+      ...errors,
+      '\n${bold}Components annotated with @_debugAssert.$reset',
+    ]);
   }
 
   @override
   void analyzeResolvedUnitResult(ResolvedUnitResult unit) {
-    final visitor = _DebugAssertVisitor();
+    final _DebugAssertVisitor visitor = _DebugAssertVisitor();
     unit.unit.visitChildren(visitor);
     for (final AstNode node in visitor.violations) {
       final LineInfo lineInfo = unit.lineInfo;
       final int lineNumber = lineInfo.getLocation(node.offset).lineNumber;
-      errors.add('${unit.path}:$lineNumber: invalid debugAssert access.');
+      errors.add('${unit.path}:$lineNumber: invalid debugAssert access: $node');
     }
   }
 
   @override
-  String toString() => '"debugAssert"';
+  String toString() => 'No "_debugAssert" access in production code';
+}
+
+bool _isDebugAssertAnnotationElement(ElementAnnotation? annotation) {
+  final Element? annotationElement = annotation?.element;
+  return annotationElement is PropertyAccessorElement && annotationElement.name == '_debugAssert';
+}
+
+bool _hasDebugAnnotation(Element element) => element.metadata.any(_isDebugAssertAnnotationElement);
+bool _containsDebugAnnotation(AnnotatedNode node) => node.metadata.any((Annotation m) => _isDebugAssertAnnotationElement(m.elementAnnotation));
+
+bool _isDebug(Element element) {
+  return switch (element) {
+    PropertyAccessorElement(:final PropertyInducingElement variable) => _hasDebugAnnotation(element) || _hasDebugAnnotation(variable),
+    MethodElement()                          => _hasDebugAnnotation(element),
+    ExecutableElement()                      => _hasDebugAnnotation(element),
+    _                                        => false,
+  } ;
 }
 
 class _DebugAssertVisitor extends RecursiveAstVisitor<void> {
-  List<AstNode> violations = [];
+  List<AstNode> violations = <AstNode>[];
 
   void _verifyNoDebugAssert(Element? element, AstNode node) {
     final isDeprecated = switch (element) {
@@ -178,23 +192,28 @@ class _DebugAssertVisitor extends RecursiveAstVisitor<void> {
 
   InterfaceElement? classDeclaration;
 
+  // Accessing debugAsserts in asserts (either in the condition or the message)
+  // is allowed.
   @override
-  void visitAssertInitializer(AssertInitializer node) {
-    // Ok to access debugAsserts in asserts, either in the condition or the
-    // message.
-  }
+  void visitAssertInitializer(AssertInitializer node) {}
   @override
   void visitAssertStatement(AssertStatement node) { }
 
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
-    final declaredElement = node.declaredElement;
-    if (declaredElement != null && _isDebug(declaredElement)) {
-      return;
+    if (!_containsDebugAnnotation(node)) {
+      // Only continue searching if the method doesn't have @_debugAssert.
+      super.visitMethodDeclaration(node);
     }
-    super.visitMethodDeclaration(node);
   }
 
+  @override
+  void visitFunctionDeclaration(FunctionDeclaration node) {
+    if (!_containsDebugAnnotation(node)) {
+      // Only continue searching if the function doesn't have @_debugAssert.
+      super.visitFunctionDeclaration(node);
+    }
+  }
 
   @override
   void visitAssignmentExpression(AssignmentExpression node) {
@@ -227,17 +246,11 @@ class _DebugAssertVisitor extends RecursiveAstVisitor<void> {
     }
   }
 
-  @override
-  void visitExportDirective(ExportDirective node) {
-    _verifyNoDebugAssert(node.element?.exportedLibrary, node);
-    super.visitExportDirective(node);
-  }
-
-  @override
-  void visitFunctionDeclaration(FunctionDeclaration node) {
-    print(node);
-    super.visitFunctionDeclaration(node);
-  }
+  //@override
+  //void visitExportDirective(ExportDirective node) {
+  //  _verifyNoDebugAssert(node.element?.exportedLibrary, node);
+  //  super.visitExportDirective(node);
+  //}
 
   @override
   void visitFunctionExpressionInvocation(FunctionExpressionInvocation node) {
@@ -248,7 +261,6 @@ class _DebugAssertVisitor extends RecursiveAstVisitor<void> {
         break;
     }
     for (final argument in node.argumentList.arguments) {
-      print('>> ${argument.staticParameterElement}: $argument');
       _verifyNoDebugAssert(argument.staticParameterElement, argument);
     }
     super.visitFunctionExpressionInvocation(node);

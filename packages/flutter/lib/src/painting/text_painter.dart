@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' show max, min;
+import 'dart:math' show max, min, pi;
 import 'dart:ui' as ui show
   BoxHeightStyle,
   BoxWidthStyle,
@@ -36,12 +36,9 @@ const _DebugAssert _debugAssert = _DebugAssert();
 // defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
 const double _kDefaultFontSize = 14.0;
 
-class _DebugAssert {
-  const _DebugAssert();
-}
-void testFunction2(ui.LineMetrics Function(ui.LineMetrics, Offset) f) {}
 
-const _debugAssert = _DebugAssert();
+@_debugAssert
+void testFunction2(ui.LineMetrics Function(ui.LineMetrics, Offset) f) {}
 
 /// How overflowing text should be handled.
 ///
@@ -1586,10 +1583,12 @@ class TextPainter {
     x.clamp(111, 123);
     final double? y = 123.0;
     y?.clamp(111, 123);
-    y!.clamp(111, 123);
-    final f = 1.clamp;
-    f(111, 123);
-
+    final r1 = y!.clamp(111, 123);
+    final r2 = 1.clamp(0, 2);
+    final r3 = 1.clamp(0.0, 2.0);
+    final fs1 = [1.clamp, 2.clamp, 3.clamp, 4.clamp, (pi + 1).clamp];
+    final fs2 = [1.clamp, 2.clamp, 3.clamp, 4.clamp];
+    fs2.map((f) => f(11.1, 11.2));
 
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
