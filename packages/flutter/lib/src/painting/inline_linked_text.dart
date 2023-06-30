@@ -303,18 +303,18 @@ class InlineLinkedText extends TextSpan {
 }
 
 // TODO(justinmc): Private?
-// TODO(justinmc): The clickable area is full-width, should be narrow.
+// TODO(justinmc): The clickable area is full-width, should be narrow. Maybe this needs to become a widget for that...
 /// An inline, interactive text link.
 class InlineLink extends TextSpan {
   /// Create an instance of [InlineLink].
   InlineLink({
     required String text,
     VoidCallback? onTap,
-    TextStyle style = defaultLinkStyle,
+    TextStyle? style,
     super.locale,
     super.semanticsLabel,
   }) : super(
-    style: style,
+    style: style ?? defaultLinkStyle,
     mouseCursor: SystemMouseCursors.click,
     text: text,
     // TODO(justinmc): You need to manage the lifecycle of this recognizer. I
@@ -323,12 +323,27 @@ class InlineLink extends TextSpan {
     recognizer: onTap == null ? null : (TapGestureRecognizer()..onTap = onTap),
   );
 
+  static Color get _linkColor {
+    return switch (defaultTargetPlatform) {
+      // This value was taken from Safari on an iPhone 14 Pro iOS 16.4
+      // simulator.
+      TargetPlatform.iOS => const Color(0xff1717f0),
+      // This value was taken from Chrome on macOS 13.4.1.
+      TargetPlatform.macOS => const Color(0xff0000ee),
+      // This value was taken from Chrome on Android 14.
+      TargetPlatform.android || TargetPlatform.fuchsia => const Color(0xff0e0eef),
+      // This value was taken from the Chrome browser running on GNOME 43.3 on
+      // Debian.
+      TargetPlatform.linux => const Color(0xff0026e8),
+      // This value was taken from the Edge browser running on Windows 10.
+      TargetPlatform.windows => const Color(0xff1e2b8b),
+    };
+  }
+
   @visibleForTesting
-  static const TextStyle defaultLinkStyle = TextStyle(
-    // TODO(justinmc): Correct color per-platform. Get it from Theme in
-    // Material somehow?
+  static TextStyle defaultLinkStyle = TextStyle(
     // And decide underline or not per-platform.
-    color: Color(0xff0000ff),
+    color: _linkColor,
     decoration: TextDecoration.underline,
   );
 }
@@ -411,7 +426,8 @@ class _TextLinkerMatch {
 
 // TODO(justinmc): Would it simplify things if the public class TextLinker
 // actually handled multiple rangesFinders and linkBuilders? Then there was a
-// private single _TextLinker or something?
+// private single _TextLinker or something? Seems like it didn't work out when
+// I tried this, actually.
 // TODO(justinmc): Think about which links need to go here vs. on InlineTextLinker.
 /// Specifies a way to find and style parts of a String.
 class TextLinker {
