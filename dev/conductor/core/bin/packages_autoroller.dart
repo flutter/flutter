@@ -16,6 +16,7 @@ import 'package:process/process.dart';
 const String kTokenOption = 'token';
 const String kGithubClient = 'github-client';
 const String kUpstreamRemote = 'upstream-remote';
+const String kGithubAccountName = 'flutter-pub-roller-bot';
 
 Future<void> main(List<String> args) {
   return run(args);
@@ -90,7 +91,7 @@ ${parser.usage}
     orgName: _parseOrgName(mirrorUrl),
     token: token,
     processManager: processManager,
-    githubUsername: 'flutter-pub-roller-bot',
+    githubUsername: kGithubAccountName,
   ).roll();
 }
 
