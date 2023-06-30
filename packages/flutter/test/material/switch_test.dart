@@ -460,7 +460,7 @@ void main() {
   });
 
   testWidgets('Material3 - Switch has default colors when enabled', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
+    final ThemeData theme = ThemeData(useMaterial3: true);
     final ColorScheme colors = theme.colorScheme;
     bool value = false;
     await tester.pumpWidget(
@@ -589,11 +589,7 @@ void main() {
   });
 
   testWidgets('Material3 - Inactive Switch has default colors when disabled', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(
-      useMaterial3: true,
-      colorSchemeSeed: const Color(0xff6750a4),
-      brightness: Brightness.light,
-    );
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     final ColorScheme colors = themeData.colorScheme;
 
     await tester.pumpWidget(MaterialApp(
@@ -631,11 +627,7 @@ void main() {
   });
 
   testWidgets('Material3 - Active Switch has default colors when disabled', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(
-      useMaterial3: true,
-      colorSchemeSeed: const Color(0xff6750a4),
-      brightness: Brightness.light
-    );
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     final ColorScheme colors = themeData.colorScheme;
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -818,11 +810,7 @@ void main() {
   });
 
   testWidgets('Material3 - Switch can be set color', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(
-      useMaterial3: true,
-      colorSchemeSeed: const Color(0xff6750a4),
-      brightness: Brightness.light,
-    );
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     final ColorScheme colors = themeData.colorScheme;
 
     bool value = false;
@@ -1253,7 +1241,7 @@ void main() {
   });
 
   testWidgets('Material3 - Switch is focusable and has correct focus color', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     final ColorScheme colors = themeData.colorScheme;
     final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -1443,7 +1431,7 @@ void main() {
   });
 
   testWidgets('Material3 - Switch can be hovered and has correct hover color', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     final ColorScheme colors = themeData.colorScheme;
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool value = true;
@@ -1815,7 +1803,7 @@ void main() {
   });
 
   testWidgets('Material3 - Switch thumb color resolves in active/enabled states', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     final ColorScheme colors = themeData.colorScheme;
     const Color activeEnabledThumbColor = Color(0xFF000001);
     const Color activeDisabledThumbColor = Color(0xFF000002);
@@ -2000,7 +1988,7 @@ void main() {
   });
 
   testWidgets('Material3 - Switch thumb color resolves in hovered/focused states', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     final ColorScheme colors = themeData.colorScheme;
     final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -2165,7 +2153,7 @@ void main() {
   });
 
   testWidgets('Material3 - Track color resolves in active/enabled states', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     const Color activeEnabledTrackColor = Color(0xFF000001);
     const Color activeDisabledTrackColor = Color(0xFF000002);
     const Color inactiveEnabledTrackColor = Color(0xFF000003);
@@ -2327,7 +2315,7 @@ void main() {
   });
 
   testWidgets('Material3 - Switch track color resolves in hovered/focused states', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredTrackColor = Color(0xFF000001);
@@ -2449,7 +2437,7 @@ void main() {
 
   testWidgets('Material3 - Switch thumb color is blended against surface color', (WidgetTester tester) async {
     final Color activeDisabledThumbColor = Colors.blue.withOpacity(.60);
-    final ThemeData theme = ThemeData.light(useMaterial3: true);
+    final ThemeData theme = ThemeData(useMaterial3: true);
     final ColorScheme colors = theme.colorScheme;
 
     Color getThumbColor(Set<MaterialState> states) {
