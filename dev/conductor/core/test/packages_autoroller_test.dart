@@ -476,12 +476,11 @@ void main() {
 
   group('command argument validations', () {
     const String tokenPath = '/path/to/token';
-    const String mirrorRemote = 'https://githost.com/org/project';
 
     test('validates that file exists at --token option', () async {
       await expectLater(
         () => run(
-          <String>['--token', tokenPath, '--mirror-remote', mirrorRemote],
+          <String>['--token', tokenPath],
           fs: fileSystem,
           processManager: processManager,
         ),
@@ -500,7 +499,7 @@ void main() {
         ..writeAsStringSync('');
       await expectLater(
         () => run(
-          <String>['--token', tokenPath, '--mirror-remote', mirrorRemote],
+          <String>['--token', tokenPath],
           fs: fileSystem,
           processManager: processManager,
         ),
