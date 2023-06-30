@@ -13,7 +13,10 @@ class NavigationBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: NavigationExample());
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const NavigationExample(),
+    );
   }
 }
 
@@ -45,13 +48,20 @@ class _NavigationExampleState extends State<NavigationExample> {
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.business),
-            label: 'Business',
+            icon: Badge(child: Icon(Icons.notifications_sharp)),
+            label: 'Notifications',
           ),
           NavigationDestination(
-            selectedIcon: Icon(Icons.school),
-            icon: Icon(Icons.school_outlined),
-            label: 'School',
+            icon: Badge(
+              label: Text('4'),
+              child: Icon(Icons.messenger_sharp),
+            ),
+            label: 'Messages',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.person),
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
           ),
         ],
       ),
@@ -70,6 +80,11 @@ class _NavigationExampleState extends State<NavigationExample> {
           color: Colors.blue,
           alignment: Alignment.center,
           child: const Text('Page 3'),
+        ),
+        Container(
+          color: Colors.yellow,
+          alignment: Alignment.center,
+          child: const Text('Page 4'),
         ),
       ][currentPageIndex],
     );
