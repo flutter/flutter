@@ -362,7 +362,7 @@ class _RawViewElement extends RenderTreeRootElement {
   void deactivate() {
     _detachFromViewHooks();
     assert(_effectivePipelineOwner.rootNode == renderObject);
-    _effectivePipelineOwner.rootNode = null;
+    _effectivePipelineOwner.rootNode = null; // To satisfy the assert in the super class.
     super.deactivate();
   }
 
