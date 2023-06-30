@@ -929,10 +929,20 @@ extension DomHTMLScriptElementExtension on DomHTMLScriptElement {
   external set _src(JSAny value);
   set src(Object /* String|TrustedScriptURL */ value) =>
       _src = value.toJSAnyShallow;
+
+  @JS('nonce')
+  external set _nonce(JSString? value);
+  set nonce(String? value) => _nonce = value?.toJS;
 }
 
-DomHTMLScriptElement createDomHTMLScriptElement() =>
-    domDocument.createElement('script') as DomHTMLScriptElement;
+DomHTMLScriptElement createDomHTMLScriptElement(String? nonce) {
+  final DomHTMLScriptElement script =
+      domDocument.createElement('script') as DomHTMLScriptElement;
+  if (nonce != null) {
+    script.nonce = nonce;
+  }
+  return script;
+}
 
 @JS()
 @staticInterop
@@ -971,11 +981,25 @@ extension DomHTMLStyleElementExtension on DomHTMLStyleElement {
   external set _type(JSString? value);
   set type(String? value) => _type = value?.toJS;
 
+  @JS('nonce')
+  external set _nonce(JSString? value);
+  set nonce(String? value) => _nonce = value?.toJS;
+
+  @JS('nonce')
+  external JSString? get _nonce;
+  String? get nonce => _nonce?.toDart;
+
   external DomStyleSheet? get sheet;
 }
 
-DomHTMLStyleElement createDomHTMLStyleElement() =>
-    domDocument.createElement('style') as DomHTMLStyleElement;
+DomHTMLStyleElement createDomHTMLStyleElement(String? nonce) {
+  final DomHTMLStyleElement style =
+      domDocument.createElement('style') as DomHTMLStyleElement;
+  if (nonce != null) {
+    style.nonce = nonce;
+  }
+  return style;
+}
 
 @JS()
 @staticInterop

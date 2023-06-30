@@ -16,15 +16,23 @@ void testMain() {
   late DomHTMLStyleElement styleElement;
 
   setUp(() {
-    styleElement = createDomHTMLStyleElement();
+    styleElement = createDomHTMLStyleElement(null);
     domDocument.body!.append(styleElement);
     applyGlobalCssRulesToSheet(
       styleElement,
       defaultCssFont: _kDefaultCssFont,
     );
   });
+
   tearDown(() {
     styleElement.remove();
+  });
+
+  test('createDomHTMLStyleElement sets a nonce value, when passed', () {
+    expect(styleElement.nonce, isEmpty);
+
+    final DomHTMLStyleElement style = createDomHTMLStyleElement('a-nonce-value');
+    expect(style.nonce, 'a-nonce-value');
   });
 
   test('(Self-test) hasCssRule can extract rules', () {

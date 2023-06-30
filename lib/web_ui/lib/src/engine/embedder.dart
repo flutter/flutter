@@ -188,7 +188,7 @@ class FlutterViewEmbedder {
     });
     _glassPaneShadow = shadowRoot;
 
-    final DomHTMLStyleElement shadowRootStyleElement = createDomHTMLStyleElement();
+    final DomHTMLStyleElement shadowRootStyleElement = createDomHTMLStyleElement(configuration.nonce);
     shadowRootStyleElement.id = 'flt-internals-stylesheet';
     // The shadowRootStyleElement must be appended to the DOM, or its `sheet` will be null later.
     shadowRoot.appendChild(shadowRootStyleElement);
@@ -198,7 +198,7 @@ class FlutterViewEmbedder {
     );
 
     _textEditingHostNode =
-        createTextEditingHostNode(flutterViewElement, defaultCssFont);
+        createTextEditingHostNode(flutterViewElement, defaultCssFont, configuration.nonce);
 
     // Don't allow the scene to receive pointer events.
     _sceneHostElement = domDocument.createElement('flt-scene-host')
@@ -434,10 +434,10 @@ FlutterViewEmbedder ensureFlutterViewEmbedderInitialized() =>
 
 /// Creates a node to host text editing elements and applies a stylesheet
 /// to Flutter nodes that exist outside of the shadowDOM.
-DomElement createTextEditingHostNode(DomElement root, String defaultFont) {
+DomElement createTextEditingHostNode(DomElement root, String defaultFont, String? nonce) {
   final DomElement domElement =
       domDocument.createElement('flt-text-editing-host');
-  final DomHTMLStyleElement styleElement = createDomHTMLStyleElement();
+  final DomHTMLStyleElement styleElement = createDomHTMLStyleElement(nonce);
 
   styleElement.id = 'flt-text-editing-stylesheet';
   root.appendChild(styleElement);
