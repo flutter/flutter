@@ -88,8 +88,8 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
-  printProgress('No Double.clamp');
-  await verifyNoDoubleClamp(flutterRoot);
+  printProgress('Analyzing code in the framework');
+  await parseFlutterLibAndAnalyze(flutterRoot, [verifyNoDoubleClamp, verifyDebugAssertAccess]);
 
   //printProgress('All tool test files end in _test.dart...');
   //await verifyToolTestsEndInTestDart(flutterRoot);
@@ -266,9 +266,6 @@ _Line _getLine(ParseStringResult parseResult, int offset) {
 //    ]);
 //  }
 //}
-Future<void> verifyNoDoubleClamp(String workingDirectory) async {
-  await parseFlutterLibAndAnalyze(workingDirectory);
-}
 
 /// Verify Token Templates are mapped to correct file names while generating
 /// M3 defaults in /dev/tools/gen_defaults/bin/gen_defaults.dart.

@@ -672,12 +672,6 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       to: trailingScrollOffset,
     );
 
-    final double x = 123.0;
-    x.clamp(111, 123);
-    final double? y = 123.0;
-    y?.clamp(111, 123);
-    y!.clamp(111, 123);
-
     geometry = SliverGeometry(
       scrollExtent: estimatedTotalExtent,
       paintExtent: paintExtent,

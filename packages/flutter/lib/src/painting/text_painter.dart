@@ -31,6 +31,13 @@ export 'package:flutter/services.dart' show TextRange, TextSelection;
 // defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
 const double _kDefaultFontSize = 14.0;
 
+class _DebugAssert {
+  const _DebugAssert();
+}
+void testFunction2(ui.LineMetrics Function(ui.LineMetrics, Offset) f) {}
+
+const _debugAssert = _DebugAssert();
+
 /// How overflowing text should be handled.
 ///
 /// A [TextOverflow] can be passed to [Text] and [RichText] via their
@@ -612,6 +619,7 @@ class TextPainter {
   // the color of the text), on ui.Paragraph or ui.ParagraphBuilder.
   double _inputWidth = double.nan;
 
+  @_debugAssert
   bool get _debugAssertTextLayoutIsValid {
     assert(!debugDisposed);
     if (_layoutCache == null) {
@@ -624,6 +632,7 @@ class TextPainter {
     return true;
   }
 
+  @_debugAssert
   StackTrace? _debugMarkNeedsLayoutCallStack;
 
   /// Marks this text painter's layout information as dirty and removes cached
@@ -1484,6 +1493,7 @@ class TextPainter {
     return _layoutCache!.paragraph.getLineBoundary(position);
   }
 
+  @_debugAssert
   static ui.LineMetrics _shiftLineMetrics(ui.LineMetrics metrics, Offset offset) {
     assert(offset.dx.isFinite);
     assert(offset.dy.isFinite);
@@ -1542,6 +1552,7 @@ class TextPainter {
   /// Whether this object has been disposed or not.
   ///
   /// Only for use when asserts are enabled.
+  @_debugAssert
   bool get debugDisposed {
     bool? disposed;
     assert(() {
@@ -1555,10 +1566,24 @@ class TextPainter {
   ///
   /// After disposal this painter is unusable.
   void dispose() {
+    final xxxx = _shiftLineMetrics;
+    void testFunction(ui.LineMetrics Function(ui.LineMetrics, Offset) f) {}
+    testFunction(_shiftLineMetrics);
+    testFunction2(_shiftLineMetrics);
+
     assert(() {
       _disposed = true;
       return true;
     }());
+    final double x = 123.0;
+    x.clamp(111, 123);
+    final double? y = 123.0;
+    y?.clamp(111, 123);
+    y!.clamp(111, 123);
+    final f = 1.clamp;
+    f(111, 123);
+
+
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
     _layoutCache?.paragraph.dispose();
