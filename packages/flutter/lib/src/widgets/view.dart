@@ -263,7 +263,6 @@ class _RawViewElement extends RenderTreeRootElement {
 
   void _handleSemanticsOwnerCreated() {
     (_effectivePipelineOwner.rootNode as RenderView?)?.scheduleInitialSemantics();
-    // If the rootNode is not set yet, initial semantics are scheduled in _ViewElement.mount right after the rootNode is set.
   }
 
   void _handleSemanticsOwnerDisposed() {
