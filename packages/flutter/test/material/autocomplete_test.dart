@@ -507,4 +507,41 @@ void main() {
     checkOptionHighlight(tester, 'lemur', null);
     checkOptionHighlight(tester, 'northern white rhinoceros', null);
   });
+
+  group('optionsViewOpenDirection', () {
+    testWidgets('default (down)', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Autocomplete<String>(
+              optionsBuilder: (_) => <String>['a']))));
+      final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+        .optionsViewOpenDirection;
+      expect(actual, equals(OptionsViewOpenDirection.down));
+    });
+
+    testWidgets('down', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Autocomplete<String>(
+              optionsViewOpenDirection: OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+              optionsBuilder: (_) => <String>['a']))));
+      final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+        .optionsViewOpenDirection;
+      expect(actual, equals(OptionsViewOpenDirection.down));
+    });
+
+    testWidgets('up', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Autocomplete<String>(
+              optionsViewOpenDirection: OptionsViewOpenDirection.up,
+              optionsBuilder: (_) => <String>['a']))));
+      final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+        .optionsViewOpenDirection;
+      expect(actual, equals(OptionsViewOpenDirection.up));
+    });
+  });
 }

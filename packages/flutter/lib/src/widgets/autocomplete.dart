@@ -225,9 +225,11 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// {@endtemplate}
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
 
+  /// {@template flutter.widgets.RawAutocomplete.optionsViewOpenDirection}
   /// The direction in which to open the options-view overlay.
   ///
   /// Defaults to [OptionsViewOpenDirection.down].
+  /// {@endtemplate}
   final OptionsViewOpenDirection optionsViewOpenDirection;
 
   /// {@template flutter.widgets.RawAutocomplete.displayStringForOption}
