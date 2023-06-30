@@ -155,7 +155,7 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
   FML_DCHECK(pass->superpass_ == nullptr);
   pass->superpass_ = this;
 
-  if (pass->backdrop_filter_proc_.has_value()) {
+  if (pass->backdrop_filter_proc_) {
     backdrop_filter_reads_from_pass_texture_ += 1;
   }
   if (pass->blend_mode_ > Entity::kLastPipelineBlendMode) {
@@ -413,7 +413,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       return EntityPass::EntityResult::Skip();
     }
 
-    if (!subpass->backdrop_filter_proc_.has_value() &&
+    if (!subpass->backdrop_filter_proc_ &&
         subpass->delegate_->CanCollapseIntoParentPass(subpass)) {
       // Directly render into the parent target and move on.
       if (!subpass->OnRender(
@@ -436,10 +436,10 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     }
 
     std::shared_ptr<Contents> backdrop_filter_contents = nullptr;
-    if (subpass->backdrop_filter_proc_.has_value()) {
+    if (subpass->backdrop_filter_proc_) {
       auto texture = pass_context.GetTexture();
       // Render the backdrop texture before any of the pass elements.
-      const auto& proc = subpass->backdrop_filter_proc_.value();
+      const auto& proc = subpass->backdrop_filter_proc_;
       backdrop_filter_contents =
           proc(FilterInput::Make(std::move(texture)), subpass->xformation_,
                /*is_subpass*/ true);
@@ -700,7 +700,7 @@ bool EntityPass::OnRender(
     return true;
   };
 
-  if (backdrop_filter_proc_.has_value()) {
+  if (backdrop_filter_proc_) {
     if (!backdrop_filter_contents) {
       VALIDATION_LOG
           << "EntityPass contains a backdrop filter, but no backdrop filter "
@@ -932,7 +932,7 @@ Color EntityPass::GetClearColor(ISize target_size) const {
   return result;
 }
 
-void EntityPass::SetBackdropFilter(std::optional<BackdropFilterProc> proc) {
+void EntityPass::SetBackdropFilter(BackdropFilterProc proc) {
   if (superpass_) {
     VALIDATION_LOG << "Backdrop filters cannot be set on EntityPasses that "
                       "have already been appended to another pass.";

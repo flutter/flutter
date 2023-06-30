@@ -88,7 +88,7 @@ class EntityPass {
 
   Color GetClearColor(ISize size = ISize::Infinite()) const;
 
-  void SetBackdropFilter(std::optional<BackdropFilterProc> proc);
+  void SetBackdropFilter(BackdropFilterProc proc);
 
   void SetEnableOffscreenCheckerboard(bool enabled);
 
@@ -223,7 +223,7 @@ class EntityPass {
 
   uint32_t GetTotalPassReads(ContentContext& renderer) const;
 
-  std::optional<BackdropFilterProc> backdrop_filter_proc_ = std::nullopt;
+  BackdropFilterProc backdrop_filter_proc_ = nullptr;
 
   std::unique_ptr<EntityPassDelegate> delegate_ =
       EntityPassDelegate::MakeDefault();
