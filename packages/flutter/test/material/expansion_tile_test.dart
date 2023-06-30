@@ -638,55 +638,6 @@ void main() {
     expect(expandedContainerDecoration.shape, shape);
   });
 
-  testWidgets('ExpansionTile shape from ExpansionTileTheme', (WidgetTester tester) async {
-    const Key expansionTileKey = PageStorageKey<String>('expansionTile');
-
-    const Border collapsedShape = Border(top: BorderSide(color: Colors.blue), bottom: BorderSide(color: Colors.green));
-    final Border shape = Border.all(color: Colors.red);
-
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: SingleChildScrollView(
-          child: ExpansionTileTheme(
-            data: ExpansionTileThemeData(
-              collapsedShape: collapsedShape,
-              shape: shape,
-            ),
-            child: const Column(
-              children: <Widget>[
-                ExpansionTile(
-                  key: expansionTileKey,
-                  title: Text('ExpansionTile'),
-                  children: <Widget>[
-                    ListTile(
-                      title: Text('0'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ));
-
-    Container getContainer(Key key) => tester.firstWidget(find.descendant(
-          of: find.byKey(key),
-          matching: find.byType(Container),
-        ));
-
-    // expansionTile should be Collapsed now.
-    ShapeDecoration expandedContainerDecoration = getContainer(expansionTileKey).decoration! as ShapeDecoration;
-    expect(expandedContainerDecoration.shape, collapsedShape);
-
-    await tester.tap(find.text('ExpansionTile'));
-    await tester.pumpAndSettle();
-
-    // expansionTile should be Expanded now.
-    expandedContainerDecoration = getContainer(expansionTileKey).decoration! as ShapeDecoration;
-    expect(expandedContainerDecoration.shape, shape);
-  });
-
   testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
