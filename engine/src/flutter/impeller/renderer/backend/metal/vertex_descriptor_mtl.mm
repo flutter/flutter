@@ -174,8 +174,8 @@ bool VertexDescriptorMTL::SetStageInputsAndLayout(
     const std::vector<ShaderStageBufferLayout>& layouts) {
   auto descriptor = descriptor_ = [MTLVertexDescriptor vertexDescriptor];
 
-  // TODO: its odd that we offset buffers from the max index on metal
-  // but not on GLES or Vulkan. We should probably consistently start
+  // TODO(jonahwilliams): its odd that we offset buffers from the max index on
+  // metal but not on GLES or Vulkan. We should probably consistently start
   // these at zero?
   for (size_t i = 0; i < inputs.size(); i++) {
     const auto& input = inputs[i];
