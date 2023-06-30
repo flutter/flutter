@@ -142,7 +142,8 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use for the accessibility label when the switch is off.
   ///
-  /// Defaults to [CupertinoColors.offSwitchLabel] when null.
+  /// Defaults to [Color.fromARGB(255, 179, 179, 179)]
+  /// (or [Color.fromARGB(255, 255, 255, 255)] in high contrast) when null.
   final Color? offLabelColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -377,7 +378,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
                   context,
                 ),
                 CupertinoDynamicColor.resolve(
-                  widget.offLabelColor ?? CupertinoColors.offSwitchLabel,
+                  widget.offLabelColor ?? _kOffLabelColor,
                   context,
                 ),
               )
@@ -504,6 +505,16 @@ const double _kOnLabelPaddingHorizontal = 11.0;
 const double _kOffLabelWidth = 1.0;
 const double _kOffLabelPaddingHorizontal = 12.0;
 const double _kOffLabelRadius = 5.0;
+const CupertinoDynamicColor _kOffLabelColor = CupertinoDynamicColor.withBrightnessAndContrast(
+  debugLabel: 'offSwitchLabel',
+  // Source: https://github.com/flutter/flutter/pull/39993#discussion_r321946033
+  color: Color.fromARGB(255, 179, 179, 179),
+  // Source: https://github.com/flutter/flutter/pull/39993#issuecomment-535196665
+  darkColor: Color.fromARGB(255, 179, 179, 179),
+  // Source: https://github.com/flutter/flutter/pull/127776#discussion_r1244208264
+  highContrastColor: Color.fromARGB(255, 255, 255, 255),
+  darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
+);
 // Opacity of a disabled switch, as eye-balled from iOS Simulator on Mac.
 const double _kCupertinoSwitchDisabledOpacity = 0.5;
 
