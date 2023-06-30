@@ -699,33 +699,29 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     }
 
     if (_onOffLabelColors != null) {
-      final double leftLabelOpacity = visualPosition * (1.0 - currentReactionValue);
-      final double rightLabelOpacity = (1.0 - visualPosition) * (1.0 - currentReactionValue);
-
-      final Offset onLabelOffset;
-      final double onLabelOpacity;
-      final Offset offLabelOffset;
-      final double offLabelOpacity;
-
-      switch (textDirection) {
-        case TextDirection.ltr:
-          onLabelOffset =
-              trackRect.centerLeft.translate(_kOnLabelPaddingHorizontal, 0);
-          onLabelOpacity = leftLabelOpacity;
-          offLabelOffset =
-              trackRect.centerRight.translate(-_kOffLabelPaddingHorizontal, 0);
-          offLabelOpacity = rightLabelOpacity;
-        case TextDirection.rtl:
-          onLabelOffset =
-              trackRect.centerRight.translate(-_kOnLabelPaddingHorizontal, 0);
-          onLabelOpacity = rightLabelOpacity;
-          offLabelOffset =
-              trackRect.centerLeft.translate(_kOffLabelPaddingHorizontal, 0);
-          offLabelOpacity = leftLabelOpacity;
-      }
-
       final (Color onLabelColor, Color offLabelColor) = onOffLabelColors!;
 
+      final double leftLabelOpacity = visualPosition * (1.0 - currentReactionValue);
+      final double rightLabelOpacity = (1.0 - visualPosition) * (1.0 - currentReactionValue);
+      final (double onLabelOpacity, double offLabelOpacity) =
+          switch (textDirection) {
+        TextDirection.ltr => (leftLabelOpacity, rightLabelOpacity),
+        TextDirection.rtl => (rightLabelOpacity, leftLabelOpacity),
+      };
+
+      final (Offset onLabelOffset, Offset offLabelOffset) =
+          switch (textDirection) {
+        TextDirection.ltr => (
+            trackRect.centerLeft.translate(_kOnLabelPaddingHorizontal, 0),
+            trackRect.centerRight.translate(-_kOffLabelPaddingHorizontal, 0),
+          ),
+        TextDirection.rtl => (
+            trackRect.centerRight.translate(-_kOnLabelPaddingHorizontal, 0),
+            trackRect.centerLeft.translate(_kOffLabelPaddingHorizontal, 0),
+          ),
+      };
+
+      // Draws '|' label
       final Rect onLabelRect = Rect.fromCenter(
         center: onLabelOffset,
         width: _kOnLabelWidth,
@@ -736,6 +732,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         ..style = PaintingStyle.fill;
       canvas.drawRect(onLabelRect, onLabelPaint);
 
+      // Draws 'O' label
       final Paint offLabelPaint = Paint()
         ..color = offLabelColor.withOpacity(offLabelOpacity)
         ..style = PaintingStyle.stroke
