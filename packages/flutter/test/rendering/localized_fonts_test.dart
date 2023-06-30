@@ -66,7 +66,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false),
+          theme: ThemeData(useMaterial3: true),
           supportedLocales: const <Locale>[
             Locale('en', 'US'),
             Locale('ja'),
