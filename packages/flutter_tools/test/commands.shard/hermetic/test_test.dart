@@ -324,6 +324,7 @@ dev_dependencies:
   });
 
   testUsingContext('Coverage provides library names matching regexps to Coverage Collector', () async {
+    const String currentPackageName = '';
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         FakeVmServiceRequest(
@@ -347,7 +348,7 @@ dev_dependencies:
             'reports': <Object>['Coverage'],
             'forceCompile': true,
             'reportLines': true,
-            'libraryFilters': <String>['package:test_api/'],
+            'libraryFilters': <String>['package:$currentPackageName/', 'package:test_api/'],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[
@@ -386,7 +387,10 @@ dev_dependencies:
       'test/some_test.dart',
     ]);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
-    expect((testRunner.lastTestWatcher! as CoverageCollector).libraryNames, <String>{'test_api'});
+    expect(
+      (testRunner.lastTestWatcher! as CoverageCollector).libraryNames,
+      <String>{'test_api', currentPackageName},
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),

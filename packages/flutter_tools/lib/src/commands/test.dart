@@ -135,6 +135,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addMultiOption('coverage-package',
         help: 'A regular expression matching packages names '
               'to include in the coverage report (if coverage is enabled). '
+              'Current package is always included. '
               'By default, the coverage will be collected only for the current package.',
         valueHelp: 'package-name-regexp',
         splitCommas: false,
@@ -403,14 +404,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     CoverageCollector? collector;
     if (boolArg('coverage') || boolArg('merge-coverage') ||
         boolArg('branch-coverage')) {
-      final Iterable<String> packagesToInclude = _getCoveragePackages(
+      final Set<String> packagesToInclude = _getCoveragePackages(
         stringsArg('coverage-package'),
         flutterProject,
         buildInfo.packageConfig,
       );
       collector = CoverageCollector(
         verbose: !machine,
-        libraryNames: packagesToInclude.toSet(),
+        libraryNames: packagesToInclude,
         packagesPath: buildInfo.packagesPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
         testTimeRecorder: testTimeRecorder,
@@ -520,20 +521,20 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     return FlutterCommandResult.success();
   }
 
-  Iterable<String> _getCoveragePackages(
+  Set<String> _getCoveragePackages(
     List<String> packagesRegExps,
     FlutterProject flutterProject,
     PackageConfig packageConfig,
   ) {
     final String projectName = flutterProject.manifest.appName;
-    final Iterable<String> packagesToInclude;
-    if (packagesRegExps.isNotEmpty) {
-      final RegExp combinedRegExp = RegExp('(${packagesRegExps.join(")|(")})');
-      packagesToInclude = packageConfig.packages
-          .map((Package e) => e.name)
-          .where((String e) => combinedRegExp.hasMatch(e));
-    } else {
-      packagesToInclude = <String>[projectName];
+    final Set<String> packagesToInclude = <String>{projectName};
+    for (final String regExpStr in packagesRegExps) {
+      final RegExp regExp = RegExp(regExpStr);
+      packagesToInclude.addAll(
+        packageConfig.packages
+            .map((Package e) => e.name)
+            .where((String e) => regExp.hasMatch(e)),
+      );
     }
     return packagesToInclude;
   }
