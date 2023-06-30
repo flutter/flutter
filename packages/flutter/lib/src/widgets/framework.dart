@@ -4440,16 +4440,17 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// Whether the child in the provided `slot` (or one of its descendants) must
   /// insert a [RenderObject] into its ancestor [RenderObjectElement] by calling
-  /// [RenderObjectElement.insertRenderObject] on it.
+  /// [RenderObjectElement.insertRenderObjectChild] on it.
   ///
   /// Most branches of the [Element] tree are expected to eventually insert a
   /// [RenderObject] into their [RenderObjectElement] ancestor to construct the
   /// render tree. However, there is a notable exception: An [Element] may
   /// expect that the occupants of certain child slots create a new independent
-  /// render tree and therefore are not allowed to insert a render object
-  /// into the existing render tree. Those elements must return false from this
+  /// render tree and therefore are not allowed to insert a render object into
+  /// the existing render tree. Those elements must return false from this
   /// method for the slot in question to signal to the child in that slot that
-  /// it must not call [RenderObjectElement.insertRenderObject] on its ancestor.
+  /// it must not call [RenderObjectElement.insertRenderObjectChild] on its
+  /// ancestor.
   ///
   /// As an example, the element backing the [ViewAnchor] returns false from
   /// this method for the [ViewAnchor.view] slot to enforce that it is occupied

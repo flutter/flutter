@@ -1134,7 +1134,7 @@ void debugDumpApp() {
   debugPrint(_debugDumpAppString());
 }
 
-/// A widget for the root of the [WidgetTree].
+/// A widget for the root of the widget tree.
 ///
 /// Exposes an [attach] method to attach the widget tree to a [BuildOwner]. That
 /// method also bootstraps the element tree.
