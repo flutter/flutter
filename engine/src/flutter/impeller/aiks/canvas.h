@@ -68,8 +68,7 @@ class Canvas {
 
   void SaveLayer(const Paint& paint,
                  std::optional<Rect> bounds = std::nullopt,
-                 const std::optional<Paint::ImageFilterProc>& backdrop_filter =
-                     std::nullopt);
+                 const Paint::ImageFilterProc& backdrop_filter = nullptr);
 
   bool Restore();
 
@@ -182,8 +181,7 @@ class Canvas {
 
   void Save(bool create_subpass,
             BlendMode = BlendMode::kSourceOver,
-            std::optional<EntityPass::BackdropFilterProc> backdrop_filter =
-                std::nullopt);
+            EntityPass::BackdropFilterProc backdrop_filter = nullptr);
 
   void RestoreClip();
 
