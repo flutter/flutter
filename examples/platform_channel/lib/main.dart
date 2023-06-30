@@ -86,5 +86,10 @@ class _PlatformChannelState extends State<PlatformChannel> {
 }
 
 void main() {
-  runApp(const MaterialApp(home: PlatformChannel()));
+  runApp(MaterialApp(
+    title: 'Flutter platform_channel',
+      theme: ThemeData(
+        primarySwatch: Colors.grey,
+        useMaterial3: true,
+      ),home: const PlatformChannel()));
 }

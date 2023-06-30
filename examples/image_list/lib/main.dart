@@ -133,6 +133,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        useMaterial3: true
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page', port: port),
     );
