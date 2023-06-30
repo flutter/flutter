@@ -432,13 +432,10 @@ void main() {
                 fieldViewBuilder: (_, TextEditingController controller, FocusNode focusNode, __) {
                   return TextField(controller: controller, focusNode: focusNode);
                 },
-                optionsViewBuilder: (_, __, ___) => const Placeholder())))));
+                optionsViewBuilder: (_, __, ___) => const Text('a'))))));
       await tester.showKeyboard(find.byType(TextField));
-      final Offset fieldBottomLeft = tester.getBottomLeft(find.byType(TextField));
-      final Offset optionsViewTopLeft = tester.getTopLeft(find.byType(Placeholder));
-      final Offset optionsViewCenter = tester.getCenter(find.byType(Placeholder));
-      expect(fieldBottomLeft, offsetMoreOrLessEquals(optionsViewTopLeft));
-      expect(optionsViewCenter.dy, greaterThan(optionsViewTopLeft.dy));
+      expect(tester.getBottomLeft(find.byType(TextField)),
+        offsetMoreOrLessEquals(tester.getTopLeft(find.text('a'))));
     });
 
     testWidgets('down: open downward', (WidgetTester tester) async {
@@ -452,13 +449,10 @@ void main() {
                   fieldViewBuilder: (_, TextEditingController controller, FocusNode focusNode, __) {
                     return TextField(controller: controller, focusNode: focusNode);
                   },
-                  optionsViewBuilder: (_, __, ___) => const Placeholder())))));
+                  optionsViewBuilder: (_, __, ___) => const Text('a'))))));
       await tester.showKeyboard(find.byType(TextField));
-      final Offset fieldBottomLeft = tester.getBottomLeft(find.byType(TextField));
-      final Offset optionsViewTopLeft = tester.getTopLeft(find.byType(Placeholder));
-      final Offset optionsViewCenter = tester.getCenter(find.byType(Placeholder));
-      expect(fieldBottomLeft, offsetMoreOrLessEquals(optionsViewTopLeft));
-      expect(optionsViewCenter.dy, greaterThan(optionsViewTopLeft.dy));
+      expect(tester.getBottomLeft(find.byType(TextField)),
+        offsetMoreOrLessEquals(tester.getTopLeft(find.text('a'))));
     });
 
     testWidgets('up: open upward', (WidgetTester tester) async {
@@ -472,25 +466,15 @@ void main() {
                 fieldViewBuilder: (_, TextEditingController controller, FocusNode focusNode, __) {
                   return TextField(controller: controller, focusNode: focusNode);
                 },
-                optionsViewBuilder: (_, __, ___) => const Placeholder())))));
+                optionsViewBuilder: (_, __, ___) => const Text('a'))))));
       await tester.showKeyboard(find.byType(TextField));
-      final Offset fieldTopLeft = tester.getTopLeft(find.byType(TextField));
-      final Offset optionsViewBottomLeft = tester.getBottomLeft(find.byType(Placeholder));
-      final Offset optionsViewCenter = tester.getCenter(find.byType(Placeholder));
-      expect(fieldTopLeft, offsetMoreOrLessEquals(optionsViewBottomLeft));
-      expect(optionsViewCenter.dy, lessThan(optionsViewBottomLeft.dy));
+      expect(tester.getTopLeft(find.byType(TextField)),
+        offsetMoreOrLessEquals(tester.getBottomLeft(find.text('a'))));
     });
 
     group('fieldViewBuilder not passed', () {
-      // Find the [SizedBox.shrink] that substitutes for a text field when
-      // [RawAutocomplete.fieldViewBuilder] is not passed.
-      final Finder sizedBoxShrinkFinder = find.descendant(
-        of: find.byType(RawAutocomplete<String>),
-        matching: find.byWidgetPredicate((Widget widget) {
-          return widget is SizedBox && widget.height == 0.0 && widget.width == 0.0;
-        }));
-
       testWidgets('down', (WidgetTester tester) async {
+        final GlobalKey autocompleteKey = GlobalKey();
         final TextEditingController controller = TextEditingController();
         final FocusNode focusNode = FocusNode();
         await tester.pumpWidget(
@@ -501,22 +485,20 @@ void main() {
                 children: <Widget>[
                   TextField(controller: controller, focusNode: focusNode),
                   RawAutocomplete<String>(
-                    key: GlobalKey(),
+                    key: autocompleteKey,
                     textEditingController: controller,
                     focusNode: focusNode,
                     optionsViewOpenDirection: OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
                     optionsBuilder: (_) => <String>['a'],
-                    optionsViewBuilder: (_, __, ___) => const Placeholder()),
+                    optionsViewBuilder: (_, __, ___) => const Text('a')),
                 ]))));
         await tester.showKeyboard(find.byType(TextField));
-        final Offset sizedBoxBottomLeft = tester.getBottomLeft(sizedBoxShrinkFinder);
-        final Offset optionsViewTopLeft = tester.getTopLeft(find.byType(Placeholder));
-        final Offset optionsViewCenter = tester.getCenter(find.byType(Placeholder));
-        expect(sizedBoxBottomLeft, offsetMoreOrLessEquals(optionsViewTopLeft));
-        expect(optionsViewCenter.dy, greaterThan(optionsViewTopLeft.dy));
+        expect(tester.getBottomLeft(find.byKey(autocompleteKey)),
+          offsetMoreOrLessEquals(tester.getTopLeft(find.text('a'))));
       });
 
       testWidgets('up', (WidgetTester tester) async {
+        final GlobalKey autocompleteKey = GlobalKey();
         final TextEditingController controller = TextEditingController();
         final FocusNode focusNode = FocusNode();
         await tester.pumpWidget(
@@ -527,20 +509,17 @@ void main() {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   RawAutocomplete<String>(
-                    key: GlobalKey(),
+                    key: autocompleteKey,
                     textEditingController: controller,
                     focusNode: focusNode,
                     optionsViewOpenDirection: OptionsViewOpenDirection.up,
                     optionsBuilder: (_) => <String>['a'],
-                    optionsViewBuilder: (_, __, ___) => const Placeholder()),
+                    optionsViewBuilder: (_, __, ___) => const Text('a')),
                   TextField(controller: controller, focusNode: focusNode),
                 ]))));
         await tester.showKeyboard(find.byType(TextField));
-        final Offset sizedBoxTopLeft = tester.getTopLeft(sizedBoxShrinkFinder);
-        final Offset optionsViewBottomLeft = tester.getBottomLeft(find.byType(Placeholder));
-        final Offset optionsViewCenter = tester.getCenter(find.byType(Placeholder));
-        expect(sizedBoxTopLeft, offsetMoreOrLessEquals(optionsViewBottomLeft));
-        expect(optionsViewCenter.dy, lessThan(optionsViewBottomLeft.dy));
+        expect(tester.getTopLeft(find.byKey(autocompleteKey)),
+          offsetMoreOrLessEquals(tester.getBottomLeft(find.text('a'))));
       });
     });
   });

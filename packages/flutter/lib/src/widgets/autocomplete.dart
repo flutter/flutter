@@ -92,10 +92,11 @@ enum OptionsViewOpenDirection {
   /// The bottom edge of the options view will align with the top edge
   /// of the text field built by [RawAutocomplete.fieldViewBuilder].
   up,
+
   /// Open downward.
   ///
   /// The top edge of the options view will align with the bottom edge
-  /// of the text field build by [RawAutocomplete.fieldViewBuilder].
+  /// of the text field built by [RawAutocomplete.fieldViewBuilder].
   down,
 }
 
@@ -173,10 +174,10 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///
   /// Pass the provided [TextEditingController] to the field built here so that
   /// RawAutocomplete can listen for changes.
+  /// {@endtemplate}
   ///
   /// If this parameter is null, then a [SizedBox.shrink] is built instead.
   /// For how that pattern can be useful, see [textEditingController].
-  /// {@endtemplate}
   final AutocompleteFieldViewBuilder? fieldViewBuilder;
 
   /// The [FocusNode] that is used for the text field.
@@ -187,8 +188,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// field built by [fieldViewBuilder]. For example, it may be desirable to
   /// place the text field in the AppBar and the options below in the main body.
   ///
-  /// When following this pattern, [fieldViewBuilder] can be omitted;
-  /// in that case, a `SizedBox.shrink()` is built instead,
+  /// When following this pattern, [fieldViewBuilder] can be omitted,
   /// so that a text field is not drawn where it would normally be.
   /// A separate text field can be created elsewhere, and a
   /// FocusNode and TextEditingController can be passed both to that text field
@@ -453,12 +453,14 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
           return CompositedTransformFollower(
             link: _optionsLayerLink,
             showWhenUnlinked: false,
-            targetAnchor: widget.optionsViewOpenDirection == OptionsViewOpenDirection.up
-              ? Alignment.topLeft
-              : Alignment.bottomLeft,
-            followerAnchor: widget.optionsViewOpenDirection == OptionsViewOpenDirection.up
-              ? Alignment.bottomLeft
-              : Alignment.topLeft,
+            targetAnchor: switch (widget.optionsViewOpenDirection) {
+              OptionsViewOpenDirection.up => Alignment.topLeft,
+              OptionsViewOpenDirection.down => Alignment.bottomLeft,
+            },
+            followerAnchor: switch (widget.optionsViewOpenDirection) {
+              OptionsViewOpenDirection.up => Alignment.bottomLeft,
+              OptionsViewOpenDirection.down => Alignment.topLeft,
+            },
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
                 highlightIndexNotifier: _highlightedOptionIndex,
