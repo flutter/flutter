@@ -19,7 +19,7 @@ class SurfaceVK final : public Surface {
 
   static std::unique_ptr<SurfaceVK> WrapSwapchainImage(
       const std::shared_ptr<Context>& context,
-      const std::shared_ptr<SwapchainImageVK>& swapchain_image,
+      std::shared_ptr<SwapchainImageVK>& swapchain_image,
       SwapCallback swap_callback);
 
   // |Surface|
