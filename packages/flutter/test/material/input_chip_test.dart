@@ -385,4 +385,16 @@ void main() {
     final RenderBox materialBox = getMaterialBox(tester);
     expect(materialBox, paints..path(color: material3ChipDefaults.disabledColor));
   });
+
+  testWidgets('InputChip passes iconTheme property to RawChip', (WidgetTester tester) async {
+    const IconThemeData iconTheme = IconThemeData(color: Colors.red);
+    await tester.pumpWidget(wrapForChip(
+      child: const InputChip(
+      label: Text('input chip'),
+      selected: true,
+      iconTheme: iconTheme,
+    )));
+    final RawChip rawChip = tester.widget(find.byType(RawChip));
+    expect(rawChip.iconTheme, iconTheme);
+  });
 }

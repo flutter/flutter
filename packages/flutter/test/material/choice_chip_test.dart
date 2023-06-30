@@ -531,7 +531,7 @@ void main() {
     const IconThemeData iconTheme = IconThemeData(color: Colors.red);
     await tester.pumpWidget(wrapForChip(
       child: const ChoiceChip(
-      label: Text('Test'),
+      label: Text('choice chip'),
       selected: true,
       iconTheme: iconTheme,
     )));
