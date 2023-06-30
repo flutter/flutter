@@ -269,6 +269,11 @@ class FlutterConfiguration {
   /// to render, or `null` if the user hasn't specified anything.
   DomElement? get hostElement => _configuration?.hostElement;
 
+  /// Returns a `nonce` to allowlist the inline styles that Flutter web needs.
+  ///
+  /// See: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/nonce
+  String? get nonce => _configuration?.nonce;
+
   /// Returns the [requestedRendererType] to be used with the current Flutter
   /// application, normally 'canvaskit' or 'auto'.
   ///
@@ -319,6 +324,10 @@ extension JsFlutterConfigurationExtension on JsFlutterConfiguration {
   bool? get debugShowSemanticsNodes => _debugShowSemanticsNodes?.toDart;
 
   external DomElement? get hostElement;
+
+  @JS('nonce')
+  external JSString? get _nonce;
+  String? get nonce => _nonce?.toDart;
 
   @JS('renderer')
   external JSString? get _renderer;
