@@ -244,9 +244,9 @@ class FormState extends State<Form> {
         break;
     }
 
-    if (widget.canPop != null) {
+    if (widget.canPop != null || widget.onPopInvoked != null) {
       return PopScope(
-        canPop: widget.canPop!,
+        canPop: widget.canPop ?? true,
         onPopInvoked: widget.onPopInvoked,
         child: _FormScope(
           formState: this,
