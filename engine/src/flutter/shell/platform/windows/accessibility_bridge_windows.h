@@ -68,6 +68,9 @@ class AccessibilityBridgeWindows : public AccessibilityBridge,
   std::shared_ptr<FlutterPlatformNodeDelegate>
   CreateFlutterPlatformNodeDelegate() override;
 
+  // Retrieve the focused node for accessibility events.
+  virtual std::weak_ptr<FlutterPlatformNodeDelegate> GetFocusedNode();
+
  private:
   FlutterWindowsView* view_;
 
