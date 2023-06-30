@@ -332,6 +332,8 @@ class SnackBar extends StatefulWidget {
   /// If this property is null, then [SnackBarThemeData.insetPadding] of
   /// [ThemeData.snackBarTheme] is used. If that is also null, then the default is
   /// `EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0)`.
+  ///
+  /// If this property is not null and [hitTestBehavior] is null, then [hitTestBehavior] default is [HitTestBehavior.deferToChild].
   final EdgeInsetsGeometry? margin;
 
   /// The amount of padding to apply to the snack bar's content and optional
@@ -386,6 +388,8 @@ class SnackBar extends StatefulWidget {
   final ShapeBorder? shape;
 
   /// Defines how the snack bar area, including margin, will behave during hit testing.
+  ///
+  /// If this property is null and [margin] is not null, then [HitTestBehavior.deferToChild] is used by default.
   ///
   /// Please refer to [HitTestBehavior] for a detailed explanation of every behavior.
   final HitTestBehavior? hitTestBehavior;
