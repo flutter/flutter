@@ -40,7 +40,11 @@ void main() {
     rangePickerHeaderHelpStyle: TextStyle(fontSize: 15),
     rangeSelectionBackgroundColor: Color(0xffffff2f),
     rangeSelectionOverlayColor: MaterialStatePropertyAll<Color>(Color(0xffffff3f)),
-    dividerColor: Color(0xffffff3f),
+    dividerColor: Color(0xffffff4f),
+    inputDecorationTheme: InputDecorationTheme(
+      fillColor: Color(0xffffff5f),
+      border: UnderlineInputBorder(),
+    )
   );
 
   Material findDialogMaterial(WidgetTester tester) {
@@ -119,6 +123,7 @@ void main() {
     expect(theme.rangeSelectionBackgroundColor, null);
     expect(theme.rangeSelectionOverlayColor, null);
     expect(theme.dividerColor, null);
+    expect(theme.inputDecorationTheme, null);
   });
 
   testWidgets('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
@@ -129,7 +134,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
+        theme: ThemeData(useMaterial3: true),
         home: Builder(
           builder: (BuildContext context) {
             m3 = DatePickerTheme.defaults(context);
@@ -193,6 +198,7 @@ void main() {
     expect(m3.rangePickerHeaderHeadlineStyle, textTheme.titleLarge);
     expect(m3.rangePickerHeaderHelpStyle, textTheme.titleSmall);
     expect(m3.dividerColor, null);
+    expect(m3.inputDecorationTheme, null);
   });
 
   testWidgets('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
@@ -203,7 +209,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(useMaterial3: false),
+        theme: ThemeData(useMaterial3: false),
         home: Builder(
           builder: (BuildContext context) {
             m2 = DatePickerTheme.defaults(context);
@@ -258,6 +264,8 @@ void main() {
     expect(m2.rangePickerHeaderForegroundColor, colorScheme.onPrimary);
     expect(m2.rangePickerHeaderHeadlineStyle, textTheme.headlineSmall);
     expect(m2.rangePickerHeaderHelpStyle, textTheme.labelSmall);
+    expect(m2.dividerColor, null);
+    expect(m2.inputDecorationTheme, null);
   });
 
   testWidgets('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
@@ -282,7 +290,9 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description, <String>[
+    expect(
+      description,
+      equalsIgnoringHashCodes(<String>[
       'backgroundColor: Color(0xfffffff0)',
       'elevation: 6.0',
       'shadowColor: Color(0xfffffff1)',
@@ -315,15 +325,18 @@ void main() {
       'rangePickerHeaderHelpStyle: TextStyle(inherit: true, size: 15.0)',
       'rangeSelectionBackgroundColor: Color(0xffffff2f)',
       'rangeSelectionOverlayColor: MaterialStatePropertyAll(Color(0xffffff3f))',
-      'dividerColor: Color(0xffffff3f)',
-    ]);
+      'dividerColor: Color(0xffffff4f)',
+      'inputDecorationTheme: InputDecorationTheme#00000(fillColor: Color(0xffffff5f), border: UnderlineInputBorder())'
+      ]),
+    );
   });
 
-  testWidgets('DatePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
+  testWidgets('DatePickerDialog uses ThemeData datePicker theme (calendar mode)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(useMaterial3: true).copyWith(
+        theme: ThemeData(
           datePickerTheme: datePickerTheme,
+          useMaterial3: true,
         ),
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -398,11 +411,53 @@ void main() {
     expect(year2023Decoration.border?.bottom.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
   });
 
+  testWidgets('DatePickerDialog uses ThemeData datePicker theme (input mode)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          datePickerTheme: datePickerTheme,
+          useMaterial3: true,
+        ),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: DatePickerDialog(
+                initialEntryMode: DatePickerEntryMode.input,
+                initialDate: DateTime(2023, DateTime.january, 25),
+                firstDate: DateTime(2022),
+                lastDate: DateTime(2024, DateTime.december, 31),
+                currentDate: DateTime(2023, DateTime.january, 24),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = findDialogMaterial(tester);
+    expect(material.color, datePickerTheme.backgroundColor);
+    expect(material.elevation, datePickerTheme.elevation);
+    expect(material.shadowColor, datePickerTheme.shadowColor);
+    expect(material.surfaceTintColor, datePickerTheme.surfaceTintColor);
+    expect(material.shape, datePickerTheme.shape);
+
+    final Text selectDate = tester.widget<Text>(find.text('Select date'));
+    final Material headerMaterial = findHeaderMaterial(tester, 'Select date');
+    expect(selectDate.style?.color, datePickerTheme.headerForegroundColor);
+    expect(selectDate.style?.fontSize, datePickerTheme.headerHelpStyle?.fontSize);
+    expect(headerMaterial.color, datePickerTheme.headerBackgroundColor);
+
+    final InputDecoration inputDecoration = tester.widget<TextField>(find.byType(TextField)).decoration!;
+    expect(inputDecoration.fillColor, datePickerTheme.inputDecorationTheme?.fillColor);
+  });
+
   testWidgets('DateRangePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(useMaterial3: true).copyWith(
+        theme: ThemeData(
           datePickerTheme: datePickerTheme,
+          useMaterial3: true,
         ),
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -450,8 +505,9 @@ void main() {
       addTearDown(tester.view.reset);
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.light(useMaterial3: true).copyWith(
+          theme: ThemeData(
             datePickerTheme: datePickerTheme,
+            useMaterial3: true,
           ),
           home: Directionality(
             textDirection: TextDirection.ltr,
@@ -481,5 +537,61 @@ void main() {
     // Test horizontal divider.
     final Divider horizontalDivider = tester.widget(find.byType(Divider));
     expect(horizontalDivider.color, datePickerTheme.dividerColor);
+  });
+
+  testWidgets(
+    'DatePicker uses ThemeData.inputDecorationTheme properties '
+    'which are null in DatePickerThemeData.inputDecorationTheme',
+    (WidgetTester tester) async {
+
+      Widget buildWidget({
+        InputDecorationTheme? inputDecorationTheme,
+        DatePickerThemeData? datePickerTheme,
+       }) {
+        return MaterialApp(
+          theme: ThemeData(
+            useMaterial3: true,
+            inputDecorationTheme: inputDecorationTheme,
+            datePickerTheme: datePickerTheme,
+          ),
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: Center(
+                child: DatePickerDialog(
+                  initialEntryMode: DatePickerEntryMode.input,
+                  initialDate: DateTime(2023, DateTime.january, 25),
+                  firstDate: DateTime(2022),
+                  lastDate: DateTime(2024, DateTime.december, 31),
+                  currentDate: DateTime(2023, DateTime.january, 24),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Test DatePicker with DatePickerThemeData.inputDecorationTheme.
+      await tester.pumpWidget(buildWidget(
+        inputDecorationTheme: const InputDecorationTheme(filled: true),
+        datePickerTheme: datePickerTheme,
+      ));
+      InputDecoration inputDecoration = tester.widget<TextField>(find.byType(TextField)).decoration!;
+      expect(inputDecoration.fillColor, datePickerTheme.inputDecorationTheme!.fillColor);
+      expect(inputDecoration.border , datePickerTheme.inputDecorationTheme!.border);
+
+      // Test DatePicker with ThemeData.inputDecorationTheme.
+      await tester.pumpWidget(buildWidget(
+        inputDecorationTheme: const InputDecorationTheme(
+          filled: true,
+          fillColor: Color(0xFF00FF00),
+          border: OutlineInputBorder(),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      inputDecoration = tester.widget<TextField>(find.byType(TextField)).decoration!;
+      expect(inputDecoration.fillColor, const Color(0xFF00FF00));
+      expect(inputDecoration.border , const OutlineInputBorder());
   });
 }
