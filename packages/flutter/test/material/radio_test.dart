@@ -1579,7 +1579,6 @@ void main() {
 
   testWidgets('Material3 - Radio button default colors', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
-    final bool material3 = theme.useMaterial3;
     Widget buildRadio({bool enabled = true, bool selected = true}) {
       return MaterialApp(
           theme: theme,
