@@ -1248,6 +1248,7 @@ void main() {
       final UniqueKey outerText = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
