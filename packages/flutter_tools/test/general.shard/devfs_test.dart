@@ -747,6 +747,9 @@ class FakeBundle extends AssetBundle {
   bool wasBuiltOnce() {
     return false;
   }
+
+  @override
+  Map<String, List<AssetTransformer>> get transformers => <String, List<AssetTransformer>>{};
 }
 
 class AnsweringFakeProcessManager implements ProcessManager {

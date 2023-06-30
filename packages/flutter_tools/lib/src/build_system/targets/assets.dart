@@ -4,12 +4,16 @@
 
 import 'package:pool/pool.dart';
 
+import '../../artifacts.dart';
 import '../../asset.dart';
+import '../../base/common.dart';
 import '../../base/file_system.dart';
+import '../../base/io.dart';
 import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
+import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
@@ -123,7 +127,22 @@ Future<Depfile> copyAssets(
           bool doCopy = true;
           switch (assetKind) {
             case AssetKind.regular:
-              break;
+              final List<AssetTransformer>? transformers = assetBundle.transformers[entry.key];
+              if (transformers != null) {
+                doCopy = false;
+                // todo avoid initial copy
+                await (content.file as File).copy(file.path);
+                for (final AssetTransformer transformer in transformers) {
+                  await _transformAsset(
+                    file.path,
+                    file.path,
+                    transformer.package,
+                    transformer.args ?? '', // todo
+                    fileSystem: environment.fileSystem,
+                    logger: environment.logger,
+                  );
+                }
+              }
             case AssetKind.font:
               doCopy = !await iconTreeShaker.subsetFont(
                 input: content.file as File,
@@ -328,5 +347,37 @@ class CopyAssets extends Target {
       depfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
+  }
+}
+
+Future<void> _transformAsset(
+  String asset,
+  String output,
+  String transformer,
+  String transformerArgs, {
+  required FileSystem fileSystem,
+  required Logger logger,
+}) async {
+  final String dartBinary = globals.artifacts!.getArtifactPath(Artifact.engineDartBinary);
+  final List<String> transformerArguments = <String>[
+    ...transformerArgs.split(r'\w+'),
+    '--input=$asset',
+    '--output=$output',
+  ];
+  final ProcessResult result = await Process.run(
+    dartBinary,
+    <String>[
+      'run',
+      transformer,
+      ...transformerArguments,
+    ],
+  );
+  if (result.exitCode != 0) {
+    logger.printError(utf8.decode(result.stdout as List<int>));
+    throwToolExit('uh oh');
+  }
+  if (!await fileSystem.file(output).exists()) {
+    // TODO improve message
+    throwToolExit('Transformer $transformer did not produce an output.');
   }
 }

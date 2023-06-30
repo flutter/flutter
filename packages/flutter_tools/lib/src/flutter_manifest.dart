@@ -325,7 +325,6 @@ class FlutterManifest {
         _logger.printError('Asset manifest entry parsing failed.');
       } else {
         results.add(entry);
-        print('@andrewkolos ${entry.transformers?[0].package}');
       }
     }
     return results;
@@ -709,7 +708,7 @@ void _validateFonts(YamlList fonts, List<String> errors) {
 class AssetsEntry {
   const AssetsEntry({
     required this.assetUris,
-    required this.transformers,
+    this.transformers,
   });
 
   final List<Uri> assetUris;
@@ -850,13 +849,13 @@ class AssetsTransformerEntry {
       return null;
     }
     final Object? args = yamlObject['args'];
-    if (args is! String) {
+    if (args != null && args is! String) {
       logger.printError('transformers entry is malformed. '
         'Expected "args" entry to be a String '
         ' Got ${args.runtimeType} instead.');
       return null;
     }
 
-    return AssetsTransformerEntry(package: package, args: args);
+    return AssetsTransformerEntry(package: package, args: args as String?);
   }
 }
