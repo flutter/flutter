@@ -66,7 +66,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.onSelected,
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
-    this.optionsViewOpenDirection = AutocompleteOptionsViewOpenDirection.down,
+    this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.initialValue,
   });
 
@@ -91,8 +91,8 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// default.
   final AutocompleteOptionsViewBuilder<T>? optionsViewBuilder;
 
-  /// {@macro flutter.widgets.RawAutocomplete.fieldViewBuilder}
-  final AutocompleteOptionsViewOpenDirection optionsViewOpenDirection;
+  /// {@macro flutter.widgets.RawAutocomplete.optionsViewOpenDirection}
+  final OptionsViewOpenDirection optionsViewOpenDirection;
 
   /// The maximum height used for the default Material options list widget.
   ///

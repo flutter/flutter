@@ -515,9 +515,9 @@ void main() {
           home: Scaffold(
             body: Autocomplete<String>(
               optionsBuilder: (_) => <String>['a']))));
-      final AutocompleteOptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+      final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
         .optionsViewOpenDirection;
-      expect(actual, equals(AutocompleteOptionsViewOpenDirection.down));
+      expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
     testWidgets('down', (WidgetTester tester) async {
@@ -525,11 +525,11 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Autocomplete<String>(
-              optionsViewOpenDirection: AutocompleteOptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+              optionsViewOpenDirection: OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
               optionsBuilder: (_) => <String>['a']))));
-      final AutocompleteOptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+      final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
         .optionsViewOpenDirection;
-      expect(actual, equals(AutocompleteOptionsViewOpenDirection.down));
+      expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
     testWidgets('up', (WidgetTester tester) async {
@@ -537,11 +537,11 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Autocomplete<String>(
-              optionsViewOpenDirection: AutocompleteOptionsViewOpenDirection.up,
+              optionsViewOpenDirection: OptionsViewOpenDirection.up,
               optionsBuilder: (_) => <String>['a']))));
-      final AutocompleteOptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+      final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
         .optionsViewOpenDirection;
-      expect(actual, equals(AutocompleteOptionsViewOpenDirection.up));
+      expect(actual, equals(OptionsViewOpenDirection.up));
     });
   });
 }

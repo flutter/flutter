@@ -86,7 +86,7 @@ typedef AutocompleteOptionToString<T extends Object> = String Function(T option)
 ///    selectable-options widget.
 ///  * [RawAutocomplete.fieldViewBuilder] to optionally specify how to build the
 ///    corresponding field widget.
-enum AutocompleteOptionsViewOpenDirection {
+enum OptionsViewOpenDirection {
   /// Open upward.
   ///
   /// The bottom edge of the options view will align with the top edge
@@ -151,7 +151,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     super.key,
     required this.optionsViewBuilder,
     required this.optionsBuilder,
-    this.optionsViewOpenDirection = AutocompleteOptionsViewOpenDirection.down,
+    this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.displayStringForOption = defaultStringForOption,
     this.fieldViewBuilder,
     this.focusNode,
@@ -228,9 +228,9 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// {@template flutter.widgets.RawAutocomplete.optionsViewOpenDirection}
   /// The direction in which to open the options-view overlay.
   ///
-  /// Defaults to [AutocompleteOptionsViewOpenDirection.down].
+  /// Defaults to [OptionsViewOpenDirection.down].
   /// {@endtemplate}
-  final AutocompleteOptionsViewOpenDirection optionsViewOpenDirection;
+  final OptionsViewOpenDirection optionsViewOpenDirection;
 
   /// {@template flutter.widgets.RawAutocomplete.displayStringForOption}
   /// Returns the string to display in the field when the option is selected.
@@ -457,12 +457,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             link: _optionsLayerLink,
             showWhenUnlinked: false,
             targetAnchor: switch (widget.optionsViewOpenDirection) {
-              AutocompleteOptionsViewOpenDirection.up => Alignment.topLeft,
-              AutocompleteOptionsViewOpenDirection.down => Alignment.bottomLeft,
+              OptionsViewOpenDirection.up => Alignment.topLeft,
+              OptionsViewOpenDirection.down => Alignment.bottomLeft,
             },
             followerAnchor: switch (widget.optionsViewOpenDirection) {
-              AutocompleteOptionsViewOpenDirection.up => Alignment.bottomLeft,
-              AutocompleteOptionsViewOpenDirection.down => Alignment.topLeft,
+              OptionsViewOpenDirection.up => Alignment.bottomLeft,
+              OptionsViewOpenDirection.down => Alignment.topLeft,
             },
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
