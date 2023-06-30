@@ -86,7 +86,7 @@
 /dev/devicelab/bin/tasks/raster_cache_use_memory_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/routing_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/shader_mask_cache_perf__e2e_summary.dart @flar @flutter/engine
-/dev/devicelab/bin/tasks/spell_check_test.dart @camsim99 @flutter/android
+/dev/devicelab/bin/tasks/spell_check_test_ios.dart @camsim99 @flutter/android
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/wide_gamut_ios.dart @gaaclarke @flutter/engine
