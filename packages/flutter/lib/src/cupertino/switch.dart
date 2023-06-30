@@ -142,8 +142,7 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use for the accessibility label when the switch is off.
   ///
-  /// Defaults to [Color(0xFFB3B3B3)] (or [CupertinoColors.white] in high
-  /// contrast) when null.
+  /// Defaults to [CupertinoColors.offSwitchLabel] when null.
   final Color? offLabelColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -378,10 +377,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
                   context,
                 ),
                 CupertinoDynamicColor.resolve(
-                  widget.offLabelColor ??
-                      (MediaQuery.highContrastOf(context)
-                          ? CupertinoColors.white
-                          : const Color(0xFFB3B3B3)),
+                  widget.offLabelColor ?? CupertinoColors.offSwitchLabel,
                   context,
                 ),
               )

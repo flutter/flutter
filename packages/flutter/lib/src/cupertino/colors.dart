@@ -630,6 +630,15 @@ abstract final class CupertinoColors {
     highContrastElevatedColor: Color.fromARGB(255, 0, 122, 255),
     darkHighContrastElevatedColor: Color.fromARGB(255, 9, 132, 255),
   );
+
+  /// The color for the off label in [CupertinoSwitch].
+  static const CupertinoDynamicColor offSwitchLabel = CupertinoDynamicColor.withBrightnessAndContrast(
+    debugLabel: 'offSwitchLabel',
+    color: Color.fromARGB(255, 179, 179, 179),
+    darkColor: Color.fromARGB(255, 179, 179, 179),
+    highContrastColor: Color.fromARGB(255, 255, 255, 255),
+    darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
+  );
 }
 
 /// A [Color] subclass that represents a family of colors, and the correct effective
