@@ -484,10 +484,13 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       ));
     }
 
-    // Remove duplicate validator based on its title
-    final Set<String> validatorTitles = <String>{};
+    // Remove JetBrains Toolbox results
     validators.removeWhere((DoctorValidator validator) {
-      return !validatorTitles.add(validator.title);
+      final String identifierKey = plistParser.getValueFromFile(
+        (validator as IntelliJValidatorOnMac).plistFile,
+        PlistParser.kCFBundleIdentifierKey,
+      ) as String;
+      return identifierKey.contains('com.jetbrains.toolbox.linkapp');
     });
 
     return validators;

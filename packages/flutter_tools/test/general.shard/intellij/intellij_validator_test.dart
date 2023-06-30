@@ -305,6 +305,7 @@ void main() {
       processManager: processManager,
       plistParser: FakePlistParser(<String, String>{
         PlistParser.kCFBundleShortVersionStringKey: '2020.10',
+        PlistParser.kCFBundleIdentifierKey: 'com.jetbrains.intellij',
       }),
     ).whereType<IntelliJValidatorOnMac>();
     expect(validators.length, 2);
@@ -372,46 +373,29 @@ void main() {
     expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
   });
 
-  testWithoutContext('Remove duplicate validator', () async {
+  testWithoutContext('Remove JetBrains Toolbox', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final List<String> installPaths = <String>[
-      '/foo/bar/Applications/JetBrains Toolbox/IntelliJ IDEA Ultimate.app',
-      '/foo/bar/Applications/JetBrains Toolbox/IntelliJ IDEA Community Edition.app'
+      fileSystem.path.join('/', 'foo', 'bar', 'Applications',
+          'JetBrains Toolbox', 'IntelliJ IDEA Ultimate.app'),
+      fileSystem.path.join('/', 'foo', 'bar', 'Applications',
+          'JetBrains Toolbox', 'IntelliJ IDEA Community Edition.app')
     ];
 
     for (final String installPath in installPaths) {
-      fileSystem
-          .directory(installPath)
-          .createSync(recursive: true);
+      fileSystem.directory(installPath).createSync(recursive: true);
     }
-
-    final String ceRandomLocation = fileSystem.path.join(
-      '/',
-      'random',
-      'IntelliJ CE (stable).app',
-    );
-    final String ultimateRandomLocation = fileSystem.path.join(
-      '/',
-      'random',
-      'IntelliJ UE (stable).app',
-    );
 
     final FakeProcessManager processManager =
     FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: const <String>[
-          'mdfind',
-          'kMDItemCFBundleIdentifier="com.jetbrains.intellij.ce"',
-        ],
-        stdout: ceRandomLocation,
-      ),
-      FakeCommand(
-        command: const <String>[
-          'mdfind',
-          'kMDItemCFBundleIdentifier="com.jetbrains.intellij*"',
-        ],
-        stdout: '$ultimateRandomLocation\n$ceRandomLocation',
-      ),
+      const FakeCommand(command: <String>[
+        'mdfind',
+        'kMDItemCFBundleIdentifier="com.jetbrains.intellij.ce"',
+      ], stdout: 'skip'),
+      const FakeCommand(command: <String>[
+        'mdfind',
+        'kMDItemCFBundleIdentifier="com.jetbrains.intellij*"',
+      ], stdout: 'skip')
     ]);
 
     final Iterable<DoctorValidator> installed =
@@ -422,11 +406,12 @@ void main() {
       userMessages: UserMessages(),
       plistParser: FakePlistParser(<String, String>{
         'JetBrainsToolboxApp': '/path/to/JetBrainsToolboxApp',
+        'CFBundleIdentifier': 'com.jetbrains.toolbox.linkapp',
       }),
       processManager: processManager,
     );
 
-    expect(installed.length, 2);
+    expect(installed.length, 0);
   });
 }
 
