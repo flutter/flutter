@@ -45,10 +45,8 @@ void AccessibilityBridgeWindows::OnAccessibilityEvent(
       // only for the focused node whose selection has changed. If a valid
       // caret and selection exist in the app tree, they must both be within
       // the focus node.
-      ui::AXNode::AXID focus_id = GetAXTreeData().sel_focus_object_id;
-      auto focus_delegate =
-          GetFlutterPlatformNodeDelegateFromID(focus_id).lock();
-      if (!focus_delegate) {
+      auto focus_delegate = GetFocusedNode().lock();
+      if (focus_delegate) {
         win_delegate =
             std::static_pointer_cast<FlutterPlatformNodeDelegateWindows>(
                 focus_delegate);
@@ -202,6 +200,12 @@ AccessibilityBridgeWindows::GetParentOfAXFragmentRoot() {
 
 bool AccessibilityBridgeWindows::IsAXFragmentRootAControlElement() {
   return true;
+}
+
+std::weak_ptr<FlutterPlatformNodeDelegate>
+AccessibilityBridgeWindows::GetFocusedNode() {
+  ui::AXNode::AXID focus_id = GetAXTreeData().sel_focus_object_id;
+  return GetFlutterPlatformNodeDelegateFromID(focus_id);
 }
 
 }  // namespace flutter
