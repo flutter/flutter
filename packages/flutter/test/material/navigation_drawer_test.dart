@@ -115,7 +115,7 @@ void main() {
   });
 
   testWidgets(
-      'M3 NavigationDrawer uses proper defaults when no parameters are given',
+    'NavigationDrawer uses proper defaults when no parameters are given',
       (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: true);
@@ -125,13 +125,13 @@ void main() {
         NavigationDrawer(
           children: <Widget>[
             Text('Headline', style: theme.textTheme.bodyLarge),
-            NavigationDrawerDestination(
-              icon: Icon(Icons.ac_unit, color: theme.iconTheme.color),
-              label: Text('AC', style: theme.textTheme.bodySmall),
+            const NavigationDrawerDestination(
+              icon: Icon(Icons.ac_unit),
+              label: Text('AC'),
             ),
-            NavigationDrawerDestination(
-              icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-              label: Text('Alarm', style: theme.textTheme.bodySmall),
+            const NavigationDrawerDestination(
+              icon: Icon(Icons.access_alarm),
+              label: Text('Alarm'),
             ),
           ],
           onDestinationSelected: (int i) {},
@@ -142,11 +142,25 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pump(const Duration(seconds: 1));
 
+    // Test drawer Material.
     expect(_getMaterial(tester).color, theme.colorScheme.surface);
     expect(_getMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(_getMaterial(tester).shadowColor, Colors.transparent);
     expect(_getMaterial(tester).elevation, 1);
+    // Test indicator decoration.
     expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
     expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+    // Test selected and unselected icon colors.
+    expect(_iconStyle(tester, Icons.ac_unit)?.color, theme.colorScheme.onSecondaryContainer);
+    expect(_iconStyle(tester, Icons.access_alarm)?.color, theme.colorScheme.onSurfaceVariant);
+    // Test selected and unselected label colors.
+    expect(_labelStyle(tester, 'AC')?.color, theme.colorScheme.onSecondaryContainer);
+    expect(_labelStyle(tester, 'Alarm')?.color, theme.colorScheme.onSurfaceVariant);
+    // Test that the icon and label are the correct size.
+    RenderBox iconBox = tester.renderObject(find.byIcon(Icons.ac_unit));
+    expect(iconBox.size, const Size(24.0, 24.0));
+    iconBox = tester.renderObject(find.byIcon(Icons.access_alarm));
+    expect(iconBox.size, const Size(24.0, 24.0));
   });
 
   testWidgets('Navigation drawer is scrollable', (WidgetTester tester) async {
@@ -416,6 +430,20 @@ ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
         ),
       )
       .decoration as ShapeDecoration?;
+}
+
+TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
+}
+
+TextStyle? _labelStyle(WidgetTester tester, String label) {
+  final RichText labelRichText = tester.widget<RichText>(
+    find.descendant(of: find.text(label), matching: find.byType(RichText)),
+  );
+  return labelRichText.text.style;
 }
 
 void widgetSetup(WidgetTester tester, double viewWidth, {double viewHeight = 1000}) {
