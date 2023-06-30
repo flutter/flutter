@@ -301,26 +301,15 @@ class _RawViewElement extends RenderTreeRootElement {
 
   @override
   void mount(Element? parent, Object? newSlot) {
-    super.mount(parent, newSlot); // calls attachRenderObject(), updates slot member.
+    super.mount(parent, newSlot);
+    assert(_effectivePipelineOwner.rootNode == null);
+    _effectivePipelineOwner.rootNode = renderObject;
+    _attachToViewHooks();
     _updateChild();
     renderObject.prepareInitialFrame();
     if (_effectivePipelineOwner.semanticsOwner != null) {
       renderObject.scheduleInitialSemantics();
     }
-  }
-
-  @override
-  void attachRenderObject(Object? newSlot) {
-    super.attachRenderObject(newSlot); // updates slot member
-    assert(_effectivePipelineOwner.rootNode == null || _effectivePipelineOwner.rootNode == renderObject);
-    _effectivePipelineOwner.rootNode = renderObject;
-    _attachToViewHooks();
-  }
-
-  @override
-  void detachRenderObject() {
-    _detachFromViewHooks();
-    super.detachRenderObject(); // updates slot member
   }
 
   ViewHooks? _attachmentPoint;
@@ -366,10 +355,12 @@ class _RawViewElement extends RenderTreeRootElement {
     super.activate();
     assert(_effectivePipelineOwner.rootNode == null);
     _effectivePipelineOwner.rootNode = renderObject;
+    _attachToViewHooks();
   }
 
   @override
   void deactivate() {
+    _detachFromViewHooks();
     assert(_effectivePipelineOwner.rootNode == renderObject);
     _effectivePipelineOwner.rootNode = null;
     super.deactivate();

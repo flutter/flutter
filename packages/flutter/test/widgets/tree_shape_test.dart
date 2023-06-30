@@ -722,6 +722,180 @@ void main() {
     );
   });
 
+  testWidgets('Can move stuff out of a view that is moving itself, stuff ends up before view', (WidgetTester tester) async {
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+    final Key key3 = UniqueKey();
+    final Key key4 = UniqueKey();
+
+    final GlobalKey viewKey = GlobalKey();
+    final GlobalKey childKey = GlobalKey();
+
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        SizedBox(key: key1),
+        ViewAnchor(
+          key: key2,
+          view: View(
+            key: viewKey,
+            view: FakeView(tester.view),
+            child: SizedBox(
+              child: ColoredBox(
+                key: childKey,
+                color: Colors.green,
+              ),
+            ),
+          ),
+          child: const SizedBox(),
+        ),
+        ViewAnchor(
+          key: key3,
+          child: const SizedBox(),
+        ),
+        SizedBox(key: key4),
+      ],
+    ));
+
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        SizedBox(
+          key: key1,
+          child: ColoredBox(
+            key: childKey,
+            color: Colors.green,
+          ),
+        ),
+        ViewAnchor(
+          key: key2,
+          child: const SizedBox(),
+        ),
+        ViewAnchor(
+          key: key3,
+          view: View(
+            key: viewKey,
+            view: FakeView(tester.view),
+            child: const SizedBox(),
+          ),
+          child: const SizedBox(),
+        ),
+        SizedBox(key: key4),
+      ],
+    ));
+
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        SizedBox(key: key1),
+        ViewAnchor(
+          key: key2,
+          view: View(
+            key: viewKey,
+            view: FakeView(tester.view),
+            child: SizedBox(
+              child: ColoredBox(
+                key: childKey,
+                color: Colors.green,
+              ),
+            ),
+          ),
+          child: const SizedBox(),
+        ),
+        ViewAnchor(
+          key: key3,
+          child: const SizedBox(),
+        ),
+        SizedBox(key: key4),
+      ],
+    ));
+  });
+
+  testWidgets('Can move stuff out of a view that is moving itself, stuff ends up after view', (WidgetTester tester) async {
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+    final Key key3 = UniqueKey();
+    final Key key4 = UniqueKey();
+
+    final GlobalKey viewKey = GlobalKey();
+    final GlobalKey childKey = GlobalKey();
+
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        SizedBox(key: key1),
+        ViewAnchor(
+          key: key2,
+          view: View(
+            key: viewKey,
+            view: FakeView(tester.view),
+            child: SizedBox(
+              child: ColoredBox(
+                key: childKey,
+                color: Colors.green,
+              ),
+            ),
+          ),
+          child: const SizedBox(),
+        ),
+        ViewAnchor(
+          key: key3,
+          child: const SizedBox(),
+        ),
+        SizedBox(key: key4),
+      ],
+    ));
+
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        SizedBox(
+          key: key1,
+        ),
+        ViewAnchor(
+          key: key2,
+          child: const SizedBox(),
+        ),
+        ViewAnchor(
+          key: key3,
+          view: View(
+            key: viewKey,
+            view: FakeView(tester.view),
+            child: const SizedBox(),
+          ),
+          child: const SizedBox(),
+        ),
+        SizedBox(
+          key: key4,
+          child: ColoredBox(
+            key: childKey,
+            color: Colors.green,
+          ),
+        ),
+      ],
+    ));
+
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        SizedBox(key: key1),
+        ViewAnchor(
+          key: key2,
+          view: View(
+            key: viewKey,
+            view: FakeView(tester.view),
+            child: SizedBox(
+              child: ColoredBox(
+                key: childKey,
+                color: Colors.green,
+              ),
+            ),
+          ),
+          child: const SizedBox(),
+        ),
+        ViewAnchor(
+          key: key3,
+          child: const SizedBox(),
+        ),
+        SizedBox(key: key4),
+      ],
+    ));
+  });
+
   testWidgets('Can globalkey move down the tree from a view that is going away', (WidgetTester tester) async {
     final FlutterView anchorView = FakeView(tester.view);
     final Widget globalKeyChild = SizedBox(
@@ -868,6 +1042,68 @@ void main() {
     expect(findsColoredBox(Colors.green), findsNothing);
     expect(findsColoredBox(Colors.red), findsOneWidget);
     expect(box.debugDisposed, isTrue);
+  });
+
+  testWidgets('RawView can be wrapped and unwrapped', (WidgetTester tester) async {
+    final Widget rawView = RawView(
+      view: tester.view,
+      builder: (BuildContext context, PipelineOwner owner) {
+        return const SizedBox();
+      },
+    );
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: rawView,
+    );
+
+    final RenderObject renderView = tester.renderObject(find.byType(RawView));
+    final RenderObject renderSizedBox = tester.renderObject(find.byType(SizedBox));
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[rawView],
+      ),
+    );
+
+    expect(tester.renderObject(find.byType(RawView)), same(renderView));
+    expect(tester.renderObject(find.byType(SizedBox)), same(renderSizedBox));
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: rawView,
+    );
+
+    expect(tester.renderObject(find.byType(RawView)), same(renderView));
+    expect(tester.renderObject(find.byType(SizedBox)), same(renderSizedBox));
+  });
+
+  testWidgets('ViewAnchor with RawView can be wrapped and unwrapped', (WidgetTester tester) async {
+    final Widget viewAnchor = ViewAnchor(
+      view: RawView(
+        view: FakeView(tester.view),
+        builder: (BuildContext context, PipelineOwner owner) {
+          return const SizedBox();
+        },
+      ),
+      child: const ColoredBox(color: Colors.green),
+    );
+
+    await tester.pumpWidget(viewAnchor);
+
+    final List<RenderObject> renderViews = tester.renderObjectList(find.byType(RawView)).toList();
+    final RenderObject renderSizedBox = tester.renderObject(find.byType(SizedBox));
+
+    await tester.pumpWidget(ColoredBox(color: Colors.yellow, child: viewAnchor));
+
+    expect(tester.renderObjectList(find.byType(RawView)), renderViews);
+    expect(tester.renderObject(find.byType(SizedBox)), same(renderSizedBox));
+
+    await tester.pumpWidget(viewAnchor);
+
+    expect(tester.renderObjectList(find.byType(RawView)), renderViews);
+    expect(tester.renderObject(find.byType(SizedBox)), same(renderSizedBox));
   });
 }
 

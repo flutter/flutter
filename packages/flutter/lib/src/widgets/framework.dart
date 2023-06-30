@@ -4196,8 +4196,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           try {
             newChild._activateWithParent(this, newSlot);
           } catch (_) {
-            // Attempt to do some clean-up if activation fails.
-            deactivateChild(newChild);
+            // Attempt to do some clean-up if activation fails to leave tree in a reasonable state.
+            try {
+              deactivateChild(newChild);
+            } catch (_) {
+              // Clean-up failed. Only surface original exception.
+            }
             rethrow;
           }
           final Element? updatedChild = updateChild(newChild, newWidget, newSlot);
