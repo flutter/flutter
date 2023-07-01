@@ -526,6 +526,9 @@ class Overlay extends StatefulWidget {
 class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   final List<OverlayEntry> _entries = <OverlayEntry>[];
 
+  /// all OverlayEntry
+  List<OverlayEntry> get entries => _entries;
+
   @override
   void initState() {
     super.initState();
@@ -649,6 +652,13 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       old.removeAll(newEntriesList);
       _entries.insertAll(_insertionIndex(below, above), old);
     });
+  }
+
+  /// remove all OverlayEntry
+  void clear(){
+    for (final OverlayEntry e in entries) {
+      e.remove();
+    }
   }
 
   void _markDirty() {
