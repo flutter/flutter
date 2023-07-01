@@ -37,13 +37,13 @@
 namespace impeller {
 
 namespace {
-std::optional<Color> AsBackgroundColor(const EntityPass::Element& element,
-                                       ISize target_size) {
+std::tuple<std::optional<Color>, BlendMode> ElementAsBackgroundColor(
+    const EntityPass::Element& element,
+    ISize target_size) {
   if (const Entity* entity = std::get_if<Entity>(&element)) {
-    std::optional<Color> entity_color =
-        entity->GetContents()->AsBackgroundColor(*entity, target_size);
+    std::optional<Color> entity_color = entity->AsBackgroundColor(target_size);
     if (entity_color.has_value()) {
-      return entity_color.value();
+      return {entity_color.value(), entity->GetBlendMode()};
     }
   }
   return {};
@@ -251,7 +251,7 @@ bool EntityPass::Render(ContentContext& renderer,
   if (!supports_onscreen_backdrop_reads && reads_from_onscreen_backdrop) {
     auto offscreen_target = CreateRenderTarget(
         renderer, root_render_target.GetRenderTargetSize(), true,
-        GetClearColor(render_target.GetRenderTargetSize()).Premultiply());
+        GetClearColor(render_target.GetRenderTargetSize()));
 
     if (!OnRender(renderer,  // renderer
                   offscreen_target.GetRenderTarget()
@@ -356,8 +356,7 @@ bool EntityPass::Render(ContentContext& renderer,
   }
 
   // Set up the clear color of the root pass.
-  color0.clear_color =
-      GetClearColor(render_target.GetRenderTargetSize()).Premultiply();
+  color0.clear_color = GetClearColor(render_target.GetRenderTargetSize());
   root_render_target.SetColorAttachment(color0, 0);
 
   EntityPassTarget pass_target(
@@ -723,13 +722,12 @@ bool EntityPass::OnRender(
   for (const auto& element : elements_) {
     // Skip elements that are incorporated into the clear color.
     if (is_collapsing_clear_colors) {
-      std::optional<Color> entity_color =
-          AsBackgroundColor(element, root_pass_size);
+      auto [entity_color, _] =
+          ElementAsBackgroundColor(element, root_pass_size);
       if (entity_color.has_value()) {
         continue;
-      } else {
-        is_collapsing_clear_colors = false;
       }
+      is_collapsing_clear_colors = false;
     }
 
     EntityResult result =
@@ -922,14 +920,14 @@ void EntityPass::SetBlendMode(BlendMode blend_mode) {
 Color EntityPass::GetClearColor(ISize target_size) const {
   Color result = Color::BlackTransparent();
   for (const Element& element : elements_) {
-    std::optional<Color> entity_color = AsBackgroundColor(element, target_size);
-    if (entity_color.has_value()) {
-      result = entity_color.value();
-    } else {
+    auto [entity_color, blend_mode] =
+        ElementAsBackgroundColor(element, target_size);
+    if (!entity_color.has_value()) {
       break;
     }
+    result = result.Blend(entity_color.value(), blend_mode);
   }
-  return result;
+  return result.Premultiply();
 }
 
 void EntityPass::SetBackdropFilter(BackdropFilterProc proc) {

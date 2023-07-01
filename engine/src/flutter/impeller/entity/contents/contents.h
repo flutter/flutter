@@ -117,10 +117,14 @@ class Contents {
   ///        Use of this method is invalid if CanAcceptOpacity returns false.
   virtual void SetInheritedOpacity(Scalar opacity);
 
+  /// @brief Returns a color if this Contents will flood the given `target_size`
+  ///        with a color. This output color is the "Source" color that will be
+  ///        used for the Entity's blend operation.
+  ///
+  ///        This is useful for absorbing full screen solid color draws into
+  ///        subpass clear colors.
   virtual std::optional<Color> AsBackgroundColor(const Entity& entity,
-                                                 ISize target_size) const {
-    return {};
-  }
+                                                 ISize target_size) const;
 
  private:
   std::optional<Rect> coverage_hint_;
