@@ -138,4 +138,8 @@ std::unique_ptr<Geometry> Geometry::MakeRect(Rect rect) {
   return std::make_unique<RectGeometry>(rect);
 }
 
+bool Geometry::CoversArea(const Matrix& transform, const Rect& rect) const {
+  return false;
+}
+
 }  // namespace impeller

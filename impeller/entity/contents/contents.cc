@@ -118,6 +118,11 @@ void Contents::SetInheritedOpacity(Scalar opacity) {
                     "Contents::CanAcceptOpacity returns false.";
 }
 
+std::optional<Color> Contents::AsBackgroundColor(const Entity& entity,
+                                                 ISize target_size) const {
+  return {};
+}
+
 bool Contents::ShouldRender(const Entity& entity,
                             const std::optional<Rect>& stencil_coverage) const {
   if (!stencil_coverage.has_value()) {
