@@ -100,10 +100,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   // under debug mode.
   static bool _firstRun = false;
 
-  /// Artificially changes the surface size to `size` on the Widget binding,
-  /// then flushes microtasks.
-  ///
-  /// Set to null to use the default surface size.
   @override
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
@@ -118,14 +114,10 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
 
   @override
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
-    // TODO(goderbauer): Remove "surfaceSize" handling, when soon-to-be deprecated setSurfaceSize is removed.
-    //  See also: https://github.com/flutter/flutter/issues/123881, https://github.com/flutter/flutter/issues/124071
-    final Size? surfaceSize = renderView == this.renderView ? _surfaceSize : null; // ignore: deprecated_member_use
     final FlutterView view = renderView.flutterView;
-    final double devicePixelRatio = view.devicePixelRatio;
-    final Size size = surfaceSize ?? view.physicalSize / devicePixelRatio;
+    final Size? surfaceSize = view == platformDispatcher.implicitView ? _surfaceSize : null;
     return TestViewConfiguration.fromView(
-      size: size,
+      size: surfaceSize ?? view.physicalSize / view.devicePixelRatio,
       view: view,
     );
   }

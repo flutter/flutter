@@ -495,9 +495,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   Size? _surfaceSize;
 
-  // ignore: deprecated_member_use
-  /// Artificially changes the logical size of [renderView] to the specified
-  /// size, then flushes microtasks.
+  /// Artificially changes the logical size of [WidgetTester.view] to the
+  /// specified size, then flushes microtasks.
   ///
   /// Set to null to use the default surface size.
   ///
@@ -509,12 +508,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///   addTearDown(() => binding.setSurfaceSize(null));
   /// ```
   ///
-  // ignore: deprecated_member_use
-  /// This method only affects the [renderView]. It does not affect any of the
-  /// other [renderViews] managed by this binding.
-  ///
-  /// Instead of this method, consider setting [TestFlutterView.physicalSize],
-  /// which works for any view.
+  /// This method only affects the size of the [WidgetTester.view]. It does not
+  /// affect the size of any other views. Instead of this method, consider
+  /// setting [TestFlutterView.physicalSize], which works for any view,
+  /// including [WidgetTester.view].
   // TODO(pdblasi-google): Deprecate this. https://github.com/flutter/flutter/issues/123881
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
@@ -528,16 +525,34 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   @override
+  void addRenderView(RenderView view) {
+    _insideAddRenderView = true;
+    try {
+      super.addRenderView(view);
+    } finally {
+      _insideAddRenderView = false;
+    }
+  }
+
+  bool _insideAddRenderView = false;
+
+  @override
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
-    // TODO(goderbauer): Remove this override, when soon-to-be deprecated setSurfaceSize is removed.
-    //  See also: https://github.com/flutter/flutter/issues/123881, https://github.com/flutter/flutter/issues/124071
-    if (renderView == this.renderView) { // ignore: deprecated_member_use
-      final FlutterView view = renderView.flutterView;
-      final double devicePixelRatio = view.devicePixelRatio;
-      final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
+    if (_insideAddRenderView
+        && renderView.hasConfiguration
+        && renderView.configuration is TestViewConfiguration
+        && renderView == this.renderView) { // ignore: deprecated_member_use
+      // If a test has reached out to the now deprecated renderView property to set a custom TestViewConfiguration
+      // we are not replacing it. This is to maintain backwards compatibility with how things worked prior to the
+      // deprecation of that property.
+      // TODO(goderbauer): Remove this "if" when the deprecated renderView property is removed.
+      return renderView.configuration;
+    }
+    final FlutterView view = renderView.flutterView;
+    if (_surfaceSize != null && view == platformDispatcher.implicitView) {
       return ViewConfiguration(
-        size: size,
-        devicePixelRatio: devicePixelRatio,
+        size: _surfaceSize!,
+        devicePixelRatio: view.devicePixelRatio,
       );
     }
     return super.createViewConfigurationFor(renderView);
@@ -2018,14 +2033,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
-    // TODO(goderbauer): This implementation is broken, see https://github.com/flutter/flutter/issues/124071
-    if (renderView == this.renderView) { // ignore: deprecated_member_use
+    final FlutterView view = renderView.flutterView;
+    if (view == platformDispatcher.implicitView) {
       return TestViewConfiguration.fromView(
         size: _surfaceSize ?? _kDefaultTestViewportSize,
-        view: renderView.flutterView,
+        view: view,
       );
     }
-    final FlutterView view = renderView.flutterView;
     final double devicePixelRatio = view.devicePixelRatio;
     return TestViewConfiguration.fromView(
       size: view.physicalSize / devicePixelRatio,

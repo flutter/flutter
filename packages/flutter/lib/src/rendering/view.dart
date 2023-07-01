@@ -88,7 +88,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// The configuration is set and updated by the [RenderViewRepository]. If set
   /// elsewhere, the [RenderViewRepository] this [RenderView] is registered with
-  /// may update it at any time.
+  /// may override it at any time.
+  ///
+  /// For tests that want to change the size of the view, set
+  /// [TestFlutterView.physicalSize] on the appropriate [TestFlutterView]
+  /// (typically [WidgetTester.view]) instead of setting a configuration
+  /// directly on the [RenderView]. The [RenderViewRepository] will honor a size
+  /// set that way and not override it.
   ViewConfiguration get configuration => _configuration!;
   ViewConfiguration? _configuration;
   set configuration(ViewConfiguration value) {
@@ -107,6 +113,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(_rootTransform != null);
     markNeedsLayout();
   }
+
+  /// Whether a [configuration] has been set.
+  bool get hasConfiguration => _configuration != null;
 
   /// The [FlutterView] into which this [RenderView] will render.
   ui.FlutterView get flutterView => _view;
