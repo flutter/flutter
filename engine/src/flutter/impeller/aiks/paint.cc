@@ -90,11 +90,8 @@ std::shared_ptr<Contents> Paint::WithColorFilter(
     return input;
   }
   if (color_filter) {
-    auto color_filter_contents = color_filter(FilterInput::Make(input));
-    if (color_filter_contents) {
-      color_filter_contents->SetAbsorbOpacity(absorb_opacity);
-    }
-    input = color_filter_contents;
+    input =
+        color_filter->GetColorFilter(FilterInput::Make(input), absorb_opacity);
   }
   return input;
 }

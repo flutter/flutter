@@ -172,7 +172,13 @@ ColorSource ColorSource::MakeImage(std::shared_ptr<Texture> texture,
     contents->SetTileModes(x_tile_mode, y_tile_mode);
     contents->SetSamplerDescriptor(sampler_descriptor);
     contents->SetEffectTransform(effect_transform);
-    contents->SetColorFilter(paint.color_filter);
+    if (paint.color_filter) {
+      TiledTextureContents::ColorFilterProc filter_proc =
+          [color_filter = paint.color_filter](FilterInput::Ref input) {
+            return color_filter->GetColorFilter(std::move(input), false);
+          };
+      contents->SetColorFilter(filter_proc);
+    }
     contents->SetColorSourceSize(Size::Ceil(texture->GetSize()));
     return contents;
   };
