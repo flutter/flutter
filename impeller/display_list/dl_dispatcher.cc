@@ -14,6 +14,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "impeller/aiks/color_filter.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
@@ -474,7 +475,7 @@ void DlDispatcher::setColorSource(const flutter::DlColorSource* source) {
   }
 }
 
-static Paint::ColorFilterProc ToColorFilterProc(
+static std::shared_ptr<ColorFilter> ToColorFilter(
     const flutter::DlColorFilter* filter) {
   if (filter == nullptr) {
     return nullptr;
@@ -484,28 +485,18 @@ static Paint::ColorFilterProc ToColorFilterProc(
       auto dl_blend = filter->asBlend();
       auto blend_mode = ToBlendMode(dl_blend->mode());
       auto color = skia_conversions::ToColor(dl_blend->color());
-      return [blend_mode, color](FilterInput::Ref input) {
-        return ColorFilterContents::MakeBlend(blend_mode, {std::move(input)},
-                                              color);
-      };
+      return ColorFilter::MakeBlend(blend_mode, color);
     }
     case flutter::DlColorFilterType::kMatrix: {
       const flutter::DlMatrixColorFilter* dl_matrix = filter->asMatrix();
       impeller::ColorMatrix color_matrix;
       dl_matrix->get_matrix(color_matrix.array);
-      return [color_matrix](FilterInput::Ref input) {
-        return ColorFilterContents::MakeColorMatrix({std::move(input)},
-                                                    color_matrix);
-      };
+      return ColorFilter::MakeMatrix(color_matrix);
     }
     case flutter::DlColorFilterType::kSrgbToLinearGamma:
-      return [](FilterInput::Ref input) {
-        return ColorFilterContents::MakeSrgbToLinearFilter({std::move(input)});
-      };
+      return ColorFilter::MakeSrgbToLinear();
     case flutter::DlColorFilterType::kLinearToSrgbGamma:
-      return [](FilterInput::Ref input) {
-        return ColorFilterContents::MakeLinearToSrgbFilter({std::move(input)});
-      };
+      return ColorFilter::MakeLinearToSrgb();
   }
   return nullptr;
 }
@@ -513,7 +504,7 @@ static Paint::ColorFilterProc ToColorFilterProc(
 // |flutter::DlOpReceiver|
 void DlDispatcher::setColorFilter(const flutter::DlColorFilter* filter) {
   // Needs https://github.com/flutter/flutter/issues/95434
-  paint_.color_filter = ToColorFilterProc(filter);
+  paint_.color_filter = ToColorFilter(filter);
 }
 
 // |flutter::DlOpReceiver|
@@ -662,14 +653,20 @@ static Paint::ImageFilterProc ToImageFilterProc(
     case flutter::DlImageFilterType::kColorFilter: {
       auto color_filter_image_filter = filter->asColorFilter();
       FML_DCHECK(color_filter_image_filter);
-      auto color_filter_proc =
-          ToColorFilterProc(color_filter_image_filter->color_filter().get());
-      if (!color_filter_proc) {
+      auto color_filter =
+          ToColorFilter(color_filter_image_filter->color_filter().get());
+      if (!color_filter) {
         return nullptr;
       }
-      return [color_filter = color_filter_proc](
-                 FilterInput::Ref input, const Matrix& effect_transform,
-                 bool is_subpass) { return color_filter(std::move(input)); };
+      return [filter = color_filter](FilterInput::Ref input,
+                                     const Matrix& effect_transform,
+                                     bool is_subpass) {
+        // When color filters are used as image filters, set the color filter's
+        // "absorb opacity" flag to false. For image filters, the snapshot
+        // opacity needs to be deferred until the result of the filter chain is
+        // being blended with the layer.
+        return filter->GetColorFilter(std::move(input), false);
+      };
       break;
     }
     case flutter::DlImageFilterType::kLocalMatrix: {
