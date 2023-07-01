@@ -65,10 +65,7 @@ TEST_P(AiksTest, RotateColorFilteredPath) {
       .stroke_join = Join::kRound,
       .style = Paint::Style::kStroke,
       .color_filter =
-          [](FilterInput::Ref input) {
-            return ColorFilterContents::MakeBlend(
-                BlendMode::kSourceIn, {std::move(input)}, Color::AliceBlue());
-          },
+          ColorFilter::MakeBlend(BlendMode::kSourceIn, Color::AliceBlue()),
   };
 
   canvas.DrawPath(arrow_stem, paint);
@@ -1924,10 +1921,8 @@ TEST_P(AiksTest, PaintWithFilters) {
 
   ASSERT_FALSE(paint.HasColorFilter());
 
-  paint.color_filter = [](FilterInput::Ref input) {
-    return ColorFilterContents::MakeBlend(BlendMode::kSourceOver,
-                                          {std::move(input)}, Color::Blue());
-  };
+  paint.color_filter =
+      ColorFilter::MakeBlend(BlendMode::kSourceOver, Color::Blue());
 
   ASSERT_TRUE(paint.HasColorFilter());
 
@@ -1954,10 +1949,8 @@ TEST_P(AiksTest, OpacityPeepHoleApplicationTest) {
   auto rect = Rect::MakeLTRB(0, 0, 100, 100);
   Paint paint;
   paint.color = Color::White().WithAlpha(0.5);
-  paint.color_filter = [](FilterInput::Ref input) {
-    return ColorFilterContents::MakeBlend(BlendMode::kSourceOver,
-                                          {std::move(input)}, Color::Blue());
-  };
+  paint.color_filter =
+      ColorFilter::MakeBlend(BlendMode::kSourceOver, Color::Blue());
 
   // Paint has color filter, can't elide.
   auto delegate = std::make_shared<OpacityPeepholePassDelegate>(paint, rect);
@@ -2106,10 +2099,7 @@ TEST_P(AiksTest, ForegroundBlendSubpassCollapseOptimization) {
 
   canvas.SaveLayer({
       .color_filter =
-          [](FilterInput::Ref input) {
-            return ColorFilterContents::MakeBlend(
-                BlendMode::kColorDodge, {std::move(input)}, Color::Red());
-          },
+          ColorFilter::MakeBlend(BlendMode::kColorDodge, Color::Red()),
   });
 
   canvas.Translate({500, 300, 0});
@@ -2124,15 +2114,13 @@ TEST_P(AiksTest, ColorMatrixFilterSubpassCollapseOptimization) {
 
   canvas.SaveLayer({
       .color_filter =
-          [](FilterInput::Ref input) {
-            return ColorFilterContents::MakeColorMatrix(
-                std::move(input), {.array = {
-                                       -1.0, 0,    0,    1.0, 0,  //
-                                       0,    -1.0, 0,    1.0, 0,  //
-                                       0,    0,    -1.0, 1.0, 0,  //
-                                       1.0,  1.0,  1.0,  1.0, 0   //
-                                   }});
-          },
+          ColorFilter::MakeMatrix({.array =
+                                       {
+                                           -1.0, 0,    0,    1.0, 0,  //
+                                           0,    -1.0, 0,    1.0, 0,  //
+                                           0,    0,    -1.0, 1.0, 0,  //
+                                           1.0,  1.0,  1.0,  1.0, 0   //
+                                       }}),
   });
 
   canvas.Translate({500, 300, 0});
@@ -2146,11 +2134,7 @@ TEST_P(AiksTest, LinearToSrgbFilterSubpassCollapseOptimization) {
   Canvas canvas;
 
   canvas.SaveLayer({
-      .color_filter =
-          [](FilterInput::Ref input) {
-            return ColorFilterContents::MakeLinearToSrgbFilter(
-                std::move(input));
-          },
+      .color_filter = ColorFilter::MakeLinearToSrgb(),
   });
 
   canvas.Translate({500, 300, 0});
@@ -2164,11 +2148,7 @@ TEST_P(AiksTest, SrgbToLinearFilterSubpassCollapseOptimization) {
   Canvas canvas;
 
   canvas.SaveLayer({
-      .color_filter =
-          [](FilterInput::Ref input) {
-            return ColorFilterContents::MakeSrgbToLinearFilter(
-                std::move(input));
-          },
+      .color_filter = ColorFilter::MakeSrgbToLinear(),
   });
 
   canvas.Translate({500, 300, 0});
@@ -2290,10 +2270,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithBlendColorFilterDrawsCorrectly) {
   canvas.SaveLayer({
       .color = Color::Black().WithAlpha(0.5),
       .color_filter =
-          [](FilterInput::Ref input) {
-            return ColorFilterContents::MakeBlend(
-                BlendMode::kDestinationOver, {std::move(input)}, Color::Red());
-          },
+          ColorFilter::MakeBlend(BlendMode::kDestinationOver, Color::Red()),
   });
   canvas.DrawRect(Rect::MakeXYWH(100, 500, 300, 300), {.color = Color::Blue()});
   canvas.Restore();
@@ -2330,10 +2307,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorAndImageFilterDrawsCorrectly) {
   canvas.SaveLayer({
       .color = Color::Black().WithAlpha(0.5),
       .color_filter =
-          [](FilterInput::Ref input) {
-            return ColorFilterContents::MakeBlend(
-                BlendMode::kDestinationOver, {std::move(input)}, Color::Red());
-          },
+          ColorFilter::MakeBlend(BlendMode::kDestinationOver, Color::Red()),
   });
 
   canvas.DrawRect(Rect::MakeXYWH(100, 500, 300, 300), {.color = Color::Blue()});
@@ -2363,16 +2337,13 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorMatrixColorFilterDrawsCorrectly) {
 
   canvas.SaveLayer({
       .color = Color::Black().WithAlpha(0.5),
-      .color_filter =
-          [](FilterInput::Ref input) {
-            return ColorFilterContents::MakeColorMatrix({std::move(input)},
-                                                        {.array = {
-                                                             1, 0, 0, 0, 0,  //
-                                                             0, 1, 0, 0, 0,  //
-                                                             0, 0, 1, 0, 0,  //
-                                                             0, 0, 0, 2, 0   //
-                                                         }});
-          },
+      .color_filter = ColorFilter::MakeMatrix({.array =
+                                                   {
+                                                       1, 0, 0, 0, 0,  //
+                                                       0, 1, 0, 0, 0,  //
+                                                       0, 0, 1, 0, 0,  //
+                                                       0, 0, 0, 2, 0   //
+                                                   }}),
   });
   canvas.DrawImage(image, {100, 500}, {});
   canvas.Restore();
@@ -2427,10 +2398,7 @@ TEST_P(AiksTest,
                                      }});
           },
       .color_filter =
-          [](FilterInput::Ref input) {
-            return ColorFilterContents::MakeBlend(
-                BlendMode::kModulate, {std::move(input)}, Color::Green());
-          },
+          ColorFilter::MakeBlend(BlendMode::kModulate, Color::Green()),
   });
   canvas.DrawImage(image, {100, 500}, {});
   canvas.Restore();
@@ -2640,11 +2608,8 @@ TEST_P(AiksTest, CanRenderForegroundBlendWithMaskBlur) {
   canvas.DrawCircle({400, 400}, 200,
                     {
                         .color = Color::White(),
-                        .color_filter =
-                            [](const FilterInput::Ref& input) {
-                              return ColorFilterContents::MakeBlend(
-                                  BlendMode::kSource, {input}, Color::Green());
-                            },
+                        .color_filter = ColorFilter::MakeBlend(
+                            BlendMode::kSource, Color::Green()),
                         .mask_blur_descriptor =
                             Paint::MaskBlurDescriptor{
                                 .style = FilterContents::BlurStyle::kNormal,
@@ -2664,11 +2629,8 @@ TEST_P(AiksTest, CanRenderForegroundAdvancedBlendWithMaskBlur) {
   canvas.DrawCircle({400, 400}, 200,
                     {
                         .color = Color::White(),
-                        .color_filter =
-                            [](const FilterInput::Ref& input) {
-                              return ColorFilterContents::MakeBlend(
-                                  BlendMode::kColor, {input}, Color::Green());
-                            },
+                        .color_filter = ColorFilter::MakeBlend(
+                            BlendMode::kColor, Color::Green()),
                         .mask_blur_descriptor =
                             Paint::MaskBlurDescriptor{
                                 .style = FilterContents::BlurStyle::kNormal,
