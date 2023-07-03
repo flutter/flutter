@@ -771,6 +771,54 @@ void main() {
     await checkCursorBlinking();
   });
 
+  testWidgets('Turning showCursor off stops the cursor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/108187.
+    final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;
+    // This doesn't really matter.
+    EditableText.debugDeterministicCursor = false;
+    addTearDown(() { EditableText.debugDeterministicCursor = debugDeterministicCursor; });
+    const Key key = Key('EditableText');
+
+    Widget buildEditableText({ required bool showCursor }) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            key: key,
+            backgroundCursorColor: Colors.grey,
+            // Use animation controller to animate cursor blink for testing.
+            cursorOpacityAnimates: true,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            showCursor: showCursor,
+          ),
+        ),
+      );
+    }
+    late final EditableTextState editableTextState = tester.state(find.byKey(key));
+    await tester.pumpWidget(buildEditableText(showCursor: false));
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    // No cursor even when focused.
+    expect(editableTextState.cursorCurrentlyVisible, false);
+
+    // The EditableText still has focus, so the cursor should starts blinking.
+    await tester.pumpWidget(buildEditableText(showCursor: true));
+    expect(editableTextState.cursorCurrentlyVisible, true);
+    await tester.pump();
+    expect(editableTextState.cursorCurrentlyVisible, true);
+
+    // readOnly disables blinking cursor.
+    await tester.pumpWidget(buildEditableText(showCursor: false));
+    expect(editableTextState.cursorCurrentlyVisible, false);
+    await tester.pump();
+    expect(editableTextState.cursorCurrentlyVisible, false);
+  });
+
   // Regression test for https://github.com/flutter/flutter/pull/30475.
   testWidgets('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
@@ -879,6 +927,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Padding(
           padding: const EdgeInsets.only(top: 0.25),
           child: Material(

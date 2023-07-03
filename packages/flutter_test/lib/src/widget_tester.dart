@@ -47,7 +47,20 @@ export 'package:matcher/expect.dart' hide expect, isInstanceOf;
 // that doesn't apply here.
 export 'package:test_api/hooks.dart' show TestFailure;
 export 'package:test_api/scaffolding.dart'
-    hide group, setUp, setUpAll, tearDown, tearDownAll, test;
+    show
+        OnPlatform,
+        Retry,
+        Skip,
+        Tags,
+        TestOn,
+        Timeout,
+        addTearDown,
+        markTestSkipped,
+        printOnFailure,
+        pumpEventQueue,
+        registerException,
+        spawnHybridCode,
+        spawnHybridUri;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);

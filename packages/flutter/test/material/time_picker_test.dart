@@ -5,6 +5,7 @@
 @TestOn('!chrome')
 library;
 
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -710,7 +711,7 @@ void main() {
       testWidgets('OK Cancel button and helpText layout', (WidgetTester tester) async {
         Widget buildFrame(TextDirection textDirection) {
           return MaterialApp(
-            theme: ThemeData.light().copyWith(useMaterial3: materialType == MaterialType.material3),
+            theme: ThemeData(useMaterial3: materialType == MaterialType.material3),
             home: Material(
               child: Center(
                 child: Builder(
@@ -752,8 +753,8 @@ void main() {
             expect(tester.getBottomRight(find.text(cancelString)).dx, 582);
           case MaterialType.material3:
             expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(138, 129)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(292.0, 143.0)));
-            expect(tester.getBottomLeft(find.text(okString)).dx, 616);
+            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(295.0, 149.0)));
+            expect(tester.getBottomLeft(find.text(okString)).dx, 615.5);
             expect(tester.getBottomRight(find.text(cancelString)).dx, 578);
         }
 
@@ -774,10 +775,10 @@ void main() {
             expect(tester.getBottomRight(find.text(okString)).dx, 184);
             expect(tester.getBottomLeft(find.text(cancelString)).dx, 218);
           case MaterialType.material3:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(508, 129)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(662, 143)));
-            expect(tester.getBottomLeft(find.text(okString)).dx, 156);
-            expect(tester.getBottomRight(find.text(okString)).dx, 184);
+            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(505.0, 129.0)));
+            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(662, 149)));
+            expect(tester.getBottomLeft(find.text(okString)).dx, 155.5);
+            expect(tester.getBottomRight(find.text(okString)).dx, 184.5);
             expect(tester.getBottomLeft(find.text(cancelString)).dx, 222);
         }
 
@@ -808,7 +809,7 @@ void main() {
 
         final double amHeight2x = tester.getSize(find.text(amString)).height;
         expect(tester.getSize(find.text('41')).height, equals(minutesDisplayHeight));
-        expect(amHeight2x, greaterThanOrEqualTo(amHeight * 2));
+        expect(amHeight2x, math.min(38.0, amHeight * 2));
 
         await tester.tap(find.text(okString)); // dismiss the dialog
         await tester.pumpAndSettle();
@@ -822,7 +823,7 @@ void main() {
         );
 
         expect(tester.getSize(find.text('41')).height, equals(minutesDisplayHeight));
-        expect(tester.getSize(find.text(amString)).height, equals(amHeight2x));
+        expect(tester.getSize(find.text(amString)).height, math.min(38.0, amHeight * 2));
       });
 
       group('showTimePicker avoids overlapping display features', () {
@@ -1694,55 +1695,53 @@ Future<void> mediaQueryBoilerplate(
   Orientation? orientation,
 }) async {
   await tester.pumpWidget(
-    Builder(builder: (BuildContext context) {
-      return Theme(
-        data: Theme.of(context).copyWith(useMaterial3: materialType == MaterialType.material3),
-        child: Localizations(
-          locale: const Locale('en', 'US'),
-          delegates: const <LocalizationsDelegate<dynamic>>[
-            DefaultMaterialLocalizations.delegate,
-            DefaultWidgetsLocalizations.delegate,
-          ],
-          child: MediaQuery(
-            data: MediaQueryData(
-              alwaysUse24HourFormat: alwaysUse24HourFormat,
-              textScaleFactor: textScaleFactor,
-              accessibleNavigation: accessibleNavigation,
-              size: tester.view.physicalSize / tester.view.devicePixelRatio,
-            ),
-            child: Material(
-              child: Center(
-                child: Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: Navigator(
-                    onGenerateRoute: (RouteSettings settings) {
-                      return MaterialPageRoute<void>(builder: (BuildContext context) {
-                        return TextButton(
-                          onPressed: () {
-                            showTimePicker(
-                              context: context,
-                              initialTime: initialTime,
-                              initialEntryMode: entryMode,
-                              helpText: helpText,
-                              hourLabelText: hourLabelText,
-                              minuteLabelText: minuteLabelText,
-                              errorInvalidText: errorInvalidText,
-                              onEntryModeChanged: onEntryModeChange,
-                              orientation: orientation,
-                            );
-                          },
-                          child: const Text('X'),
-                        );
-                      });
-                    },
-                  ),
+    Theme(
+      data: ThemeData(useMaterial3: materialType == MaterialType.material3),
+      child: Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: MediaQuery(
+          data: MediaQueryData(
+            alwaysUse24HourFormat: alwaysUse24HourFormat,
+            textScaleFactor: textScaleFactor,
+            accessibleNavigation: accessibleNavigation,
+            size: tester.view.physicalSize / tester.view.devicePixelRatio,
+          ),
+          child: Material(
+            child: Center(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Navigator(
+                  onGenerateRoute: (RouteSettings settings) {
+                    return MaterialPageRoute<void>(builder: (BuildContext context) {
+                      return TextButton(
+                        onPressed: () {
+                          showTimePicker(
+                            context: context,
+                            initialTime: initialTime,
+                            initialEntryMode: entryMode,
+                            helpText: helpText,
+                            hourLabelText: hourLabelText,
+                            minuteLabelText: minuteLabelText,
+                            errorInvalidText: errorInvalidText,
+                            onEntryModeChanged: onEntryModeChange,
+                            orientation: orientation,
+                          );
+                        },
+                        child: const Text('X'),
+                      );
+                    });
+                  },
                 ),
               ),
             ),
           ),
         ),
-      );
-    }),
+      ),
+    ),
   );
   if (tapButton) {
     await tester.tap(find.text('X'));
