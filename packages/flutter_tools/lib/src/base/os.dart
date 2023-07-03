@@ -106,7 +106,7 @@ abstract class OperatingSystemUtils {
   /// Return a directory's total size in bytes.
   int? getDirectorySize(Directory directory) {
     int? size;
-    for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
+    for (final FileSystemEntity entity in directory.listSync(recursive: true, followLinks: false)) {
       if (entity is File) {
         size ??= 0;
         size += entity.lengthSync();

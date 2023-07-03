@@ -269,7 +269,7 @@ STDERR STUFF
     await createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--no-pub']
     );
-    expect(testLogger.statusText, contains('✓ Built build/macos/Build/Products/Release/example.app (1337.0MB)'));
+    expect(testLogger.statusText, contains('✓ Built build/macos/Build/Products/Release/example.app (10.0MB)'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[

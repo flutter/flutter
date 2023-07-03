@@ -90,7 +90,7 @@ String getElapsedAsMilliseconds(Duration duration) {
 
 /// Return a String - with units - for the size in MB of the given number of bytes.
 String getSizeAsMB(int bytesLength) {
-  return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
+  return '${(bytesLength / (1000 * 1000)).toStringAsFixed(1)}MB';
 }
 
 /// A class to maintain a list of items, fire events when items are added or

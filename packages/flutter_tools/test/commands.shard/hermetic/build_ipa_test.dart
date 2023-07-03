@@ -428,7 +428,7 @@ void main() {
 
     expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
     expect(testLogger.statusText, contains('Building App Store IPA'));
-    expect(testLogger.statusText, contains('Built IPA to build/ios/ipa (1337.0MB)'));
+    expect(testLogger.statusText, contains('Built IPA to build/ios/ipa (10.0MB)'));
     expect(testLogger.statusText, contains('To upload to the App Store'));
     expect(testLogger.statusText, contains('Apple Transporter macOS app'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -477,7 +477,7 @@ void main() {
 
     expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
     expect(testLogger.statusText, contains('Building ad-hoc IPA'));
-    expect(testLogger.statusText, contains('Built IPA to build/ios/ipa (1337.0MB)'));
+    expect(testLogger.statusText, contains('Built IPA to build/ios/ipa (10.0MB)'));
     // Don't instruct how to upload to the App Store.
     expect(testLogger.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -526,7 +526,7 @@ void main() {
 
     expect(testLogger.statusText, contains('build/ios/archive/Runner.xcarchive'));
     expect(testLogger.statusText, contains('Building enterprise IPA'));
-    expect(testLogger.statusText, contains('Built IPA to build/ios/ipa (1337.0MB)'));
+    expect(testLogger.statusText, contains('Built IPA to build/ios/ipa (10.0MB)'));
     // Don't instruct how to upload to the App Store.
     expect(testLogger.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -717,7 +717,7 @@ void main() {
       ],
     );
 
-    expect(testLogger.statusText, contains('Built IPA to $outputPath (1337.0MB)'));
+    expect(testLogger.statusText, contains('Built IPA to $outputPath (10.0MB)'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
