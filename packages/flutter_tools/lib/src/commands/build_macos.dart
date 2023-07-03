@@ -6,6 +6,7 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/terminal.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -129,10 +130,10 @@ class BuildMacosCommand extends BuildSubCommand {
     }
 
     final Directory outputDirectory = globals.fs.directory(result.output);
-    final String? directorySize = globals.os.directorySize(outputDirectory);
+    final int? directorySize = globals.os.getDirectorySize(outputDirectory);
     final String appSize = (directorySize == null)
         ? '' // Don't display the size when building a debug variant.
-        : ' ($directorySize)';
+        : ' (${getSizeAsMB(directorySize)})';
 
     globals.printStatus(
       '${globals.terminal.successMark} '

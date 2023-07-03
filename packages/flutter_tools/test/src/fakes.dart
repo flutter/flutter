@@ -530,7 +530,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   List<File> whichAll(String execName) => <File>[];
 
   @override
-  String? directorySize(Directory directory) => '1337.0MB';
+  int? getDirectorySize(Directory directory) => 1337;
 
   @override
   void unzip(File file, Directory targetDirectory) { }

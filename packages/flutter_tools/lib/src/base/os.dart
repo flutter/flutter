@@ -103,8 +103,17 @@ abstract class OperatingSystemUtils {
   /// Return the File representing a new pipe.
   File makePipe(String path);
 
-  /// Return a directory's total size in human-readable format.
-  String? directorySize(Directory directory);
+  /// Return a directory's total size in bytes.
+  int? getDirectorySize(Directory directory) {
+    int? size;
+    for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
+      if (entity is File) {
+        size ??= 0;
+        size += entity.lengthSync();
+      }
+    }
+    return size;
+  }
 
   void unzip(File file, Directory targetDirectory);
 
@@ -258,29 +267,6 @@ class _PosixUtils extends OperatingSystemUtils {
       throwOnError: true,
     );
     return _fileSystem.file(path);
-  }
-
-  @override
-  String? directorySize(Directory directory) {
-    final List<String> command = <String>[
-      'du',
-      '-sk',
-      directory.path,
-    ];
-    final ProcessResult result = _processManager.runSync(command);
-    if (result.exitCode != 0) {
-      return null;
-    }
-    final String stdout = result.stdout as String;
-    final List<String> outputLines = stdout.trim().split('\t');
-    if (outputLines.isEmpty) {
-      return null;
-    }
-    final int? kiloBytes = int.tryParse(outputLines.first);
-    if (kiloBytes == null) {
-      return null;
-    }
-    return '${(kiloBytes / 1000).toStringAsFixed(1)}MB';
   }
 
   @override
@@ -587,11 +573,6 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   File makePipe(String path) {
     throw UnsupportedError('makePipe is not implemented on Windows.');
-  }
-
-  @override
-  String? directorySize(Directory directory) {
-    throw UnsupportedError('directorySize is not implemented on Windows.');
   }
 
   String? _name;
