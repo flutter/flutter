@@ -36,6 +36,7 @@ import 'src/web/recorder.dart';
 typedef RecorderFactory = Recorder Function();
 
 const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+const bool isSkwasm = bool.fromEnvironment('FLUTTER_WEB_USE_SKWASM');
 
 /// List of all benchmarks that run in the devicelab.
 ///
@@ -62,14 +63,18 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchMouseRegionGridHover.benchmarkName: () => BenchMouseRegionGridHover(),
   BenchMouseRegionMixedGridHover.benchmarkName: () => BenchMouseRegionMixedGridHover(),
   BenchWrapBoxScroll.benchmarkName: () => BenchWrapBoxScroll(),
-  BenchPlatformViewInfiniteScroll.benchmarkName: () => BenchPlatformViewInfiniteScroll.forward(),
-  BenchPlatformViewInfiniteScroll.benchmarkNameBackward: () => BenchPlatformViewInfiniteScroll.backward(),
+  if (!isSkwasm) ...<String, RecorderFactory>{
+    // Platform views are not yet supported with Skwasm.
+    // https://github.com/flutter/flutter/issues/126346
+    BenchPlatformViewInfiniteScroll.benchmarkName: () => BenchPlatformViewInfiniteScroll.forward(),
+    BenchPlatformViewInfiniteScroll.benchmarkNameBackward: () => BenchPlatformViewInfiniteScroll.backward(),
+  },
   BenchMaterial3Components.benchmarkName: () => BenchMaterial3Components(),
   BenchMaterial3Semantics.benchmarkName: () => BenchMaterial3Semantics(),
   BenchMaterial3ScrollSemantics.benchmarkName: () => BenchMaterial3ScrollSemantics(),
 
-  // CanvasKit-only benchmarks
-  if (isCanvasKit) ...<String, RecorderFactory>{
+  // Skia-only benchmarks
+  if (isCanvasKit || isSkwasm) ...<String, RecorderFactory>{
     BenchTextLayout.canvasKitBenchmarkName: () => BenchTextLayout.canvasKit(),
     BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
     BenchTextCachedLayout.canvasKitBenchmarkName: () => BenchTextCachedLayout.canvasKit(),
@@ -81,7 +86,7 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   },
 
   // HTML-only benchmarks
-  if (!isCanvasKit) ...<String, RecorderFactory>{
+  if (!isCanvasKit && !isSkwasm) ...<String, RecorderFactory>{
     BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout.canvas(),
     BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout.canvas(),
     BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid.canvas(),

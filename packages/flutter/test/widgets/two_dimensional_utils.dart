@@ -46,6 +46,7 @@ Widget simpleBuilderTest({
   bool setLayoutOffset = true,
 }) {
   return MaterialApp(
+    theme: ThemeData(useMaterial3: false),
     restorationScopeId: restorationID,
     home: Scaffold(
       body: SimpleBuilderTableView(
