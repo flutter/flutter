@@ -531,7 +531,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     await createTestCommandRunner(command).run(
       const <String>['windows', '--release', '--no-pub']
     );
-    expect(testLogger.statusText, contains(r'✓  Built build\windows\runner\Release'));
+    expect(testLogger.statusText, contains(r'✓ Built build\windows\runner\Release'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

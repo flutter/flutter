@@ -206,8 +206,8 @@ class BuildWebCommand extends BuildSubCommand {
       outputDirectoryPath: outputDirectoryPath,
     );
 
-    // We don't print a size because the containing directory may contain
-    // additional files not seen by the user.
+    // We don't print a size because the output directory can contain
+    // optional files not needed by the user.
     globals.printStatus(
       '${globals.terminal.successMark} '
       'Built ${globals.fs.path.relative(outputDirectory.path)}',

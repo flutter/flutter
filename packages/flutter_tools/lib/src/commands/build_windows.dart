@@ -68,11 +68,11 @@ class BuildWindowsCommand extends BuildSubCommand {
       ),
     );
 
-    // We don't print a size because the containing directory may contain
-    // additional files not seen by the user and because the binary is not
+    // We don't print a size because the output directory can contain
+    // optional files not needed by the user and because the binary is not
     // self-contained.
     globals.logger.printStatus(
-      '${globals.logger.terminal.successMark}  '
+      '${globals.logger.terminal.successMark} '
       'Built ${globals.fs.path.relative(output.path)}',
       color: TerminalColor.green,
     );
