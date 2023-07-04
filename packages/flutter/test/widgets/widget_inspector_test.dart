@@ -2724,36 +2724,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             ],
           ),
         ),
-    testWidgets(
-      'ext.flutter.inspector.getSelectedSummaryWidget should not throw "type \'MultiChildRenderObjectElement\' is not a subtype of type \'DiagnosticsNode?\' in type cast',
-      (WidgetTester tester) async {
-        // Build our app and trigger a frame.
-        await tester.pumpWidget(
-          MaterialApp(
-            home: WidgetInspector(
-              selectButtonBuilder: (BuildContext context, void Function() onPressed) {
-                final selectedWidget =
-                    WidgetInspectorService.instance.getSelectedWidget(null, 'groupName');
-                final id = jsonDecode(selectedWidget)['valueId'];
-                final summaryWidget =
-                    WidgetInspectorService.instance.getSelectedSummaryWidget(id, 'groupName');
-                return Text(summaryWidget.toString());
-              },
-              child: MaterialApp(
-                title: 'Flutter Demo',
-                theme: ThemeData(
-                  colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-                  useMaterial3: true,
-                ),
-                home: const Placeholder(),
-              ),
-            ),
-          ),
-        );
-
-        await tester.tap(find.byType(Placeholder));
-      },
-    );
       );
       final Element elementA = find.text('a').evaluate().first;
       final Element elementB = find.text('b').evaluate().first;
@@ -2789,7 +2759,40 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Column numbers are more stable than line numbers.
       expect(columnA, equals(15));
       expect(columnA, equals(columnB));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+    },
+        skip: !WidgetInspectorService.instance
+            .isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+
+    testWidgets(
+      'ext.flutter.inspector.getSelectedSummaryWidget should not throw "type \'MultiChildRenderObjectElement\' is not a subtype of type \'DiagnosticsNode?\' in type cast',
+      (WidgetTester tester) async {
+        // Build our app and trigger a frame.
+        await tester.pumpWidget(
+          MaterialApp(
+            home: WidgetInspector(
+              selectButtonBuilder: (BuildContext context, void Function() onPressed) {
+                final selectedWidget =
+                    WidgetInspectorService.instance.getSelectedWidget(null, 'groupName');
+                final id = jsonDecode(selectedWidget)['valueId'];
+                final summaryWidget =
+                    WidgetInspectorService.instance.getSelectedSummaryWidget(id, 'groupName');
+                return Text(summaryWidget.toString());
+              },
+              child: MaterialApp(
+                title: 'Flutter Demo',
+                theme: ThemeData(
+                  colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+                  useMaterial3: true,
+                ),
+                home: const Placeholder(),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(Placeholder));
+      },
+    );
 
     group(
       'ext.flutter.inspector.addPubRootDirectories group',
