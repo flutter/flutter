@@ -30552,7 +30552,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ସେଭ କରନ୍ତୁ';
 
   @override
-  String get scanTextButtonLabel => 'ପାଠ୍ୟ ସ୍କାନ୍ କରନ୍ତୁ |';
+  String get scanTextButtonLabel => 'ପାଠ୍ୟ ସ୍କାନ୍ କରନ୍ତୁ';
 
   @override
   String get scrimLabel => 'ସ୍କ୍ରିମ';
@@ -39621,7 +39621,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Kaydet';
 
   @override
-  String get scanTextButtonLabel => 'metni tara';
+  String get scanTextButtonLabel => 'Metni tara';
 
   @override
   String get scrimLabel => 'opaklık katmanı';
@@ -40577,7 +40577,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'محفوظ کریں';
 
   @override
-  String get scanTextButtonLabel => 'متن اسکین کریں۔';
+  String get scanTextButtonLabel => 'متن کو اسکین کریں۔';
 
   @override
   String get scrimLabel => 'اسکریم';
@@ -41533,7 +41533,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Lưu';
 
   @override
-  String get scanTextButtonLabel => 'quét văn bản';
+  String get scanTextButtonLabel => 'Quét văn bản';
 
   @override
   String get scrimLabel => 'Scrim';
