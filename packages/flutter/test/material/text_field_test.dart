@@ -205,7 +205,7 @@ void main() {
   }
 
   testWidgets(
-    'Live Text button shows and hides correctly when LiveTextStatus changes.',
+    'Live Text button shows and hides correctly when LiveTextStatus changes',
     (WidgetTester tester) async {
       final LiveTextInputTester liveTextInputTester = LiveTextInputTester();
       addTearDown(liveTextInputTester.dispose);

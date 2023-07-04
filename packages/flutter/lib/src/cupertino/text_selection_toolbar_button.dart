@@ -229,7 +229,7 @@ class _LiveTextIconPainter extends CustomPainter {
       ..lineTo(origin.dx + 3.5, origin.dy);
 
     // Rotate to draw corner four times.
-    final Matrix4 rotationMatrix = Matrix4.identity()..rotateZ(pi / 2);
+    final Matrix4 rotationMatrix = Matrix4.identity()..rotateZ(pi / 2.0);
     for (int i = 0; i < 4; i += 1) {
       canvas.drawPath(path, _painter);
       canvas.transform(rotationMatrix.storage);

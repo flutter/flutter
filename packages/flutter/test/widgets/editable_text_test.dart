@@ -120,7 +120,7 @@ void main() {
   }
 
   testWidgets(
-    'Tapping the Live Text button calls onLiveTextInput.',
+    'Tapping the Live Text button calls onLiveTextInput',
     (WidgetTester tester) async {
       bool invokedLiveTextInputSuccessfully = false;
       final GlobalKey key = GlobalKey();
