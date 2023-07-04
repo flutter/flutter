@@ -1947,7 +1947,6 @@ mixin WidgetInspectorService {
   /// reused.
   // TODO(polina-c): delete [previousSelectionId] when it is not used in DevTools
   // https://github.com/flutter/devtools/issues/3951
-  @protected
   String getSelectedWidget(String? previousSelectionId, String groupName) {
     return _safeJsonEncode(_getSelectedWidget(previousSelectionId, groupName));
   }
