@@ -2759,9 +2759,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Column numbers are more stable than line numbers.
       expect(columnA, equals(15));
       expect(columnA, equals(columnB));
-    },
-        skip: !WidgetInspectorService.instance
-            .isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets(
       'ext.flutter.inspector.getSelectedSummaryWidget should not throw "type \'MultiChildRenderObjectElement\' is not a subtype of type \'DiagnosticsNode?\' in type cast',
@@ -2771,11 +2769,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           MaterialApp(
             home: WidgetInspector(
               selectButtonBuilder: (BuildContext context, void Function() onPressed) {
-                final selectedWidget =
-                    WidgetInspectorService.instance.getSelectedWidget(null, 'groupName');
+                final selectedWidget = WidgetInspectorService.instance.getSelectedWidget(null, 'groupName');
                 final id = jsonDecode(selectedWidget)['valueId'];
-                final summaryWidget =
-                    WidgetInspectorService.instance.getSelectedSummaryWidget(id, 'groupName');
+                final summaryWidget = WidgetInspectorService.instance.getSelectedSummaryWidget(id, 'groupName');
                 return Text(summaryWidget.toString());
               },
               child: MaterialApp(
