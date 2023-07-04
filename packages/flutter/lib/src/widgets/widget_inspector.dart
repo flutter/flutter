@@ -2251,7 +2251,9 @@ mixin WidgetInspectorService {
     if (!isWidgetCreationTracked()) {
       return _getSelectedWidgetDiagnosticsNode(previousSelectionId);
     }
-    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
+    final obj = toObject(previousSelectionId);
+    final DiagnosticsNode? previousSelection =
+        (obj is RenderObjectElement?) ? obj?.toDiagnosticsNode() : obj as DiagnosticsNode?;
     Element? current = selection.currentElement;
     if (current != null && !_isValueCreatedByLocalProject(current)) {
       Element? firstLocal;
