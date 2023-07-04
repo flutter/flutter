@@ -685,6 +685,162 @@ void main() {
     expect(textTopRight.dy - snackBarTopRight.dy, padding);
   });
 
+  group('Snackbar constraints can be customized', () {
+    testWidgets('minHeight not ignore', (WidgetTester tester) async {
+      const double minHeight = 100;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('I am a snack bar.'),
+                        constraints: BoxConstraints(minHeight: minHeight),
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('X'));
+      await tester.pump(); // start animation
+      await tester.pump(const Duration(milliseconds: 750));
+
+      final Finder materialFinder = find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.byType(Material),
+      );
+      final Size size = tester.getSize(materialFinder);
+      expect(size.height, minHeight);
+    });
+
+    testWidgets('maxHeight not ignore', (WidgetTester tester) async {
+      const double maxHeight = 100;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: SizedBox(
+                          height: maxHeight + 1,
+                          child: Text('I am a snack bar.'),
+                        ),
+                        constraints: BoxConstraints(maxHeight: maxHeight),
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('X'));
+      await tester.pump(); // start animation
+      await tester.pump(const Duration(milliseconds: 750));
+
+      final Finder materialFinder = find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.byType(Material),
+      );
+      final Size size = tester.getSize(materialFinder);
+      expect(size.height, maxHeight);
+    });
+
+    testWidgets('minWidth ignore', (WidgetTester tester) async {
+      const double minWidth = 100;
+      const double width = minWidth - 1;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('I am a snack bar.'),
+                        behavior: SnackBarBehavior.floating,
+                        width: width,
+                        constraints: BoxConstraints(minWidth: minWidth),
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('X'));
+      await tester.pump(); // start animation
+      await tester.pump(const Duration(milliseconds: 750));
+
+      final Finder materialFinder = find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.byType(Material),
+      );
+      final Size size = tester.getSize(materialFinder);
+      expect(size.width, width);
+    });
+
+    testWidgets('maxWidth ignore', (WidgetTester tester) async {
+      const double maxWidth = 100;
+      const double width = maxWidth + 1;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('I am a snack bar.'),
+                        behavior: SnackBarBehavior.floating,
+                        width: width,
+                        constraints: BoxConstraints(maxWidth: maxWidth),
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('X'));
+      await tester.pump(); // start animation
+      await tester.pump(const Duration(milliseconds: 750));
+
+      final Finder materialFinder = find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.byType(Material),
+      );
+      final Size size = tester.getSize(materialFinder);
+      expect(size.width, width);
+    });
+  });
+
   testWidgets('Snackbar width can be customized', (WidgetTester tester) async {
     const double width = 200.0;
     await tester.pumpWidget(

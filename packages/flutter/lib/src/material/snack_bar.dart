@@ -274,6 +274,7 @@ class SnackBar extends StatefulWidget {
     this.elevation,
     this.margin,
     this.padding,
+    this.constraints,
     this.width,
     this.shape,
     this.behavior,
@@ -353,6 +354,11 @@ class SnackBar extends StatefulWidget {
   ///     * Right padding is replaced with one and a half times the
   ///       right padding.
   final EdgeInsetsGeometry? padding;
+
+  /// The [constraints] of the snack bar.
+  ///
+  /// If [width] is specified, `minWidth` and `maxWidth` is ignored.
+  final BoxConstraints? constraints;
 
   /// The width of the snack bar.
   ///
@@ -480,6 +486,7 @@ class SnackBar extends StatefulWidget {
       elevation: elevation,
       margin: margin,
       padding: padding,
+      constraints: constraints,
       width: width,
       shape: shape,
       behavior: behavior,
@@ -710,6 +717,13 @@ class _SnackBarState extends State<SnackBar> {
             ],
         ),
     );
+
+    if (widget.constraints != null) {
+      snackBar = ConstrainedBox(
+        constraints: widget.constraints!,
+        child: snackBar,
+      );
+    }
 
     if (!isFloatingSnackBar) {
       snackBar = SafeArea(
