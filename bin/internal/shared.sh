@@ -123,7 +123,10 @@ function upgrade_flutter () (
   #  * STAMP_PATH is an empty file, or
   #  * Contents of STAMP_PATH is not what we are going to compile, or
   #  * pubspec.yaml last modified after pubspec.lock
-  if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$compilekey" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+  if [[ ! -f "$SNAPSHOT_PATH" || \
+        ! -s "$STAMP_PATH" || \
+        "$(cat "$STAMP_PATH")" != "$compilekey" || \
+        "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
     # Waits for the update lock to be acquired. Placing this check inside the
     # conditional allows the majority of flutter/dart installations to bypass
     # the lock entirely, but as a result this required a second verification that
@@ -137,6 +140,7 @@ function upgrade_flutter () (
 
     # Fetch Dart...
     rm -f "$FLUTTER_ROOT/version"
+    rm -f "$FLUTTER_ROOT/bin/cache/flutter.version.json"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 

@@ -1407,6 +1407,7 @@ void main() {
         values = newValues;
       }
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           // The builder is used to pass the context from the MaterialApp widget
           // to the [Navigator]. This context is required in order for the
