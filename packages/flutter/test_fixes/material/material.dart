@@ -317,4 +317,9 @@ void main() {
     clipBehavior: Clip.none,
   );
   final Clip clip = details.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/XXXX
+  Curve curve = standardEasing;
+  Curve curve = accelerateEasing;
+  Curve curve = decelerateEasing;
 }

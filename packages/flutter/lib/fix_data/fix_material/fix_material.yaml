@@ -897,4 +897,34 @@ transforms:
         oldName: 'showTrackOnHover'
         newName: 'trackVisibility'
 
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'Easing.legacy'"
+    date: 2023-07-04
+    element:
+      uris: [ 'material.dart' ]
+      variable: 'standardEasing'
+    changes:
+      - kind: 'rename'
+        newName: 'Easing.legacy'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'Easing.legacyAccelerate'"
+    date: 2023-07-04
+    element:
+      uris: [ 'material.dart' ]
+      variable: 'accelerateEasing'
+    changes:
+      - kind: 'rename'
+        newName: 'Easing.legacyAccelerate'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'Easing.legacyDecelerate'"
+    date: 2023-07-04
+    element:
+      uris: [ 'material.dart' ]
+      variable: 'decelerateEasing'
+    changes:
+      - kind: 'rename'
+        newName: 'Easing.legacyDecelerate'
+
 # Before adding a new fix: read instructions at the top of this file.
