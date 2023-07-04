@@ -2316,10 +2316,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree', (WidgetTester tester) async {
-      // ???
+
       const String group = 'test-group';
 
-      const Directionality theWidget = Directionality(
+      await tester.pumpWidget(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
             children: <Widget>[
@@ -2328,28 +2329,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               Text('c', textDirection: TextDirection.ltr),
             ],
           ),
-        );
-      await tester.pumpWidget(theWidget);
-
-      //final Element element = find.byWidget(theWidget).evaluate().first;
-      //final children = element.debugDescribeChildren();
-
-
-
-      Map<String, Object?> rootJson = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
-        <String, String>{'objectGroup': group},
-      ))! as Map<String, Object?>;
-
-      List<Object?> alternateChildrenJson = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-        <String, String>{'arg': rootJson['objectId']! as String, 'objectGroup': group},
-      ))! as List<Object?>;
-
-      expect(alternateChildrenJson.length, equals(1));
+        ),
+      );
 
       final Element elementA = find.text('a').evaluate().first;
 
+      service.disposeAllGroups();
       service.resetPubRootDirectories();
       service.setSelection(elementA, 'my-group');
       final Map<String, dynamic> jsonA = (await service.testExtension(
