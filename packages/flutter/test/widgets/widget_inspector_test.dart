@@ -2316,9 +2316,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree', (WidgetTester tester) async {
-
       const String group = 'test-group';
-
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -2343,6 +2341,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       ))! as Map<String, dynamic>;
 
       service.resetPubRootDirectories();
+      Map<String, Object?> rootJson = (await service.testExtension(
+        WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
+        <String, String>{'objectGroup': group},
+      ))! as Map<String, Object?>;
 
       // We haven't yet properly specified which directories are summary tree
       // directories so we get an empty tree other than the root that is always
