@@ -2052,10 +2052,6 @@ mixin WidgetInspectorService {
           final RenderObject? renderParent = renderObject.parent;
           if (renderParent is RenderObject && subtreeDepth > 0) {
             final Object? parentCreator = renderParent.debugCreator;
-            if (parentCreator is DebugCreator && parentCreator.element.widget is Semantics) {
-              developer.debugger();
-            }
-
             if (parentCreator is DebugCreator) {
               additionalJson['parentRenderElement'] =
                   parentCreator.element.toDiagnosticsNode().toJsonMap(
