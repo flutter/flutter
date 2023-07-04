@@ -882,7 +882,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(chainNode['node'], isMap);
         final Map<String, Object?> jsonNode = chainNode['node']! as Map<String, Object?>;
         expect(service.toObject(jsonNode['valueId']! as String), equals(element));
-        expect(service.toObject(jsonNode['objectId']! as String), isA<DiagnosticsNode>());
 
         expect(chainNode['children'], isList);
         final List<Object?> jsonChildren = chainNode['children']! as List<Object?>;
@@ -898,30 +897,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(jsonChildren[j], isMap);
           final Map<String, Object?> childJson = jsonChildren[j]! as Map<String, Object?>;
           expect(service.toObject(childJson['valueId']! as String), equals(childrenElements[j]));
-          expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode>());
         }
       }
     });
 
-    test('WidgetInspectorService getProperties for $DiagnosticsNode', () {
-      // TODO(polina-c): delete this test once getChildrenDetailsSubtree stops accepting DiagnosticsNode.
-      // https://github.com/flutter/devtools/issues/3951
-      final DiagnosticsNode diagnostic = const Text('a', textDirection: TextDirection.ltr).toDiagnosticsNode();
-      const String group = 'group';
-      service.disposeAllGroups();
-      final String id = service.toId(diagnostic, group)!;
-      final List<Object?> propertiesJson = json.decode(service.getProperties(id, group)) as List<Object?>;
-      final List<DiagnosticsNode> properties = diagnostic.getProperties();
-      expect(properties, isNotEmpty);
-      expect(propertiesJson.length, equals(properties.length));
-      for (int i = 0; i < propertiesJson.length; ++i) {
-        final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
-        expect(service.toObject(propertyJson['valueId'] as String?), equals(properties[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
-      }
-    });
-
-    test('WidgetInspectorService getProperties for $Diagnosticable', () {
+    test('WidgetInspectorService getProperties', () {
       const Diagnosticable diagnosticable = Text('a', textDirection: TextDirection.ltr);
       const String group = 'group';
       service.disposeAllGroups();
@@ -933,7 +913,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
         expect(service.toObject(propertyJson['valueId'] as String?), equals(properties[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
       }
     });
 
@@ -962,7 +941,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
         expect(service.toObject(propertyJson['valueId']! as String), equals(children[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
       }
     });
 
@@ -2108,7 +2086,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(chainNode['node'], isMap);
         final Map<String, Object?> jsonNode = chainNode['node']! as Map<String, Object?>;
         expect(service.toObject(jsonNode['valueId']! as String), equals(element));
-        expect(service.toObject(jsonNode['objectId']! as String), isA<DiagnosticsNode>());
 
         expect(chainNode['children'], isList);
         final List<Object?> jsonChildren = chainNode['children']! as List<Object?>;
@@ -2124,32 +2101,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(jsonChildren[j], isMap);
           final Map<String, Object?> childJson = jsonChildren[j]! as Map<String, Object?>;
           expect(service.toObject(childJson['valueId']! as String), equals(childrenElements[j]));
-          expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode>());
         }
       }
     });
 
-    test('ext.flutter.inspector.getProperties for $DiagnosticsNode', () async {
-      // TODO(polina-c): delete this test once getChildrenDetailsSubtree stops accepting DiagnosticsNode.
-      // https://github.com/flutter/devtools/issues/3951
-      final DiagnosticsNode diagnostic = const Text('a', textDirection: TextDirection.ltr).toDiagnosticsNode();
-      const String group = 'group';
-      final String id = service.toId(diagnostic, group)!;
-      final List<Object?> propertiesJson = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getProperties.name,
-        <String, String>{'arg': id, 'objectGroup': group},
-      ))! as List<Object?>;
-      final List<DiagnosticsNode> properties = diagnostic.getProperties();
-      expect(properties, isNotEmpty);
-      expect(propertiesJson.length, equals(properties.length));
-      for (int i = 0; i < propertiesJson.length; ++i) {
-        final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
-        expect(service.toObject(propertyJson['valueId'] as String?), equals(properties[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
-      }
-    });
-
-    test('ext.flutter.inspector.getProperties for $Diagnosticable', () async {
+    test('ext.flutter.inspector.getProperties', () async {
       const Diagnosticable diagnosticable = Text('a', textDirection: TextDirection.ltr);
       const String group = 'group';
       final String id = service.toId(diagnosticable, group)!;
@@ -2163,7 +2119,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
         expect(service.toObject(propertyJson['valueId'] as String?), equals(properties[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
       }
     });
 
@@ -2194,7 +2149,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
         expect(service.toObject(propertyJson['valueId']! as String), equals(children[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
       }
     });
 
@@ -2213,26 +2167,25 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         ),
       );
-      final DiagnosticsNode diagnostic = find.byType(Stack).evaluate().first.toDiagnosticsNode();
-      final String id = service.toId(diagnostic, group)!;
+      final Diagnosticable diagnosticable = find.byType(Stack).evaluate().first;
+      final String id = service.toId(diagnosticable, group)!;
       final List<Object?> childrenJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.getChildrenDetailsSubtree.name,
         <String, String>{'arg': id, 'objectGroup': group},
       ))! as List<Object?>;
-      final List<DiagnosticsNode> children = diagnostic.getChildren();
+      final List<DiagnosticsNode> children = diagnosticable.toDiagnosticsNode().getChildren();
       expect(children.length, equals(3));
       expect(childrenJson.length, equals(children.length));
       for (int i = 0; i < childrenJson.length; ++i) {
         final Map<String, Object?> childJson = childrenJson[i]! as Map<String, Object?>;
         expect(service.toObject(childJson['valueId']! as String), equals(children[i].value));
-        expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode>());
         final List<Object?> propertiesJson = childJson['properties']! as List<Object?>;
-        final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId']! as String)! as DiagnosticsNode;
-        final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
+        final Element element = service.toObject(childJson['valueId']! as String)! as Element;
+        final List<DiagnosticsNode> expectedProperties = element.toDiagnosticsNode().getProperties();
+        final Iterable<Object?> propertyValues = expectedProperties.map((DiagnosticsNode e) => e.value.toString());
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
-          final Object? property = service.toObject(propertyJson['objectId']! as String);
-          expect(property, isA<DiagnosticsNode>());
-          expect(expectedProperties, contains(property));
+          final  String property = service.toObject(propertyJson['valueId']! as String)!.toString();
+          expect(propertyValues, contains(property));
         }
       }
     });
@@ -2252,31 +2205,30 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         ),
       );
-      final DiagnosticsNode diagnostic = find.byType(Stack).evaluate().first.toDiagnosticsNode();
-      final String id = service.toId(diagnostic, group)!;
+      final Diagnosticable diagnosticable = find.byType(Stack).evaluate().first;
+      final String id = service.toId(diagnosticable, group)!;
       final Map<String, Object?> subtreeJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.getDetailsSubtree.name,
         <String, String>{'arg': id, 'objectGroup': group},
       ))! as Map<String, Object?>;
-      expect(subtreeJson['objectId'], equals(id));
+      expect(subtreeJson['valueId'], equals(id));
       final List<Object?> childrenJson = subtreeJson['children']! as List<Object?>;
-      final List<DiagnosticsNode> children = diagnostic.getChildren();
+      final List<DiagnosticsNode> children = diagnosticable.toDiagnosticsNode().getChildren();
       expect(children.length, equals(3));
       expect(childrenJson.length, equals(children.length));
       for (int i = 0; i < childrenJson.length; ++i) {
         final Map<String, Object?> childJson = childrenJson[i]! as Map<String, Object?>;
         expect(service.toObject(childJson['valueId']! as String), equals(children[i].value));
-        expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode>());
         final List<Object?> propertiesJson = childJson['properties']! as List<Object?>;
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
           expect(propertyJson, isNot(contains('children')));
         }
-        final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId']! as String)! as DiagnosticsNode;
-        final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
+        final Element element = service.toObject(childJson['valueId']! as String)! as Element;
+        final List<DiagnosticsNode> expectedProperties = element.toDiagnosticsNode().getProperties();
+        final Iterable<Object?> propertyValues = expectedProperties.map((DiagnosticsNode e) => e.value.toString());
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
-          final Object property = service.toObject(propertyJson['objectId']! as String)!;
-          expect(property, isA<DiagnosticsNode>());
-          expect(expectedProperties, contains(property));
+          final String property = service.toObject(propertyJson['valueId']! as String)!.toString();
+          expect(propertyValues, contains(property));
         }
       }
 
@@ -2301,13 +2253,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       a.children.add(b.toDiagnosticsNode());
       b.related = a;
 
-      final DiagnosticsNode diagnostic = a.toDiagnosticsNode();
-      final String id = service.toId(diagnostic, group)!;
+      final String id = service.toId(a, group)!;
       final Map<String, Object?> subtreeJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.getDetailsSubtree.name,
         <String, String>{'arg': id, 'objectGroup': group},
       ))! as Map<String, Object?>;
-      expect(subtreeJson['objectId'], equals(id));
+      expect(subtreeJson['valueId'], equals(id));
       expect(subtreeJson, contains('children'));
       final List<Object?> propertiesJson = subtreeJson['properties']! as List<Object?>;
       expect(propertiesJson.length, equals(1));
@@ -2330,118 +2281,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(nestedRelatedProperty, isNot(contains('children')));
     });
 
-    testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree on $DiagnosticsNode', (WidgetTester tester) async {
-      // TODO(polina-c): delete this test once getChildrenSummaryTree stops accepting DiagnosticsNode.
-      // https://github.com/flutter/devtools/issues/3951
-      const String group = 'test-group';
-
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Text('a', textDirection: TextDirection.ltr),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
-            ],
-          ),
-        ),
-      );
-      final Element elementA = find.text('a').evaluate().first;
-
-      service.disposeAllGroups();
-      service.resetPubRootDirectories();
-      service.setSelection(elementA, 'my-group');
-      final Map<String, dynamic> jsonA = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getSelectedWidget.name,
-        <String, String>{'objectGroup': 'my-group'},
-      ))! as Map<String, dynamic>;
-
-      service.resetPubRootDirectories();
-      Map<String, Object?> rootJson = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
-        <String, String>{'objectGroup': group},
-      ))! as Map<String, Object?>;
-      // We haven't yet properly specified which directories are summary tree
-      // directories so we get an empty tree other than the root that is always
-      // included.
-      final Object? rootWidget = service.toObject(rootJson['valueId']! as String);
-      expect(rootWidget, equals(WidgetsBinding.instance.rootElement));
-      List<Object?> childrenJson = rootJson['children']! as List<Object?>;
-      // There are no summary tree children.
-      expect(childrenJson.length, equals(0));
-
-      final Map<String, Object?> creationLocation = jsonA['creationLocation']! as Map<String, Object?>;
-      expect(creationLocation, isNotNull);
-      final String testFile = creationLocation['file']! as String;
-      expect(testFile, endsWith('widget_inspector_test.dart'));
-      final List<String> segments = Uri.parse(testFile).pathSegments;
-      // Strip a couple subdirectories away to generate a plausible pub root
-      // directory.
-      final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
-      service.resetPubRootDirectories();
-      await service.testExtension(
-        WidgetInspectorServiceExtensions.addPubRootDirectories.name,
-        <String, String>{'arg0': pubRootTest},
-      );
-
-      rootJson = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
-        <String, String>{'objectGroup': group},
-      ))! as Map<String, Object?>;
-      childrenJson = rootJson['children']! as List<Object?>;
-      // The tree of nodes returned contains all widgets created directly by the
-      // test.
-      childrenJson = rootJson['children']! as List<Object?>;
-      expect(childrenJson.length, equals(1));
-
-      List<Object?> alternateChildrenJson = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-        <String, String>{'arg': rootJson['objectId']! as String, 'objectGroup': group},
-      ))! as List<Object?>;
-      expect(alternateChildrenJson.length, equals(1));
-      Map<String, Object?> childJson = childrenJson[0]! as Map<String, Object?>;
-      Map<String, Object?> alternateChildJson = alternateChildrenJson[0]! as Map<String, Object?>;
-      expect(childJson['description'], startsWith('Directionality'));
-      expect(alternateChildJson['description'], startsWith('Directionality'));
-      expect(alternateChildJson['valueId'], equals(childJson['valueId']));
-
-      childrenJson = childJson['children']! as List<Object?>;
-      alternateChildrenJson = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-        <String, String>{'arg': childJson['objectId']! as String, 'objectGroup': group},
-      ))! as List<Object?>;
-      expect(alternateChildrenJson.length, equals(1));
-      expect(childrenJson.length, equals(1));
-      alternateChildJson = alternateChildrenJson[0]! as Map<String, Object?>;
-      childJson = childrenJson[0]! as Map<String, Object?>;
-      expect(childJson['description'], startsWith('Stack'));
-      expect(alternateChildJson['description'], startsWith('Stack'));
-      expect(alternateChildJson['valueId'], equals(childJson['valueId']));
-      childrenJson = childJson['children']! as List<Object?>;
-
-      childrenJson = childJson['children']! as List<Object?>;
-      alternateChildrenJson = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-        <String, String>{'arg': childJson['objectId']! as String, 'objectGroup': group},
-      ))! as List<Object?>;
-      expect(alternateChildrenJson.length, equals(3));
-      expect(childrenJson.length, equals(3));
-      alternateChildJson = alternateChildrenJson[2]! as Map<String, Object?>;
-      childJson = childrenJson[2]! as Map<String, Object?>;
-      expect(childJson['description'], startsWith('Text'));
-      expect(alternateChildJson['description'], startsWith('Text'));
-      expect(alternateChildJson['valueId'], equals(childJson['valueId']));
-      alternateChildrenJson = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-        <String, String>{'arg': childJson['objectId']! as String, 'objectGroup': group},
-      ))! as List<Object?>;
-      expect(alternateChildrenJson.length , equals(0));
-      // Tests are failing when this typo is fixed.
-      expect(childJson['chidlren'], isNull);
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
-
-    testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree on $Diagnosticable', (WidgetTester tester) async {
+    testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree', (WidgetTester tester) async {
       const String group = 'test-group';
 
       await tester.pumpWidget(
@@ -2602,7 +2442,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       List<Object?> alternateChildrenJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-        <String, String>{'arg': rootJson['objectId']! as String, 'objectGroup': group},
+        <String, String>{'arg': rootJson['valueId']! as String, 'objectGroup': group},
       ))! as List<Object?>;
       expect(alternateChildrenJson.length, equals(1));
       Map<String, Object?> childJson = childrenJson[0]! as Map<String, Object?>;
@@ -2614,7 +2454,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       childrenJson = childJson['children']! as List<Object?>;
       alternateChildrenJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-        <String, String>{'arg': childJson['objectId']! as String, 'objectGroup': group},
+        <String, String>{'arg': childJson['valueId']! as String, 'objectGroup': group},
       ))! as List<Object?>;
       expect(alternateChildrenJson.length, equals(1));
       expect(childrenJson.length, equals(1));
@@ -2628,7 +2468,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       childrenJson = childJson['children']! as List<Object?>;
       alternateChildrenJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-        <String, String>{'arg': childJson['objectId']! as String, 'objectGroup': group},
+        <String, String>{'arg': childJson['valueId']! as String, 'objectGroup': group},
       ))! as List<Object?>;
       expect(alternateChildrenJson.length, equals(3));
       expect(childrenJson.length, equals(3));
@@ -4535,8 +4375,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element rowElement = tester.element(find.byType(Row));
         service.setSelection(rowElement, group);
 
-        final DiagnosticsNode diagnostic = rowElement.toDiagnosticsNode();
-        final String id = service.toId(diagnostic, group)!;
+        final String id = service.toId(rowElement, group)!;
         final Map<String, Object?> result = (await service.testExtension(
           WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
           <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
@@ -4581,8 +4420,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element flexibleElement = tester.element(find.byType(Flexible).first);
         service.setSelection(flexibleElement, group);
 
-        final DiagnosticsNode diagnostic = flexibleElement.toDiagnosticsNode();
-        final String id = service.toId(diagnostic, group)!;
+        final String id = service.toId(flexibleElement, group)!;
         final Map<String, Object?> result = (await service.testExtension(
           WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
           <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
@@ -4623,16 +4461,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         await pumpWidgetForLayoutExplorer(tester);
 
         final Element element = tester.element(find.byType(Directionality).first);
-        Element? root;
+        late Element root;
         element.visitAncestorElements((Element ancestor) {
           root = ancestor;
           return true;
         });
-        expect(root, isNotNull);
         service.setSelection(root, group);
 
-        final DiagnosticsNode diagnostic = root!.toDiagnosticsNode();
-        final String id = service.toId(diagnostic, group)!;
+        final String id = service.toId(root, group)!;
         final Map<String, Object?> result = (await service.testExtension(
           WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
           <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
@@ -4663,8 +4499,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element childElement = tester.element(find.byType(Flexible).first);
         service.setSelection(childElement, group);
 
-        final DiagnosticsNode diagnostic = childElement.toDiagnosticsNode();
-        final String id = service.toId(diagnostic, group)!;
+        final String id = service.toId(childElement, group)!;
         Map<String, Object?> result = (await service.testExtension(
           WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
           <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
@@ -4694,8 +4529,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element childElement = tester.element(find.byType(Flexible).first);
         service.setSelection(childElement, group);
 
-        final DiagnosticsNode diagnostic = childElement.toDiagnosticsNode();
-        final String id = service.toId(diagnostic, group)!;
+        final String id = service.toId(childElement, group)!;
         Map<String, Object?> result = (await service.testExtension(
           WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
           <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
@@ -4725,8 +4559,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element rowElement = tester.element(find.byType(Row).first);
         service.setSelection(rowElement, group);
 
-        final DiagnosticsNode diagnostic = rowElement.toDiagnosticsNode();
-        final String id = service.toId(diagnostic, group)!;
+        final String id = service.toId(rowElement, group)!;
         Map<String, Object?> result = (await service.testExtension(
           WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
           <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
@@ -5098,69 +4931,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(box2.localToGlobal(Offset.zero), equals(position2));
     });
 
-    testWidgets('getChildrenDetailsSubtree with $DiagnosticsNode', (WidgetTester tester) async {
-      // TODO(polina-c): delete this test once getChildrenDetailsSubtree stops accepting DiagnosticsNode.
-      // https://github.com/flutter/devtools/issues/3951
-      await tester.pumpWidget(
-        MaterialApp(
-          title: 'Hello, World',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-          ),
-          home: Scaffold(
-            appBar: AppBar(
-              title: const Text('Hello, World'),
-            ),
-            body: const Center(
-              child: Text('Hello, World!'),
-            ),
-          ),
-        ),
-      );
-      service.setSelection(find.text('Hello, World!').evaluate().first, 'my-group');
-
-      // Figure out the pubRootDirectory
-      final Map<String, Object?> jsonObject = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getSelectedWidget.name,
-        <String, String>{'objectGroup': 'my-group'},
-      ))! as Map<String, Object?>;
-      final Map<String, Object?> creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
-      expect(creationLocation, isNotNull);
-      final String file = creationLocation['file']! as String;
-      expect(file, endsWith('widget_inspector_test.dart'));
-      final List<String> segments = Uri.parse(file).pathSegments;
-      // Strip a couple subdirectories away to generate a plausible pub rootdirectory.
-      final String pubRootTest = '/${segments.take(segments.length - 2).join('/')}';
-      service.resetPubRootDirectories();
-      service.addPubRootDirectories(<String>[pubRootTest]);
-
-      final String summary = service.getRootWidgetSummaryTree('foo1');
-      // ignore: avoid_dynamic_calls
-      final List<Object?> childrenOfRoot = json.decode(summary)['children'] as List<Object?>;
-      final List<Object?> childrenOfMaterialApp = (childrenOfRoot.first! as Map<String, Object?>)['children']! as List<Object?>;
-      final Map<String, Object?> scaffold = childrenOfMaterialApp.first! as Map<String, Object?>;
-      expect(scaffold['description'], 'Scaffold');
-      final String objectId = scaffold['objectId']! as String;
-      final String details = service.getDetailsSubtree(objectId, 'foo2');
-      // ignore: avoid_dynamic_calls
-      final List<Object?> detailedChildren = json.decode(details)['children'] as List<Object?>;
-
-      final List<Map<String, Object?>> appBars = <Map<String, Object?>>[];
-      void visitChildren(List<Object?> children) {
-        for (final Map<String, Object?> child in children.cast<Map<String, Object?>>()) {
-          if (child['description'] == 'AppBar') {
-            appBars.add(child);
-          }
-          if (child.containsKey('children')) {
-            visitChildren(child['children']! as List<Object?>);
-          }
-        }
-      }
-      visitChildren(detailedChildren);
-      expect(appBars.single, isNot(contains('children')));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
-
-    testWidgets('getChildrenDetailsSubtree with $Diagnosticable', (WidgetTester tester) async {
+    testWidgets('getChildrenDetailsSubtree', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           title: 'Hello, World',
