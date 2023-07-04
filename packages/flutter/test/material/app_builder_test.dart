@@ -10,7 +10,6 @@ void main() {
     final List<String> log = <String>[];
     final Widget app = MaterialApp(
       theme: ThemeData(
-        useMaterial3: false,
         primarySwatch: Colors.green,
       ),
       home: const Placeholder(),
@@ -43,7 +42,6 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          useMaterial3: false,
           primarySwatch: Colors.yellow,
         ),
         home: Builder(

@@ -11,16 +11,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestPage extends StatelessWidget {
-  const TestPage({ super.key, this.useMaterial3 });
-
-  final bool? useMaterial3;
+  const TestPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Test',
       theme: ThemeData(
-        useMaterial3: useMaterial3,
         primarySwatch: Colors.blue,
       ),
       home: const HomePage(),
@@ -93,23 +90,13 @@ class ModalPage extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Material2 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
-    await tester.pumpWidget(const TestPage(useMaterial3: false));
+  testWidgets('Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(const TestPage());
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(TestPage),
-      matchesGoldenFile('m2_page_route_builder.barrier.png'),
-    );
-  });
-
-  testWidgets('Material3 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
-    await tester.pumpWidget(const TestPage(useMaterial3: true));
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(TestPage),
-      matchesGoldenFile('m3_page_route_builder.barrier.png'),
+      matchesGoldenFile('page_route_builder.barrier.png'),
     );
   });
 }

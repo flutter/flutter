@@ -81,7 +81,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             key: dragTarget,
@@ -173,7 +172,6 @@ void main() {
     const double expandedHeight = 200;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
@@ -440,7 +438,6 @@ void main() {
     late double width;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
@@ -489,7 +486,6 @@ void main() {
     const double expandedTitleScale = 3.0;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
@@ -559,7 +555,6 @@ void main() {
     const double height = 300.0;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
@@ -620,7 +615,6 @@ void main() {
     const double expandedTitleScale = 3.0;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
@@ -680,7 +674,7 @@ void main() {
   testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
-        theme: ThemeData(platform: platform, useMaterial3: false),
+        theme: ThemeData(platform: platform),
         home: Scaffold(
           appBar: AppBar(
             flexibleSpace: FlexibleSpaceBar(
@@ -730,7 +724,7 @@ void main() {
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
-        theme: ThemeData(platform: platform, useMaterial3: false),
+        theme: ThemeData(platform: platform),
         home: Scaffold(
           appBar: AppBar(
             flexibleSpace: FlexibleSpaceBar(
@@ -801,29 +795,14 @@ void main() {
     ));
 
     expect(RenderRebuildTracker.count, 1);
-    expect(
-      tester.layers.lastWhere((Layer element) => element is OpacityLayer),
-      isA<OpacityLayer>().having((OpacityLayer p0) => p0.alpha, 'alpha', 255),
-    );
 
     // We drag up to fully collapse the space bar.
-    for (int i = 0; i < 9; i++) {
-      await tester.drag(find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
-      await tester.pumpAndSettle();
-    }
-
-    expect(
-      tester.layers.lastWhere((Layer element) => element is OpacityLayer),
-      isA<OpacityLayer>().having((OpacityLayer p0) => p0.alpha, 'alpha', lessThan(255)),
-    );
-
-    for (int i = 0; i < 11; i++) {
+    for (int i = 0; i < 20; i++) {
       await tester.drag(find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
       await tester.pumpAndSettle();
     }
 
     expect(RenderRebuildTracker.count, greaterThan(1));
-    expect(tester.layers.whereType<OpacityLayer>(), isEmpty);
   });
 }
 

@@ -218,7 +218,7 @@ class NavigationDrawerDestination extends StatelessWidget {
   ///
   /// The icon will use [NavigationDrawerThemeData.iconTheme] with
   /// [MaterialState.selected]. If this is null, the default [IconThemeData]
-  /// would use a size of 24.0 and [ColorScheme.onSecondaryContainer].
+  /// would use a size of 24.0 and [ColorScheme.onSurfaceVariant].
   final Widget? selectedIcon;
 
   /// The text label that appears on the right of the icon
@@ -702,7 +702,7 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
       return IconThemeData(
         size: 24.0,
         color: states.contains(MaterialState.selected)
-            ? _colors.onSecondaryContainer
+            ? null
             : _colors.onSurfaceVariant,
       );
     });

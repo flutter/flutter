@@ -70,14 +70,12 @@ TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool? enableImpeller}
   ).run;
 }
 
-TaskFunction createAndroidTextureScrollPerfTest({bool? enableImpeller}) {
+TaskFunction createAndroidTextureScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/android_view_scroll_perf.dart',
     'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
-    needsFullTimeline: false,
-    enableImpeller: enableImpeller,
   ).run;
 }
 

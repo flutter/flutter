@@ -27,7 +27,7 @@ import 'message_parser.dart';
 // * <https://pub.dev/packages/intl>
 // * <https://pub.dev/documentation/intl/latest/intl/DateFormat-class.html>
 // * <https://api.dartlang.org/stable/2.7.0/dart-core/DateTime-class.html>
-const Set<String> validDateFormats = <String>{
+const Set<String> _validDateFormats = <String>{
   'd',
   'E',
   'EEEE',
@@ -244,14 +244,13 @@ class Placeholder {
   String? type;
   bool isPlural = false;
   bool isSelect = false;
-  bool isDateTime = false;
-  bool requiresDateFormatting = false;
 
   bool get requiresFormatting => requiresDateFormatting || requiresNumFormatting;
+  bool get requiresDateFormatting => type == 'DateTime';
   bool get requiresNumFormatting => <String>['int', 'num', 'double'].contains(type) && format != null;
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
-  bool get hasValidDateFormat => validDateFormats.contains(format);
+  bool get hasValidDateFormat => _validDateFormats.contains(format);
 
   static String? _stringAttribute(
     String resourceId,
@@ -489,12 +488,7 @@ class Message {
       final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
       while (traversalStack.isNotEmpty) {
         final Node node = traversalStack.removeLast();
-        if (<ST>[
-          ST.placeholderExpr,
-          ST.pluralExpr,
-          ST.selectExpr,
-          ST.argumentExpr
-        ].contains(node.type)) {
+        if (<ST>[ST.placeholderExpr, ST.pluralExpr, ST.selectExpr].contains(node.type)) {
           final String identifier = node.children[1].value!;
           Placeholder? placeholder = getPlaceholder(identifier);
           if (placeholder == null) {
@@ -505,14 +499,6 @@ class Message {
             placeholder.isPlural = true;
           } else if (node.type == ST.selectExpr) {
             placeholder.isSelect = true;
-          } else if (node.type == ST.argumentExpr) {
-            placeholder.isDateTime = true;
-          } else {
-            // Here the node type must be ST.placeholderExpr.
-            // A DateTime placeholder must require date formatting.
-            if (placeholder.type == 'DateTime') {
-              placeholder.requiresDateFormatting = true;
-            }
           }
         }
         traversalStack.addAll(node.children);
@@ -524,16 +510,9 @@ class Message {
         ..sort((MapEntry<String, Placeholder> p1, MapEntry<String, Placeholder> p2) => p1.key.compareTo(p2.key))
     );
 
-    bool atMostOneOf(bool x, bool y, bool z) {
-      return x && !y && !z
-        || !x && y && !z
-        || !x && !y && z
-        || !x && !y && !z;
-    }
-
     for (final Placeholder placeholder in placeholders.values) {
-      if (!atMostOneOf(placeholder.isPlural, placeholder.isDateTime, placeholder.isSelect)) {
-        throw L10nException('Placeholder is used as plural/select/datetime in certain languages.');
+      if (placeholder.isPlural && placeholder.isSelect) {
+        throw L10nException('Placeholder is used as both a plural and select in certain languages.');
       } else if (placeholder.isPlural) {
         if (placeholder.type == null) {
           placeholder.type = 'num';
@@ -546,12 +525,6 @@ class Message {
           placeholder.type = 'String';
         } else if (placeholder.type != 'String') {
           throw L10nException("Placeholders used in selects must be of type 'String'");
-        }
-      } else if (placeholder.isDateTime) {
-        if (placeholder.type == null) {
-          placeholder.type = 'DateTime';
-        } else if (placeholder.type != 'DateTime') {
-          throw L10nException("Placeholders used in datetime expressions much be of type 'DateTime'");
         }
       }
       placeholder.type ??= 'Object';

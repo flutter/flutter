@@ -21,6 +21,7 @@ import 'devfs.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
+
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
   /// Builds the bundle for the given target platform.

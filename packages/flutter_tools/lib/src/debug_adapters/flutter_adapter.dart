@@ -11,12 +11,11 @@ import 'package:vm_service/vm_service.dart' as vm;
 import '../base/io.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart' as globals show fs;
 import 'flutter_adapter_args.dart';
 import 'flutter_base_adapter.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter applications.
-class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFileUtils {
+class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   FlutterDebugAdapter(
     super.channel, {
     required super.fileSystem,
@@ -121,16 +120,6 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   @override
   Future<void> attachImpl() async {
     final FlutterAttachRequestArguments args = this.args as FlutterAttachRequestArguments;
-    String? vmServiceUri = args.vmServiceUri;
-    final String? vmServiceInfoFile = args.vmServiceInfoFile;
-
-    if (vmServiceUri != null && vmServiceInfoFile != null) {
-      sendConsoleOutput(
-        'To attach, provide only one (or neither) of vmServiceUri/vmServiceInfoFile',
-      );
-      handleSessionTerminate();
-      return;
-    }
 
     launchProgress = startProgressNotification(
       'launch',
@@ -138,11 +127,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
       message: 'Attaching…',
     );
 
-    if (vmServiceUri == null && vmServiceInfoFile != null) {
-      final Uri uriFromFile = await waitForVmServiceInfoFile(logger, globals.fs.file(vmServiceInfoFile));
-      vmServiceUri = uriFromFile.toString();
-    }
-
+    final String? vmServiceUri = args.vmServiceUri;
     final List<String> toolArgs = <String>[
       'attach',
       '--machine',

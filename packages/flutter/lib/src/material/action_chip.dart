@@ -10,7 +10,6 @@ import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
-import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -50,22 +49,6 @@ enum _ChipVariant { flat, elevated }
 /// Material Design 3. If [ThemeData.useMaterial3] is true, then [ActionChip]
 /// will be styled to match the Material Design 3 Assist and Suggestion chips.
 ///
-/// ### Creating an Assist chip
-///
-/// Assist chips are used to provide a quick way to perform an action.
-/// To create an Action chip, set the icon property to the icon
-/// that represents the action and set the label to the name of the action.
-///
-///
-/// ### Creating a Suggestion chip
-///
-/// Suggestion chips usually display generated suggestions for the user,
-/// like a suggested response to a message.
-///
-/// To create a Suggestion chip, set the label to the suggestion
-/// and don't set the icon property.
-//
-///
 /// See also:
 ///
 ///  * [Chip], a chip that displays information and can be deleted.
@@ -98,7 +81,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
-    this.color,
     this.backgroundColor,
     this.disabledColor,
     this.padding,
@@ -131,7 +113,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
-    this.color,
     this.backgroundColor,
     this.disabledColor,
     this.padding,
@@ -170,8 +151,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   @override
   final bool autofocus;
   @override
-  final MaterialStateProperty<Color?>? color;
-  @override
   final Color? backgroundColor;
   @override
   final Color? disabledColor;
@@ -209,7 +188,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       pressElevation: pressElevation,
       tooltip: tooltip,
       labelStyle: labelStyle,
-      color: color,
       backgroundColor: backgroundColor,
       side: side,
       shape: shape,
@@ -261,15 +239,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
-  MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return _chipVariant == _ChipVariant.flat
-          ? null
-          : _colors.onSurface.withOpacity(0.12);
-      }
-      return null;
-    });
+  Color? get backgroundColor => null;
 
   @override
   Color? get shadowColor => _chipVariant == _ChipVariant.flat
@@ -280,7 +250,15 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
+  Color? get selectedColor => null;
+
+  @override
   Color? get checkmarkColor => null;
+
+  @override
+  Color? get disabledColor => _chipVariant == _ChipVariant.flat
+    ? null
+    : _colors.onSurface.withOpacity(0.12);
 
   @override
   Color? get deleteIconColor => null;

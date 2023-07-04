@@ -63,7 +63,6 @@ void main() {
       orgName: orgName,
       processManager: processManager,
       stdio: stdio,
-      githubUsername: 'flutter-pub-roller-bot',
     );
   });
 
@@ -200,7 +199,7 @@ void main() {
         'pr',
         'list',
         '--author',
-        'flutter-pub-roller-bot',
+        'fluttergithubbot',
         '--repo',
         'flutter/flutter',
         '--state',
@@ -217,7 +216,7 @@ void main() {
     await controller.stream.drain();
     await rollFuture;
     expect(processManager, hasNoRemainingExpectations);
-    expect(stdio.stdout, contains('flutter-pub-roller-bot already has open tool PRs'));
+    expect(stdio.stdout, contains('fluttergithubbot already has open tool PRs'));
     expect(stdio.stdout, contains(r'[{number: 123}]'));
   });
 
@@ -240,7 +239,7 @@ void main() {
         'pr',
         'list',
         '--author',
-        'flutter-pub-roller-bot',
+        'fluttergithubbot',
         '--repo',
         'flutter/flutter',
         '--state',
@@ -336,7 +335,7 @@ void main() {
         'pr',
         'list',
         '--author',
-        'flutter-pub-roller-bot',
+        'fluttergithubbot',
         '--repo',
         'flutter/flutter',
         '--state',
@@ -428,7 +427,7 @@ void main() {
         'commit',
         '--message',
         'roll packages',
-        '--author="flutter-pub-roller-bot <flutter-pub-roller-bot@google.com>"',
+        '--author="fluttergithubbot <fluttergithubbot@gmail.com>"',
       ]),
       const FakeCommand(command: <String>[
         'git',
@@ -476,11 +475,12 @@ void main() {
 
   group('command argument validations', () {
     const String tokenPath = '/path/to/token';
+    const String mirrorRemote = 'https://githost.com/org/project';
 
     test('validates that file exists at --token option', () async {
       await expectLater(
         () => run(
-          <String>['--token', tokenPath],
+          <String>['--token', tokenPath, '--mirror-remote', mirrorRemote],
           fs: fileSystem,
           processManager: processManager,
         ),
@@ -499,7 +499,7 @@ void main() {
         ..writeAsStringSync('');
       await expectLater(
         () => run(
-          <String>['--token', tokenPath],
+          <String>['--token', tokenPath, '--mirror-remote', mirrorRemote],
           fs: fileSystem,
           processManager: processManager,
         ),

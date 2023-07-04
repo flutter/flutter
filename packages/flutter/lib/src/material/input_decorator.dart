@@ -302,7 +302,6 @@ class _HelperError extends StatefulWidget {
     this.helperText,
     this.helperStyle,
     this.helperMaxLines,
-    this.error,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
@@ -312,7 +311,6 @@ class _HelperError extends StatefulWidget {
   final String? helperText;
   final TextStyle? helperStyle;
   final int? helperMaxLines;
-  final Widget? error;
   final String? errorText;
   final TextStyle? errorStyle;
   final int? errorMaxLines;
@@ -330,8 +328,6 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   Widget? _helper;
   Widget? _error;
 
-  bool get _hasError => widget.errorText != null || widget.error != null;
-
   @override
   void initState() {
     super.initState();
@@ -339,7 +335,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       duration: _kTransitionDuration,
       vsync: this,
     );
-    if (_hasError) {
+    if (widget.errorText != null) {
       _error = _buildError();
       _controller.value = 1.0;
     } else if (widget.helperText != null) {
@@ -364,19 +360,16 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   void didUpdateWidget(_HelperError old) {
     super.didUpdateWidget(old);
 
-    final Widget? newError = widget.error;
     final String? newErrorText = widget.errorText;
     final String? newHelperText = widget.helperText;
-    final Widget? oldError = old.error;
     final String? oldErrorText = old.errorText;
     final String? oldHelperText = old.helperText;
 
-    final bool errorStateChanged = (newError != null) != (oldError != null);
     final bool errorTextStateChanged = (newErrorText != null) != (oldErrorText != null);
     final bool helperTextStateChanged = newErrorText == null && (newHelperText != null) != (oldHelperText != null);
 
-    if (errorStateChanged || errorTextStateChanged || helperTextStateChanged) {
-      if (newError != null || newErrorText != null) {
+    if (errorTextStateChanged || helperTextStateChanged) {
+      if (newErrorText != null) {
         _error = _buildError();
         _controller.forward();
       } else if (newHelperText != null) {
@@ -406,7 +399,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 
   Widget _buildError() {
-    assert(widget.error != null || widget.errorText != null);
+    assert(widget.errorText != null);
     return Semantics(
       container: true,
       child: FadeTransition(
@@ -416,7 +409,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
             begin: const Offset(0.0, -0.25),
             end: Offset.zero,
           ).evaluate(_controller.view),
-          child: widget.error ?? Text(
+          child: Text(
             widget.errorText!,
             style: widget.errorStyle,
             textAlign: widget.textAlign,
@@ -442,7 +435,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
     if (_controller.isCompleted) {
       _helper = null;
-      if (_hasError) {
+      if (widget.errorText != null) {
         return _error = _buildError();
       } else {
         _error = null;
@@ -450,7 +443,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       }
     }
 
-    if (_helper == null && _hasError) {
+    if (_helper == null && widget.errorText != null) {
       return _buildError();
     }
 
@@ -458,7 +451,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       return _buildHelper();
     }
 
-    if (_hasError) {
+    if (widget.errorText != null) {
       return Stack(
         children: <Widget>[
           FadeTransition(
@@ -1410,7 +1403,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         double start = right - _boxSize(icon).width;
         double end = left;
         if (prefixIcon != null) {
-          start += contentPadding.right;
+          start += contentPadding.left;
           start -= centerLayout(prefixIcon!, start - prefixIcon!.size.width);
         }
         if (label != null) {
@@ -2372,7 +2365,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       helperText: decoration.helperText,
       helperStyle: _getHelperStyle(themeData, defaults),
       helperMaxLines: decoration.helperMaxLines,
-      error: decoration.error,
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData, defaults),
       errorMaxLines: decoration.errorMaxLines,
@@ -2570,7 +2562,6 @@ class InputDecoration {
     this.hintStyle,
     this.hintTextDirection,
     this.hintMaxLines,
-    this.error,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
@@ -2610,8 +2601,7 @@ class InputDecoration {
     this.constraints,
   }) : assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
-       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
-       assert(!(error != null && errorText != null), 'Declaring both error and errorText is not supported.');
+       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
 
   /// Defines an [InputDecorator] that is the same size as the input field.
   ///
@@ -2640,7 +2630,6 @@ class InputDecoration {
        helperStyle = null,
        helperMaxLines = null,
        hintMaxLines = null,
-       error = null,
        errorText = null,
        errorStyle = null,
        errorMaxLines = null,
@@ -2853,13 +2842,6 @@ class InputDecoration {
   /// used to handle the overflow when it is limited to single line.
   final int? hintMaxLines;
 
-  /// Optional widget that appears below the [InputDecorator.child] and the border.
-  ///
-  /// If non-null, the border's color animates to red and the [helperText] is not shown.
-  ///
-  /// Only one of [error] and [errorText] can be specified.
-  final Widget? error;
-
   /// Text that appears below the [InputDecorator.child] and the border.
   ///
   /// If non-null, the border's color animates to red and the [helperText] is
@@ -2867,10 +2849,6 @@ class InputDecoration {
   ///
   /// In a [TextFormField], this is overridden by the value returned from
   /// [TextFormField.validator], if that is not null.
-  ///
-  /// If a more elaborate error is required, consider using [error] instead.
-  ///
-  /// Only one of [error] and [errorText] can be specified.
   final String? errorText;
 
   /// {@template flutter.material.inputDecoration.errorStyle}
@@ -3507,7 +3485,6 @@ class InputDecoration {
     TextStyle? hintStyle,
     TextDirection? hintTextDirection,
     int? hintMaxLines,
-    Widget? error,
     String? errorText,
     TextStyle? errorStyle,
     int? errorMaxLines,
@@ -3560,7 +3537,6 @@ class InputDecoration {
       hintStyle: hintStyle ?? this.hintStyle,
       hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
-      error: error ?? this.error,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
@@ -3617,14 +3593,11 @@ class InputDecoration {
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
       floatingLabelAlignment: floatingLabelAlignment ?? theme.floatingLabelAlignment,
+      isCollapsed: isCollapsed,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
-      isCollapsed: isCollapsed,
-      iconColor: iconColor ?? theme.iconColor,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
-      prefixIconColor: prefixIconColor ?? theme.prefixIconColor,
       suffixStyle: suffixStyle ?? theme.suffixStyle,
-      suffixIconColor: suffixIconColor ?? theme.suffixIconColor,
       counterStyle: counterStyle ?? theme.counterStyle,
       filled: filled ?? theme.filled,
       fillColor: fillColor ?? theme.fillColor,
@@ -3663,7 +3636,6 @@ class InputDecoration {
         && other.hintStyle == hintStyle
         && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
-        && other.error == error
         && other.errorText == errorText
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
@@ -3719,7 +3691,6 @@ class InputDecoration {
       hintStyle,
       hintTextDirection,
       hintMaxLines,
-      error,
       errorText,
       errorStyle,
       errorMaxLines,
@@ -3773,7 +3744,6 @@ class InputDecoration {
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
-      if (error != null) 'error: "$error"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
@@ -4306,49 +4276,6 @@ class InputDecorationTheme with Diagnosticable {
       border: border ?? this.border,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
-    );
-  }
-
-  /// Returns a copy of this InputDecorationTheme where the non-null fields in
-  /// the given InputDecorationTheme override the corresponding nullable fields
-  /// in this InputDecorationTheme.
-  ///
-  /// The non-nullable fields of InputDecorationTheme, such as [floatingLabelBehavior],
-  /// [isDense], [isCollapsed], [filled], and [alignLabelWithHint] cannot be overridden.
-  ///
-  /// In other words, the fields of the provided [InputDecorationTheme] are used to
-  /// fill in the unspecified and nullable fields of this InputDecorationTheme.
-  InputDecorationTheme merge(InputDecorationTheme? inputDecorationTheme) {
-    if (inputDecorationTheme == null) {
-      return this;
-    }
-    return copyWith(
-      labelStyle: labelStyle ?? inputDecorationTheme.labelStyle,
-      floatingLabelStyle: floatingLabelStyle ?? inputDecorationTheme.floatingLabelStyle,
-      helperStyle: helperStyle ?? inputDecorationTheme.helperStyle,
-      helperMaxLines: helperMaxLines ?? inputDecorationTheme.helperMaxLines,
-      hintStyle: hintStyle ?? inputDecorationTheme.hintStyle,
-      errorStyle: errorStyle ?? inputDecorationTheme.errorStyle,
-      errorMaxLines: errorMaxLines ?? inputDecorationTheme.errorMaxLines,
-      contentPadding: contentPadding ?? inputDecorationTheme.contentPadding,
-      iconColor: iconColor ?? inputDecorationTheme.iconColor,
-      prefixStyle: prefixStyle ?? inputDecorationTheme.prefixStyle,
-      prefixIconColor: prefixIconColor ?? inputDecorationTheme.prefixIconColor,
-      suffixStyle: suffixStyle ?? inputDecorationTheme.suffixStyle,
-      suffixIconColor: suffixIconColor ?? inputDecorationTheme.suffixIconColor,
-      counterStyle: counterStyle ?? inputDecorationTheme.counterStyle,
-      fillColor: fillColor ?? inputDecorationTheme.fillColor,
-      activeIndicatorBorder: activeIndicatorBorder ?? inputDecorationTheme.activeIndicatorBorder,
-      outlineBorder: outlineBorder ?? inputDecorationTheme.outlineBorder,
-      focusColor: focusColor ?? inputDecorationTheme.focusColor,
-      hoverColor: hoverColor ?? inputDecorationTheme.hoverColor,
-      errorBorder: errorBorder ?? inputDecorationTheme.errorBorder,
-      focusedBorder: focusedBorder ?? inputDecorationTheme.focusedBorder,
-      focusedErrorBorder: focusedErrorBorder ?? inputDecorationTheme.focusedErrorBorder,
-      disabledBorder: disabledBorder ?? inputDecorationTheme.disabledBorder,
-      enabledBorder: enabledBorder ?? inputDecorationTheme.enabledBorder,
-      border: border ?? inputDecorationTheme.border,
-      constraints: constraints ?? inputDecorationTheme.constraints,
     );
   }
 

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -2699,7 +2700,7 @@ class BuildOwner {
         }
         return true;
       }());
-      FlutterTimeline.startSync(
+      Timeline.startSync(
         'BUILD',
         arguments: debugTimelineArguments
       );
@@ -2770,7 +2771,7 @@ class BuildOwner {
             }
             return true;
           }());
-          FlutterTimeline.startSync(
+          Timeline.startSync(
             '${element.widget.runtimeType}',
             arguments: debugTimelineArguments,
           );
@@ -2793,7 +2794,7 @@ class BuildOwner {
           );
         }
         if (isTimelineTracked) {
-          FlutterTimeline.finishSync();
+          Timeline.finishSync();
         }
         index += 1;
         if (dirtyCount < _dirtyElements.length || _dirtyElementsNeedsResorting!) {
@@ -2831,7 +2832,7 @@ class BuildOwner {
       _scheduledFlushDirtyElements = false;
       _dirtyElementsNeedsResorting = null;
       if (!kReleaseMode) {
-        FlutterTimeline.finishSync();
+        Timeline.finishSync();
       }
       assert(_debugBuilding);
       assert(() {
@@ -3043,7 +3044,7 @@ class BuildOwner {
   @pragma('vm:notify-debugger-on-exception')
   void finalizeTree() {
     if (!kReleaseMode) {
-      FlutterTimeline.startSync('FINALIZE TREE');
+      Timeline.startSync('FINALIZE TREE');
     }
     try {
       lockState(_inactiveElements._unmountAll); // this unregisters the GlobalKeys
@@ -3139,7 +3140,7 @@ class BuildOwner {
       _reportException(ErrorSummary('while finalizing the widget tree'), e, stack);
     } finally {
       if (!kReleaseMode) {
-        FlutterTimeline.finishSync();
+        Timeline.finishSync();
       }
     }
   }
@@ -3152,7 +3153,7 @@ class BuildOwner {
   /// This is expensive and should not be called except during development.
   void reassemble(Element root, DebugReassembleConfig? reassembleConfig) {
     if (!kReleaseMode) {
-      FlutterTimeline.startSync('Preparing Hot Reload (widgets)');
+      Timeline.startSync('Preparing Hot Reload (widgets)');
     }
     try {
       assert(root._parent == null);
@@ -3161,7 +3162,7 @@ class BuildOwner {
       root.reassemble();
     } finally {
       if (!kReleaseMode) {
-        FlutterTimeline.finishSync();
+        Timeline.finishSync();
       }
     }
   }
@@ -3677,14 +3678,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             }
             return true;
           }());
-          FlutterTimeline.startSync(
+          Timeline.startSync(
             '${newWidget.runtimeType}',
             arguments: debugTimelineArguments,
           );
         }
         child.update(newWidget);
         if (isTimelineTracked) {
-          FlutterTimeline.finishSync();
+          Timeline.finishSync();
         }
         assert(child.widget == newWidget);
         assert(() {
@@ -4152,7 +4153,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         }
         return true;
       }());
-      FlutterTimeline.startSync(
+      Timeline.startSync(
         '${newWidget.runtimeType}',
         arguments: debugTimelineArguments,
       );
@@ -4185,7 +4186,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return newChild;
     } finally {
       if (isTimelineTracked) {
-        FlutterTimeline.finishSync();
+        Timeline.finishSync();
       }
     }
   }

@@ -463,7 +463,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: Row(
               crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -471,11 +470,11 @@ void main() {
               children: <Widget>[
                 Text('big text',
                   key: key1,
-                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1, height: 1.0),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1),
                 ),
                 Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
                   key: key2,
-                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2, height: 1.0),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2),
                 ),
               ],
             ),
@@ -518,7 +517,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: Row(
               crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -526,11 +524,11 @@ void main() {
               children: <Widget>[
                 Text('big text',
                   key: key1,
-                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1, height: 1.0),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1),
                 ),
                 Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
                   key: key2,
-                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2, height: 1.0),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2),
                 ),
                 const FlutterLogo(size: 250),
               ],

@@ -120,7 +120,6 @@ void main() {
           child: RepaintBoundary(
             key: key,
             child: MaterialApp(
-              theme: ThemeData(useMaterial3: false),
               home: Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: () { },
@@ -218,10 +217,9 @@ void main() {
     expect(babRect, const Rect.fromLTRB(240, 520, 560, 600));
   });
 
-  testWidgets('color defaults to Theme.bottomAppBarColor in M2', (WidgetTester tester) async {
+  testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
@@ -247,7 +245,6 @@ void main() {
   testWidgets('color overrides theme color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
@@ -327,7 +324,7 @@ void main() {
   testWidgets('dark theme applies an elevation overlay color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(useMaterial3: false, colorScheme: const ColorScheme.dark()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.dark()),
         home: Scaffold(
           bottomNavigationBar: BottomAppBar(
             color: const ColorScheme.dark().surface,
@@ -511,9 +508,8 @@ void main() {
 
   testWidgets('observes safe area', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: const MediaQuery(
+      const MaterialApp(
+        home: MediaQuery(
           data: MediaQueryData(
             padding: EdgeInsets.all(50.0),
           ),
@@ -570,10 +566,8 @@ void main() {
 
   testWidgets('BottomAppBar with shape when Scaffold.bottomNavigationBar == null', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80878
-    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
-        theme: theme,
         home: Scaffold(
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           floatingActionButton: FloatingActionButton(
@@ -601,7 +595,7 @@ void main() {
     );
 
     expect(tester.getRect(find.byType(FloatingActionButton)), const Rect.fromLTRB(372, 528, 428, 584));
-    expect(tester.getSize(find.byType(BottomAppBar)), theme.useMaterial3 ? const Size(800, 80) : const Size(800, 50));
+    expect(tester.getSize(find.byType(BottomAppBar)), const Size(800, 50));
   });
 
   testWidgets('notch with margin and top padding, home safe area', (WidgetTester tester) async {

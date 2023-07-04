@@ -46,7 +46,7 @@ void main() {
         flutterWebWasm.environmentOverride!: 'true'
       },
     );
-    expect(result, const ProcessResultMatcher());
+    expect(result.exitCode, 0);
 
     final Directory appBuildDir = fileSystem.directory(fileSystem.path.join(
       exampleAppDir.path,

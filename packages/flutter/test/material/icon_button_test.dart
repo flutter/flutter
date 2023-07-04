@@ -789,7 +789,7 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-        useMaterial3: false,
+        useMaterial3: theme.useMaterial3,
         child: Column(
           children: <Widget>[
             IconButton(

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
 
@@ -228,7 +229,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
     if (!kReleaseMode) {
-      FlutterTimeline.startSync('COMPOSITING');
+      Timeline.startSync('COMPOSITING');
     }
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
@@ -246,7 +247,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       }());
     } finally {
       if (!kReleaseMode) {
-        FlutterTimeline.finishSync();
+        Timeline.finishSync();
       }
     }
   }

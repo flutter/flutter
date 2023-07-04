@@ -32,7 +32,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")};
 
   @override
-  MaterialStateProperty<Color?>? get color => null; // Subclasses override this getter
+  Color? get backgroundColor => ${componentColor("$tokenGroup$variant.container")};
 
   @override
   Color? get shadowColor => ${colorOrTransparent("$tokenGroup.container.shadow-color")};
@@ -41,7 +41,13 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
+  Color? get selectedColor => ${componentColor("$tokenGroup$variant.selected.container")};
+
+  @override
   Color? get checkmarkColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
+
+  @override
+  Color? get disabledColor => ${componentColor("$tokenGroup$variant.disabled.container")};
 
   @override
   Color? get deleteIconColor => ${color("$tokenGroup.with-icon.selected.icon.color")};

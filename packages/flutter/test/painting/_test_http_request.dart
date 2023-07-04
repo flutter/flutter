@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_interop';
+// For now, we're hiding dart:js_interop's `@JS` to avoid a conflict with
+// package:js' `@JS`. In the future, we should be able to remove package:js
+// altogether and just import dart:js_interop.
+import 'dart:js_interop' hide JS;
 
 import 'package:flutter/src/services/dom.dart';
+import 'package:js/js.dart';
+import 'package:js/js_util.dart' as js_util;
 
 /// Defines a new property on an Object.
 @JS('Object.defineProperty')
@@ -12,12 +17,13 @@ external JSVoid objectDefineProperty(JSAny o, JSString symbol, JSAny desc);
 
 void createGetter(JSAny mock, String key, JSAny? Function() get) {
   objectDefineProperty(
-    mock,
-    key.toJS,
-    <String, JSFunction>{
-      'get': (() => get()).toJS,
-    }.jsify()!,
-  );
+      mock,
+      key.toJS,
+      js_util.jsify(
+          <String, Object>{
+            'get': () { return get(); }.toJS
+          }
+      ) as JSAny);
 }
 
 @JS()
@@ -45,12 +51,13 @@ class TestHttpRequest {
     );
     // TODO(srujzs): This is needed for when we reify JS types. Right now, JSAny
     // is a typedef for Object?, but when we reify, it'll be its own type.
+    // ignore: unnecessary_cast
     final JSAny mock = _mock as JSAny;
-    createGetter(mock, 'headers', () => headers.jsify());
+    createGetter(mock, 'headers', () => js_util.jsify(headers) as JSAny);
     createGetter(mock,
-        'responseHeaders', () => responseHeaders.jsify());
+        'responseHeaders', () => js_util.jsify(responseHeaders) as JSAny);
     createGetter(mock, 'status', () => status.toJS);
-    createGetter(mock, 'response', () => response.jsify());
+    createGetter(mock, 'response', () => js_util.jsify(response) as JSAny);
   }
 
   late DomXMLHttpRequestMock _mock;

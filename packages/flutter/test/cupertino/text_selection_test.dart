@@ -60,6 +60,18 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
 
+  // Returns true iff the button is visually enabled.
+  bool appearsEnabled(WidgetTester tester, String text) {
+    final CupertinoButton button = tester.widget<CupertinoButton>(
+      find.ancestor(
+        of: find.text(text),
+        matching: find.byType(CupertinoButton),
+      ),
+    );
+    // Disabled buttons have no opacity change when pressed.
+    return button.pressedOpacity! < 1.0;
+  }
+
   List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
     return points.map<TextSelectionPoint>((TextSelectionPoint point) {
       return TextSelectionPoint(
@@ -179,15 +191,6 @@ void main() {
   });
 
   group('Text selection menu overflow (iOS)', () {
-    Finder findOverflowNextButton() => find.byWidgetPredicate((Widget widget) =>
-      widget is CustomPaint &&
-      '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
-    );
-    Finder findOverflowBackButton() => find.byWidgetPredicate((Widget widget) =>
-      widget is CustomPaint &&
-      '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
-    );
-
     testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(CupertinoApp(
@@ -213,8 +216,8 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsNothing);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsNothing);
 
       // Long press on an empty space to show the selection menu.
       await tester.longPressAt(textOffsetToPosition(tester, 4));
@@ -223,8 +226,8 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsOneWidget);
       expect(find.text('Select All'), findsOneWidget);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsNothing);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsNothing);
 
       // Double tap to select a word and show the full selection menu.
       final Offset textOffset = textOffsetToPosition(tester, 1);
@@ -238,8 +241,8 @@ void main() {
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsOneWidget);
       expect(find.text('Select All'), findsNothing);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsNothing);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsNothing);
     },
       skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
@@ -270,8 +273,8 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsNothing);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsNothing);
 
       // Double tap to select a word and show the selection menu.
       final Offset textOffset = textOffsetToPosition(tester, 1);
@@ -285,29 +288,32 @@ void main() {
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsOneWidget);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '▶'), true);
 
-      // Tapping the next button shows the overflowing button and the next
-      // button is hidden as the last page is shown.
-      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+      // Tapping the next button shows the overflowing button.
+      await tester.tap(find.text('▶'));
       await tester.pumpAndSettle();
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsOneWidget);
       expect(find.text('Select All'), findsNothing);
-      expect(findOverflowBackButton(), findsOneWidget);
-      expect(findOverflowNextButton(), findsNothing);
+      expect(find.text('◀'), findsOneWidget);
+      expect(appearsEnabled(tester, '◀'), true);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '▶'), false);
 
-      // Tapping the back button shows the first page again with the next button.
-      await tester.tapAt(tester.getCenter(findOverflowBackButton()));
+      // Tapping the back button shows the first page again.
+      await tester.tap(find.text('◀'));
       await tester.pumpAndSettle();
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsOneWidget);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '▶'), true);
     },
       skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
@@ -335,13 +341,13 @@ void main() {
       ));
 
       // Initially, the menu isn't shown at all.
-      expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
+      expect(find.byType(CupertinoButton), findsNothing);
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsNothing);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsNothing);
 
       // Double tap to select a word and show the selection menu.
       final Offset textOffset = textOffsetToPosition(tester, 1);
@@ -351,58 +357,65 @@ void main() {
       await tester.pumpAndSettle();
 
       // Only the first button fits, and a next button is shown.
-      expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(2));
+      expect(find.byType(CupertinoButton), findsNWidgets(2));
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsOneWidget);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '▶'), true);
 
       // Tapping the next button shows Copy.
-      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+      await tester.tap(find.text('▶'));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(3));
+      expect(find.byType(CupertinoButton), findsNWidgets(3));
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(findOverflowBackButton(), findsOneWidget);
-      expect(findOverflowNextButton(), findsOneWidget);
+      expect(find.text('◀'), findsOneWidget);
+      expect(appearsEnabled(tester, '◀'), true);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '▶'), true);
 
-      // Tapping the next button again shows Paste and hides the next button as
-      // the last page is shown.
-      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+      // Tapping the next button again shows Paste.
+      await tester.tap(find.text('▶'));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(2));
+      expect(find.byType(CupertinoButton), findsNWidgets(3));
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsOneWidget);
       expect(find.text('Select All'), findsNothing);
-      expect(findOverflowBackButton(), findsOneWidget);
-      expect(findOverflowNextButton(), findsNothing);
+      expect(find.text('◀'), findsOneWidget);
+      expect(appearsEnabled(tester, '◀'), true);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '▶'), false);
 
-      // Tapping the back button shows the second page again with the next button.
-      await tester.tapAt(tester.getCenter(findOverflowBackButton()));
+      // Tapping the back button shows the second page again.
+      await tester.tap(find.text('◀'));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(3));
+      expect(find.byType(CupertinoButton), findsNWidgets(3));
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(findOverflowBackButton(), findsOneWidget);
-      expect(findOverflowNextButton(), findsOneWidget);
+      expect(find.text('◀'), findsOneWidget);
+      expect(appearsEnabled(tester, '◀'), true);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '▶'), true);
 
       // Tapping the back button again shows the first page again.
-      await tester.tapAt(tester.getCenter(findOverflowBackButton()));
+      await tester.tap(find.text('◀'));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(2));
+      expect(find.byType(CupertinoButton), findsNWidgets(2));
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsOneWidget);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '▶'), true);
     },
       skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
@@ -439,8 +452,8 @@ void main() {
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsNothing);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsNothing);
 
       // Long press on an empty space to show the selection menu, with only the
       // paste button visible.
@@ -450,18 +463,21 @@ void main() {
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsOneWidget);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsOneWidget);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '▶'), true);
 
       // Tap next to go to the second and final page.
-      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+      await tester.tap(find.text('▶'));
       await tester.pumpAndSettle();
       expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsOneWidget);
-      expect(findOverflowBackButton(), findsOneWidget);
-      expect(findOverflowNextButton(), findsNothing);
+      expect(find.text('◀'), findsOneWidget);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '◀'), true);
+      expect(appearsEnabled(tester, '▶'), false);
 
       // Tap select all to show the full selection menu.
       await tester.tap(find.text(_longLocalizations.selectAllButtonLabel));
@@ -472,48 +488,56 @@ void main() {
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsOneWidget);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '▶'), true);
 
       // Tap next to go to the second page.
-      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+      await tester.tap(find.text('▶'));
       await tester.pumpAndSettle();
       expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.copyButtonLabel), findsOneWidget);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(findOverflowBackButton(), findsOneWidget);
-      expect(findOverflowNextButton(), findsOneWidget);
+      expect(find.text('◀'), findsOneWidget);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '◀'), true);
+      expect(appearsEnabled(tester, '▶'), true);
 
       // Tap next to go to the third and final page.
-      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+      await tester.tap(find.text('▶'));
       await tester.pumpAndSettle();
       expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsOneWidget);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(findOverflowBackButton(), findsOneWidget);
-      expect(findOverflowNextButton(), findsNothing);
+      expect(find.text('◀'), findsOneWidget);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '◀'), true);
+      expect(appearsEnabled(tester, '▶'), false);
 
       // Tap back to go to the second page again.
-      await tester.tapAt(tester.getCenter(findOverflowBackButton()));
+      await tester.tap(find.text('◀'));
       await tester.pumpAndSettle();
       expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.copyButtonLabel), findsOneWidget);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(findOverflowBackButton(), findsOneWidget);
-      expect(findOverflowNextButton(), findsOneWidget);
+      expect(find.text('◀'), findsOneWidget);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '◀'), true);
+      expect(appearsEnabled(tester, '▶'), true);
 
       // Tap back to go to the first page again.
-      await tester.tapAt(tester.getCenter(findOverflowBackButton()));
+      await tester.tap(find.text('◀'));
       await tester.pumpAndSettle();
       expect(find.text(_longLocalizations.cutButtonLabel), findsOneWidget);
       expect(find.text(_longLocalizations.copyButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.pasteButtonLabel), findsNothing);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
-      expect(findOverflowBackButton(), findsNothing);
-      expect(findOverflowNextButton(), findsOneWidget);
+      expect(find.text('◀'), findsNothing);
+      expect(find.text('▶'), findsOneWidget);
+      expect(appearsEnabled(tester, '▶'), true);
     },
       skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
@@ -548,8 +572,8 @@ void main() {
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsNothing);
         expect(find.text('Select All'), findsNothing);
-        expect(findOverflowBackButton(), findsNothing);
-        expect(findOverflowNextButton(), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsNothing);
 
         // Long press on an space to show the selection menu.
         await tester.longPressAt(textOffsetToPosition(tester, 1));
@@ -558,8 +582,8 @@ void main() {
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select All'), findsOneWidget);
-        expect(findOverflowBackButton(), findsNothing);
-        expect(findOverflowNextButton(), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsNothing);
 
         // Tap to select all.
         await tester.tap(find.text('Select All'));
@@ -570,8 +594,8 @@ void main() {
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select All'), findsNothing);
-        expect(findOverflowBackButton(), findsNothing);
-        expect(findOverflowNextButton(), findsNothing);
+        expect(find.text('◀'), findsNothing);
+        expect(find.text('▶'), findsNothing);
 
         // The menu appears at the top of the visible selection.
         final Offset selectionOffset = tester
@@ -579,8 +603,8 @@ void main() {
         final Offset textFieldOffset =
             tester.getTopLeft(find.byType(CupertinoTextField));
 
-        // 7.0 + 45.0 + 8.0 - 8.0 = _kToolbarArrowSize + _kToolbarHeight + _kToolbarContentDistance - padding
-        expect(selectionOffset.dy + 7.0 + 45.0 + 8.0 - 8.0, equals(textFieldOffset.dy));
+        // 7.0 + 43.0 + 8.0 - 8.0 = _kToolbarArrowSize + _kToolbarHeight + _kToolbarContentDistance - padding
+        expect(selectionOffset.dy + 7.0 + 43.0 + 8.0 - 8.0, equals(textFieldOffset.dy));
       },
       skip: isBrowser, // [intended] the selection menu isn't required by web
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),

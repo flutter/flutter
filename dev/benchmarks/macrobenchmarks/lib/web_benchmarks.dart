@@ -19,7 +19,6 @@ import 'src/web/bench_draw_rect.dart';
 import 'src/web/bench_dynamic_clip_on_static_picture.dart';
 import 'src/web/bench_image_decoding.dart';
 import 'src/web/bench_material_3.dart';
-import 'src/web/bench_material_3_semantics.dart';
 import 'src/web/bench_mouse_region_grid_hover.dart';
 import 'src/web/bench_mouse_region_grid_scroll.dart';
 import 'src/web/bench_mouse_region_mixed_grid_hover.dart';
@@ -36,7 +35,6 @@ import 'src/web/recorder.dart';
 typedef RecorderFactory = Recorder Function();
 
 const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
-const bool isSkwasm = bool.fromEnvironment('FLUTTER_WEB_USE_SKWASM');
 
 /// List of all benchmarks that run in the devicelab.
 ///
@@ -63,18 +61,12 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchMouseRegionGridHover.benchmarkName: () => BenchMouseRegionGridHover(),
   BenchMouseRegionMixedGridHover.benchmarkName: () => BenchMouseRegionMixedGridHover(),
   BenchWrapBoxScroll.benchmarkName: () => BenchWrapBoxScroll(),
-  if (!isSkwasm) ...<String, RecorderFactory>{
-    // Platform views are not yet supported with Skwasm.
-    // https://github.com/flutter/flutter/issues/126346
-    BenchPlatformViewInfiniteScroll.benchmarkName: () => BenchPlatformViewInfiniteScroll.forward(),
-    BenchPlatformViewInfiniteScroll.benchmarkNameBackward: () => BenchPlatformViewInfiniteScroll.backward(),
-  },
+  BenchPlatformViewInfiniteScroll.benchmarkName: () => BenchPlatformViewInfiniteScroll.forward(),
+  BenchPlatformViewInfiniteScroll.benchmarkNameBackward: () => BenchPlatformViewInfiniteScroll.backward(),
   BenchMaterial3Components.benchmarkName: () => BenchMaterial3Components(),
-  BenchMaterial3Semantics.benchmarkName: () => BenchMaterial3Semantics(),
-  BenchMaterial3ScrollSemantics.benchmarkName: () => BenchMaterial3ScrollSemantics(),
 
-  // Skia-only benchmarks
-  if (isCanvasKit || isSkwasm) ...<String, RecorderFactory>{
+  // CanvasKit-only benchmarks
+  if (isCanvasKit) ...<String, RecorderFactory>{
     BenchTextLayout.canvasKitBenchmarkName: () => BenchTextLayout.canvasKit(),
     BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
     BenchTextCachedLayout.canvasKitBenchmarkName: () => BenchTextCachedLayout.canvasKit(),
@@ -86,7 +78,7 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   },
 
   // HTML-only benchmarks
-  if (!isCanvasKit && !isSkwasm) ...<String, RecorderFactory>{
+  if (!isCanvasKit) ...<String, RecorderFactory>{
     BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout.canvas(),
     BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout.canvas(),
     BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid.canvas(),
@@ -162,9 +154,9 @@ Future<void> _runBenchmark(String benchmarkName) async {
 
 extension WebHTMLElementExtension on web.HTMLElement {
   void appendHtml(String html) {
-    final web.HTMLDivElement div = web.document.createElement('div') as
+    final web.HTMLDivElement div = web.document.createElement('div'.toJS) as
         web.HTMLDivElement;
-    div.innerHTML = html;
+    div.innerHTML = html.toJS;
     final web.DocumentFragment fragment = web.document.createDocumentFragment();
     fragment.append(div);
     web.document.adoptNode(fragment);
@@ -191,10 +183,10 @@ void _fallbackToManual(String error) {
   ''');
 
   for (final String benchmarkName in benchmarks.keys) {
-    final web.Element button = web.document.querySelector('#$benchmarkName')!;
-    button.addEventListener('click', (JSObject _) {
+    final web.Element button = web.document.querySelector('#$benchmarkName'.toJS)!;
+    button.addEventListener('click'.toJS, (JSObject _) {
       final web.Element? manualPanel =
-          web.document.querySelector('#manual-panel');
+          web.document.querySelector('#manual-panel'.toJS);
       manualPanel?.remove();
       _runBenchmark(benchmarkName);
     }.toJS);
@@ -204,7 +196,7 @@ void _fallbackToManual(String error) {
 /// Visualizes results on the Web page for manual inspection.
 void _printResultsToScreen(Profile profile) {
   web.document.body!.remove();
-  web.document.body = web.document.createElement('body') as web.HTMLBodyElement;
+  web.document.body = web.document.createElement('body'.toJS) as web.HTMLBodyElement;
   web.document.body!.appendHtml('<h2>${profile.name}</h2>');
 
   profile.scoreData.forEach((String scoreKey, Timeseries timeseries) {
@@ -218,15 +210,15 @@ void _printResultsToScreen(Profile profile) {
 class TimeseriesVisualization {
   TimeseriesVisualization(this._timeseries) {
     _stats = _timeseries.computeStats();
-    _canvas = web.document.createElement('canvas') as web.HTMLCanvasElement;
-    _screenWidth = web.window.screen.width;
-    _canvas.width = _screenWidth;
-    _canvas.height = (_kCanvasHeight * web.window.devicePixelRatio).round();
+    _canvas = web.document.createElement('canvas'.toJS) as web.HTMLCanvasElement;
+    _screenWidth = web.window.screen.width.toDart.toInt();
+    _canvas.width = _screenWidth.toJS;
+    _canvas.height = (_kCanvasHeight * web.window.devicePixelRatio.toDart).round().toJS;
     _canvas.style
-      ..setProperty('width', '100%')
-      ..setProperty('height',  '${_kCanvasHeight}px')
-      ..setProperty('outline', '1px solid green');
-    _ctx = _canvas.getContext('2d')! as web.CanvasRenderingContext2D;
+      ..setProperty('width'.toJS, '100%'.toJS)
+      ..setProperty('height'.toJS,  '${_kCanvasHeight}px'.toJS)
+      ..setProperty('outline'.toJS, '1px solid green'.toJS);
+    _ctx = _canvas.getContext('2d'.toJS)! as web.CanvasRenderingContext2D;
 
     // The amount of vertical space available on the chart. Because some
     // outliers can be huge they can dwarf all the useful values. So we
@@ -258,15 +250,15 @@ class TimeseriesVisualization {
   /// A utility for drawing lines.
   void drawLine(num x1, num y1, num x2, num y2) {
     _ctx.beginPath();
-    _ctx.moveTo(x1.toDouble(), y1.toDouble());
-    _ctx.lineTo(x2.toDouble(), y2.toDouble());
+    _ctx.moveTo(x1.toJS, y1.toJS);
+    _ctx.lineTo(x2.toJS, y2.toJS);
     _ctx.stroke();
   }
 
   /// Renders the timeseries into a `<canvas>` and returns the canvas element.
   web.HTMLCanvasElement render() {
-    _ctx.translate(0, _kCanvasHeight * web.window.devicePixelRatio);
-    _ctx.scale(1, -web.window.devicePixelRatio);
+    _ctx.translate(0.toJS, (_kCanvasHeight * web.window.devicePixelRatio.toDart).toJS);
+    _ctx.scale(1.toJS, (-web.window.devicePixelRatio.toDart).toJS);
 
     final double barWidth = _screenWidth / _stats.samples.length;
     double xOffset = 0;
@@ -276,7 +268,8 @@ class TimeseriesVisualization {
       if (sample.isWarmUpValue) {
         // Put gray background behind warm-up samples.
         _ctx.fillStyle = 'rgba(200,200,200,1)'.toJS;
-        _ctx.fillRect(xOffset, 0, barWidth, _normalized(_maxValueChartRange));
+        _ctx.fillRect(xOffset.toJS, 0.toJS, barWidth.toJS,
+            _normalized(_maxValueChartRange).toJS);
       }
 
       if (sample.magnitude > _maxValueChartRange) {
@@ -290,12 +283,13 @@ class TimeseriesVisualization {
         _ctx.fillStyle = 'rgba(50,50,255,0.6)'.toJS;
       }
 
-      _ctx.fillRect(xOffset, 0, barWidth - 1, _normalized(sample.magnitude));
+      _ctx.fillRect(xOffset.toJS, 0.toJS, (barWidth - 1).toJS,
+          _normalized(sample.magnitude).toJS);
       xOffset += barWidth;
     }
 
     // Draw a horizontal solid line corresponding to the average.
-    _ctx.lineWidth = 1;
+    _ctx.lineWidth = 1.toJS;
     drawLine(0, _normalized(_stats.average), _screenWidth, _normalized(_stats.average));
 
     // Draw a horizontal dashed line corresponding to the outlier cut off.
@@ -305,10 +299,10 @@ class TimeseriesVisualization {
     // Draw a light red band that shows the noise (1 stddev in each direction).
     _ctx.fillStyle = 'rgba(255,50,50,0.3)'.toJS;
     _ctx.fillRect(
-      0,
-      _normalized(_stats.average * (1 - _stats.noise)),
-      _screenWidth.toDouble(),
-      _normalized(2 * _stats.average * _stats.noise),
+      0.toJS,
+      _normalized(_stats.average * (1 - _stats.noise)).toJS,
+      _screenWidth.toJS,
+      _normalized(2 * _stats.average * _stats.noise).toJS,
     );
 
     return _canvas;
@@ -346,13 +340,13 @@ class LocalBenchmarkServerClient {
     // 404 is expected in the following cases:
     // - The benchmark is ran using plain `flutter run`, which does not provide "next-benchmark" handler.
     // - We ran all benchmarks and the benchmark is telling us there are no more benchmarks to run.
-    if (request.status != 200) {
+    if (request.status.toDart != 200) {
       isInManualMode = true;
       return kManualFallback;
     }
 
     isInManualMode = false;
-    return request.responseText;
+    return request.responseText.toDart;
   }
 
   void _checkNotManualMode() {
@@ -395,7 +389,7 @@ class LocalBenchmarkServerClient {
       mimeType: 'application/json',
       sendData: json.encode(profile.toJson()),
     );
-    if (request.status != 200) {
+    if (request.status.toDart != 200) {
       throw Exception(
         'Failed to report profile data to benchmark server. '
         'The server responded with status code ${request.status}.'
@@ -445,31 +439,31 @@ class LocalBenchmarkServerClient {
     final web.XMLHttpRequest xhr = web.XMLHttpRequest();
 
     method ??= 'GET';
-    xhr.open(method, url, true);
+    xhr.open(method.toJS, url.toJS, true.toJS);
 
     if (withCredentials != null) {
-      xhr.withCredentials = withCredentials;
+      xhr.withCredentials = withCredentials.toJS;
     }
 
     if (responseType != null) {
-      xhr.responseType = responseType;
+      xhr.responseType = responseType.toJS;
     }
 
     if (mimeType != null) {
-      xhr.overrideMimeType(mimeType);
+      xhr.overrideMimeType(mimeType.toJS);
     }
 
     if (requestHeaders != null) {
       requestHeaders.forEach((String header, String value) {
-        xhr.setRequestHeader(header, value);
+        xhr.setRequestHeader(header.toJS, value.toJS);
       });
     }
 
-    xhr.addEventListener('load', (web.ProgressEvent e) {
+    xhr.addEventListener('load'.toJS, (web.ProgressEvent e) {
       completer.complete(xhr);
     }.toJS);
 
-    xhr.addEventListener('error', (JSObject error) {
+    xhr.addEventListener('error'.toJS, (JSObject error) {
         return completer.completeError(error);
     }.toJS);
 

@@ -1358,9 +1358,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   void _handlePreviousAnimationStatusChanged(AnimationStatus status) {
     setState(() {
-      if (widget.child != null && status == AnimationStatus.dismissed) {
+      if (status == AnimationStatus.dismissed) {
         assert(widget.currentController.status == AnimationStatus.dismissed);
-        widget.currentController.forward();
+        if (widget.child != null) {
+          widget.currentController.forward();
+        }
       }
     });
   }

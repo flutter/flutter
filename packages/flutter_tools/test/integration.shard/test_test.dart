@@ -235,7 +235,7 @@ void main() {
     if ((result.stderr as String).isNotEmpty) {
       fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
     }
-    expect(result, const ProcessResultMatcher());
+    expect(result.exitCode, 0);
   });
 
   testWithoutContext('flutter test should run all tests inside of a directory with no trailing slash', () async {
@@ -250,7 +250,7 @@ void main() {
     if ((result.stderr as String).isNotEmpty) {
       fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
     }
-    expect(result, const ProcessResultMatcher());
+    expect(result.exitCode, 0);
   });
 
   testWithoutContext('flutter gold skips tests where the expectations are missing', () async {

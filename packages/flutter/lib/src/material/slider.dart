@@ -1512,7 +1512,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           _state.interactionTimer?.cancel();
           _state.interactionTimer = Timer(_minimumInteractionTime * timeDilation, () {
             _state.interactionTimer = null;
-            if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
+            if (!_active && !hasFocus &&
+                _state.valueIndicatorController.status == AnimationStatus.completed) {
               _state.valueIndicatorController.reverse();
             }
           });
@@ -1530,7 +1531,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       onChangeEnd?.call(_discretize(_currentDragValue));
       _active = false;
       _currentDragValue = 0.0;
-      _state.overlayController.reverse();
+      if (!hasFocus) {
+        _state.overlayController.reverse();
+      }
+
       if (showValueIndicator && _state.interactionTimer == null) {
         _state.valueIndicatorController.reverse();
       }

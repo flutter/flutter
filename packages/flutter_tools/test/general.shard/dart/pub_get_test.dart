@@ -940,8 +940,6 @@ exit code: 66
         context: PubContext.flutterTests);
     expect(logger.statusText,
         contains('Found an existing Pub cache at /global/.pub-cache'));
-    expect(logger.statusText,
-        contains('It can be reset by running `dart pub cache clean`'));
     expect(
       logger.statusText,
       contains(

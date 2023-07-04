@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
@@ -15,16 +16,16 @@ const String benchmarkViewType = 'benchmark_element';
 void _registerFactory() {
   ui_web.platformViewRegistry.registerViewFactory(benchmarkViewType, (int viewId) {
     final web.HTMLElement htmlElement =
-      web.document.createElement('div') as web.HTMLDivElement;
-    htmlElement.id = '${benchmarkViewType}_$viewId';
-    htmlElement.innerText = 'Google';
+      web.document.createElement('div'.toJS) as web.HTMLDivElement;
+    htmlElement.id = '${benchmarkViewType}_$viewId'.toJS;
+    htmlElement.innerText = 'Google'.toJS;
     htmlElement.style
-      ..setProperty('width', '100%')
-      ..setProperty('height', '100%')
-      ..setProperty('color', 'black')
-      ..setProperty('backgroundColor', 'rgba(0, 255, 0, .5)')
-      ..setProperty('textAlign', 'center')
-      ..setProperty('border', '1px solid black');
+      ..setProperty('width'.toJS, '100%'.toJS)
+      ..setProperty('height'.toJS, '100%'.toJS)
+      ..setProperty('color'.toJS, 'black'.toJS)
+      ..setProperty('backgroundColor'.toJS, 'rgba(0, 255, 0, .5)'.toJS)
+      ..setProperty('textAlign'.toJS, 'center'.toJS)
+      ..setProperty('border'.toJS, '1px solid black'.toJS);
     return htmlElement;
   });
 }

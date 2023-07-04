@@ -18,7 +18,6 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
-import '../version.dart';
 import '../web/web_device.dart';
 
 /// Common flutter command line options.
@@ -319,16 +318,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
           globals.flutterUsage.sendCommand(FlutterGlobalOptions.kVersionFlag);
-          final FlutterVersion version = globals.flutterVersion.fetchTagsAndGetVersion(
-            clock: globals.systemClock,
-          );
-          final String status;
+          globals.flutterVersion.fetchTagsAndUpdate();
+          String status;
           if (machineFlag) {
-            final Map<String, Object> jsonOut = version.toJson();
+            final Map<String, Object> jsonOut = globals.flutterVersion.toJson();
             jsonOut['flutterRoot'] = Cache.flutterRoot!;
             status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
-            status = version.toString();
+            status = globals.flutterVersion.toString();
           }
           globals.printStatus(status);
           return;

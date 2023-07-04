@@ -99,14 +99,14 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
 
   static HttpClient get _httpClient {
-    HttpClient? client;
+    HttpClient client = _sharedHttpClient;
     assert(() {
       if (debugNetworkImageHttpClientProvider != null) {
         client = debugNetworkImageHttpClientProvider!();
       }
       return true;
     }());
-    return client ?? _sharedHttpClient;
+    return client;
   }
 
   Future<ui.Codec> _loadAsync(

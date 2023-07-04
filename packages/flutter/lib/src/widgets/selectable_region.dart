@@ -263,7 +263,7 @@ class SelectableRegion extends StatefulWidget {
     required final VoidCallback onCopy,
     required final VoidCallback onSelectAll,
   }) {
-    final bool canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
+    final bool canCopy = selectionGeometry.hasSelection;
     final bool canSelectAll = selectionGeometry.hasContent;
 
     // Determine which buttons will appear so that the order and total number is
@@ -439,7 +439,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         instance
           ..onLongPressStart = _handleTouchLongPressStart
           ..onLongPressMoveUpdate = _handleTouchLongPressMoveUpdate
-          ..onLongPressEnd = _handleTouchLongPressEnd;
+          ..onLongPressEnd = _handleTouchLongPressEnd
+          ..onLongPressCancel = _clearSelection;
       },
     );
   }
@@ -488,62 +489,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _updateSelectedContentIfNeeded();
   }
 
-  bool _positionIsOnActiveSelection({required Offset globalPosition}) {
-    for (final Rect selectionRect in _selectionDelegate.value.selectionRects) {
-      final Matrix4 transform = _selectable!.getTransformTo(null);
-      final Rect globalRect = MatrixUtils.transformRect(transform, selectionRect);
-      if (globalRect.contains(globalPosition)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   void _handleRightClickDown(TapDownDetails details) {
-    final Offset? previousSecondaryTapDownPosition = lastSecondaryTapDownPosition;
-    final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
     lastSecondaryTapDownPosition = details.globalPosition;
     widget.focusNode.requestFocus();
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.windows:
-        // If lastSecondaryTapDownPosition is within the current selection then
-        // keep the current selection, if not then collapse it.
-        final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
-        if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _selectStartTo(offset: lastSecondaryTapDownPosition!);
-          _selectEndTo(offset: lastSecondaryTapDownPosition!);
-        }
-        _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
-      case TargetPlatform.iOS:
-        _selectWordAt(offset: lastSecondaryTapDownPosition!);
-        _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
-      case TargetPlatform.macOS:
-        if (previousSecondaryTapDownPosition == lastSecondaryTapDownPosition && toolbarIsVisible) {
-          hideToolbar();
-          return;
-        }
-        _selectWordAt(offset: lastSecondaryTapDownPosition!);
-        _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
-      case TargetPlatform.linux:
-        if (toolbarIsVisible) {
-          hideToolbar();
-          return;
-        }
-        // If lastSecondaryTapDownPosition is within the current selection then
-        // keep the current selection, if not then collapse it.
-        final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
-        if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _selectStartTo(offset: lastSecondaryTapDownPosition!);
-          _selectEndTo(offset: lastSecondaryTapDownPosition!);
-        }
-        _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
-    }
+    _selectWordAt(offset: details.globalPosition);
+    _showHandles();
+    _showToolbar(location: details.globalPosition);
     _updateSelectedContentIfNeeded();
   }
 
@@ -1819,30 +1770,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       }
     }
 
-    // Need to collect selection rects from selectables ranging from the
-    // currentSelectionStartIndex to the currentSelectionEndIndex.
-    final List<Rect> selectionRects = <Rect>[];
-    final Rect? drawableArea = hasSize ? Rect
-      .fromLTWH(0, 0, containerSize.width, containerSize.height) : null;
-    for (int index = currentSelectionStartIndex; index <= currentSelectionEndIndex; index++) {
-      final List<Rect> currSelectableSelectionRects = selectables[index].value.selectionRects;
-      final List<Rect> selectionRectsWithinDrawableArea = currSelectableSelectionRects.map((Rect selectionRect) {
-        final Matrix4 transform = getTransformFrom(selectables[index]);
-        final Rect localRect = MatrixUtils.transformRect(transform, selectionRect);
-        if (drawableArea != null) {
-          return drawableArea.intersect(localRect);
-        }
-        return localRect;
-      }).where((Rect selectionRect) {
-        return selectionRect.isFinite && !selectionRect.isEmpty;
-      }).toList();
-      selectionRects.addAll(selectionRectsWithinDrawableArea);
-    }
-
     return SelectionGeometry(
       startSelectionPoint: startPoint,
       endSelectionPoint: endPoint,
-      selectionRects: selectionRects,
       status: startGeometry != endGeometry
         ? SelectionStatus.uncollapsed
         : startGeometry.status,

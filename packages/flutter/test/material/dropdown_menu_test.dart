@@ -112,7 +112,7 @@ void main() {
   testWidgets('The width of the text field should always be the same as the menu view',
     (WidgetTester tester) async {
 
-    final ThemeData themeData = ThemeData(useMaterial3: false);
+    final ThemeData themeData = ThemeData();
     final bool useMaterial3 = themeData.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
@@ -1315,29 +1315,6 @@ void main() {
     await tester.pumpWidget(buildFrame());
     expect(find.text(errorText), findsOneWidget);
   });
-
-  testWidgets('Can scroll to the highlighted item', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: DropdownMenu<TestMenu>(
-          requestFocusOnTap: true,
-          menuHeight: 100, // Give a small number so the list can only show 2 or 3 items.
-          dropdownMenuEntries: menuChildren,
-        ),
-      ),
-    ));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Item 5').hitTestable(), findsNothing);
-    await tester.enterText(find.byType(TextField), '5');
-    await tester.pumpAndSettle();
-    // Item 5 should show up.
-    expect(find.text('Item 5').hitTestable(), findsOneWidget);
-  });
-
 }
 
 enum TestMenu {

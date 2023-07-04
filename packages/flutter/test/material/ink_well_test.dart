@@ -338,26 +338,23 @@ void main() {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     const Color splashColor = Color(0xffff0000);
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: false),
-      home: Material(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: Focus(
-              focusNode: focusNode,
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: InkWell(
-                  hoverColor: const Color(0xff00ff00),
-                  splashColor: splashColor,
-                  focusColor: const Color(0xff0000ff),
-                  highlightColor: const Color(0xf00fffff),
-                  onTap: () { },
-                  onLongPress: () { },
-                  onHover: (bool hover) { },
-                ),
+    await tester.pumpWidget(Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Focus(
+            focusNode: focusNode,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                hoverColor: const Color(0xff00ff00),
+                splashColor: splashColor,
+                focusColor: const Color(0xff0000ff),
+                highlightColor: const Color(0xf00fffff),
+                onTap: () { },
+                onLongPress: () { },
+                onHover: (bool hover) { },
               ),
             ),
           ),
@@ -379,34 +376,31 @@ void main() {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     const Color splashColor = Color(0xffff0000);
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: false),
-      home: Material(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: Focus(
-              focusNode: focusNode,
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: InkWell(
-                  overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered)) {
-                      return const Color(0xff00ff00);
-                    }
-                    if (states.contains(MaterialState.focused)) {
-                      return const Color(0xff0000ff);
-                    }
-                    if (states.contains(MaterialState.pressed)) {
-                      return splashColor;
-                    }
-                    return const Color(0xffbadbad); // Shouldn't happen.
-                  }),
-                  onTap: () { },
-                  onLongPress: () { },
-                  onHover: (bool hover) { },
-                ),
+    await tester.pumpWidget(Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Focus(
+            focusNode: focusNode,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.hovered)) {
+                    return const Color(0xff00ff00);
+                  }
+                  if (states.contains(MaterialState.focused)) {
+                    return const Color(0xff0000ff);
+                  }
+                  if (states.contains(MaterialState.pressed)) {
+                    return splashColor;
+                  }
+                  return const Color(0xffbadbad); // Shouldn't happen.
+                }),
+                onTap: () { },
+                onLongPress: () { },
+                onHover: (bool hover) { },
               ),
             ),
           ),
@@ -826,22 +820,19 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/121626.
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     Widget boilerplate(BorderRadius borderRadius) {
-      return MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Material(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: MouseRegion(
-                  child: InkWell(
-                    focusNode: focusNode,
-                    customBorder: RoundedRectangleBorder(borderRadius: borderRadius),
-                    onTap: () { },
-                  ),
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: MouseRegion(
+                child: InkWell(
+                  focusNode: focusNode,
+                  customBorder: RoundedRectangleBorder(borderRadius: borderRadius),
+                  onTap: () { },
                 ),
               ),
             ),
@@ -1117,9 +1108,9 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
   testWidgets('splashing survives scrolling when keep-alive is enabled', (WidgetTester tester) async {
     Future<void> runTest(bool keepAlive) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: Material(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
             child: CompositedTransformFollower(
               // forces a layer, which makes the paints easier to separate out
               link: LayerLink(),
@@ -1334,19 +1325,16 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Material(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: paddedInkWell(
               child: paddedInkWell(
+                key: middleKey,
                 child: paddedInkWell(
-                  key: middleKey,
-                  child: paddedInkWell(
-                    key: innerKey,
-                    child: const SizedBox(width: 50, height: 50),
-                  ),
+                  key: innerKey,
+                  child: const SizedBox(width: 50, height: 50),
                 ),
               ),
             ),
@@ -1403,27 +1391,24 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Material(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                width: 200,
-                height: 100,
-                child: Row(
-                  children: <Widget>[
-                    paddedInkWell(
-                      key: middleKey,
-                      child: paddedInkWell(
-                        key: innerKey,
-                      ),
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 200,
+              height: 100,
+              child: Row(
+                children: <Widget>[
+                  paddedInkWell(
+                    key: middleKey,
+                    child: paddedInkWell(
+                      key: innerKey,
                     ),
-                    const SizedBox(),
-                  ],
-                ),
+                  ),
+                  const SizedBox(),
+                ],
               ),
             ),
           ),
@@ -1439,26 +1424,23 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
 
     // Reparent parent
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Material(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                width: 200,
-                height: 100,
-                child: Row(
-                  children: <Widget>[
-                    paddedInkWell(
-                      key: innerKey,
-                    ),
-                    paddedInkWell(
-                      key: middleKey,
-                    ),
-                  ],
-                ),
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 200,
+              height: 100,
+              child: Row(
+                children: <Widget>[
+                  paddedInkWell(
+                    key: innerKey,
+                  ),
+                  paddedInkWell(
+                    key: middleKey,
+                  ),
+                ],
               ),
             ),
           ),
@@ -1497,19 +1479,16 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Material(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: paddedInkWell(
               child: paddedInkWell(
+                key: middleKey,
                 child: paddedInkWell(
-                  key: middleKey,
-                  child: paddedInkWell(
-                    key: innerKey,
-                    child: const SizedBox(width: 50, height: 50),
-                  ),
+                  key: innerKey,
+                  child: const SizedBox(width: 50, height: 50),
                 ),
               ),
             ),
@@ -1535,42 +1514,39 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     final GlobalKey leftKey = GlobalKey();
     final GlobalKey rightKey = GlobalKey();
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Material(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: InkWell(
-                  key: parentKey,
-                  onTap: () {},
-                  child: Center(
-                    child: SizedBox(
-                      width: 100,
-                      height: 50,
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: InkWell(
-                              key: leftKey,
-                              onTap: () {},
-                            ),
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                key: parentKey,
+                onTap: () {},
+                child: Center(
+                  child: SizedBox(
+                    width: 100,
+                    height: 50,
+                    child: Row(
+                      children: <Widget>[
+                        SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: InkWell(
+                            key: leftKey,
+                            onTap: () {},
                           ),
-                          SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: InkWell(
-                              key: rightKey,
-                              onTap: () {},
-                            ),
+                        ),
+                        SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: InkWell(
+                            key: rightKey,
+                            onTap: () {},
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -1634,50 +1610,47 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
       Widget? leftChild,
       Widget? rightChild,
     }) {
-      return MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Material(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                width: leftWidth+rightWidth,
-                height: 100,
-                child: Row(
-                  children: <Widget>[
-                    SizedBox(
-                      width: leftWidth,
-                      height: 100,
-                      child: InkWell(
-                        key: leftKey,
-                        onTap: () {},
-                        child: Center(
-                          child: SizedBox(
-                            width: leftWidth,
-                            height: 50,
-                            child: leftChild,
-                          ),
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: leftWidth+rightWidth,
+              height: 100,
+              child: Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: leftWidth,
+                    height: 100,
+                    child: InkWell(
+                      key: leftKey,
+                      onTap: () {},
+                      child: Center(
+                        child: SizedBox(
+                          width: leftWidth,
+                          height: 50,
+                          child: leftChild,
                         ),
                       ),
                     ),
-                    SizedBox(
-                      width: rightWidth,
-                      height: 100,
-                      child: InkWell(
-                        key: rightKey,
-                        onTap: () {},
-                        child: Center(
-                          child: SizedBox(
-                            width: leftWidth,
-                            height: 50,
-                            child: rightChild,
-                          ),
+                  ),
+                  SizedBox(
+                    width: rightWidth,
+                    height: 100,
+                    child: InkWell(
+                      key: rightKey,
+                      onTap: () {},
+                      child: Center(
+                        child: SizedBox(
+                          width: leftWidth,
+                          height: 50,
+                          child: rightChild,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -1741,27 +1714,24 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
   testWidgets("Ink wells's splash starts before tap is confirmed and disappear after tap is canceled", (WidgetTester tester) async {
     final GlobalKey innerKey = GlobalKey();
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Material(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: GestureDetector(
-              onHorizontalDragStart: (_) {},
-              child: Center(
-                child: SizedBox(
-                  width: 100,
-                  height: 100,
-                  child: InkWell(
-                    onTap: () {},
-                    child: Center(
-                      child: SizedBox(
-                        width: 50,
-                        height: 50,
-                        child: InkWell(
-                          key: innerKey,
-                          onTap: () {},
-                        ),
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: GestureDetector(
+            onHorizontalDragStart: (_) {},
+            child: Center(
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: InkWell(
+                  onTap: () {},
+                  child: Center(
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: InkWell(
+                        key: innerKey,
+                        onTap: () {},
                       ),
                     ),
                   ),

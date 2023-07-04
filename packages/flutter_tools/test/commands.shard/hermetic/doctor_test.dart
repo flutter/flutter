@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio_validator.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
@@ -30,16 +32,17 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  late FakeFlutterVersion flutterVersion;
   late BufferLogger logger;
   late FakeProcessManager fakeProcessManager;
-  late MemoryFileSystem fs;
 
   setUp(() {
+    flutterVersion = FakeFlutterVersion();
     logger = BufferLogger.test();
     fakeProcessManager = FakeProcessManager.empty();
-    fs = MemoryFileSystem.test();
   });
 
   testWithoutContext('ValidationMessage equality and hashCode includes contextUrl', () {
@@ -758,55 +761,27 @@ void main() {
       contains(isA<CustomDeviceWorkflow>()),
     );
   }, overrides: <Type, Generator>{
-    FileSystem: () => fs,
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => fakeProcessManager,
   });
 
-  group('FlutterValidator', () {
-    late FakeFlutterVersion initialVersion;
-    late FakeFlutterVersion secondVersion;
-    late TestFeatureFlags featureFlags;
+  testUsingContext('Fetches tags to get the right version', () async {
+    Cache.disableLocking();
 
-    setUp(() {
-      secondVersion = FakeFlutterVersion(frameworkRevisionShort: '222');
-      initialVersion = FakeFlutterVersion(
-        frameworkRevisionShort: '111',
-        nextFlutterVersion: secondVersion,
-      );
-      featureFlags = TestFeatureFlags();
-    });
+    final DoctorCommand doctorCommand = DoctorCommand();
+    final CommandRunner<void> commandRunner = createTestCommandRunner(doctorCommand);
 
-    testUsingContext('FlutterValidator fetches tags and gets fresh version', () async {
-      final Directory devtoolsDir = fs.directory('/path/to/flutter/bin/cache/dart-sdk/bin/resources/devtools')
-          ..createSync(recursive: true);
-      fs.directory('/path/to/flutter/bin/cache/artifacts').createSync(recursive: true);
-      devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "123"}');
-      fakeProcessManager.addCommands(const <FakeCommand>[
-        FakeCommand(command: <String>['which', 'java']),
-      ]);
-      final List<DoctorValidator> validators = DoctorValidatorsProvider.test(
-        featureFlags: featureFlags,
-        platform: FakePlatform(),
-      ).validators;
-      final FlutterValidator flutterValidator = validators.whereType<FlutterValidator>().first;
-      final ValidationResult result = await flutterValidator.validate();
-      expect(
-        result.messages.map((ValidationMessage msg) => msg.message),
-        contains(contains('Framework revision 222')),
-      );
-    }, overrides: <Type, Generator>{
-      Cache: () => Cache.test(
-        rootOverride: fs.directory('/path/to/flutter'),
-        fileSystem: fs,
-        processManager: fakeProcessManager,
-      ),
-      FileSystem: () => fs,
-      FlutterVersion: () => initialVersion,
-      Platform: () => FakePlatform(),
-      ProcessManager: () => fakeProcessManager,
-      TestFeatureFlags: () => featureFlags,
-    });
-  });
+    await commandRunner.run(<String>['doctor']);
+
+    expect(flutterVersion.didFetchTagsAndUpdate, true);
+    Cache.enableLocking();
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => MemoryFileSystem.test(),
+    FlutterVersion: () => flutterVersion,
+    Doctor: () => NoOpDoctor(),
+  }, initializeFlutterRoot: false);
+
   testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
     final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
       featureFlags: TestFeatureFlags(isAndroidEnabled: false),
@@ -831,6 +806,7 @@ class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
   final bool appliesToHostPlatform;
 }
 
+
 class NoOpDoctor implements Doctor {
   @override
   bool get canLaunchAnything => true;
@@ -850,7 +826,6 @@ class NoOpDoctor implements Doctor {
     bool showPii = true,
     List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
-    FlutterVersion? version,
   }) async => true;
 
   @override

@@ -757,26 +757,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     context.setSemanticsActions(_semanticActions!);
   }
 
-  ScrollPositionAlignmentPolicy _maybeFlipAlignment(ScrollPositionAlignmentPolicy alignmentPolicy) {
-    return switch (alignmentPolicy) {
-      // Don't flip when explicit.
-      ScrollPositionAlignmentPolicy.explicit => alignmentPolicy,
-      ScrollPositionAlignmentPolicy.keepVisibleAtEnd => ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-      ScrollPositionAlignmentPolicy.keepVisibleAtStart => ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-    };
-  }
-
-  ScrollPositionAlignmentPolicy _applyAxisDirectionToAlignmentPolicy(ScrollPositionAlignmentPolicy alignmentPolicy) {
-    return switch (axisDirection) {
-      // Start and end alignments must account for axis direction.
-      // When focus is requested for example, it knows the directionality of the
-      // keyboard keys initiating traversal, but not the direction of the
-      // Scrollable.
-      AxisDirection.up || AxisDirection.left => _maybeFlipAlignment(alignmentPolicy),
-      AxisDirection.down || AxisDirection.right => alignmentPolicy,
-    };
-  }
-
   /// Animates the position such that the given object is as visible as possible
   /// by just scrolling this position.
   ///
@@ -810,7 +790,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     }
 
     double target;
-    switch (_applyAxisDirectionToAlignmentPolicy(alignmentPolicy)) {
+    switch (alignmentPolicy) {
       case ScrollPositionAlignmentPolicy.explicit:
         target = clampDouble(viewport.getOffsetToReveal(object, alignment, rect: targetRect).offset, minScrollExtent, maxScrollExtent);
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:

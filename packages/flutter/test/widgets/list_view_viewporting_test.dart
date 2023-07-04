@@ -231,7 +231,7 @@ void main() {
 
   testWidgets('ListView reinvoke builders', (WidgetTester tester) async {
     late StateSetter setState;
-    ThemeData themeData = ThemeData.light(useMaterial3: false);
+    ThemeData themeData = ThemeData.light();
 
     Widget itemBuilder(BuildContext context, int index) {
       return Container(
@@ -263,7 +263,7 @@ void main() {
     expect(widget.color, equals(Colors.blue));
 
     setState(() {
-      themeData = ThemeData(primarySwatch: Colors.green, useMaterial3: false);
+      themeData = ThemeData(primarySwatch: Colors.green);
     });
 
     await tester.pump();

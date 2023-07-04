@@ -11,7 +11,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icons.dart';
-import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -100,7 +99,6 @@ class InputChip extends StatelessWidget
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
-    this.color,
     this.backgroundColor,
     this.padding,
     this.visualDensity,
@@ -164,8 +162,6 @@ class InputChip extends StatelessWidget
   @override
   final bool autofocus;
   @override
-  final MaterialStateProperty<Color?>? color;
-  @override
   final Color? backgroundColor;
   @override
   final EdgeInsetsGeometry? padding;
@@ -227,7 +223,6 @@ class InputChip extends StatelessWidget
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
-      color: color,
       backgroundColor: backgroundColor,
       padding: padding,
       visualDensity: visualDensity,
@@ -269,19 +264,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
-  MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
-        return _colors.onSurface.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.disabled)) {
-        return null;
-      }
-      if (states.contains(MaterialState.selected)) {
-        return _colors.secondaryContainer;
-      }
-      return null;
-    });
+  Color? get backgroundColor => null;
 
   @override
   Color? get shadowColor => Colors.transparent;
@@ -290,7 +273,15 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => Colors.transparent;
 
   @override
+  Color? get selectedColor => isEnabled
+    ? _colors.secondaryContainer
+    : _colors.onSurface.withOpacity(0.12);
+
+  @override
   Color? get checkmarkColor => null;
+
+  @override
+  Color? get disabledColor => null;
 
   @override
   Color? get deleteIconColor => _colors.onSecondaryContainer;

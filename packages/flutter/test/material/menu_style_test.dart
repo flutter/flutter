@@ -239,7 +239,6 @@ void main() {
     testWidgets('visual density', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false),
           home: Material(
             child: Column(
               children: <Widget>[

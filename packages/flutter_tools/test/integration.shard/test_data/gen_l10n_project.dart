@@ -232,8 +232,6 @@ class Home extends StatelessWidget {
               "${localizations.selectInPlural('male', 1)}",
               "${localizations.selectInPlural('male', 2)}",
               "${localizations.selectInPlural('female', 1)}",
-              '${localizations.datetime1(DateTime(2023, 6, 26))}',
-              '${localizations.datetime2(DateTime(2023, 6, 26, 5, 23))}',
             ]);
           },
         ),
@@ -684,9 +682,7 @@ void main() {
         "type": "num"
       }
     }
-  },
-  "datetime1": "{today, date, ::yMd}",
-  "datetime2": "{current, time, ::jms}"
+  }
 }
 ''';
 

@@ -36,7 +36,6 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
-          useMaterial3: false,
           bottomAppBarTheme: theme,
           bottomAppBarColor: themeColor
         ),
@@ -54,7 +53,6 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
-          useMaterial3: false,
           bottomAppBarTheme: theme,
           bottomAppBarColor: themeColor
         ),
@@ -69,7 +67,7 @@ void main() {
       const Color themeColor = Colors.white10;
 
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: false, bottomAppBarColor: themeColor),
+        theme: ThemeData(bottomAppBarColor: themeColor),
         home: const Scaffold(body: BottomAppBar()),
       ));
 
@@ -79,7 +77,7 @@ void main() {
 
     testWidgets('BAB color - Default', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: false),
+        theme: ThemeData(),
         home: const Scaffold(body: BottomAppBar()),
       ));
 
@@ -104,9 +102,8 @@ void main() {
     });
 
     testWidgets('BAB theme does not affect defaults', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: const Scaffold(body: BottomAppBar()),
+      await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(body: BottomAppBar()),
       ));
 
       final PhysicalShape widget = _getBabRenderObject(tester);

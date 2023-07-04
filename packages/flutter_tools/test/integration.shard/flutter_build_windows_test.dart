@@ -26,18 +26,16 @@ void main() {
         'bin',
         'flutter',
       );
-      ProcessResult result = processManager.runSync(<String>[flutterBin, 'config',
+      processManager.runSync(<String>[flutterBin, 'config',
         '--enable-windows-desktop',
       ]);
-      expect(result, const ProcessResultMatcher());
 
-      result = processManager.runSync(<String>[
+      processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'create',
         'hello',
       ], workingDirectory: tempDir.path);
-      expect(result, const ProcessResultMatcher());
 
       projectRoot = tempDir.childDirectory('hello');
 
@@ -67,8 +65,8 @@ void main() {
         'windows',
         '--no-pub',
       ], workingDirectory: projectRoot.path);
-      expect(result, const ProcessResultMatcher());
 
+      expect(result.exitCode, 0);
       expect(releaseDir, exists);
       expect(exeFile, exists);
 
@@ -81,7 +79,7 @@ void main() {
     });
 
     testWithoutContext('flutter build windows sets build name', () {
-      final ProcessResult result = processManager.runSync(<String>[
+      processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'build',
@@ -90,7 +88,6 @@ void main() {
         '--build-name',
         '1.2.3',
       ], workingDirectory: projectRoot.path);
-      expect(result, const ProcessResultMatcher());
 
       final String fileVersion = _getFileVersion(exeFile);
       final String productVersion = _getProductVersion(exeFile);
@@ -100,7 +97,7 @@ void main() {
     });
 
     testWithoutContext('flutter build windows sets build name and build number', () {
-      final ProcessResult result = processManager.runSync(<String>[
+      processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'build',
@@ -111,7 +108,6 @@ void main() {
         '--build-number',
         '4',
       ], workingDirectory: projectRoot.path);
-      expect(result, const ProcessResultMatcher());
 
       final String fileVersion = _getFileVersion(exeFile);
       final String productVersion = _getProductVersion(exeFile);
@@ -133,7 +129,9 @@ String _getFileVersion(File file) {
     <String>[]
   );
 
-  expect(result, const ProcessResultMatcher());
+  if (result.exitCode != 0) {
+    throw Exception('GetVersionInfo failed.');
+  }
 
   // Trim trailing new line.
   final String output = result.stdout as String;
@@ -146,7 +144,9 @@ String _getProductVersion(File file) {
     <String>[]
   );
 
-  expect(result, const ProcessResultMatcher());
+  if (result.exitCode != 0) {
+    throw Exception('GetVersionInfo failed.');
+  }
 
   // Trim trailing new line.
   final String output = result.stdout as String;

@@ -13,10 +13,8 @@ import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 import 'ios/xcodeproj.dart';
 import 'project.dart';
 import 'version.dart';
@@ -246,10 +244,7 @@ Future<vm_service.VmService> setUpVmService({
   }
 
   vmService.registerServiceCallback(kFlutterVersionServiceName, (Map<String, Object?> params) async {
-    final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion(
-      fs: globals.fs,
-      flutterRoot: Cache.flutterRoot!,
-    );
+    final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion();
     final Map<String, Object> versionJson = version.toJson();
     versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
     versionJson['engineRevisionShort'] = version.engineRevisionShort;
@@ -1107,22 +1102,6 @@ class FlutterVmService {
             return null;
           }
           return Future<vm_service.Isolate?>.error(error, stackTrace);
-        });
-  }
-
-  /// Attempt to retrieve the isolate pause event with id [isolateId], or `null` if it has
-  /// been collected.
-  Future<vm_service.Event?> getIsolatePauseEventOrNull(String isolateId) async {
-    return service.getIsolatePauseEvent(isolateId)
-      .then<vm_service.Event?>(
-        (vm_service.Event event) => event,
-        onError: (Object? error, StackTrace stackTrace) {
-          if (error is vm_service.SentinelException ||
-            error == null ||
-            (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared)) {
-            return null;
-          }
-          return Future<vm_service.Event?>.error(error, stackTrace);
         });
   }
 

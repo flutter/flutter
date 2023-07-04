@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
@@ -14,25 +13,15 @@ Widget wrapForChip({
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
   Brightness brightness = Brightness.light,
-  bool? useMaterial3,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
+    theme: ThemeData(brightness: brightness),
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
         data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Material(child: child),
       ),
-    ),
-  );
-}
-
-RenderBox getMaterialBox(WidgetTester tester, Finder type) {
-  return tester.firstRenderObject<RenderBox>(
-    find.descendant(
-      of: type,
-      matching: find.byType(CustomPaint),
     ),
   );
 }
@@ -205,120 +194,6 @@ void main() {
 
     decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
-  });
-
-  testWidgets('ActionChip.color resolves material states', (WidgetTester tester) async {
-    const Color disabledColor = Color(0xff00ff00);
-    const Color backgroundColor = Color(0xff0000ff);
-    final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return disabledColor;
-      }
-      return backgroundColor;
-    });
-    Widget buildApp({ required bool enabled, required bool selected }) {
-      return wrapForChip(
-        useMaterial3: true,
-        child: Column(
-          children: <Widget>[
-            ActionChip(
-              onPressed: enabled ? () { } : null,
-              color: color,
-              label: const Text('ActionChip'),
-            ),
-            ActionChip.elevated(
-              onPressed: enabled ? () { } : null,
-              color: color,
-              label: const Text('ActionChip.elevated'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Test enabled state.
-    await tester.pumpWidget(buildApp(enabled: true, selected: false));
-
-    // Enabled ActionChip should have the provided backgroundColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).first),
-      paints..rrect(color: backgroundColor),
-    );
-    // Enabled elevated ActionChip should have the provided backgroundColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).last),
-      paints..rrect(color: backgroundColor),
-    );
-
-    // Test disabled state.
-    await tester.pumpWidget(buildApp(enabled: false, selected: false));
-    await tester.pumpAndSettle();
-
-    // Disabled ActionChip should have the provided disabledColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).first),
-      paints..rrect(color: disabledColor),
-    );
-    // Disabled elevated ActionChip should have the provided disabledColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).last),
-      paints..rrect(color: disabledColor),
-    );
-  });
-
-  testWidgets('ActionChip uses provided state color properties', (WidgetTester tester) async {
-    const Color disabledColor = Color(0xff00ff00);
-    const Color backgroundColor = Color(0xff0000ff);
-    Widget buildApp({ required bool enabled, required bool selected }) {
-      return wrapForChip(
-        useMaterial3: true,
-        child: Column(
-          children: <Widget>[
-            ActionChip(
-              onPressed: enabled ? () { } : null,
-              disabledColor: disabledColor,
-              backgroundColor: backgroundColor,
-              label: const Text('ActionChip'),
-            ),
-            ActionChip.elevated(
-              onPressed: enabled ? () { } : null,
-              disabledColor: disabledColor,
-              backgroundColor: backgroundColor,
-              label: const Text('ActionChip.elevated'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Test enabled state.
-    await tester.pumpWidget(buildApp(enabled: true, selected: false));
-
-    // Enabled ActionChip should have the provided backgroundColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).first),
-      paints..rrect(color: backgroundColor),
-    );
-    // Enabled elevated ActionChip should have the provided backgroundColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).last),
-      paints..rrect(color: backgroundColor),
-    );
-
-    // Test disabled state.
-    await tester.pumpWidget(buildApp(enabled: false, selected: false));
-    await tester.pumpAndSettle();
-
-    // Disabled ActionChip should have the provided disabledColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).first),
-      paints..rrect(color: disabledColor),
-    );
-    // Disabled elevated ActionChip should have the provided disabledColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).last),
-      paints..rrect(color: disabledColor),
-    );
   });
 
   testWidgetsWithLeakTracking('ActionChip can be tapped', (WidgetTester tester) async {

@@ -41,14 +41,11 @@ void main() {
   group('analytics', () {
     late Directory tempDir;
     late Config testConfig;
-    late FileSystem fs;
-    const String flutterRoot = '/path/to/flutter';
 
     setUp(() {
-      Cache.flutterRoot = flutterRoot;
+      Cache.flutterRoot = '../..';
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
       testConfig = Config.test();
-      fs = MemoryFileSystem.test();
     });
 
     tearDown(() {
@@ -80,7 +77,7 @@ void main() {
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FakeFlutterVersion(),
+      FlutterVersion: () => FlutterVersion(),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
@@ -104,7 +101,7 @@ void main() {
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FakeFlutterVersion(),
+      FlutterVersion: () => FlutterVersion(),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
@@ -121,12 +118,12 @@ void main() {
 
       expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FakeFlutterVersion(),
+      FlutterVersion: () => FlutterVersion(),
       Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => fs,
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -144,12 +141,12 @@ void main() {
         contains('$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'),
       );
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FakeFlutterVersion(),
+      FlutterVersion: () => FlutterVersion(),
       Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => fs,
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -387,7 +384,6 @@ class FakeDoctor extends Fake implements Doctor {
     bool showPii = true,
     List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
-    FlutterVersion? version,
   }) async {
     return diagnoseSucceeds;
   }

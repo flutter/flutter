@@ -157,9 +157,6 @@ const String selectVariableTemplate = '''
       },
     );''';
 
-const String dateVariableTemplate = '''
-    String @(varName) = intl.DateFormat.@(formatType)(localeName).format(@(argument));''';
-
 const String classFileTemplate = '''
 @(header)@(requiresIntlImport)import '@(fileName)';
 

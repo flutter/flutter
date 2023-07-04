@@ -183,7 +183,6 @@ void main() {
     final Key headerKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: ExpansionPanelListSemanticsTest(headerKey: headerKey),
       ),
     );
@@ -1025,7 +1024,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: SingleChildScrollView(
           child: expansionList,
         ),

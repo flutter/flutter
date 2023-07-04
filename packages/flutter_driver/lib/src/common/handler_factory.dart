@@ -320,7 +320,7 @@ mixin CommandHandlerFactory {
     SemanticsNode? node;
     while (renderObject != null && node == null) {
       node = renderObject.debugSemantics;
-      renderObject = renderObject.parent;
+      renderObject = renderObject.parent as RenderObject?;
     }
     if (node == null) {
       throw StateError('No semantics data found');

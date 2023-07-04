@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
-import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -296,13 +295,10 @@ class IOSDevice extends Device {
   final IMobileDevice _iMobileDevice;
   final IProxy _iproxy;
 
-  Version? get sdkVersion {
-    return Version.parse(_sdkVersion);
-  }
-
   /// May be 0 if version cannot be parsed.
   int get majorSdkVersion {
-    return sdkVersion?.major ?? 0;
+    final String? majorVersionString = _sdkVersion?.split('.').first.trim();
+    return majorVersionString != null ? int.tryParse(majorVersionString) ?? 0 : 0;
   }
 
   @override

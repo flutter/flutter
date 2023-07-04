@@ -104,7 +104,6 @@ class ContactsDemoState extends State<ContactsDemo> {
   Widget build(BuildContext context) {
     return Theme(
       data: ThemeData(
-        useMaterial3: false,
         brightness: Brightness.light,
         primarySwatch: Colors.indigo,
         platform: Theme.of(context).platform,

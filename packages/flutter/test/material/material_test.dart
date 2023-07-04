@@ -924,7 +924,6 @@ void main() {
       final Key painterKey = UniqueKey();
 
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: RepaintBoundary(
             key: painterKey,
@@ -963,7 +962,6 @@ void main() {
       final Key painterKey = UniqueKey();
 
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: RepaintBoundary(
             key: painterKey,

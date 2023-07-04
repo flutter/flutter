@@ -20,7 +20,6 @@ import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
 import 'service_extensions.dart';
-import 'timeline.dart';
 
 export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow; // ignore: deprecated_member_use
 
@@ -142,9 +141,7 @@ abstract class BindingBase {
   /// [initServiceExtensions] to have bindings initialize their
   /// VM service extensions, if any.
   BindingBase() {
-    if (!kReleaseMode) {
-      FlutterTimeline.startSync('Framework initialization');
-    }
+    developer.Timeline.startSync('Framework initialization');
     assert(() {
       _debugConstructed = true;
       return true;
@@ -160,9 +157,7 @@ abstract class BindingBase {
 
     developer.postEvent('Flutter.FrameworkInitialization', <String, String>{});
 
-    if (!kReleaseMode) {
-      FlutterTimeline.finishSync();
-    }
+    developer.Timeline.finishSync();
   }
 
   bool _debugConstructed = false;

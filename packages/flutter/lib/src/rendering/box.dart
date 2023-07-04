@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer' show Timeline;
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
@@ -1395,7 +1396,7 @@ abstract class RenderBox extends RenderObject {
       }());
       if (!kReleaseMode) {
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          FlutterTimeline.startSync(
+          Timeline.startSync(
             '$runtimeType intrinsics',
             arguments: debugTimelineArguments,
           );
@@ -1410,7 +1411,7 @@ abstract class RenderBox extends RenderObject {
       if (!kReleaseMode) {
         _debugIntrinsicsDepth -= 1;
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          FlutterTimeline.finishSync();
+          Timeline.finishSync();
         }
       }
       return result;
@@ -1831,7 +1832,7 @@ abstract class RenderBox extends RenderObject {
       }());
       if (!kReleaseMode) {
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          FlutterTimeline.startSync(
+          Timeline.startSync(
             '$runtimeType.getDryLayout',
             arguments: debugTimelineArguments,
           );
@@ -1843,7 +1844,7 @@ abstract class RenderBox extends RenderObject {
       if (!kReleaseMode) {
         _debugIntrinsicsDepth -= 1;
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          FlutterTimeline.finishSync();
+          Timeline.finishSync();
         }
       }
       return result;
@@ -2135,6 +2136,7 @@ abstract class RenderBox extends RenderObject {
     assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     assert(!debugNeedsLayout);
     assert(() {
+      final RenderObject? parent = this.parent as RenderObject?;
       if (owner!.debugDoingLayout) {
         return (RenderObject.debugActiveLayout == parent) && parent!.debugDoingThisLayout;
       }
@@ -2142,6 +2144,7 @@ abstract class RenderBox extends RenderObject {
         return ((RenderObject.debugActivePaint == parent) && parent!.debugDoingThisPaint) ||
                ((RenderObject.debugActivePaint == this) && debugDoingThisPaint);
       }
+      assert(parent == this.parent);
       return false;
     }());
     assert(_debugSetDoingBaseline(true));

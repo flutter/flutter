@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,7 +12,6 @@ import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
@@ -507,7 +504,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('--dart-define-from-file successfully forwards values to build env', () async {
+  testUsingContext('test --dart-define-from-file option', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
@@ -517,8 +514,7 @@ void main() {
           "kInt": 1,
           "kDouble": 1.1,
           "name": "denghaizhu",
-          "title": "this is title from config json file",
-          "nullValue": null
+          "title": "this is title from config json file"
         }
       '''
     );
@@ -541,17 +537,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      expect(
-        _decodeDartDefines(environment),
-        containsAllInOrder(const <String>[
-          'kInt=1',
-          'kDouble=1.1',
-          'name=denghaizhu',
-          'title=this is title from config json file',
-          'nullValue=null',
-          'body=this is body from config json file',
-        ]),
-      );
+      expect(environment.defines[kDartDefines], 'a0ludD0x,a0RvdWJsZT0xLjE=,bmFtZT1kZW5naGFpemh1,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=,Ym9keT10aGlzIGlzIGJvZHkgZnJvbSBjb25maWcganNvbiBmaWxl');
     }),
     FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
@@ -590,10 +576,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      expect(
-        _decodeDartDefines(environment),
-        containsAllInOrder(<String>['kInt=2', 'kDouble=1.1', 'name=denghaizhu', 'title=this is title from config json file']),
-      );
+      expect(environment.defines[kDartDefines], 'a0ludD0y,a0RvdWJsZT0xLjE=,bmFtZT1kZW5naGFpemh1,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=');
     }),
     FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
@@ -647,15 +630,6 @@ void main() {
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
     ProcessManager: () => FakeProcessManager.any(),
   });
-}
-
-Iterable<String> _decodeDartDefines(Environment environment) {
-  final String encodedDefines = environment.defines[kDartDefines]!;
-  const Utf8Decoder byteDecoder = Utf8Decoder();
-  return encodedDefines
-      .split(',')
-      .map<Uint8List>(base64.decode)
-      .map<String>(byteDecoder.convert);
 }
 
 class FakeBundleBuilder extends Fake implements BundleBuilder {

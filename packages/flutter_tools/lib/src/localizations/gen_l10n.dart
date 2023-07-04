@@ -1157,7 +1157,6 @@ class LocalizationsGenerator {
       // When traversing through a placeholderExpr node, return "$placeholderName".
       // When traversing through a pluralExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
       // When traversing through a selectExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
-      // When traversing through an argumentExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
       // When traversing through a message node, return concatenation of all of "generateVariables(child)" for each child.
       String generateVariables(Node node, { bool isRoot = false }) {
         switch (node.type) {
@@ -1258,34 +1257,6 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
               .replaceAll('@(varName)', tempVarName)
               .replaceAll('@(choice)', identifier.value!)
               .replaceAll('@(selectCases)', selectLogicArgs.join('\n'))
-            );
-            return '\$$tempVarName';
-          case ST.argumentExpr:
-            requiresIntlImport = true;
-            assert(node.children[1].type == ST.identifier);
-            assert(node.children[3].type == ST.argType);
-            assert(node.children[7].type == ST.identifier);
-            final String identifierName = node.children[1].value!;
-            final Node formatType = node.children[7];
-            // Check that formatType is a valid intl.DateFormat.
-            if (!validDateFormats.contains(formatType.value)) {
-              throw L10nParserException(
-                'Date format "${formatType.value!}" for placeholder '
-                '$identifierName does not have a corresponding DateFormat '
-                "constructor\n. Check the intl library's DateFormat class "
-                'constructors for allowed date formats, or set "isCustomDateFormat" attribute '
-                'to "true".',
-                _inputFileNames[locale]!,
-                message.resourceId,
-                translationForMessage,
-                formatType.positionInMessage,
-              );
-            }
-            final String tempVarName = getTempVariableName();
-            tempVariables.add(dateVariableTemplate
-              .replaceAll('@(varName)', tempVarName)
-              .replaceAll('@(formatType)', formatType.value!)
-              .replaceAll('@(argument)', identifierName)
             );
             return '\$$tempVarName';
           // ignore: no_default_cases

@@ -1560,7 +1560,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: PopupMenuButton<String>(
@@ -1775,7 +1774,6 @@ void main() {
       double fontSize = 24,
     }) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         builder: (BuildContext context, Widget? child) {
           return Directionality(
             textDirection: textDirection,
@@ -2365,7 +2363,6 @@ void main() {
 
     Widget buildFrame(double width, double height) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         builder: (BuildContext context, Widget? child) {
           return MediaQuery(
             data: const MediaQueryData(
@@ -2425,7 +2422,6 @@ void main() {
 
     Widget buildFrame(double width, double height) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         builder: (BuildContext context, Widget? child) {
           return MediaQuery(
             data: const MediaQueryData(
@@ -2714,7 +2710,6 @@ void main() {
     Future<void> buildFrameWithoutChild({double? splashRadius}) {
       return tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: Center(
               child: PopupMenuButton<String>(

@@ -37,7 +37,13 @@ void main() {
     ];
     final ProcessResult firstRunResult = await processManager.run(buildCommand, workingDirectory: workingDirectory);
 
-    expect(firstRunResult, const ProcessResultMatcher(stdoutPattern: 'Running pod install'));
+    printOnFailure('Output of flutter build ios:');
+    final String firstRunStdout = firstRunResult.stdout.toString();
+    printOnFailure('First run stdout: $firstRunStdout');
+    printOnFailure('First run stderr: ${firstRunResult.stderr}');
+
+    expect(firstRunResult.exitCode, 0);
+    expect(firstRunStdout, contains('Running pod install'));
 
     final File generatedConfig = fileSystem.file(fileSystem.path.join(
       workingDirectory,
@@ -65,8 +71,10 @@ void main() {
     // Run again with no changes.
     final ProcessResult secondRunResult = await processManager.run(buildCommand, workingDirectory: workingDirectory);
     final String secondRunStdout = secondRunResult.stdout.toString();
+    printOnFailure('Second run stdout: $secondRunStdout');
+    printOnFailure('Second run stderr: ${secondRunResult.stderr}');
 
-    expect(secondRunResult, const ProcessResultMatcher());
+    expect(secondRunResult.exitCode, 0);
     // Do not run "pod install" when nothing changes.
     expect(secondRunStdout, isNot(contains('pod install')));
   }, skip: !platform.isMacOS); // [intended] iOS builds only work on macos.

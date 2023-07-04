@@ -27,7 +27,7 @@ void main() {
       tempDir.path,
       '--project-name=testapp',
     ], workingDirectory: tempDir.path);
-    expect(result, const ProcessResultMatcher());
+    expect(result.exitCode, 0);
 
     final File api33File = tempDir
        .childDirectory('android')
@@ -68,6 +68,7 @@ public final class Android33Api extends Activity {
       'build',
       'apk',
     ], workingDirectory: tempDir.path);
-    expect(result, const ProcessResultMatcher(stdoutPattern: 'app-release.apk'));
+    expect(result.exitCode, 0);
+    expect(result.stdout.toString(), contains('app-release.apk'));
   });
 }

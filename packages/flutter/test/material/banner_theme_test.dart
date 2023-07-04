@@ -457,7 +457,6 @@ void main() {
       const String contentText = 'Content';
 
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: MaterialBanner(
             content: const Text(contentText),
@@ -504,7 +503,6 @@ void main() {
       const Key tapTarget = Key('tap-target');
 
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {

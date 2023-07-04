@@ -29,22 +29,9 @@ Future<void> main() async {
     expect(cleanedLeaks.total, 1);
   });
 
-  test('$LeakCleaner catches extra leaks', () {
-    Leaks leaks = _leaksOfAllTypes();
-    final LeakReport leak = leaks.notDisposed.first;
-    leaks.notDisposed.add(leak);
-
-    final LeakTrackingTestConfig config = LeakTrackingTestConfig(
-      notDisposedAllowList: <String, int?>{leak.type: 1},
-    );
-    leaks = LeakCleaner(config).clean(leaks);
-
-    expect(leaks.notDisposed, hasLength(2));
-  });
-
-  group('Leak tracking works for non-web, and', () {
+  group('Leak tracking works for non-web', () {
     testWidgetsWithLeakTracking(
-      'respects all allow lists',
+      'Leak tracker respects all allow lists',
       (WidgetTester tester) async {
         await tester.pumpWidget(_StatelessLeakingWidget());
       },
@@ -54,41 +41,7 @@ Future<void> main() async {
       ),
     );
 
-    testWidgetsWithLeakTracking(
-      'respects count in allow lists',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(_StatelessLeakingWidget());
-      },
-      leakTrackingConfig: LeakTrackingTestConfig(
-        notDisposedAllowList: <String, int?>{_leakTrackedClassName: 1},
-        notGCedAllowList: <String, int?>{_leakTrackedClassName: 1},
-      ),
-    );
-
-    group('fails if number or leaks is more than allowed', () {
-      // This test cannot run inside other tests because test nesting is forbidden.
-      // So, `expect` happens outside the tests, in `tearDown`.
-      late Leaks leaks;
-
-      testWidgetsWithLeakTracking(
-        'for $_StatelessLeakingWidget',
-        (WidgetTester tester) async {
-          await tester.pumpWidget(_StatelessLeakingWidget());
-          await tester.pumpWidget(_StatelessLeakingWidget());
-        },
-        leakTrackingConfig: LeakTrackingTestConfig(
-          onLeaks: (Leaks theLeaks) {
-            leaks = theLeaks;
-          },
-          failTestOnLeaks: false,
-          notDisposedAllowList: <String, int?>{_leakTrackedClassName: 1},
-        ),
-      );
-
-      tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 2));
-    });
-
-    group('respects notGCed allow lists', () {
+    group('Leak tracker respects notGCed allow lists', () {
       // These tests cannot run inside other tests because test nesting is forbidden.
       // So, `expect` happens outside the tests, in `tearDown`.
       late Leaks leaks;
@@ -110,8 +63,8 @@ Future<void> main() async {
       tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1));
     });
 
-    group('catches that', () {
-      // These test cannot run inside other tests because test nesting is forbidden.
+    group('Leak tracker catches that', () {
+      // These tests cannot run inside other tests because test nesting is forbidden.
       // So, `expect` happens outside the tests, in `tearDown`.
       late Leaks leaks;
 

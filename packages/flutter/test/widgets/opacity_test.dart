@@ -155,7 +155,6 @@ void main() {
   testWidgets('offset is correctly handled in Opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: SingleChildScrollView(
             child: RepaintBoundary(

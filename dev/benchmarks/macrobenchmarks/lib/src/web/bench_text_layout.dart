@@ -203,7 +203,6 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
 
   @override
   Future<void> setUpAll() async {
-    super.setUpAll();
     registerEngineBenchmarkValueListener('text_layout', (num value) {
       _textLayoutMicros += value;
     });

@@ -686,7 +686,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(
-            useMaterial3: false,
             tooltipTheme: const TooltipThemeData(
               decoration: customDecoration,
             ),
@@ -724,25 +723,22 @@ void main() {
       color: Color(0x80800000),
     );
     await tester.pumpWidget(
-      Theme(
-        data: ThemeData(useMaterial3: false),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: TooltipTheme(
-            data: const TooltipThemeData(decoration: customDecoration),
-            child: Overlay(
-              initialEntries: <OverlayEntry>[
-                OverlayEntry(
-                  builder: (BuildContext context) {
-                    return Tooltip(
-                      key: key,
-                      message: tooltipText,
-                      child: const SizedBox.shrink(),
-                    );
-                  },
-                ),
-              ],
-            ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TooltipTheme(
+          data: const TooltipThemeData(decoration: customDecoration),
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Tooltip(
+                    key: key,
+                    message: tooltipText,
+                    child: const SizedBox.shrink(),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),
@@ -1334,5 +1330,5 @@ SemanticsNode findDebugSemantics(RenderObject object) {
   if (object.debugSemantics != null) {
     return object.debugSemantics!;
   }
-  return findDebugSemantics(object.parent!);
+  return findDebugSemantics(object.parent! as RenderObject);
 }

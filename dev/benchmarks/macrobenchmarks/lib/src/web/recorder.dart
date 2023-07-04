@@ -426,18 +426,12 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     _runCompleter!.completeError(error, stackTrace);
   }
 
-  late final _RecordingWidgetsBinding _binding;
-
-  @override
-  @mustCallSuper
-  Future<void> setUpAll() async {
-    _binding = _RecordingWidgetsBinding.ensureInitialized();
-  }
-
   @override
   Future<Profile> run() async {
     _runCompleter = Completer<void>();
     final Profile localProfile = profile = Profile(name: name, useCustomWarmUp: useCustomWarmUp);
+    final _RecordingWidgetsBinding binding =
+        _RecordingWidgetsBinding.ensureInitialized();
     final Widget widget = createWidget();
 
     registerEngineBenchmarkValueListener(kProfilePrerollFrame, (num value) {
@@ -455,7 +449,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
       );
     });
 
-    _binding._beginRecording(this, widget);
+    binding._beginRecording(this, widget);
 
     try {
       await _runCompleter!.future;
@@ -514,14 +508,6 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
     }
   }
 
-  late final _RecordingWidgetsBinding _binding;
-
-  @override
-  @mustCallSuper
-  Future<void> setUpAll() async {
-    _binding = _RecordingWidgetsBinding.ensureInitialized();
-  }
-
   @override
   @mustCallSuper
   void frameWillDraw() {
@@ -560,7 +546,9 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
   Future<Profile> run() async {
     _runCompleter = Completer<void>();
     final Profile localProfile = profile = Profile(name: name);
-    _binding._beginRecording(this, _WidgetBuildRecorderHost(this));
+    final _RecordingWidgetsBinding binding =
+        _RecordingWidgetsBinding.ensureInitialized();
+    binding._beginRecording(this, _WidgetBuildRecorderHost(this));
 
     try {
       await _runCompleter!.future;
@@ -960,15 +948,6 @@ class Profile {
     }
   }
 
-  /// A convenience wrapper over [addDataPoint] for adding [AggregatedTimedBlock]
-  /// to the profile.
-  ///
-  /// Uses [AggregatedTimedBlock.name] as the name of the data point, and
-  /// [AggregatedTimedBlock.duration] as the duration.
-  void addTimedBlock(AggregatedTimedBlock timedBlock, { required bool reported }) {
-    addDataPoint(timedBlock.name, Duration(microseconds: timedBlock.duration.toInt()), reported: reported);
-  }
-
   /// Checks the samples collected so far and sets the appropriate benchmark phase.
   ///
   /// If enough warm-up samples have been collected, stops the warm-up phase and
@@ -1279,7 +1258,7 @@ void startMeasureFrame(Profile profile) {
 
   if (!profile.isWarmingUp) {
     // Tell the browser to mark the beginning of the frame.
-    web.window.performance.mark('measured_frame_start#$_currentFrameNumber');
+    web.window.performance.mark('measured_frame_start#$_currentFrameNumber'.toJS);
     _isMeasuringFrame = true;
   }
 }
@@ -1301,11 +1280,11 @@ void endMeasureFrame() {
 
   if (_isMeasuringFrame) {
     // Tell the browser to mark the end of the frame, and measure the duration.
-    web.window.performance.mark('measured_frame_end#$_currentFrameNumber');
+    web.window.performance.mark('measured_frame_end#$_currentFrameNumber'.toJS);
     web.window.performance.measure(
-      'measured_frame',
+      'measured_frame'.toJS,
       'measured_frame_start#$_currentFrameNumber'.toJS,
-      'measured_frame_end#$_currentFrameNumber',
+      'measured_frame_end#$_currentFrameNumber'.toJS,
     );
 
     // Increment the current frame number.

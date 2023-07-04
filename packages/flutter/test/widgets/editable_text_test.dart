@@ -9652,7 +9652,7 @@ void main() {
       expect(tester.takeException(), isNull);
 
       await tester.pumpWidget(Container());
-      expect(tester.takeException(), isAssertionError);
+      expect(tester.takeException(), isNotNull);
     });
   });
 

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
 import 'dart:ui' as ui show SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
@@ -506,13 +507,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     await super.performReassemble();
     if (BindingBase.debugReassembleConfig?.widgetName == null) {
       if (!kReleaseMode) {
-        FlutterTimeline.startSync('Preparing Hot Reload (layout)');
+        Timeline.startSync('Preparing Hot Reload (layout)');
       }
       try {
         renderView.reassemble();
       } finally {
         if (!kReleaseMode) {
-          FlutterTimeline.finishSync();
+          Timeline.finishSync();
         }
       }
     }

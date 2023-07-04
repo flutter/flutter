@@ -320,10 +320,6 @@ class Scrollable extends StatefulWidget {
   /// the nearest enclosing [ScrollableState] in that [Axis] is returned, or
   /// null if there is none.
   ///
-  /// This finds the nearest _ancestor_ [Scrollable] of the `context`. This
-  /// means that if the `context` is that of a [Scrollable], it will _not_ find
-  /// _that_ [Scrollable].
-  ///
   /// See also:
   ///
   /// * [Scrollable.of], which is similar to this method, but asserts
@@ -362,10 +358,6 @@ class Scrollable extends StatefulWidget {
   /// Using the optional [Axis] is useful when Scrollables are nested and the
   /// target [Scrollable] is not the closest instance. When [axis] is provided,
   /// the nearest enclosing [ScrollableState] in that [Axis] is returned.
-  ///
-  /// This finds the nearest _ancestor_ [Scrollable] of the `context`. This
-  /// means that if the `context` is that of a [Scrollable], it will _not_ find
-  /// _that_ [Scrollable].
   ///
   /// If no [Scrollable] ancestor is found, then this method will assert in
   /// debug mode, and throw an exception in release mode.
@@ -951,6 +943,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     Widget result = _ScrollableScope(
       scrollable: this,
       position: position,
+      // TODO(ianh): Having all these global keys is sad.
       child: Listener(
         onPointerSignal: _receivedPointerSignal,
         child: RawGestureDetector(

@@ -130,10 +130,10 @@ class _Tester {
     final int frameDurationMs = fullFrameDuration.inMilliseconds;
 
     final int fullFrames = duration.inMilliseconds ~/ frameDurationMs;
-    final Offset fullFrameOffset = offset * (frameDurationMs.toDouble() / durationMs);
+    final Offset fullFrameOffset = offset * ((frameDurationMs as double) / durationMs);
 
     final Duration finalFrameDuration = duration - fullFrameDuration * fullFrames;
-    final Offset finalFrameOffset = offset - fullFrameOffset * fullFrames.toDouble();
+    final Offset finalFrameOffset = offset - fullFrameOffset * (fullFrames as double);
 
     await gesture.down(start, timeStamp: currentTime);
 

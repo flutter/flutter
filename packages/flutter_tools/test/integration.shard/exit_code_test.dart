@@ -34,7 +34,10 @@ void main() {
       fileSystem.path.join(tempDir.path, 'main.dart'),
     ]);
 
-    expect(result, const ProcessResultMatcher());
+    printOnFailure('Output of dart main.dart:');
+    printOnFailure(result.stdout.toString());
+    printOnFailure(result.stderr.toString());
+    expect(result.exitCode, 0);
   });
 
   testWithoutContext('dart.sh/bat can return a non-zero exit code', () async {
@@ -51,6 +54,9 @@ void main() {
       fileSystem.path.join(tempDir.path, 'main.dart'),
     ]);
 
-    expect(result, const ProcessResultMatcher(exitCode: 1));
+    printOnFailure('Output of dart main.dart:');
+    printOnFailure(result.stdout.toString());
+    printOnFailure(result.stderr.toString());
+    expect(result.exitCode, 1);
   });
 }

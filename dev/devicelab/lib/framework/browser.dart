@@ -25,7 +25,6 @@ class ChromeOptions {
     this.windowHeight = 1024,
     this.headless,
     this.debugPort,
-    this.enableWasmGC = false,
   });
 
   /// If not null passed as `--user-data-dir`.
@@ -54,9 +53,6 @@ class ChromeOptions {
   /// mode without a debug port, Chrome quits immediately. For most tests it is
   /// typical to set [headless] to true and set a non-null debug port.
   final int? debugPort;
-
-  /// Whether to enable experimental WasmGC flags
-  final bool enableWasmGC;
 }
 
 /// A function called when the Chrome process encounters an error.
@@ -108,8 +104,6 @@ class Chrome {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      if (options.enableWasmGC)
-        '--js-flags=--experimental-wasm-gc',
     ];
 
     final io.Process chromeProcess = await _spawnChromiumProcess(

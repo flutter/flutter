@@ -137,13 +137,6 @@ abstract interface class ChipAttributes {
   /// {@macro flutter.widgets.Focus.autofocus}
   bool get autofocus;
 
-  /// The color that fills the chip, in all [MaterialState]s.
-  ///
-  /// Resolves in the following states:
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.disabled].
-  MaterialStateProperty<Color?>? get color;
-
   /// Color to be used for the unselected, enabled chip's background.
   ///
   /// The default is light grey.
@@ -568,7 +561,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
-    this.color,
     this.backgroundColor,
     this.padding,
     this.visualDensity,
@@ -602,8 +594,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final FocusNode? focusNode;
   @override
   final bool autofocus;
-  @override
-  final MaterialStateProperty<Color?>? color;
   @override
   final Color? backgroundColor;
   @override
@@ -654,7 +644,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
-      color: color,
       backgroundColor: backgroundColor,
       padding: padding,
       visualDensity: visualDensity,
@@ -740,7 +729,6 @@ class RawChip extends StatefulWidget
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
-    this.color,
     this.backgroundColor,
     this.materialTapTargetSize,
     this.elevation,
@@ -809,8 +797,6 @@ class RawChip extends StatefulWidget
   final FocusNode? focusNode;
   @override
   final bool autofocus;
-  @override
-  final MaterialStateProperty<Color?>? color;
   @override
   final Color? backgroundColor;
   @override
@@ -1001,47 +987,23 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     return resolvedShape.copyWith(side: resolvedSide);
   }
 
-  Color? resolveColor({
-    MaterialStateProperty<Color?>? color,
-    Color? selectedColor,
-    Color? backgroundColor,
-    Color? disabledColor,
-    MaterialStateProperty<Color?>? defaultColor,
-  }) {
-    return _IndividualOverrides(
-      color: color,
-      selectedColor: selectedColor,
-      backgroundColor: backgroundColor,
-      disabledColor: disabledColor,
-    ).resolve(materialStates) ?? defaultColor?.resolve(materialStates);
-  }
-
   /// Picks between three different colors, depending upon the state of two
   /// different animations.
   Color? _getBackgroundColor(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
     if (theme.useMaterial3) {
-      final Color? disabledColor = resolveColor(
-        color: widget.color ?? chipTheme.color,
-        disabledColor: widget.disabledColor ?? chipTheme.disabledColor,
-        defaultColor: chipDefaults.color,
-      );
-      final Color? backgroundColor = resolveColor(
-        color: widget.color ?? chipTheme.color,
-        backgroundColor: widget.backgroundColor ?? chipTheme.backgroundColor,
-        defaultColor: chipDefaults.color,
-      );
-      final Color? selectedColor = resolveColor(
-        color: widget.color ?? chipTheme.color,
-        selectedColor: widget.selectedColor ?? chipTheme.selectedColor,
-        defaultColor: chipDefaults.color,
-      );
       final ColorTween backgroundTween = ColorTween(
-        begin: disabledColor,
-        end: backgroundColor,
+        begin: widget.disabledColor
+          ?? chipTheme.disabledColor
+          ?? chipDefaults.disabledColor,
+        end: widget.backgroundColor
+          ?? chipTheme.backgroundColor
+          ?? chipDefaults.backgroundColor,
       );
       final ColorTween selectTween = ColorTween(
         begin: backgroundTween.evaluate(enableController),
-        end: selectedColor,
+        end: widget.selectedColor
+          ?? chipTheme.selectedColor
+          ?? chipDefaults.selectedColor,
       );
       return selectTween.evaluate(selectionFade);
     } else {
@@ -1330,37 +1292,6 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       enabled: widget.tapEnabled ? canTap : null,
       child: result,
     );
-  }
-}
-
-class _IndividualOverrides extends MaterialStateProperty<Color?> {
-  _IndividualOverrides({
-    this.color,
-    this.backgroundColor,
-    this.selectedColor,
-    this.disabledColor,
-  });
-
-  final MaterialStateProperty<Color?>? color;
-  final Color? backgroundColor;
-  final Color? selectedColor;
-  final Color? disabledColor;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (color != null) {
-      return color!.resolve(states);
-    }
-    if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
-      return selectedColor;
-    }
-    if (states.contains(MaterialState.disabled)) {
-      return disabledColor;
-    }
-    if (states.contains(MaterialState.selected)) {
-      return selectedColor;
-    }
-    return backgroundColor;
   }
 }
 
@@ -2245,7 +2176,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
-  MaterialStateProperty<Color?>? get color => null; // Subclasses override this getter
+  Color? get backgroundColor => null;
 
   @override
   Color? get shadowColor => Colors.transparent;
@@ -2254,7 +2185,13 @@ class _ChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
+  Color? get selectedColor => null;
+
+  @override
   Color? get checkmarkColor => null;
+
+  @override
+  Color? get disabledColor => null;
 
   @override
   Color? get deleteIconColor => null;

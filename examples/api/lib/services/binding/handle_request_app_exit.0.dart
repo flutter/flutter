@@ -79,29 +79,30 @@ class _BodyState extends State<Body> with WidgetsBindingObserver {
     return Center(
       child: SizedBox(
         width: 300,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            RadioListTile<bool>(
-              title: const Text('Do Not Allow Exit'),
-              groupValue: _shouldExit,
-              value: false,
-              onChanged: _radioChanged,
-            ),
-            RadioListTile<bool>(
-              title: const Text('Allow Exit'),
-              groupValue: _shouldExit,
-              value: true,
-              onChanged: _radioChanged,
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _quit,
-              child: const Text('Quit'),
-            ),
-            const SizedBox(height: 30),
-            Text(lastResponse),
-          ],
+        child: IntrinsicHeight(
+          child: Column(
+            children: <Widget>[
+              RadioListTile<bool>(
+                title: const Text('Do Not Allow Exit'),
+                groupValue: _shouldExit,
+                value: false,
+                onChanged: _radioChanged,
+              ),
+              RadioListTile<bool>(
+                title: const Text('Allow Exit'),
+                groupValue: _shouldExit,
+                value: true,
+                onChanged: _radioChanged,
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: _quit,
+                child: const Text('Quit'),
+              ),
+              const SizedBox(height: 30),
+              Text(lastResponse),
+            ],
+          ),
         ),
       ),
     );

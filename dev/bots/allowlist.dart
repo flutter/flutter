@@ -31,6 +31,7 @@ const Set<String> kCorePackageAllowList = <String>{
   'fuchsia_remote_debug_protocol',
   'integration_test',
   'intl',
+  'js',
   'matcher',
   'material_color_utilities',
   'meta',
@@ -47,6 +48,5 @@ const Set<String> kCorePackageAllowList = <String>{
   'test_api',
   'vector_math',
   'vm_service',
-  'web',
   'webdriver',
 };

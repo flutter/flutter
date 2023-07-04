@@ -99,7 +99,6 @@ void main() {
 
     Widget buildFrame() {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: PopupMenuTheme(
             data: const PopupMenuThemeData(

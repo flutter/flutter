@@ -20,19 +20,19 @@ class ListTileApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const ListTileExample(),
+      home: const LisTileExample(),
     );
   }
 }
 
-class ListTileExample extends StatefulWidget {
-  const ListTileExample({super.key});
+class LisTileExample extends StatefulWidget {
+  const LisTileExample({super.key});
 
   @override
-  State<ListTileExample> createState() => _ListTileExampleState();
+  State<LisTileExample> createState() => _LisTileExampleState();
 }
 
-class _ListTileExampleState extends State<ListTileExample> with TickerProviderStateMixin {
+class _LisTileExampleState extends State<LisTileExample> with TickerProviderStateMixin {
   late final AnimationController _fadeController;
   late final AnimationController _sizeController;
   late final Animation<double> _fadeAnimation;

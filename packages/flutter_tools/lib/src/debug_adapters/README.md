@@ -40,10 +40,7 @@ Arguments specific to `launchRequest` are:
 
 Arguments specific to `attachRequest` are:
 
-- `String? vmServiceInfoFile` - the file to read the VM Service info from \*
-- `String? vmServiceUri` - the VM Service URI to attach to \*
-
-\* Only one of `vmServiceInfoFile` or `vmServiceUri` may be supplied. If neither are supplied, Flutter will try to discover it from the device.
+- `String? vmServiceUri` - the VM Service URI to attach to (if not supplied, Flutter will try to discover it from the device)
 
 ## Custom Requests
 

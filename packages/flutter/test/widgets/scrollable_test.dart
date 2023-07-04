@@ -947,7 +947,6 @@ void main() {
     final ScrollController outerController = ScrollController();
     final ScrollController innerController = ScrollController();
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: false),
       home: Scaffold(
         body: SingleChildScrollView(
           controller: outerController,

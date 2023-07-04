@@ -87,7 +87,7 @@ class SemanticsController {
     RenderObject? renderObject = element.findRenderObject();
     SemanticsNode? result = renderObject?.debugSemantics;
     while (renderObject != null && (result == null || result.isMergedIntoParent)) {
-      renderObject = renderObject.parent;
+      renderObject = renderObject.parent as RenderObject?;
       result = renderObject?.debugSemantics;
     }
     if (result == null) {
@@ -366,7 +366,7 @@ abstract class WidgetController {
     final RenderObject object = element.renderObject!;
     RenderObject current = object;
     while (current.debugLayer == null) {
-      current = current.parent!;
+      current = current.parent! as RenderObject;
     }
     final ContainerLayer layer = current.debugLayer!;
     return _walkLayers(layer);

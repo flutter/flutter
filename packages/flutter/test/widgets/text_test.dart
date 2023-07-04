@@ -208,7 +208,6 @@ void main() {
     double textScaleFactor = 1.0;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           appBar: AppBar(title: const Text('title')),
           body: Center(
@@ -237,7 +236,6 @@ void main() {
     textScaleFactor = textScaleFactor * 5;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           appBar: AppBar(title: const Text('title')),
           body: Center(
@@ -1134,7 +1132,6 @@ void main() {
     Future<void> createText(TextWidthBasis textWidthBasis) {
       return tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: Center(
               // Each word takes up more than a half of a line. Together they

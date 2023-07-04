@@ -270,26 +270,6 @@ void main() {
     expect(changeCount, 2);
   });
 
-  testWidgets('SearchBar respects onSubmitted property', (WidgetTester tester) async {
-    String submittedQuery = '';
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SearchBar(
-            onSubmitted: (String text) {
-              submittedQuery = text;
-            },
-          ),
-        ),
-      ),
-    );
-
-    await tester.enterText(find.byType(SearchBar), 'query');
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-
-    expect(submittedQuery, equals('query'));
-  });
-
   testWidgets('SearchBar respects constraints property', (WidgetTester tester) async {
     const BoxConstraints constraints = BoxConstraints(maxWidth: 350.0, minHeight: 80);
     await tester.pumpWidget(
@@ -1787,50 +1767,6 @@ void main() {
 
     final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
     expect(searchViewRect.topLeft, equals(const Offset(rootSpacing, rootSpacing)));
-  });
-
-  testWidgets('Docked search view with nested navigator does not go off the screen', (WidgetTester tester) async {
-    addTearDown(tester.view.reset);
-    tester.view.physicalSize = const Size(400.0, 400.0);
-    tester.view.devicePixelRatio = 1.0;
-
-    const double rootSpacing = 100.0;
-
-    await tester.pumpWidget(MaterialApp(
-      builder: (BuildContext context, Widget? child) {
-        return Scaffold(
-          body: Padding(
-            padding: const EdgeInsets.all(rootSpacing),
-            child: child,
-          ),
-        );
-      },
-      home: Material(
-        child: Align(
-          alignment: Alignment.bottomRight,
-          child: SearchAnchor(
-            isFullScreen: false,
-            builder: (BuildContext context, SearchController controller) {
-              return IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  controller.openView();
-                },
-              );
-            },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
-            },
-          ),
-        ),
-      ),
-    ));
-
-    await tester.tap(find.byIcon(Icons.search));
-    await tester.pumpAndSettle();
-
-    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
-    expect(searchViewRect.bottomRight, equals(const Offset(300.0, 300.0)));
   });
 
 

@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
-import 'test_utils.dart';
 
 const String xcodeBackendPath = 'bin/xcode_backend.sh';
 const String xcodeBackendErrorHeader = '========================================================================';
@@ -86,7 +85,8 @@ void main() {
           'INFOPLIST_PATH': 'Info.plist',
         },
       );
-      expect(result, const ProcessResultMatcher(stdoutPattern: 'Info.plist does not exist.'));
+      expect(result.stdout, contains('Info.plist does not exist.'));
+      expect(result.exitCode, 0);
     });
 
     const String emptyPlist = '''
@@ -115,7 +115,7 @@ void main() {
       expect(actualInfoPlist, isNot(contains('dartVmService')));
       expect(actualInfoPlist, isNot(contains('NSLocalNetworkUsageDescription')));
 
-      expect(result, const ProcessResultMatcher());
+      expect(result.exitCode, 0);
     });
 
     for (final String buildConfiguration in <String>['Debug', 'Profile']) {
@@ -137,7 +137,7 @@ void main() {
         expect(actualInfoPlist, contains('dartVmService'));
         expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
 
-        expect(result, const ProcessResultMatcher());
+        expect(result.exitCode, 0);
       });
     }
 
@@ -181,7 +181,7 @@ void main() {
 </dict>
 </plist>
 ''');
-      expect(result, const ProcessResultMatcher());
+      expect(result.exitCode, 0);
     });
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 }
