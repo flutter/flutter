@@ -2421,8 +2421,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(alternateChildrenJson.length , equals(0));
       // Tests are failing when this typo is fixed.
       expect(childJson['chidlren'], isNull);
-
-      service.disposeAllGroups();
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTreeWithPreviews', (WidgetTester tester) async {
