@@ -306,6 +306,25 @@ void main() {
         ])
     ));
 
+    expect(Parser('argumentTest', 'app_en.arb', 'Today is {date, date, ::yMMd}').parse(), equals(
+      Node(ST.message, 0, children: <Node>[
+        Node(ST.string, 0, value: 'Today is '),
+        Node(ST.argumentExpr, 9, children: <Node>[
+          Node(ST.openBrace, 9, value: '{'),
+          Node(ST.identifier, 10, value: 'date'),
+          Node(ST.comma, 14, value: ','),
+          Node(ST.argType, 16, children: <Node>[
+            Node(ST.date, 16, value: 'date'),
+          ]),
+          Node(ST.comma, 20, value: ','),
+          Node(ST.colon, 22, value: ':'),
+          Node(ST.colon, 23, value: ':'),
+          Node(ST.identifier, 24, value: 'yMMd'),
+          Node(ST.closeBrace, 28, value: '}'),
+        ]),
+      ])
+    ));
+
     expect(Parser(
       'plural',
       'app_en.arb',
