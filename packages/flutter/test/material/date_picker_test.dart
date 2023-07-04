@@ -382,6 +382,7 @@ void main() {
       );
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Center(
             child: Builder(
               builder: (BuildContext context) {
@@ -417,7 +418,7 @@ void main() {
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.fallback().copyWith(dialogTheme: customDialogTheme),
+          theme: ThemeData.fallback(useMaterial3: false).copyWith(dialogTheme: customDialogTheme),
           home: Center(
             child: Builder(
               builder: (BuildContext context) {
@@ -447,6 +448,7 @@ void main() {
     testWidgets('OK Cancel button layout', (WidgetTester tester) async {
        Widget buildFrame(TextDirection textDirection) {
          return MaterialApp(
+           theme: ThemeData(useMaterial3: false),
            home: Material(
              child: Center(
                child: Builder(
@@ -1266,6 +1268,7 @@ void main() {
 
         expect(tester.getSemantics(find.text('3')), matchesSemantics(
           label: '3, Sunday, January 3, 2016, Today',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));

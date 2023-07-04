@@ -52,6 +52,7 @@ void main() {
   testWidgets('BottomNavigationBar content test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
             items: const <BottomNavigationBarItem>[
@@ -81,7 +82,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData.light(useMaterial3: false).copyWith(
           colorScheme: const ColorScheme.light().copyWith(primary: primaryColor),
           unselectedWidgetColor: unselectedWidgetColor,
         ),
@@ -413,6 +414,7 @@ void main() {
   testWidgets('Shifting BottomNavigationBar defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.shifting,
@@ -991,6 +993,7 @@ void main() {
   testWidgets('BottomNavigationBar adds bottom padding to height', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: MediaQuery(
           data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: 40.0)),
           child: Scaffold(
@@ -1323,6 +1326,7 @@ void main() {
   testWidgets('BottomNavigationBar responds to textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
@@ -1396,6 +1400,7 @@ void main() {
   testWidgets('BottomNavigationBar does not grow with textScaleFactor when labels are provided', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
@@ -1484,19 +1489,22 @@ void main() {
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute<void>(
                   builder: (BuildContext context) {
-                    return Scaffold(
-                      bottomNavigationBar: BottomNavigationBar(
-                        items: const <BottomNavigationBarItem>[
-                          BottomNavigationBarItem(
-                            label: label,
-                            icon: Icon(Icons.ac_unit),
-                            tooltip: label,
-                          ),
-                          BottomNavigationBarItem(
-                            label: 'B',
-                            icon: Icon(Icons.battery_alert),
-                          ),
-                        ],
+                    return MaterialApp(
+                      theme: ThemeData(useMaterial3: false),
+                      home: Scaffold(
+                        bottomNavigationBar: BottomNavigationBar(
+                          items: const <BottomNavigationBarItem>[
+                            BottomNavigationBarItem(
+                              label: label,
+                              icon: Icon(Icons.ac_unit),
+                              tooltip: label,
+                            ),
+                            BottomNavigationBarItem(
+                              label: 'B',
+                              icon: Icon(Icons.battery_alert),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -1566,6 +1574,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           bottomNavigationBar: BottomNavigationBar(
             items: <BottomNavigationBarItem>[
@@ -1595,6 +1604,7 @@ void main() {
   testWidgets('BottomNavigationBar paints circles', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
+        useMaterial3: false,
         textDirection: TextDirection.ltr,
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
@@ -1924,6 +1934,7 @@ void main() {
     Widget runTest() {
       int currentIndex = 0;
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Scaffold(
@@ -2363,6 +2374,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Builder(
           builder: (BuildContext context) {
             return Scaffold(
@@ -2410,6 +2422,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Builder(
           builder: (BuildContext context) {
             return Scaffold(
@@ -2455,6 +2468,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Builder(
           builder: (BuildContext context) {
             return Scaffold(
@@ -2490,8 +2504,9 @@ void main() {
   });
 }
 
-Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDirection }) {
+Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDirection, bool? useMaterial3 }) {
   return MaterialApp(
+    theme: ThemeData(useMaterial3: useMaterial3),
     home: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[

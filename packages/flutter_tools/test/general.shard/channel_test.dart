@@ -276,7 +276,7 @@ void main() {
           command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/stable'],
         ),
         FakeCommand(
-            command: <String>['git', 'checkout', 'stable', '--']
+          command: <String>['git', 'checkout', 'stable', '--'],
         ),
         FakeCommand(
           command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
