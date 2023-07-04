@@ -1180,11 +1180,26 @@ Directory _getLocalEngineRepo({
   required AndroidBuildInfo androidBuildInfo,
   required FileSystem fileSystem,
 }) {
-
-  final String abi = _getAbiByLocalEnginePath(engineOutPath);
   final Directory localEngineRepo = fileSystem.systemTempDirectory
     .createTempSync('flutter_tool_local_engine_repo.');
   final String buildMode = androidBuildInfo.buildInfo.modeName;
+  createLocalEngineRepo(
+    engineOutPath: engineOutPath,
+    repoPath: localEngineRepo.path,
+    fileSystem: fileSystem,
+    mode: buildMode,
+  );
+  return localEngineRepo;
+}
+
+void createLocalEngineRepo({
+  required String engineOutPath,
+  required String repoPath,
+  required FileSystem fileSystem,
+  String? mode
+}) {
+  final String abi = _getAbiByLocalEnginePath(engineOutPath);
+  final String buildMode = mode ?? _getBuildModeByLocalEnginePath(engineOutPath);
   final String artifactVersion = _getLocalArtifactVersion(
     fileSystem.path.join(
       engineOutPath,
@@ -1200,7 +1215,7 @@ Directory _getLocalEngineRepo({
         'flutter_embedding_$buildMode.$artifact',
       ),
       fileSystem.path.join(
-        localEngineRepo.path,
+        repoPath,
         'io',
         'flutter',
         'flutter_embedding_$buildMode',
@@ -1216,7 +1231,7 @@ Directory _getLocalEngineRepo({
         '${abi}_$buildMode.$artifact',
       ),
       fileSystem.path.join(
-        localEngineRepo.path,
+        repoPath,
         'io',
         'flutter',
         '${abi}_$buildMode',
@@ -1226,14 +1241,17 @@ Directory _getLocalEngineRepo({
       fileSystem,
     );
   }
-  for (final String artifact in <String>['flutter_embedding_$buildMode', '${abi}_$buildMode']) {
+  for (final String artifact in <String>[
+    'flutter_embedding_$buildMode',
+    '${abi}_$buildMode'
+  ]) {
     _createSymlink(
       fileSystem.path.join(
         engineOutPath,
         '$artifact.maven-metadata.xml',
       ),
       fileSystem.path.join(
-        localEngineRepo.path,
+        repoPath,
         'io',
         'flutter',
         artifact,
@@ -1242,7 +1260,6 @@ Directory _getLocalEngineRepo({
       fileSystem,
     );
   }
-  return localEngineRepo;
 }
 
 String _getAbiByLocalEnginePath(String engineOutPath) {
@@ -1253,6 +1270,16 @@ String _getAbiByLocalEnginePath(String engineOutPath) {
     result = 'x86_64';
   } else if (engineOutPath.contains('arm64')) {
     result = 'arm64_v8a';
+  }
+  return result;
+}
+
+String _getBuildModeByLocalEnginePath(String engineOutPath) {
+  String result = 'debug';
+  if (engineOutPath.contains('debug')) {
+    result = 'debug';
+  } else if (engineOutPath.contains('release')) {
+    result = 'release';
   }
   return result;
 }

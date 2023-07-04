@@ -16,6 +16,7 @@ import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
+import 'src/commands/create_local_engine_repo.dart';
 import 'src/commands/channel.dart';
 import 'src/commands/clean.dart';
 import 'src/commands/config.dart';
@@ -231,6 +232,7 @@ List<FlutterCommand> generateCommands({
   // Development-only commands. These are always hidden,
   IdeConfigCommand(),
   UpdatePackagesCommand(),
+  CreateLocalEngineRepoCommand(verbose: verbose),
 ];
 
 /// An abstraction for instantiation of the correct logger type.
