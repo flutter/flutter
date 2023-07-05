@@ -2219,8 +2219,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Iterable<Object?> propertyValues = expectedProperties.map((DiagnosticsNode e) => e.value.toString());
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
           final String id = propertyJson['valueId']! as String;
-          print('!!!!');
-          print(propertyJson);
           final  String property = service.toObject(id)!.toString();
           expect(propertyValues, contains(property));
         }
