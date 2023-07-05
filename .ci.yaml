@@ -275,8 +275,8 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      dependencies: >-
-        &linux_build_tests_dependencies [
+      dependencies: &linux_build_tests_dependencies >-
+        [
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:114.0"},
           {"dependency": "open_jdk", "version": "version:17"},
@@ -2686,8 +2686,8 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      dependencies: >-
-        &mac_build_tests_dependencies [
+      dependencies: &mac_build_tests_dependencies >-
+        [
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:114.0"},
           {"dependency": "open_jdk", "version": "version:17"},
@@ -4108,8 +4108,8 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      dependencies: >-
-        &windows_build_test_dependencies [
+      dependencies: &windows_build_test_dependencies >-
+        [
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:114.0"},
           {"dependency": "open_jdk", "version": "version:17"},
