@@ -2417,7 +2417,6 @@ targets:
       task_name: platform_views_scroll_perf_impeller__timeline_summary
 
   - name: Linux_samsung_s10 platform_views_scroll_perf_impeller__timeline_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
