@@ -256,6 +256,24 @@ void main() {
           allowExtras: true,
       );
 
+      // Repeat the test for hot reload with custom syntax.
+      final Future<List<String>> customOutputEventsFuture = dap.client.stdoutOutput
+          // But skip any topLevelFunctions that come before the reload.
+          .skipWhile((String output) => output.startsWith('topLevelFunction'))
+          .take(2)
+          .toList();
+
+      await dap.client.customSyntaxHotReload();
+
+      expectLines(
+          (await customOutputEventsFuture).join(),
+          <Object>[
+            startsWith('Reloaded'),
+            'topLevelFunction',
+          ],
+          allowExtras: true,
+      );
+
       await dap.client.terminate();
     });
 

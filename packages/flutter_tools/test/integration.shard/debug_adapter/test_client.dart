@@ -111,6 +111,11 @@ class DapTestClient {
     return custom('hotReload');
   }
 
+  /// Sends a custom request with custom syntax convention to the debug adapter to trigger a Hot Reload.
+  Future<Response> customSyntaxHotReload() {
+    return custom(r'$/hotReload');
+  }
+
   /// Sends a custom request to the debug adapter to trigger a Hot Restart.
   Future<Response> hotRestart() {
     return custom('hotRestart');
