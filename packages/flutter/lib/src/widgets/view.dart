@@ -403,6 +403,14 @@ class _RawViewElement extends RenderTreeRootElement {
     assert(renderObject.child == child);
     renderObject.child = null;
   }
+
+  @override
+  void unmount() {
+    if (_effectivePipelineOwner != (widget as RawView)._deprecatedPipelineOwner) {
+      _effectivePipelineOwner.dispose();
+    }
+    super.unmount();
+  }
 }
 
 class _ViewScope extends InheritedWidget {

@@ -678,20 +678,43 @@ void main() {
 
     expect(root.semanticsOwner, isNotNull);
     expect(child.semanticsOwner, isNotNull);
-    expect(childOfChild.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNotNull); // Retained in case we get re-attached.
 
     final SemanticsHandle childSemantics = child.ensureSemantics();
     root.dropChild(child);
 
     expect(root.semanticsOwner, isNotNull);
     expect(child.semanticsOwner, isNotNull);
-    expect(childOfChild.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNotNull); // Retained in case we get re-attached.
 
     childSemantics.dispose();
 
     expect(root.semanticsOwner, isNotNull);
     expect(child.semanticsOwner, isNull);
-    expect(childOfChild.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNotNull);
+
+    manifold.semanticsEnabled = false;
+
+    expect(root.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNotNull);
+
+    root.adoptChild(childOfChild);
+    expect(root.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNull); // Disposed on re-attachment.
+
+    manifold.semanticsEnabled = true;
+    expect(root.semanticsOwner, isNotNull);
+    expect(childOfChild.semanticsOwner, isNotNull);
+
+    root.dropChild(childOfChild);
+
+    expect(root.semanticsOwner, isNotNull);
+    expect(childOfChild.semanticsOwner, isNotNull);
+
+    childOfChild.dispose();
+
+    expect(root.semanticsOwner, isNotNull);
+    expect(childOfChild.semanticsOwner, isNull); // Disposed on dispose.
   });
 
   test('can adopt/drop children during own layout', () {

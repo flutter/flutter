@@ -1105,6 +1105,42 @@ void main() {
     expect(tester.renderObjectList(find.byType(RawView)), renderViews);
     expect(tester.renderObject(find.byType(SizedBox)), same(renderSizedBox));
   });
+
+  testWidgets('Moving a View keeps its semantics tree stable', (WidgetTester tester) async {
+    final Widget view = View(
+      // No explicit key, we rely on the implicit key of the underlying RawView.
+      view: tester.view,
+      child: Semantics(
+        textDirection: TextDirection.ltr,
+        label: 'Hello',
+        child: const SizedBox(),
+      )
+    );
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: view,
+    );
+
+    final RenderObject renderSemantics = tester.renderObject(find.bySemanticsLabel('Hello'));
+    final SemanticsNode semantics = tester.getSemantics(find.bySemanticsLabel('Hello'));
+    expect(semantics.id, 1);
+    expect(renderSemantics.debugSemantics, same(semantics));
+
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: ViewCollection(
+        views: <Widget>[
+          view,
+        ],
+      ),
+    );
+
+    final RenderObject renderSemanticsAfterMove = tester.renderObject(find.bySemanticsLabel('Hello'));
+    final SemanticsNode semanticsAfterMove = tester.getSemantics(find.bySemanticsLabel('Hello'));
+    expect(renderSemanticsAfterMove, same(renderSemantics));
+    expect(semanticsAfterMove.id, 1);
+    expect(semanticsAfterMove, same(semantics));
+  });
 }
 
 Finder findsColoredBox(Color color) {
