@@ -2906,7 +2906,7 @@ class InputDecoration {
   ///
   /// Default is 4.0
   final double? floatingLabelGap;
-  
+
   /// {@template flutter.material.inputDecoration.floatingLabelBehavior}
   /// Defines **how** the floating label should behave.
   ///
@@ -3941,7 +3941,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// Defaults to 4.0
   final double floatingLabelGap;
-  
+
   /// {@macro flutter.material.inputDecoration.floatingLabelBehavior}
   ///
   /// Defaults to [FloatingLabelBehavior.auto].
