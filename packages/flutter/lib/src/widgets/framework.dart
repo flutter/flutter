@@ -4794,7 +4794,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       final List<DiagnosticsNode> diagnosticsDependencies = sortedDependencies
         .map((InheritedElement element) => element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse))
         .toList();
-      properties.add(DiagnosticsProperty<Set<InheritedElement>>('dependencies', _dependencies, description: diagnosticsDependencies.toString()));
+      properties.add(DiagnosticsProperty<Set<InheritedElement>>('dependencies', deps, description: diagnosticsDependencies.toString()));
     }
   }
 
