@@ -50,16 +50,7 @@ bool DeviceBufferVK::OnCopyHostBuffer(const uint8_t* source,
     ::memmove(dest + offset, source + source_range.offset, source_range.length);
   }
 
-  // Some devices do not have support for coherent host memory and require an
-  // explicit flush.
-  ::vmaFlushAllocation(allocator_, allocation_, offset, source_range.length);
-
   return true;
-}
-
-void DeviceBufferVK::Flush() {
-  TRACE_EVENT0("impeller", "FlushDeviceBuffer");
-  ::vmaFlushAllocation(allocator_, allocation_, 0, VK_WHOLE_SIZE);
 }
 
 bool DeviceBufferVK::SetLabel(const std::string& label) {

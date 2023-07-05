@@ -32,8 +32,6 @@ class DeviceBuffer : public Buffer,
 
   BufferView AsBufferView() const;
 
-  virtual void Flush();
-
   virtual std::shared_ptr<Texture> AsTexture(
       Allocator& allocator,
       const TextureDescriptor& descriptor,
