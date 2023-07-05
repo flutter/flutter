@@ -489,7 +489,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   }
 
   void updateTweens(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
+    final RenderBox navigator = Navigator.of(context).context.findRenderObject()! as RenderBox;
+    final Size screenSize = navigator.size;
     final Rect anchorRect = getRect() ?? Rect.zero;
 
     final BoxConstraints effectiveConstraints = viewConstraints ?? viewTheme.constraints ?? viewDefaults.constraints!;
@@ -996,6 +997,7 @@ class SearchBar extends StatefulWidget {
     this.trailing,
     this.onTap,
     this.onChanged,
+    this.onSubmitted,
     this.constraints,
     this.elevation,
     this.backgroundColor,
@@ -1043,6 +1045,10 @@ class SearchBar extends StatefulWidget {
 
   /// Invoked upon user input.
   final ValueChanged<String>? onChanged;
+
+  /// Called when the user indicates that they are done editing the text in the
+  /// field.
+  final ValueChanged<String>? onSubmitted;
 
   /// Optional size constraints for the search bar.
   ///
@@ -1236,6 +1242,7 @@ class _SearchBarState extends State<SearchBar> {
                       child: TextField(
                         focusNode: _focusNode,
                         onChanged: widget.onChanged,
+                        onSubmitted: widget.onSubmitted,
                         controller: widget.controller,
                         style: effectiveTextStyle,
                         decoration: InputDecoration(

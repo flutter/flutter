@@ -783,8 +783,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
       'This feature was deprecated after v2.6.0-1.0.pre.'
     )
-    // TODO(pdblasi-google): Do not remove until https://github.com/flutter/flutter/issues/124346
-    // is complete, as this removal will cascade into `integration_test`
     Duration? timeout,
   });
 
@@ -1458,8 +1456,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
       'This feature was deprecated after v2.6.0-1.0.pre.'
     )
-    // TODO(pdblasi-google): Do not remove until https://github.com/flutter/flutter/issues/124346
-    // is complete, as this removal will cascade into `integration_test`
     Duration? timeout,
   }) {
     assert(!inTest);
@@ -2006,8 +2002,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
       'This feature was deprecated after v2.6.0-1.0.pre.'
     )
-    // TODO(pdblasi-google): Do not remove until https://github.com/flutter/flutter/issues/124346
-    // is complete, as this removal will cascade into `integration_test`
     Duration? timeout,
   }) {
     assert(!inTest);

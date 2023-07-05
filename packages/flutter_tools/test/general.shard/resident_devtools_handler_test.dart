@@ -156,6 +156,7 @@ void main() {
         },
       ),
       listViews,
+      listViews,
       const FakeVmServiceRequest(
         method: 'ext.flutter.activeDevToolsServerAddress',
         args: <String, Object>{
@@ -163,7 +164,6 @@ void main() {
           'value': 'http://localhost:8080',
         },
       ),
-      listViews,
       const FakeVmServiceRequest(
         method: 'ext.flutter.connectedVmServiceUri',
         args: <String, Object>{
@@ -314,6 +314,7 @@ void main() {
         },
       ),
       listViews,
+      listViews,
       const FakeVmServiceRequest(
         method: 'ext.flutter.activeDevToolsServerAddress',
         args: <String, Object>{
@@ -321,7 +322,6 @@ void main() {
           'value': 'http://localhost:8080',
         },
       ),
-      listViews,
       const FakeVmServiceRequest(
         method: 'ext.flutter.connectedVmServiceUri',
         args: <String, Object>{
