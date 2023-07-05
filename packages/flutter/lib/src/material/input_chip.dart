@@ -322,10 +322,10 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   /// remains 4px.
   @override
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
-        const EdgeInsets.symmetric(horizontal: 8.0),
-        const EdgeInsets.symmetric(horizontal: 4.0),
-        clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
-      )!;
+    const EdgeInsets.symmetric(horizontal: 8.0),
+    const EdgeInsets.symmetric(horizontal: 4.0),
+    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
+  )!;
 }
 
 // END GENERATED TOKEN PROPERTIES - InputChip
