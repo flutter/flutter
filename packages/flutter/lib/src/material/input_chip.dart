@@ -190,8 +190,10 @@ class InputChip extends StatelessWidget
   @override
   final IconThemeData? iconTheme;
   @override
-  @Deprecated('Migrate to deleteButtonTooltipMessage. '
-      'This feature was deprecated after v2.10.0-0.3.pre.')
+  @Deprecated(
+    'Migrate to deleteButtonTooltipMessage. '
+    'This feature was deprecated after v2.10.0-0.3.pre.'
+  )
   final bool useDeleteButtonTooltip;
 
   @override
