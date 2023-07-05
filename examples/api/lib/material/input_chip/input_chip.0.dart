@@ -16,7 +16,7 @@ class ChipApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         colorSchemeSeed: const Color(0xff6750a4),
-        useMaterial3: true
+        useMaterial3: true,
       ),
       home: const InputChipExample(),
     );
