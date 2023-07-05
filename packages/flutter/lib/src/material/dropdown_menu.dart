@@ -651,6 +651,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         );
       },
     );
+
     if (widget.expandedInsets != null) {
       menuAnchor = Container(
         alignment: AlignmentDirectional.topStart,
