@@ -1443,8 +1443,6 @@ class PlatformViewWithOtherBackDropFilter extends PlatformViewScenario {
 /// A simple platform view for testing backDropFilter with a platform view in the scene.
 ///
 /// The stack would look like: picture 1 -> pv1 -> picture 2 -> filter -> pv2 - > picture 3.
-/// Because backdrop filter on platform views has not been implemented(see: https://github.com/flutter/flutter/issues/43902),
-/// the result will not including a filtered pv1.
 class TwoPlatformViewsWithOtherBackDropFilter extends Scenario
     with _BasePlatformViewScenarioMixin {
   /// Constructs the scenario.
@@ -1526,6 +1524,68 @@ class TwoPlatformViewsWithOtherBackDropFilter extends Scenario
     );
     final Picture picture3 = recorder3.endRecording();
     builder.addPicture(const Offset(100, 100), picture3);
+
+    final Scene scene = builder.build();
+    view.render(scene);
+    scene.dispose();
+  }
+}
+
+/// A simple platform view for testing backDropFilter with a platform view in the scene.
+///
+/// The backdrop filter sigma value is negative, which tries to reproduce a crash, see:
+/// https://github.com/flutter/flutter/issues/127095
+class PlatformViewWithNegativeBackDropFilter extends Scenario
+    with _BasePlatformViewScenarioMixin {
+  /// Constructs the scenario.
+  PlatformViewWithNegativeBackDropFilter(
+    super.view, {
+    required int id,
+  }) : _id = id;
+
+  final int _id;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    // This is just a background picture to make the result more viewable.
+    canvas.drawRect(
+      const Rect.fromLTRB(0, 0, 600, 1000),
+      Paint()..color = const Color(0xFFFF0000),
+    );
+    canvas.drawRect(
+      const Rect.fromLTRB(0, 0, 300, 300),
+      Paint()..color = const Color(0xFF00FF00),
+    );
+    final Picture picture1 = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture1);
+
+    builder.pushOffset(0, 200);
+
+    addPlatformView(
+      _id,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+      width: 100,
+      height: 100,
+      text: 'platform view 1'
+    );
+
+    final PictureRecorder recorder2 = PictureRecorder();
+    final Canvas canvas2 = Canvas(recorder2);
+    canvas2.drawCircle(
+      const Offset(200, 100),
+      50,
+      Paint()..color = const Color(0xFF0000EF),
+    );
+    final Picture picture2 = recorder2.endRecording();
+    builder.addPicture(const Offset(100, 100), picture2);
+
+    final ImageFilter filter = ImageFilter.blur(sigmaX: -8, sigmaY: 8);
+    builder.pushBackdropFilter(filter);
 
     final Scene scene = builder.build();
     view.render(scene);
