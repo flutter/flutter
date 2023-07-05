@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' show max, min, pi;
+import 'dart:math' show max, min;
 import 'dart:ui' as ui show
   BoxHeightStyle,
   BoxWidthStyle,
@@ -26,19 +26,13 @@ import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
-class _DebugAssert {
-  const _DebugAssert();
-}
-const _DebugAssert _debugAssert = _DebugAssert();
+const String _debugAssert = '_debug';
 
 // The default font size if none is specified. This should be kept in
 // sync with the default values in text_style.dart, as well as the
 // defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
 const double _kDefaultFontSize = 14.0;
 
-
-@_debugAssert
-void testFunction2(ui.LineMetrics Function(ui.LineMetrics, Offset) f) {}
 
 /// How overflowing text should be handled.
 ///
@@ -298,7 +292,6 @@ class _TextLayout {
   /// Whether this layout has been invalidated and disposed.
   ///
   /// Only for use when asserts are enabled.
-  @_debugAssert
   bool get debugDisposed => _paragraph.debugDisposed;
 
   /// The horizontal space required to paint this text.
@@ -605,7 +598,6 @@ class TextPainter {
   }
 
   // Whether textWidthBasis has changed after the most recent `layout` call.
-  @_debugAssert
   bool _debugNeedsRelayout = true;
   // The result of the most recent `layout` call.
   _TextPainterLayoutCacheWithOffset? _layoutCache;
@@ -1497,7 +1489,6 @@ class TextPainter {
     return _layoutCache!.paragraph.getLineBoundary(position);
   }
 
-  @_debugAssert
   static ui.LineMetrics _shiftLineMetrics(ui.LineMetrics metrics, Offset offset) {
     assert(offset.dx.isFinite);
     assert(offset.dy.isFinite);
@@ -1570,26 +1561,10 @@ class TextPainter {
   ///
   /// After disposal this painter is unusable.
   void dispose() {
-    final xxxx = _shiftLineMetrics;
-    void testFunction(ui.LineMetrics Function(ui.LineMetrics, Offset) f) {}
-    testFunction(_shiftLineMetrics);
-    testFunction2(_shiftLineMetrics);
-
     assert(() {
       _disposed = true;
       return true;
     }());
-    final double x = 123.0;
-    x.clamp(111, 123);
-    final double? y = 123.0;
-    y?.clamp(111, 123);
-    final r1 = y!.clamp(111, 123);
-    final r2 = 1.clamp(0, 2);
-    final r3 = 1.clamp(0.0, 2.0);
-    final fs1 = [1.clamp, 2.clamp, 3.clamp, 4.clamp, (pi + 1).clamp];
-    final fs2 = [1.clamp, 2.clamp, 3.clamp, 4.clamp];
-    fs2.map((f) => f(11.1, 11.2));
-
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
     _layoutCache?.paragraph.dispose();

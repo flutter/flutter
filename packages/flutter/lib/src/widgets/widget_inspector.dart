@@ -574,10 +574,13 @@ class _ScreenshotPaintingContext extends PaintingContext {
       // Repaint everything under the repaint boundary.
       // We call debugInstrumentRepaintCompositedChild instead of paintChild as
       // we need to force everything under the repaint boundary to repaint.
-      PaintingContext.debugInstrumentRepaintCompositedChild(
-        repaintBoundary,
-        customContext: context,
-      );
+      assert(() {
+        PaintingContext.debugInstrumentRepaintCompositedChild(
+          repaintBoundary,
+          customContext: context,
+        );
+        return true;
+      }());
     }
 
     // The check that debugPaintSizeEnabled is false exists to ensure we only
