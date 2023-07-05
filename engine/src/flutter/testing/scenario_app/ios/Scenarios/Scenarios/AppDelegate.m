@@ -55,6 +55,8 @@
     @"--platform-view-with-other-backdrop-filter" : @"platform_view_with_other_backdrop_filter",
     @"--two-platform-views-with-other-backdrop-filter" :
         @"two_platform_views_with_other_backdrop_filter",
+    @"--platform-view-with-negative-backdrop-filter" :
+        @"platform_view_with_negative_backdrop_filter",
     @"--platform-view-rotate" : @"platform_view_rotate",
     @"--non-full-screen-flutter-view-platform-view" : @"non_full_screen_flutter_view_platform_view",
     @"--gesture-reject-after-touches-ended" : @"platform_view_gesture_reject_after_touches_ended",
