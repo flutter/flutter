@@ -70,6 +70,7 @@ class VerboseStdio extends Stdio {
     required this.stdout,
     required this.stderr,
     required this.stdin,
+    this.filter,
   });
 
   factory VerboseStdio.local() => VerboseStdio(
@@ -81,27 +82,40 @@ class VerboseStdio extends Stdio {
   final io.Stdout stdout;
   final io.Stdout stderr;
   final io.Stdin stdin;
+  final String Function(String)? filter;
 
   @override
   void printError(String message) {
+    if (filter != null) {
+      message = filter!(message);
+    }
     super.printError(message);
     stderr.writeln(message);
   }
 
   @override
   void printStatus(String message) {
+    if (filter != null) {
+      message = filter!(message);
+    }
     super.printStatus(message);
     stdout.writeln(message);
   }
 
   @override
   void printTrace(String message) {
+    if (filter != null) {
+      message = filter!(message);
+    }
     super.printTrace(message);
     stdout.writeln(message);
   }
 
   @override
   void write(String message) {
+    if (filter != null) {
+      message = filter!(message);
+    }
     super.write(message);
     stdout.write(message);
   }
