@@ -2407,7 +2407,6 @@ targets:
       task_name: platform_views_scroll_perf__timeline_summary
 
   - name: Linux_android platform_views_scroll_perf_impeller__timeline_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
