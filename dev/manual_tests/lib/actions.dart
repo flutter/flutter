@@ -63,14 +63,12 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   // at the end of the list.
   final List<Memento> _undoneActions = <Memento>[];
 
-  static const int _defaultMaxUndoLevels = 1000;
-
   /// The maximum number of undo levels allowed.
   ///
   /// If this value is set to a value smaller than the number of completed
   /// actions, then the stack of completed actions is truncated to only include
   /// the last [maxUndoLevels] actions.
-  int get maxUndoLevels => _defaultMaxUndoLevels;
+  int get maxUndoLevels => 1000;
 
   final Set<VoidCallback> _listeners = <VoidCallback>{};
 
