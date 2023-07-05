@@ -350,4 +350,140 @@ void main() {
     await tester.pumpAndSettle();
     expect(builtCount, 1);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('android can use CupertinoPageTransitionsBuilder', (WidgetTester tester) async {
+    int builtCount = 0;
+
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          builtCount++;
+          return TextButton(
+            child: const Text('pop'),
+            onPressed: () { Navigator.pop(context); },
+          );
+        },
+      ),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+              // iOS uses different PageTransitionsBuilder
+              TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+            },
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    // No matter push or pop was called, the child widget should built only once.
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(builtCount, 1);
+
+    final Size size = tester.getSize(find.byType(MaterialApp));
+    await tester.flingFrom(Offset(0, size.height / 2), Offset(size.width * 2 / 3, 0), 500);
+
+    await tester.pumpAndSettle();
+    expect(find.text('push'), findsOneWidget);
+    expect(builtCount, 1);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('back gesture while TargetPlatform changes', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('PUSH'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('HELLO'),
+    };
+    const PageTransitionsTheme pageTransitionsTheme = PageTransitionsTheme(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+        // iOS uses different PageTransitionsBuilder
+        TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+      },
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.android,
+          pageTransitionsTheme: pageTransitionsTheme,
+        ),
+        routes: routes,
+      ),
+    );
+    await tester.tap(find.text('PUSH'));
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
+    expect(find.text('PUSH'), findsNothing);
+    expect(find.text('HELLO'), findsOneWidget);
+
+    final Offset helloPosition1 = tester.getCenter(find.text('HELLO'));
+    final TestGesture gesture = await tester.startGesture(const Offset(2.5, 300.0));
+    await tester.pump(const Duration(milliseconds: 20));
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    expect(find.text('PUSH'), findsNothing);
+    expect(find.text('HELLO'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(find.text('PUSH'), findsOneWidget);
+    expect(find.text('HELLO'), findsOneWidget);
+    final Offset helloPosition2 = tester.getCenter(find.text('HELLO'));
+    expect(helloPosition1.dx, lessThan(helloPosition2.dx));
+    expect(helloPosition1.dy, helloPosition2.dy);
+    expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.android);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.iOS,
+          pageTransitionsTheme: pageTransitionsTheme,
+        ),
+        routes: routes,
+      ),
+    );
+    // Now, let the theme animation run through.
+    // This takes three frames (including the first one above):
+    //  1. Start the Theme animation. It's at t=0 so everything else is identical.
+    //  2. Start any animations that are informed by the Theme, for example, the
+    //     DefaultTextStyle, on the first frame that the theme is not at t=0. In
+    //     this case, it's at t=1.0 of the theme animation, so this is also the
+    //     frame in which the theme animation ends.
+    //  3. End all the other animations.
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
+    expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.iOS);
+    final Offset helloPosition3 = tester.getCenter(find.text('HELLO'));
+    expect(helloPosition3, helloPosition2);
+    expect(find.text('PUSH'), findsOneWidget);
+    expect(find.text('HELLO'), findsOneWidget);
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(find.text('PUSH'), findsOneWidget);
+    expect(find.text('HELLO'), findsOneWidget);
+    final Offset helloPosition4 = tester.getCenter(find.text('HELLO'));
+    expect(helloPosition3.dx, lessThan(helloPosition4.dx));
+    expect(helloPosition3.dy, helloPosition4.dy);
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await gesture.up();
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 3);
+    expect(find.text('PUSH'), findsOneWidget);
+    expect(find.text('HELLO'), findsNothing);
+
+    await tester.tap(find.text('PUSH'));
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
+    expect(find.text('PUSH'), findsNothing);
+    expect(find.text('HELLO'), findsOneWidget);
+  });
 }
