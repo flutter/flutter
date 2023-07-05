@@ -15,8 +15,8 @@ assignees: ''
 
       If you are filing a feature request, please describe the use case and a proposal.
 
-      If you are requesting a small infra task with P0 or P1 priority, please add it to the
-      "Infra Ticket Queue" project with "New" column, explain why the task is needed and what
-      actions need to perform (if you happen to know). No need to set an assignee; the infra oncall
+      If you are requesting a small infra task with P0 priority, please add it to the
+      "Infra Ticket Queue" project with "New" column, explain why the task is urgent and what
+      actions need to be performed (if you happen to know). No need to set an assignee; the infra oncall
       will triage and process the infra ticket queue.
 -->
