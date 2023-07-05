@@ -2,24 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 void main() =>
   runApp(
-    MaterialApp(
-      title: 'Hello, world!',
-      theme: ThemeData(
-        primarySwatch: Colors.grey,
-        useMaterial3: true,
+    const Center(
+      child:
+        Text('Hello, world!',
+          key: Key('title'),
+          textDirection: TextDirection.ltr,
+        ),
       ),
-      home: const Scaffold(
-        body: Center(
-          child:
-            Text('Hello, world!',
-              key: Key('title'),
-              textDirection: TextDirection.ltr,
-            ),
-          ),
-      ),
-    ),
     );
