@@ -2573,7 +2573,7 @@ class InputDecoration {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
-    this.floatingLabelGap = 4.0,
+    this.floatingLabelGap,
     this.floatingLabelBehavior,
     this.floatingLabelAlignment,
     this.isCollapsed = false,
@@ -2905,7 +2905,7 @@ class InputDecoration {
   /// Defines the vertical gap between the inline elements and the floating label.
   ///
   /// Default is 4.0
-  final double floatingLabelGap;
+  final double? floatingLabelGap;
   
   /// {@template flutter.material.inputDecoration.floatingLabelBehavior}
   /// Defines **how** the floating label should behave.
@@ -3788,7 +3788,7 @@ class InputDecoration {
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
-      if (floatingLabelGap != 4.0) 'floatingLabelGap: $floatingLabelGap',
+      if (floatingLabelGap != null) 'floatingLabelGap: $floatingLabelGap',
       if (floatingLabelBehavior != null) 'floatingLabelBehavior: $floatingLabelBehavior',
       if (floatingLabelAlignment != null) 'floatingLabelAlignment: $floatingLabelAlignment',
       if (isDense ?? false) 'isDense: $isDense',
@@ -3852,6 +3852,7 @@ class InputDecorationTheme with Diagnosticable {
     this.hintStyle,
     this.errorStyle,
     this.errorMaxLines,
+    this.floatingLabelGap = 4.0,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
     this.floatingLabelAlignment = FloatingLabelAlignment.start,
     this.isDense = false,
@@ -3936,6 +3937,11 @@ class InputDecorationTheme with Diagnosticable {
   ///  * [helperMaxLines], the equivalent but for the [InputDecoration.helperText].
   final int? errorMaxLines;
 
+  /// {@macro flutter.material.inputDecoration.floatingLabelGap}
+  ///
+  /// Defaults to 4.0
+  final double floatingLabelGap;
+  
   /// {@macro flutter.material.inputDecoration.floatingLabelBehavior}
   ///
   /// Defaults to [FloatingLabelBehavior.auto].
@@ -4259,6 +4265,7 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle? hintStyle,
     TextStyle? errorStyle,
     int? errorMaxLines,
+    double? floatingLabelGap,
     FloatingLabelBehavior? floatingLabelBehavior,
     FloatingLabelAlignment? floatingLabelAlignment,
     bool? isDense,
@@ -4293,6 +4300,7 @@ class InputDecorationTheme with Diagnosticable {
       hintStyle: hintStyle ?? this.hintStyle,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
+      floatingLabelGap: floatingLabelGap ?? this.floatingLabelGap,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
       floatingLabelAlignment: floatingLabelAlignment ?? this.floatingLabelAlignment,
       isDense: isDense ?? this.isDense,
@@ -4399,6 +4407,7 @@ class InputDecorationTheme with Diagnosticable {
       border,
       alignLabelWithHint,
       constraints,
+      floatingLabelGap,
     ),
   );
 
@@ -4427,6 +4436,7 @@ class InputDecorationTheme with Diagnosticable {
         && other.suffixStyle == suffixStyle
         && other.suffixIconColor == suffixIconColor
         && other.counterStyle == counterStyle
+        && other.floatingLabelGap == floatingLabelGap
         && other.floatingLabelBehavior == floatingLabelBehavior
         && other.floatingLabelAlignment == floatingLabelAlignment
         && other.filled == filled
@@ -4457,6 +4467,7 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
     properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
     properties.add(IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
+    properties.add(DiagnosticsProperty<double>('floatingLabelGap', floatingLabelGap, defaultValue: defaultTheme.floatingLabelGap));
     properties.add(DiagnosticsProperty<FloatingLabelBehavior>('floatingLabelBehavior', floatingLabelBehavior, defaultValue: defaultTheme.floatingLabelBehavior));
     properties.add(DiagnosticsProperty<FloatingLabelAlignment>('floatingLabelAlignment', floatingLabelAlignment, defaultValue: defaultTheme.floatingLabelAlignment));
     properties.add(DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
