@@ -39,8 +39,6 @@ std::shared_ptr<Texture> DeviceBuffer::AsTexture(
   return texture;
 }
 
-void DeviceBuffer::Flush() {}
-
 const DeviceBufferDescriptor& DeviceBuffer::GetDeviceBufferDescriptor() const {
   return desc_;
 }

@@ -52,6 +52,7 @@ impeller_component("vulkan") {
     "fence_waiter_vk.h",
     "formats_vk.cc",
     "formats_vk.h",
+    "limits_vk.h",
     "pass_bindings_cache.cc",
     "pass_bindings_cache.h",
     "pipeline_cache_vk.cc",

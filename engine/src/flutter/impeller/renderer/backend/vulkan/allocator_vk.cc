@@ -11,6 +11,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
+#include "impeller/renderer/backend/vulkan/limits_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 
 namespace impeller {
@@ -198,9 +199,9 @@ static constexpr VkMemoryPropertyFlags ToVKBufferMemoryPropertyFlags(
     StorageMode mode) {
   switch (mode) {
     case StorageMode::kHostVisible:
-      // See https://github.com/flutter/flutter/issues/128556 . Some devices do
-      // not have support for coherent host memory so we don't request it here.
-      return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+      return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
+             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     case StorageMode::kDevicePrivate:
       return VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
     case StorageMode::kDeviceTransient:
@@ -210,18 +211,27 @@ static constexpr VkMemoryPropertyFlags ToVKBufferMemoryPropertyFlags(
 }
 
 static VmaAllocationCreateFlags ToVmaAllocationCreateFlags(StorageMode mode,
-                                                           bool is_texture) {
+                                                           bool is_texture,
+                                                           size_t size) {
   VmaAllocationCreateFlags flags = 0;
   switch (mode) {
     case StorageMode::kHostVisible:
       if (is_texture) {
-        flags |= {};
+        if (size >= kImageSizeThresholdForDedicatedMemoryAllocation) {
+          flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+        } else {
+          flags |= {};
+        }
       } else {
-        flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
+        flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
         flags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
       }
       return flags;
     case StorageMode::kDevicePrivate:
+      if (is_texture &&
+          size >= kImageSizeThresholdForDedicatedMemoryAllocation) {
+        flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+      }
       return flags;
     case StorageMode::kDeviceTransient:
       return flags;
@@ -261,7 +271,9 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     alloc_nfo.usage = ToVMAMemoryUsage();
     alloc_nfo.preferredFlags = ToVKTextureMemoryPropertyFlags(
         desc.storage_mode, supports_memoryless_textures);
-    alloc_nfo.flags = ToVmaAllocationCreateFlags(desc.storage_mode, true);
+    alloc_nfo.flags =
+        ToVmaAllocationCreateFlags(desc.storage_mode, /*is_texture=*/true,
+                                   desc.GetByteSizeOfBaseMipLevel());
 
     auto create_info_native =
         static_cast<vk::ImageCreateInfo::NativeType>(image_info);
@@ -396,7 +408,8 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
   allocation_info.usage = ToVMAMemoryUsage();
   allocation_info.preferredFlags =
       ToVKBufferMemoryPropertyFlags(desc.storage_mode);
-  allocation_info.flags = ToVmaAllocationCreateFlags(desc.storage_mode, false);
+  allocation_info.flags = ToVmaAllocationCreateFlags(
+      desc.storage_mode, /*is_texture=*/false, desc.size);
 
   VkBuffer buffer = {};
   VmaAllocation buffer_allocation = {};
