@@ -1110,7 +1110,6 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
-
     expect(box.size.height, equals(100));
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
@@ -1150,7 +1149,6 @@ void main() {
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Shifting);
     matches(getBorderRadius(tester, 1), RadiusType.Shifting, RadiusType.Round);
-
 
     await tester.pump(const Duration(milliseconds: 100));
     expect(box.size.height, equals(216));
