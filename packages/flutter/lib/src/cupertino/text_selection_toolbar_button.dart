@@ -193,8 +193,8 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
         return textWidget;
       case ContextMenuButtonType.liveTextInput:
         return SizedBox(
-          width: 13,
-          height: 13,
+          width: 13.0,
+          height: 13.0,
           child: CustomPaint(
             painter: _LiveTextIconPainter(color: _kToolbarTextColor.resolveFrom(context)),
           ),
@@ -211,21 +211,21 @@ class _LiveTextIconPainter extends CustomPainter {
   final Paint _painter = Paint()
     ..strokeCap = StrokeCap.round
     ..strokeJoin = StrokeJoin.round
-    ..strokeWidth = 1
+    ..strokeWidth = 1.0
     ..style = PaintingStyle.stroke;
 
   @override
   void paint(Canvas canvas, Size size) {
     _painter.color = color;
     canvas.save();
-    canvas.translate(size.width / 2, size.height / 2);
+    canvas.translate(size.width / 2.0, size.height / 2.0);
 
     final Offset origin = Offset(-size.width / 2.0, -size.height / 2.0);
     // Path for the one corner.
     final Path path = Path()
       ..moveTo(origin.dx, origin.dy + 3.5)
-      ..lineTo(origin.dx, origin.dy + 1)
-      ..arcToPoint(Offset(origin.dx + 1, origin.dy), radius: const Radius.circular(1))
+      ..lineTo(origin.dx, origin.dy + 1.0)
+      ..arcToPoint(Offset(origin.dx + 1.0, origin.dy), radius: const Radius.circular(1))
       ..lineTo(origin.dx + 3.5, origin.dy);
 
     // Rotate to draw corner four times.
@@ -236,9 +236,9 @@ class _LiveTextIconPainter extends CustomPainter {
     }
 
     // Draw three lines.
-    canvas.drawLine(const Offset(-3, -3), const Offset(3, -3), _painter);
-    canvas.drawLine(const Offset(-3, 0), const Offset(3, 0), _painter);
-    canvas.drawLine(const Offset(-3, 3), const Offset(1, 3), _painter);
+    canvas.drawLine(const Offset(-3.0, -3.0), const Offset(3.0, -3.0), _painter);
+    canvas.drawLine(const Offset(-3.0, 0.0), const Offset(3.0, 0.0), _painter);
+    canvas.drawLine(const Offset(-3.0, 3.0), const Offset(1.0, 3.0), _painter);
 
     canvas.restore();
   }

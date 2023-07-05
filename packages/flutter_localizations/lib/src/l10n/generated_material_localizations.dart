@@ -40577,7 +40577,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'محفوظ کریں';
 
   @override
-  String get scanTextButtonLabel => 'متن کو اسکین کریں۔';
+  String get scanTextButtonLabel => 'متن کو اسکین کریں';
 
   @override
   String get scrimLabel => 'اسکریم';
