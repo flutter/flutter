@@ -39,6 +39,9 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.invertedStylus,
 };
 
+
+const double _kSelectableComparingThreshold = 3.0;
+
 /// A widget that introduces an area for user selections.
 ///
 /// Flutter widgets are not selectable by default. Wrapping a widget subtree
@@ -1703,11 +1706,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Returns positive if a is lower, negative if a is higher, 0 if their
   /// order can't be determine solely by their vertical position.
   static int _compareVertically(Rect a, Rect b) {
-    if ((a.top - b.top < precisionErrorTolerance && a.bottom - b.bottom > - precisionErrorTolerance) ||
-        (b.top - a.top < precisionErrorTolerance && b.bottom - a.bottom > - precisionErrorTolerance)) {
+    if ((a.top - b.top).abs() < _kSelectableComparingThreshold && (a.bottom - b.bottom).abs() < _kSelectableComparingThreshold) {
       return 0;
     }
-    if ((a.top - b.top).abs() > precisionErrorTolerance) {
+    if ((a.top - b.top).abs() > _kSelectableComparingThreshold) {
       return a.top > b.top ? 1 : -1;
     }
     return a.bottom > b.bottom ? 1 : -1;
