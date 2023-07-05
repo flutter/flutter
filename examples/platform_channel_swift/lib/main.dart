@@ -88,6 +88,6 @@ void main() {
       primarySwatch: Colors.grey,
       useMaterial3: true,
      ),
-     home: const PlatformChannel()
+    home: const PlatformChannel()
   ));
 }
