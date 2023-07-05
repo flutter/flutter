@@ -91,5 +91,7 @@ void main() {
       theme: ThemeData(
         primarySwatch: Colors.grey,
         useMaterial3: true,
-      ),home: const PlatformChannel()));
+      ),
+    home: const PlatformChannel()
+  ));
 }
