@@ -294,8 +294,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      dependencies: >-
-        *linux_build_tests_dependencies
+      dependencies: *linux_build_tests_dependencies
       shard: build_tests
       subshard: "2_3"
       tags: >
@@ -305,8 +304,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      dependencies: >-
-        *linux_build_tests_dependencies
+      dependencies: *linux_build_tests_dependencies
       shard: build_tests
       subshard: "3_3"
       tags: >
@@ -2704,8 +2702,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      dependencies: >-
-        *mac_build_tests_dependencies
+      dependencies: *mac_build_tests_dependencies
       shard: build_tests
       subshard: "2_4"
       tags: >
@@ -2716,8 +2713,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      dependencies: >-
-        *mac_build_tests_dependencies
+      dependencies: *mac_build_tests_dependencies
       shard: build_tests
       subshard: "3_4"
       tags: >
@@ -2728,8 +2724,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      dependencies: >-
-        *mac_build_tests_dependencies
+      dependencies: *mac_build_tests_dependencies
       shard: build_tests
       subshard: "4_4"
       tags: >
@@ -4108,7 +4103,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      dependencies: &windows_build_test_dependencies >-
+      dependencies: &windows_build_tests_dependencies >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:114.0"},
@@ -4126,8 +4121,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      dependencies: >-
-        *windows_build_tests_dependencies
+      dependencies: *windows_build_tests_dependencies
       shard: build_tests
       subshard: "2_4"
       tags: >
@@ -4138,8 +4132,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      dependencies: >-
-        *windows_build_tests_dependencies
+      dependencies: *windows_build_tests_dependencies
       shard: build_tests
       subshard: "3_4"
       tags: >
@@ -4150,8 +4143,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      dependencies: >-
-        *windows_build_tests_dependencies
+      dependencies: *windows_build_tests_dependencies
       shard: build_tests
       subshard: "4_4"
       tags: >
