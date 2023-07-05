@@ -2218,7 +2218,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final List<DiagnosticsNode> expectedProperties = element.toDiagnosticsNode().getProperties();
         final Iterable<Object?> propertyValues = expectedProperties.map((DiagnosticsNode e) => e.value.toString());
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
-          final  String property = service.toObject(propertyJson['valueId']! as String)!.toString();
+          final String id = propertyJson['valueId']! as String;
+          final  String property = service.toObject(id)!.toString();
           expect(propertyValues, contains(property));
         }
       }
@@ -2261,7 +2262,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final List<DiagnosticsNode> expectedProperties = element.toDiagnosticsNode().getProperties();
         final Iterable<Object?> propertyValues = expectedProperties.map((DiagnosticsNode e) => e.value.toString());
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
-          final String property = service.toObject(propertyJson['valueId']! as String)!.toString();
+          final String id = propertyJson['valueId']! as String;
+          final String property = service.toObject(id)!.toString();
           expect(propertyValues, contains(property));
         }
       }
