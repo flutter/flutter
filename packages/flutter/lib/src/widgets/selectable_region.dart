@@ -1706,7 +1706,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Returns positive if a is lower, negative if a is higher, 0 if their
   /// order can't be determine solely by their vertical position.
   static int _compareVertically(Rect a, Rect b) {
-    if ((a.top - b.top).abs() < _kSelectableComparingThreshold && (a.bottom - b.bottom).abs() < _kSelectableComparingThreshold) {
+    if ((a.top - b.top < _kSelectableComparingThreshold && a.bottom - b.bottom > - _kSelectableComparingThreshold) ||
+        (b.top - a.top < _kSelectableComparingThreshold && b.bottom - a.bottom > - _kSelectableComparingThreshold)) {
       return 0;
     }
     if ((a.top - b.top).abs() > _kSelectableComparingThreshold) {
