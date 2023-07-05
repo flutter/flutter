@@ -2405,8 +2405,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
-      // 4.0: the vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = (4.0 + 0.75 * labelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
+      floatingLabelHeight = (decoration.floatingLabelGap + 0.75 * labelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
       if (decoration.filled ?? false) {
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
@@ -2574,6 +2573,7 @@ class InputDecoration {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
+    this.floatingLabelGap = 4.0,
     this.floatingLabelBehavior,
     this.floatingLabelAlignment,
     this.isCollapsed = false,
@@ -2620,6 +2620,7 @@ class InputDecoration {
   /// Sets the [isCollapsed] property to true.
   const InputDecoration.collapsed({
     required this.hintText,
+    this.floatingLabelGap,
     this.floatingLabelBehavior,
     this.floatingLabelAlignment,
     this.hintStyle,
@@ -2901,6 +2902,11 @@ class InputDecoration {
   ///  * [helperMaxLines], the equivalent but for the [helperText].
   final int? errorMaxLines;
 
+  /// Defines the vertical gap between the inline elements and the floating label.
+  ///
+  /// Default is 4.0
+  final double floatingLabelGap;
+  
   /// {@template flutter.material.inputDecoration.floatingLabelBehavior}
   /// Defines **how** the floating label should behave.
   ///
@@ -3511,6 +3517,7 @@ class InputDecoration {
     String? errorText,
     TextStyle? errorStyle,
     int? errorMaxLines,
+    double? floatingLabelGap,
     FloatingLabelBehavior? floatingLabelBehavior,
     FloatingLabelAlignment? floatingLabelAlignment,
     bool? isCollapsed,
@@ -3564,6 +3571,7 @@ class InputDecoration {
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
+      floatingLabelGap: floatingLabelGap ?? this.floatingLabelGap,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
       floatingLabelAlignment: floatingLabelAlignment ?? this.floatingLabelAlignment,
       isCollapsed: isCollapsed ?? this.isCollapsed,
@@ -3615,6 +3623,7 @@ class InputDecoration {
       hintStyle: hintStyle ?? theme.hintStyle,
       errorStyle: errorStyle ?? theme.errorStyle,
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
+      floatingLabelGap: floatingLabelGap ?? theme.floatingLabelGap,
       floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
       floatingLabelAlignment: floatingLabelAlignment ?? theme.floatingLabelAlignment,
       isDense: isDense ?? theme.isDense,
@@ -3667,6 +3676,7 @@ class InputDecoration {
         && other.errorText == errorText
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
+        && other.floatingLabelGap == floatingLabelGap
         && other.floatingLabelBehavior == floatingLabelBehavior
         && other.floatingLabelAlignment == floatingLabelAlignment
         && other.isDense == isDense
@@ -3723,6 +3733,7 @@ class InputDecoration {
       errorText,
       errorStyle,
       errorMaxLines,
+      floatingLabelGap,
       floatingLabelBehavior,
       floatingLabelAlignment,
       isDense,
@@ -3777,6 +3788,7 @@ class InputDecoration {
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
+      if (floatingLabelGap != 4.0) 'floatingLabelGap: $floatingLabelGap',
       if (floatingLabelBehavior != null) 'floatingLabelBehavior: $floatingLabelBehavior',
       if (floatingLabelAlignment != null) 'floatingLabelAlignment: $floatingLabelAlignment',
       if (isDense ?? false) 'isDense: $isDense',
