@@ -113,11 +113,13 @@ class InputChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-    @Deprecated('Migrate to deleteButtonTooltipMessage. '
-        'This feature was deprecated after v2.10.0-0.3.pre.')
+    @Deprecated(
+      'Migrate to deleteButtonTooltipMessage. '
+      'This feature was deprecated after v2.10.0-0.3.pre.'
+    )
     this.useDeleteButtonTooltip = true,
-  })  : assert(pressElevation == null || pressElevation >= 0.0),
-        assert(elevation == null || elevation >= 0.0);
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0);
 
   @override
   final Widget? avatar;
