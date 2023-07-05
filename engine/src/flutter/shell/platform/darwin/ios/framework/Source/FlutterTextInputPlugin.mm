@@ -2190,7 +2190,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;
 @property(nonatomic, retain) FlutterTextInputView* activeView;
 @property(nonatomic, retain) FlutterTextInputViewAccessibilityHider* inputHider;
-@property(nonatomic, readonly) id<FlutterViewResponder> viewResponder;
+@property(nonatomic, readonly, weak) id<FlutterViewResponder> viewResponder;
 @end
 
 @implementation FlutterTextInputPlugin {
