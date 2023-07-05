@@ -279,6 +279,10 @@ bool FlutterWindow::OnBitmapSurfaceUpdated(const void* allocation,
 }
 
 gfx::NativeViewAccessible FlutterWindow::GetNativeViewAccessible() {
+  if (binding_handler_delegate_ == nullptr) {
+    return nullptr;
+  }
+
   return binding_handler_delegate_->GetNativeViewAccessible();
 }
 

@@ -272,6 +272,15 @@ TEST(FlutterWindowTest, OnThemeChange) {
   win32window.InjectWindowMessage(WM_THEMECHANGED, 0, 0);
 }
 
+// The window should return no root accessibility node if
+// it isn't attached to a view.
+// Regression test for https://github.com/flutter/flutter/issues/129791
+TEST(FlutterWindowTest, AccessibilityNodeWithoutView) {
+  MockFlutterWindow win32window;
+
+  EXPECT_EQ(win32window.GetNativeViewAccessible(), nullptr);
+}
+
 TEST(FlutterWindowTest, InitialAccessibilityFeatures) {
   MockFlutterWindow win32window;
   MockWindowBindingHandlerDelegate delegate;
