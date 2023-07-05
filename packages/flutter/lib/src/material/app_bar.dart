@@ -31,8 +31,7 @@ import 'theme.dart';
 // late String _logoAsset;
 // double _myToolbarHeight = 250.0;
 
-typedef _FlexibleConfigBuilder = _ScrollUnderFlexibleConfig Function(
-    BuildContext);
+typedef _FlexibleConfigBuilder = _ScrollUnderFlexibleConfig Function(BuildContext);
 
 const double _kLeadingWidth =
     kToolbarHeight; // So the leading button is square.
