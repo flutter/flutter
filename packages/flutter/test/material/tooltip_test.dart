@@ -2245,6 +2245,39 @@ void main() {
       reason: 'Tooltip should NOT be visible when hovered and tapped, when trigger mode is tap',
     );
   });
+
+  testWidgetsWithLeakTracking('Tooltip does not rebuild for fade in / fade out animation', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.square(
+            dimension: 10.0,
+            child: Tooltip(
+              message: tooltipText,
+              waitDuration: Duration(seconds: 1),
+              triggerMode: TooltipTriggerMode.longPress,
+              child: SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TooltipState tooltipState = tester.state(find.byType(Tooltip));
+    final Element element = tooltipState.context as Element;
+    // The Tooltip widget itself is almost stateless thus doesn't need
+    // rebuilding.
+    expect(element.dirty, isFalse);
+
+    expect(tooltipState.ensureTooltipVisible(), isTrue);
+    expect(element.dirty, isFalse);
+    await tester.pump(const Duration(seconds: 1));
+    expect(element.dirty, isFalse);
+
+    expect(Tooltip.dismissAllToolTips(), isTrue);
+    expect(element.dirty, isFalse);
+    await tester.pump(const Duration(seconds: 1));
+    expect(element.dirty, isFalse);
+  });
 }
 
 Future<void> setWidgetForTooltipMode(
@@ -2283,5 +2316,5 @@ SemanticsNode _findDebugSemantics(RenderObject object) {
   if (object.debugSemantics != null) {
     return object.debugSemantics!;
   }
-  return _findDebugSemantics(object.parent! as RenderObject);
+  return _findDebugSemantics(object.parent!);
 }
