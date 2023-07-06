@@ -61,7 +61,6 @@ void main() {
   testWidgets('Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: false);
-    final bool useMaterial3 = theme.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -86,7 +85,6 @@ void main() {
   testWidgets('Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: true);
-    final bool useMaterial3 = theme.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -114,7 +112,6 @@ void main() {
   testWidgets('Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: false);
-    final bool useMaterial3 = theme.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -139,7 +136,6 @@ void main() {
   testWidgets('Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme = ThemeData(useMaterial3: true);
-    final bool useMaterial3 = theme.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
