@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 @_debugAssert
 library;
 
@@ -22,7 +26,7 @@ mixin MixinFromDebugLib {
 
   MixinFromDebugLib operator +(covariant MixinFromDebugLib rhs);
 
-  MixinFromDebugLib operator ~() => this;
+  int operator ~() => ~debugGetSet;
 
   int operator [](int index) => index;
 }
@@ -31,8 +35,7 @@ class ClassFromDebugLibWithNamedConstructor {
   ClassFromDebugLibWithNamedConstructor.constructor();
 }
 
-class ClassFromDebugLibWithImplicitDefaultConstructor {
-}
+class ClassFromDebugLibWithImplicitDefaultConstructor { }
 
 class ClassFromDebugLibWithExplicitDefaultConstructor {
   ClassFromDebugLibWithExplicitDefaultConstructor();

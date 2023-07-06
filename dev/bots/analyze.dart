@@ -88,11 +88,6 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
-  final List<ResolvedUnitVerifier> verifiers = <ResolvedUnitVerifier>[verifyNoDoubleClamp, verifyDebugAssertAccess];
-  final String rules = verifiers.map((ResolvedUnitVerifier verifier) => '\n * $verifier').join();
-  printProgress('Analyzing code in the framework with the following rules:$rules');
-  await runVerifiersInResolvedDirectory(flutterRoot, verifiers);
-
   printProgress('All tool test files end in _test.dart...');
   await verifyToolTestsEndInTestDart(flutterRoot);
 
@@ -164,10 +159,22 @@ Future<void> run(List<String> arguments) async {
 
   // Analyze all the Dart code in the repo.
   printProgress('Dart analysis...');
-  await _runFlutterAnalyze(flutterRoot, options: <String>[
+  final CommandResult analyzeResults = await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     ...arguments,
   ]);
+
+  if (analyzeResults.exitCode != 0) {
+    // Only run the private lints when the code is free of type errors. The
+    // lints are easier to write when they can assume, for example, there is no
+    // inheritance cycles.
+    final List<ResolvedUnitVerifier> verifiers = <ResolvedUnitVerifier>[verifyNoDoubleClamp, verifyDebugAssertAccess];
+    final String rules = verifiers.map((ResolvedUnitVerifier verifier) => '\n * $verifier').join();
+    printProgress('Analyzing code in the framework with the following rules:$rules');
+    await runVerifiersInResolvedDirectory(flutterRoot, verifiers);
+  } else {
+    printProgress('Skipped analyzing code in the framework because dart analysis finished with a non-zero exit code.');
+  }
 
   printProgress('Executable allowlist...');
   await _checkForNewExecutables();

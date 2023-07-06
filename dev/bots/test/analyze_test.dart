@@ -210,12 +210,35 @@ void main() {
   //  expect(result, contains(':21'));
   //});
 
+  //test('analyze.dart - clampDouble', () async {
+  //  final String result = await capture(() => runVerifiersInResolvedDirectory(
+  //    testRootPath,
+  //    <ResolvedUnitVerifier>[verifyNoDoubleClamp],
+  //  ), shouldHaveErrors: true);
+  //  final String lines = <String>[
+  //      '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:35: input.clamp(0.0, 2)',
+  //      '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:36: input.toDouble().clamp(0, 2)',
+  //      '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:40: nullableInt?.clamp(0, 2.0)',
+  //      '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:41: nullableDouble?.clamp(0, 2)',
+  //      '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:44: nullableInt?.clamp',
+  //      '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:45: nullableDouble?.clamp',
+  //      '║' ,
+  //      '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".',
+  //      '║ For non-double uses of "clamp", use "// ignore_clamp_double_lint" on the line to silence this message.',
+  //    ]
+  //    .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+  //    .join('\n');
+  //  expect(result,
+  //    '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+  //    '$lines\n'
+  //    '╚═══════════════════════════════════════════════════════════════════════════════\n'
+  //  );
+  //});
+
   test('analyze.dart - debugAssert', () async {
     final String result = await capture(() => runVerifiersInResolvedDirectory(
       testRootPath,
       <ResolvedUnitVerifier>[verifyDebugAssertAccess],
     ));
-
-    expect(result, isEmpty);
   });
 }

@@ -146,16 +146,17 @@ class _DebugAssertVerifier extends ResolvedUnitVerifier {
 
   @override
   void analyzeResolvedUnitResult(ResolvedUnitResult unit) {
-    if (_DebugAssertVisitor._hasDebugAnnotation(unit.libraryElement)) {
+    if (unit.libraryElement.metadata.any(_DebugAssertVisitor._isDebugAssertAnnotationElement)) {
       return;
     }
 
-    final _DebugAssertVisitor visitor = _DebugAssertVisitor();
+    final Map<ClassMemberElement, bool> lookup = <ClassMemberElement, bool>{};
+    final _DebugAssertVisitor visitor = _DebugAssertVisitor(lookup);
     unit.unit.visitChildren(visitor);
     for (final AstNode node in visitor.violations) {
       final LineInfo lineInfo = unit.lineInfo;
       final int lineNumber = lineInfo.getLocation(node.offset).lineNumber;
-      errors.add('${unit.path}:$lineNumber: ${node.parent ?? node}');
+      errors.add('${unit.path}:$lineNumber: $node(${node.runtimeType})');
     }
   }
 
@@ -164,6 +165,8 @@ class _DebugAssertVerifier extends ResolvedUnitVerifier {
 }
 
 class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
+  _DebugAssertVisitor(this.overridableMemberLookup);
+  final Map<ClassMemberElement, bool> overridableMemberLookup;
   List<AstNode> violations = <AstNode>[];
 
   static bool _isDebugAssertAnnotationElement(ElementAnnotation? annotation) {
@@ -171,46 +174,124 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     return annotationElement is PropertyAccessorElement && annotationElement.name == '_debugAssert';
   }
 
-  static bool _supertypeHasDebugAnnotation(InterfaceType supertype, ExecutableElement classMember) {
-    if (supertype.element.library.isInSdk) {
-      return false;
+  bool _overriddableClassMemberHasDebugAnnotation(ClassMemberElement classMember, InterfaceElement enclosingElement) {
+    assert(!enclosingElement.library.isInSdk);
+    final bool? cached = overridableMemberLookup[classMember];
+    if (cached != null) {
+      return cached;
     }
-    switch (classMember) {
-      case ConstructorElement(): return false;
-      case MethodElement(:final String name):
-        final MethodElement? method = supertype.getMethod(name);
-        return method != null && _hasDebugAnnotation(method);
-      case PropertyAccessorElement(:final String name, isGetter: true):
-        final PropertyAccessorElement? property = supertype.getGetter(name);
-        return property != null && _hasDebugAnnotation(property);
-      case PropertyAccessorElement(:final String name, isSetter: true):
-        final PropertyAccessorElement? property = supertype.getSetter(name);
-        //print('\t property ${supertype.name}.$name $property (all methods: ${supertype.methods}, all accessors: ${supertype.accessors}, )');
-        return property != null && _hasDebugAnnotation(property);
-      case _: throw StateError('not reachable $classMember(${classMember.runtimeType})');
+    final bool isClassMemberAnnotated = enclosingElement.library.metadata.any(_isDebugAssertAnnotationElement)
+                                     || classMember.metadata.any(_isDebugAssertAnnotationElement)
+                                     || _hasDebugAnnotation(classMember.enclosingElement);
+
+    //print('> Looking for override. ${enclosingElement.name}.$classMember (${classMember.runtimeType} @ $enclosingElement, synthetic: ${classMember.isSynthetic}) is annotated? $isClassMemberAnnotated. Checking supertypes ${enclosingElement.allSupertypes})');
+
+    bool isAnnotated = isClassMemberAnnotated;
+    for (final InterfaceType supertype in enclosingElement.allSupertypes) {
+      if (supertype.element.library.isInSdk) {
+        continue;
+      }
+      final ExecutableElement? superImpl = switch (classMember) {
+        MethodElement(:final String name)                           => supertype.getMethod(name),
+        PropertyAccessorElement(:final String name, isGetter: true) => supertype.getGetter(name),
+        PropertyAccessorElement(:final String name, isSetter: true) => supertype.getSetter(name),
+        _ => throw StateError('not reachable $classMember(${classMember.runtimeType})'),
+      };
+      if (superImpl == null) {
+        continue;
+      }
+      final bool isSuperImplAnnotated = _overriddableClassMemberHasDebugAnnotation(superImpl as ClassMemberElement, supertype.element);
+      if (isClassMemberAnnotated && !isSuperImplAnnotated) {
+        print('!!!!!!!!! bad: ${enclosingElement.name}.${classMember.name} is annotated but $supertype.${superImpl.name}(${supertype.element.runtimeType}, ${superImpl.runtimeType}) is not');
+      }
+      isAnnotated |= isSuperImplAnnotated;
     }
+
+    return overridableMemberLookup[classMember] = isAnnotated;
+    //if (supertype == null || supertype.element.library.isInSdk) {
+    //  return classMemberLookup[classMember] = isAnnotated;
+    //}
+
+    //print('\t $supertype => $superImpl');
+    //if (superImpl != null && _hasDebugAnnotation(superImpl)) {
+    //  return classMemberLookup[classMember] = isAnnotated;
+    //} else if (superImpl != null && !_hasDebugAnnotation(superImpl) && isAnnotated) {
+    //  print('!!!!!!!!! bad: ${enclosingElement.name}.$classMember is annotated but $superImpl(${superImpl.runtimeType}) is not');
+    //  return classMemberLookup[classMember] = true;
+    //} else {
+    //  return classMemberLookup[classMember] = isAnnotated || (superImpl != null && _hasDebugAnnotation(superImpl));
+    //}
   }
 
-  static bool _hasDebugAnnotation(Element element) {
+  bool _defaultConstructorHasDebugAnnotation(ConstructorElement constructorElement) {
+    if (constructorElement.library.isInSdk) {
+      return false;
+    }
+    final bool annotated = !constructorElement.isSynthetic
+      && (constructorElement.library.metadata.any(_isDebugAssertAnnotationElement)
+       || constructorElement.metadata.any(_isDebugAssertAnnotationElement)
+       || _hasDebugAnnotation(constructorElement.enclosingElement));
+    if (annotated) {
+      return true;
+    }
+    // Subclasses can inherit default constructors from the superclass. Since
+    // constructors can't be invoked by the class members (see the next case
+    // for an example), if any superclass in the class hierarchy has a default
+    // constructor (including synthesized ones) that has the annotation, then
+    // the default constructor is debug-only.
+    final ConstructorElement? superConstructor = constructorElement.enclosingElement.thisType.superclass?.element.unnamedConstructor;
+    return superConstructor != null && _defaultConstructorHasDebugAnnotation(superConstructor);
+  }
+
+  bool _hasDebugAnnotation(Element element) {
     final LibraryElement? lib = element.library;
-    // Only search if the element is defined in the framework.
     if (lib == null || lib.isInSdk) {
+      // The assert is for framework code only. Dart sdk symbols won't be annotated.
       return false;
     }
-    if (lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement)) {
-      return true;
-    }
 
-    final Element? enclosingElement = element.enclosingElement;
-    if (enclosingElement is! InterfaceElement) {
-      return false;
-    } else if (_hasDebugAnnotation(enclosingElement)) {
-      return true;
+    switch (element) {
+      // The easier cases: things that a subclass does not inherit from its
+      // superclass: named constructors and static members, extension members.
+      case ConstructorElement(isDefaultConstructor: false, :final Element enclosingElement)
+        || ClassMemberElement(isStatic: true, :final Element enclosingElement):
+        //print('EZ: $element. enclosing element: $enclosingElement');
+        return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement) || _hasDebugAnnotation(enclosingElement);
+      case ConstructorElement(isDefaultConstructor: true):
+        return _defaultConstructorHasDebugAnnotation(element);
+      // Non-static class memebers that are overridable. Also we want to detect
+      // and warn against cases like this:
+      // class A {
+      //   int get a;
+      //   int get b => a;
+      // }
+      // class B extends A {
+      //   @_debugAssert
+      //   int get a => 0;
+      // }
+      case ExecutableElement() && ClassMemberElement(:final InterfaceElement enclosingElement):
+        assert(!element.isStatic);
+        //print('Overridable element check: ${enclosingElement.name}.$element (${element.runtimeType})');
+        return _overriddableClassMemberHasDebugAnnotation(element, enclosingElement);
+      case ClassMemberElement(:final ExtensionElement enclosingElement):
+        return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement) || _hasDebugAnnotation(enclosingElement);
+      // Non class members, fields(?), type parameters
+      default:
+      if (element.enclosingElement is! CompilationUnitElement && element is ExecutableElement) {
+        print('!!! default case. $element (${element.runtimeType} is ClassMemberElement? ${element is ClassMemberElement}). enclosing element: ${element.enclosingElement} (${element.enclosingElement.runtimeType})');
+      }
+        return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement);
     }
+    //switch ((element, element.enclosingElement)) {
 
-    return element is ExecutableElement
-        && !element.isStatic
-        && enclosingElement.allSupertypes.any((final InterfaceType type) => _supertypeHasDebugAnnotation(type, element));
+    //  // If element is a member of a debug-only interface then it is also debug-only.
+    //  case (_, final InterfaceElement enclosing) when _hasDebugAnnotation(enclosing):
+    //    return true;
+    //  case (ExecutableElement(isStatic: false) && final ExecutableElement member, InterfaceElement(:final List<InterfaceType> allSupertypes)):
+    //    return allSupertypes.any((final InterfaceType type) => _overriddableClassMemberHasDebugAnnotation(type, member));
+    //  default:
+    //    return false;
+    //}
   }
 
   static bool _isValidElementType(Element element) {
@@ -262,12 +343,6 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
       violations.add(node);
     }
-  }
-
-  @override
-  void visitFunctionExpressionInvocation(FunctionExpressionInvocation node) {
-    print('func exp invo: $node(${node.runtimeType})');
-    super.visitFunctionExpressionInvocation(node);
   }
 
  @override
