@@ -656,6 +656,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
       return;
     }
 
+    _ephemeralErrorListeners.clear();
     _currentImage?.dispose();
     _currentImage = null;
     _disposed = true;
