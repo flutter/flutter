@@ -5193,7 +5193,7 @@ abstract class Canvas {
 
   /// Returns the conservative bounds of the combined result of all clip methods
   /// executed within the current save stack of this [Canvas] object, as measured
-  /// in the local coordinate space under which rendering operations are curretnly
+  /// in the local coordinate space under which rendering operations are currently
   /// performed.
   ///
   /// The combined clip results are rounded out to an integer pixel boundary before
