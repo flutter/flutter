@@ -401,10 +401,14 @@ void Canvas::DrawPoints(std::vector<Point> points,
   GetCurrentPass().AddEntity(entity);
 }
 
-void Canvas::DrawPicture(Picture picture) {
+void Canvas::DrawPicture(const Picture& picture) {
   if (!picture.pass) {
     return;
   }
+
+  auto save_count = GetSaveCount();
+  Save();
+
   // Clone the base pass and account for the CTM updates.
   auto pass = picture.pass->Clone();
   pass->IterateAllEntities([&](auto& entity) -> bool {
@@ -413,7 +417,9 @@ void Canvas::DrawPicture(Picture picture) {
                              entity.GetTransformation());
     return true;
   });
-  return;
+  GetCurrentPass().AddSubpassInline(std::move(pass));
+
+  RestoreToCount(save_count);
 }
 
 void Canvas::DrawImage(const std::shared_ptr<Image>& image,

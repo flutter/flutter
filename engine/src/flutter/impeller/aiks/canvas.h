@@ -137,7 +137,7 @@ class Canvas {
       Scalar corner_radius,
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
 
-  void DrawPicture(Picture picture);
+  void DrawPicture(const Picture& picture);
 
   void DrawTextFrame(const TextFrame& text_frame,
                      Point position,
