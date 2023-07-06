@@ -373,7 +373,7 @@ void main() {
           '   The following child has no ID: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT:\n'
           '     creator: ConstrainedBox ← Container ← LayoutWithMissingId ←\n'
           '       CustomMultiChildLayout ← Center ← MediaQuery ←\n'
-          '       _MediaQueryFromView ← ViewHooksScope ← _ViewScope ←\n'
+          '       _MediaQueryFromView ← _ViewHooksScope ← _ViewScope ←\n'
           '       RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
           '       [root]\n'
           '     parentData: offset=Offset(0.0, 0.0); id=null\n'

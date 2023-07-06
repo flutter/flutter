@@ -311,33 +311,33 @@ class _RawViewElement extends RenderTreeRootElement {
     }
   }
 
-  ViewHooks? _attachmentPoint;
+  ViewHooks? _currentViewHooks;
 
   void _attachToViewHooks([ViewHooks? viewHooks]) {
-    assert(_attachmentPoint == null);
+    assert(_currentViewHooks == null);
     viewHooks ??= ViewHooks.of(this);
     viewHooks.pipelineOwner.adoptChild(_effectivePipelineOwner);
     viewHooks.renderViewManager.addRenderView(renderObject);
-    _attachmentPoint = viewHooks;
+    _currentViewHooks = viewHooks;
   }
 
   void _detachFromViewHooks() {
-    final ViewHooks? viewHooks = _attachmentPoint;
+    final ViewHooks? viewHooks = _currentViewHooks;
     if (viewHooks != null) {
       viewHooks.renderViewManager.removeRenderView(renderObject);
       viewHooks.pipelineOwner.dropChild(_effectivePipelineOwner);
-      _attachmentPoint = null;
+      _currentViewHooks = null;
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_attachmentPoint == null) {
+    if (_currentViewHooks == null) {
       return;
     }
     final ViewHooks newHooks = ViewHooks.of(this);
-    if (newHooks != _attachmentPoint) {
+    if (newHooks != _currentViewHooks) {
       _detachFromViewHooks();
       _attachToViewHooks(newHooks);
     }
@@ -438,11 +438,10 @@ class _ViewHooksScope extends InheritedWidget {
 ///
 /// To participate in frame production, the [View] widget (or more specifically
 /// the underlying [RawView] widget) needs to add the [RenderView] root of its
-/// render tree to a [RenderViewManager] (typically, the [RendererBinding])
-/// and add the [PipelineOwner] managing that tree to the pipeline owner tree.
-/// The [ViewHooks] define these attachment points for the [View]/[RawView]
-/// widget. They are injected into the tree via [ViewHooksScope] and can be
-/// looked up with [ViewHooks.of].
+/// render tree to a [RenderViewManager] (typically, the [RendererBinding]) and
+/// add the [PipelineOwner] managing that tree to the pipeline owner tree. The
+/// [ViewHooks] define these attachment points for the [View]/[RawView] widget.
+/// They can be looked up from a [BuildContext] with [ViewHooks.of].
 @immutable
 class ViewHooks {
   /// Creates a [ViewHooks] instance with the provided [renderViewManager]
@@ -452,8 +451,7 @@ class ViewHooks {
     required this.pipelineOwner,
   });
 
-  /// The [ViewHooks] of the closest [ViewHooksScope] instance that encloses the
-  /// given `context`.
+  /// The closest [ViewHooks] instance that encloses the given `context`.
   ///
   /// Calling this method establishes a dependency and the provided `context`
   /// and causes it to rebuild whenever the [ViewHooks] change.

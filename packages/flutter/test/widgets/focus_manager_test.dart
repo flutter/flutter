@@ -1227,7 +1227,7 @@ void main() {
           'FocusManager#00000\n'
           ' │ primaryFocus: FocusNode#00000(Child 4 [PRIMARY FOCUS])\n'
           ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← MediaQuery ←\n'
-          ' │   _MediaQueryFromView ← ViewHooksScope ← _ViewScope ←\n'
+          ' │   _MediaQueryFromView ← _ViewHooksScope ← _ViewScope ←\n'
           ' │   RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
           ' │   [root]\n'
           ' │\n'
