@@ -32,9 +32,6 @@
 'd: examples':
   - examples/**/*
 
-documentation:
-  - examples/api/**/*
-
 engine:
   - bin/internal/engine.version
 
@@ -76,7 +73,7 @@ framework:
   - packages/flutter_test/**/*
   - packages/integration_test/**/*
 
-integration_test:
+'f: integration_test':
   - packages/integration_test/**/*
 
 platform-ios:
@@ -93,7 +90,7 @@ team:
   - packages/flutter_goldens/**/*
   - packages/flutter_goldens_client/**/*
 
-'gallery':
+'customer: gallery':
   - examples/flutter_gallery/**/*
 
 tech-debt:
