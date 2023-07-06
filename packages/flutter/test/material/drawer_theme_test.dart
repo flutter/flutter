@@ -151,7 +151,7 @@ void main() {
     expect(_drawerMaterial(tester).color, theme.colorScheme.surface);
     expect(_drawerMaterial(tester).elevation, 1.0);
     expect(_drawerMaterial(tester).shadowColor, Colors.transparent);
-    expect(_drawerMaterial(tester).surfaceTintColor, ThemeData().colorScheme.surfaceTint);
+    expect(_drawerMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
     expect(
       _drawerMaterial(tester).shape,
       const RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(left:  Radius.circular(16.0)))
