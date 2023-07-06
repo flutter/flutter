@@ -13,8 +13,9 @@
 namespace flutter {
 
 std::vector<LanguageInfo> GetPreferredLanguageInfo(
-    const WindowsRegistry& registry) {
-  std::vector<std::wstring> languages = GetPreferredLanguages(registry);
+    const WindowsProcTable& windows_proc_table) {
+  std::vector<std::wstring> languages =
+      GetPreferredLanguages(windows_proc_table);
   std::vector<LanguageInfo> language_info;
   language_info.reserve(languages.size());
 
@@ -24,63 +25,29 @@ std::vector<LanguageInfo> GetPreferredLanguageInfo(
   return language_info;
 }
 
-std::wstring GetPreferredLanguagesFromRegistry(const WindowsRegistry& registry,
-                                               ULONG buffer_size) {
-  std::wstring buffer(buffer_size, '\0');
-  if (registry.GetRegistryValue(HKEY_CURRENT_USER, kGetPreferredLanguageRegKey,
-                                kGetPreferredLanguageRegValue,
-                                RRF_RT_REG_MULTI_SZ, NULL, buffer.data(),
-                                &buffer_size) != ERROR_SUCCESS) {
-    return std::wstring();
-  }
-  return buffer;
-}
-
-std::wstring GetPreferredLanguagesFromMUI() {
-  ULONG buffer_size;
+std::wstring GetPreferredLanguagesFromMUI(
+    const WindowsProcTable& windows_proc_table) {
+  ULONG buffer_size = 0;
   ULONG count = 0;
   DWORD flags = MUI_LANGUAGE_NAME | MUI_UI_FALLBACK;
-  if (!GetThreadPreferredUILanguages(flags, &count, nullptr, &buffer_size)) {
+  if (!windows_proc_table.GetThreadPreferredUILanguages(flags, &count, nullptr,
+                                                        &buffer_size)) {
     return std::wstring();
   }
   std::wstring buffer(buffer_size, '\0');
-  if (!GetThreadPreferredUILanguages(flags, &count, buffer.data(),
-                                     &buffer_size)) {
+  if (!windows_proc_table.GetThreadPreferredUILanguages(
+          flags, &count, buffer.data(), &buffer_size)) {
     return std::wstring();
   }
   return buffer;
 }
 
 std::vector<std::wstring> GetPreferredLanguages(
-    const WindowsRegistry& registry) {
+    const WindowsProcTable& windows_proc_table) {
   std::vector<std::wstring> languages;
-  BOOL languages_from_registry = TRUE;
-  ULONG buffer_size = 0;
-  ULONG count = 0;
-  DWORD flags = MUI_LANGUAGE_NAME | MUI_UI_FALLBACK;
-
-  // Determine where languages are defined and get buffer length
-  if (registry.GetRegistryValue(HKEY_CURRENT_USER, kGetPreferredLanguageRegKey,
-                                kGetPreferredLanguageRegValue,
-                                RRF_RT_REG_MULTI_SZ, NULL, NULL,
-                                &buffer_size) != ERROR_SUCCESS) {
-    languages_from_registry = FALSE;
-  }
-
-  // Multi-string must be at least 3-long if non-empty,
-  // as a multi-string is terminated with 2 nulls.
-  //
-  // See:
-  // https://learn.microsoft.com/windows/win32/sysinfo/registry-value-types
-  if (languages_from_registry && buffer_size < 3) {
-    languages_from_registry = FALSE;
-  }
 
   // Initialize the buffer
-  std::wstring buffer =
-      languages_from_registry
-          ? GetPreferredLanguagesFromRegistry(registry, buffer_size)
-          : GetPreferredLanguagesFromMUI();
+  std::wstring buffer = GetPreferredLanguagesFromMUI(windows_proc_table);
 
   // Extract the individual languages from the buffer.
   size_t start = 0;

@@ -21,6 +21,9 @@ class MockWindowsProcTable : public WindowsProcTable {
   MOCK_METHOD2(GetPointerType,
                BOOL(UINT32 pointer_id, POINTER_INPUT_TYPE* pointer_type));
 
+  MOCK_CONST_METHOD4(GetThreadPreferredUILanguages,
+                     LRESULT(DWORD, PULONG, PZZWSTR, PULONG));
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindowsProcTable);
 };

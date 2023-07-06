@@ -25,4 +25,11 @@ BOOL WindowsProcTable::GetPointerType(UINT32 pointer_id,
   return get_pointer_type_.value()(pointer_id, pointer_type);
 }
 
+LRESULT WindowsProcTable::GetThreadPreferredUILanguages(DWORD flags,
+                                                        PULONG count,
+                                                        PZZWSTR languages,
+                                                        PULONG length) const {
+  return ::GetThreadPreferredUILanguages(flags, count, languages, length);
+}
+
 }  // namespace flutter

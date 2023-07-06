@@ -13,7 +13,7 @@
 namespace flutter {
 
 // Lookup table for Windows APIs that aren't available on all versions of
-// Windows.
+// Windows, or for mocking Windows API calls.
 class WindowsProcTable {
  public:
   WindowsProcTable();
@@ -25,6 +25,15 @@ class WindowsProcTable {
   // Available in Windows 8 and newer, otherwise returns false.
   virtual BOOL GetPointerType(UINT32 pointer_id,
                               POINTER_INPUT_TYPE* pointer_type);
+
+  // Get the preferred languages for the thread, and optionally the process,
+  // and system, in that order, depending on the flags.
+  // See
+  // https://learn.microsoft.com/windows/win32/api/winnls/nf-winnls-getthreadpreferreduilanguages
+  virtual LRESULT GetThreadPreferredUILanguages(DWORD flags,
+                                                PULONG count,
+                                                PZZWSTR languages,
+                                                PULONG length) const;
 
  private:
   using GetPointerType_ = BOOL __stdcall(UINT32 pointerId,
