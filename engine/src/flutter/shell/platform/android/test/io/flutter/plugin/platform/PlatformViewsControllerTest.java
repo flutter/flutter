@@ -39,6 +39,7 @@ import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
+import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.common.MethodCall;
@@ -79,6 +80,8 @@ public class PlatformViewsControllerTest {
 
     @Override
     public void dispose() {
+      // We have been removed from the view hierarhy before the call to dispose.
+      assertNull(view.getParent());
       disposeCalls++;
     }
 
@@ -96,6 +99,46 @@ public class PlatformViewsControllerTest {
     public void onFlutterViewDetached() {
       detachCalls++;
     }
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void itRemovesPlatformViewBeforeDiposeIsCalled() {
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+    FlutterJNI jni = new FlutterJNI();
+    attach(jni, platformViewsController);
+    // Get the platform view registry.
+    PlatformViewRegistry registry = platformViewsController.getRegistry();
+
+    // Register a factory for our platform view.
+    registry.registerViewFactory(
+        CountingPlatformView.VIEW_TYPE_ID,
+        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+          @Override
+          public PlatformView create(Context context, int viewId, Object args) {
+            return new CountingPlatformView(context);
+          }
+        });
+
+    // Create the platform view.
+    int viewId = 0;
+    final PlatformViewsChannel.PlatformViewCreationRequest request =
+        new PlatformViewsChannel.PlatformViewCreationRequest(
+            viewId,
+            CountingPlatformView.VIEW_TYPE_ID,
+            0,
+            0,
+            128,
+            128,
+            View.LAYOUT_DIRECTION_LTR,
+            null);
+    PlatformView pView = platformViewsController.createPlatformView(request, true);
+    assertTrue(pView instanceof CountingPlatformView);
+    CountingPlatformView cpv = (CountingPlatformView) pView;
+    platformViewsController.configureForTextureLayerComposition(pView, request);
+    assertEquals(0, cpv.disposeCalls);
+    platformViewsController.disposePlatformView(viewId);
+    assertEquals(1, cpv.disposeCalls);
   }
 
   @Test
@@ -121,7 +164,7 @@ public class PlatformViewsControllerTest {
     int viewId = 0;
     final PlatformViewsChannel.PlatformViewCreationRequest request =
         new PlatformViewsChannel.PlatformViewCreationRequest(
-            viewId++,
+            viewId,
             CountingPlatformView.VIEW_TYPE_ID,
             0,
             0,

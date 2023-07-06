@@ -232,14 +232,22 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             Log.e(TAG, "Disposing unknown platform view with id: " + viewId);
             return;
           }
+          if (platformView.getView() != null) {
+            final View embeddedView = platformView.getView();
+            final ViewGroup pvParent = (ViewGroup) embeddedView.getParent();
+            if (pvParent != null) {
+              // Eagerly remove the embedded view from the PlatformViewWrapper.
+              // Without this call, we see some crashes because removing the view
+              // is used as a signal to stop processing.
+              pvParent.removeView(embeddedView);
+            }
+          }
           platformViews.remove(viewId);
-
           try {
             platformView.dispose();
           } catch (RuntimeException exception) {
             Log.e(TAG, "Disposing platform view threw an exception", exception);
           }
-
           if (usesVirtualDisplay(viewId)) {
             final VirtualDisplayController vdController = vdControllers.get(viewId);
             final View embeddedView = vdController.getView();
@@ -581,7 +589,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Configures the view for Texture Layer Hybrid Composition mode, returning the associated
   // texture ID.
   @TargetApi(23)
-  private long configureForTextureLayerComposition(
+  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+  public long configureForTextureLayerComposition(
       @NonNull PlatformView platformView,
       @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
     // This mode attaches the view to the Android view hierarchy and record its drawing
