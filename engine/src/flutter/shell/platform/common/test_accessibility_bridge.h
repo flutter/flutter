@@ -11,8 +11,6 @@ namespace flutter {
 
 class TestAccessibilityBridge : public AccessibilityBridge {
  public:
-  using AccessibilityBridge::RecreateNodeDelegates;
-
   TestAccessibilityBridge() = default;
 
   void DispatchAccessibilityAction(AccessibilityNodeId target,

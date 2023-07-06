@@ -40,12 +40,6 @@ class AccessibilityBridgeMac : public AccessibilityBridge {
                                    FlutterSemanticsAction action,
                                    fml::MallocMapping data) override;
 
-  // Update the default view controller, and recreate the corresponding
-  // accessibility node delegate.
-  //
-  // This is called by the engine when the default view controller is updated.
-  void UpdateDefaultViewController(__weak FlutterViewController* view_controller);
-
  protected:
   // |AccessibilityBridge|
   void OnAccessibilityEvent(ui::AXEventGenerator::TargetedEvent targeted_event) override;

@@ -149,18 +149,6 @@ AccessibilityBridge::GetPendingEvents() const {
   return result;
 }
 
-void AccessibilityBridge::RecreateNodeDelegates() {
-  for (const auto& [node_id, old_platform_node_delegate] : id_wrapper_map_) {
-    std::shared_ptr<FlutterPlatformNodeDelegate> platform_node_delegate =
-        CreateFlutterPlatformNodeDelegate();
-    platform_node_delegate->Init(
-        std::static_pointer_cast<FlutterPlatformNodeDelegate::OwnerBridge>(
-            shared_from_this()),
-        old_platform_node_delegate->GetAXNode());
-    id_wrapper_map_[node_id] = platform_node_delegate;
-  }
-}
-
 void AccessibilityBridge::OnNodeWillBeDeleted(ui::AXTree* tree,
                                               ui::AXNode* node) {}
 
