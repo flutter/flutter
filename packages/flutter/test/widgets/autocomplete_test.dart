@@ -428,11 +428,18 @@ void main() {
           home: Scaffold(
             body: Center(
               child: RawAutocomplete<String>(
-                optionsBuilder: (_) => <String>['a'],
-                fieldViewBuilder: (_, TextEditingController controller, FocusNode focusNode, __) {
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+                fieldViewBuilder: (BuildContext context, TextEditingController controller, FocusNode focusNode, VoidCallback onFieldSubmitted) {
                   return TextField(controller: controller, focusNode: focusNode);
                 },
-                optionsViewBuilder: (_, __, ___) => const Text('a'))))));
+                optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+                  return const Text('a');
+                },
+              ),
+            ),
+          ),
+        ),
+      );
       await tester.showKeyboard(find.byType(TextField));
       expect(tester.getBottomLeft(find.byType(TextField)),
         offsetMoreOrLessEquals(tester.getTopLeft(find.text('a'))));
@@ -440,16 +447,23 @@ void main() {
 
     testWidgets('down: open downward', (WidgetTester tester) async {
       await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: RawAutocomplete<String>(
-                  optionsViewOpenDirection: OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
-                  optionsBuilder: (_) => <String>['a'],
-                  fieldViewBuilder: (_, TextEditingController controller, FocusNode focusNode, __) {
-                    return TextField(controller: controller, focusNode: focusNode);
-                  },
-                  optionsViewBuilder: (_, __, ___) => const Text('a'))))));
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: RawAutocomplete<String>(
+                optionsViewOpenDirection: OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+                fieldViewBuilder: (BuildContext context, TextEditingController controller, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+                  return TextField(controller: controller, focusNode: focusNode);
+                },
+                optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+                  return const Text('a');
+                },
+              ),
+            ),
+          ),
+        ),
+      );
       await tester.showKeyboard(find.byType(TextField));
       expect(tester.getBottomLeft(find.byType(TextField)),
         offsetMoreOrLessEquals(tester.getTopLeft(find.text('a'))));
@@ -462,11 +476,18 @@ void main() {
             body: Center(
               child: RawAutocomplete<String>(
                 optionsViewOpenDirection: OptionsViewOpenDirection.up,
-                optionsBuilder: (_) => <String>['a'],
-                fieldViewBuilder: (_, TextEditingController controller, FocusNode focusNode, __) {
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+                fieldViewBuilder: (BuildContext context, TextEditingController controller, FocusNode focusNode, VoidCallback onFieldSubmitted) {
                   return TextField(controller: controller, focusNode: focusNode);
                 },
-                optionsViewBuilder: (_, __, ___) => const Text('a'))))));
+                optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+                  return const Text('a');
+                },
+              ),
+            ),
+          ),
+        ),
+      );
       await tester.showKeyboard(find.byType(TextField));
       expect(tester.getTopLeft(find.byType(TextField)),
         offsetMoreOrLessEquals(tester.getBottomLeft(find.text('a'))));
@@ -489,9 +510,16 @@ void main() {
                     textEditingController: controller,
                     focusNode: focusNode,
                     optionsViewOpenDirection: OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
-                    optionsBuilder: (_) => <String>['a'],
-                    optionsViewBuilder: (_, __, ___) => const Text('a')),
-                ]))));
+                    optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+                    optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+                      return const Text('a');
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
         await tester.showKeyboard(find.byType(TextField));
         expect(tester.getBottomLeft(find.byKey(autocompleteKey)),
           offsetMoreOrLessEquals(tester.getTopLeft(find.text('a'))));
@@ -513,10 +541,17 @@ void main() {
                     textEditingController: controller,
                     focusNode: focusNode,
                     optionsViewOpenDirection: OptionsViewOpenDirection.up,
-                    optionsBuilder: (_) => <String>['a'],
-                    optionsViewBuilder: (_, __, ___) => const Text('a')),
+                    optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+                    optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+                      return const Text('a');
+                    },
+                  ),
                   TextField(controller: controller, focusNode: focusNode),
-                ]))));
+                ],
+              ),
+            ),
+          ),
+        );
         await tester.showKeyboard(find.byType(TextField));
         expect(tester.getTopLeft(find.byKey(autocompleteKey)),
           offsetMoreOrLessEquals(tester.getBottomLeft(find.text('a'))));

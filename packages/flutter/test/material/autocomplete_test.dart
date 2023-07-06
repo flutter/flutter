@@ -514,7 +514,11 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Autocomplete<String>(
-              optionsBuilder: (_) => <String>['a']))));
+              optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+            ),
+          ),
+        ),
+      );
       final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
         .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.down));
@@ -526,7 +530,11 @@ void main() {
           home: Scaffold(
             body: Autocomplete<String>(
               optionsViewOpenDirection: OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
-              optionsBuilder: (_) => <String>['a']))));
+              optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+            ),
+          ),
+        ),
+      );
       final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
         .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.down));
@@ -538,7 +546,11 @@ void main() {
           home: Scaffold(
             body: Autocomplete<String>(
               optionsViewOpenDirection: OptionsViewOpenDirection.up,
-              optionsBuilder: (_) => <String>['a']))));
+              optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+            ),
+          ),
+        ),
+      );
       final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
         .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.up));
