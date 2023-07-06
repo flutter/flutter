@@ -273,7 +273,7 @@ class _Shaker extends AnimatedWidget {
   Animation<double> get animation => listenable as Animation<double>;
 
   double get translateX {
-    const double shakeDelta = ;
+    const double shakeDelta = 4.0;
     final double t = animation.value;
     if (t <= 0.25) {
       return -t * shakeDelta;
