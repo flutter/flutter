@@ -155,7 +155,7 @@ class View extends StatelessWidget {
       builder: (BuildContext context, PipelineOwner owner) {
         return _ViewScope(
           view: view,
-          child: ViewHooksScope(
+          child: _ViewHooksScope(
             hooks: ViewHooks.of(context).copyWith(pipelineOwner: owner),
             child: MediaQuery.fromView(
               view: view,
@@ -422,22 +422,16 @@ class _ViewScope extends InheritedWidget {
   bool updateShouldNotify(_ViewScope oldWidget) => view != oldWidget.view;
 }
 
-/// Injects [ViewHooks] into the widget tree so that they can be looked up by
-/// descendants via [ViewHooks.of].
-class ViewHooksScope extends InheritedWidget {
-  /// Creates a [ViewHooksScope] that makes the provided [hooks] available to
-  /// [child] and its descendants via [ViewHooks.of].
-  const ViewHooksScope({
-    super.key,
+class _ViewHooksScope extends InheritedWidget {
+  const _ViewHooksScope({
     required this.hooks,
     required super.child,
   });
 
-  /// The [ViewHooks] made available to descendants via [ViewHooks.of].
   final ViewHooks hooks;
 
   @override
-  bool updateShouldNotify(ViewHooksScope oldWidget) => hooks != oldWidget.hooks;
+  bool updateShouldNotify(_ViewHooksScope oldWidget) => hooks != oldWidget.hooks;
 }
 
 /// Attachment points for a [View] and the render tree that defines its content.
@@ -469,7 +463,7 @@ class ViewHooks {
   /// [RendererBinding.instance] and [pipelineOwner] set to
   /// [RendererBinding.rootPipelineOwner] is returned.
   static ViewHooks of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ViewHooksScope>()?.hooks
+    return context.dependOnInheritedWidgetOfExactType<_ViewHooksScope>()?.hooks
         ?? ViewHooks(
           renderViewManager: RendererBinding.instance,
           pipelineOwner: RendererBinding.instance.rootPipelineOwner,

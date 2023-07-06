@@ -87,24 +87,26 @@ void main() {
   });
 
   testWidgets('RawView attaches/detaches itself to surrounding ViewHooks', (WidgetTester tester) async {
-    final PipelineOwner pipelineOwner = PipelineOwner();
-    final FakeRenderViewManager manager = FakeRenderViewManager();
+    late final ViewHooks hooks;
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
-      widget: ViewHooksScope(
-        hooks: ViewHooks(
-          pipelineOwner: pipelineOwner,
-          renderViewManager: manager,
-        ),
-        child: RawView(
-          view: tester.view,
-          builder: (BuildContext context, PipelineOwner owner) {
-            return const SizedBox();
-          },
-        ),
+      widget: Builder(
+        builder: (BuildContext context) {
+          hooks = ViewHooks.of(context);
+          return RawView(
+            view: tester.view,
+            builder: (BuildContext context, PipelineOwner owner) {
+              return const SizedBox();
+            },
+          );
+        }
       ),
     );
+    final RendererBinding manager = hooks.renderViewManager as RendererBinding;
+    final PipelineOwner pipelineOwner = hooks.pipelineOwner;
+
     final RenderView rawView = tester.renderObject<RenderView>(find.byType(RawView));
+
     expect(manager.renderViews, contains(rawView));
     final List<PipelineOwner> children = <PipelineOwner>[];
     pipelineOwner.visitChildren((PipelineOwner child) {
@@ -114,22 +116,23 @@ void main() {
     expect(children, contains(rawViewOwner));
 
     // Remove that RawView from the tree.
+    late final ViewHooks hooks2;
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
-      widget: ViewHooksScope(
-        hooks: ViewHooks(
-          pipelineOwner: pipelineOwner,
-          renderViewManager: manager,
-        ),
-        child: RawView(
-          view: FakeView(tester.view),
-          builder: (BuildContext context, PipelineOwner owner) {
-            return const SizedBox();
-          },
-        ),
+      widget: Builder(
+        builder: (BuildContext context) {
+          hooks2 = ViewHooks.of(context);
+          return RawView(
+            view: FakeView(tester.view),
+            builder: (BuildContext context, PipelineOwner owner) {
+              return const SizedBox();
+            },
+          );
+        }
       ),
     );
 
+    expect(hooks2, hooks);
     expect(rawView.owner, isNull);
     expect(manager.renderViews, isNot(contains(rawView)));
     children.clear();
@@ -137,68 +140,6 @@ void main() {
       children.add(child);
     });
     expect(children, isNot(contains(rawViewOwner)));
-  });
-
-  testWidgets('when moved RawView attaches/detaches itself to surrounding ViewHooks', (WidgetTester tester) async {
-    final PipelineOwner pipelineOwner1 = PipelineOwner();
-    final FakeRenderViewManager manager1 = FakeRenderViewManager();
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewHooksScope(
-        hooks: ViewHooks(
-          pipelineOwner: pipelineOwner1,
-          renderViewManager: manager1,
-        ),
-        child: RawView(
-          view: tester.view,
-          builder: (BuildContext context, PipelineOwner owner) {
-            return const SizedBox();
-          },
-        ),
-      ),
-    );
-
-    final RenderView rawView = tester.renderObject<RenderView>(find.byType(RawView));
-    expect(manager1.renderViews, contains(rawView));
-    final List<PipelineOwner> children1 = <PipelineOwner>[];
-    pipelineOwner1.visitChildren((PipelineOwner child) {
-      children1.add(child);
-    });
-    final PipelineOwner rawViewOwner = rawView.owner!;
-    expect(children1, contains(rawViewOwner));
-
-    final PipelineOwner pipelineOwner2 = PipelineOwner();
-    final FakeRenderViewManager manager2 = FakeRenderViewManager();
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewHooksScope(
-        hooks: ViewHooks(
-          pipelineOwner: pipelineOwner2,
-          renderViewManager: manager2,
-        ),
-        child: RawView(
-          view: tester.view,
-          builder: (BuildContext context, PipelineOwner owner) {
-            return const SizedBox();
-          },
-        ),
-      ),
-    );
-
-    expect(tester.renderObject<RenderView>(find.byType(RawView)), same(rawView));
-    expect(rawView.owner, same(rawViewOwner));
-    expect(manager1.renderViews, isNot(contains(rawView)));
-    expect(manager2.renderViews, contains(rawView));
-    children1.clear();
-    pipelineOwner1.visitChildren((PipelineOwner child) {
-      children1.add(child);
-    });
-    expect(children1, isNot(contains(rawViewOwner)));
-    final List<PipelineOwner> children2 = <PipelineOwner>[];
-    pipelineOwner2.visitChildren((PipelineOwner child) {
-      children2.add(child);
-    });
-    expect(children2, contains(rawViewOwner));
   });
 }
 
@@ -223,21 +164,6 @@ class InheritedText extends InheritedWidget {
 
   @override
   bool updateShouldNotify(InheritedText oldWidget) => text != oldWidget.text;
-}
-
-class FakeRenderViewManager implements RenderViewManager {
-  final List<RenderView> renderViews = <RenderView>[];
-
-  @override
-  void addRenderView(RenderView view) {
-    view.configuration = TestViewConfiguration.fromView(view: view.flutterView);
-    renderViews.add(view);
-  }
-
-  @override
-  void removeRenderView(RenderView view) {
-    renderViews.remove(view);
-  }
 }
 
 class FakeView extends TestFlutterView{
