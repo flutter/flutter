@@ -436,7 +436,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///   });
 ///
 ///   await testMain();
-/// });
+/// }
 /// ```
 /// {@end-tool}
 /// {@endtemplate}
@@ -2054,7 +2054,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
         Uint8List.view(referenceBytes.buffer),
       );
       return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
-    }, additionalTime: const Duration(minutes: 1));
+    });
   }
 
   @override

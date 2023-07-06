@@ -10,6 +10,7 @@ void main() {
     // This should fail with user created widget = Row.
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           appBar: AppBar(
             title: const Text('RenderFlex OverFlow'),

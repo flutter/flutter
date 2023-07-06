@@ -4,14 +4,10 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -345,99 +341,6 @@ void main() {
       Platform: () => FakePlatform(operatingSystem: 'windows'),
       Config: () => config,
     });
-
-    group('findJavaBinary', () {
-      testUsingContext('returns the path of the JDK bundled with Android Studio, if it exists', () {
-        final String androidStudioBundledJdkHome = globals.androidStudio!.javaPath!;
-        final String expectedJavaBinaryPath = globals.fs.path.join(androidStudioBundledJdkHome, 'bin', 'java');
-
-        final String? foundJavaBinaryPath = Java.find(
-          logger: globals.logger,
-          androidStudio: globals.androidStudio,
-          fileSystem: globals.fs,
-          platform: globals.platform,
-          processManager: globals.processManager,
-        )?.binaryPath;
-
-        expect(foundJavaBinaryPath, expectedJavaBinaryPath);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => FakePlatform(),
-        Config: () => Config,
-        AndroidStudio: () => FakeAndroidStudioWithJdk(),
-      });
-
-      testUsingContext('returns the current value of JAVA_HOME if it is set and the JDK bundled with Android Studio could not be found', () {
-        final String expectedJavaBinaryPath = globals.fs.path.join('java-home-path', 'bin', 'java');
-
-        final String? foundJavaBinaryPath = Java.find(
-          logger: globals.logger,
-          androidStudio: globals.androidStudio,
-          fileSystem: globals.fs,
-          platform: globals.platform,
-          processManager: globals.processManager,
-        )?.binaryPath;
-
-        expect(foundJavaBinaryPath, expectedJavaBinaryPath);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.empty(),
-        Platform: () => FakePlatform(environment: <String, String>{
-          Java.javaHomeEnvironmentVariable: 'java-home-path',
-        }),
-        Config: () => Config,
-        AndroidStudio: () => FakeAndroidStudioWithoutJdk(),
-      });
-
-      testUsingContext('returns the java binary found on PATH if no other can be found', () {
-        final String? foundJavaBinaryPath = Java.find(
-          logger: globals.logger,
-          androidStudio: globals.androidStudio,
-          fileSystem: globals.fs,
-          platform: globals.platform,
-          processManager: globals.processManager,
-        )?.binaryPath;
-
-        expect(foundJavaBinaryPath, 'java');
-      }, overrides: <Type, Generator>{
-        Logger: () => BufferLogger.test(),
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['which', 'java'],
-            stdout: 'java',
-          ),
-        ]),
-        Platform: () => FakePlatform(),
-        Config: () => Config,
-        AndroidStudio: () => FakeAndroidStudioWithoutJdk(),
-      });
-
-      testUsingContext('returns null if no java binary could be found', () {
-        final String? foundJavaBinaryPath = Java.find(
-          logger: globals.logger,
-          androidStudio: globals.androidStudio,
-          fileSystem: globals.fs,
-          platform: globals.platform,
-          processManager: globals.processManager,
-        )?.binaryPath;
-
-        expect(foundJavaBinaryPath, null);
-      }, overrides: <Type, Generator>{
-        Logger: () => BufferLogger.test(),
-        FileSystem: () => MemoryFileSystem.test(),
-        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['which', 'java'],
-            exitCode: 1,
-          ),
-        ]),
-        Platform: () => FakePlatform(),
-        Config: () => Config,
-        AndroidStudio: () => FakeAndroidStudioWithoutJdk(),
-      });
-    });
   });
 }
 
@@ -519,13 +422,3 @@ ro.build.version.incremental=1624448
 ro.build.version.sdk=24
 ro.build.version.codename=REL
 ''';
-
-class FakeAndroidStudioWithJdk extends Fake implements AndroidStudio {
-  @override
-  String? get javaPath => '/fake/android_studio/java/path/';
-}
-
-class FakeAndroidStudioWithoutJdk extends Fake implements AndroidStudio {
-  @override
-  String? get javaPath => null;
-}

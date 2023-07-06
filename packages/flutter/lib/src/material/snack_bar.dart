@@ -842,11 +842,12 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 
   @override
   TextStyle? get contentTextStyle => ThemeData(
-          brightness: _theme.brightness == Brightness.light
-              ? Brightness.dark
-              : Brightness.light)
-      .textTheme
-      .titleMedium;
+    useMaterial3: _theme.useMaterial3,
+    brightness: _theme.brightness == Brightness.light
+      ? Brightness.dark
+      : Brightness.light)
+    .textTheme
+    .titleMedium;
 
   @override
   SnackBarBehavior get behavior => SnackBarBehavior.fixed;
@@ -884,8 +885,6 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _SnackbarDefaultsM3 extends SnackBarThemeData {
     _SnackbarDefaultsM3(this.context);

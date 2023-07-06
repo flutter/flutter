@@ -202,7 +202,7 @@ class _ZoomPageTransition extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [TransitionRoute.allowSnapshotting], which defines wether the route
+  ///  * [TransitionRoute.allowSnapshotting], which defines whether the route
   ///    transition will prefer to animate a snapshot of the entering and exiting
   ///    routes.
   final bool allowSnapshotting;
@@ -741,7 +741,7 @@ class PageTransitionsTheme with Diagnosticable {
   Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders;
   final Map<TargetPlatform, PageTransitionsBuilder> _builders;
 
-  /// Delegates to the builder for the current [ThemeData.platform].
+  /// Delegates to the builder for the current [platform].
   /// If a builder for the current platform is not found, then the
   /// [ZoomPageTransitionsBuilder] is used.
   ///
@@ -752,13 +752,8 @@ class PageTransitionsTheme with Diagnosticable {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
+    TargetPlatform platform,
   ) {
-    TargetPlatform platform = Theme.of(context).platform;
-
-    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route)) {
-      platform = TargetPlatform.iOS;
-    }
-
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? const ZoomPageTransitionsBuilder();
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);

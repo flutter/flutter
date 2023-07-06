@@ -18,7 +18,7 @@ class TestAssetBundle extends CachingAssetBundle {
 
   @override
   Future<ByteData> load(String key) async {
-    if (key == 'AssetManifest.smcbin') {
+    if (key == 'AssetManifest.bin') {
       return const StandardMessageCodec().encodeMessage(_assetBundleMap)!;
     }
 
@@ -42,8 +42,6 @@ void main() {
     void buildAndTestWithOneAsset(String mainAssetPath) {
       final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
         <String, List<Map<Object?, Object?>>>{};
-
-      assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[];
 
       final AssetImage assetImage = AssetImage(
         mainAssetPath,
@@ -160,15 +158,17 @@ void main() {
       double chosenAssetRatio,
       String expectedAssetPath,
     ) {
-      final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
-        <String, List<Map<Object?, Object?>>>{};
-
-      final Map<Object?, Object?> mainAssetVariantManifestEntry = <Object?, Object?>{};
-      mainAssetVariantManifestEntry['asset'] = variantPath;
-      mainAssetVariantManifestEntry['dpr'] = 3.0;
-      assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[mainAssetVariantManifestEntry];
-
-      final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
+      const Map<String, List<Map<Object?, Object?>>> assetManifest =
+          <String, List<Map<Object?, Object?>>>{
+        'assets/normalFolder/normalFile.png': <Map<Object?, Object?>>[
+          <Object?, Object?>{'asset': 'assets/normalFolder/normalFile.png'},
+          <Object?, Object?>{
+            'asset': 'assets/normalFolder/3.0x/normalFile.png',
+            'dpr': 3.0
+          },
+        ]
+      };
+      final TestAssetBundle testAssetBundle = TestAssetBundle(assetManifest);
 
       final AssetImage assetImage = AssetImage(
         mainAssetPath,

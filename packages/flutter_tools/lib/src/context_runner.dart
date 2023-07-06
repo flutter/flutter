@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_builder.dart';
 import 'android/android_sdk.dart';
@@ -87,6 +88,12 @@ Future<T> runInContext<T>(
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
+      Analytics: () => Analytics(
+        tool: DashTool.flutterTool,
+        flutterChannel: globals.flutterVersion.channel,
+        flutterVersion: globals.flutterVersion.frameworkVersion,
+        dartVersion: globals.flutterVersion.dartSdkVersion,
+      ),
       AndroidBuilder: () => AndroidGradleBuilder(
         java: globals.java,
         logger: globals.logger,
@@ -102,11 +109,9 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         userMessages: globals.userMessages,
         processManager: globals.processManager,
-        androidStudio: globals.androidStudio,
         java: globals.java,
         androidSdk: globals.androidSdk,
         logger: globals.logger,
-        fileSystem: globals.fs,
         stdio: globals.stdio,
       ),
       AndroidSdk: AndroidSdk.locateAndroidSdk,
@@ -228,7 +233,10 @@ Future<T> runInContext<T>(
         config: globals.config,
         platform: globals.platform,
       ),
-      FlutterVersion: () => FlutterVersion(),
+      FlutterVersion: () => FlutterVersion(
+        fs: globals.fs,
+        flutterRoot: Cache.flutterRoot!,
+      ),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
@@ -255,6 +263,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       Java: () => Java.find(
+        config: globals.config,
         androidStudio: globals.androidStudio,
         logger: globals.logger,
         fileSystem: globals.fs,

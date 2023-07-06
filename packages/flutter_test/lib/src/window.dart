@@ -167,8 +167,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       : null;
   }
 
-  final Map<Object, TestFlutterView> _testViews = <Object, TestFlutterView>{};
-  final Map<Object, TestDisplay> _testDisplays = <Object, TestDisplay>{};
+  final Map<int, TestFlutterView> _testViews = <int, TestFlutterView>{};
+  final Map<int, TestDisplay> _testDisplays = <int, TestDisplay>{};
 
   @override
   VoidCallback? get onMetricsChanged => _platformDispatcher.onMetricsChanged;
@@ -509,6 +509,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   Iterable<TestFlutterView> get views => _testViews.values;
+
+  @override
+  FlutterView? view({required int id}) => _testViews[id];
 
   @override
   Iterable<TestDisplay> get displays => _testDisplays.values;

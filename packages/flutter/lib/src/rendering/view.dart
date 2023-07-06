@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer';
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
 
@@ -103,6 +102,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
+  /// The [FlutterView] into which this [RenderView] will render.
+  ui.FlutterView get flutterView => _view;
   final ui.FlutterView _view;
 
   /// Whether Flutter should automatically compute the desired system UI.
@@ -196,18 +197,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return true;
   }
 
-  /// Determines the set of mouse tracker annotations at the given position.
-  ///
-  /// See also:
-  ///
-  ///  * [Layer.findAllAnnotations], which is used by this method to find all
-  ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
-  HitTestResult hitTestMouseTrackers(Offset position) {
-    final BoxHitTestResult result = BoxHitTestResult();
-    hitTest(result, position: position);
-    return result;
-  }
-
   @override
   bool get isRepaintBoundary => true;
 
@@ -239,7 +228,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
     if (!kReleaseMode) {
-      Timeline.startSync('COMPOSITING');
+      FlutterTimeline.startSync('COMPOSITING');
     }
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
@@ -257,7 +246,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       }());
     } finally {
       if (!kReleaseMode) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
     }
   }

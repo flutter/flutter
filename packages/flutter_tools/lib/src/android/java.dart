@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -52,6 +53,7 @@ class Java {
   ///
   /// Returns null if no java binary could be found.
   static Java? find({
+    required Config config,
     required AndroidStudio? androidStudio,
     required Logger logger,
     required FileSystem fileSystem,
@@ -65,6 +67,7 @@ class Java {
       processManager: processManager
     );
     final String? home = _findJavaHome(
+      config: config,
       logger: logger,
       androidStudio: androidStudio,
       platform: platform
@@ -181,10 +184,16 @@ class Java {
 }
 
 String? _findJavaHome({
+  required Config config,
   required Logger logger,
   required AndroidStudio? androidStudio,
   required Platform platform,
 }) {
+  final Object? configured = config.getValue('jdk-dir');
+  if (configured != null) {
+    return configured as String;
+  }
+
   final String? androidStudioJavaPath = androidStudio?.javaPath;
   if (androidStudioJavaPath != null) {
     return androidStudioJavaPath;
