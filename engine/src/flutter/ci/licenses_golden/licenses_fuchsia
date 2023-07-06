@@ -1,4 +1,4 @@
-Signature: 35f2c5af32e2d5074b973b70478bddc4
+Signature: 748c504b325fb9b92ac49d321607d9f8
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -1150,12 +1150,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/table.dart + ../../../fuchs
 ORIGIN: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/types.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/unknown_data.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia/lib/src/fakes/fuchsia_fakes.dart + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/logger.dart + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/src/internal/_fuchsia_log_writer.dart + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/src/internal/_log_message.dart + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/src/internal/_log_writer.dart + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/src/internal/_stdout_log_writer.dart + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/src/logger/logger.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/services.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/service_provider_impl.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/internal/_error_node.dart + ../../../fuchsia/sdk/linux/LICENSE
@@ -1399,12 +1393,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/table.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/types.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/unknown_data.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia/lib/src/fakes/fuchsia_fakes.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/logger.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/src/internal/_fuchsia_log_writer.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/src/internal/_log_message.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/src/internal/_log_writer.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/src/internal/_stdout_log_writer.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/src/logger/logger.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/services.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/service_provider_impl.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/internal/_error_node.dart
