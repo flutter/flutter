@@ -46,7 +46,7 @@
     ],
     "tests": [
         {
-            "name": "test: lint host_debug",
+            "name": "test: lint host_debug 0",
             "recipe": "engine_v2/tester_engine",
             "drone_dimensions": [
                 "device_type=none",
@@ -57,8 +57,39 @@
                 "download_android_deps": false
             },
             "dependencies": [
-                "host_debug",
-                "ios_debug_sim"
+                "host_debug"
+            ],
+            "contexts": [
+                "osx_sdk"
+            ],
+            "tasks": [
+                {
+                    "name": "test: lint host_debug",
+                    "parameters": [
+                        "--variant",
+                        "host_debug",
+                        "--lint-all",
+                        "--shard-id=0",
+                        "--shard-variants=host_debug,host_debug,host_debug"
+                    ],
+		    "max_attempts": 1,
+                    "script": "flutter/ci/lint.sh"
+                }
+            ]
+        },
+        {
+            "name": "test: lint host_debug 1",
+            "recipe": "engine_v2/tester_engine",
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "dependencies": [
+                "host_debug"
             ],
             "contexts": [
                 "osx_sdk"
@@ -71,9 +102,73 @@
                         "host_debug",
                         "--lint-all",
                         "--shard-id=1",
-                        "--shard-variants=ios_debug_sim"
+                        "--shard-variants=host_debug,host_debug,host_debug"
                     ],
-		    "max_attempts": 1,
+            "max_attempts": 1,
+                    "script": "flutter/ci/lint.sh"
+                }
+            ]
+        },
+        {
+            "name": "test: lint host_debug 2",
+            "recipe": "engine_v2/tester_engine",
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "dependencies": [
+                "host_debug"
+            ],
+            "contexts": [
+                "osx_sdk"
+            ],
+            "tasks": [
+                {
+                    "name": "test: lint host_debug",
+                    "parameters": [
+                        "--variant",
+                        "host_debug",
+                        "--lint-all",
+                        "--shard-id=2",
+                        "--shard-variants=host_debug,host_debug,host_debug"
+                    ],
+            "max_attempts": 1,
+                    "script": "flutter/ci/lint.sh"
+                }
+            ]
+        },
+        {
+            "name": "test: lint host_debug 3",
+            "recipe": "engine_v2/tester_engine",
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "dependencies": [
+                "host_debug"
+            ],
+            "contexts": [
+                "osx_sdk"
+            ],
+            "tasks": [
+                {
+                    "name": "test: lint host_debug",
+                    "parameters": [
+                        "--variant",
+                        "host_debug",
+                        "--lint-all",
+                        "--shard-id=3",
+                        "--shard-variants=host_debug,host_debug,host_debug"
+                    ],
+            "max_attempts": 1,
                     "script": "flutter/ci/lint.sh"
                 }
             ]

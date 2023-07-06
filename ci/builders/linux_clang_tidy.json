@@ -37,7 +37,65 @@
     ],
     "tests": [
         {
-            "name": "test: lint host_debug",
+            "name": "test: lint host_debug 0",
+            "recipe": "engine_v2/tester_engine",
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cores=32"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "dependencies": [
+                "host_debug"
+            ],
+            "tasks": [
+                {
+                    "name": "test: lint host_debug",
+                    "parameters": [
+                        "--variant",
+                        "host_debug",
+                        "--lint-all",
+                        "--shard-id=0",
+                        "--shard-variants=host_debug,host_debug,host_debug"
+                    ],
+		    "max_attempts": 1,
+                    "script": "flutter/ci/lint.sh"
+                }
+            ]
+        },
+        {
+            "name": "test: lint host_debug 1",
+            "recipe": "engine_v2/tester_engine",
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cores=32"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "dependencies": [
+                "host_debug"
+            ],
+            "tasks": [
+                {
+                    "name": "test: lint host_debug",
+                    "parameters": [
+                        "--variant",
+                        "host_debug",
+                        "--lint-all",
+                        "--shard-id=1",
+                        "--shard-variants=host_debug,host_debug,host_debug"
+                    ],
+            "max_attempts": 1,
+                    "script": "flutter/ci/lint.sh"
+                }
+            ]
+        },
+        {
+            "name": "test: lint host_debug 2",
             "recipe": "engine_v2/tester_engine",
             "drone_dimensions": [
                 "device_type=none",
@@ -58,10 +116,40 @@
                         "--variant",
                         "host_debug",
                         "--lint-all",
-                        "--shard-id=1",
-                        "--shard-variants=android_debug_arm64"
+                        "--shard-id=2",
+                        "--shard-variants=host_debug,host_debug,host_debug"
                     ],
-		    "max_attempts": 1,
+            "max_attempts": 1,
+                    "script": "flutter/ci/lint.sh"
+                }
+            ]
+        },
+        {
+            "name": "test: lint host_debug 3",
+            "recipe": "engine_v2/tester_engine",
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cores=32"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "dependencies": [
+                "host_debug",
+                "android_debug_arm64"
+            ],
+            "tasks": [
+                {
+                    "name": "test: lint host_debug",
+                    "parameters": [
+                        "--variant",
+                        "host_debug",
+                        "--lint-all",
+                        "--shard-id=3",
+                        "--shard-variants=host_debug,host_debug,host_debug"
+                    ],
+            "max_attempts": 1,
                     "script": "flutter/ci/lint.sh"
                 }
             ]
