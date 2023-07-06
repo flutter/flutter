@@ -100,7 +100,7 @@ void main() {
     expect(outsideHooks, isNotNull);
     expect(insideHooks, isNotNull);
     expect(outsideHooks, isNot(equals(insideHooks)));
-    expect(outsideHooks!.renderViewRepository, equals(insideHooks!.renderViewRepository));
+    expect(outsideHooks!.renderViewManager, equals(insideHooks!.renderViewManager));
     expect(outsideHooks!.pipelineOwner, isNot(equals(insideHooks!.pipelineOwner)));
 
     expect(outsideHooks!.pipelineOwner, tester.binding.rootPipelineOwner);
@@ -143,19 +143,19 @@ void main() {
   testWidgets('ViewHooks tests', (WidgetTester tester) async {
     final PipelineOwner owner1 = PipelineOwner();
     final PipelineOwner owner2 = PipelineOwner();
-    final RenderViewRepository repo1 = FakeRenderViewRepository();
-    final RenderViewRepository repo2 = FakeRenderViewRepository();
+    final RenderViewManager manager1 = FakeRenderViewManager();
+    final RenderViewManager manager2 = FakeRenderViewManager();
 
-    final ViewHooks hooks11 = ViewHooks(renderViewRepository: repo1, pipelineOwner: owner1);
-    final ViewHooks hooks12 = ViewHooks(renderViewRepository: repo1, pipelineOwner: owner2);
-    final ViewHooks hooks21 = ViewHooks(renderViewRepository: repo2, pipelineOwner: owner1);
-    final ViewHooks hooks22 = ViewHooks(renderViewRepository: repo2, pipelineOwner: owner2);
+    final ViewHooks hooks11 = ViewHooks(renderViewManager: manager1, pipelineOwner: owner1);
+    final ViewHooks hooks12 = ViewHooks(renderViewManager: manager1, pipelineOwner: owner2);
+    final ViewHooks hooks21 = ViewHooks(renderViewManager: manager2, pipelineOwner: owner1);
+    final ViewHooks hooks22 = ViewHooks(renderViewManager: manager2, pipelineOwner: owner2);
     expect(hooks11, isNot(hooks12));
     expect(hooks11, isNot(hooks21));
     expect(hooks11, isNot(hooks22));
-    expect(ViewHooks(renderViewRepository: hooks11.renderViewRepository, pipelineOwner: hooks11.pipelineOwner), hooks11);
+    expect(ViewHooks(renderViewManager: hooks11.renderViewManager, pipelineOwner: hooks11.pipelineOwner), hooks11);
     expect(hooks12.copyWith(pipelineOwner: hooks11.pipelineOwner), hooks11);
-    expect(hooks21.copyWith(renderViewRepository: hooks11.renderViewRepository), hooks11);
+    expect(hooks21.copyWith(renderViewManager: hooks11.renderViewManager), hooks11);
   });
 
   testWidgets('ViewCollection must have one view', (WidgetTester tester) async {
@@ -428,7 +428,7 @@ Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, require
   return tester.binding.pump();
 }
 
-class FakeRenderViewRepository extends Fake implements RenderViewRepository { }
+class FakeRenderViewManager extends Fake implements RenderViewManager { }
 
 class FakeView extends TestFlutterView{
   FakeView(FlutterView view, { this.viewId = 100 }) : super(

@@ -185,7 +185,7 @@ typedef RawViewContentBuilder = Widget Function(BuildContext context, PipelineOw
 /// tree.
 ///
 /// It instantiates the [RenderView] as the root of that render tree and adds it
-/// to the [RenderViewRepository] obtained from the surrounding [ViewHooks] via
+/// to the [RenderViewManager] obtained from the surrounding [ViewHooks] via
 /// [ViewHooks.of] (typically, that is the [RendererBinding]). It also owns the
 /// [PipelineOwner] that manages this render tree and adds it as a child to the
 /// surrounding [ViewHooks.pipelineOwner]. This ensures, that the render tree
@@ -317,14 +317,14 @@ class _RawViewElement extends RenderTreeRootElement {
     assert(_attachmentPoint == null);
     viewHooks ??= ViewHooks.of(this);
     viewHooks.pipelineOwner.adoptChild(_effectivePipelineOwner);
-    viewHooks.renderViewRepository.addRenderView(renderObject);
+    viewHooks.renderViewManager.addRenderView(renderObject);
     _attachmentPoint = viewHooks;
   }
 
   void _detachFromViewHooks() {
     final ViewHooks? viewHooks = _attachmentPoint;
     if (viewHooks != null) {
-      viewHooks.renderViewRepository.removeRenderView(renderObject);
+      viewHooks.renderViewManager.removeRenderView(renderObject);
       viewHooks.pipelineOwner.dropChild(_effectivePipelineOwner);
       _attachmentPoint = null;
     }
@@ -444,17 +444,17 @@ class ViewHooksScope extends InheritedWidget {
 ///
 /// To participate in frame production, the [View] widget (or more specifically
 /// the underlying [RawView] widget) needs to add the [RenderView] root of its
-/// render tree to a [RenderViewRepository] (typically, the [RendererBinding])
+/// render tree to a [RenderViewManager] (typically, the [RendererBinding])
 /// and add the [PipelineOwner] managing that tree to the pipeline owner tree.
 /// The [ViewHooks] define these attachment points for the [View]/[RawView]
 /// widget. They are injected into the tree via [ViewHooksScope] and can be
 /// looked up with [ViewHooks.of].
 @immutable
 class ViewHooks {
-  /// Creates a [ViewHooks] instance with the provided [renderViewRepository]
+  /// Creates a [ViewHooks] instance with the provided [renderViewManager]
   /// and [pipelineOwner].
   const ViewHooks({
-    required this.renderViewRepository,
+    required this.renderViewManager,
     required this.pipelineOwner,
   });
 
@@ -465,21 +465,21 @@ class ViewHooks {
   /// and causes it to rebuild whenever the [ViewHooks] change.
   ///
   /// When no [ViewHooks] are available in the provided `context`, a default
-  /// ViewHooks instance with [renderViewRepository] set to
+  /// ViewHooks instance with [renderViewManager] set to
   /// [RendererBinding.instance] and [pipelineOwner] set to
   /// [RendererBinding.rootPipelineOwner] is returned.
   static ViewHooks of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<ViewHooksScope>()?.hooks
         ?? ViewHooks(
-          renderViewRepository: RendererBinding.instance,
+          renderViewManager: RendererBinding.instance,
           pipelineOwner: RendererBinding.instance.rootPipelineOwner,
         );
   }
 
-  /// The [RenderViewRepository] to which the [RawView] widget should add the
+  /// The [RenderViewManager] to which the [RawView] widget should add the
   /// [RenderView] root of its render tree by calling
-  /// [RenderViewRepository.addRenderView].
-  final RenderViewRepository renderViewRepository;
+  /// [RenderViewManager.addRenderView].
+  final RenderViewManager renderViewManager;
 
   /// The parent [PipelineOwner] to which the [RawView] widget should add the
   /// [PipelineOwner] managing its render tree by calling
@@ -489,23 +489,23 @@ class ViewHooks {
   /// Create a clone of the current [ViewHooks] but with provided parameters
   /// replaced.
   ViewHooks copyWith({
-    RenderViewRepository? renderViewRepository,
+    RenderViewManager? renderViewManager,
     PipelineOwner? pipelineOwner,
   }) {
-    assert(renderViewRepository != null || pipelineOwner != null);
+    assert(renderViewManager != null || pipelineOwner != null);
     return ViewHooks(
-      renderViewRepository: renderViewRepository ?? this.renderViewRepository,
+      renderViewManager: renderViewManager ?? this.renderViewManager,
       pipelineOwner: pipelineOwner ?? this.pipelineOwner,
     );
   }
 
   @override
-  int get hashCode => Object.hash(renderViewRepository, pipelineOwner);
+  int get hashCode => Object.hash(renderViewManager, pipelineOwner);
 
   @override
   bool operator ==(Object other) {
     return other is ViewHooks
-        && renderViewRepository == other.renderViewRepository
+        && renderViewManager == other.renderViewManager
         && pipelineOwner == other.pipelineOwner;
   }
 
@@ -514,7 +514,7 @@ class ViewHooks {
     return
       '${objectRuntimeType(this, 'ViewHooks')}('
         'pipelineOwner: $pipelineOwner, '
-        'renderViewRepository: $renderViewRepository'
+        'renderViewManager: $renderViewManager'
       ')';
   }
 }

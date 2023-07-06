@@ -88,13 +88,13 @@ void main() {
 
   testWidgets('RawView attaches/detaches itself to surrounding ViewHooks', (WidgetTester tester) async {
     final PipelineOwner pipelineOwner = PipelineOwner();
-    final FakeRenderViewRepository repository = FakeRenderViewRepository();
+    final FakeRenderViewManager manager = FakeRenderViewManager();
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: ViewHooksScope(
         hooks: ViewHooks(
           pipelineOwner: pipelineOwner,
-          renderViewRepository: repository,
+          renderViewManager: manager,
         ),
         child: RawView(
           view: tester.view,
@@ -105,7 +105,7 @@ void main() {
       ),
     );
     final RenderView rawView = tester.renderObject<RenderView>(find.byType(RawView));
-    expect(repository.renderViews, contains(rawView));
+    expect(manager.renderViews, contains(rawView));
     final List<PipelineOwner> children = <PipelineOwner>[];
     pipelineOwner.visitChildren((PipelineOwner child) {
       children.add(child);
@@ -119,7 +119,7 @@ void main() {
       widget: ViewHooksScope(
         hooks: ViewHooks(
           pipelineOwner: pipelineOwner,
-          renderViewRepository: repository,
+          renderViewManager: manager,
         ),
         child: RawView(
           view: FakeView(tester.view),
@@ -131,7 +131,7 @@ void main() {
     );
 
     expect(rawView.owner, isNull);
-    expect(repository.renderViews, isNot(contains(rawView)));
+    expect(manager.renderViews, isNot(contains(rawView)));
     children.clear();
     pipelineOwner.visitChildren((PipelineOwner child) {
       children.add(child);
@@ -141,13 +141,13 @@ void main() {
 
   testWidgets('when moved RawView attaches/detaches itself to surrounding ViewHooks', (WidgetTester tester) async {
     final PipelineOwner pipelineOwner1 = PipelineOwner();
-    final FakeRenderViewRepository repository1 = FakeRenderViewRepository();
+    final FakeRenderViewManager manager1 = FakeRenderViewManager();
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: ViewHooksScope(
         hooks: ViewHooks(
           pipelineOwner: pipelineOwner1,
-          renderViewRepository: repository1,
+          renderViewManager: manager1,
         ),
         child: RawView(
           view: tester.view,
@@ -159,7 +159,7 @@ void main() {
     );
 
     final RenderView rawView = tester.renderObject<RenderView>(find.byType(RawView));
-    expect(repository1.renderViews, contains(rawView));
+    expect(manager1.renderViews, contains(rawView));
     final List<PipelineOwner> children1 = <PipelineOwner>[];
     pipelineOwner1.visitChildren((PipelineOwner child) {
       children1.add(child);
@@ -168,13 +168,13 @@ void main() {
     expect(children1, contains(rawViewOwner));
 
     final PipelineOwner pipelineOwner2 = PipelineOwner();
-    final FakeRenderViewRepository repository2 = FakeRenderViewRepository();
+    final FakeRenderViewManager manager2 = FakeRenderViewManager();
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: ViewHooksScope(
         hooks: ViewHooks(
           pipelineOwner: pipelineOwner2,
-          renderViewRepository: repository2,
+          renderViewManager: manager2,
         ),
         child: RawView(
           view: tester.view,
@@ -187,8 +187,8 @@ void main() {
 
     expect(tester.renderObject<RenderView>(find.byType(RawView)), same(rawView));
     expect(rawView.owner, same(rawViewOwner));
-    expect(repository1.renderViews, isNot(contains(rawView)));
-    expect(repository2.renderViews, contains(rawView));
+    expect(manager1.renderViews, isNot(contains(rawView)));
+    expect(manager2.renderViews, contains(rawView));
     children1.clear();
     pipelineOwner1.visitChildren((PipelineOwner child) {
       children1.add(child);
@@ -225,7 +225,7 @@ class InheritedText extends InheritedWidget {
   bool updateShouldNotify(InheritedText oldWidget) => text != oldWidget.text;
 }
 
-class FakeRenderViewRepository implements RenderViewRepository {
+class FakeRenderViewManager implements RenderViewManager {
   final List<RenderView> renderViews = <RenderView>[];
 
   @override

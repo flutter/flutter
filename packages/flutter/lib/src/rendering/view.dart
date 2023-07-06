@@ -69,7 +69,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Providing a [configuration] is optional, but a configuration must be set
   /// before calling [prepareInitialFrame]. Typically, a configuration is set
-  /// and updated by the [RenderViewRepository] when the [RenderView] is
+  /// and updated by the [RenderViewManager] when the [RenderView] is
   /// registered with it.
   RenderView({
     RenderBox? child,
@@ -86,14 +86,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   /// The constraints used for the root layout.
   ///
-  /// The configuration is set and updated by the [RenderViewRepository]. If set
-  /// elsewhere, the [RenderViewRepository] this [RenderView] is registered with
+  /// The configuration is set and updated by the [RenderViewManager]. If set
+  /// elsewhere, the [RenderViewManager] this [RenderView] is registered with
   /// may override it at any time.
   ///
   /// For tests that want to change the size of the view, set
   /// [TestFlutterView.physicalSize] on the appropriate [TestFlutterView]
   /// (typically [WidgetTester.view]) instead of setting a configuration
-  /// directly on the [RenderView]. The [RenderViewRepository] will honor a size
+  /// directly on the [RenderView]. The [RenderViewManager] will honor a size
   /// set that way and not override it.
   ViewConfiguration get configuration => _configuration!;
   ViewConfiguration? _configuration;
@@ -447,11 +447,11 @@ typedef DebugPaintCallback = void Function(PaintingContext context, Offset offse
 /// [FlutterView]s associated with those [RenderView]s.
 ///
 /// Typically, to participate in frame production, hit testing, etc.
-/// [RenderView]s must be added to a [RenderViewRepository].
+/// [RenderView]s must be added to a [RenderViewManager].
 ///
 /// Implementors of this interface have the following responsibilities:
 ///
-/// {@template flutter.rendering.RenderViewRepository}
+/// {@template flutter.rendering.RenderViewManager}
 ///  * setting and updating [RenderView.configuration],
 ///  * calling [RenderView.compositeFrame] when it is time to produce a new
 ///    frame, and
@@ -462,17 +462,17 @@ typedef DebugPaintCallback = void Function(PaintingContext context, Offset offse
 /// [removeRenderView].
 ///
 /// The [RendererBinding] implements this interface.
-abstract class RenderViewRepository {
-  /// Adds a [RenderView] to be managed by this repository.
+abstract class RenderViewManager {
+  /// Adds a [RenderView] to this manager.
   ///
-  /// The repository will manage the [RenderView] by
+  /// The Manager will interact with the [RenderView] in the following ways:
   ///
-  /// {@macro flutter.rendering.RenderViewRepository}
+  /// {@macro flutter.rendering.RenderViewManager}
   ///
-  /// To remove a [RenderView] from the repository, call [removeRenderView].
+  /// To remove a [RenderView] from the manager, call [removeRenderView].
   void addRenderView(RenderView view);
 
   /// Removes a [RenderView] previously added with [addRenderView] from the
-  /// repository.
+  /// manager.
   void removeRenderView(RenderView view);
 }

@@ -33,7 +33,7 @@ export 'package:flutter/gestures.dart' show HitTestResult;
 /// described above is left as a responsibility for a higher level abstraction.
 /// The widgets library, for example, introduces the [View] widget, which
 /// registers its [RenderView] and [PipelineOwner] with this binding.
-mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable implements RenderViewRepository {
+mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable implements RenderViewManager {
   @override
   void initInstances() {
     super.initInstances();
