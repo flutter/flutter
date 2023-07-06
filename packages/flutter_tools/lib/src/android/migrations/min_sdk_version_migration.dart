@@ -8,9 +8,12 @@ import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../project.dart';
 import '../gradle_utils.dart';
-/// Replacement value for https://developer.android.com/reference/tools/gradle-api/8.0/com/android/build/api/dsl/BaseFlavor#minSdkVersion(kotlin.Int) that instead of using a value defaults to the version defined by the flutter sdk as the minimum supported by flutter. 
+
+/// Replacement value for https://developer.android.com/reference/tools/gradle-api/8.0/com/android/build/api/dsl/BaseFlavor#minSdkVersion(kotlin.Int)
+/// that instead of using a value defaults to the version defined by the
+/// flutter sdk as the minimum supported by flutter.
 @visibleForTesting
-const String flutterMinSdk = 'minSdkVersion flutter.minSdkVersion';
+const String replacementMinSdkText = 'minSdkVersion flutter.minSdkVersion';
 @visibleForTesting
 const String appGradleNotFoundWarning = 'Module level build.gradle file not found, skipping minSdkVersion migration.';
 
@@ -34,6 +37,6 @@ class MinSdkVersionMigration extends ProjectMigrator {
 
   @override
   String migrateFileContents(String fileContents) {
-    return fileContents.replaceAll(jellyBeanMinSdkVersionMatch, flutterMinSdk);
+    return fileContents.replaceAll(jellyBeanMinSdkVersionMatch, replacementMinSdkText);
   }
 }

@@ -363,21 +363,21 @@ tasks.register("clean", Delete) {
         const String minSdkVersion16 = 'minSdkVersion 16';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion16));
         migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
       });
 
       testWithoutContext('replace when api 17', () {
         const String minSdkVersion17 = 'minSdkVersion 17';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion17));
         migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
       });
 
       testWithoutContext('replace when api 18', () {
         const String minSdkVersion18 = 'minSdkVersion 18';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion18));
         migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
       });
 
       testWithoutContext('do nothing when >=api 19', () {
@@ -389,9 +389,9 @@ tasks.register("clean", Delete) {
 
       testWithoutContext('do nothing when already using '
           'flutter.minSdkVersion', () {
-        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(flutterMinSdk));
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(replacementMinSdkText));
         migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(flutterMinSdk));
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
       });
 
       testWithoutContext('avoid rewriting comments', () {
