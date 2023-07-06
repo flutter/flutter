@@ -218,7 +218,7 @@ class NavigationDrawerDestination extends StatelessWidget {
   ///
   /// The icon will use [NavigationDrawerThemeData.iconTheme] with
   /// [MaterialState.selected]. If this is null, the default [IconThemeData]
-  /// would use a size of 24.0 and [ColorScheme.onSurfaceVariant].
+  /// would use a size of 24.0 and [ColorScheme.onSecondaryContainer].
   final Widget? selectedIcon;
 
   /// The text label that appears on the right of the icon
@@ -671,8 +671,6 @@ bool _isForwardOrCompleted(Animation<double> animation) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   _NavigationDrawerDefaultsM3(this.context)
     : super(
@@ -704,7 +702,7 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
       return IconThemeData(
         size: 24.0,
         color: states.contains(MaterialState.selected)
-            ? null
+            ? _colors.onSecondaryContainer
             : _colors.onSurfaceVariant,
       );
     });

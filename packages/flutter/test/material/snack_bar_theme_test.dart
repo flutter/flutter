@@ -98,7 +98,10 @@ void main() {
 
   testWidgets('Passing no SnackBarThemeData returns defaults', (WidgetTester tester) async {
     const String text = 'I am a snack bar.';
+    final ThemeData theme = ThemeData();
+    final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(MaterialApp(
+      theme: theme,
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
@@ -123,8 +126,10 @@ void main() {
     final Material material = _getSnackBarMaterial(tester);
     final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
 
-    expect(content.text.style, Typography.material2018().white.titleMedium);
-    expect(material.color, const Color(0xFF333333));
+    expect(content.text.style, material3
+      ? Typography.material2021().englishLike.bodyMedium?.merge(Typography.material2021().black.bodyMedium).copyWith(color: theme.colorScheme.onInverseSurface, decorationColor: theme.colorScheme.onSurface)
+      : Typography.material2018().white.titleMedium);
+    expect(material.color, material3 ? theme.colorScheme.inverseSurface : const Color(0xFF333333));
     expect(material.elevation, 6.0);
     expect(material.shape, null);
   });

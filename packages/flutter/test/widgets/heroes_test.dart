@@ -1188,7 +1188,7 @@ Future<void> main() async {
         if (currentNode is RenderAnimatedOpacity && currentNode.opacity.value == 0) {
           return false;
         }
-        currentNode = currentNode.parent as RenderObject?;
+        currentNode = currentNode.parent;
       }
       return true;
     }
@@ -2919,7 +2919,7 @@ Future<void> main() async {
     final ScrollController controller = ScrollController();
 
     RenderAnimatedOpacity? findRenderAnimatedOpacity() {
-      AbstractNode? parent = tester.renderObject(find.byType(Placeholder));
+      RenderObject? parent = tester.renderObject(find.byType(Placeholder));
       while (parent is RenderObject && parent is! RenderAnimatedOpacity) {
         parent = parent.parent;
       }

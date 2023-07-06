@@ -585,6 +585,7 @@ class _RailDestination extends StatelessWidget {
     final bool material3 = theme.useMaterial3;
     final EdgeInsets destinationPadding = (padding ?? EdgeInsets.zero).resolve(Directionality.of(context));
     Offset indicatorOffset;
+    bool applyXOffset = false;
 
     final Widget themedIcon = IconTheme(
       data: disabled
@@ -645,6 +646,7 @@ class _RailDestination extends StatelessWidget {
           );
         } else {
           final Animation<double> labelFadeAnimation = extendedTransitionAnimation.drive(CurveTween(curve: const Interval(0.0, 0.25)));
+          applyXOffset = true;
           content = Padding(
             padding: padding ?? EdgeInsets.zero,
             child: ConstrainedBox(
@@ -775,6 +777,7 @@ class _RailDestination extends StatelessWidget {
               hoverColor: colors.primary.withOpacity(0.04),
               useMaterial3: material3,
               indicatorOffset: indicatorOffset,
+              applyXOffset: applyXOffset,
               child: content,
             ),
           ),
@@ -797,6 +800,7 @@ class _IndicatorInkWell extends InkResponse {
     super.hoverColor,
     required this.useMaterial3,
     required this.indicatorOffset,
+    required this.applyXOffset,
   }) : super(
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
@@ -805,14 +809,19 @@ class _IndicatorInkWell extends InkResponse {
   );
 
   final bool useMaterial3;
+  // The offset used to position Ink highlight.
   final Offset indicatorOffset;
+  // Whether the horizontal offset from indicatorOffset should be used to position Ink highlight.
+  // If true, Ink highlight uses the indicator horizontal offset. If false, Ink highlight is centered horizontally.
+  final bool applyXOffset;
 
   @override
   RectCallback? getRectCallback(RenderBox referenceBox) {
     if (useMaterial3) {
+      final double indicatorHorizontalCenter = applyXOffset ? indicatorOffset.dx : referenceBox.size.width / 2;
       return () {
         return Rect.fromLTWH(
-          indicatorOffset.dx - (_kCircularIndicatorDiameter / 2),
+          indicatorHorizontalCenter - (_kCircularIndicatorDiameter / 2),
           indicatorOffset.dy,
           _kCircularIndicatorDiameter,
           _kIndicatorHeight,
@@ -1039,8 +1048,6 @@ class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
   _NavigationRailDefaultsM3(this.context)

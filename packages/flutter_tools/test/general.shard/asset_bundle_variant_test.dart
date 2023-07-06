@@ -33,7 +33,7 @@ void main() {
   }
 
   Future<Map<Object?, Object?>> extractAssetManifestSmcBinFromBundle(ManifestAssetBundle bundle) async {
-    final List<int> manifest = await bundle.entries['AssetManifest.smcbin']!.contentsAsBytes();
+    final List<int> manifest = await bundle.entries['AssetManifest.bin']!.contentsAsBytes();
     final ByteData asByteData = ByteData.view(Uint8List.fromList(manifest).buffer);
     final Map<Object?, Object?> decoded = const StandardMessageCodec().decodeMessage(asByteData)! as Map<Object?, Object?>;
     return decoded;

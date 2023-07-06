@@ -9,9 +9,9 @@ import '../rendering/mock_canvas.dart';
 void main() {
   testWidgets('Divider control test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Center(
           child: Divider(),
         ),
       ),
@@ -94,9 +94,9 @@ void main() {
 
   testWidgets('Vertical Divider Test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Center(
           child: VerticalDivider(),
         ),
       ),

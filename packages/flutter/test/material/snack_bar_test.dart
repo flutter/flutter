@@ -302,7 +302,7 @@ void main() {
   });
 
   testWidgets('Light theme SnackBar has dark background', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData lightTheme = ThemeData.light(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: lightTheme,
@@ -383,7 +383,7 @@ void main() {
   });
 
   testWidgets('Dark theme SnackBar has primary text buttons', (WidgetTester tester) async {
-    final ThemeData darkTheme = ThemeData.dark();
+    final ThemeData darkTheme = ThemeData.dark(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: darkTheme,
@@ -961,6 +961,7 @@ void main() {
 
   testWidgets('SnackBar button text alignment', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.only(
@@ -1010,6 +1011,7 @@ void main() {
     'Custom padding between SnackBar and its contents when set to SnackBarBehavior.fixed',
     (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: MediaQuery(
           data: const MediaQueryData(
             padding: EdgeInsets.only(
@@ -1120,6 +1122,7 @@ void main() {
   testWidgets('Floating SnackBar button text alignment', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
+        useMaterial3: false,
         snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
       ),
       home: MediaQuery(
@@ -1172,6 +1175,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
+          useMaterial3: false,
           snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
         ),
         home: MediaQuery(
@@ -1902,8 +1906,9 @@ void main() {
     testWidgets('Snackbar with SnackBarBehavior.floating will assert when offset too high by a large Scaffold.persistentFooterButtons', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/84263
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
             persistentFooterButtons: <Widget>[SizedBox(height: 1000)],
           ),
         ),
@@ -1917,8 +1922,9 @@ void main() {
     testWidgets('Snackbar with SnackBarBehavior.floating will assert when offset too high by a large Scaffold.bottomNavigationBar', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/84263
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
             bottomNavigationBar: SizedBox(height: 1000),
           ),
         ),
@@ -2149,8 +2155,9 @@ void main() {
   });
 
   testWidgets('SnackBars should be shown above the bottomSheet', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2232,6 +2239,7 @@ void main() {
 
   testWidgets('ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),
@@ -2433,6 +2441,7 @@ void main() {
   testWidgets('Snackbar by default clips BackdropFilter', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/98205
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),
@@ -2463,8 +2472,9 @@ void main() {
   });
 
   testWidgets('Floating snackbar can display optional icon', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2494,8 +2504,9 @@ void main() {
   });
 
   testWidgets('Fixed width snackbar can display optional icon', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2520,8 +2531,9 @@ void main() {
   });
 
     testWidgets('Fixed snackbar can display optional icon without action', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2548,8 +2560,9 @@ void main() {
 
   testWidgets(
       'Floating width snackbar can display optional icon without action', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2574,8 +2587,9 @@ void main() {
   });
 
   testWidgets('Floating multi-line snackbar with icon is aligned correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2601,8 +2615,9 @@ void main() {
   });
 
   testWidgets('Floating multi-line snackbar with icon and actionOverflowThreshold=1 is aligned correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2621,10 +2636,10 @@ void main() {
       behavior: SnackBarBehavior.floating,
       actionOverflowThreshold: 1,
     ));
-    await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate in.
 
     await expectLater(find.byType(MaterialApp),
-        matchesGoldenFile('snack_bar.goldenTest.multiLineWithIconWithZeroActionOverflowThreshold.png'));
+      matchesGoldenFile('snack_bar.goldenTest.multiLineWithIconWithZeroActionOverflowThreshold.png'));
   });
 
   testWidgets(

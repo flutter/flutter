@@ -242,15 +242,18 @@ void main() {
     });
 
     testUsingContext('can switch channels', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(
           command: <String>['git', 'fetch'],
         ),
-        const FakeCommand(
+        FakeCommand(
           command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
         ),
-        const FakeCommand(
-            command: <String>['git', 'checkout', 'beta', '--']
+        FakeCommand(
+          command: <String>['git', 'checkout', 'beta', '--']
+        ),
+        FakeCommand(
+          command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
         ),
       ]);
 
@@ -265,15 +268,18 @@ void main() {
       );
       expect(testLogger.errorText, hasLength(0));
 
-      fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(
           command: <String>['git', 'fetch'],
         ),
-        const FakeCommand(
+        FakeCommand(
           command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/stable'],
         ),
-        const FakeCommand(
-            command: <String>['git', 'checkout', 'stable', '--']
+        FakeCommand(
+          command: <String>['git', 'checkout', 'stable', '--'],
+        ),
+        FakeCommand(
+          command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
         ),
       ]);
 
@@ -286,15 +292,18 @@ void main() {
     });
 
     testUsingContext('switching channels prompts to run flutter upgrade', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(
           command: <String>['git', 'fetch'],
         ),
-        const FakeCommand(
+        FakeCommand(
           command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
         ),
-        const FakeCommand(
+        FakeCommand(
             command: <String>['git', 'checkout', 'beta', '--']
+        ),
+        FakeCommand(
+          command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
         ),
       ]);
 
@@ -322,15 +331,18 @@ void main() {
     // This verifies that bug https://github.com/flutter/flutter/issues/21134
     // doesn't return.
     testUsingContext('removes version stamp file when switching channels', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(
           command: <String>['git', 'fetch'],
         ),
-        const FakeCommand(
+        FakeCommand(
           command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
         ),
-        const FakeCommand(
+        FakeCommand(
           command: <String>['git', 'checkout', 'beta', '--']
+        ),
+        FakeCommand(
+          command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
         ),
       ]);
 

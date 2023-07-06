@@ -53,6 +53,7 @@ void main() {
   testWidgets('FlexibleSpaceBar stretch mode blurBackground', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: CustomScrollView(
             physics: const BouncingScrollPhysics(),

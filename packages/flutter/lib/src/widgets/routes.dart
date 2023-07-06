@@ -1813,9 +1813,9 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// ## Type arguments
 ///
-/// When using more aggressive
-/// [lints](http://dart-lang.github.io/linter/lints/), in particular lints such
-/// as `always_specify_types`, the Dart analyzer will require that certain types
+/// When using more aggressive [lints](https://dart.dev/lints),
+/// in particular lints such as `always_specify_types`,
+/// the Dart analyzer will require that certain types
 /// be given with their type arguments. Since the [Route] class and its
 /// subclasses have a type argument, this includes the arguments passed to this
 /// class. Consider using `dynamic` to specify the entire class of routes rather
