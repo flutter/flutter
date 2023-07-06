@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
+import '../widgets/live_text_utils.dart';
 
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
@@ -166,6 +167,7 @@ void main() {
           onCut: () {},
           onPaste: () {},
           onSelectAll: () {},
+          onLiveTextInput: () {},
         ),
       ),
     ));
@@ -178,13 +180,16 @@ void main() {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
       case TargetPlatform.fuchsia:
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
       case TargetPlatform.iOS:
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(4));
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
+        expect(findLiveTextButton(), findsOneWidget);
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(4));
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(5));
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
