@@ -680,11 +680,39 @@ typedef InspectorSelectionChangedCallback = void Function();
 
 /// Structure to help reference count Dart objects referenced by a GUI tool
 /// using [WidgetInspectorService].
-class _InspectorReferenceData {
-  _InspectorReferenceData(this.object);
+///
+/// Does not hold the object from garbage collection.
+@visibleForTesting
+class InspectorReferenceData {
+  /// Creates an instance of [InspectorReferenceData].
+  InspectorReferenceData(Object object, this.id) {
+    // These types are not supported by [WeakReference].
+    // See https://api.dart.dev/stable/3.0.2/dart-core/WeakReference-class.html
+    if (object is String || object is num || object is bool) {
+      _value = object;
+      return;
+    }
 
-  final Object object;
+    _ref = WeakReference<Object>(object);
+  }
+
+  WeakReference<Object>? _ref;
+
+  Object? _value;
+
+  /// The id of the object in the widget inspector records.
+  final String id;
+
+  /// The number of times the object has been referenced.
   int count = 1;
+
+  /// The value.
+  Object? get value {
+    if (_ref != null) {
+      return _ref!.target;
+    }
+    return _value;
+  }
 }
 
 // Production implementation of [WidgetInspectorService].
@@ -742,9 +770,9 @@ mixin WidgetInspectorService {
   /// The VM service protocol does not keep alive object references so this
   /// class needs to manually manage groups of objects that should be kept
   /// alive.
-  final Map<String, Set<_InspectorReferenceData>> _groups = <String, Set<_InspectorReferenceData>>{};
-  final Map<String, _InspectorReferenceData> _idToReferenceData = <String, _InspectorReferenceData>{};
-  final Map<Object, String> _objectToId = Map<Object, String>.identity();
+  final Map<String, Set<InspectorReferenceData>> _groups = <String, Set<InspectorReferenceData>>{};
+  final Map<String, InspectorReferenceData> _idToReferenceData = <String, InspectorReferenceData>{};
+  final WeakMap<Object, String> _objectToId = WeakMap<Object, String>();
   int _nextId = 0;
 
   /// The pubRootDirectories that are currently configured for the widget inspector.
@@ -1270,20 +1298,22 @@ mixin WidgetInspectorService {
   /// references from a different group.
   @protected
   void disposeGroup(String name) {
-    final Set<_InspectorReferenceData>? references = _groups.remove(name);
+    final Set<InspectorReferenceData>? references = _groups.remove(name);
     if (references == null) {
       return;
     }
     references.forEach(_decrementReferenceCount);
   }
 
-  void _decrementReferenceCount(_InspectorReferenceData reference) {
+  void _decrementReferenceCount(InspectorReferenceData reference) {
     reference.count -= 1;
     assert(reference.count >= 0);
     if (reference.count == 0) {
-      final String? id = _objectToId.remove(reference.object);
-      assert(id != null);
-      _idToReferenceData.remove(id);
+      final Object? value = reference.value;
+      if (value != null) {
+          _objectToId.remove(value);
+      }
+      _idToReferenceData.remove(reference.id);
     }
   }
 
@@ -1295,14 +1325,16 @@ mixin WidgetInspectorService {
       return null;
     }
 
-    final Set<_InspectorReferenceData> group = _groups.putIfAbsent(groupName, () => Set<_InspectorReferenceData>.identity());
+    final Set<InspectorReferenceData> group = _groups.putIfAbsent(groupName, () => Set<InspectorReferenceData>.identity());
     String? id = _objectToId[object];
-    _InspectorReferenceData referenceData;
+    InspectorReferenceData referenceData;
     if (id == null) {
+      // TODO(polina-c): comment here why we increase memory footprint by the prefix 'inspector-'.
+      // https://github.com/flutter/devtools/issues/5995
       id = 'inspector-$_nextId';
       _nextId += 1;
       _objectToId[object] = id;
-      referenceData = _InspectorReferenceData(object);
+      referenceData = InspectorReferenceData(object, id);
       _idToReferenceData[id] = referenceData;
       group.add(referenceData);
     } else {
@@ -1332,11 +1364,11 @@ mixin WidgetInspectorService {
       return null;
     }
 
-    final _InspectorReferenceData? data = _idToReferenceData[id];
+    final InspectorReferenceData? data = _idToReferenceData[id];
     if (data == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist.')]);
     }
-    return data.object;
+    return data.value;
   }
 
   /// Returns the object to introspect to determine the source location of an
@@ -1368,7 +1400,7 @@ mixin WidgetInspectorService {
       return;
     }
 
-    final _InspectorReferenceData? referenceData = _idToReferenceData[id];
+    final InspectorReferenceData? referenceData = _idToReferenceData[id];
     if (referenceData == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist')]);
     }
@@ -3731,3 +3763,54 @@ class _WidgetFactory {
 // recognize the annotation.
 // ignore: library_private_types_in_public_api
 const _WidgetFactory widgetFactory = _WidgetFactory();
+
+/// Does not hold keys from garbage collection.
+@visibleForTesting
+class WeakMap<K, V> {
+  Expando<Object> _objects = Expando<Object>();
+
+  /// Strings, numbers, booleans.
+  final Map<K, V> _primitives = <K, V>{};
+
+  bool _isPrimitive(Object? key) {
+    return key == null || key is String || key is num || key is bool;
+  }
+
+  /// Returns the value for the given [key] or null if [key] is not in the map
+  /// or garbage collected.
+  ///
+  /// Does not support records to act as keys.
+  V? operator [](K key){
+    if (_isPrimitive(key)) {
+      return _primitives[key];
+    } else {
+      return _objects[key!] as V?;
+    }
+  }
+
+  /// Associates the [key] with the given [value].
+  void operator []=(K key, V value){
+    if (_isPrimitive(key)) {
+      _primitives[key] = value;
+    } else {
+      _objects[key!] = value;
+    }
+  }
+
+  /// Removes the value for the given [key] from the map.
+  V? remove(K key) {
+    if (_isPrimitive(key)) {
+      return _primitives.remove(key);
+    } else {
+      final V? result = _objects[key!]  as V?;
+      _objects[key] = null;
+      return result;
+    }
+  }
+
+  /// Removes all pairs from the map.
+  void clear() {
+    _objects = Expando<Object>();
+    _primitives.clear();
+  }
+}
