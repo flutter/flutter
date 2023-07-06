@@ -1204,7 +1204,7 @@ class FakeSimControl extends Fake implements SimControl {
 
   @override
   Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String>? launchArgs ]) async {
-    requests.add(LaunchRequest(deviceId, appIdentifier, launchArgs));
+    requests.add(LaunchRequest(appIdentifier, launchArgs));
     return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
   }
 
@@ -1215,9 +1215,8 @@ class FakeSimControl extends Fake implements SimControl {
 }
 
 class LaunchRequest {
-  const LaunchRequest(this.deviceId, this.appIdentifier, this.launchArgs);
+  const LaunchRequest(this.appIdentifier, this.launchArgs);
 
-  final String deviceId;
   final String appIdentifier;
   final List<String>? launchArgs;
 }
