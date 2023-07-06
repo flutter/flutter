@@ -240,7 +240,41 @@ extension TextFromString on String {
   }
 }
 
+final List<Object> _weakValueTests = <Object>[1, 1.0, 'hello', true, false, Object(), <int>[3, 4], DateTime(2023)];
+
 void main() {
+  group('$InspectorReferenceData', (){
+    for (final Object item in _weakValueTests) {
+      test('can be created for any type but $Record, $item', () async {
+        final InspectorReferenceData weakValue = InspectorReferenceData(item, 'id');
+        expect(weakValue.value, item);
+      });
+    }
+
+    test('throws for $Record', () async {
+      expect(()=> InspectorReferenceData((1, 2), 'id'), throwsA(isA<ArgumentError>()));
+    });
+  });
+
+  group('$WeakMap', (){
+    for (final Object item in _weakValueTests) {
+      test('assigns and removes value, $item', () async {
+        final WeakMap<Object, Object> weakMap = WeakMap<Object, Object>();
+        weakMap[item] = 1;
+        expect(weakMap[item], 1);
+        expect(weakMap.remove(item), 1);
+        expect(weakMap[item], null);
+      });
+    }
+
+    for (final Object item in _weakValueTests) {
+      test('returns null for absent value, $item', () async {
+        final WeakMap<Object, Object> weakMap = WeakMap<Object, Object>();
+        expect(weakMap[item], null);
+      });
+    }
+  });
+
   _TestWidgetInspectorService.runTests();
 }
 
@@ -2184,7 +2218,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final List<DiagnosticsNode> expectedProperties = element.toDiagnosticsNode().getProperties();
         final Iterable<Object?> propertyValues = expectedProperties.map((DiagnosticsNode e) => e.value.toString());
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
-          final  String property = service.toObject(propertyJson['valueId']! as String)!.toString();
+          final String id = propertyJson['valueId']! as String;
+          final  String property = service.toObject(id)!.toString();
           expect(propertyValues, contains(property));
         }
       }
@@ -2227,7 +2262,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final List<DiagnosticsNode> expectedProperties = element.toDiagnosticsNode().getProperties();
         final Iterable<Object?> propertyValues = expectedProperties.map((DiagnosticsNode e) => e.value.toString());
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
-          final String property = service.toObject(propertyJson['valueId']! as String)!.toString();
+          final String id = propertyJson['valueId']! as String;
+          final String property = service.toObject(id)!.toString();
           expect(propertyValues, contains(property));
         }
       }
@@ -2283,7 +2319,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree', (WidgetTester tester) async {
       const String group = 'test-group';
-
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -2296,6 +2331,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         ),
       );
+
       final Element elementA = find.text('a').evaluate().first;
 
       service.disposeAllGroups();
@@ -2311,6 +2347,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
         <String, String>{'objectGroup': group},
       ))! as Map<String, Object?>;
+
       // We haven't yet properly specified which directories are summary tree
       // directories so we get an empty tree other than the root that is always
       // included.

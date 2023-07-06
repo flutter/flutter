@@ -3292,6 +3292,8 @@ mixin Diagnosticable {
   /// {@end-tool}
   ///
   /// Used by [toDiagnosticsNode] and [toString].
+  ///
+  /// Do not add values, that have lifetime shorter than the object.
   @protected
   @mustCallSuper
   void debugFillProperties(DiagnosticPropertiesBuilder properties) { }

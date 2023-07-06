@@ -1592,13 +1592,13 @@ void main() {
       builder.properties.any((DiagnosticsNode property) => property.name == 'dependencies' && property.value != null),
       isTrue,
     );
-    final DiagnosticsProperty<List<DiagnosticsNode>> dependenciesProperty =
-        builder.properties.firstWhere((DiagnosticsNode property) => property.name == 'dependencies') as DiagnosticsProperty<List<DiagnosticsNode>>;
+    final DiagnosticsProperty<Set<InheritedElement>> dependenciesProperty =
+        builder.properties.firstWhere((DiagnosticsNode property) => property.name == 'dependencies') as DiagnosticsProperty<Set<InheritedElement>>;
     expect(dependenciesProperty, isNotNull);
 
-    final List<DiagnosticsNode> dependencies = dependenciesProperty.value!;
+    final Set<InheritedElement> dependencies = dependenciesProperty.value!;
     expect(dependencies.length, equals(3));
-    expect(dependencies.toString(), '[ButtonBarTheme, Directionality, FocusTraversalOrder]');
+    expect(dependenciesProperty.toDescription(), '[ButtonBarTheme, Directionality, FocusTraversalOrder]');
   });
 
   testWidgets('BuildOwner.globalKeyCount keeps track of in-use global keys', (WidgetTester tester) async {
