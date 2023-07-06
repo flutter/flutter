@@ -75,9 +75,21 @@ LogMessage::LogMessage(LogSeverity severity,
 // static
 thread_local std::ostringstream* LogMessage::capture_next_log_stream_ = nullptr;
 
-void CaptureNextLog(std::ostringstream* stream) {
-  LogMessage::CaptureNextLog(stream);
+namespace testing {
+
+LogCapture::LogCapture() {
+  fml::LogMessage::CaptureNextLog(&stream_);
 }
+
+LogCapture::~LogCapture() {
+  fml::LogMessage::CaptureNextLog(nullptr);
+}
+
+std::string LogCapture::str() const {
+  return stream_.str();
+}
+
+}  // namespace testing
 
 // static
 void LogMessage::CaptureNextLog(std::ostringstream* stream) {
