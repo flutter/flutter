@@ -310,19 +310,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get registerTestTextInput => true;
 
-  /// This method has no effect.
-  ///
-  /// This method was previously used to change the timeout of the test. However,
-  /// in practice having short timeouts was found to be nothing but trouble,
-  /// primarily being a cause flakes rather than helping debug tests.
-  ///
-  /// For this reason, this method has been deprecated.
-  @Deprecated(
-    'This method has no effect. '
-    'This feature was deprecated after v2.6.0-1.0.pre.'
-  )
-  void addTime(Duration duration) { }
-
   /// Delay for `duration` of time.
   ///
   /// In the automated test environment ([AutomatedTestWidgetsFlutterBinding],
@@ -465,17 +452,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// are required to wait for the returned future to complete before calling
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
-  ///
-  /// The `additionalTime` argument was previously used with
-  /// [AutomatedTestWidgetsFlutterBinding.addTime] but now has no effect.
-  Future<T?> runAsync<T>(
-    Future<T> Function() callback, {
-    @Deprecated(
-      'This parameter has no effect. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration additionalTime = const Duration(milliseconds: 1000),
-  });
+  Future<T?> runAsync<T>(Future<T> Function() callback);
 
   /// Artificially calls dispatchLocalesChanged on the Widget binding,
   /// then flushes microtasks.
@@ -779,11 +756,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
-    @Deprecated(
-      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration? timeout,
   });
 
   /// This is called during test execution before and after the body has been
@@ -1253,7 +1225,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       }
       _phase = newPhase;
       if (hasScheduledFrame) {
-        addTime(const Duration(milliseconds: 500));
         _currentFakeAsync!.flushMicrotasks();
         handleBeginFrame(Duration(
           milliseconds: _clock!.now().millisecondsSinceEpoch,
@@ -1267,10 +1238,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<T?> runAsync<T>(
-    Future<T> Function() callback, {
-    Duration additionalTime = const Duration(milliseconds: 1000),
-  }) {
+  Future<T?> runAsync<T>(Future<T> Function() callback) {
     assert(() {
       if (_pendingAsyncTasks == null) {
         return true;
@@ -1296,8 +1264,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         },
       ),
     );
-
-    addTime(additionalTime);
 
     return realAsyncZone.run<Future<T?>>(() {
       final Completer<T?> result = Completer<T?>();
@@ -1452,11 +1418,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
-    @Deprecated(
-      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration? timeout,
   }) {
     assert(!inTest);
     assert(_currentFakeAsync == null);
@@ -1961,10 +1922,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<T?> runAsync<T>(
-    Future<T> Function() callback, {
-    Duration additionalTime = const Duration(milliseconds: 1000),
-  }) async {
+  Future<T?> runAsync<T>(Future<T> Function() callback) async {
     assert(() {
       if (!_runningAsyncTasks) {
         return true;
@@ -1998,11 +1956,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
-    @Deprecated(
-      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration? timeout,
   }) {
     assert(!inTest);
     _inTest = true;
