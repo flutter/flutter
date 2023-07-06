@@ -2471,52 +2471,49 @@ void main() {
   });
 
   testWidgets('Multiple selectables on a single line should be in screen order', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/127942.
-      final UniqueKey outerText = UniqueKey();
-      const TextStyle textStyle = TextStyle(fontSize: 10);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            focusNode: FocusNode(),
-            selectionControls: materialTextSelectionControls,
-            child: Scaffold(
-              body: Center(
-                child: Text.rich(
-                  const TextSpan(
-                    children: <InlineSpan>[
-                      TextSpan(text: 'Hello my name is ', style: textStyle),
-                      WidgetSpan(
-                        child: Text('Dash', style: textStyle),
-                        alignment: PlaceholderAlignment.aboveBaseline,
-                        baseline: TextBaseline.ideographic,
-                      ),
-                      TextSpan(text: '.', style: textStyle),
-                    ],
-                  ),
-                  key: outerText,
+    // Regression test for https://github.com/flutter/flutter/issues/127942.
+    final UniqueKey outerText = UniqueKey();
+    const TextStyle textStyle = TextStyle(fontSize: 10);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionControls,
+          child: Scaffold(
+            body: Center(
+              child: Text.rich(
+                const TextSpan(
+                  children: <InlineSpan>[
+                    TextSpan(text: 'Hello my name is ', style: textStyle),
+                    WidgetSpan(
+                      child: Text('Dash', style: textStyle),
+                      alignment: PlaceholderAlignment.middle,
+                    ),
+                    TextSpan(text: '.', style: textStyle),
+                  ],
                 ),
+                key: outerText,
               ),
             ),
           ),
         ),
-      );
-      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
-      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 0), kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
-      await tester.pump();
-      await gesture.up();
+      ),
+    );
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 0), kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
 
-      // Select all.
-      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyA, control: true));
+    // Select all.
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyA, control: true));
 
-      // keyboard copy.
-      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
+    // keyboard copy.
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
-      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'Hello my name is Dash.');
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
-  );
+    final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+    expect(clipboardData['text'], 'Hello my name is Dash.');
+  });
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
