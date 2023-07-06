@@ -333,12 +333,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   return _shell->GetTaskRunners().GetPlatformTaskRunner();
 }
 
-- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner {
-  FML_DCHECK(_shell);
-  return _shell->GetTaskRunners().GetUITaskRunner();
-}
-
-- (fml::RefPtr<fml::TaskRunner>)rasterTaskRunner {
+- (fml::RefPtr<fml::TaskRunner>)RasterTaskRunner {
   FML_DCHECK(_shell);
   return _shell->GetTaskRunners().GetRasterTaskRunner();
 }

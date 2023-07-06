@@ -33,8 +33,6 @@ typedef NS_ENUM(NSInteger, FlutterKeyboardMode) {
   FlutterKeyboardModeFloating = 2,
 };
 
-typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
-
 @interface FlutterViewController () <FlutterViewResponder>
 
 @property(class, nonatomic, readonly) BOOL accessibilityIsOnOffSwitchLabelsEnabled;
