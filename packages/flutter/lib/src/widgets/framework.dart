@@ -6149,7 +6149,7 @@ abstract class RenderObjectElement extends Element {
       // In debug mode we check whether the ancestor accepts RenderObjects to
       // produce a better error message in attachRenderObject. In release mode,
       // we assume only correct trees are built (i.e.
-      // debugAcceptsRenderObjectForSlot always returns true) and don't check
+      // debugMustInsertRenderObjectIntoSlot always returns true) and don't check
       // explicitly.
       assert(() {
         if (!ancestor!.debugMustInsertRenderObjectIntoSlot(slot)) {
