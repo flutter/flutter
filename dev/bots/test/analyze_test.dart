@@ -216,13 +216,13 @@ void main() {
       <ResolvedUnitVerifier>[verifyNoDoubleClamp],
     ), shouldHaveErrors: true);
     final String lines = <String>[
-        '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:35: input.clamp(0.0, 2)',
-        '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:36: input.toDouble().clamp(0, 2)',
-        '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:40: nullableInt?.clamp(0, 2.0)',
-        '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:41: nullableDouble?.clamp(0, 2)',
-        '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:44: nullableInt?.clamp',
-        '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:45: nullableDouble?.clamp',
-        '║',
+        '║ packages/flutter/lib/bar.dart:35: input.clamp(0.0, 2)',
+        '║ packages/flutter/lib/bar.dart:36: input.toDouble().clamp(0, 2)',
+        '║ packages/flutter/lib/bar.dart:40: nullableInt?.clamp(0, 2.0)',
+        '║ packages/flutter/lib/bar.dart:41: nullableDouble?.clamp(0, 2)',
+        '║ packages/flutter/lib/bar.dart:44: nullableInt?.clamp',
+        '║ packages/flutter/lib/bar.dart:45: nullableDouble?.clamp',
+        '║ ',
         '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".',
         '║ For non-double uses of "clamp", use "// ignore_clamp_double_lint" on the line to silence this message.',
       ]
@@ -244,12 +244,12 @@ void main() {
     final String badAnnotations = <String>[
       '║ Overriding a framework class member that was not annotated with @_debugAssert and marking the override @_debugAssert is not allowed.',
       '║ A framework method/getter/setter not marked as debug-only itself cannot have a debug-only override.',
-      '║',
+      '║ ',
       '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.value is not annotated wtih @_debugAssert, but its override MixinOnBaseClass.value is.',
       '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.~ is not annotated wtih @_debugAssert, but its override MixinOnBaseClass.~ is.',
       '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.run is not annotated wtih @_debugAssert, but its override ClassWithBadAnnotation1.run is.',
       '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.run is not annotated wtih @_debugAssert, but its override ClassWithBadAnnotation2.run is.',
-      '║',
+      '║ ',
       '║ Consider either removing the @_debugAssert annotation, or adding the annotation to the class member that is being overridden instead.',
     ]
     .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))

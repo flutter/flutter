@@ -274,16 +274,18 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     }
 
     switch (element) {
-      // The easier cases: things that a subclass does not inherit from its
-      // superclass: named constructors, static members, extension members.
+      // The easier cases: non-overridable class members: named constructors,
+      // static members, extension members.
       case ConstructorElement(isDefaultConstructor: false, :final Element enclosingElement)
         || ExecutableElement(isStatic: true, :final Element enclosingElement)
         || ClassMemberElement(enclosingElement: ExtensionElement() && final Element enclosingElement):
         return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement) || enclosingElement.metadata.any(_isDebugAssertAnnotationElement);
+      // Default constructors. They're overridable but they're static in nature
+      // so there won't be any "bad annotations" (see the next case).
       case ConstructorElement(isDefaultConstructor: true):
         return _defaultConstructorHasDebugAnnotation(element);
-      // Non-static class memebers that are overridable. Also we want to detect
-      // and warn against "bad annotations":
+      // Non-static, overridable class memebers. Call to these members can be
+      // polymorphic so we want to detect and warn against "bad annotations":
       // class A {
       //   int get a;
       //   int get b => a;
@@ -295,9 +297,9 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
       case ExecutableElement(:final InterfaceElement enclosingElement):
         assert(!element.isStatic);
         return _overriddableClassMemberHasDebugAnnotation(element, enclosingElement);
-      // Non class members.
+      // Non class members and fields (which we assume isn't overridable).
       case FieldElement() || ExecutableElement():
-        assert(element.enclosingElement is! InterfaceElement);
+        assert(element is FieldElement || element.enclosingElement is! InterfaceElement);
         return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement);
       default:
         return false;
