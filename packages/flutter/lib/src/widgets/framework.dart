@@ -6750,7 +6750,7 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
           ErrorHint(
             'Try moving the subtree that contains the ${toStringShort()} widget into the '
             'view property of a ViewAnchor widget or to the root of the widget tree, where '
-            'it is not expected to attach its RenderObject to its ancestor.',
+            'it is not expected to attach its RenderObject to a parent.',
           ),
         ],
       );
