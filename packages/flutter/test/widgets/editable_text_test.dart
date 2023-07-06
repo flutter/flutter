@@ -5042,7 +5042,7 @@ void main() {
     expect(onChangedCount , 2);
     expect(controller.value.isComposingRangeValid , true);
 
-    // Simulate selecting the item that show 'and' on accessory view. 
+    // Simulate selecting the item that show 'and' on accessory view.
     state.updateEditingValue(
       const TextEditingValue(text: 'and'),
     );
