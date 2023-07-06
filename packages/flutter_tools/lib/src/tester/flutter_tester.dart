@@ -44,7 +44,7 @@ class FlutterTesterApp extends ApplicationPackage {
 /// also be used as a regular device when `--show-test-device` is provided
 /// to the flutter command.
 class FlutterTesterDevice extends Device {
-  FlutterTesterDevice(super.deviceId, {
+  FlutterTesterDevice(super.id, {
     required ProcessManager processManager,
     required FlutterVersion flutterVersion,
     required Logger logger,

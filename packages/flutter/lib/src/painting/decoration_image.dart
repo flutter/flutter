@@ -613,7 +613,7 @@ void paintImage({
         developer.postEvent(
           'Flutter.ImageSizesForFrame',
           <String, Object>{
-            for (ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
+            for (final ImageSizeInfo imageSizeInfo in _pendingImageSizeInfo.values)
               imageSizeInfo.source!: imageSizeInfo.toJson(),
           },
         );

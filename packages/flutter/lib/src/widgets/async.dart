@@ -40,7 +40,7 @@ import 'framework.dart';
 ///    recent interaction is needed for widget building.
 abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   /// Creates a [StreamBuilderBase] connected to the specified [stream].
-  const StreamBuilderBase({ super.key, this.stream });
+  const StreamBuilderBase({ super.key, required this.stream });
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null. When changed, the current summary is updated using
@@ -391,7 +391,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   const StreamBuilder({
     super.key,
     this.initialData,
-    super.stream,
+    required super.stream,
     required this.builder,
   });
 
@@ -521,7 +521,7 @@ class FutureBuilder<T> extends StatefulWidget {
   /// The [builder] must not be null.
   const FutureBuilder({
     super.key,
-    this.future,
+    required this.future,
     this.initialData,
     required this.builder,
   });

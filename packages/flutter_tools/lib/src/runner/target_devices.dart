@@ -29,6 +29,8 @@ String _foundSpecifiedDevicesMessage(int count, String deviceId) =>
     'Found $count devices with name or id matching $deviceId:';
 String _noMatchingDeviceMessage(String deviceId) => 'No supported devices found with name or id '
     "matching '$deviceId'.";
+String flutterSpecifiedDeviceDevModeDisabled(String deviceName) => 'To use '
+    "'$deviceName' for development, enable Developer Mode in Settings → Privacy & Security.";
 
 /// This class handles functionality of finding and selecting target devices.
 ///
@@ -486,17 +488,38 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       // If there are multiple matches, continue on to wait for all attached
       // and wireless devices to load so the user can select between all
       // connected matches.
-      final List<Device> devices = await _getDeviceById(
+      final List<Device> specifiedDevices = await _getDeviceById(
         includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
         includeDisconnected: true,
       );
-      if (devices.length == 1) {
-        Device? matchedDevice = devices.first;
+
+      if (specifiedDevices.length == 1) {
+        Device? matchedDevice = specifiedDevices.first;
+        // If the only matching device does not have Developer Mode enabled,
+        // print a warning
+        if (matchedDevice is IOSDevice && !matchedDevice.devModeEnabled) {
+          _logger.printStatus(
+              flutterSpecifiedDeviceDevModeDisabled(matchedDevice.name)
+          );
+          return null;
+        }
+
         if (!matchedDevice.isConnected && matchedDevice is IOSDevice) {
           matchedDevice = await _waitForIOSDeviceToConnect(matchedDevice);
         }
+
         if (matchedDevice != null && matchedDevice.isConnected) {
           return <Device>[matchedDevice];
+        }
+
+      } else {
+        for (final Device device in specifiedDevices) {
+          // Print warning for every matching device that does not have Developer Mode enabled.
+          if (device is IOSDevice && !device.devModeEnabled) {
+            _logger.printStatus(
+                flutterSpecifiedDeviceDevModeDisabled(device.name)
+            );
+          }
         }
       }
     }
@@ -751,7 +774,7 @@ class TargetDeviceSelection {
         throwToolExit('');
       }
       final int deviceIndex = int.parse(userInputString) - 1;
-      if (deviceIndex < devices.length) {
+      if (deviceIndex > -1 && deviceIndex < devices.length) {
         chosenDevice = devices[deviceIndex];
       }
     }

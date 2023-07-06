@@ -11,10 +11,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
-
-// The test_api package is not for general use... it's literally for our use.
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/scaffolding.dart' as test_package;
 
 import 'all_elements.dart';
 import 'binding.dart';
@@ -50,7 +47,20 @@ export 'package:matcher/expect.dart' hide expect, isInstanceOf;
 // that doesn't apply here.
 export 'package:test_api/hooks.dart' show TestFailure;
 export 'package:test_api/scaffolding.dart'
-    hide group, setUp, setUpAll, tearDown, tearDownAll, test;
+    show
+        OnPlatform,
+        Retry,
+        Skip,
+        Tags,
+        TestOn,
+        Timeout,
+        addTearDown,
+        markTestSkipped,
+        printOnFailure,
+        pumpEventQueue,
+        registerException,
+        spawnHybridCode,
+        spawnHybridUri;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
@@ -83,9 +93,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// `test` package. If set, it should be relatively large (minutes). It defaults
 /// to ten minutes for tests run by `flutter test`, and is unlimited for tests
 /// run by `flutter run`; specifically, it defaults to
-/// [TestWidgetsFlutterBinding.defaultTestTimeout]. (The `initialTimeout`
-/// parameter has no effect. It was previously used with
-/// [TestWidgetsFlutterBinding.addTime] but that feature was removed.)
+/// [TestWidgetsFlutterBinding.defaultTestTimeout].
 ///
 /// If the `semanticsEnabled` parameter is set to `true`,
 /// [WidgetTester.ensureSemantics] will have been called before the tester is
@@ -105,11 +113,6 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
-/// See also:
-///
-///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
-///    timeout and how to manually increase timeouts.
-///
 /// ## Sample code
 ///
 /// ```dart
@@ -125,14 +128,10 @@ void testWidgets(
   WidgetTesterCallback callback, {
   bool? skip,
   test_package.Timeout? timeout,
-  @Deprecated(
-    'This parameter has no effect. Use `timeout` instead. '
-    'This feature was deprecated after v2.6.0-1.0.pre.'
-  )
-  Duration? initialTimeout,
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
+  int? retry,
 }) {
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -152,7 +151,7 @@ void testWidgets(
         tester._testDescription = combinedDescription;
         SemanticsHandle? semanticsHandle;
         tester._recordNumberOfSemanticsHandles();
-        if (semanticsEnabled == true) {
+        if (semanticsEnabled) {
           semanticsHandle = tester.ensureSemantics();
         }
         test_package.addTearDown(binding.postTest);
@@ -171,12 +170,12 @@ void testWidgets(
           },
           tester._endOfTestVerifications,
           description: combinedDescription,
-          timeout: initialTimeout,
         );
       },
       skip: skip,
       timeout: timeout ?? binding.defaultTestTimeout,
       tags: tags,
+      retry: retry,
     );
   }
 }
@@ -423,7 +422,7 @@ Future<void> benchmarkWidgets(
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
   SemanticsHandle? semanticsHandle;
-  if (semanticsEnabled == true) {
+  if (semanticsEnabled) {
     semanticsHandle = tester.ensureSemantics();
   }
   tester._recordNumberOfSemanticsHandles();
@@ -686,7 +685,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final WidgetsBinding binding = this.binding;
       if (binding is LiveTestWidgetsFlutterBinding &&
           binding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
-        test_package.fail(
+        matcher_expect.fail(
           'When using LiveTestWidgetsFlutterBindingFramePolicy.benchmark, '
           'hasScheduledFrame is never set to true. This means that pumpAndSettle() '
           'cannot be used, because it has no way to know if the application has '
@@ -814,8 +813,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///   your widget tree, then await that future inside [callback].
   Future<T?> runAsync<T>(
     Future<T> Function() callback, {
+    @Deprecated(
+      'This is no longer supported and has no effect. '
+      'This feature was deprecated after v3.12.0-1.1.pre.'
+    )
     Duration additionalTime = const Duration(milliseconds: 1000),
-  }) => binding.runAsync<T?>(callback, additionalTime: additionalTime);
+  }) => binding.runAsync<T?>(callback);
 
   /// Whether there are any transient callbacks scheduled.
   ///
@@ -835,7 +838,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   HitTestResult hitTestOnBinding(Offset location) {
-    location = binding.localToGlobal(location);
+    location = binding.localToGlobal(location, binding.renderView);
     return super.hitTestOnBinding(location);
   }
 

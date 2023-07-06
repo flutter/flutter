@@ -5,6 +5,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -79,7 +81,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('AnimationController with throwing listener', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimationController with throwing listener', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -102,7 +104,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('AnimationController with throwing status listener', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimationController with throwing status listener', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),

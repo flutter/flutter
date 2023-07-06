@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show AccessibilityFeatures, Brightness, Locale, PlatformDispatcher;
+import 'dart:ui' show AccessibilityFeatures, Brightness, Display, FlutterView, Locale, PlatformDispatcher, VoidCallback;
 
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
 import 'package:flutter_test/flutter_test.dart';
@@ -152,6 +152,106 @@ void main() {
     expect(observer.locales, equals(expectedValue));
     retrieveTestBinding(tester).platformDispatcher.localesTestValue = defaultLocales;
   });
+
+  testWidgets('TestPlatformDispatcher.view getter returns the implicit view', (WidgetTester tester) async {
+    expect(WidgetsBinding.instance.platformDispatcher.view(id: tester.view.viewId), same(tester.view));
+  });
+
+  // TODO(pdblasi-google): Removed this group of tests when the Display API is stable and supported on all platforms.
+  group('TestPlatformDispatcher with unsupported Display API', () {
+    testWidgets('can initialize with empty displays', (WidgetTester tester) async {
+      expect(() {
+        TestPlatformDispatcher(
+          platformDispatcher: _FakePlatformDispatcher(
+            displays: <Display>[],
+            views: <FlutterView>[
+              _FakeFlutterView(),
+            ],
+          )
+        );
+      }, isNot(throwsA(anything)));
+    });
+
+    testWidgets('can initialize with mismatched displays', (WidgetTester tester) async {
+      expect(() {
+        TestPlatformDispatcher(
+          platformDispatcher: _FakePlatformDispatcher(
+            displays: <Display>[
+              _FakeDisplay(id: 2),
+            ],
+            views: <FlutterView>[
+              _FakeFlutterView(display: _FakeDisplay(id: 1)),
+            ],
+          )
+        );
+      }, isNot(throwsA(anything)));
+    });
+
+    testWidgets('creates test views for all views', (WidgetTester tester) async {
+      final PlatformDispatcher backingDispatcher = _FakePlatformDispatcher(
+        displays: <Display>[],
+        views: <FlutterView>[
+          _FakeFlutterView(),
+        ],
+      );
+      final TestPlatformDispatcher testDispatcher = TestPlatformDispatcher(
+        platformDispatcher: backingDispatcher,
+      );
+
+      expect(testDispatcher.views.length, backingDispatcher.views.length);
+    });
+
+    group('creates TestFlutterViews', () {
+      testWidgets('that defaults to the correct devicePixelRatio', (WidgetTester tester) async {
+        const double expectedDpr = 2.5;
+        final TestPlatformDispatcher testDispatcher =  TestPlatformDispatcher(
+          platformDispatcher: _FakePlatformDispatcher(
+            displays: <Display>[],
+            views: <FlutterView>[
+              _FakeFlutterView(devicePixelRatio: expectedDpr),
+            ],
+          )
+        );
+
+        expect(testDispatcher.views.single.devicePixelRatio, expectedDpr);
+      });
+
+      testWidgets('with working devicePixelRatio setter', (WidgetTester tester) async {
+        const double expectedDpr = 2.5;
+        const double defaultDpr = 4;
+        final TestPlatformDispatcher testDispatcher =  TestPlatformDispatcher(
+          platformDispatcher: _FakePlatformDispatcher(
+            displays: <Display>[],
+            views: <FlutterView>[
+              _FakeFlutterView(devicePixelRatio: defaultDpr),
+            ],
+          )
+        );
+
+        testDispatcher.views.single.devicePixelRatio = expectedDpr;
+
+        expect(testDispatcher.views.single.devicePixelRatio, expectedDpr);
+      });
+
+      testWidgets('with working resetDevicePixelRatio', (WidgetTester tester) async {
+        const double changedDpr = 2.5;
+        const double defaultDpr = 4;
+        final TestPlatformDispatcher testDispatcher =  TestPlatformDispatcher(
+          platformDispatcher: _FakePlatformDispatcher(
+            displays: <Display>[],
+            views: <FlutterView>[
+              _FakeFlutterView(devicePixelRatio: defaultDpr),
+            ],
+          )
+        );
+
+        testDispatcher.views.single.devicePixelRatio = changedDpr;
+        testDispatcher.views.single.resetDevicePixelRatio();
+
+        expect(testDispatcher.views.single.devicePixelRatio, defaultDpr);
+      });
+    });
+  });
 }
 
 class TestObserver with WidgetsBindingObserver {
@@ -161,4 +261,46 @@ class TestObserver with WidgetsBindingObserver {
   void didChangeLocales(List<Locale>? locales) {
     this.locales = locales;
   }
+}
+
+class _FakeDisplay extends Fake implements Display {
+  _FakeDisplay({this.id = 0});
+
+  @override
+  final int id;
+}
+
+class _FakeFlutterView extends Fake implements FlutterView {
+  _FakeFlutterView({
+    this.devicePixelRatio = 1,
+    Display? display,
+  }) : _display = display;
+
+  @override
+  final double devicePixelRatio;
+
+  // This emulates the PlatformDispatcher not having a display on the engine
+  // side. We don't have access to the `_displayId` used in the engine to try
+  // to find it and can't directly extend `FlutterView` to emulate it closer.
+  @override
+  Display get display {
+    assert(_display != null);
+    return _display!;
+  }
+  final Display? _display;
+
+  @override
+  final int viewId = 1;
+}
+
+class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
+  _FakePlatformDispatcher({required this.displays, required this.views});
+  @override
+  final Iterable<Display> displays;
+
+  @override
+  final Iterable<FlutterView> views;
+
+  @override
+  VoidCallback? onMetricsChanged;
 }

@@ -685,13 +685,13 @@ platform :ios, '11.0'
 	objectVersion = 54;
 	objects = {
 			attributes = {
-				LastUpgradeCheck = 1300;
+				LastUpgradeCheck = 1430;
 				ORGANIZATIONNAME = "";
       ''';
         xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
 
         const String xcodeProjectSchemeFileContents = '''
-   LastUpgradeVersion = "1300"
+   LastUpgradeVersion = "1430"
 ''';
         xcodeProjectSchemeFile.writeAsStringSync(xcodeProjectSchemeFileContents);
 
@@ -739,13 +739,13 @@ platform :ios, '11.0'
 	objectVersion = 54;
 	objects = {
 			attributes = {
-				LastUpgradeCheck = 1300;
+				LastUpgradeCheck = 1430;
 				ORGANIZATIONNAME = "";
 ''');
 
         expect(xcodeProjectSchemeFile.readAsStringSync(), '''
 <Scheme
-   LastUpgradeVersion = "1300"
+   LastUpgradeVersion = "1430"
    version = "1.3">
 ''');
         // Only print once even though 3 lines were changed.

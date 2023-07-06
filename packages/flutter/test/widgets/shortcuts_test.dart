@@ -601,18 +601,12 @@ void main() {
     testWidgets('Shortcuts.manager lets manager handle shortcuts', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
-      bool shortcutsSet = false;
-      void onShortcutsSet() {
-        shortcutsSet = true;
-      }
       final TestShortcutManager testManager = TestShortcutManager(
         pressedKeys,
-        onShortcutsSet: onShortcutsSet,
         shortcuts: <LogicalKeySet, Intent>{
           LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
         },
       );
-      shortcutsSet = false;
       bool invoked = false;
       await tester.pumpWidget(
         Actions(
@@ -636,7 +630,6 @@ void main() {
       await tester.pump();
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, isTrue);
-      expect(shortcutsSet, isFalse);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
 
@@ -1909,8 +1902,6 @@ class TestAction extends CallbackAction<Intent> {
   TestAction({
     required super.onInvoke,
   });
-
-  static const LocalKey key = ValueKey<Type>(TestAction);
 }
 
 /// An activator that accepts down events that has [key] as the logical key.
@@ -1955,10 +1946,9 @@ class TestIntent2 extends Intent {
 }
 
 class TestShortcutManager extends ShortcutManager {
-  TestShortcutManager(this.keys, { super.shortcuts, this.onShortcutsSet });
+  TestShortcutManager(this.keys, { super.shortcuts });
 
   List<LogicalKeyboardKey> keys;
-  VoidCallback? onShortcutsSet;
 
   @override
   KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {

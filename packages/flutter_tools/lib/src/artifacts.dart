@@ -583,7 +583,7 @@ class CachedArtifacts implements Artifacts {
     final String root = _fileSystem.path.join(
       _cache.getArtifactDirectory('flutter_runner').path,
       'flutter',
-      fuchsiaArchForTargetPlatform(platform),
+      platform.fuchsiaArchForTargetPlatform,
       mode.isRelease ? 'release' : mode.toString(),
     );
     final String runtime = mode.isJit ? 'jit' : 'aot';
@@ -1108,7 +1108,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
           );
         case Artifact.wasmOptBinary:
           return _fileSystem.path.join(
-            _getDartSdkPath(), 'bin', 'snapshots',
+            _getDartSdkPath(), 'bin', 'utils',
             _artifactToFileName(artifact, _platform, mode),
           );
         case Artifact.genSnapshot:

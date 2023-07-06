@@ -24,7 +24,7 @@ Future<ui.Image> captureImage(Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent! as RenderObject;
+    renderObject = renderObject.parent!;
   }
   assert(!renderObject.debugNeedsPaint);
   final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
@@ -78,10 +78,13 @@ class MatchesGoldenFile extends AsyncMatcher {
       }
     }
     Future<ui.Image?> imageFuture;
+    final bool disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
     if (item is Future<ui.Image?>) {
       imageFuture = item;
+      disposeImage = false;
     } else if (item is ui.Image) {
       imageFuture = Future<ui.Image>.value(item);
+      disposeImage = false;
     } else if (item is Finder) {
       final Iterable<Element> elements = item.evaluate();
       if (elements.isEmpty) {
@@ -90,6 +93,7 @@ class MatchesGoldenFile extends AsyncMatcher {
         return 'matched too many widgets';
       }
       imageFuture = captureImage(elements.single);
+      disposeImage = true;
     } else {
       throw AssertionError('must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
     }
@@ -100,21 +104,27 @@ class MatchesGoldenFile extends AsyncMatcher {
       if (image == null) {
         throw AssertionError('Future<Image> completed to null');
       }
-      final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null) {
-        return 'could not encode screenshot.';
-      }
-      if (autoUpdateGoldenFiles) {
-        await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
-        return null;
-      }
       try {
-        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
-        return success ? null : 'does not match';
-      } on TestFailure catch (ex) {
-        return ex.message;
+        final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+        if (bytes == null) {
+          return 'could not encode screenshot.';
+        }
+        if (autoUpdateGoldenFiles) {
+          await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
+          return null;
+        }
+        try {
+          final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
+          return success ? null : 'does not match';
+        } on TestFailure catch (ex) {
+          return ex.message;
+        }
+      } finally {
+        if (disposeImage) {
+          image.dispose();
+        }
       }
-    }, additionalTime: const Duration(minutes: 1));
+    });
   }
 
   @override

@@ -47,7 +47,7 @@ void main() {
         'HasWebPlugins': 'false',
         'ServiceWorkerStrategy': ServiceWorkerStrategy.offlineFirst.cliName,
         'WasmOmitTypeChecks': 'false',
-        'RunWasmOpt': 'false',
+        'RunWasmOpt': 'none',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
@@ -73,24 +73,35 @@ void main() {
       ServiceWorkerStrategy.offlineFirst,
       compilerConfig: const WasmCompilerConfig(
         omitTypeChecks: false,
-        runWasmOpt: false
+        wasmOpt: WasmOptLevel.none,
       ),
     );
 
     expect(logger.statusText, contains('Compiling target for the Web...'));
     expect(logger.errorText, isEmpty);
     // Runs ScrubGeneratedPluginRegistrant migrator.
-    expect(logger.traceText, contains('generated_plugin_registrant.dart not found. Skipping.'));
+    expect(
+      logger.traceText,
+      contains('generated_plugin_registrant.dart not found. Skipping.'),
+    );
 
     // Sends build config event
-    expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
+    expect(
+      testUsage.events,
+      unorderedEquals(
+        <TestUsageEvent>[
       const TestUsageEvent(
         'build',
         'web',
         label: 'web-compile',
-        parameters: CustomDimensions(buildEventSettings: 'wasm-compile: true; web-renderer: auto;')
+            parameters: CustomDimensions(
+              buildEventSettings:
+                  'RunWasmOpt: none; WasmOmitTypeChecks: false; wasm-compile: true; web-renderer: auto;',
       ),
-    ]));
+          ),
+        ],
+      ),
+    );
 
     // Sends timing event.
     final TestTimingEvent timingEvent = testUsage.timings.single;

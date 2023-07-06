@@ -80,7 +80,7 @@ class PathBoundsMatcher extends Matcher {
     final List<dynamic> values = <dynamic> [bounds, bounds.top, bounds.left, bounds.right, bounds.bottom];
     final Map<Matcher, dynamic> failedMatcher = <Matcher, dynamic> {};
 
-    for(int idx = 0; idx < matchers.length; idx++) {
+    for (int idx = 0; idx < matchers.length; idx++) {
       if (!(matchers[idx]?.matches(values[idx], matchState) ?? true)) {
         failedMatcher[matchers[idx]!] = values[idx];
       }
@@ -1545,7 +1545,7 @@ void main() {
 
     Text text = tester.widget<Text>(find.text('Paste'));
     expect(text.style!.color!.value, CupertinoColors.black.value);
-    expect(text.style!.fontSize, 14);
+    expect(text.style!.fontSize, 15);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
 
@@ -1577,7 +1577,7 @@ void main() {
     text = tester.widget<Text>(find.text('Paste'));
     // The toolbar buttons' text are still the same style.
     expect(text.style!.color!.value, CupertinoColors.white.value);
-    expect(text.style!.fontSize, 14);
+    expect(text.style!.fontSize, 15);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
@@ -6537,7 +6537,7 @@ void main() {
             topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
             leftMatcher: moreOrLessEquals(8),
             rightMatcher: lessThanOrEqualTo(400 - 8),
-            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 45, epsilon: 0.01),
           ),
         ),
       );
@@ -6597,7 +6597,7 @@ void main() {
           pathMatcher: PathBoundsMatcher(
             topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
             rightMatcher: moreOrLessEquals(400.0 - 8),
-            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 45, epsilon: 0.01),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
         ),
@@ -6650,7 +6650,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
@@ -6719,7 +6719,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
@@ -6792,7 +6792,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
@@ -9512,5 +9512,50 @@ void main() {
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('text selection toolbar is hidden on tap down', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+
+    TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(tester, 8),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
+
+    gesture = await tester.startGesture(
+      textOffsetToPosition(tester, 2),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+
+    // After the gesture is down but not up, the toolbar is already gone.
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+  },
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
   );
 }

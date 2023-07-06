@@ -14,8 +14,6 @@ class TestIntent extends Intent {
 class TestAction extends Action<Intent> {
   TestAction();
 
-  static const LocalKey key = ValueKey<Type>(TestAction);
-
   int calls = 0;
 
   @override

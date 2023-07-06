@@ -12,6 +12,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -493,7 +494,7 @@ class XCDevice {
     //  },
     // ...
 
-    final List<IOSDevice> devices = <IOSDevice>[];
+    final Map<String, IOSDevice> deviceMap = <String, IOSDevice>{};
     for (final Object device in allAvailableDevices) {
       if (device is Map<String, Object?>) {
         // Only include iPhone, iPad, iPod, or other iOS devices.
@@ -505,7 +506,7 @@ class XCDevice {
         if (identifier == null || name == null) {
           continue;
         }
-
+        bool devModeEnabled = true;
         bool isConnected = true;
         final Map<String, Object?>? errorProperties = _errorProperties(device);
         if (errorProperties != null) {
@@ -525,34 +526,63 @@ class XCDevice {
           if (code != -10) {
             isConnected = false;
           }
-        }
 
-        String? sdkVersion = _sdkVersion(device);
-
-        if (sdkVersion != null) {
-          final String? buildVersion = _buildVersion(device);
-          if (buildVersion != null) {
-            sdkVersion = '$sdkVersion $buildVersion';
+          if (code == 6) {
+            devModeEnabled = false;
           }
         }
 
-        devices.add(IOSDevice(
+        String? sdkVersionString = _sdkVersion(device);
+
+        if (sdkVersionString != null) {
+          final String? buildVersion = _buildVersion(device);
+          if (buildVersion != null) {
+            sdkVersionString = '$sdkVersionString $buildVersion';
+          }
+        }
+
+        // Duplicate entries started appearing in Xcode 15, possibly due to
+        // Xcode's new device connectivity stack.
+        // If a duplicate entry is found in `xcdevice list`, don't overwrite
+        // existing entry when the existing entry indicates the device is
+        // connected and the current entry indicates the device is not connected.
+        // Don't overwrite if current entry's sdkVersion is null.
+        // Don't overwrite if both entries indicate the device is not
+        // connected and the existing entry has a higher sdkVersion.
+        if (deviceMap.containsKey(identifier)) {
+          final IOSDevice deviceInMap = deviceMap[identifier]!;
+          if ((deviceInMap.isConnected && !isConnected) || sdkVersionString == null) {
+            continue;
+          }
+
+          final Version? sdkVersion = Version.parse(sdkVersionString);
+          if (!deviceInMap.isConnected &&
+              !isConnected &&
+              sdkVersion != null &&
+              deviceInMap.sdkVersion != null &&
+              deviceInMap.sdkVersion!.compareTo(sdkVersion) > 0) {
+            continue;
+          }
+        }
+
+        deviceMap[identifier] = IOSDevice(
           identifier,
           name: name,
           cpuArchitecture: _cpuArchitecture(device),
           connectionInterface: _interfaceType(device),
           isConnected: isConnected,
-          sdkVersion: sdkVersion,
+          sdkVersion: sdkVersionString,
           iProxy: _iProxy,
           fileSystem: globals.fs,
           logger: _logger,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
           platform: globals.platform,
-        ));
+          devModeEnabled: devModeEnabled,
+        );
       }
     }
-    return devices;
+    return deviceMap.values.toList();
   }
 
   /// Despite the name, com.apple.platform.iphoneos includes iPhone, iPads, and all iOS devices.
@@ -632,7 +662,7 @@ class XCDevice {
         }
         _logger.printWarning(
           'Unknown architecture $architecture, defaulting to '
-          '${getNameForDarwinArch(cpuArchitecture)}',
+          '${cpuArchitecture.name}',
         );
       }
     }

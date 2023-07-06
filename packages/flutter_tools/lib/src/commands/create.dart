@@ -682,7 +682,7 @@ Your $application code is in $relativeAppMain.
 
   List<String> _getSupportedPlatformsFromTemplateContext(Map<String, Object?> templateContext) {
     return <String>[
-      for (String platform in kAllCreatePlatforms)
+      for (final String platform in kAllCreatePlatforms)
         if (templateContext[platform] == true) platform,
     ];
   }

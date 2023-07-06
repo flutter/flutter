@@ -69,11 +69,7 @@ abstract class AndroidAssetBundle extends Target {
       buildMode: buildMode,
       shaderTarget: ShaderTarget.impellerAndroid,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       assetDepfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
@@ -162,8 +158,7 @@ class AndroidAot extends AotElfBase {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getNameForAndroidArch(
-      getAndroidArchForName(getNameForTargetPlatform(targetPlatform)));
+    return getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
   }
 
   @override
@@ -264,11 +259,7 @@ class AndroidAot extends AotElfBase {
         outputs.add(environment.fileSystem.file(unit.path));
       }
     }
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       Depfile(<File>[], outputs),
       environment.buildDir.childFile('flutter_$name.d'),
       writeEmpty: true,
@@ -294,8 +285,7 @@ class AndroidAotBundle extends Target {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getNameForAndroidArch(
-      getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)));
+    return getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)).archName;
   }
 
   @override
@@ -351,11 +341,7 @@ class AndroidAotBundle extends Target {
       inputs.add(manifestFile);
       outputs.add(destinationFile);
     }
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       Depfile(inputs, outputs),
       environment.buildDir.childFile('flutter_$name.d'),
       writeEmpty: true,
@@ -385,8 +371,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getNameForAndroidArch(
-      getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)));
+    return getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)).archName;
   }
 
   @override
@@ -433,11 +418,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
       libDepfile.inputs.add(manifestFile);
     }
 
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       libDepfile,
       environment.buildDir.childFile('flutter_$name.d'),
       writeEmpty: true,

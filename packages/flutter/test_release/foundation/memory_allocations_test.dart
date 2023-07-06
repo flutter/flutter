@@ -57,12 +57,8 @@ Future<void> _activateFlutterObjects(WidgetTester tester) async {
   changeNotifier.dispose();
   picture.dispose();
 
-  // TODO(polina-c): Remove the condition after
-  // https://github.com/flutter/flutter/issues/110599 is fixed.
-  if (!kIsWeb) {
-    final Image image = await _createImage();
-    image.dispose();
-  }
+  final Image image = await _createImage();
+  image.dispose();
 }
 
 Future<Image> _createImage() async {

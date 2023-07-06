@@ -230,7 +230,7 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   }
 
   void setDevices(List<Device> devices) {
-    while(_devices.isNotEmpty) {
+    while (_devices.isNotEmpty) {
       _removeDevice(_devices.first);
     }
     devices.forEach(addDevice);

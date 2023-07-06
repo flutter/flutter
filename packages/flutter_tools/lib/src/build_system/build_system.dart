@@ -18,6 +18,7 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../reporting/reporting.dart';
+import 'depfile.dart';
 import 'exceptions.dart';
 import 'file_store.dart';
 import 'source.dart';
@@ -524,6 +525,11 @@ class Environment {
   /// When [true], the main entrypoint is wrapped and the wrapper becomes
   /// the new entrypoint.
   final bool generateDartPluginRegistry;
+
+  late final DepfileService depFileService = DepfileService(
+    logger: logger,
+    fileSystem: fileSystem,
+  );
 }
 
 /// The result information from the build system.
@@ -1154,18 +1160,13 @@ class InvalidatedReason {
 
   @override
   String toString() {
-    switch (kind) {
-      case InvalidatedReasonKind.inputMissing:
-        return 'The following inputs were missing: ${data.join(',')}';
-      case InvalidatedReasonKind.inputChanged:
-        return 'The following inputs have updated contents: ${data.join(',')}';
-      case InvalidatedReasonKind.outputChanged:
-        return 'The following outputs have updated contents: ${data.join(',')}';
-      case InvalidatedReasonKind.outputMissing:
-        return 'The following outputs were missing: ${data.join(',')}';
-      case InvalidatedReasonKind.outputSetChanged:
-        return 'The following outputs were removed from the output set: ${data.join(',')}';
-    }
+    return switch (kind) {
+      InvalidatedReasonKind.inputMissing => 'The following inputs were missing: ${data.join(',')}',
+      InvalidatedReasonKind.inputChanged => 'The following inputs have updated contents: ${data.join(',')}',
+      InvalidatedReasonKind.outputChanged => 'The following outputs have updated contents: ${data.join(',')}',
+      InvalidatedReasonKind.outputMissing => 'The following outputs were missing: ${data.join(',')}',
+      InvalidatedReasonKind.outputSetChanged => 'The following outputs were removed from the output set: ${data.join(',')}'
+    };
   }
 }
 

@@ -25,6 +25,10 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
+    if (project.android.hasProperty("namespace")) {
+        namespace '{{androidIdentifier}}'
+    }
+
     // Bumping the plugin compileSdkVersion requires all clients of this plugin
     // to bump the version in their app.
     compileSdkVersion {{compileSdkVersion}}

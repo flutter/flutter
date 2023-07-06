@@ -20,6 +20,7 @@ import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
 import 'service_extensions.dart';
+import 'timeline.dart';
 
 export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow; // ignore: deprecated_member_use
 
@@ -141,7 +142,9 @@ abstract class BindingBase {
   /// [initServiceExtensions] to have bindings initialize their
   /// VM service extensions, if any.
   BindingBase() {
-    developer.Timeline.startSync('Framework initialization');
+    if (!kReleaseMode) {
+      FlutterTimeline.startSync('Framework initialization');
+    }
     assert(() {
       _debugConstructed = true;
       return true;
@@ -157,7 +160,9 @@ abstract class BindingBase {
 
     developer.postEvent('Flutter.FrameworkInitialization', <String, String>{});
 
-    developer.Timeline.finishSync();
+    if (!kReleaseMode) {
+      FlutterTimeline.finishSync();
+    }
   }
 
   bool _debugConstructed = false;
@@ -221,11 +226,12 @@ abstract class BindingBase {
   /// [BindingBase], e.g., [ServicesBinding], [RendererBinding], and
   /// [WidgetsBinding]. Each of these bindings define behaviors that interact
   /// with a [ui.PlatformDispatcher], e.g., [ServicesBinding] registers
-  /// listeners with the [ChannelBuffers], and [RendererBinding]
+  /// listeners with the [ChannelBuffers], [RendererBinding]
   /// registers [ui.PlatformDispatcher.onMetricsChanged],
-  /// [ui.PlatformDispatcher.onTextScaleFactorChanged],
-  /// [ui.PlatformDispatcher.onSemanticsEnabledChanged], and
-  /// [ui.PlatformDispatcher.onSemanticsAction] handlers.
+  /// [ui.PlatformDispatcher.onTextScaleFactorChanged], and [SemanticsBinding]
+  /// registers [ui.PlatformDispatcher.onSemanticsEnabledChanged],
+  /// [ui.PlatformDispatcher.onSemanticsActionEvent], and
+  /// [ui.PlatformDispatcher.onAccessibilityFeaturesChanged] handlers.
   ///
   /// Each of these other bindings could individually access a
   /// [ui.PlatformDispatcher] statically, but that would preclude the ability to
@@ -644,6 +650,11 @@ abstract class BindingBase {
   /// (which it partially does asynchronously).
   ///
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
+  ///
+  /// The [gestures] binding wraps [PlatformDispatcher.onPointerDataPacket] in
+  /// logic that honors this event locking mechanism. Similarly, tasks queued
+  /// using [SchedulerBinding.scheduleTask] will only start when events are not
+  /// [locked].
   @protected
   Future<void> lockEvents(Future<void> Function() callback) {
     final developer.TimelineTask timelineTask = developer.TimelineTask()..start('Lock events');
@@ -654,7 +665,16 @@ abstract class BindingBase {
       _lockCount -= 1;
       if (!locked) {
         timelineTask.finish();
-        unlocked();
+        try {
+          unlocked();
+        } catch (error, stack) {
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: error,
+            stack: stack,
+            library: 'foundation',
+            context: ErrorDescription('while handling pending events'),
+          ));
+        }
       }
     });
     return future;
@@ -816,6 +836,8 @@ abstract class BindingBase {
   /// All events dispatched by a [BindingBase] use this method instead of
   /// calling [developer.postEvent] directly so that tests for [BindingBase]
   /// can track which events were dispatched by overriding this method.
+  ///
+  /// This is unrelated to the events managed by [lockEvents].
   @protected
   void postEvent(String eventKind, Map<String, dynamic> eventData) {
     developer.postEvent(eventKind, eventData);

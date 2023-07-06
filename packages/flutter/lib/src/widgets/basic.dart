@@ -850,7 +850,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
     this.clipper,
     this.clipBehavior = Clip.antiAlias,
     super.child,
-  }) : assert(borderRadius != null || clipper != null);
+  });
 
   /// The border radius of the rounded corners.
   ///
@@ -858,7 +858,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// exceed width/height.
   ///
   /// This value is ignored if [clipper] is non-null.
-  final BorderRadiusGeometry? borderRadius;
+  final BorderRadiusGeometry borderRadius;
 
   /// If non-null, determines which clip to use.
   final CustomClipper<RRect>? clipper;
@@ -871,7 +871,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   @override
   RenderClipRRect createRenderObject(BuildContext context) {
     return RenderClipRRect(
-      borderRadius: borderRadius!,
+      borderRadius: borderRadius,
       clipper: clipper,
       clipBehavior: clipBehavior,
       textDirection: Directionality.maybeOf(context),
@@ -881,7 +881,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
     renderObject
-      ..borderRadius = borderRadius!
+      ..borderRadius = borderRadius
       ..clipBehavior = clipBehavior
       ..clipper = clipper
       ..textDirection = Directionality.maybeOf(context);
@@ -1371,7 +1371,7 @@ class Transform extends SingleChildRenderObjectWidget {
 
   /// Creates a widget that scales its child along the 2D plane.
   ///
-  /// The `scaleX` argument provides the scalar by which to multiply the `x` axis, and the `scaleY` argument provides the scalar by which to multiply the `y` axis. Either may be omitted, in which case that axis defaults to 1.0.
+  /// The `scaleX` argument provides the scalar by which to multiply the `x` axis, and the `scaleY` argument provides the scalar by which to multiply the `y` axis. Either may be omitted, in which case the scaling factor for that axis defaults to 1.0.
   ///
   /// For convenience, to scale the child uniformly, instead of providing `scaleX` and `scaleY`, the `scale` parameter may be used.
   ///
@@ -2263,7 +2263,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
     final MultiChildLayoutParentData parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
-      final AbstractNode? targetParent = renderObject.parent;
+      final RenderObject? targetParent = renderObject.parent;
       if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
       }
@@ -4348,7 +4348,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
     }
 
     if (needsLayout) {
-      final AbstractNode? targetParent = renderObject.parent;
+      final RenderObject? targetParent = renderObject.parent;
       if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
       }
@@ -5207,7 +5207,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     }
 
     if (needsLayout) {
-      final AbstractNode? targetParent = renderObject.parent;
+      final RenderObject? targetParent = renderObject.parent;
       if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
       }
@@ -5732,24 +5732,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
-       super(children: _extractChildren(text));
-
-  // Traverses the InlineSpan tree and depth-first collects the list of
-  // child widgets that are created in WidgetSpans.
-  static List<Widget> _extractChildren(InlineSpan span) {
-    int index = 0;
-    final List<Widget> result = <Widget>[];
-    span.visitChildren((InlineSpan span) {
-      if (span is WidgetSpan) {
-        result.add(Semantics(
-          tagForChildren: PlaceholderSpanIndexSemanticsTag(index++),
-          child: span.child,
-        ));
-      }
-      return true;
-    });
-    return result;
-  }
+       super(children: WidgetSpan.extractFromInlineSpan(text, textScaleFactor));
 
   /// The text to display in this widget.
   final InlineSpan text;
@@ -7000,6 +6983,8 @@ class MetaData extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
+///  * [SemanticsProperties], which contains a complete documentation for each
+///    of the constructor parameters that belongs to semantics properties.
 ///  * [MergeSemantics], which marks a subtree as being a single node for
 ///    accessibility purposes.
 ///  * [ExcludeSemantics], which excludes a subtree from the semantics tree
@@ -7021,6 +7006,8 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///
   /// See also:
   ///
+  ///  * [SemanticsProperties], which contains a complete documentation for each
+  ///    of the constructor parameters that belongs to semantics properties.
   ///  * [SemanticsSortKey] for a class that determines accessibility traversal
   ///    order.
   Semantics({

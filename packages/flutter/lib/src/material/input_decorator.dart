@@ -302,6 +302,7 @@ class _HelperError extends StatefulWidget {
     this.helperText,
     this.helperStyle,
     this.helperMaxLines,
+    this.error,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
@@ -311,6 +312,7 @@ class _HelperError extends StatefulWidget {
   final String? helperText;
   final TextStyle? helperStyle;
   final int? helperMaxLines;
+  final Widget? error;
   final String? errorText;
   final TextStyle? errorStyle;
   final int? errorMaxLines;
@@ -328,6 +330,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   Widget? _helper;
   Widget? _error;
 
+  bool get _hasError => widget.errorText != null || widget.error != null;
+
   @override
   void initState() {
     super.initState();
@@ -335,7 +339,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       duration: _kTransitionDuration,
       vsync: this,
     );
-    if (widget.errorText != null) {
+    if (_hasError) {
       _error = _buildError();
       _controller.value = 1.0;
     } else if (widget.helperText != null) {
@@ -360,16 +364,19 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   void didUpdateWidget(_HelperError old) {
     super.didUpdateWidget(old);
 
+    final Widget? newError = widget.error;
     final String? newErrorText = widget.errorText;
     final String? newHelperText = widget.helperText;
+    final Widget? oldError = old.error;
     final String? oldErrorText = old.errorText;
     final String? oldHelperText = old.helperText;
 
+    final bool errorStateChanged = (newError != null) != (oldError != null);
     final bool errorTextStateChanged = (newErrorText != null) != (oldErrorText != null);
     final bool helperTextStateChanged = newErrorText == null && (newHelperText != null) != (oldHelperText != null);
 
-    if (errorTextStateChanged || helperTextStateChanged) {
-      if (newErrorText != null) {
+    if (errorStateChanged || errorTextStateChanged || helperTextStateChanged) {
+      if (newError != null || newErrorText != null) {
         _error = _buildError();
         _controller.forward();
       } else if (newHelperText != null) {
@@ -399,7 +406,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 
   Widget _buildError() {
-    assert(widget.errorText != null);
+    assert(widget.error != null || widget.errorText != null);
     return Semantics(
       container: true,
       child: FadeTransition(
@@ -409,7 +416,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
             begin: const Offset(0.0, -0.25),
             end: Offset.zero,
           ).evaluate(_controller.view),
-          child: Text(
+          child: widget.error ?? Text(
             widget.errorText!,
             style: widget.errorStyle,
             textAlign: widget.textAlign,
@@ -435,7 +442,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
     if (_controller.isCompleted) {
       _helper = null;
-      if (widget.errorText != null) {
+      if (_hasError) {
         return _error = _buildError();
       } else {
         _error = null;
@@ -443,7 +450,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       }
     }
 
-    if (_helper == null && widget.errorText != null) {
+    if (_helper == null && _hasError) {
       return _buildError();
     }
 
@@ -451,7 +458,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       return _buildHelper();
     }
 
-    if (widget.errorText != null) {
+    if (_hasError) {
       return Stack(
         children: <Widget>[
           FadeTransition(
@@ -693,7 +700,7 @@ class _RenderDecorationLayout {
 }
 
 // The workhorse: layout and paint a _Decorator widget's _Decoration.
-class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin<_DecorationSlot> {
+class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin<_DecorationSlot, RenderBox> {
   _RenderDecoration({
     required _Decoration decoration,
     required TextDirection textDirection,
@@ -1403,7 +1410,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         double start = right - _boxSize(icon).width;
         double end = left;
         if (prefixIcon != null) {
-          start += contentPadding.left;
+          start += contentPadding.right;
           start -= centerLayout(prefixIcon!, start - prefixIcon!.size.width);
         }
         if (label != null) {
@@ -1637,7 +1644,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   }
 }
 
-class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_DecorationSlot> {
+class _Decorator extends SlottedMultiChildRenderObjectWidget<_DecorationSlot, RenderBox> {
   const _Decorator({
     required this.textAlignVertical,
     required this.decoration,
@@ -2365,6 +2372,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       helperText: decoration.helperText,
       helperStyle: _getHelperStyle(themeData, defaults),
       helperMaxLines: decoration.helperMaxLines,
+      error: decoration.error,
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData, defaults),
       errorMaxLines: decoration.errorMaxLines,
@@ -2562,6 +2570,7 @@ class InputDecoration {
     this.hintStyle,
     this.hintTextDirection,
     this.hintMaxLines,
+    this.error,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
@@ -2601,7 +2610,8 @@ class InputDecoration {
     this.constraints,
   }) : assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
-       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
+       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
+       assert(!(error != null && errorText != null), 'Declaring both error and errorText is not supported.');
 
   /// Defines an [InputDecorator] that is the same size as the input field.
   ///
@@ -2630,6 +2640,7 @@ class InputDecoration {
        helperStyle = null,
        helperMaxLines = null,
        hintMaxLines = null,
+       error = null,
        errorText = null,
        errorStyle = null,
        errorMaxLines = null,
@@ -2842,6 +2853,13 @@ class InputDecoration {
   /// used to handle the overflow when it is limited to single line.
   final int? hintMaxLines;
 
+  /// Optional widget that appears below the [InputDecorator.child] and the border.
+  ///
+  /// If non-null, the border's color animates to red and the [helperText] is not shown.
+  ///
+  /// Only one of [error] and [errorText] can be specified.
+  final Widget? error;
+
   /// Text that appears below the [InputDecorator.child] and the border.
   ///
   /// If non-null, the border's color animates to red and the [helperText] is
@@ -2849,6 +2867,10 @@ class InputDecoration {
   ///
   /// In a [TextFormField], this is overridden by the value returned from
   /// [TextFormField.validator], if that is not null.
+  ///
+  /// If a more elaborate error is required, consider using [error] instead.
+  ///
+  /// Only one of [error] and [errorText] can be specified.
   final String? errorText;
 
   /// {@template flutter.material.inputDecoration.errorStyle}
@@ -3485,6 +3507,7 @@ class InputDecoration {
     TextStyle? hintStyle,
     TextDirection? hintTextDirection,
     int? hintMaxLines,
+    Widget? error,
     String? errorText,
     TextStyle? errorStyle,
     int? errorMaxLines,
@@ -3537,6 +3560,7 @@ class InputDecoration {
       hintStyle: hintStyle ?? this.hintStyle,
       hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
+      error: error ?? this.error,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
@@ -3593,11 +3617,14 @@ class InputDecoration {
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
       floatingLabelAlignment: floatingLabelAlignment ?? theme.floatingLabelAlignment,
-      isCollapsed: isCollapsed,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
+      isCollapsed: isCollapsed,
+      iconColor: iconColor ?? theme.iconColor,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
+      prefixIconColor: prefixIconColor ?? theme.prefixIconColor,
       suffixStyle: suffixStyle ?? theme.suffixStyle,
+      suffixIconColor: suffixIconColor ?? theme.suffixIconColor,
       counterStyle: counterStyle ?? theme.counterStyle,
       filled: filled ?? theme.filled,
       fillColor: fillColor ?? theme.fillColor,
@@ -3636,6 +3663,7 @@ class InputDecoration {
         && other.hintStyle == hintStyle
         && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
+        && other.error == error
         && other.errorText == errorText
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
@@ -3691,6 +3719,7 @@ class InputDecoration {
       hintStyle,
       hintTextDirection,
       hintMaxLines,
+      error,
       errorText,
       errorStyle,
       errorMaxLines,
@@ -3744,6 +3773,7 @@ class InputDecoration {
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
+      if (error != null) 'error: "$error"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
@@ -4279,6 +4309,49 @@ class InputDecorationTheme with Diagnosticable {
     );
   }
 
+  /// Returns a copy of this InputDecorationTheme where the non-null fields in
+  /// the given InputDecorationTheme override the corresponding nullable fields
+  /// in this InputDecorationTheme.
+  ///
+  /// The non-nullable fields of InputDecorationTheme, such as [floatingLabelBehavior],
+  /// [isDense], [isCollapsed], [filled], and [alignLabelWithHint] cannot be overridden.
+  ///
+  /// In other words, the fields of the provided [InputDecorationTheme] are used to
+  /// fill in the unspecified and nullable fields of this InputDecorationTheme.
+  InputDecorationTheme merge(InputDecorationTheme? inputDecorationTheme) {
+    if (inputDecorationTheme == null) {
+      return this;
+    }
+    return copyWith(
+      labelStyle: labelStyle ?? inputDecorationTheme.labelStyle,
+      floatingLabelStyle: floatingLabelStyle ?? inputDecorationTheme.floatingLabelStyle,
+      helperStyle: helperStyle ?? inputDecorationTheme.helperStyle,
+      helperMaxLines: helperMaxLines ?? inputDecorationTheme.helperMaxLines,
+      hintStyle: hintStyle ?? inputDecorationTheme.hintStyle,
+      errorStyle: errorStyle ?? inputDecorationTheme.errorStyle,
+      errorMaxLines: errorMaxLines ?? inputDecorationTheme.errorMaxLines,
+      contentPadding: contentPadding ?? inputDecorationTheme.contentPadding,
+      iconColor: iconColor ?? inputDecorationTheme.iconColor,
+      prefixStyle: prefixStyle ?? inputDecorationTheme.prefixStyle,
+      prefixIconColor: prefixIconColor ?? inputDecorationTheme.prefixIconColor,
+      suffixStyle: suffixStyle ?? inputDecorationTheme.suffixStyle,
+      suffixIconColor: suffixIconColor ?? inputDecorationTheme.suffixIconColor,
+      counterStyle: counterStyle ?? inputDecorationTheme.counterStyle,
+      fillColor: fillColor ?? inputDecorationTheme.fillColor,
+      activeIndicatorBorder: activeIndicatorBorder ?? inputDecorationTheme.activeIndicatorBorder,
+      outlineBorder: outlineBorder ?? inputDecorationTheme.outlineBorder,
+      focusColor: focusColor ?? inputDecorationTheme.focusColor,
+      hoverColor: hoverColor ?? inputDecorationTheme.hoverColor,
+      errorBorder: errorBorder ?? inputDecorationTheme.errorBorder,
+      focusedBorder: focusedBorder ?? inputDecorationTheme.focusedBorder,
+      focusedErrorBorder: focusedErrorBorder ?? inputDecorationTheme.focusedErrorBorder,
+      disabledBorder: disabledBorder ?? inputDecorationTheme.disabledBorder,
+      enabledBorder: enabledBorder ?? inputDecorationTheme.enabledBorder,
+      border: border ?? inputDecorationTheme.border,
+      constraints: constraints ?? inputDecorationTheme.constraints,
+    );
+  }
+
   @override
   int get hashCode => Object.hash(
     labelStyle,
@@ -4531,8 +4604,6 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)
     : super();
@@ -4560,71 +4631,65 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.error)) {
-        if (states.contains(MaterialState.focused)) {
-          return BorderSide(color: _colors.error, width: 2.0);
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return BorderSide(color: _colors.onErrorContainer);
-        }
-        return BorderSide(color: _colors.error);
+    if (states.contains(MaterialState.disabled)) {
+      return BorderSide(color: _colors.onSurface.withOpacity(0.38));
+    }
+    if (states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return BorderSide(color: _colors.onErrorContainer);
       }
       if (states.contains(MaterialState.focused)) {
-        return BorderSide(color: _colors.primary, width: 2.0);
+        return BorderSide(color: _colors.error, width: 2.0);
       }
-      if (states.contains(MaterialState.hovered)) {
-        return BorderSide(color: _colors.onSurface);
-      }
-      if (states.contains(MaterialState.disabled)) {
-        return BorderSide(color: _colors.onSurface.withOpacity(0.38));
-      }
-      return BorderSide(color: _colors.onSurfaceVariant);
+      return BorderSide(color: _colors.error);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return BorderSide(color: _colors.onSurface);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return BorderSide(color: _colors.primary, width: 2.0);
+    }
+    return BorderSide(color: _colors.onSurfaceVariant);
     });
 
   @override
   BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.error)) {
-        if (states.contains(MaterialState.focused)) {
-          return BorderSide(color: _colors.error, width: 2.0);
-        }
-        if (states.contains(MaterialState.hovered)) {
-          return BorderSide(color: _colors.onErrorContainer);
-        }
-        return BorderSide(color: _colors.error);
+    if (states.contains(MaterialState.disabled)) {
+      return BorderSide(color: _colors.onSurface.withOpacity(0.12));
+    }
+    if (states.contains(MaterialState.error)) {
+      if (states.contains(MaterialState.hovered)) {
+        return BorderSide(color: _colors.onErrorContainer);
       }
       if (states.contains(MaterialState.focused)) {
-        return BorderSide(color: _colors.primary, width: 2.0);
+        return BorderSide(color: _colors.error, width: 2.0);
       }
-      if (states.contains(MaterialState.hovered)) {
-        return BorderSide(color: _colors.onSurface);
-      }
-      if (states.contains(MaterialState.disabled)) {
-        return BorderSide(color: _colors.onSurface.withOpacity(0.12));
-      }
-      return BorderSide(color: _colors.outline);
-    });
+      return BorderSide(color: _colors.error);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return BorderSide(color: _colors.onSurface);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return BorderSide(color: _colors.primary, width: 2.0);
+    }
+    return BorderSide(color: _colors.outline);
+  });
 
   @override
   Color? get iconColor => _colors.onSurfaceVariant;
 
   @override
   Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return _colors.onSurface.withOpacity(0.38);
-    }
     return _colors.onSurfaceVariant;
   });
 
   @override
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if(states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return _colors.onErrorContainer;
-      }
-      return _colors.error;
-    }
     if (states.contains(MaterialState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
+    }
+    if (states.contains(MaterialState.error)) {
+      return _colors.error;
     }
     return _colors.onSurfaceVariant;
   });
@@ -4632,23 +4697,23 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if(states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
-        return textStyle.copyWith(color: _colors.error);
-      }
+    if (states.contains(MaterialState.disabled)) {
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
+    }
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
         return textStyle.copyWith(color: _colors.onErrorContainer);
       }
+      if (states.contains(MaterialState.focused)) {
+        return textStyle.copyWith(color: _colors.error);
+      }
       return textStyle.copyWith(color: _colors.error);
-    }
-    if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color: _colors.primary);
     }
     if (states.contains(MaterialState.hovered)) {
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
-    if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
+    if (states.contains(MaterialState.focused)) {
+      return textStyle.copyWith(color: _colors.primary);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
@@ -4656,23 +4721,23 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if(states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
-        return textStyle.copyWith(color: _colors.error);
-      }
+    if (states.contains(MaterialState.disabled)) {
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
+    }
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
         return textStyle.copyWith(color: _colors.onErrorContainer);
       }
+      if (states.contains(MaterialState.focused)) {
+        return textStyle.copyWith(color: _colors.error);
+      }
       return textStyle.copyWith(color: _colors.error);
-    }
-    if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color: _colors.primary);
     }
     if (states.contains(MaterialState.hovered)) {
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
-    if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
+    if (states.contains(MaterialState.focused)) {
+      return textStyle.copyWith(color: _colors.primary);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });

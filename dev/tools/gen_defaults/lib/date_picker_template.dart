@@ -11,10 +11,10 @@ class DatePickerTemplate extends TokenTemplate {
   });
 
   String _layerOpacity(String layerToken) {
-    if (tokens.containsKey(layerToken)) {
-      final String? layerValue = tokens[layerToken] as String?;
-      if (tokens.containsKey(layerValue)) {
-        final String? opacityValue = opacity(layerValue!);
+    if (tokenAvailable(layerToken)) {
+      final String layerValue = getToken(layerToken) as String;
+      if (tokenAvailable(layerValue)) {
+        final String? opacityValue = opacity(layerValue);
         if (opacityValue != null) {
           return '.withOpacity($opacityValue)';
         }
@@ -106,24 +106,24 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get dayOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return ${_stateColor('md.comp.date-picker.modal.date', 'selected', 'pressed')};
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${_stateColor('md.comp.date-picker.modal.date', 'selected', 'hover')};
         }
         if (states.contains(MaterialState.focused)) {
           return ${_stateColor('md.comp.date-picker.modal.date', 'selected', 'focus')};
         }
-        if (states.contains(MaterialState.pressed)) {
-          return ${_stateColor('md.comp.date-picker.modal.date', 'selected', 'pressed')};
-        }
       } else {
+        if (states.contains(MaterialState.pressed)) {
+          return ${_stateColor('md.comp.date-picker.modal.date', 'unselected', 'pressed')};
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${_stateColor('md.comp.date-picker.modal.date', 'unselected', 'hover')};
         }
         if (states.contains(MaterialState.focused)) {
           return ${_stateColor('md.comp.date-picker.modal.date', 'unselected', 'focus')};
-        }
-        if (states.contains(MaterialState.pressed)) {
-          return ${_stateColor('md.comp.date-picker.modal.date', 'unselected', 'pressed')};
         }
       }
       return null;
@@ -173,24 +173,24 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get yearOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'selected', 'pressed')};
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'selected', 'hover')};
         }
         if (states.contains(MaterialState.focused)) {
           return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'selected', 'focus')};
         }
-        if (states.contains(MaterialState.pressed)) {
-          return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'selected', 'pressed')};
-        }
       } else {
+        if (states.contains(MaterialState.pressed)) {
+          return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'unselected', 'pressed')};
+        }
         if (states.contains(MaterialState.hovered)) {
           return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'unselected', 'hover')};
         }
         if (states.contains(MaterialState.focused)) {
           return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'unselected', 'focus')};
-        }
-        if (states.contains(MaterialState.pressed)) {
-          return ${_stateColor('md.comp.date-picker.modal.year-selection.year', 'unselected', 'pressed')};
         }
       }
       return null;
@@ -208,14 +208,14 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
   @override
   MaterialStateProperty<Color?>? get rangeSelectionOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range', null, 'pressed')};
+      }
       if (states.contains(MaterialState.hovered)) {
-        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range.', null, 'hover')};
+        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range', null, 'hover')};
       }
       if (states.contains(MaterialState.focused)) {
-        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range.', null, 'focus')};
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range.', null, 'pressed')};
+        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range', null, 'focus')};
       }
       return null;
     });

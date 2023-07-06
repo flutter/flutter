@@ -60,7 +60,7 @@ class InlineSpanSemanticsInformation {
     this.semanticsLabel,
     this.stringAttributes = const <ui.StringAttribute>[],
     this.recognizer,
-  }) : assert(isPlaceholder == false || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
+  }) : assert(!isPlaceholder || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
        requiresOwnNode = isPlaceholder || recognizer != null;
 
   /// The text info for a [PlaceholderSpan].
@@ -225,7 +225,30 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// When `visitor` returns true, the walk will continue. When `visitor` returns
   /// false, then the walk will end.
+  ///
+  /// See also:
+  ///
+  ///  * [visitDirectChildren], which preforms `build`-order traversal on the
+  ///    immediate children of this [InlineSpan], regardless of whether they
+  ///    have content.
   bool visitChildren(InlineSpanVisitor visitor);
+
+  /// Calls `visitor` for each immediate child of this [InlineSpan].
+  ///
+  /// The immediate children are visited in the same order they are added to
+  /// a [ui.ParagraphBuilder] in the [build] method, which is also the logical
+  /// order of the child [InlineSpan]s in the text.
+  ///
+  /// The traversal stops when all immediate children are visited, or when the
+  /// `visitor` callback returns `false` on an immediate child. This method
+  /// itself returns a `bool` indicating whether the visitor callback returned
+  /// `true` on all immediate children.
+  ///
+  /// See also:
+  ///
+  ///  * [visitChildren], which performs preorder traversal on this [InlineSpan]
+  ///    if it has content, and all its descendants with content.
+  bool visitDirectChildren(InlineSpanVisitor visitor);
 
   /// Returns the [InlineSpan] that contains the given position in the text.
   InlineSpan? getSpanForPosition(TextPosition position) {
@@ -372,9 +395,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
-
-    if (style != null) {
-      style!.debugFillProperties(properties);
-    }
+    style?.debugFillProperties(properties);
   }
 }
