@@ -637,6 +637,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         );
 
         if (widget.expandedInsets != null) {
+          // If [expandedInsets] is not null, the width of the text field should depend
+          // on its parent width. So we don't need to use `_DropdownMenuBody` to
+          // calculate the children's width.
           return textField;
         }
 
