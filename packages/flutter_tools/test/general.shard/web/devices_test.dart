@@ -394,12 +394,6 @@ void main() {
 class TestChromiumLauncher implements ChromiumLauncher {
   TestChromiumLauncher();
 
-  bool _hasInstance = false;
-  void setInstance(Chromium chromium) {
-    _hasInstance = true;
-    currentCompleter.complete(chromium);
-  }
-
   @override
   Completer<Chromium> currentCompleter = Completer<Chromium>();
 
@@ -417,7 +411,7 @@ class TestChromiumLauncher implements ChromiumLauncher {
   }
 
   @override
-  bool get hasChromeInstance => _hasInstance;
+  bool get hasChromeInstance => false;
 
   @override
   Future<Chromium> launch(

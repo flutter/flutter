@@ -2526,8 +2526,7 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  SelectionGeometry get value => _value;
-  SelectionGeometry _value = const SelectionGeometry(
+  final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
     startSelectionPoint: SelectionPoint(
@@ -2541,15 +2540,6 @@ class RenderSelectionSpy extends RenderProxyBox
       handleType: TextSelectionHandleType.left,
     ),
   );
-  set value(SelectionGeometry other) {
-    if (other == _value) {
-      return;
-    }
-    _value = other;
-    for (final VoidCallback callback in listeners) {
-      callback();
-    }
-  }
 
   @override
   void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }

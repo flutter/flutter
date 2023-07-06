@@ -19,9 +19,7 @@ import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
 class FakePub extends Fake implements Pub {
-  FakePub(this.fs);
 
-  final FileSystem fs;
   int calledGetOffline = 0;
   int calledOnline = 0;
 
@@ -59,7 +57,7 @@ void main() {
 
     setUp(() {
       testbed = Testbed(setup: () {
-        fakePub = FakePub(globals.fs);
+        fakePub = FakePub();
         Cache.flutterRoot = 'flutter';
         final List<String> filePaths = <String>[
           globals.fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),

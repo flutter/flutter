@@ -371,7 +371,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will de-download a file if unzipping fails on windows', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils(windows: true);
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -421,7 +421,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will bail if unzipping fails more than twice on Windows', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils(windows: true);
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -529,10 +529,7 @@ void main() {
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  FakeOperatingSystemUtils({this.windows = false});
-
   int failures = 0;
-  final bool windows;
 
   /// A mapping of zip [file] paths to callbacks that receive the [targetDirectory].
   ///

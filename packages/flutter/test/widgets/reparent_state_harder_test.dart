@@ -63,10 +63,8 @@ class DummyStatefulWidgetState extends State<DummyStatefulWidget> {
 class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {
   const RekeyableDummyStatefulWidgetWrapper({
     super.key,
-    this.child,
     required this.initialKey,
   });
-  final Widget? child;
   final GlobalKey initialKey;
   @override
   RekeyableDummyStatefulWidgetWrapperState createState() => RekeyableDummyStatefulWidgetWrapperState();
