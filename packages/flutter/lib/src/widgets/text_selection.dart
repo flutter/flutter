@@ -3383,6 +3383,115 @@ enum ClipboardStatus {
   notPasteable,
 }
 
+/// A [ValueNotifier] whose [value] indicates whether the current device supports the Live Text
+/// (OCR) function.
+///
+/// See also:
+///  * [LiveText], where the availability of Live Text input can be obtained.
+///  * [LiveTextInputStatus], an enumeration that indicates whether the current device is available
+///                           for Live Text input.
+///
+/// Call [update] to asynchronously update [value] if needed.
+class LiveTextInputStatusNotifier extends ValueNotifier<LiveTextInputStatus> with WidgetsBindingObserver {
+  /// Create a new LiveTextStatusNotifier.
+  LiveTextInputStatusNotifier({
+    LiveTextInputStatus value = LiveTextInputStatus.unknown,
+  }) : super(value);
+
+  bool _disposed = false;
+
+  /// Check the [LiveTextInputStatus] and update [value] if needed.
+  Future<void> update() async {
+    if (_disposed) {
+      return;
+    }
+
+    final bool isLiveTextInputEnabled;
+    try {
+      isLiveTextInputEnabled = await LiveText.isLiveTextInputAvailable();
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widget library',
+        context: ErrorDescription('while checking the availability of Live Text input'),
+      ));
+      // In the case of an error from the Live Text API, set the value to
+      // unknown so that it will try to update again later.
+      if (_disposed || value == LiveTextInputStatus.unknown) {
+        return;
+      }
+      value = LiveTextInputStatus.unknown;
+      return;
+    }
+
+    final LiveTextInputStatus nextStatus = isLiveTextInputEnabled
+        ? LiveTextInputStatus.enabled
+        : LiveTextInputStatus.disabled;
+
+    if (_disposed || nextStatus == value) {
+      return;
+    }
+    value = nextStatus;
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    if (!hasListeners) {
+      WidgetsBinding.instance.addObserver(this);
+    }
+    if (value == LiveTextInputStatus.unknown) {
+      update();
+    }
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    super.removeListener(listener);
+    if (!_disposed && !hasListeners) {
+      WidgetsBinding.instance.removeObserver(this);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        update();
+      case AppLifecycleState.detached:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+      // Nothing to do.
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _disposed = true;
+    super.dispose();
+  }
+}
+
+/// An enumeration that indicates whether the current device is available for Live Text input.
+///
+/// See also:
+///  * [LiveText], where the availability of Live Text input can be obtained.
+enum LiveTextInputStatus {
+  /// This device supports Live Text input currently.
+  enabled,
+
+  /// The status of the Live Text input is unknown. Since getting the Live Text input availability
+  /// is asynchronous (see [LiveText.isLiveTextInputAvailable]), this status often exists while
+  /// waiting to receive the status value for the first time.
+  unknown,
+
+  /// The current device doesn't support Live Text input.
+  disabled,
+}
+
 // TODO(justinmc): Deprecate this after TextSelectionControls.buildToolbar is
 // deleted, when users should migrate back to TextSelectionControls.buildHandle.
 // See https://github.com/flutter/flutter/pull/124262

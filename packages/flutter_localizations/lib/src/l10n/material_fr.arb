@@ -26,6 +26,7 @@
   "continueButtonLabel": "Continuer",
   "copyButtonLabel": "Copier",
   "cutButtonLabel": "Couper",
+  "scanTextButtonLabel": "Numériser du texte",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Coller",
   "selectAllButtonLabel": "Tout sélectionner",

@@ -25,6 +25,7 @@
   "continueButtonLabel": "続行",
   "copyButtonLabel": "コピー",
   "cutButtonLabel": "切り取り",
+  "scanTextButtonLabel": "テキストをスキャン",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "貼り付け",
   "selectAllButtonLabel": "すべて選択",

@@ -25,6 +25,7 @@ export 'src/services/hardware_keyboard.dart';
 export 'src/services/keyboard_inserted_content.dart';
 export 'src/services/keyboard_key.g.dart';
 export 'src/services/keyboard_maps.g.dart';
+export 'src/services/live_text.dart';
 export 'src/services/message_codec.dart';
 export 'src/services/message_codecs.dart';
 export 'src/services/mouse_cursor.dart';

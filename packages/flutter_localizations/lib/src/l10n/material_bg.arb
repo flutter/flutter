@@ -25,6 +25,7 @@
   "continueButtonLabel": "Напред",
   "copyButtonLabel": "Копиране",
   "cutButtonLabel": "Изрязване",
+  "scanTextButtonLabel": "Сканиране на текст",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Поставяне",
   "selectAllButtonLabel": "Избиране на всички",
