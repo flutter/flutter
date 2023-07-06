@@ -157,16 +157,6 @@ class AccessibilityBridge
   virtual std::shared_ptr<FlutterPlatformNodeDelegate>
   CreateFlutterPlatformNodeDelegate() = 0;
 
-  //------------------------------------------------------------------------------
-  /// @brief      Recreate all FlutterPlatformNodeDelegates.
-  ///
-  ///             This can be useful for subclasses when updating some
-  ///             properties that are used by node delegates, such as views.
-  ///             Each node is recreated using
-  ///             CreateFlutterPlatformNodeDelegate, then initialized using
-  ///             AXNodes from their corresponding old one.
-  void RecreateNodeDelegates();
-
  private:
   // See FlutterSemanticsNode in embedder.h
   typedef struct {
