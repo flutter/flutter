@@ -12,7 +12,17 @@
 
 namespace fml {
 
-void CaptureNextLog(std::ostringstream* stream);
+namespace testing {
+struct LogCapture {
+  LogCapture();
+  ~LogCapture();
+
+  std::string str() const;
+
+ private:
+  std::ostringstream stream_;
+};
+}  // namespace testing
 
 class LogMessageVoidify {
  public:
