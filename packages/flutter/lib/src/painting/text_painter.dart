@@ -26,7 +26,7 @@ import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
-const String _debugAssert = '_debug';
+const Object _debugAssert = Object();
 
 // The default font size if none is specified. This should be kept in
 // sync with the default values in text_style.dart, as well as the

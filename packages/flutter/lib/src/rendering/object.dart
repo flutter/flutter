@@ -33,7 +33,7 @@ export 'package:flutter/foundation.dart' show
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
 
-const String _debugAssert = '_debug';
+const Object _debugAssert = Object();
 
 /// Base class for data associated with a [RenderObject] by its parent.
 ///

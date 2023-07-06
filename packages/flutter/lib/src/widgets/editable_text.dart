@@ -50,7 +50,7 @@ import 'widget_span.dart';
 
 export 'package:flutter/services.dart' show KeyboardInsertedContent, SelectionChangedCause, SmartDashesType, SmartQuotesType, TextEditingValue, TextInputType, TextSelection;
 
-const String _debugAssert = '_debug';
+const Object _debugAssert = Object();
 
 // Examples can assume:
 // late BuildContext context;
