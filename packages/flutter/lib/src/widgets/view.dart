@@ -27,16 +27,16 @@ import 'media_query.dart';
 /// Internally, this limitation is enforced by a [GlobalObjectKey] that derives
 /// its identity from the [view] provided to this widget.
 ///
-/// Since the [View] widget bootstraps its own independent render tree neither
+/// Since the [View] widget bootstraps its own independent render tree, neither
 /// it not any of its descendants will insert a [RenderObject] into an existing
 /// render tree. Therefore, the [View] widget can only be used in those parts of
-/// the widget tree, where it is not required to participate in the construction
+/// the widget tree where it is not required to participate in the construction
 /// of the surrounding render tree. In practical terms, this means it can
 /// typically be used at the root of the widget tree outside of any other [View]
 /// widget, as a child of a [ViewCollection] widget, or in the [ViewAnchor.view]
-/// slot of a [ViewAnchor] widget. It must not necessarily be a direct child,
-/// though, since other non-[RenderObjectWidget]s (e.g. [InheritedWidget]s) are
-/// allowed to be present between those widgets and the [View] widget.
+/// slot of a [ViewAnchor] widget. It might not be a direct child, though, since
+/// other non-[RenderObjectWidget]s (e.g. [InheritedWidget]s) are allowed to be
+/// present between those widgets and the [View] widget.
 ///
 /// In technical terms, whether a [View] is allowed to occupy a certain slot of
 /// an element is determined by that element's
@@ -181,14 +181,14 @@ class View extends StatelessWidget {
 /// Used by [RawView.builder].
 typedef RawViewContentBuilder = Widget Function(BuildContext context, PipelineOwner owner);
 
-/// The workhorse behind the [View] widget that actually bootstraps the render
+/// The workhorse behind the [View] widget that actually bootstraps a render
 /// tree.
 ///
 /// It instantiates the [RenderView] as the root of that render tree and adds it
 /// to the [RenderViewManager] obtained from the surrounding [ViewHooks] via
 /// [ViewHooks.of] (typically, that is the [RendererBinding]). It also owns the
 /// [PipelineOwner] that manages this render tree and adds it as a child to the
-/// surrounding [ViewHooks.pipelineOwner]. This ensures, that the render tree
+/// surrounding [ViewHooks.pipelineOwner]. This ensures that the render tree
 /// bootstrapped by this widget participates properly in frame production and
 /// hit testing.
 ///
@@ -222,7 +222,7 @@ class RawView extends RenderObjectWidget {
        assert(deprecatedRenderView == null || deprecatedRenderView.flutterView == view),
        super(key: _DeprecatedRawViewKey(view, deprecatedPipelineOwner, deprecatedRenderView));
 
-  /// The [FlutterView] into which [Widget} returned by [builder] is drawn.
+  /// The [FlutterView] into which the [Widget] returned by [builder] is drawn.
   final FlutterView view;
 
   /// Determines the content [Widget] that is drawn into the [view].
@@ -571,6 +571,15 @@ class ViewCollection extends _MultiChildComponentWidget {
 /// [RenderObjectWidget] is allowed to appear between the [ViewAnchor] and the
 /// next [View] widget in the [view] slot. The widgets in the [view] slot have
 /// access to all [InheritedWidget]s above the [ViewAnchor] in the tree.
+///
+/// {@template flutter.widgets.ViewAnchor}
+/// An example use case for this widget is a tooltip for a button. The tooltip
+/// should be able to extend beyond the bounds of the main view. For this, the
+/// tooltip can be implemented as a separate [View], which is anchored to the
+/// button in the main view by wrapping that button with a [ViewAnchor]. In this
+/// example, the [view] slot is configured with the tooltip [View] and the
+/// [child] is the button widget rendered into the surrounding view.
+/// {@endtemplate}
 class ViewAnchor extends StatelessWidget {
   /// Creates a [ViewAnchor] widget.
   const ViewAnchor({
@@ -581,14 +590,18 @@ class ViewAnchor extends StatelessWidget {
 
   /// The widget that defines the view anchored to this widget.
   ///
-  /// Typically, a [View] or [ViewCollection] widget is used, which may be wrapped
-  /// in other non-[RenderObjectWidget]s (e.g. [InheritedWidget]s).
+  /// Typically, a [View] or [ViewCollection] widget is used, which may be
+  /// wrapped in other non-[RenderObjectWidget]s (e.g. [InheritedWidget]s).
+  ///
+  /// {@macro flutter.widgets.ViewAnchor}
   final Widget? view;
 
   /// The widget below this widget in the tree.
   ///
   /// It is rendered into the surrounding view, not in the view defined by
   /// [view].
+  ///
+  /// {@macro flutter.widgets.ViewAnchor}
   final Widget child;
 
   @override

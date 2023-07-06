@@ -273,7 +273,7 @@ abstract mixin class WidgetsBindingObserver {
 
 /// The glue between the widgets layer and the Flutter engine.
 ///
-/// The [WidgetsBinding] manges a single [Element] tree rooted at [rootElement].
+/// The [WidgetsBinding] manages a single [Element] tree rooted at [rootElement].
 /// Call [runApp] (which indirectly calls [attachRootWidget]) to bootstrap that
 /// element tree.
 ///
@@ -1192,7 +1192,7 @@ class RootWidget extends Widget {
 ///
 /// This element class is the instantiation of a [RootWidget]. It can be used
 /// only as the root of an [Element] tree (it cannot be mounted into another
-/// [Element]; it's parent must be null).
+/// [Element]; its parent must be null).
 ///
 /// In typical usage, it will be instantiated for a [RootWidget] by calling
 /// [RootWidget.attach]. In this usage, it is normally instantiated by the

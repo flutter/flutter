@@ -21,11 +21,11 @@ export 'package:flutter/gestures.dart' show HitTestResult;
 // Examples can assume:
 // late BuildContext context;
 
-/// The glue between the render tree and the Flutter engine.
+/// The glue between the render trees and the Flutter engine.
 ///
 /// The [RendererBinding] manages multiple render trees. Each render tree is
 /// rooted in a [RenderView] that must be added to the binding via
-/// [addRenderView] to be consider during frame production, hit testing, etc.
+/// [addRenderView] to be considered during frame production, hit testing, etc.
 /// Furthermore, the render tree must be managed by a [PipelineOwner] that is
 /// part of the pipeline owner tree rooted at [rootPipelineOwner].
 ///
@@ -274,6 +274,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     'Consider using RendererBinding.renderViews instead as the binding may manage multiple RenderViews. '
     'This feature was deprecated after v3.10.0-12.0.pre.'
   )
+  // TODO(goderbauer): When this deprecated property is removed also delete the _ReusableRenderView class.
   late final RenderView renderView = _ReusableRenderView(
     view: platformDispatcher.implicitView!,
   );
@@ -754,7 +755,7 @@ void debugDumpPipelineOwnerTree() {
 /// library, such as the Flutter Widgets library, then you would use
 /// that layer's binding (see [WidgetsFlutterBinding]).
 ///
-/// The [RenderingFlutterBinding] can manages multiple render trees. Each render
+/// The [RenderingFlutterBinding] can manage multiple render trees. Each render
 /// tree is rooted in a [RenderView] that must be added to the binding via
 /// [addRenderView] to be consider during frame production, hit testing, etc.
 /// Furthermore, the render tree must be managed by a [PipelineOwner] that is
@@ -762,7 +763,7 @@ void debugDumpPipelineOwnerTree() {
 ///
 /// Adding [PipelineOwner]s and [RenderView]s to this binding in the way
 /// described above is left as a responsibility for a higher level abstraction.
-/// The binding does not own any [RenderView] directly.
+/// The binding does not own any [RenderView]s directly.
 class RenderingFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding, ServicesBinding, SemanticsBinding, PaintingBinding, RendererBinding {
   /// Returns an instance of the binding that implements
   /// [RendererBinding]. If no binding has yet been initialized, the
