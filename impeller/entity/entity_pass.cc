@@ -167,6 +167,22 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
   return subpass_pointer;
 }
 
+void EntityPass::AddSubpassInline(std::unique_ptr<EntityPass> pass) {
+  if (!pass) {
+    return;
+  }
+  FML_DCHECK(pass->superpass_ == nullptr);
+
+  elements_.insert(elements_.end(),
+                   std::make_move_iterator(pass->elements_.begin()),
+                   std::make_move_iterator(pass->elements_.end()));
+
+  backdrop_filter_reads_from_pass_texture_ +=
+      pass->backdrop_filter_reads_from_pass_texture_;
+  advanced_blend_reads_from_pass_texture_ +=
+      pass->advanced_blend_reads_from_pass_texture_;
+}
+
 static RenderTarget::AttachmentConfig GetDefaultStencilConfig(bool readable) {
   return RenderTarget::AttachmentConfig{
       .storage_mode = readable ? StorageMode::kDevicePrivate
