@@ -75,6 +75,8 @@ RegExp(
     multiLine: true
 );
 
+// This matches uncommented minSdkVersion lines in the module-level build.gradle
+// file which have minSdkVersion 16,17, or 18 (the Jelly Bean api levels).
 final RegExp jellyBeanMinSdkVersionMatch =
 RegExp(r'(?<=^\s*)minSdkVersion 1[678](?=\s*(?://|$))', multiLine: true);
 
