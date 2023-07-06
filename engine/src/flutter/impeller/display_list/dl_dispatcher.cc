@@ -1052,6 +1052,10 @@ void DlDispatcher::drawDisplayList(
   Matrix saved_initial_matrix = initial_matrix_;
   int restore_count = canvas_.GetSaveCount();
 
+  // The display list may alter the clip, which must be restored to the current
+  // clip at the end of playback.
+  canvas_.Save();
+
   // Establish a new baseline for interpreting the new DL.
   // Matrix and clip are left untouched, the current
   // transform is saved as the new base matrix, and paint
