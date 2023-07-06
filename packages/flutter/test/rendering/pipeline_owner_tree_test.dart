@@ -812,6 +812,38 @@ void main() {
     });
     expect(children.single, childOfChild3);
   });
+
+  test('printing pipeline owner tree smoke test', () {
+    final PipelineOwner root = PipelineOwner();
+    final PipelineOwner child1 = PipelineOwner()
+      ..rootNode = FakeRenderView();
+    final PipelineOwner childOfChild1 = PipelineOwner()
+      ..rootNode = FakeRenderView();
+    final PipelineOwner child2 = PipelineOwner()
+      ..rootNode = FakeRenderView();
+    final PipelineOwner childOfChild2 = PipelineOwner()
+      ..rootNode = FakeRenderView();
+
+    root.adoptChild(child1);
+    child1.adoptChild(childOfChild1);
+    root.adoptChild(child2);
+    child2.adoptChild(childOfChild2);
+
+    expect(root.toStringDeep(), equalsIgnoringHashCodes(
+      'PipelineOwner#00000\n'
+      ' ├─PipelineOwner#00000\n'
+      ' │ │ rootNode: FakeRenderView#00000 NEEDS-LAYOUT NEEDS-PAINT\n'
+      ' │ │\n'
+      ' │ └─PipelineOwner#00000\n'
+      ' │     rootNode: FakeRenderView#00000 NEEDS-LAYOUT NEEDS-PAINT\n'
+      ' │\n'
+      ' └─PipelineOwner#00000\n'
+      '   │ rootNode: FakeRenderView#00000 NEEDS-LAYOUT NEEDS-PAINT\n'
+      '   │\n'
+      '   └─PipelineOwner#00000\n'
+      '       rootNode: FakeRenderView#00000 NEEDS-LAYOUT NEEDS-PAINT\n'
+    ));
+  });
 }
 
 class TestPipelineManifold extends ChangeNotifier implements PipelineManifold {
@@ -883,3 +915,5 @@ List<PipelineOwner> _treeWalk(PipelineOwner root) {
   root.visitChildren(visitor);
   return results;
 }
+
+class FakeRenderView extends RenderBox { }

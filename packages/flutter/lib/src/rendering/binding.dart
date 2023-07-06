@@ -723,17 +723,7 @@ void debugDumpSemanticsTree([DebugSemanticsDumpOrder childOrder = DebugSemantics
 /// Prints a textual representation of the [PipelineOwner] tree rooted at
 /// [RendererBinding.rootPipelineOwner].
 void debugDumpPipelineOwnerTree() {
-  // TODO(goderbauer): Turn this tree into a [DiagnosticableTree] for nicer output.
-  final StringBuffer result = StringBuffer();
-  int indent = 0;
-  void visit(PipelineOwner owner) {
-    result.writeln('${'    ' * indent}$owner (${owner.rootNode})');
-    indent++;
-    owner.visitChildren(visit);
-    indent--;
-  }
-  visit(RendererBinding.instance.rootPipelineOwner);
-  debugPrint(result.toString());
+  debugPrint(RendererBinding.instance.rootPipelineOwner.toStringDeep());
 }
 
 /// A concrete binding for applications that use the Rendering framework
