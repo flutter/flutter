@@ -2902,9 +2902,11 @@ class InputDecoration {
   ///  * [helperMaxLines], the equivalent but for the [helperText].
   final int? errorMaxLines;
 
+  /// {@template flutter.material.inputDecoration.floatingLabelGap}
   /// Defines the vertical gap between the inline elements and the floating label.
   ///
   /// Default is 4.0
+  /// {@endtemplate}
   final double? floatingLabelGap;
 
   /// {@template flutter.material.inputDecoration.floatingLabelBehavior}
@@ -3938,8 +3940,6 @@ class InputDecorationTheme with Diagnosticable {
   final int? errorMaxLines;
 
   /// {@macro flutter.material.inputDecoration.floatingLabelGap}
-  ///
-  /// Defaults to 4.0
   final double floatingLabelGap;
 
   /// {@macro flutter.material.inputDecoration.floatingLabelBehavior}
