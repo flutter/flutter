@@ -10,9 +10,6 @@ import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_
 import 'package:flutter_tools/src/android/migrations/min_sdk_version_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -444,8 +441,3 @@ class FakeErroringJava extends FakeJava {
     throw Exception('How did this happen?');
   }
 }
-
-class FakeFileSystem extends Fake implements FileSystem {}
-class FakeProcessUtils extends Fake implements ProcessUtils {}
-class FakePlatform extends Fake implements Platform {}
-class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {}
