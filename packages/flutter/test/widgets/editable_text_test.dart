@@ -5009,14 +5009,10 @@ void main() {
     expect(render.text!.style!.fontStyle, FontStyle.italic);
   });
 
-  testWidgets('onChanged callback only invoked on text changes', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/111651 .
+  testWidgets('onChanged callback invoked on text changes or commits', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/128565
     final TextEditingController controller = TextEditingController();
     int onChangedCount = 0;
-    bool preventInput = false;
-    final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
-      return preventInput ? oldValue : newValue;
-    });
 
     final Widget widget = MediaQuery(
       data: const MediaQueryData(),
@@ -5027,32 +5023,31 @@ void main() {
         focusNode: FocusNode(),
         style: textStyle,
         onChanged: (String newString) { onChangedCount += 1; },
-        inputFormatters: <TextInputFormatter>[formatter],
         textDirection: TextDirection.ltr,
       ),
     );
     await tester.pumpWidget(widget);
     final EditableTextState state = tester.firstState(find.byType(EditableText));
+    // Simulate typing "a".
     state.updateEditingValue(
       const TextEditingValue(text: 'a', composing: TextRange(start: 0, end: 1)),
     );
     expect(onChangedCount , 1);
+    expect(controller.value.isComposingRangeValid , true);
 
+    // Simulate typing "n".
     state.updateEditingValue(
-      const TextEditingValue(text: 'a'),
-    );
-    expect(onChangedCount , 1);
-
-    state.updateEditingValue(
-      const TextEditingValue(text: 'ab'),
+      const TextEditingValue(text: 'an', composing: TextRange(start: 0, end: 2)),
     );
     expect(onChangedCount , 2);
+    expect(controller.value.isComposingRangeValid , true);
 
-    preventInput = true;
+    // Simulate selecting the item that show 'and' on accessory view. 
     state.updateEditingValue(
-      const TextEditingValue(text: 'abc'),
+      const TextEditingValue(text: 'and'),
     );
-    expect(onChangedCount , 2);
+    expect(onChangedCount , 3);
+    expect(controller.value.isComposingRangeValid , false);
   });
 
   testWidgets('Formatters are skipped if text has not changed', (WidgetTester tester) async {
