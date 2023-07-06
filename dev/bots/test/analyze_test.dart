@@ -222,14 +222,14 @@ void main() {
         '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:41: nullableDouble?.clamp(0, 2)',
         '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:44: nullableInt?.clamp',
         '║ test/analyze-test-input/root/packages/flutter/lib/bar.dart:45: nullableDouble?.clamp',
-        '║' ,
+        '║',
         '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".',
         '║ For non-double uses of "clamp", use "// ignore_clamp_double_lint" on the line to silence this message.',
       ]
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
     expect(result,
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n\n'
       '$lines\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
@@ -304,10 +304,10 @@ void main() {
       '║ packages/flutter/lib/debug_only_access.dart:45: MixinFromDebugLib.[] accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:45: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:46: MixinFromDebugLib.[] accessed outside of an assert.\n',
-      '║ packages/flutter/lib/debug_only_access.dart:46: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:46: MixinFromDebugLib.debugGetSet accessed outside of an assert.',
     ]
     .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
-    .join('\n');
+    .join();
 
     expect(result,
       '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'

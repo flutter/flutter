@@ -33,7 +33,6 @@ const Object _debugAssert = Object();
 // defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
 const double _kDefaultFontSize = 14.0;
 
-
 /// How overflowing text should be handled.
 ///
 /// A [TextOverflow] can be passed to [Text] and [RichText] via their

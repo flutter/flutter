@@ -26,7 +26,9 @@ class ClassWithAClampMethod {
 
 void testNoDoubleClamp(int input) {
   final ClassWithAClampMethod nonDoubleClamp = ClassWithAClampMethod();
+  // ignore: unnecessary_nullable_for_final_variable_declarations
   final ClassWithAClampMethod? nonDoubleClamp2 = nonDoubleClamp;
+  // ignore: unnecessary_nullable_for_final_variable_declarations
   final int? nullableInt = input;
   final double? nullableDouble = nullableInt?.toDouble();
 
@@ -40,7 +42,10 @@ void testNoDoubleClamp(int input) {
   nullableInt?.clamp(0, 2.0);   // bad
   nullableDouble?.clamp(0, 2);  // bad.
 
-  final tearOff1 = nonDoubleClamp2?.clamp;
-  final tearOff2 = nullableInt?.clamp;    // bad.
-  final tearOff3 = nullableDouble?.clamp; // bad.
+  // ignore: unused_local_variable
+  final ClassWithAClampMethod Function(double, double)? tearOff1 = nonDoubleClamp2?.clamp;
+  // ignore: unused_local_variable
+  final num Function(num, num)? tearOff2 = nullableInt?.clamp;    // bad.
+  // ignore: unused_local_variable
+  final num Function(num, num)? tearOff3 = nullableDouble?.clamp; // bad.
 }

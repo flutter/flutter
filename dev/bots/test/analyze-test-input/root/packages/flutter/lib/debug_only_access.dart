@@ -14,12 +14,12 @@ void takeAnything(Object? input) { }
 void badDebugAssertAccess() {
   globalVaraibleFromDebugLib += 'test';
   globalFunctionFromDebugLib();
-  void Function() f = globalFunctionFromDebugLib;
+  void Function() f = globalFunctionFromDebugLib; // ignore: unused_local_variable
   f = globalFunctionFromDebugLib.call;
   MixinFromDebugLib.staticMethodFromDebugLib();
   f = MixinFromDebugLib.staticMethodFromDebugLib;
-  x.fieldFromDebugLib;
-  xx?.fieldFromDebugLib;
+  x.fieldFromDebugLib; // ignore: unnecessary_statements
+  xx?.fieldFromDebugLib; // ignore: unnecessary_statements
   x.debugGetSet;
   xx?.debugGetSet;
   x.debugGetSet = 2;
@@ -31,19 +31,19 @@ void badDebugAssertAccess() {
   takeAnything(xx?.methodFromDebugLib);
   x.debugOnlyExtensionMethod();
   takeAnything(xx?.debugOnlyExtensionMethod);
-  DebugOnlyEnum.foo;
-  DebugOnlyEnum.values;
+  DebugOnlyEnum.foo; // ignore: unnecessary_statements
+  DebugOnlyEnum.values; // ignore: unnecessary_statements
   RegularEnum.foo.debugOnlyMethod();
 
   // Overridden Operators
-  x + x;
-  xx! + xx!;
+  x + x; // ignore: unnecessary_statements
+  xx! + xx!; // ignore: unnecessary_statements
   y += x;
   y += xx!;
-  ~x;
-  ~xx!;
-  x[x.debugGetSet];
-  xx?[x.debugGetSet];
+  ~x; // ignore: unnecessary_statements
+  ~xx!; // ignore: unnecessary_statements
+  x[x.debugGetSet]; // ignore: unnecessary_statements
+  xx?[x.debugGetSet]; // ignore: unnecessary_statements
 }
 
 /// Yours truly [globalVaraibleFromDebugLib] from the comment section with love.
@@ -52,14 +52,14 @@ void goodDebugAssertAccess() {
     final _DebugOnlyClass debugObject = _DebugOnlyClass();
     debugObject
       .debugOnlyMemberMethod();
-    void Function() f = debugObject.debugOnlyMemberMethod;
+    final void Function() f = debugObject.debugOnlyMemberMethod;
     f();
     return true;
   }());
 
-  final ProductionClassWithDebugOnlyMixin x = ProductionClassWithDebugOnlyMixin()
+  final ProductionClassWithDebugOnlyMixin x = ProductionClassWithDebugOnlyMixin() // ignore: unused_local_variable
     ..run();
-    RegularEnum.foo;
+    RegularEnum.foo; // ignore: unnecessary_statements
 }
 
 mixin class BaseClass {

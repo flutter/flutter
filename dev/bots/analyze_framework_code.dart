@@ -72,7 +72,7 @@ class _NoDoubleClampVerifier implements ResolvedUnitVerifier {
     foundError(<String>[
       ...errors,
       '\n${bold}For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".$reset',
-      '\n${bold}For non-double uses of "clamp", use "// ignore_clamp_double_lint" on the line to silence this message.$reset',
+      '${bold}For non-double uses of "clamp", use "// ignore_clamp_double_lint" on the line to silence this message.$reset',
     ]);
   }
 
