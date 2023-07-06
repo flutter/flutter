@@ -1330,6 +1330,7 @@ mixin WidgetInspectorService {
     InspectorReferenceData referenceData;
     if (id == null) {
       // TODO(polina-c): comment here why we increase memory footprint by the prefix 'inspector-'.
+      // https://github.com/flutter/devtools/issues/5995
       id = 'inspector-$_nextId';
       _nextId += 1;
       _objectToId[object] = id;
