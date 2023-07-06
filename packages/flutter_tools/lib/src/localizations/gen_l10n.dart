@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -1328,7 +1330,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       syntheticPackageDirectory.createSync(recursive: true);
       final File flutterGenPubspec = syntheticPackageDirectory.childFile('pubspec.yaml');
       if (!flutterGenPubspec.existsSync()) {
-        flutterGenPubspec.writeAsStringSync(emptyPubspecTemplate);
+        flutterGenPubspec.writeAsStringSync(emptyPubspecTemplate.replaceAll('\n', Platform.lineTerminator));
       }
     }
 
@@ -1347,11 +1349,11 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
 
     // Generate the required files for localizations.
     _languageFileMap.forEach((File file, String contents) {
-      file.writeAsStringSync(contents);
+      file.writeAsStringSync(contents.replaceAll('\n', Platform.lineTerminator));
       _outputFileList.add(file.absolute.path);
     });
 
-    baseOutputFile.writeAsStringSync(generatedLocalizationsFile);
+    baseOutputFile.writeAsStringSync(generatedLocalizationsFile.replaceAll('\n', Platform.lineTerminator));
     final File? messagesFile = untranslatedMessagesFile;
     if (messagesFile != null) {
       _generateUntranslatedMessagesFile(logger, messagesFile);
@@ -1392,7 +1394,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
         json.encode(<String, Object> {
           'inputs': _inputFileList,
           'outputs': _outputFileList,
-        }),
+        }).replaceAll('\n', Platform.lineTerminator),
       );
     }
 
