@@ -2473,7 +2473,7 @@ void main() {
   testWidgets('Multiple selectables on a single line should be in screen order', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/127942.
       final UniqueKey outerText = UniqueKey();
-      const TextStyle textStyle=TextStyle(fontSize: 10);
+      const TextStyle textStyle = TextStyle(fontSize: 10);
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
