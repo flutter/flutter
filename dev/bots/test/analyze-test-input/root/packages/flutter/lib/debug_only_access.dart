@@ -7,7 +7,7 @@ import 'debug_only.dart';
 const Null _debugAssert = null;
 
 final ProductionClassWithDebugOnlyMixin x = ProductionClassWithDebugOnlyMixin();
-ProductionClassWithDebugOnlyMixin? xx = null;
+ProductionClassWithDebugOnlyMixin? xx;
 ProductionClassWithDebugOnlyMixin y = ProductionClassWithDebugOnlyMixin();
 void takeAnything(Object? input) { }
 
@@ -31,6 +31,9 @@ void badDebugAssertAccess() {
   takeAnything(xx?.methodFromDebugLib);
   x.debugOnlyExtensionMethod();
   takeAnything(xx?.debugOnlyExtensionMethod);
+  DebugOnlyEnum.foo;
+  DebugOnlyEnum.values;
+  RegularEnum.foo.debugOnlyMethod();
 
   // Overridden Operators
   x + x;
@@ -43,11 +46,12 @@ void badDebugAssertAccess() {
   xx?[x.debugGetSet];
 }
 
+/// Yours truly [globalVaraibleFromDebugLib] from the comment section with love.
 void goodDebugAssertAccess() {
   assert(() {
     final _DebugOnlyClass debugObject = _DebugOnlyClass();
     debugObject
-      ..debugOnlyMemberMethod();
+      .debugOnlyMemberMethod();
     void Function() f = debugObject.debugOnlyMemberMethod;
     f();
     return true;
@@ -55,9 +59,10 @@ void goodDebugAssertAccess() {
 
   final ProductionClassWithDebugOnlyMixin x = ProductionClassWithDebugOnlyMixin()
     ..run();
+    RegularEnum.foo;
 }
 
-class BaseClass {
+mixin class BaseClass {
   void run() { }
   void stop() { }
 
@@ -88,17 +93,17 @@ mixin MixinOnBaseClass implements BaseClass {
 
   @_debugAssert
   @override
-  int get value => -1; // bad.
+  int get value => -1;         // bad annotation.
 
   @_debugAssert
   @override
-  int operator ~() => ~value;
+  int operator ~() => ~value;  // bad annotation.
 }
 
 class ClassWithBadAnnotation1 extends BaseClass with MixinOnBaseClass {
   @_debugAssert
   @override
-  void run() {  }
+  void run() {  }             // bad annotation.
 
   void run1() {  }
 }
@@ -106,7 +111,7 @@ class ClassWithBadAnnotation1 extends BaseClass with MixinOnBaseClass {
 class ClassWithBadAnnotation2 with MixinOnBaseClass {
   @_debugAssert
   @override
-  void run() {  }
+  void run() {  }             // bad annotation.
 
   @override
   void stop() {  }
@@ -118,4 +123,18 @@ class ClassWithBadAnnotation2 with MixinOnBaseClass {
 @_debugAssert
 extension DebugOnly on ProductionClassWithDebugOnlyMixin {
   void debugOnlyExtensionMethod() {  }
+}
+
+@_debugAssert
+enum DebugOnlyEnum with BaseClass {
+  foo
+}
+
+@_debugAssert
+mixin DebugOnlyMixinOnRegularEnum {
+  void debugOnlyMethod() {}
+}
+
+enum RegularEnum with DebugOnlyMixinOnRegularEnum {
+  foo
 }

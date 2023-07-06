@@ -27,11 +27,11 @@ Future<void> runVerifiersInResolvedDirectory(String workingDirectory, List<Resol
     final Iterable<String> analyzedFilePaths = context.contextRoot.analyzedFiles();
     final AnalysisSession session = context.currentSession;
 
-    for (final String path in analyzedFilePaths) {
-      final SomeResolvedUnitResult unit = await session.getResolvedUnit(path);
+    for (final String filePath in analyzedFilePaths) {
+      final SomeResolvedUnitResult unit = await session.getResolvedUnit(filePath);
       if (unit is ResolvedUnitResult) {
         for (final ResolvedUnitVerifier verifier in verifiers) {
-          verifier.analyzeResolvedUnitResult(unit);
+          verifier.analyzeResolvedUnitResult(unit, workingDirectory);
         }
       } else {
         analyzerErrors.add('Analyzer error: file $unit could not be resolved.');
@@ -49,11 +49,17 @@ Future<void> runVerifiersInResolvedDirectory(String workingDirectory, List<Resol
 
 abstract class ResolvedUnitVerifier {
   void reportError();
-  void analyzeResolvedUnitResult(ResolvedUnitResult unit);
+  void analyzeResolvedUnitResult(ResolvedUnitResult unit, String workingDirectory);
 }
 
 // ----------- Verify No double.clamp -----------
 
+/// Verify that we use clampDouble instead of double.clamp for performance
+/// reasons.
+///
+/// See also:
+///   * https://github.com/flutter/flutter/pull/103559
+///   * https://github.com/flutter/flutter/issues/103917
 final ResolvedUnitVerifier verifyNoDoubleClamp = _NoDoubleClampVerifier();
 class _NoDoubleClampVerifier implements ResolvedUnitVerifier {
   final List<String> errors = <String>[];
@@ -71,7 +77,7 @@ class _NoDoubleClampVerifier implements ResolvedUnitVerifier {
   }
 
   @override
-  void analyzeResolvedUnitResult(ResolvedUnitResult unit) {
+  void analyzeResolvedUnitResult(ResolvedUnitResult unit, String workingDirectory) {
     final _DoubleClampVisitor visitor = _DoubleClampVisitor();
     unit.unit.visitChildren(visitor);
     for (final AstNode node in visitor.clampAccessNodes) {
@@ -84,7 +90,8 @@ class _NoDoubleClampVerifier implements ResolvedUnitVerifier {
       if (lineContent.contains('// ignore_clamp_double_lint')) {
         continue;
       }
-      errors.add('${unit.path}:$lineNumber: ${node.parent}');
+      final String relativePath = path.relative(unit.path, from: workingDirectory);
+      errors.add('$relativePath:$lineNumber: ${node.parent}');
     }
   }
 
@@ -94,6 +101,16 @@ class _NoDoubleClampVerifier implements ResolvedUnitVerifier {
 
 class _DoubleClampVisitor extends RecursiveAstVisitor<void> {
   final List<AstNode> clampAccessNodes = <AstNode>[];
+
+  // We don't care about directives or comments.
+  @override
+  void visitImportDirective(ImportDirective node) { }
+
+  @override
+  void visitExportDirective(ExportDirective node) { }
+
+  @override
+  void visitComment(Comment node) { }
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
@@ -132,20 +149,28 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<void> {
 
 final ResolvedUnitVerifier verifyDebugAssertAccess = _DebugAssertVerifier();
 class _DebugAssertVerifier extends ResolvedUnitVerifier {
-  final List<String> errors = <String>[];
+  final List<String> accessErrors = <String>[];
+  final List<String> annotationErrors = <String>[];
   @override
   void reportError() {
-    if (errors.isEmpty) {
-      return;
+    if (annotationErrors.isNotEmpty) {
+      foundError(<String>[
+        '${bold}Overriding a framework class member that was not annotated with @_debugAssert and marking the override @_debugAssert is not allowed.$reset',
+        '${bold}A framework method/getter/setter not marked as debug-only itself cannot have a debug-only override.$reset\n',
+        ...annotationErrors,
+        '\n${bold}Consider either removing the @_debugAssert annotation, or adding the annotation to the class member that is being overridden instead.$reset',
+      ]);
     }
-    foundError(<String>[
-      '\n${bold}Components annotated with @_debugAssert.$reset\n',
-      ...errors,
-    ]);
+    if (accessErrors.isNotEmpty) {
+      foundError(<String>[
+        '${bold}Framework symbols annotated with @_debugAssert should not be accessed outside of asserts.$reset\n',
+        ...accessErrors,
+      ]);
+    }
   }
 
   @override
-  void analyzeResolvedUnitResult(ResolvedUnitResult unit) {
+  void analyzeResolvedUnitResult(ResolvedUnitResult unit, String workingDirectory) {
     if (unit.libraryElement.metadata.any(_DebugAssertVisitor._isDebugAssertAnnotationElement)) {
       return;
     }
@@ -153,10 +178,20 @@ class _DebugAssertVerifier extends ResolvedUnitVerifier {
     final Map<ExecutableElement, bool> lookup = <ExecutableElement, bool>{};
     final _DebugAssertVisitor visitor = _DebugAssertVisitor(lookup);
     unit.unit.visitChildren(visitor);
+    final String relativePath = path.relative(unit.path, from: workingDirectory);
     for (final (AstNode node, Element element) in visitor.accessViolations) {
       final LineInfo lineInfo = unit.lineInfo;
       final int lineNumber = lineInfo.getLocation(node.offset).lineNumber;
-      errors.add('${unit.path}:$lineNumber: $element');
+      final String name = switch (element) {
+        ConstructorElement(:final InterfaceElement enclosingElement, isDefaultConstructor: true) => '${enclosingElement.name}.new',
+        ExecutableElement(:final InterfaceElement enclosingElement, :final String name) => '${enclosingElement.name}.$name',
+        Element(:final String? name) => name ?? '',
+      };
+      accessErrors.add('$relativePath:$lineNumber: $bold$name$reset accessed outside of an assert.');
+    }
+
+    for (final (String superImpl, String override) in visitor.incorrectAnnotations) {
+      annotationErrors.add('$relativePath: class member $bold$superImpl$reset is not annotated wtih $bold@_debugAssert$reset, but its override $bold$override$reset is.');
     }
   }
 
@@ -166,8 +201,11 @@ class _DebugAssertVerifier extends ResolvedUnitVerifier {
 
 class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
   _DebugAssertVisitor(this.overridableMemberLookup);
+
   final Map<ExecutableElement, bool> overridableMemberLookup;
-  List<(AstNode, Element)> accessViolations = <(AstNode, Element)>[];
+
+  final List<(AstNode, Element)> accessViolations = <(AstNode, Element)>[];
+  final List<(String, String)> incorrectAnnotations = <(String, String)>[];
 
   static bool _isDebugAssertAnnotationElement(ElementAnnotation? annotation) {
     final Element? annotationElement = annotation?.element;
@@ -175,16 +213,14 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
   }
 
   bool _overriddableClassMemberHasDebugAnnotation(ExecutableElement classMember, InterfaceElement enclosingElement) {
-    assert(!enclosingElement.library.isInSdk, '$enclosingElement (${enclosingElement.runtimeType}) is defined in ${enclosingElement.library}');
+    assert(!enclosingElement.library.isInSdk);
     final bool? cached = overridableMemberLookup[classMember];
     if (cached != null) {
       return cached;
     }
     final bool isClassMemberAnnotated = enclosingElement.library.metadata.any(_isDebugAssertAnnotationElement)
                                      || classMember.metadata.any(_isDebugAssertAnnotationElement)
-                                     || _hasDebugAnnotation(classMember.enclosingElement);
-
-    //print('> Looking for override. ${enclosingElement.name}.$classMember (${classMember.runtimeType} @ $enclosingElement, synthetic: ${classMember.isSynthetic}) is annotated? $isClassMemberAnnotated. Checking supertypes ${enclosingElement.allSupertypes})');
+                                     || classMember.enclosingElement.metadata.any(_isDebugAssertAnnotationElement);
 
     bool isAnnotated = isClassMemberAnnotated;
     for (final InterfaceType supertype in enclosingElement.allSupertypes) {
@@ -202,25 +238,12 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
       }
       final bool isSuperImplAnnotated = _overriddableClassMemberHasDebugAnnotation(superImpl, supertype.element);
       if (isClassMemberAnnotated && !isSuperImplAnnotated) {
-        print('!!!!!!!!! bad: ${enclosingElement.name}.${classMember.name} is annotated but $supertype.${superImpl.name}(${supertype.element.runtimeType}, ${superImpl.runtimeType}) is not');
+        incorrectAnnotations.add(('$supertype.${superImpl.name}', '${enclosingElement.name}.${classMember.name}'));
       }
       isAnnotated |= isSuperImplAnnotated;
     }
 
     return overridableMemberLookup[classMember] = isAnnotated;
-    //if (supertype == null || supertype.element.library.isInSdk) {
-    //  return classMemberLookup[classMember] = isAnnotated;
-    //}
-
-    //print('\t $supertype => $superImpl');
-    //if (superImpl != null && _hasDebugAnnotation(superImpl)) {
-    //  return classMemberLookup[classMember] = isAnnotated;
-    //} else if (superImpl != null && !_hasDebugAnnotation(superImpl) && isAnnotated) {
-    //  print('!!!!!!!!! bad: ${enclosingElement.name}.$classMember is annotated but $superImpl(${superImpl.runtimeType}) is not');
-    //  return classMemberLookup[classMember] = true;
-    //} else {
-    //  return classMemberLookup[classMember] = isAnnotated || (superImpl != null && _hasDebugAnnotation(superImpl));
-    //}
   }
 
   bool _defaultConstructorHasDebugAnnotation(ConstructorElement constructorElement) {
@@ -230,20 +253,20 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     final bool annotated = !constructorElement.isSynthetic
       && (constructorElement.library.metadata.any(_isDebugAssertAnnotationElement)
        || constructorElement.metadata.any(_isDebugAssertAnnotationElement)
-       || _hasDebugAnnotation(constructorElement.enclosingElement));
+       || constructorElement.enclosingElement.metadata.any(_isDebugAssertAnnotationElement));
     if (annotated) {
       return true;
     }
     // Subclasses can inherit default constructors from the superclass. Since
-    // constructors can't be invoked by the class members (see the next case
-    // for an example), if any superclass in the class hierarchy has a default
-    // constructor (including synthesized ones) that has the annotation, then
-    // the default constructor is debug-only.
+    // constructors can't be invoked by the class members (unlike methods that
+    // can have "bad annotations"), if any superclass in the class hierarchy has
+    // a default constructor (excluding synthesized ones) that has the
+    // annotation, then the default constructor is debug-only.
     final ConstructorElement? superConstructor = constructorElement.enclosingElement.thisType.superclass?.element.unnamedConstructor;
     return superConstructor != null && _defaultConstructorHasDebugAnnotation(superConstructor);
   }
 
-  bool _hasDebugAnnotation(Element element) {
+  bool _isDebugOnlyExecutableElement(Element element) {
     final LibraryElement? lib = element.library;
     if (lib == null || lib.isInSdk) {
       // The assert is for framework code only. Dart sdk symbols won't be annotated.
@@ -252,15 +275,15 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
 
     switch (element) {
       // The easier cases: things that a subclass does not inherit from its
-      // superclass: named constructors and static members, extension members.
+      // superclass: named constructors, static members, extension members.
       case ConstructorElement(isDefaultConstructor: false, :final Element enclosingElement)
-        || ExecutableElement(isStatic: true, :final Element enclosingElement):
-        //print('EZ: $element. enclosing element: $enclosingElement');
-        return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement) || _hasDebugAnnotation(enclosingElement);
+        || ExecutableElement(isStatic: true, :final Element enclosingElement)
+        || ClassMemberElement(enclosingElement: ExtensionElement() && final Element enclosingElement):
+        return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement) || enclosingElement.metadata.any(_isDebugAssertAnnotationElement);
       case ConstructorElement(isDefaultConstructor: true):
         return _defaultConstructorHasDebugAnnotation(element);
       // Non-static class memebers that are overridable. Also we want to detect
-      // and warn against cases like this:
+      // and warn against "bad annotations":
       // class A {
       //   int get a;
       //   int get b => a;
@@ -271,24 +294,14 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
       // }
       case ExecutableElement(:final InterfaceElement enclosingElement):
         assert(!element.isStatic);
-        //print('Overridable element check: ${enclosingElement.name}.$element (${element.runtimeType})');
         return _overriddableClassMemberHasDebugAnnotation(element, enclosingElement);
-      case ClassMemberElement(:final ExtensionElement enclosingElement):
-        return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement) || _hasDebugAnnotation(enclosingElement);
-      // Non class members, fields(?), type parameters
-      default:
-      //if (element.enclosingElement is! CompilationUnitElement && element is ExecutableElement) {
-      //  print('!!! default case. $element (${element.runtimeType} is ClassMemberElement? ${element is ClassMemberElement}). enclosing element: ${element.enclosingElement} (${element.enclosingElement.runtimeType})');
-      //}
+      // Non class members.
+      case FieldElement() || ExecutableElement():
+        assert(element.enclosingElement is! InterfaceElement);
         return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement);
+      default:
+        return false;
     }
-  }
-
-  static bool _isValidElementType(Element element) {
-    return switch (element) {
-      FieldElement() || ExecutableElement() => true,
-      _ => false,
-    };
   }
 
   // Accessing debugAsserts in asserts (either in the condition or the message)
@@ -308,13 +321,12 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
   void visitAnnotatedNode(AnnotatedNode node) {
     if (node is ClassMember) {
       final Element? element = node.declaredElement;
-      if (element != null && _hasDebugAnnotation(element)) {
+      if (element != null && _isDebugOnlyExecutableElement(element)) {
         return;
       }
     } else if (node.metadata.any((Annotation m) => _isDebugAssertAnnotationElement(m.elementAnnotation))) {
       return;
     }
-
     // Only continue searching if the declaration doesn't have @_debugAssert.
     return super.visitAnnotatedNode(node);
   }
@@ -322,15 +334,20 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
     final Element? element = node.staticElement;
-    if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
+    if (element != null && _isDebugOnlyExecutableElement(element)) {
       accessViolations.add((node, element));
     }
+    // Most symbols will be inspected in this method, with the exceptions of:
+    //  * unamed constructors
+    //  * prefix, binary, postfix operators, index access (e.g., ==, ~, list[index]),
+    //    as they're tokens not identifiers.
+    //  * assignments (to account for compound assignments the staticElement field is intentionally set to null)
   }
 
   @override
   void visitConstructorName(ConstructorName node) {
     final Element? element = node.staticElement;
-    if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
+    if (element != null && _isDebugOnlyExecutableElement(element)) {
       accessViolations.add((node, element));
     }
   }
@@ -339,7 +356,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
   void visitBinaryExpression(BinaryExpression node) {
     final Element? element = node.staticElement;
     node.leftOperand.accept(this);
-    if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
+    if (element != null && _isDebugOnlyExecutableElement(element)) {
       accessViolations.add((node, element));
     }
     node.rightOperand.accept(this);
@@ -348,7 +365,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
   @override
   void visitPrefixExpression(PrefixExpression node) {
     final Element? element = node.staticElement;
-    if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
+    if (element != null && _isDebugOnlyExecutableElement(element)) {
       accessViolations.add((node, element));
     }
     node.operand.accept(this);
@@ -358,7 +375,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
   void visitPostfixExpression(PostfixExpression node) {
     node.operand.accept(this);
     final Element? element = node.staticElement;
-    if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
+    if (element != null && _isDebugOnlyExecutableElement(element)) {
       accessViolations.add((node, element));
     }
   }
@@ -367,7 +384,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
   void visitIndexExpression(IndexExpression node) {
     node.target?.accept(this);
     final Element? element = node.staticElement;
-    if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
+    if (element != null && _isDebugOnlyExecutableElement(element)) {
       accessViolations.add((node, element));
     }
     node.index.accept(this);
@@ -378,13 +395,13 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     final Element? readElement = node.readElement;
     final Element? writeElement = node.writeElement;
     final Element? operatorElement = node.staticElement;
-    if (readElement != null && _hasDebugAnnotation(readElement)) {
+    if (readElement != null && _isDebugOnlyExecutableElement(readElement)) {
       accessViolations.add((node, readElement));
     }
-    if (writeElement != null && writeElement != readElement && _hasDebugAnnotation(writeElement)) {
+    if (writeElement != null && writeElement != readElement && _isDebugOnlyExecutableElement(writeElement)) {
       accessViolations.add((node, writeElement));
     }
-    if (operatorElement != null && _hasDebugAnnotation(operatorElement) && _isValidElementType(operatorElement)) {
+    if (operatorElement != null && _isDebugOnlyExecutableElement(operatorElement)) {
       accessViolations.add((node, operatorElement));
     }
     super.visitAssignmentExpression(node);
@@ -392,6 +409,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
 
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
+    // Special case toString.
     if (node.name.lexeme != 'toString' || node.isStatic) {
       super.visitMethodDeclaration(node);
     }

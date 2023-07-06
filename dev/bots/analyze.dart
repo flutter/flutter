@@ -17,7 +17,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'allowlist.dart';
-import 'flutter_lib_lints.dart';
+import 'analyze_framework_code.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -164,7 +164,7 @@ Future<void> run(List<String> arguments) async {
     ...arguments,
   ]);
 
-  if (analyzeResults.exitCode != 0) {
+  if (analyzeResults.exitCode == 0) {
     // Only run the private lints when the code is free of type errors. The
     // lints are easier to write when they can assume, for example, there is no
     // inheritance cycles.
@@ -240,41 +240,6 @@ _Line _getLine(ParseStringResult parseResult, int offset) {
   );
   return _Line(lineNumber, content);
 }
-
-/// Verify that we use clampDouble instead of Double.clamp for performance reasons.
-///
-/// We currently can't distinguish valid uses of clamp from problematic ones so
-/// if the clamp is operating on a type other than a `double` the
-/// `// ignore_clamp_double_lint` comment must be added to the line where clamp is
-/// invoked.
-///
-/// See also:
-///   * https://github.com/flutter/flutter/pull/103559
-///   * https://github.com/flutter/flutter/issues/103917
-//Future<void> verifyNoDoubleClamp(String workingDirectory) async {
-//  final String flutterLibPath = '$workingDirectory/packages/flutter/lib';
-//  final Stream<File> testFiles =
-//      _allFiles(flutterLibPath, 'dart', minimumMatches: 100);
-//  final List<String> errors = <String>[];
-//  await for (final File file in testFiles) {
-//    final ParseStringResult parseResult = parseFile(
-//      featureSet: _parsingFeatureSet(),
-//      path: file.absolute.path,
-//    );
-//    final _DoubleClampVisitor visitor = _DoubleClampVisitor(parseResult);
-//    visitor.visitCompilationUnit(parseResult.unit);
-//    for (final _Line clamp in visitor.clamps) {
-//      errors.add('${file.path}:${clamp.line}: `clamp` method used instead of `clampDouble`.');
-//    }
-//  }
-//  if (errors.isNotEmpty) {
-//    foundError(<String>[
-//      ...errors,
-//      '\n${bold}For performance reasons, we use a custom `clampDouble` function instead of using `Double.clamp`.$reset',
-//      '\n${bold}For non-double uses of `clamp`, use `// ignore_clamp_double_lint` on the line to silence this message.$reset',
-//    ]);
-//  }
-//}
 
 /// Verify Token Templates are mapped to correct file names while generating
 /// M3 defaults in /dev/tools/gen_defaults/bin/gen_defaults.dart.
