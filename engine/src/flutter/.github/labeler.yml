@@ -6,7 +6,7 @@
 embedder:
   - shell/platform/embedder
 
-impeller:
+'e: impeller':
   - impeller/**/*
 
 platform-android:
