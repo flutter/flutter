@@ -166,9 +166,8 @@ class ManifestAssetBundle implements AssetBundle {
   DateTime? _lastBuildTimestamp;
 
   // We assume the main asset is designed for a device pixel ratio of 1.0.
-  static const double _defaultResolution = 1.0;
   static const String _kAssetManifestJsonFilename = 'AssetManifest.json';
-  static const String _kAssetManifestBinFilename = 'AssetManifest.smcbin';
+  static const String _kAssetManifestBinFilename = 'AssetManifest.bin';
 
   static const String _kNoticeFile = 'NOTICES';
   // Comically, this can't be name with the more common .gz file extension
@@ -597,7 +596,7 @@ class ManifestAssetBundle implements AssetBundle {
       if (packageName == null)
         ...manifest.fontsDescriptor
       else
-        for (Font font in _parsePackageFonts(
+        for (final Font font in _parsePackageFonts(
           manifest,
           packageName,
           packageConfig,
@@ -688,7 +687,7 @@ class ManifestAssetBundle implements AssetBundle {
   DevFSByteContent _createAssetManifestBinary(
     Map<String, List<String>> assetManifest
   ) {
-    double parseScale(String key) {
+    double? parseScale(String key) {
       final Uri assetUri = Uri.parse(key);
       String directoryPath = '';
       if (assetUri.pathSegments.length > 1) {
@@ -699,7 +698,8 @@ class ManifestAssetBundle implements AssetBundle {
       if (match != null && match.groupCount > 0) {
         return double.parse(match.group(1)!);
       }
-      return _defaultResolution;
+
+      return null;
     }
 
     final Map<String, dynamic> result = <String, dynamic>{};
@@ -708,15 +708,12 @@ class ManifestAssetBundle implements AssetBundle {
       final List<dynamic> resultVariants = <dynamic>[];
       final List<String> entries = (manifestEntry.value as List<dynamic>).cast<String>();
       for (final String variant in entries) {
-        if (variant == manifestEntry.key) {
-          // With the newer binary format, don't include the main asset in it's
-          // list of variants. This reduces parsing time at runtime.
-          continue;
-        }
         final Map<String, dynamic> resultVariant = <String, dynamic>{};
-        final double variantDevicePixelRatio = parseScale(variant);
+        final double? variantDevicePixelRatio = parseScale(variant);
         resultVariant['asset'] = variant;
-        resultVariant['dpr'] = variantDevicePixelRatio;
+        if (variantDevicePixelRatio != null) {
+          resultVariant['dpr'] = variantDevicePixelRatio;
+        }
         resultVariants.add(resultVariant);
       }
       result[manifestEntry.key] = resultVariants;

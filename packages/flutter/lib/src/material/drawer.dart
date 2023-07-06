@@ -130,6 +130,12 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// ```
 /// {@end-tool}
 ///
+/// {@tool snippet}
+/// This example shows how to migrate the above [Drawer] to a [NavigationDrawer].
+///
+/// See code in examples/api/lib/material/navigation_drawer/navigation_drawer.1.dart **
+/// {@end-tool}
+///
 /// An open drawer may be closed with a swipe to close gesture, pressing the
 /// escape key, by tapping the scrim, or by calling pop route function such as
 /// [Navigator.pop]. For example a drawer item might close the drawer when tapped:
@@ -832,8 +838,6 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
   _DrawerDefaultsM3(this.context)

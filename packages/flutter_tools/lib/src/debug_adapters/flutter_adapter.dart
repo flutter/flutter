@@ -11,11 +11,12 @@ import 'package:vm_service/vm_service.dart' as vm;
 import '../base/io.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../globals.dart' as globals show fs;
 import 'flutter_adapter_args.dart';
 import 'flutter_base_adapter.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter applications.
-class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
+class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFileUtils {
   FlutterDebugAdapter(
     super.channel, {
     required super.fileSystem,
@@ -120,6 +121,16 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   @override
   Future<void> attachImpl() async {
     final FlutterAttachRequestArguments args = this.args as FlutterAttachRequestArguments;
+    String? vmServiceUri = args.vmServiceUri;
+    final String? vmServiceInfoFile = args.vmServiceInfoFile;
+
+    if (vmServiceUri != null && vmServiceInfoFile != null) {
+      sendConsoleOutput(
+        'To attach, provide only one (or neither) of vmServiceUri/vmServiceInfoFile',
+      );
+      handleSessionTerminate();
+      return;
+    }
 
     launchProgress = startProgressNotification(
       'launch',
@@ -127,7 +138,11 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
       message: 'Attaching…',
     );
 
-    final String? vmServiceUri = args.vmServiceUri;
+    if (vmServiceUri == null && vmServiceInfoFile != null) {
+      final Uri uriFromFile = await waitForVmServiceInfoFile(logger, globals.fs.file(vmServiceInfoFile));
+      vmServiceUri = uriFromFile.toString();
+    }
+
     final List<String> toolArgs = <String>[
       'attach',
       '--machine',
@@ -170,6 +185,8 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     switch (request.command) {
       case 'hotRestart':
       case 'hotReload':
+      // This convention is for the internal IDE client.
+      case r'$/hotReload':
         final bool isFullRestart = request.command == 'hotRestart';
         await _performRestart(isFullRestart, args?.args['reason'] as String?);
         sendResponse(null);
@@ -663,6 +680,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     bool fullRestart, [
     String? reason,
   ]) async {
+    // Don't do anything if the app hasn't started yet, as restarts and reloads
+    // can only operate on a running app.
+    if (_appId == null) {
+      return;
+    }
+
     final String progressId = fullRestart ? 'hotRestart' : 'hotReload';
     final String progressMessage = fullRestart ? 'Hot restarting…' : 'Hot reloading…';
     final DapProgressReporter progress = startProgressNotification(

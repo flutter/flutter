@@ -211,7 +211,7 @@ void main() {
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, responseError: const OSError('Connection Reset by peer')),
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, responseError: const OSError('Connection Reset by peer')),
         // This is the value of `<int>[1, 2, 3, 4, 5]` run through `osUtils.gzipLevel1Stream`.
-        FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (List<int> chunk in expectedEncoded) ...chunk]),
+        FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (final List<int> chunk in expectedEncoded) ...chunk]),
       ]),
       uploadRetryThrottle: Duration.zero,
     );

@@ -4,111 +4,100 @@
 
 # See https://github.com/actions/labeler/blob/main/README.md for docs.
 'a: accessibility':
-  - any:
-    - accessibility
-    - semantics
+  - '**/accessibility/*'
+  - '**/*accessibility*'
+  - '**/semantics/*'
+  - '**/*semantics*'
 
 'a: animation':
-  - any:
-    - animation
+  - '**/animation/*'
+  - '**/*animation*'
 
 'a: internationalization':
-  - any:
-    - packages/flutter_localizations/**
+  - packages/flutter_localizations/**/*
 
-'a: test':
-  - any:
-    - packages/flutter_driver/**
-    - packages/flutter_goldens/**
-    - packages/flutter_goldens_client/**
-    - packages/flutter_test/**
+'a: tests':
+  - packages/flutter_driver/**/*
+  - packages/flutter_goldens/**/*
+  - packages/flutter_goldens_client/**/*
+  - packages/flutter_test/**/*
 
 'a: text input':
-  - any:
-    - text
+  - '**/text/*'
+  - '**/*text*'
 
 'd: api docs':
-  - any:
-    - examples/api/**
+  - examples/api/**/*
 
 'd: examples':
-  - any:
-    - examples/**
-
-documentation:
-  - any:
-    - examples/api/**
+  - examples/**/*
 
 engine:
-  - any:
-    - bin/internal/engine.version
+  - bin/internal/engine.version
 
 'f: cupertino':
-  - any:
-    - cupertino
+  - '**/cupertino/*'
+  - '**/*cupertino*'
 
 'f: focus':
-  - any:
-    - focus
+  - '**/focus/*'
+  - '**/*focus*'
 
 'f: gestures':
-  - any:
-    - gestures
+  - '**/gestures/*'
+  - '**/*gestures*'
 
-'f: material':
-  - any:
-    - material
+'f: material design':
+  - '**/material/*'
+  - '**/*material*'
 
 'f: routes':
-  - any:
-    - navigator
-    - route
+  - '**/navigator/*'
+  - '**/*navigator*'
+  - '**/route/*'
+  - '**/*route*'
 
 'f: scrolling':
-  - any:
-    - scroll
-    - sliver
-    - viewport
+  - '**/*scroll*'
+  - '**/scroll/*'
+  - '**/*sliver*'
+  - '**/sliver/*'
+  - '**/*viewport*'
+  - '**/viewport/*'
 
 framework:
-  - any:
-    - packages/flutter/**
-    - packages/flutter_driver/**
-    - packages/flutter_goldens/**
-    - packages/flutter_goldens_client/**
-    - packages/flutter_test/**
-    - packages/integration_test/**
+  - packages/flutter/**/*
+  - packages/flutter_driver/**/*
+  - packages/flutter_goldens/**/*
+  - packages/flutter_goldens_client/**/*
+  - packages/flutter_test/**/*
+  - packages/integration_test/**/*
 
-integration_test:
-  - any:
-    - packages/integration_test/**
+'f: integration_test':
+  - packages/integration_test/**/*
 
 platform-ios:
-  - any:
-    - packages/flutter_tools/lib/src/ios/**
+  - packages/flutter_tools/lib/src/ios/**/*
 
 team:
-  - any:
-    - '**/pubspec.yaml'
-    - '**/fix_data.yaml'
-    - '**/*.expect'
-    - '**/*test_fixes*'
-    - dev/**
-    - examples/**
-    - packages/flutter_goldens/**
-    - packages/flutter_goldens_client/**
+  - '**/pubspec.yaml'
+  - '**/fix_data.yaml'
+  - '**/*.expect'
+  - '**/*test_fixes*'
+  - .github/**/*
+  - dev/**/*
+  - examples/**/*
+  - packages/flutter_goldens/**/*
+  - packages/flutter_goldens_client/**/*
 
-'team: gallery':
-  - any:
-    - examples/flutter_gallery/**
+'customer: gallery':
+  - examples/flutter_gallery/**/*
 
 tech-debt:
-  - any:
-    - '**/fix_data.yaml'
-    - '**/*.expect'
-    - '**/*test_fixes*'
+  - '**/fix_data.yaml'
+  - '**/*.expect'
+  - '**/*test_fixes*'
 
 tool:
-  - any:
-    - packages/flutter_tools/**
-    - packages/fuchsia_remote_debug_protocol/**
+  - packages/flutter_tools/**/*
+  - packages/fuchsia_remote_debug_protocol/**/*

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -91,19 +90,7 @@ Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
 // Analytics instance for package:unified_analytics for telemetry
 // reporting for all Flutter and Dart related tooling
-Analytics get analytics => context.get<Analytics>() ?? getDefaultAnalytics();
-Analytics getDefaultAnalytics() {
-
-  initializeDateFormatting();
-  final Analytics defaultAnalytics = Analytics(
-    tool: DashTool.flutterTool,
-    flutterChannel: flutterVersion.channel,
-    flutterVersion: flutterVersion.frameworkVersion,
-    dartVersion: flutterVersion.dartSdkVersion,
-  );
-
-  return defaultAnalytics;
-}
+Analytics get analytics => context.get<Analytics>()!;
 
 /// Currently active implementation of the file system.
 ///
@@ -299,9 +286,6 @@ FlutterProjectFactory get projectFactory {
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
 
 PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
-
-// TODO(fujino): Migrate to 'main' https://github.com/flutter/flutter/issues/95041
-const String kDefaultFrameworkChannel = 'master';
 
 // Used to build RegExp instances which can detect the VM service message.
 final RegExp kVMServiceMessageRegExp = RegExp(r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');

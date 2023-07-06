@@ -307,8 +307,8 @@ class ThemeData with Diagnosticable {
     VisualDensity? visualDensity,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
-    // properties (as well as primaryColorBrightness, and primarySwatch)
-    // will gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
+    // properties (as well as primarySwatch) will gradually be phased out, see
+    // https://github.com/flutter/flutter/issues/91772.
     Brightness? brightness,
     Color? canvasColor,
     Color? cardColor,
@@ -389,11 +389,6 @@ class ThemeData with Diagnosticable {
     TooltipThemeData? tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.6.0-11.0.pre.',
-    )
-    Brightness? primaryColorBrightness,
-    @Deprecated(
       'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
@@ -469,7 +464,6 @@ class ThemeData with Diagnosticable {
 
       // Default some of the color settings to values from the color scheme
       primaryColor ??= primarySurfaceColor;
-      primaryColorBrightness = ThemeData.estimateBrightnessForColor(primarySurfaceColor);
       canvasColor ??= colorScheme.background;
       scaffoldBackgroundColor ??= colorScheme.background;
       bottomAppBarColor ??= colorScheme.surface;
@@ -599,7 +593,6 @@ class ThemeData with Diagnosticable {
     tooltipTheme ??= const TooltipThemeData();
 
     // DEPRECATED (newest deprecations at the bottom)
-    primaryColorBrightness = estimatedPrimaryColorBrightness;
     errorColor ??= Colors.red[700]!;
     backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
     bottomAppBarColor ??= colorSchemeSeed != null ? colorScheme.surface : isDark ? Colors.grey[800]! : Colors.white;
@@ -696,7 +689,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      primaryColorBrightness: primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator,
       toggleableActiveColor: toggleableActiveColor,
       selectedRowColor: selectedRowColor,
@@ -809,11 +801,6 @@ class ThemeData with Diagnosticable {
     required this.tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.6.0-11.0.pre.',
-    )
-    Brightness? primaryColorBrightness,
-    @Deprecated(
       'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
@@ -848,7 +835,6 @@ class ThemeData with Diagnosticable {
 
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
-       _primaryColorBrightness = primaryColorBrightness,
        _toggleableActiveColor = toggleableActiveColor,
        _selectedRowColor = selectedRowColor,
        _errorColor = errorColor,
@@ -856,7 +842,6 @@ class ThemeData with Diagnosticable {
        _bottomAppBarColor = bottomAppBarColor,
        assert(toggleableActiveColor != null),
         // DEPRECATED (newest deprecations at the bottom)
-       assert(primaryColorBrightness != null),
        assert(errorColor != null),
        assert(backgroundColor != null);
 
@@ -903,7 +888,6 @@ class ThemeData with Diagnosticable {
       colorScheme: colorScheme,
       brightness: colorScheme.brightness,
       primaryColor: primarySurfaceColor,
-      primaryColorBrightness: ThemeData.estimateBrightnessForColor(primarySurfaceColor),
       canvasColor: colorScheme.background,
       scaffoldBackgroundColor: colorScheme.background,
       bottomAppBarColor: colorScheme.surface,
@@ -1524,22 +1508,6 @@ class ThemeData with Diagnosticable {
 
   // DEPRECATED (newest deprecations at the bottom)
 
-  /// Obsolete property that was originally used to determine the color
-  /// of text and icons placed on top of the primary color (e.g. toolbar text).
-  ///
-  /// The material library no longer uses this property. The [appBarTheme] can
-  /// be used to configure the appearance of [AppBar]s. The appearance of
-  /// Keyboards for [TextField]s now uses the overall theme's
-  /// [ThemeData.brightness] and can also be customized with
-  /// [TextField.keyboardAppearance]. The brightness of any color can be found
-  /// with [ThemeData.estimateBrightnessForColor].
-  @Deprecated(
-    'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after v2.6.0-11.0.pre.',
-  )
-  Brightness get primaryColorBrightness => _primaryColorBrightness!;
-  final Brightness? _primaryColorBrightness;
-
   /// Specifies which overscroll indicator to use on [TargetPlatform.android].
   ///
   /// When null, the default value of
@@ -1697,11 +1665,6 @@ class ThemeData with Diagnosticable {
     TooltipThemeData? tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.6.0-11.0.pre.',
-    )
-    Brightness? primaryColorBrightness,
-    @Deprecated(
       'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
@@ -1827,7 +1790,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      primaryColorBrightness: primaryColorBrightness ?? _primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
       toggleableActiveColor: toggleableActiveColor ?? _toggleableActiveColor,
       selectedRowColor: selectedRowColor ?? _selectedRowColor,
@@ -2022,7 +1984,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
       // DEPRECATED (newest deprecations at the bottom)
-      primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
       toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),
@@ -2129,7 +2090,6 @@ class ThemeData with Diagnosticable {
         other.toggleButtonsTheme == toggleButtonsTheme &&
         other.tooltipTheme == tooltipTheme &&
         // DEPRECATED (newest deprecations at the bottom)
-        other.primaryColorBrightness == primaryColorBrightness &&
         other.androidOverscrollIndicator == androidOverscrollIndicator &&
         other.toggleableActiveColor == toggleableActiveColor &&
         other.selectedRowColor == selectedRowColor &&
@@ -2233,7 +2193,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme,
       tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      primaryColorBrightness,
       androidOverscrollIndicator,
       toggleableActiveColor,
       selectedRowColor,
@@ -2339,7 +2298,6 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ToggleButtonsThemeData>('toggleButtonsTheme', toggleButtonsTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme, level: DiagnosticLevel.debug));
     // DEPRECATED (newest deprecations at the bottom)
-    properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor, level: DiagnosticLevel.debug));
@@ -2762,8 +2720,6 @@ class VisualDensity with Diagnosticable {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 const ColorScheme _colorSchemeLightM3 = ColorScheme(
   brightness: Brightness.light,

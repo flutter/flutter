@@ -607,15 +607,16 @@ void main() {
         ..line(
           color: theme.colorScheme.primary,
           strokeWidth: indicatorWeight,
-          p1: const Offset(65.5, indicatorY),
-          p2: const Offset(134.5, indicatorY),
+          p1: const Offset(bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 65.75 : 65.5, indicatorY),
+          p2: const Offset(bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 134.25 : 134.5, indicatorY),
         ),
     );
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Tab bar defaults (primary)', (WidgetTester tester) async {
     // Test default label color and label styles.

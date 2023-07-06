@@ -759,8 +759,6 @@ class _ExpansionTileDefaultsM2 extends ExpansionTileThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _ExpansionTileDefaultsM3 extends ExpansionTileThemeData {
   _ExpansionTileDefaultsM3(this.context);
 

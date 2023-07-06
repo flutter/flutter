@@ -8,15 +8,22 @@ import 'package:flutter_test/flutter_test.dart';
 class TestAssetBundle extends AssetBundle {
   @override
   Future<ByteData> load(String key) async {
-    if (key == 'AssetManifest.smcbin') {
+    if (key == 'AssetManifest.bin') {
       final Map<String, List<Object>> binManifestData = <String, List<Object>>{
         'assets/foo.png': <Object>[
           <String, Object>{
+            'asset': 'assets/foo.png',
+          },
+          <String, Object>{
             'asset': 'assets/2x/foo.png',
             'dpr': 2.0
-          }
+          },
         ],
-        'assets/bar.png': <Object>[],
+        'assets/bar.png': <Object>[
+          <String, Object>{
+            'asset': 'assets/bar.png',
+          },
+        ],
       };
 
       final ByteData data = const StandardMessageCodec().encodeMessage(binManifestData)!;
@@ -31,7 +38,6 @@ class TestAssetBundle extends AssetBundle {
     return parser(await loadString(key));
   }
 }
-
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

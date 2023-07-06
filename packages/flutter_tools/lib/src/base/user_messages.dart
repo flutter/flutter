@@ -21,7 +21,7 @@ class UserMessages {
 
   // Messages used in FlutterValidator
   String flutterStatusInfo(String? channel, String? version, String os, String locale) =>
-      'Channel ${channel ?? 'unknown'}, ${version ?? 'Unknown'}, on $os, locale $locale';
+      'Channel ${channel ?? 'unknown'}, ${version ?? 'unknown version'}, on $os, locale $locale';
   String flutterVersion(String version, String channel, String flutterRoot) =>
       'Flutter version $version on channel $channel at $flutterRoot';
   String get flutterUnknownChannel =>
