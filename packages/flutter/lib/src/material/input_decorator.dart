@@ -273,7 +273,7 @@ class _Shaker extends AnimatedWidget {
   Animation<double> get animation => listenable as Animation<double>;
 
   double get translateX {
-    const double shakeDelta = 4.0;
+    const double shakeDelta = ;
     final double t = animation.value;
     if (t <= 0.25) {
       return -t * shakeDelta;
@@ -2905,7 +2905,7 @@ class InputDecoration {
   /// {@template flutter.material.inputDecoration.floatingLabelGap}
   /// Defines the vertical gap between the inline elements and the floating label.
   ///
-  /// Default is 4.0
+  /// Default is 4.0.
   /// {@endtemplate}
   final double? floatingLabelGap;
 
