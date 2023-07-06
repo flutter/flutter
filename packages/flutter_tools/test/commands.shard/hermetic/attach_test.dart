@@ -105,7 +105,6 @@ void main() {
 
       testUsingContext('succeeds with iOS device with protocol discovery', () async {
         final FakeIOSDevice device = FakeIOSDevice(
-          logReader: fakeLogReader,
           portForwarder: portForwarder,
           majorSdkVersion: 12,
           onGetLogReader: () {
@@ -167,7 +166,6 @@ void main() {
 
       testUsingContext('succeeds with iOS device with mDNS', () async {
         final FakeIOSDevice device = FakeIOSDevice(
-          logReader: fakeLogReader,
           portForwarder: portForwarder,
           majorSdkVersion: 16,
           onGetLogReader: () {
@@ -237,7 +235,6 @@ void main() {
 
       testUsingContext('succeeds with iOS device with mDNS wireless device', () async {
         final FakeIOSDevice device = FakeIOSDevice(
-          logReader: fakeLogReader,
           portForwarder: portForwarder,
           majorSdkVersion: 16,
           connectionInterface: DeviceConnectionInterface.wireless,
@@ -309,7 +306,6 @@ void main() {
 
       testUsingContext('succeeds with iOS device with mDNS wireless device with debug-port', () async {
         final FakeIOSDevice device = FakeIOSDevice(
-          logReader: fakeLogReader,
           portForwarder: portForwarder,
           majorSdkVersion: 16,
           connectionInterface: DeviceConnectionInterface.wireless,
@@ -385,7 +381,6 @@ void main() {
 
       testUsingContext('succeeds with iOS device with mDNS wireless device with debug-url', () async {
         final FakeIOSDevice device = FakeIOSDevice(
-          logReader: fakeLogReader,
           portForwarder: portForwarder,
           majorSdkVersion: 16,
           connectionInterface: DeviceConnectionInterface.wireless,
@@ -619,7 +614,6 @@ void main() {
 
       testUsingContext('succeeds when ipv6 is specified and debug-port is not on iOS device', () async {
         final FakeIOSDevice device = FakeIOSDevice(
-          logReader: fakeLogReader,
           portForwarder: portForwarder,
           majorSdkVersion: 12,
           onGetLogReader: () {
@@ -1350,11 +1344,10 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     DevicePortForwarder? portForwarder,
-    DeviceLogReader? logReader,
     this.onGetLogReader,
     this.connectionInterface = DeviceConnectionInterface.attached,
     this.majorSdkVersion = 0,
-  }) : _portForwarder = portForwarder, _logReader = logReader;
+  }) : _portForwarder = portForwarder;
 
   final DevicePortForwarder? _portForwarder;
   @override
@@ -1372,9 +1365,6 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   DartDevelopmentService get dds => throw UnimplementedError('getter dds not implemented');
-
-  final DeviceLogReader? _logReader;
-  DeviceLogReader get logReader => _logReader!;
 
   final DeviceLogReader Function()? onGetLogReader;
 
@@ -1470,10 +1460,8 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({required this.logger}) : super(logger: logger);
+  TestDeviceManager({required super.logger});
   List<Device> devices = <Device>[];
-
-  final BufferLogger logger;
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
