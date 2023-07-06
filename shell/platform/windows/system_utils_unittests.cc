@@ -7,46 +7,16 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/system_utils.h"
+#include "flutter/shell/platform/windows/testing/mock_windows_proc_table.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
 
-class MockWindowsRegistry : public WindowsRegistry {
- public:
-  MockWindowsRegistry() = default;
-  virtual ~MockWindowsRegistry() = default;
-
-  virtual LSTATUS GetRegistryValue(HKEY hkey,
-                                   LPCWSTR key,
-                                   LPCWSTR value,
-                                   DWORD flags,
-                                   LPDWORD type,
-                                   PVOID data,
-                                   LPDWORD data_size) const {
-    using namespace std::string_literals;
-    static const std::wstring locales =
-        L"en-US\0zh-Hans-CN\0ja\0zh-Hant-TW\0he\0\0"s;
-    static DWORD locales_len = locales.size() * sizeof(wchar_t);
-    if (data != nullptr) {
-      if (*data_size < locales_len) {
-        return ERROR_MORE_DATA;
-      }
-      std::memcpy(data, locales.data(), locales_len);
-      *data_size = locales_len;
-    } else if (data_size != NULL) {
-      *data_size = locales_len;
-    }
-    return ERROR_SUCCESS;
-  }
-
- private:
-  FML_DISALLOW_COPY_AND_ASSIGN(MockWindowsRegistry);
-};
-
 TEST(SystemUtils, GetPreferredLanguageInfo) {
-  WindowsRegistry registry;
-  std::vector<LanguageInfo> languages = GetPreferredLanguageInfo(registry);
+  WindowsProcTable proc_table;
+  std::vector<LanguageInfo> languages =
+      GetPreferredLanguageInfo(WindowsProcTable());
   // There should be at least one language.
   ASSERT_GE(languages.size(), 1);
   // The info should have a valid languge.
@@ -54,24 +24,30 @@ TEST(SystemUtils, GetPreferredLanguageInfo) {
 }
 
 TEST(SystemUtils, GetPreferredLanguages) {
-  WindowsRegistry registry;
-  std::vector<std::wstring> languages = GetPreferredLanguages(registry);
+  MockWindowsProcTable proc_table;
+  ON_CALL(proc_table, GetThreadPreferredUILanguages)
+      .WillByDefault(
+          [](DWORD flags, PULONG count, PZZWSTR languages, PULONG size) {
+            // Languages string ends in a double-null.
+            static const wchar_t lang[] = L"en-US\0";
+            static const size_t lang_len = sizeof(lang) / sizeof(wchar_t);
+            static const int cnt = 1;
+            if (languages == nullptr) {
+              *size = lang_len;
+              *count = cnt;
+            } else if (*size >= lang_len) {
+              memcpy(languages, lang, lang_len * sizeof(wchar_t));
+            }
+            return TRUE;
+          });
+  std::vector<std::wstring> languages = GetPreferredLanguages(proc_table);
   // There should be at least one language.
   ASSERT_GE(languages.size(), 1);
   // The language should be non-empty.
   EXPECT_FALSE(languages[0].empty());
   // There should not be a trailing null from the parsing step.
   EXPECT_EQ(languages[0].size(), wcslen(languages[0].c_str()));
-
-  // Test mock results
-  MockWindowsRegistry mock_registry;
-  languages = GetPreferredLanguages(mock_registry);
-  ASSERT_EQ(languages.size(), 5);
-  ASSERT_EQ(languages[0], std::wstring(L"en-US"));
-  ASSERT_EQ(languages[1], std::wstring(L"zh-Hans-CN"));
-  ASSERT_EQ(languages[2], std::wstring(L"ja"));
-  ASSERT_EQ(languages[3], std::wstring(L"zh-Hant-TW"));
-  ASSERT_EQ(languages[4], std::wstring(L"he"));
+  EXPECT_EQ(languages[0], L"en-US");
 }
 
 TEST(SystemUtils, ParseLanguageNameGeneric) {

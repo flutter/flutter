@@ -107,8 +107,6 @@ source_set("flutter_windows_source") {
     "windows_lifecycle_manager.h",
     "windows_proc_table.cc",
     "windows_proc_table.h",
-    "windows_registry.cc",
-    "windows_registry.h",
     "windowsx_shim.h",
   ]
 

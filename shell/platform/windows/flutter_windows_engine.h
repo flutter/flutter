@@ -37,7 +37,7 @@
 #include "flutter/shell/platform/windows/window_proc_delegate_manager.h"
 #include "flutter/shell/platform/windows/window_state.h"
 #include "flutter/shell/platform/windows/windows_lifecycle_manager.h"
-#include "flutter/shell/platform/windows/windows_registry.h"
+#include "flutter/shell/platform/windows/windows_proc_table.h"
 #include "third_party/rapidjson/include/rapidjson/document.h"
 
 namespace flutter {
@@ -77,13 +77,8 @@ static void WindowsPlatformThreadPrioritySetter(
 // run in headless mode.
 class FlutterWindowsEngine {
  public:
-  // Creates a new Flutter engine with an injectible windows registry.
-  FlutterWindowsEngine(const FlutterProjectBundle& project,
-                       std::unique_ptr<WindowsRegistry> windows_registry);
-
   // Creates a new Flutter engine object configured to run |project|.
-  explicit FlutterWindowsEngine(const FlutterProjectBundle& project)
-      : FlutterWindowsEngine(project, std::make_unique<WindowsRegistry>()) {}
+  explicit FlutterWindowsEngine(const FlutterProjectBundle& project);
 
   virtual ~FlutterWindowsEngine();
 
@@ -405,11 +400,10 @@ class FlutterWindowsEngine {
   // The on frame drawn callback.
   fml::closure next_frame_callback_;
 
-  // Wrapper providing Windows registry access.
-  std::unique_ptr<WindowsRegistry> windows_registry_;
-
   // Handler for top level window messages.
   std::unique_ptr<WindowsLifecycleManager> lifecycle_manager_;
+
+  WindowsProcTable windows_proc_table_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsEngine);
 };
