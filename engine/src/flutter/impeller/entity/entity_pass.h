@@ -62,13 +62,21 @@ class EntityPass {
 
   void SetElements(std::vector<Element> elements);
 
+  /// @brief  Appends a given pass as a subpass.
   EntityPass* AddSubpass(std::unique_ptr<EntityPass> pass);
+
+  /// @brief  Merges a given pass into this pass. Useful for drawing
+  ///         pre-recorded pictures that don't require rendering into a separate
+  ///         subpass.
+  void AddSubpassInline(std::unique_ptr<EntityPass> pass);
 
   EntityPass* GetSuperpass() const;
 
   bool Render(ContentContext& renderer,
               const RenderTarget& render_target) const;
 
+  /// @brief  Iterate all entities in this pass, recursively including entities
+  ///         of child passes. The iteration order is depth-first.
   void IterateAllEntities(const std::function<bool(Entity&)>& iterator);
 
   /// @brief  Iterate entities in this pass up until the first subpass is found.

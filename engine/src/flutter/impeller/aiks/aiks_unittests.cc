@@ -2837,5 +2837,19 @@ TEST_P(AiksTest, TextForegroundShaderWithTransform) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanCanvasDrawPicture) {
+  Canvas subcanvas;
+  subcanvas.DrawRect(Rect::MakeLTRB(-100, -50, 100, 50),
+                     {.color = Color::CornflowerBlue()});
+  auto picture = subcanvas.EndRecordingAsPicture();
+
+  Canvas canvas;
+  canvas.Translate({200, 200});
+  canvas.Rotate(Radians(kPi / 4));
+  canvas.DrawPicture(picture);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller
