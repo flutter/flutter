@@ -150,13 +150,13 @@ class _DebugAssertVerifier extends ResolvedUnitVerifier {
       return;
     }
 
-    final Map<ClassMemberElement, bool> lookup = <ClassMemberElement, bool>{};
+    final Map<ExecutableElement, bool> lookup = <ExecutableElement, bool>{};
     final _DebugAssertVisitor visitor = _DebugAssertVisitor(lookup);
     unit.unit.visitChildren(visitor);
-    for (final AstNode node in visitor.violations) {
+    for (final (AstNode node, Element element) in visitor.accessViolations) {
       final LineInfo lineInfo = unit.lineInfo;
       final int lineNumber = lineInfo.getLocation(node.offset).lineNumber;
-      errors.add('${unit.path}:$lineNumber: $node(${node.runtimeType})');
+      errors.add('${unit.path}:$lineNumber: $element');
     }
   }
 
@@ -166,16 +166,16 @@ class _DebugAssertVerifier extends ResolvedUnitVerifier {
 
 class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
   _DebugAssertVisitor(this.overridableMemberLookup);
-  final Map<ClassMemberElement, bool> overridableMemberLookup;
-  List<AstNode> violations = <AstNode>[];
+  final Map<ExecutableElement, bool> overridableMemberLookup;
+  List<(AstNode, Element)> accessViolations = <(AstNode, Element)>[];
 
   static bool _isDebugAssertAnnotationElement(ElementAnnotation? annotation) {
     final Element? annotationElement = annotation?.element;
     return annotationElement is PropertyAccessorElement && annotationElement.name == '_debugAssert';
   }
 
-  bool _overriddableClassMemberHasDebugAnnotation(ClassMemberElement classMember, InterfaceElement enclosingElement) {
-    assert(!enclosingElement.library.isInSdk);
+  bool _overriddableClassMemberHasDebugAnnotation(ExecutableElement classMember, InterfaceElement enclosingElement) {
+    assert(!enclosingElement.library.isInSdk, '$enclosingElement (${enclosingElement.runtimeType}) is defined in ${enclosingElement.library}');
     final bool? cached = overridableMemberLookup[classMember];
     if (cached != null) {
       return cached;
@@ -200,7 +200,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
       if (superImpl == null) {
         continue;
       }
-      final bool isSuperImplAnnotated = _overriddableClassMemberHasDebugAnnotation(superImpl as ClassMemberElement, supertype.element);
+      final bool isSuperImplAnnotated = _overriddableClassMemberHasDebugAnnotation(superImpl, supertype.element);
       if (isClassMemberAnnotated && !isSuperImplAnnotated) {
         print('!!!!!!!!! bad: ${enclosingElement.name}.${classMember.name} is annotated but $supertype.${superImpl.name}(${supertype.element.runtimeType}, ${superImpl.runtimeType}) is not');
       }
@@ -254,7 +254,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
       // The easier cases: things that a subclass does not inherit from its
       // superclass: named constructors and static members, extension members.
       case ConstructorElement(isDefaultConstructor: false, :final Element enclosingElement)
-        || ClassMemberElement(isStatic: true, :final Element enclosingElement):
+        || ExecutableElement(isStatic: true, :final Element enclosingElement):
         //print('EZ: $element. enclosing element: $enclosingElement');
         return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement) || _hasDebugAnnotation(enclosingElement);
       case ConstructorElement(isDefaultConstructor: true):
@@ -269,7 +269,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
       //   @_debugAssert
       //   int get a => 0;
       // }
-      case ExecutableElement() && ClassMemberElement(:final InterfaceElement enclosingElement):
+      case ExecutableElement(:final InterfaceElement enclosingElement):
         assert(!element.isStatic);
         //print('Overridable element check: ${enclosingElement.name}.$element (${element.runtimeType})');
         return _overriddableClassMemberHasDebugAnnotation(element, enclosingElement);
@@ -277,21 +277,11 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
         return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement) || _hasDebugAnnotation(enclosingElement);
       // Non class members, fields(?), type parameters
       default:
-      if (element.enclosingElement is! CompilationUnitElement && element is ExecutableElement) {
-        print('!!! default case. $element (${element.runtimeType} is ClassMemberElement? ${element is ClassMemberElement}). enclosing element: ${element.enclosingElement} (${element.enclosingElement.runtimeType})');
-      }
+      //if (element.enclosingElement is! CompilationUnitElement && element is ExecutableElement) {
+      //  print('!!! default case. $element (${element.runtimeType} is ClassMemberElement? ${element is ClassMemberElement}). enclosing element: ${element.enclosingElement} (${element.enclosingElement.runtimeType})');
+      //}
         return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement);
     }
-    //switch ((element, element.enclosingElement)) {
-
-    //  // If element is a member of a debug-only interface then it is also debug-only.
-    //  case (_, final InterfaceElement enclosing) when _hasDebugAnnotation(enclosing):
-    //    return true;
-    //  case (ExecutableElement(isStatic: false) && final ExecutableElement member, InterfaceElement(:final List<InterfaceType> allSupertypes)):
-    //    return allSupertypes.any((final InterfaceType type) => _overriddableClassMemberHasDebugAnnotation(type, member));
-    //  default:
-    //    return false;
-    //}
   }
 
   static bool _isValidElementType(Element element) {
@@ -333,7 +323,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
   void visitSimpleIdentifier(SimpleIdentifier node) {
     final Element? element = node.staticElement;
     if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
-      violations.add(node);
+      accessViolations.add((node, element));
     }
   }
 
@@ -341,7 +331,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
   void visitConstructorName(ConstructorName node) {
     final Element? element = node.staticElement;
     if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
-      violations.add(node);
+      accessViolations.add((node, element));
     }
   }
 
@@ -350,7 +340,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     final Element? element = node.staticElement;
     node.leftOperand.accept(this);
     if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
-      violations.add(node);
+      accessViolations.add((node, element));
     }
     node.rightOperand.accept(this);
   }
@@ -359,7 +349,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
   void visitPrefixExpression(PrefixExpression node) {
     final Element? element = node.staticElement;
     if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
-      violations.add(node);
+      accessViolations.add((node, element));
     }
     node.operand.accept(this);
   }
@@ -369,7 +359,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     node.operand.accept(this);
     final Element? element = node.staticElement;
     if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
-      violations.add(node);
+      accessViolations.add((node, element));
     }
   }
 
@@ -378,7 +368,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     node.target?.accept(this);
     final Element? element = node.staticElement;
     if (element != null && _hasDebugAnnotation(element) && _isValidElementType(element)) {
-      violations.add(node);
+      accessViolations.add((node, element));
     }
     node.index.accept(this);
   }
@@ -388,14 +378,16 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     final Element? readElement = node.readElement;
     final Element? writeElement = node.writeElement;
     final Element? operatorElement = node.staticElement;
-    final bool hasDebugAsserts = readElement != null && _hasDebugAnnotation(readElement)
-                              || (writeElement != null && writeElement != readElement && _hasDebugAnnotation(writeElement))
-                              || (operatorElement != null && _hasDebugAnnotation(operatorElement) && _isValidElementType(operatorElement));
-    if (hasDebugAsserts) {
-      violations.add(node);
-    } else {
-      super.visitAssignmentExpression(node);
+    if (readElement != null && _hasDebugAnnotation(readElement)) {
+      accessViolations.add((node, readElement));
     }
+    if (writeElement != null && writeElement != readElement && _hasDebugAnnotation(writeElement)) {
+      accessViolations.add((node, writeElement));
+    }
+    if (operatorElement != null && _hasDebugAnnotation(operatorElement) && _isValidElementType(operatorElement)) {
+      accessViolations.add((node, operatorElement));
+    }
+    super.visitAssignmentExpression(node);
   }
 
   @override
