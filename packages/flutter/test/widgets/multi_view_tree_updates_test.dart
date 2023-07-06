@@ -219,7 +219,3 @@ class FakeView extends TestFlutterView{
   @override
   final int viewId;
 }
-
-Finder findsColoredBox(Color color) {
-  return find.byWidgetPredicate((Widget widget) => widget is ColoredBox && widget.color == color);
-}
