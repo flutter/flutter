@@ -19,7 +19,7 @@ class PlatformView extends StatelessWidget {
     return MaterialApp(
       title: 'Platform View',
       theme: ThemeData(
-        primarySwatch: Colors.grey, 
+        primarySwatch: Colors.grey,
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Platform View'),
