@@ -40,7 +40,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 };
 
 
-const double _kSelectableComparingThreshold = 3.0;
+const double _kSelectableComparingThreshold = 5.0;
 
 /// A widget that introduces an area for user selections.
 ///
