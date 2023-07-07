@@ -10,6 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+import '../foundation/leak_tracking.dart';
 import '../widgets/semantics_tester.dart';
 
 MaterialApp _buildAppWithDialog(

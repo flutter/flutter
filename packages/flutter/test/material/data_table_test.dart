@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 import 'data_table_test_utils.dart';
 

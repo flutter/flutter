@@ -10,6 +10,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('CardTheme copyWith, ==, hashCode basics', () {
     expect(const CardTheme(), const CardTheme().copyWith());
