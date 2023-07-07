@@ -78,6 +78,11 @@ void main() {
     "description": "Sample description"
   }
 }''');
+    fileSystem
+      .file('pubspec.yaml')
+      .writeAsStringSync('''
+flutter:
+  generate: true''');
 
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
@@ -109,7 +114,11 @@ void main() {
   }
 }''');
     fileSystem.file('header.txt').writeAsStringSync('a header file');
-
+    fileSystem
+      .file('pubspec.yaml')
+      .writeAsStringSync('''
+flutter:
+  generate: true''');
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
