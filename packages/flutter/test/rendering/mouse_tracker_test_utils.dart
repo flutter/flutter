@@ -33,7 +33,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
   }
 
   late final RenderView _renderView = RenderView(
-    view: platformDispatcher.views.single,
+    view: platformDispatcher.implicitView!,
   );
 
   void setHitTest(BoxHitTest hitTest) {
