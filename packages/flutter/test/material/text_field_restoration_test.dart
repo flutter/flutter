@@ -9,7 +9,7 @@ const String text = 'Hello World! How are you? Life is good!';
 const String alternativeText = 'Everything is awesome!!';
 
 void main() {
-  testWidgets('TextField restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextField restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
@@ -20,7 +20,7 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  testWidgets('TextField restoration with external controller', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextField restoration with external controller', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'root',

@@ -12,7 +12,7 @@ void main() {
     expect(const NavigationRailThemeData().hashCode, const NavigationRailThemeData().copyWith().hashCode);
   });
 
-  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified', (WidgetTester tester) async {
     final ThemeData theme = ThemeData.light(useMaterial3: true);
     // Material 3 defaults
     await tester.pumpWidget(
@@ -47,7 +47,7 @@ void main() {
     expect(inkResponse.customBorder, const StadiumBorder());
   });
 
-  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified (Material 2)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified (Material 2)', (WidgetTester tester) async {
     // This test can be removed when `useMaterial3` is deprecated.
     await tester.pumpWidget(
       MaterialApp(
@@ -77,7 +77,7 @@ void main() {
     expect(find.byType(NavigationIndicator), findsNothing);
   });
 
-  testWidgets('NavigationRailThemeData values are used when no NavigationRail properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRailThemeData values are used when no NavigationRail properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 7.0;
     const double selectedIconSize = 25.0;
@@ -145,7 +145,7 @@ void main() {
     expect(_indicatorDecoration(tester)?.shape, indicatorShape);
   });
 
-  testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 7.0;
     const double selectedIconSize = 25.0;
@@ -229,14 +229,14 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/118618.
-  testWidgets('NavigationRailThemeData lerps correctly with null iconThemes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRailThemeData lerps correctly with null iconThemes', (WidgetTester tester) async {
     final NavigationRailThemeData lerp = NavigationRailThemeData.lerp(const NavigationRailThemeData(), const NavigationRailThemeData(), 0.5)!;
 
     expect(lerp.selectedIconTheme, isNull);
     expect(lerp.unselectedIconTheme, isNull);
   });
 
-  testWidgets('Default debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationRailThemeData().debugFillProperties(builder);
 
@@ -248,7 +248,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationRailThemeData(
       backgroundColor: Color(0x00000099),

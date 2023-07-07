@@ -101,7 +101,7 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgets('InputChip.color resolves material states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InputChip.color resolves material states', (WidgetTester tester) async {
     const Color disabledSelectedColor = Color(0xffffff00);
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
@@ -157,7 +157,7 @@ void main() {
     expect(getMaterialBox(tester), paints..rrect(color: disabledSelectedColor));
   });
 
-  testWidgets('InputChip uses provided state color properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InputChip uses provided state color properties', (WidgetTester tester) async {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     const Color selectedColor = Color(0xffff0000);
@@ -196,7 +196,7 @@ void main() {
     expect(getMaterialBox(tester), paints..rrect(color: selectedColor));
   });
 
-  testWidgets('InputChip can be tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InputChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -211,7 +211,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('loses focus when disabled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('loses focus when disabled', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'InputChip');
     await tester.pumpWidget(
       wrapForChip(
@@ -243,7 +243,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('cannot be traversed to when disabled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('cannot be traversed to when disabled', (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'InputChip 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'InputChip 2');
     await tester.pumpWidget(
@@ -278,7 +278,7 @@ void main() {
     expect(focusNode2.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
@@ -290,7 +290,7 @@ void main() {
     );
   });
 
-  testWidgets('Input chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Input chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
@@ -303,7 +303,7 @@ void main() {
     );
   });
 
-  testWidgets('Input chip check mark color can be set by the chip theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Input chip check mark color can be set by the chip theme', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(),
@@ -316,7 +316,7 @@ void main() {
     );
   });
 
-  testWidgets('Input chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Input chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(checkmarkColor: const Color(0xff00ff00)),
@@ -328,7 +328,7 @@ void main() {
     );
   });
 
-  testWidgets('Input chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Input chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedInputChip(checkmarkColor: const Color(0xffff0000)),
@@ -341,7 +341,7 @@ void main() {
     );
   });
 
-  testWidgets('InputChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InputChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
     await tester.pumpWidget(wrapForChip(child: const InputChip(label: label)));
     checkChipMaterialClipBehavior(tester, Clip.none);
@@ -350,7 +350,7 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('Input chip has correct selected color when enabled - M3 defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Input chip has correct selected color when enabled - M3 defaults', (WidgetTester tester) async {
     final ChipThemeData material3ChipDefaults = ThemeData(useMaterial3: true).chipTheme;
     await pumpCheckmarkChip(
       tester,
@@ -362,7 +362,7 @@ void main() {
     expect(materialBox, paints..rrect(color: material3ChipDefaults.backgroundColor));
   });
 
-  testWidgets('Input chip has correct selected color when disabled - M3 defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Input chip has correct selected color when disabled - M3 defaults', (WidgetTester tester) async {
     final ChipThemeData material3ChipDefaults = ThemeData(useMaterial3: true).chipTheme;
     await pumpCheckmarkChip(
       tester,

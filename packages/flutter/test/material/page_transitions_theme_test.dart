@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Default PageTransitionsTheme platform', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default PageTransitionsTheme platform', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Text('home')));
     final PageTransitionsTheme theme = Theme.of(tester.element(find.text('home'))).pageTransitionsTheme;
     expect(theme.builders, isNotNull);
@@ -35,7 +35,7 @@ void main() {
     }
   });
 
-  testWidgets('Default PageTransitionsTheme builds a CupertinoPageTransition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default PageTransitionsTheme builds a CupertinoPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
@@ -61,7 +61,7 @@ void main() {
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Default PageTransitionsTheme builds a _ZoomPageTransition for android', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default PageTransitionsTheme builds a _ZoomPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
@@ -94,7 +94,7 @@ void main() {
     expect(findZoomPageTransition(), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('PageTransitionsTheme override builds a _OpenUpwardsPageTransition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageTransitionsTheme override builds a _OpenUpwardsPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
@@ -134,7 +134,7 @@ void main() {
     expect(findOpenUpwardsPageTransition(), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('PageTransitionsTheme override builds a _FadeUpwardsTransition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageTransitionsTheme override builds a _FadeUpwardsTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
@@ -214,7 +214,7 @@ void main() {
     return !(hasOneOpacityLayer && hasOneTransformLayer);
   }
 
-  testWidgets('ZoomPageTransitionsBuilder default route snapshotting behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ZoomPageTransitionsBuilder default route snapshotting behavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(themeAllowSnapshotting: true),
     );
@@ -247,7 +247,7 @@ void main() {
     expect(isTransitioningWithSnapshotting(tester, page1), isTrue);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
-  testWidgets('ZoomPageTransitionsBuilder.allowSnapshotting can disable route snapshotting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ZoomPageTransitionsBuilder.allowSnapshotting can disable route snapshotting', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(themeAllowSnapshotting: false),
     );
@@ -280,7 +280,7 @@ void main() {
     expect(isTransitioningWithSnapshotting(tester, page1), isFalse);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
-  testWidgets('Setting PageRoute.allowSnapshotting to false overrides ZoomPageTransitionsBuilder.allowSnapshotting = true', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Setting PageRoute.allowSnapshotting to false overrides ZoomPageTransitionsBuilder.allowSnapshotting = true', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         themeAllowSnapshotting: true,
@@ -305,7 +305,7 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
-  testWidgets('_ZoomPageTransition only causes child widget built once', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('_ZoomPageTransition only causes child widget built once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/58345
 
     int builtCount = 0;

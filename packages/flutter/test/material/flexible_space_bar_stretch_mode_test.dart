@@ -15,7 +15,7 @@ const double expandedAppbarHeight = 250.0;
 final Key finderKey = UniqueKey();
 
 void main() {
-  testWidgets('FlexibleSpaceBar stretch mode default zoomBackground', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FlexibleSpaceBar stretch mode default zoomBackground', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -50,7 +50,7 @@ void main() {
     expect(sizeBeforeScroll.height, lessThan(sizeAfterScroll.height));
   });
 
-  testWidgets('FlexibleSpaceBar stretch mode blurBackground', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FlexibleSpaceBar stretch mode blurBackground', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -90,7 +90,7 @@ void main() {
     );
   });
 
-  testWidgets('FlexibleSpaceBar stretch mode fadeTitle', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FlexibleSpaceBar stretch mode fadeTitle', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -134,7 +134,7 @@ void main() {
     expect(opacityWidget.opacity, equals(0.0));
   });
 
-  testWidgets('FlexibleSpaceBar stretch mode ignored for non-overscroll physics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FlexibleSpaceBar stretch mode ignored for non-overscroll physics', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

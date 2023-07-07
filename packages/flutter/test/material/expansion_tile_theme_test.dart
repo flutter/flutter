@@ -69,7 +69,7 @@ void main() {
     expect(theme.clipBehavior, null);
   });
 
-  testWidgets('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TooltipThemeData().debugFillProperties(builder);
 
@@ -81,7 +81,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ExpansionTileThemeData(
       backgroundColor: Color(0xff000000),
@@ -119,7 +119,7 @@ void main() {
     ]);
   });
 
-  testWidgets('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key iconKey = UniqueKey();
@@ -211,7 +211,7 @@ void main() {
     expect(shapeDecoration.shape, collapsedShape);
   });
 
-  testWidgets('ExpansionTileTheme - expanded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionTileTheme - expanded', (WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key iconKey = UniqueKey();

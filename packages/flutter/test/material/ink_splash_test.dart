@@ -9,7 +9,7 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/21506.
-  testWidgets('InkSplash receives textDirection', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkSplash receives textDirection', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Button Border Test')),
@@ -27,7 +27,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('InkWell with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkWell with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
     Widget buildFrame({ InteractiveInkFeatureFactory? splashFactory }) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),

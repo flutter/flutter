@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('position in the toolbar changes width', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('position in the toolbar changes width', (WidgetTester tester) async {
     late StateSetter setState;
     int index = 1;
     int total = 3;

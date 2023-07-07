@@ -69,7 +69,7 @@ void main() {
     expect(popupMenuTheme.mouseCursor, null);
   });
 
-  testWidgets('Default PopupMenuThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default PopupMenuThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const PopupMenuThemeData().debugFillProperties(builder);
 
@@ -81,7 +81,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('PopupMenuThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PopupMenuThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
      PopupMenuThemeData(
       color: const Color(0xFFFFFFFF),
@@ -116,7 +116,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
     final Key enabledPopupItemKey = UniqueKey();
@@ -217,7 +217,7 @@ void main() {
     );
   });
 
-  testWidgets('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
     final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM3();
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
@@ -315,7 +315,7 @@ void main() {
     );
   });
 
-  testWidgets('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
     final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM3();
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
@@ -404,7 +404,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
      final Key popupButtonKey = UniqueKey();
       final Key popupButtonApp = UniqueKey();
       final Key enabledPopupItemKey = UniqueKey();
@@ -503,7 +503,7 @@ void main() {
       );
     });
 
-    testWidgets('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
       final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM2();
       final Key popupButtonKey = UniqueKey();
       final Key popupButtonApp = UniqueKey();
@@ -589,7 +589,7 @@ void main() {
       );
     });
 
-    testWidgets('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
       final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM2();
       final Key popupButtonKey = UniqueKey();
       final Key popupButtonApp = UniqueKey();

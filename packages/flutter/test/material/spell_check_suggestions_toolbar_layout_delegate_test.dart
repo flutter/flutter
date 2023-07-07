@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('positions itself at anchorAbove if it fits and shifts up when not', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('positions itself at anchorAbove if it fits and shifts up when not', (WidgetTester tester) async {
     late StateSetter setState;
     const double toolbarOverlap = 100;
     const double height = 500;

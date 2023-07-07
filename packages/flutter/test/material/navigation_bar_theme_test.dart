@@ -24,7 +24,7 @@ void main() {
     expect(identical(NavigationBarThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('Default debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData().debugFillProperties(builder);
 
@@ -36,7 +36,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData(
       height: 200.0,
@@ -68,7 +68,7 @@ void main() {
     expect(description[7], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
   });
 
-  testWidgets('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
@@ -140,7 +140,7 @@ void main() {
     expect(_labelBehavior(tester), labelBehavior);
   });
 
-  testWidgets('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
@@ -174,7 +174,7 @@ void main() {
     expect(_labelBehavior(tester), labelBehavior);
   });
 
-  testWidgets('Custom label style renders ink ripple properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom label style renders ink ripple properly', (WidgetTester tester) async {
     Widget buildWidget({ NavigationDestinationLabelBehavior? labelBehavior }) {
       return MaterialApp(
         theme: ThemeData(

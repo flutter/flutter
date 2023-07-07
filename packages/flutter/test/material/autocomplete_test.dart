@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 
 class User {
@@ -47,7 +48,7 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
-  testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can filter and select a list of string options', (WidgetTester tester) async {
     late String lastSelection;
     await tester.pumpWidget(
       MaterialApp(
@@ -107,7 +108,7 @@ void main() {
     expect(list.semanticChildCount, 6);
   });
 
-  testWidgets('can filter and select a list of custom User options', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can filter and select a list of custom User options', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -161,7 +162,7 @@ void main() {
     expect(list.semanticChildCount, 1);
   });
 
-  testWidgets('displayStringForOption is displayed in the options', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('displayStringForOption is displayed in the options', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -204,7 +205,7 @@ void main() {
     expect(field.controller!.text, kOptionsUsers.first.name);
   });
 
-  testWidgets('can build a custom field', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can build a custom field', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -228,7 +229,7 @@ void main() {
     expect(find.byType(TextFormField), findsNothing);
   });
 
-  testWidgets('can build custom options', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can build custom options', (WidgetTester tester) async {
     final GlobalKey optionsKey = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -257,7 +258,7 @@ void main() {
     expect(find.byKey(optionsKey), findsOneWidget);
   });
 
-  testWidgets('the default Autocomplete options widget has a maximum height of 200', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('the default Autocomplete options widget has a maximum height of 200', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(home: Scaffold(
       body: Autocomplete<String>(
         optionsBuilder: (TextEditingValue textEditingValue) {
@@ -278,7 +279,7 @@ void main() {
     expect(resultingHeight, equals(200));
   });
 
-  testWidgets('the options height restricts to max desired height', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('the options height restricts to max desired height', (WidgetTester tester) async {
     const double desiredHeight = 150.0;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -307,7 +308,7 @@ void main() {
     expect(resultingHeight, equals(desiredHeight));
   });
 
-  testWidgets('The height of options shrinks to height of resulting items, if less than maxHeight', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The height of options shrinks to height of resulting items, if less than maxHeight', (WidgetTester tester) async {
     // Returns a Future with the height of the default [Autocomplete] options widget
     // after the provided text had been entered into the [Autocomplete] field.
     Future<double> getDefaultOptionsHeight(
@@ -355,7 +356,7 @@ void main() {
     expect(oneItemsHeight, lessThan(twoItemsHeight));
   });
 
-  testWidgets('initialValue sets initial text field value', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('initialValue sets initial text field value', (WidgetTester tester) async {
     late String lastSelection;
     await tester.pumpWidget(
       MaterialApp(
@@ -416,7 +417,7 @@ void main() {
     }
   }
 
-  testWidgets('keyboard navigation of the options properly highlights the option', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('keyboard navigation of the options properly highlights the option', (WidgetTester tester) async {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
@@ -455,7 +456,7 @@ void main() {
     checkOptionHighlight(tester, 'elephant', highlightColor);
   });
 
-  testWidgets('keyboard navigation keeps the highlighted option scrolled into view', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('keyboard navigation keeps the highlighted option scrolled into view', (WidgetTester tester) async {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
@@ -509,7 +510,7 @@ void main() {
   });
 
   group('optionsViewOpenDirection', () {
-    testWidgets('default (down)', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('default (down)', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -524,7 +525,7 @@ void main() {
       expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
-    testWidgets('down', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('down', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -540,7 +541,7 @@ void main() {
       expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
-    testWidgets('up', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('up', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

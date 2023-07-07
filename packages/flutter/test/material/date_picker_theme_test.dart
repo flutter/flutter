@@ -126,7 +126,7 @@ void main() {
     expect(theme.inputDecorationTheme, null);
   });
 
-  testWidgets('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
     late final DatePickerThemeData m3; // M3 Defaults
     late final ThemeData theme;
     late final ColorScheme colorScheme;
@@ -201,7 +201,7 @@ void main() {
     expect(m3.inputDecorationTheme, null);
   });
 
-  testWidgets('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
     late final DatePickerThemeData m2; // M2 defaults
     late final ThemeData theme;
     late final ColorScheme colorScheme;
@@ -268,7 +268,7 @@ void main() {
     expect(m2.inputDecorationTheme, null);
   });
 
-  testWidgets('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DatePickerThemeData().debugFillProperties(builder);
 
@@ -280,7 +280,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('DatePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     datePickerTheme.debugFillProperties(builder);
@@ -331,7 +331,7 @@ void main() {
     );
   });
 
-  testWidgets('DatePickerDialog uses ThemeData datePicker theme (calendar mode)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerDialog uses ThemeData datePicker theme (calendar mode)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -411,7 +411,7 @@ void main() {
     expect(year2023Decoration.border?.bottom.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
   });
 
-  testWidgets('DatePickerDialog uses ThemeData datePicker theme (input mode)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerDialog uses ThemeData datePicker theme (input mode)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -452,7 +452,7 @@ void main() {
     expect(inputDecoration.fillColor, datePickerTheme.inputDecorationTheme?.fillColor);
   });
 
-  testWidgets('DateRangePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DateRangePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -498,7 +498,7 @@ void main() {
     expect(selectedDate.style?.fontSize, datePickerTheme.rangePickerHeaderHeadlineStyle?.fontSize);
   });
 
-  testWidgets('Dividers use DatePickerThemeData.dividerColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dividers use DatePickerThemeData.dividerColor', (WidgetTester tester) async {
     Future<void> showPicker(WidgetTester tester, Size size) async {
       tester.view.physicalSize = size;
       tester.view.devicePixelRatio = 1.0;
@@ -539,7 +539,7 @@ void main() {
     expect(horizontalDivider.color, datePickerTheme.dividerColor);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'DatePicker uses ThemeData.inputDecorationTheme properties '
     'which are null in DatePickerThemeData.inputDecorationTheme',
     (WidgetTester tester) async {

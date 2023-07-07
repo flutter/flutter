@@ -22,7 +22,7 @@ Widget wrap({ required Widget child }) {
 }
 
 void main() {
-  testWidgets('CheckboxListTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile control test', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
     await tester.pumpWidget(wrap(
       child: CheckboxListTile(
@@ -37,7 +37,7 @@ void main() {
     expect(log, equals(<dynamic>[false, '-', false]));
   });
 
-  testWidgets('CheckboxListTile checkColor test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile checkColor test', (WidgetTester tester) async {
     const Color checkBoxBorderColor = Color(0xff2196f3);
     Color checkBoxCheckColor = const Color(0xffFFFFFF);
 
@@ -69,7 +69,7 @@ void main() {
     expect(getCheckboxListTileRenderer(), paints..path(color: checkBoxBorderColor)..path(color: checkBoxCheckColor));
   });
 
-  testWidgets('CheckboxListTile activeColor test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile activeColor test', (WidgetTester tester) async {
     Widget buildFrame(Color? themeColor, Color? activeColor) {
       return wrap(
         child: Theme(
@@ -101,7 +101,7 @@ void main() {
     expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFFFFFFFF)));
   });
 
-  testWidgets('CheckboxListTile can autofocus unless disabled.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile can autofocus unless disabled.', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
 
     await tester.pumpWidget(
@@ -133,7 +133,7 @@ void main() {
     expect(Focus.maybeOf(childKey.currentContext!)!.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('CheckboxListTile contentPadding test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile contentPadding test', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: const Center(
@@ -163,7 +163,7 @@ void main() {
     expect(paddingRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 2);
   });
 
-  testWidgets('CheckboxListTile tristate test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile tristate test', (WidgetTester tester) async {
     bool? value = false;
     bool tristate = false;
 
@@ -241,7 +241,7 @@ void main() {
     expect(value, false);
   });
 
-  testWidgets('CheckboxListTile respects shape', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects shape', (WidgetTester tester) async {
     const ShapeBorder shapeBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.horizontal(right: Radius.circular(100)),
     );
@@ -258,7 +258,7 @@ void main() {
     expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
   });
 
-  testWidgets('CheckboxListTile respects tileColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects tileColor', (WidgetTester tester) async {
     final Color tileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
@@ -277,7 +277,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: tileColor));
   });
 
-  testWidgets('CheckboxListTile respects selectedTileColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects selectedTileColor', (WidgetTester tester) async {
     final Color selectedTileColor = Colors.green.shade500;
 
     await tester.pumpWidget(
@@ -297,7 +297,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
-  testWidgets('CheckboxListTile selected item text Color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile selected item text Color', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/76908
 
     const Color activeColor = Color(0xff00ff00);
@@ -336,7 +336,7 @@ void main() {
     expect(textColor('title'), activeColor);
   });
 
-  testWidgets('CheckboxListTile respects checkbox shape and side', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects checkbox shape and side', (WidgetTester tester) async {
     Widget buildApp(BorderSide side, OutlinedBorder shape) {
       return MaterialApp(
         home: Material(
@@ -390,7 +390,7 @@ void main() {
     );
   });
 
-  testWidgets('CheckboxListTile respects visualDensity', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects visualDensity', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
@@ -414,7 +414,7 @@ void main() {
     expect(box.size, equals(const Size(800, 56)));
   });
 
-  testWidgets('CheckboxListTile respects focusNode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects focusNode', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
     await tester.pumpWidget(
       wrap(
@@ -436,7 +436,7 @@ void main() {
     expect(tileNode.hasPrimaryFocus, isTrue);
   });
 
-  testWidgets('CheckboxListTile onFocusChange callback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile onFocusChange callback', (WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'CheckboxListTile onFocusChange');
     bool gotFocus = false;
     await tester.pumpWidget(
@@ -465,7 +465,7 @@ void main() {
     expect(node.hasFocus, isFalse);
   });
 
-    testWidgets('CheckboxListTile can be disabled', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('CheckboxListTile can be disabled', (WidgetTester tester) async {
       bool? value = false;
       bool enabled = true;
 
@@ -506,7 +506,7 @@ void main() {
       expect(tester.widget<Checkbox>(checkbox).value, true);
     });
 
-  testWidgets('CheckboxListTile respects mouseCursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects mouseCursor when hovered', (WidgetTester tester) async {
     // Test Checkbox() constructor
     await tester.pumpWidget(
       wrap(
@@ -577,7 +577,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('CheckboxListTile respects fillColor in enabled/disabled states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects fillColor in enabled/disabled states', (WidgetTester tester) async {
     const Color activeEnabledFillColor = Color(0xFF000001);
     const Color activeDisabledFillColor = Color(0xFF000002);
 
@@ -613,7 +613,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: activeDisabledFillColor));
   });
 
-  testWidgets('CheckboxListTile respects fillColor in hovered state', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects fillColor in hovered state', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
 
@@ -657,7 +657,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: hoveredFillColor));
   });
 
-  testWidgets('CheckboxListTile respects hoverColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects hoverColor', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     Widget buildApp({bool enabled = true}) {
@@ -709,7 +709,7 @@ void main() {
     );
   });
 
-  testWidgets('CheckboxListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color fillColor = Color(0xFF000000);
@@ -825,7 +825,7 @@ void main() {
     );
   });
 
-  testWidgets('CheckboxListTile respects splashRadius', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects splashRadius', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const double splashRadius = 30;
     Widget buildApp() {
@@ -854,7 +854,7 @@ void main() {
     );
   });
 
-  testWidgets('CheckboxListTile respects materialTapTargetSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects materialTapTargetSize', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: CheckboxListTile(
@@ -880,7 +880,7 @@ void main() {
     expect(tester.getSize(find.byType(Checkbox)), const Size(48.0, 48.0));
   });
 
-  testWidgets('CheckboxListTile respects isError - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile respects isError - M3', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(useMaterial3: true);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
@@ -928,7 +928,7 @@ void main() {
     );
   });
 
-  testWidgets('CheckboxListTile.adaptive shows the correct checkbox platform widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile.adaptive shows the correct checkbox platform widget', (WidgetTester tester) async {
     Widget buildApp(TargetPlatform platform) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
@@ -971,7 +971,7 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgets('CheckboxListTile respects enableFeedback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('CheckboxListTile respects enableFeedback', (WidgetTester tester) async {
       Future<void> buildTest(bool enableFeedback) async {
         return tester.pumpWidget(
           wrap(
@@ -1000,7 +1000,7 @@ void main() {
     });
   });
 
-  testWidgets('CheckboxListTile has proper semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxListTile has proper semantics', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(wrap(

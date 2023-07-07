@@ -149,7 +149,7 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/87102
-  testWidgets('label position test - show hint', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('label position test - show hint', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -200,7 +200,7 @@ void main() {
     expect(hintEmptyLabel, oneValueLabel);
   });
 
-  testWidgets('label position test - show disabledHint: disable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('label position test - show disabledHint: disable', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -238,7 +238,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 12.0));
   });
 
-  testWidgets('label position test - show disabledHint: enable + null item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('label position test - show disabledHint: enable + null item', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -263,7 +263,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 12.0));
   });
 
-  testWidgets('label position test - show disabledHint: enable + empty item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('label position test - show disabledHint: enable + empty item', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -288,7 +288,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 12.0));
   });
 
-  testWidgets('label position test - show hint: enable + empty item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('label position test - show hint: enable + empty item', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -313,7 +313,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 12.0));
   });
 
-  testWidgets('label position test - no hint shown: enable + no selected + disabledHint', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('label position test - no hint shown: enable + no selected + disabledHint', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -351,7 +351,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 24.0));
   });
 
-  testWidgets('label position test - show selected item: disabled + hint + disabledHint', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('label position test - show selected item: disabled + hint + disabledHint', (WidgetTester tester) async {
     const int value = 1;
 
     await tester.pumpWidget(
@@ -391,7 +391,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/82910
-  testWidgets('null value test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('null value test', (WidgetTester tester) async {
     int? value = 1;
 
     await tester.pumpWidget(
@@ -443,7 +443,7 @@ void main() {
     expect(nonEmptyLabel, nullValueLabel);
   });
 
-  testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
     String? value = 'one';
     int validateCalled = 0;
 
@@ -492,7 +492,7 @@ void main() {
     expect(value, equals('three'));
   });
 
-  testWidgets('DropdownButtonFormField arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     // There shouldn't be overflow when expanded although list contains longer items.
@@ -527,7 +527,7 @@ void main() {
     );
   });
 
-  testWidgets('DropdownButtonFormField with isDense:true aligns selected menu item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -567,7 +567,7 @@ void main() {
     }
   });
 
-  testWidgets('DropdownButtonFormField with isDense:true does not clip large scale text',
+  testWidgetsWithLeakTracking('DropdownButtonFormField with isDense:true does not clip large scale text',
       (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     const String value = 'two';
@@ -606,7 +606,7 @@ void main() {
     expect(box.size.height, 72.0);
   });
 
-  testWidgets('DropdownButtonFormField.isDense is true by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField.isDense is true by default', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/46844
     final Key buttonKey = UniqueKey();
     const String value = 'two';
@@ -637,7 +637,7 @@ void main() {
     expect(box.size.height, 48.0);
   });
 
-  testWidgets('DropdownButtonFormField - custom text style', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - custom text style', (WidgetTester tester) async {
     const String value = 'foo';
     final UniqueKey itemKey = UniqueKey();
 
@@ -675,7 +675,7 @@ void main() {
     expect(richText.text.style!.fontSize, 20.0);
   });
 
-  testWidgets('DropdownButtonFormField - disabledHint displays when the items list is empty, when items is null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - disabledHint displays when the items list is empty, when items is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String>? items }) {
@@ -698,7 +698,7 @@ void main() {
     expect(find.text('disabled'), findsOneWidget);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'DropdownButtonFormField - hint displays when the items list is '
     'empty, items is null, and disabledHint is null',
     (WidgetTester tester) async {
@@ -722,7 +722,7 @@ void main() {
     },
   );
 
-  testWidgets('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String>? items }) {
@@ -742,7 +742,7 @@ void main() {
     expect(find.text('hint used when disabled'), findsOneWidget);
   });
 
-  testWidgets('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - disabledHint is null by default', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String>? items }) {
@@ -762,7 +762,7 @@ void main() {
     expect(find.text('hint used when disabled'), findsOneWidget);
   });
 
-  testWidgets('DropdownButtonFormField - disabledHint displays when onChanged is null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - disabledHint displays when onChanged is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String>? items, ValueChanged<String?>? onChanged }) {
@@ -780,7 +780,7 @@ void main() {
     expect(find.text('disabled'), findsOneWidget);
   });
 
-  testWidgets('DropdownButtonFormField - disabled hint should be of same size as enabled hint', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - disabled hint should be of same size as enabled hint', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String>? items}) {
@@ -805,7 +805,7 @@ void main() {
     expect(enabledHintBox.size, equals(disabledHintBox.size));
   });
 
-  testWidgets('DropdownButtonFormField - Custom icon size and colors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - Custom icon size and colors', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
 
@@ -838,7 +838,7 @@ void main() {
     expect(disabledRichText.text.style!.color, Colors.orange);
   });
 
-  testWidgets('DropdownButtonFormField - default elevation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - default elevation', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     debugDisableShadows = false;
     await tester.pumpWidget(buildFormFrame(
@@ -858,7 +858,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('DropdownButtonFormField - custom elevation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - custom elevation', (WidgetTester tester) async {
     debugDisableShadows = false;
     final Key buttonKeyOne = UniqueKey();
     final Key buttonKeyTwo = UniqueKey();
@@ -895,7 +895,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('DropdownButtonFormField does not allow duplicate item values', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField does not allow duplicate item values', (WidgetTester tester) async {
     final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>['a', 'b', 'c', 'c']
       .map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
@@ -924,7 +924,7 @@ void main() {
     );
   });
 
-  testWidgets('DropdownButtonFormField value should only appear in one menu item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField value should only appear in one menu item', (WidgetTester tester) async {
     final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>['a', 'b', 'c', 'd']
       .map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
@@ -953,7 +953,7 @@ void main() {
     );
   });
 
-  testWidgets('DropdownButtonFormField - selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
     const List<String> items = <String>[
       'One',
       'Two',
@@ -997,7 +997,7 @@ void main() {
     expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
   });
 
-  testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
     int dropdownButtonTapCounter = 0;
     String? value = 'one';
     void onChanged(String? newValue) {
@@ -1043,7 +1043,7 @@ void main() {
     expect(dropdownButtonTapCounter, 2); // Should not change.
   });
 
-  testWidgets('DropdownButtonFormField should re-render if value param changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField should re-render if value param changes', (WidgetTester tester) async {
     String currentValue = 'two';
 
     await tester.pumpWidget(
@@ -1089,7 +1089,7 @@ void main() {
     expect(find.text(currentValue), findsOneWidget);
   });
 
-  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('autovalidateMode is passed to super', (WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -1118,7 +1118,7 @@ void main() {
     expect(validateCalled, 1);
   });
 
-  testWidgets('DropdownButtonFormField - Custom button alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - Custom button alignment', (WidgetTester tester) async {
     await tester.pumpWidget(buildFormFrame(
       buttonAlignment: AlignmentDirectional.center,
       items: <String>['one'],

@@ -14,7 +14,7 @@ void main() {
     const ShapeBorder defaultFABShapeM3 = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const EdgeInsets defaultFABPadding = EdgeInsets.zero;
 
-    testWidgets('theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
       final ThemeData theme = ThemeData.light();
       final bool material3 = theme.useMaterial3;
       await tester.pumpWidget(
@@ -43,7 +43,7 @@ void main() {
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
-    testWidgets('theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
       final ThemeData theme = ThemeData.light();
       final bool material3 = theme.useMaterial3;
       await tester.pumpWidget(

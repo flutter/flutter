@@ -29,7 +29,7 @@ void main() {
     expect(identical(SegmentedButtonThemeData.lerp(theme, theme, 0.5), theme), true);
   });
 
-  testWidgets('Default SegmentedButtonThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default SegmentedButtonThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SegmentedButtonThemeData().debugFillProperties(builder);
 
@@ -41,7 +41,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('With no other configuration, defaults are used', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('With no other configuration, defaults are used', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -108,7 +108,7 @@ void main() {
     }
   });
 
-  testWidgets('ThemeData.segmentedButtonTheme overrides defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ThemeData.segmentedButtonTheme overrides defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       useMaterial3: true,
       segmentedButtonTheme: SegmentedButtonThemeData(
@@ -201,7 +201,7 @@ void main() {
     }
   });
 
-  testWidgets('SegmentedButtonTheme overrides ThemeData and defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SegmentedButtonTheme overrides ThemeData and defaults', (WidgetTester tester) async {
     final SegmentedButtonThemeData global = SegmentedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -328,7 +328,7 @@ void main() {
     }
   });
 
-  testWidgets('Widget parameters overrides SegmentedTheme, ThemeData and defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Widget parameters overrides SegmentedTheme, ThemeData and defaults', (WidgetTester tester) async {
     final SegmentedButtonThemeData global = SegmentedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {

@@ -16,7 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('test page transition (_FadeUpwardsPageTransition)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test page transition (_FadeUpwardsPageTransition)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: const Material(child: Text('Page 1')),
@@ -80,7 +80,7 @@ void main() {
     expect(find.text('Page 2'), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('test page transition (CupertinoPageTransition)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test page transition (CupertinoPageTransition)', (WidgetTester tester) async {
     final Key page2Key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -161,7 +161,7 @@ void main() {
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgets('test page transition (_ZoomPageTransition) without rasterization', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test page transition (_ZoomPageTransition) without rasterization', (WidgetTester tester) async {
     Iterable<Layer> findLayers(Finder of) {
       return tester.layerListOf(
         find.ancestor(of: of, matching: find.byType(SnapshotWidget)).first,
@@ -240,7 +240,7 @@ void main() {
     expect(find.text('Page 2'), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when view insets change', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when view insets change', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(1000, 1000);
     tester.view.viewInsets = FakeViewPadding.zero;
@@ -281,7 +281,7 @@ void main() {
     await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.big.png'));
   }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
       'test page transition (_ZoomPageTransition) with rasterization disables snapshotting for enter route',
       (WidgetTester tester) async {
     Iterable<Layer> findLayers(Finder of) {
@@ -363,7 +363,7 @@ void main() {
     expect(isSnapshotted(page1Finder), isFalse);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
-  testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(child: Text('Page 1')),
@@ -423,7 +423,7 @@ void main() {
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgets('test no back gesture on Android', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test no back gesture on Android', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: const Scaffold(body: Text('Page 1')),
@@ -453,7 +453,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('test back gesture', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test back gesture', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: const Scaffold(body: Text('Page 1')),
@@ -494,7 +494,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Page 2')), const Offset(100.0, 0.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgets('back gesture while OS changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('back gesture while OS changes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
@@ -585,7 +585,7 @@ void main() {
     expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.macOS);
   });
 
-  testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(body: Text('Page 1')),
@@ -615,7 +615,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('test adaptable transitions switch during execution', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test adaptable transitions switch during execution', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -696,7 +696,7 @@ void main() {
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
@@ -731,7 +731,7 @@ void main() {
     expect(find.text('Page 2'), isOnstage);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('test edge swipe then drop back at ending point works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test edge swipe then drop back at ending point works', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
@@ -764,7 +764,7 @@ void main() {
     expect(find.text('Page 2'), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28728
     final GlobalKey scaffoldKey = GlobalKey();
 
@@ -859,7 +859,7 @@ void main() {
     expect(find.text('push'), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('During back swipe the route ignores input', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('During back swipe the route ignores input', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/39989
 
     final GlobalKey homeScaffoldKey = GlobalKey();
@@ -929,7 +929,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('After a pop caused by a back-swipe, input reaches the exposed route', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('After a pop caused by a back-swipe, input reaches the exposed route', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/41024
 
     final GlobalKey homeScaffoldKey = GlobalKey();
@@ -1000,7 +1000,7 @@ void main() {
     expect(pageTapCount, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('A MaterialPageRoute should slide out with CupertinoPageTransition when a compatible PageRoute is pushed on top of it', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('A MaterialPageRoute should slide out with CupertinoPageTransition when a compatible PageRoute is pushed on top of it', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/44864.
 
     await tester.pumpWidget(
@@ -1028,7 +1028,7 @@ void main() {
     expect(titleInitialTopLeft.dx, greaterThan(titleTransientTopLeft.dx));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('MaterialPage works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
     List<Page<void>> myPages = <Page<void>>[
@@ -1071,7 +1071,7 @@ void main() {
     expect(find.text('second'), findsOneWidget);
   });
 
-  testWidgets('MaterialPage can toggle MaintainState', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialPage can toggle MaintainState', (WidgetTester tester) async {
     final LocalKey pageKeyOne = UniqueKey();
     final LocalKey pageKeyTwo = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
@@ -1120,7 +1120,7 @@ void main() {
     expect(find.text('second'), findsOneWidget);
   });
 
-  testWidgets('MaterialPage does not lose its state when transitioning out', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialPage does not lose its state when transitioning out', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(KeepsStateTestWidget(navigatorKey: navigator));
     expect(find.text('subpage'), findsOneWidget);
@@ -1133,7 +1133,7 @@ void main() {
     expect(find.text('home'), findsOneWidget);
   });
 
-  testWidgets('MaterialPage restores its state', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialPage restores its state', (WidgetTester tester) async {
     await tester.pumpWidget(
       RootRestorationScope(
         restorationId: 'root',

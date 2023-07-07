@@ -66,7 +66,7 @@ void main() {
     expect(theme.colorScheme, const ColorScheme.dark());
   });
 
-  testWidgets('ButtonTheme alignedDropdown', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ButtonTheme alignedDropdown', (WidgetTester tester) async {
     final Key dropdownKey = UniqueKey();
 
     Widget buildFrame({ required bool alignedDropdown, required TextDirection textDirection }) {

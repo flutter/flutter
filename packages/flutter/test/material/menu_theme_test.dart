@@ -52,7 +52,7 @@ void main() {
     expect(identical(MenuThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('theme is honored', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('theme is honored', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -105,7 +105,7 @@ void main() {
     expect(subMenuMaterial.color, equals(Colors.red));
   });
 
-  testWidgets('Constructor parameters override theme parameters', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Constructor parameters override theme parameters', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),

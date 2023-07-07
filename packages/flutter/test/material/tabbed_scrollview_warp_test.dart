@@ -74,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 }
 
 void main() {
-  testWidgets('Tabbed CustomScrollViews, warp from tab 1 to 3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tabbed CustomScrollViews, warp from tab 1 to 3', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: MyHomePage()));
 
     // should not crash.

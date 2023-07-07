@@ -23,7 +23,7 @@ import '../widgets/semantics_tester.dart';
 void main() {
   final ThemeData theme = ThemeData();
 
-  testWidgets('Radio control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     final List<int?> log = <int?>[];
 
@@ -84,7 +84,7 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgets('Radio can be toggled when toggleable is set', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio can be toggled when toggleable is set', (WidgetTester tester) async {
     final Key key = UniqueKey();
     final List<int?> log = <int?>[];
 
@@ -148,7 +148,7 @@ void main() {
     expect(log, equals(<int>[1]));
   });
 
-  testWidgets('Radio size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     final Key key1 = UniqueKey();
     await tester.pumpWidget(
       Theme(
@@ -194,7 +194,7 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(40.0, 40.0));
   });
 
-  testWidgets('Radio selected semantics - platform adaptive', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio selected semantics - platform adaptive', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(Theme(
@@ -229,7 +229,7 @@ void main() {
     semantics.dispose();
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Radio semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(Theme(
@@ -360,7 +360,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('has semantic events', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('has semantic events', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
     dynamic semanticEvent;
@@ -398,7 +398,7 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgets('Material2 - Radio ink ripple is displayed correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Radio ink ripple is displayed correctly', (WidgetTester tester) async {
     final Key painterKey = UniqueKey();
     const Key radioKey = Key('radio');
 
@@ -432,7 +432,7 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - Radio ink ripple is displayed correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Radio ink ripple is displayed correctly', (WidgetTester tester) async {
     final Key painterKey = UniqueKey();
     const Key radioKey = Key('radio');
 
@@ -466,7 +466,7 @@ void main() {
     );
   });
 
-  testWidgets('Radio with splash radius set', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio with splash radius set', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const double splashRadius = 30;
     Widget buildApp() {
@@ -503,7 +503,7 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - Radio is focusable and has correct focus color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Radio is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
@@ -586,7 +586,7 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - Radio is focusable and has correct focus color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Radio is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
@@ -664,7 +664,7 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - Radio can be hovered and has correct hover color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Radio can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     const Key radioKey = Key('radio');
@@ -747,7 +747,7 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - Radio can be hovered and has correct hover color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Radio can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     const Key radioKey = Key('radio');
@@ -831,7 +831,7 @@ void main() {
     );
   });
 
-  testWidgets('Radio can be controlled by keyboard shortcuts', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio can be controlled by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 1;
     const Key radioKey0 = Key('radio0');
@@ -910,7 +910,7 @@ void main() {
     expect(groupValue, equals(2));
   });
 
-  testWidgets('Radio responds to density changes.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
@@ -949,7 +949,7 @@ void main() {
     expect(box.size, equals(const Size(60, 36)));
   });
 
-  testWidgets('Radio changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio changes mouse cursor when hovered', (WidgetTester tester) async {
     const Key key = ValueKey<int>(1);
     // Test Radio() constructor
     await tester.pumpWidget(
@@ -1032,7 +1032,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('Radio button fill color resolves in enabled/disabled states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio button fill color resolves in enabled/disabled states', (WidgetTester tester) async {
     const Color activeEnabledFillColor = Color(0xFF000001);
     const Color activeDisabledFillColor = Color(0xFF000002);
     const Color inactiveEnabledFillColor = Color(0xFF000003);
@@ -1143,7 +1143,7 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - Radio fill color resolves in hovered/focused states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Radio fill color resolves in hovered/focused states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
@@ -1226,7 +1226,7 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - Radio fill color resolves in hovered/focused states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Radio fill color resolves in hovered/focused states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
@@ -1304,7 +1304,7 @@ void main() {
     );
   });
 
-  testWidgets('Radio overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
@@ -1449,7 +1449,7 @@ void main() {
     );
   });
 
-  testWidgets('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
     final Key key = UniqueKey();
 
     Widget buildRadio(bool show) {
@@ -1475,7 +1475,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('disabled radio shows tooltip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('disabled radio shows tooltip', (WidgetTester tester) async {
     const String longPressTooltip = 'long press tooltip';
     const String tapTooltip = 'tap tooltip';
     await tester.pumpWidget(
@@ -1531,7 +1531,7 @@ void main() {
     expect(find.text(tapTooltip), findsOneWidget);
   });
 
-  testWidgets('Material2 - Radio button default colors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Radio button default colors', (WidgetTester tester) async {
     Widget buildRadio({bool enabled = true, bool selected = true}) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -1577,7 +1577,7 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - Radio button default colors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Radio button default colors', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     Widget buildRadio({bool enabled = true, bool selected = true}) {
       return MaterialApp(
@@ -1625,7 +1625,7 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - Radio button default overlay colors in hover/focus/press states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Radio button default overlay colors in hover/focus/press states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
@@ -1712,7 +1712,7 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - Radio button default overlay colors in hover/focus/press states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Radio button default overlay colors in hover/focus/press states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
@@ -1798,7 +1798,7 @@ void main() {
     );
   });
 
-  testWidgets('Radio.adaptive shows the correct platform widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio.adaptive shows the correct platform widget', (WidgetTester tester) async {
     Widget buildApp(TargetPlatform platform) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
@@ -1829,7 +1829,7 @@ void main() {
     }
   });
 
-  testWidgets('Material2 - Radio default overlayColor and fillColor resolves pressed state', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Radio default overlayColor and fillColor resolves pressed state', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final ThemeData theme = ThemeData(useMaterial3: false);
@@ -1894,7 +1894,7 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - Radio default overlayColor and fillColor resolves pressed state', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Radio default overlayColor and fillColor resolves pressed state', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final ThemeData theme = ThemeData(useMaterial3: true);

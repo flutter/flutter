@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('InkSparkle in a Button compiles and does not crash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkSparkle in a Button compiles and does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
@@ -34,7 +34,7 @@ void main() {
     skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
 
-  testWidgets('InkSparkle default splashFactory paints with drawRect when bounded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkSparkle default splashFactory paints with drawRect when bounded', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
@@ -65,7 +65,7 @@ void main() {
     skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
 
-  testWidgets('InkSparkle default splashFactory paints with drawPaint when unbounded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkSparkle default splashFactory paints with drawPaint when unbounded', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
@@ -92,19 +92,19 @@ void main() {
   // Goldens //
   /////////////
 
-  testWidgets('InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'top_left', 0.2);
   },
     skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
 
-  testWidgets('InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'center', 0.5);
   },
     skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
 
-  testWidgets('InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'bottom_right', 0.8);
   },
     skip: kIsWeb, // [intended] shaders are not yet supported for web.

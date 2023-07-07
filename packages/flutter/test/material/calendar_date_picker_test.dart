@@ -77,7 +77,7 @@ void main() {
   }
 
   group('CalendarDatePicker', () {
-    testWidgets('Can select a day', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Can select a day', (WidgetTester tester) async {
       DateTime? selectedDate;
       await tester.pumpWidget(calendarDatePicker(
         onDateChanged: (DateTime date) => selectedDate = date,
@@ -86,7 +86,7 @@ void main() {
       expect(selectedDate, equals(DateTime(2016, DateTime.january, 12)));
     });
 
-    testWidgets('Can select a month', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Can select a month', (WidgetTester tester) async {
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         onDisplayedMonthChanged: (DateTime date) => displayedMonth = date,
@@ -110,7 +110,7 @@ void main() {
       expect(displayedMonth, equals(DateTime(2015, DateTime.december)));
     });
 
-    testWidgets('Can select a year', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Can select a year', (WidgetTester tester) async {
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         onDisplayedMonthChanged: (DateTime date) => displayedMonth = date,
@@ -124,7 +124,7 @@ void main() {
       expect(displayedMonth, equals(DateTime(2018)));
     });
 
-    testWidgets('Selecting date does not change displayed month', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Selecting date does not change displayed month', (WidgetTester tester) async {
       DateTime? selectedDate;
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
@@ -147,7 +147,7 @@ void main() {
       expect(find.text('31'), findsNothing);
     });
 
-    testWidgets('Changing year does not change selected date', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Changing year does not change selected date', (WidgetTester tester) async {
       DateTime? selectedDate;
       await tester.pumpWidget(calendarDatePicker(
         onDateChanged: (DateTime date) => selectedDate = date,
@@ -161,7 +161,7 @@ void main() {
       expect(selectedDate, equals(DateTime(2016, DateTime.january, 4)));
     });
 
-    testWidgets('Changing year does not change the month', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Changing year does not change the month', (WidgetTester tester) async {
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         onDisplayedMonthChanged: (DateTime date) => displayedMonth = date,
@@ -178,7 +178,7 @@ void main() {
       expect(displayedMonth, equals(DateTime(2018, DateTime.march)));
     });
 
-    testWidgets('Can select a year and then a day', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Can select a year and then a day', (WidgetTester tester) async {
       DateTime? selectedDate;
       await tester.pumpWidget(calendarDatePicker(
         onDateChanged: (DateTime date) => selectedDate = date,
@@ -191,7 +191,7 @@ void main() {
       expect(selectedDate, equals(DateTime(2017, DateTime.january, 19)));
     });
 
-    testWidgets('Cannot select a day outside bounds', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Cannot select a day outside bounds', (WidgetTester tester) async {
       final DateTime validDate = DateTime(2017, DateTime.january, 15);
       DateTime? selectedDate;
       await tester.pumpWidget(calendarDatePicker(
@@ -214,7 +214,7 @@ void main() {
       expect(selectedDate, validDate);
     });
 
-    testWidgets('Cannot navigate to a month outside bounds', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Cannot navigate to a month outside bounds', (WidgetTester tester) async {
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         firstDate: DateTime(2016, DateTime.december, 15),
@@ -238,7 +238,7 @@ void main() {
       expect(previousMonthIcon, findsNothing);
     });
 
-    testWidgets('Cannot select disabled year', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Cannot select disabled year', (WidgetTester tester) async {
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         firstDate: DateTime(2018, DateTime.june, 9),
@@ -259,7 +259,7 @@ void main() {
       expect(displayedMonth, isNull);
     });
 
-    testWidgets('Selecting firstDate year respects firstDate', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Selecting firstDate year respects firstDate', (WidgetTester tester) async {
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         firstDate: DateTime(2016, DateTime.june, 9),
@@ -276,7 +276,7 @@ void main() {
       expect(displayedMonth, DateTime(2016, DateTime.june));
     });
 
-    testWidgets('Selecting lastDate year respects lastDate', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Selecting lastDate year respects lastDate', (WidgetTester tester) async {
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         firstDate: DateTime(2016, DateTime.june, 9),
@@ -293,7 +293,7 @@ void main() {
       expect(displayedMonth, DateTime(2019));
     });
 
-    testWidgets('Only predicate days are selectable', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Only predicate days are selectable', (WidgetTester tester) async {
       DateTime? selectedDate;
       await tester.pumpWidget(calendarDatePicker(
         firstDate: DateTime(2017, DateTime.january, 10),
@@ -310,7 +310,7 @@ void main() {
       expect(selectedDate, DateTime(2017, DateTime.january, 10));
     });
 
-    testWidgets('Can select initial calendar picker mode', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Can select initial calendar picker mode', (WidgetTester tester) async {
       await tester.pumpWidget(calendarDatePicker(
         initialDate: DateTime(2014, DateTime.january, 15),
         initialCalendarMode: DatePickerMode.year,
@@ -322,7 +322,7 @@ void main() {
       expect(find.text('January 2018'), findsOneWidget);
     });
 
-    testWidgets('currentDate is highlighted', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('currentDate is highlighted', (WidgetTester tester) async {
       await tester.pumpWidget(calendarDatePicker(
         currentDate: DateTime(2016, 1, 2),
       ));
@@ -338,7 +338,7 @@ void main() {
       );
     });
 
-    testWidgets('currentDate is highlighted even if it is disabled', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('currentDate is highlighted even if it is disabled', (WidgetTester tester) async {
       await tester.pumpWidget(calendarDatePicker(
         firstDate: DateTime(2016, 1, 3),
         lastDate: DateTime(2016, 1, 31),
@@ -358,7 +358,7 @@ void main() {
       );
     });
 
-    testWidgets('Selecting date does not switch picker to year selection', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Selecting date does not switch picker to year selection', (WidgetTester tester) async {
       await tester.pumpWidget(calendarDatePicker(
         initialDate: DateTime(2020, DateTime.may, 10),
         initialCalendarMode: DatePickerMode.year,
@@ -372,7 +372,7 @@ void main() {
       expect(find.text('2017'), findsNothing);
     });
 
-    testWidgets('Updates to initialDate parameter is reflected in the state', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Updates to initialDate parameter is reflected in the state', (WidgetTester tester) async {
       final Key pickerKey = UniqueKey();
       final DateTime initialDate = DateTime(2020, 1, 21);
       final DateTime updatedDate = DateTime(1976, 2, 23);
@@ -418,7 +418,7 @@ void main() {
       );
     });
 
-    testWidgets('Updates to initialCalendarMode parameter is reflected in the state', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Updates to initialCalendarMode parameter is reflected in the state', (WidgetTester tester) async {
       final Key pickerKey = UniqueKey();
 
       await tester.pumpWidget(calendarDatePicker(
@@ -443,7 +443,7 @@ void main() {
       expect(find.text('2016'), findsNothing); // 2016 in year grid
     });
 
-    testWidgets('Dragging more than half the width should not cause a jump', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Dragging more than half the width should not cause a jump', (WidgetTester tester) async {
       await tester.pumpWidget(calendarDatePicker());
       await tester.pumpAndSettle();
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
@@ -463,7 +463,7 @@ void main() {
     });
 
     group('Keyboard navigation', () {
-      testWidgets('Can toggle to year mode', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Can toggle to year mode', (WidgetTester tester) async {
         await tester.pumpWidget(calendarDatePicker());
         expect(find.text('2016'), findsNothing);
         expect(find.text('January 2016'), findsOneWidget);
@@ -476,7 +476,7 @@ void main() {
         expect(find.text('January 2016'), findsOneWidget);
       });
 
-      testWidgets('Can navigate next/previous months', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Can navigate next/previous months', (WidgetTester tester) async {
         await tester.pumpWidget(calendarDatePicker());
         expect(find.text('January 2016'), findsOneWidget);
         // Navigate to the previous month button and activate it twice.
@@ -503,7 +503,7 @@ void main() {
         expect(find.text('March 2016'), findsOneWidget);
       });
 
-      testWidgets('Can navigate date grid with arrow keys', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Can navigate date grid with arrow keys', (WidgetTester tester) async {
         DateTime? selectedDate;
         await tester.pumpWidget(calendarDatePicker(
           onDateChanged: (DateTime date) => selectedDate = date,
@@ -532,7 +532,7 @@ void main() {
         expect(selectedDate, DateTime(2016, DateTime.january, 18));
       });
 
-      testWidgets('Navigating with arrow keys scrolls months', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Navigating with arrow keys scrolls months', (WidgetTester tester) async {
         DateTime? selectedDate;
         await tester.pumpWidget(calendarDatePicker(
           onDateChanged: (DateTime date) => selectedDate = date,
@@ -572,7 +572,7 @@ void main() {
         expect(selectedDate, DateTime(2015, DateTime.november, 26));
       });
 
-      testWidgets('RTL text direction reverses the horizontal arrow key navigation', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('RTL text direction reverses the horizontal arrow key navigation', (WidgetTester tester) async {
         DateTime? selectedDate;
         await tester.pumpWidget(calendarDatePicker(
           onDateChanged: (DateTime date) => selectedDate = date,
@@ -615,7 +615,7 @@ void main() {
         feedback.dispose();
       });
 
-      testWidgets('Selecting date vibrates', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Selecting date vibrates', (WidgetTester tester) async {
         await tester.pumpWidget(calendarDatePicker());
         await tester.tap(find.text('10'));
         await tester.pump(hapticFeedbackInterval);
@@ -628,7 +628,7 @@ void main() {
         expect(feedback.hapticCount, 3);
       });
 
-      testWidgets('Tapping unselectable date does not vibrate', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Tapping unselectable date does not vibrate', (WidgetTester tester) async {
         await tester.pumpWidget(calendarDatePicker(
           initialDate: DateTime(2016, DateTime.january, 10),
           selectableDayPredicate: (DateTime date) => date.day.isEven,
@@ -644,7 +644,7 @@ void main() {
         expect(feedback.hapticCount, 0);
       });
 
-      testWidgets('Changing modes and year vibrates', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('Changing modes and year vibrates', (WidgetTester tester) async {
         await tester.pumpWidget(calendarDatePicker());
         await tester.tap(find.text('January 2016'));
         await tester.pump(hapticFeedbackInterval);
@@ -656,7 +656,7 @@ void main() {
     });
 
     group('Semantics', () {
-      testWidgets('day mode', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('day mode', (WidgetTester tester) async {
         final SemanticsHandle semantics = tester.ensureSemantics();
 
         await tester.pumpWidget(calendarDatePicker());
@@ -870,7 +870,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgets('calendar year mode', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('calendar year mode', (WidgetTester tester) async {
         final SemanticsHandle semantics = tester.ensureSemantics();
 
         await tester.pumpWidget(calendarDatePicker(
@@ -899,12 +899,12 @@ void main() {
   });
 
   group('YearPicker', () {
-    testWidgets('Current year is visible in year picker', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Current year is visible in year picker', (WidgetTester tester) async {
       await tester.pumpWidget(yearPicker());
       expect(find.text('2016'), findsOneWidget);
     });
 
-    testWidgets('Can select a year', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Can select a year', (WidgetTester tester) async {
       DateTime? selectedDate;
       await tester.pumpWidget(yearPicker(
         onChanged: (DateTime date) => selectedDate = date,
@@ -915,7 +915,7 @@ void main() {
       expect(selectedDate, equals(DateTime(2018)));
     });
 
-    testWidgets('Cannot select disabled year', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Cannot select disabled year', (WidgetTester tester) async {
       DateTime? selectedYear;
       await tester.pumpWidget(yearPicker(
         firstDate: DateTime(2018, DateTime.june, 9),

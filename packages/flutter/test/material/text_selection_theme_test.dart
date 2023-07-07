@@ -27,7 +27,7 @@ void main() {
     expect(theme.selectionHandleColor, null);
   });
 
-  testWidgets('Default TextSelectionThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default TextSelectionThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TextSelectionThemeData().debugFillProperties(builder);
 
@@ -39,7 +39,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('TextSelectionThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextSelectionThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TextSelectionThemeData(
       cursorColor: Color(0xffeeffaa),
@@ -59,7 +59,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final bool material3 = theme.useMaterial3;
     final Color defaultCursorColor = material3 ? theme.colorScheme.primary : const Color(0xff2196f3);
@@ -108,7 +108,7 @@ void main() {
     expect(handle, paints..path(color: defaultSelectionHandleColor));
   });
 
-  testWidgets('ThemeData.textSelectionTheme will be used if provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ThemeData.textSelectionTheme will be used if provided', (WidgetTester tester) async {
     const TextSelectionThemeData textSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffaabbcc),
       selectionColor: Color(0x88888888),
@@ -161,7 +161,7 @@ void main() {
     expect(handle, paints..path(color: textSelectionTheme.selectionHandleColor));
   });
 
-  testWidgets('TextSelectionTheme widget will override ThemeData.textSelectionTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextSelectionTheme widget will override ThemeData.textSelectionTheme', (WidgetTester tester) async {
     const TextSelectionThemeData defaultTextSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffaabbcc),
       selectionColor: Color(0x88888888),
@@ -223,7 +223,7 @@ void main() {
     expect(handle, paints..path(color: widgetTextSelectionTheme.selectionHandleColor));
   });
 
-  testWidgets('TextField parameters will override theme settings', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextField parameters will override theme settings', (WidgetTester tester) async {
     const TextSelectionThemeData defaultTextSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffaabbcc),
       selectionHandleColor: Color(0x00ccbbaa),
@@ -272,7 +272,7 @@ void main() {
     expect(renderSelectable.cursorColor, cursorColor.withAlpha(0));
   });
 
-  testWidgets('TextSelectionThem overrides DefaultSelectionStyle', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextSelectionThem overrides DefaultSelectionStyle', (WidgetTester tester) async {
     const Color themeSelectionColor = Color(0xffaabbcc);
     const Color themeCursorColor = Color(0x00ccbbaa);
     const Color defaultSelectionColor = Color(0xffaa1111);

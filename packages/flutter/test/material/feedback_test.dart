@@ -37,7 +37,7 @@ void main () {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
     });
 
-    testWidgets('forTap', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('forTap', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       await tester.pumpWidget(TestWidget(
@@ -66,7 +66,7 @@ void main () {
       semanticsTester.dispose();
     });
 
-    testWidgets('forTap Wrapper', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('forTap Wrapper', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       int callbackCount = 0;
@@ -101,7 +101,7 @@ void main () {
       semanticsTester.dispose();
     });
 
-    testWidgets('forLongPress', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('forLongPress', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       await tester.pumpWidget(TestWidget(
@@ -129,7 +129,7 @@ void main () {
       semanticsTester.dispose();
     });
 
-    testWidgets('forLongPress Wrapper', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('forLongPress Wrapper', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
       int callbackCount = 0;
       void callback() {
@@ -166,7 +166,7 @@ void main () {
   });
 
   group('Feedback on iOS', () {
-    testWidgets('forTap', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('forTap', (WidgetTester tester) async {
       await tester.pumpWidget(Theme(
         data: ThemeData(platform: TargetPlatform.iOS),
         child: TestWidget(
@@ -182,7 +182,7 @@ void main () {
       expect(feedback.clickSoundCount, 0);
     });
 
-    testWidgets('forLongPress', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('forLongPress', (WidgetTester tester) async {
       await tester.pumpWidget(Theme(
         data: ThemeData(platform: TargetPlatform.iOS),
         child: TestWidget(
