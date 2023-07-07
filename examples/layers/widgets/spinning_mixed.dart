@@ -52,10 +52,10 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
                     ElevatedButton(
-                      child: Row(
+                      child: const Row(
                         children: <Widget>[
-                          Image.network('https://storage.googleapis.com/cms-storage-bucket/4fd0db61df0567c0f352.png'),
-                          const Text('PRESS ME'),
+                          FlutterLogo(),
+                          Text('PRESS ME'),
                         ],
                       ),
                       onPressed: () {
