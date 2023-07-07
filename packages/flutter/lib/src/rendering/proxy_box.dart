@@ -1999,7 +1999,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     _updateClip();
     final RRect offsetRRect = _clip!.shift(offset);
-    final Rect offsetBounds = offsetRRect.outerRect;
     final Path offsetRRectAsPath = Path()..addRRect(offsetRRect);
     bool paintShadows = true;
     assert(() {
@@ -2020,14 +2019,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     final Canvas canvas = context.canvas;
     if (elevation != 0.0 && paintShadows) {
-      // The drawShadow call doesn't add the region of the shadow to the
-      // picture's bounds, so we draw a hardcoded amount of extra space to
-      // account for the maximum potential area of the shadow.
-      // TODO(jsimmons): remove this when Skia does it for us.
-      canvas.drawRect(
-        offsetBounds.inflate(20.0),
-        _transparentPaint,
-      );
       canvas.drawShadow(
         offsetRRectAsPath,
         shadowColor,

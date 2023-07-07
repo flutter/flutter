@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'focus_manager.dart';
 import 'framework.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_configuration.dart';
@@ -158,11 +157,8 @@ class EdgeDraggingAutoScroller {
   EdgeDraggingAutoScroller(
     this.scrollable, {
     this.onScrollViewScrolled,
-    double? velocityScalar,
-  }): velocityScalar = velocityScalar ?? _kDefaultAutoScrollVelocityScalar;
-
-  // An eyeballed value for a smooth scrolling experience.
-  static const double _kDefaultAutoScrollVelocityScalar = 7;
+    required this.velocityScalar,
+  });
 
   /// The [Scrollable] this auto scroller is scrolling.
   final ScrollableState scrollable;
@@ -179,8 +175,6 @@ class EdgeDraggingAutoScroller {
   ///
   /// It represents how the velocity scale with the over scroll distance. The
   /// auto-scroll velocity = <distance of overscroll> * velocityScalar.
-  ///
-  /// Defaults to 7 if not set or set to null.
   /// {@endtemplate}
   final double velocityScalar;
 
@@ -382,10 +376,10 @@ class ScrollIntent extends Intent {
   final ScrollIncrementType type;
 }
 
-/// An [Action] that scrolls the [Scrollable] that encloses the current
-/// [primaryFocus] by the amount configured in the [ScrollIntent] given to it.
+/// An [Action] that scrolls the relevant [Scrollable] by the amount configured
+/// in the [ScrollIntent] given to it.
 ///
-/// If a Scrollable cannot be found above the current [primaryFocus], the
+/// If a Scrollable cannot be found above the given [BuildContext], the
 /// [PrimaryScrollController] will be considered for default handling of
 /// [ScrollAction]s.
 ///
@@ -393,21 +387,17 @@ class ScrollIntent extends Intent {
 /// for a [ScrollIntent.type] set to [ScrollIncrementType.page] is 80% of the
 /// size of the scroll window, and for [ScrollIncrementType.line], 50 logical
 /// pixels.
-class ScrollAction extends Action<ScrollIntent> {
+class ScrollAction extends ContextAction<ScrollIntent> {
   @override
-  bool isEnabled(ScrollIntent intent) {
-    final FocusNode? focus = primaryFocus;
-    final bool contextIsValid = focus != null && focus.context != null;
-    if (contextIsValid) {
-      // Check for primary scrollable within the current context
-      if (Scrollable.maybeOf(focus.context!) != null) {
-        return true;
-      }
-      // Check for fallback scrollable with context from PrimaryScrollController
-      final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(focus.context!);
-      return primaryScrollController != null && primaryScrollController.hasClients;
+  bool isEnabled(ScrollIntent intent, [BuildContext? context]) {
+    if (context == null) {
+      return false;
     }
-    return false;
+    if (Scrollable.maybeOf(context) != null) {
+      return true;
+    }
+    final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
+    return (primaryScrollController != null) && (primaryScrollController.hasClients);
   }
 
   /// Returns the scroll increment for a single scroll request, for use when
@@ -485,10 +475,11 @@ class ScrollAction extends Action<ScrollIntent> {
   }
 
   @override
-  void invoke(ScrollIntent intent) {
-    ScrollableState? state = Scrollable.maybeOf(primaryFocus!.context!);
+  void invoke(ScrollIntent intent, [BuildContext? context]) {
+    assert(context != null, 'Cannot scroll without a context.');
+    ScrollableState? state = Scrollable.maybeOf(context!);
     if (state == null) {
-      final ScrollController primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
+      final ScrollController primaryScrollController = PrimaryScrollController.of(context);
       assert (() {
         if (primaryScrollController.positions.length != 1) {
           throw FlutterError.fromParts(<DiagnosticsNode>[

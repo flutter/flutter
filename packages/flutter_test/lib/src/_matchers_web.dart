@@ -77,7 +77,7 @@ class MatchesGoldenFile extends AsyncMatcher {
       } on TestFailure catch (ex) {
         return ex.message;
       }
-    }, additionalTime: const Duration(seconds: 22));
+    });
     _renderElement(view, _findRepaintBoundary(e));
     return result;
   }
@@ -93,7 +93,7 @@ RenderObject _findRepaintBoundary(Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent! as RenderObject;
+    renderObject = renderObject.parent!;
   }
   return renderObject;
 }

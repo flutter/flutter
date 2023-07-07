@@ -1253,34 +1253,34 @@ void main() {
       ..text = const TextSpan(text: 'TEXT')
       ..textDirection = TextDirection.ltr;
 
-    FlutterError? exception;
-    try {
-      painter.getPositionForOffset(Offset.zero);
-    } on FlutterError catch (e) {
-      exception = e;
-    }
-    expect(exception?.message, contains('The TextPainter has never been laid out.'));
-    exception = null;
+    expect(
+      () => painter.getPositionForOffset(Offset.zero),
+      throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.message,
+        'message',
+        contains('The TextPainter has never been laid out.'),
+      )),
+    );
 
-    try {
-      painter.layout();
-      painter.getPositionForOffset(Offset.zero);
-    } on FlutterError catch (e) {
-      exception = e;
-    }
+    expect(
+      () {
+        painter.layout();
+        painter.getPositionForOffset(Offset.zero);
+      },
+      returnsNormally,
+    );
 
-    expect(exception, isNull);
-    exception = null;
-
-    try {
-      painter.markNeedsLayout();
-      painter.getPositionForOffset(Offset.zero);
-    } on FlutterError catch (e) {
-      exception = e;
-    }
-
-    expect(exception?.message, contains('The calls that first invalidated the text layout were:'));
-    exception = null;
+    expect(
+      () {
+        painter.markNeedsLayout();
+        painter.getPositionForOffset(Offset.zero);
+      },
+      throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.message,
+        'message',
+        contains('The calls that first invalidated the text layout were:'),
+      )),
+    );
     painter.dispose();
   });
 

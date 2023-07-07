@@ -46,6 +46,7 @@ Widget simpleBuilderTest({
   bool setLayoutOffset = true,
 }) {
   return MaterialApp(
+    theme: ThemeData(useMaterial3: false),
     restorationScopeId: restorationID,
     home: Scaffold(
       body: SimpleBuilderTableView(
@@ -283,6 +284,7 @@ Widget simpleListTest({
   Clip? clipBehavior,
 }) {
   return MaterialApp(
+    theme: ThemeData(useMaterial3: true),
     home: Scaffold(
       body: SimpleListTableView(
         mainAxis: mainAxis,

@@ -62,6 +62,18 @@ void main() {
     expect(result, matches(regex), reason: 'require.config must have a waitSeconds: 0 config entry');
   });
 
+  test('generateMainModule hides requireJS injected by DDC', () {
+    final String result = generateMainModule(
+      entrypoint: 'foo/bar/main.js',
+      nullAssertions: false,
+      nativeNullAssertions: false,
+    );
+    expect(result, contains('''define._amd = define.amd;'''),
+      reason: 'define.amd must be preserved as _amd so users may restore it if needed.');
+    expect(result, contains('''delete define.amd;'''),
+      reason: "define.amd must be removed so packages don't attempt to use Dart's instance.");
+  });
+
   test('generateMainModule embeds urls correctly', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',

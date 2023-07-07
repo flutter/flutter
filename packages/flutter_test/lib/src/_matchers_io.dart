@@ -24,7 +24,7 @@ Future<ui.Image> captureImage(Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent! as RenderObject;
+    renderObject = renderObject.parent!;
   }
   assert(!renderObject.debugNeedsPaint);
   final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
@@ -124,7 +124,7 @@ class MatchesGoldenFile extends AsyncMatcher {
           image.dispose();
         }
       }
-    }, additionalTime: const Duration(minutes: 1));
+    });
   }
 
   @override
