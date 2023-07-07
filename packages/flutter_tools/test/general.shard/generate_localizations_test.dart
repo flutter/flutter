@@ -827,7 +827,6 @@ flutter:\r
       expect(content, contains('\r\n'));
     });
 
-
     testWithoutContext('blank lines generated nicely', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
