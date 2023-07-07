@@ -442,7 +442,7 @@ format: true
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-   testUsingContext('throw when generate: false and uses synthetic package when run via commandline options', () async {
+  testUsingContext('throw when generate: false and uses synthetic package when run via commandline options', () async {
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
@@ -475,7 +475,6 @@ format: true
       () async => createTestCommandRunner(command).run(<String>['gen-l10n', '--synthetic-package']),
       throwsToolExit(message: 'Attempted to generate localizations code without having the flutter: generate flag turned on.')
     );
-
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
