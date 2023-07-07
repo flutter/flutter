@@ -683,11 +683,39 @@ typedef InspectorSelectionChangedCallback = void Function();
 
 /// Structure to help reference count Dart objects referenced by a GUI tool
 /// using [WidgetInspectorService].
-class _InspectorReferenceData {
-  _InspectorReferenceData(this.object);
+///
+/// Does not hold the object from garbage collection.
+@visibleForTesting
+class InspectorReferenceData {
+  /// Creates an instance of [InspectorReferenceData].
+  InspectorReferenceData(Object object, this.id) {
+    // These types are not supported by [WeakReference].
+    // See https://api.dart.dev/stable/3.0.2/dart-core/WeakReference-class.html
+    if (object is String || object is num || object is bool) {
+      _value = object;
+      return;
+    }
 
-  final Object object;
+    _ref = WeakReference<Object>(object);
+  }
+
+  WeakReference<Object>? _ref;
+
+  Object? _value;
+
+  /// The id of the object in the widget inspector records.
+  final String id;
+
+  /// The number of times the object has been referenced.
   int count = 1;
+
+  /// The value.
+  Object? get value {
+    if (_ref != null) {
+      return _ref!.target;
+    }
+    return _value;
+  }
 }
 
 // Production implementation of [WidgetInspectorService].
@@ -745,9 +773,9 @@ mixin WidgetInspectorService {
   /// The VM service protocol does not keep alive object references so this
   /// class needs to manually manage groups of objects that should be kept
   /// alive.
-  final Map<String, Set<_InspectorReferenceData>> _groups = <String, Set<_InspectorReferenceData>>{};
-  final Map<String, _InspectorReferenceData> _idToReferenceData = <String, _InspectorReferenceData>{};
-  final Map<Object, String> _objectToId = Map<Object, String>.identity();
+  final Map<String, Set<InspectorReferenceData>> _groups = <String, Set<InspectorReferenceData>>{};
+  final Map<String, InspectorReferenceData> _idToReferenceData = <String, InspectorReferenceData>{};
+  final WeakMap<Object, String> _objectToId = WeakMap<Object, String>();
   int _nextId = 0;
 
   /// The pubRootDirectories that are currently configured for the widget inspector.
@@ -1273,20 +1301,22 @@ mixin WidgetInspectorService {
   /// references from a different group.
   @protected
   void disposeGroup(String name) {
-    final Set<_InspectorReferenceData>? references = _groups.remove(name);
+    final Set<InspectorReferenceData>? references = _groups.remove(name);
     if (references == null) {
       return;
     }
     references.forEach(_decrementReferenceCount);
   }
 
-  void _decrementReferenceCount(_InspectorReferenceData reference) {
+  void _decrementReferenceCount(InspectorReferenceData reference) {
     reference.count -= 1;
     assert(reference.count >= 0);
     if (reference.count == 0) {
-      final String? id = _objectToId.remove(reference.object);
-      assert(id != null);
-      _idToReferenceData.remove(id);
+      final Object? value = reference.value;
+      if (value != null) {
+          _objectToId.remove(value);
+      }
+      _idToReferenceData.remove(reference.id);
     }
   }
 
@@ -1298,14 +1328,16 @@ mixin WidgetInspectorService {
       return null;
     }
 
-    final Set<_InspectorReferenceData> group = _groups.putIfAbsent(groupName, () => Set<_InspectorReferenceData>.identity());
+    final Set<InspectorReferenceData> group = _groups.putIfAbsent(groupName, () => Set<InspectorReferenceData>.identity());
     String? id = _objectToId[object];
-    _InspectorReferenceData referenceData;
+    InspectorReferenceData referenceData;
     if (id == null) {
+      // TODO(polina-c): comment here why we increase memory footprint by the prefix 'inspector-'.
+      // https://github.com/flutter/devtools/issues/5995
       id = 'inspector-$_nextId';
       _nextId += 1;
       _objectToId[object] = id;
-      referenceData = _InspectorReferenceData(object);
+      referenceData = InspectorReferenceData(object, id);
       _idToReferenceData[id] = referenceData;
       group.add(referenceData);
     } else {
@@ -1335,11 +1367,11 @@ mixin WidgetInspectorService {
       return null;
     }
 
-    final _InspectorReferenceData? data = _idToReferenceData[id];
+    final InspectorReferenceData? data = _idToReferenceData[id];
     if (data == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist.')]);
     }
-    return data.object;
+    return data.value;
   }
 
   /// Returns the object to introspect to determine the source location of an
@@ -1371,7 +1403,7 @@ mixin WidgetInspectorService {
       return;
     }
 
-    final _InspectorReferenceData? referenceData = _idToReferenceData[id];
+    final InspectorReferenceData? referenceData = _idToReferenceData[id];
     if (referenceData == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist')]);
     }
@@ -1725,8 +1757,8 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getProperties(diagnosticsNodeId, groupName));
   }
 
-  List<Object>  _getProperties(String? diagnosticsOrDiagnosticableId, String groupName) {
-    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+  List<Object>  _getProperties(String? diagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticableId);
     if (node == null) {
       return const <Object>[];
     }
@@ -1763,28 +1795,22 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getChildrenSummaryTree(diagnosticsNodeId, groupName));
   }
 
-  DiagnosticsNode? _idToDiagnosticsNode(String? diagnosticsOrDiagnosticableId) {
-    // TODO(polina-c): start always assuming Diagnosticable, when DevTools stops sending DiagnosticsNode to
-    // APIs that invoke this method.
-    // https://github.com/flutter/devtools/issues/3951
-    final Object? object = toObject(diagnosticsOrDiagnosticableId);
+  DiagnosticsNode? _idToDiagnosticsNode(String? diagnosticableId) {
+    final Object? object = toObject(diagnosticableId);
     return objectToDiagnosticsNode(object);
   }
 
-  /// If posiible, returns [DiagnosticsNode] for the object.
+  /// If possible, returns [DiagnosticsNode] for the object.
   @visibleForTesting
   static DiagnosticsNode? objectToDiagnosticsNode(Object? object) {
-    if (object is DiagnosticsNode) {
-      return object;
-    }
     if (object is Diagnosticable) {
       return object.toDiagnosticsNode();
     }
     return null;
   }
 
-  List<Object> _getChildrenSummaryTree(String? diagnosticsOrDiagnosticableId, String groupName) {
-    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+  List<Object> _getChildrenSummaryTree(String? diagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticableId);
     if (node == null) {
       return <Object>[];
     }
@@ -1794,17 +1820,17 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
-  /// object that [diagnosticsOrDiagnosticableId] references providing information needed
+  /// object that [diagnosticableId] references providing information needed
   /// for the details subtree view.
   ///
   /// The details subtree shows properties inline and includes all children
   /// rather than a filtered set of important children.
-  String getChildrenDetailsSubtree(String diagnosticsOrDiagnosticableId, String groupName) {
-    return _safeJsonEncode(_getChildrenDetailsSubtree(diagnosticsOrDiagnosticableId, groupName));
+  String getChildrenDetailsSubtree(String diagnosticableId, String groupName) {
+    return _safeJsonEncode(_getChildrenDetailsSubtree(diagnosticableId, groupName));
   }
 
-  List<Object> _getChildrenDetailsSubtree(String? diagnosticsOrDiagnosticableId, String groupName) {
-    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+  List<Object> _getChildrenDetailsSubtree(String? diagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticableId);
     // With this value of minDepth we only expand one extra level of important nodes.
     final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, includeProperties: true, service: this);
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate, parent: node);
@@ -1916,19 +1942,19 @@ mixin WidgetInspectorService {
   ///  * [getChildrenDetailsSubtree], a method to get children of a node
   ///    in the details subtree.
   String getDetailsSubtree(
-    String diagnosticsOrDiagnosticableId,
+    String diagnosticableId,
     String groupName, {
     int subtreeDepth = 2,
   }) {
-    return _safeJsonEncode(_getDetailsSubtree(diagnosticsOrDiagnosticableId, groupName, subtreeDepth));
+    return _safeJsonEncode(_getDetailsSubtree(diagnosticableId, groupName, subtreeDepth));
   }
 
   Map<String, Object?>? _getDetailsSubtree(
-    String? diagnosticsOrDiagnosticableId,
+    String? diagnosticableId,
     String? groupName,
     int subtreeDepth,
   ) {
-    final DiagnosticsNode? root = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    final DiagnosticsNode? root = _idToDiagnosticsNode(diagnosticableId);
     if (root == null) {
       return null;
     }
@@ -1944,15 +1970,12 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element].
-  ///
-  /// If the currently selected [Element] is identical to the [Element]
-  /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
-  /// reused.
-  // TODO(polina-c): delete [previousSelectionId] when it is not used in DevTools
-  // https://github.com/flutter/devtools/issues/3951
   @protected
   String getSelectedWidget(String? previousSelectionId, String groupName) {
-    return _safeJsonEncode(_getSelectedWidget(previousSelectionId, groupName));
+    if (previousSelectionId != null) {
+      debugPrint('previousSelectionId is deprecated in API');
+    }
+    return _safeJsonEncode(_getSelectedWidget(null, groupName));
   }
 
   /// Captures an image of the current state of an [object] that is a
@@ -2028,11 +2051,11 @@ mixin WidgetInspectorService {
   Future<Map<String, Object?>> _getLayoutExplorerNode(
     Map<String, String> parameters,
   ) {
-    final String? diagnosticsOrDiagnosticableId = parameters['id'];
+    final String? diagnosticableId = parameters['id'];
     final int subtreeDepth = int.parse(parameters['subtreeDepth']!);
     final String? groupName = parameters['groupName'];
     Map<String, dynamic>? result = <String, dynamic>{};
-    final DiagnosticsNode? root = _idToDiagnosticsNode(diagnosticsOrDiagnosticableId);
+    final DiagnosticsNode? root = _idToDiagnosticsNode(diagnosticableId);
     if (root == null) {
       return Future<Map<String, dynamic>>.value(<String, dynamic>{
         'result': result,
@@ -2236,14 +2259,11 @@ mixin WidgetInspectorService {
   /// if the selected [Element] should be shown in the summary tree otherwise
   /// returns the first ancestor of the selected [Element] shown in the summary
   /// tree.
-  ///
-  /// If the currently selected [Element] is identical to the [Element]
-  /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
-  /// reused.
-  // TODO(polina-c): delete paramater [previousSelectionId] when it is not used in DevTools
-  // https://github.com/flutter/devtools/issues/3951
-  String getSelectedSummaryWidget(String previousSelectionId, String groupName) {
-    return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
+  String getSelectedSummaryWidget(String? previousSelectionId, String groupName) {
+    if (previousSelectionId != null) {
+      debugPrint('previousSelectionId is deprecated in API');
+    }
+    return _safeJsonEncode(_getSelectedSummaryWidget(null, groupName));
   }
 
   _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId) {
@@ -3612,7 +3632,6 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     final Map<String, Object?> result = <String, Object?>{};
     final Object? value = node.value;
     if (_interactive) {
-      result['objectId'] = service.toId(node, groupName!);
       result['valueId'] = service.toId(value, groupName!);
     }
     if (summaryTree) {
@@ -3747,3 +3766,54 @@ class _WidgetFactory {
 // recognize the annotation.
 // ignore: library_private_types_in_public_api
 const _WidgetFactory widgetFactory = _WidgetFactory();
+
+/// Does not hold keys from garbage collection.
+@visibleForTesting
+class WeakMap<K, V> {
+  Expando<Object> _objects = Expando<Object>();
+
+  /// Strings, numbers, booleans.
+  final Map<K, V> _primitives = <K, V>{};
+
+  bool _isPrimitive(Object? key) {
+    return key == null || key is String || key is num || key is bool;
+  }
+
+  /// Returns the value for the given [key] or null if [key] is not in the map
+  /// or garbage collected.
+  ///
+  /// Does not support records to act as keys.
+  V? operator [](K key){
+    if (_isPrimitive(key)) {
+      return _primitives[key];
+    } else {
+      return _objects[key!] as V?;
+    }
+  }
+
+  /// Associates the [key] with the given [value].
+  void operator []=(K key, V value){
+    if (_isPrimitive(key)) {
+      _primitives[key] = value;
+    } else {
+      _objects[key!] = value;
+    }
+  }
+
+  /// Removes the value for the given [key] from the map.
+  V? remove(K key) {
+    if (_isPrimitive(key)) {
+      return _primitives.remove(key);
+    } else {
+      final V? result = _objects[key!]  as V?;
+      _objects[key] = null;
+      return result;
+    }
+  }
+
+  /// Removes all pairs from the map.
+  void clear() {
+    _objects = Expando<Object>();
+    _primitives.clear();
+  }
+}
