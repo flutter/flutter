@@ -1007,8 +1007,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     ));
   }
 
-  /// Called by [attachRootWidget] to attached the provided [RootWidget] to
-  /// the [buildOwner].
+  /// Called by [attachRootWidget] to attach the provided [RootWidget] to the
+  /// [buildOwner].
   ///
   /// This creates the [rootElement], if necessary, or re-uses an existing one.
   ///
@@ -1260,7 +1260,7 @@ class RootElement extends Element with RootElementMixin {
 
   @override
   // There is no ancestor RenderObjectElement that the render object could be attached to.
-  bool debugMustInsertRenderObjectIntoSlot(Object? slot) => false;
+  bool debugExpectsRenderObjectForSlot(Object? slot) => false;
 }
 
 /// A concrete binding for applications based on the Widgets framework.

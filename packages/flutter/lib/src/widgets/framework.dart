@@ -3452,10 +3452,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// this location in the tree. Otherwise, this getter will walk down the tree
   /// until it finds a [RenderObjectElement].
   ///
-  /// Some locations in the tree are not backed a render object. In those cases,
-  /// this getter returns null. This may happen, if the element is located
-  /// outside of a [View] since only the element subtree rooted in a view has a
-  /// render tree associated with it.
+  /// Some locations in the tree are not backed by a render object. In those
+  /// cases, this getter returns null. This can happen, if the element is
+  /// located outside of a [View] since only the element subtree rooted in a
+  /// view has a render tree associated with it.
   RenderObject? get renderObject {
     Element? current = this;
     while (current != null) {
@@ -4444,7 +4444,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// Most branches of the [Element] tree are expected to eventually insert a
   /// [RenderObject] into their [RenderObjectElement] ancestor to construct the
-  /// render tree. However, there is a notable exception: An [Element] may
+  /// render tree. However, there is a notable exception: an [Element] may
   /// expect that the occupants of certain child slots create a new independent
   /// render tree and therefore are not allowed to insert a render object into
   /// the existing render tree. Those elements must return false from this
@@ -4460,7 +4460,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// Overriding this method is not common, as elements behaving in the way
   /// described above are rare.
-  bool debugMustInsertRenderObjectIntoSlot(Object? slot) => true;
+  bool debugExpectsRenderObjectForSlot(Object? slot) => true;
 
   @override
   RenderObject? findRenderObject() {
@@ -6149,10 +6149,10 @@ abstract class RenderObjectElement extends Element {
       // In debug mode we check whether the ancestor accepts RenderObjects to
       // produce a better error message in attachRenderObject. In release mode,
       // we assume only correct trees are built (i.e.
-      // debugMustInsertRenderObjectIntoSlot always returns true) and don't check
+      // debugExpectsRenderObjectForSlot always returns true) and don't check
       // explicitly.
       assert(() {
-        if (!ancestor!.debugMustInsertRenderObjectIntoSlot(slot)) {
+        if (!ancestor!.debugExpectsRenderObjectForSlot(slot)) {
           ancestor = null;
         }
         return true;
@@ -6160,7 +6160,7 @@ abstract class RenderObjectElement extends Element {
       ancestor = ancestor?._parent;
     }
     assert(() {
-      if (ancestor?.debugMustInsertRenderObjectIntoSlot(slot) == false) {
+      if (ancestor?.debugExpectsRenderObjectForSlot(slot) == false) {
         ancestor = null;
       }
       return true;
@@ -6352,13 +6352,13 @@ abstract class RenderObjectElement extends Element {
         FlutterError.reportError(FlutterErrorDetails(exception: FlutterError.fromParts(
         <DiagnosticsNode>[
           ErrorSummary(
-            'RenderObject for ${toStringShort()} cannot find ancestor RenderObject to attach to.',
+            'The render object for ${toStringShort()} cannot find ancestor render object to attach to.',
           ),
           ErrorDescription(
             'The ownership chain for the RenderObject in question was:\n  ${debugGetCreatorChain(10)}',
           ),
           ErrorHint(
-            'Try wrapping your Widget in a View widget or any other widget that is backed by '
+            'Try wrapping your widget in a View widget or any other widget that is backed by '
             'a $RenderTreeRootElement to serve as the root of the render tree.',
           ),
         ]

@@ -448,6 +448,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   @override
   void performSemanticsAction(SemanticsActionEvent action) {
+    // Due to the asynchronicity in some screen readers (they may not have
+    // processed the latest semantics update yet) this code is more forgiving
+    // and actions for views/nodes that no longer exist are gracefully ignored.
     _viewIdToRenderView[action.viewId]?.owner?.semanticsOwner?.performAction(action.nodeId, action.type, action.arguments);
   }
 

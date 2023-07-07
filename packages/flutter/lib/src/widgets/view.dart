@@ -40,7 +40,7 @@ import 'media_query.dart';
 ///
 /// In technical terms, whether a [View] is allowed to occupy a certain slot of
 /// an element is determined by that element's
-/// [Element.debugMustInsertRenderObjectIntoSlot]
+/// [Element.debugExpectsRenderObjectForSlot].
 ///
 /// See also:
 ///
@@ -659,7 +659,7 @@ class _MultiChildComponentElement extends Element {
     bool hasAncestorRenderObjectElement = false;
     bool ancestorWantsRenderObject = true;
     visitAncestorElements((Element ancestor) {
-      if (!ancestor.debugMustInsertRenderObjectIntoSlot(slot)) {
+      if (!ancestor.debugExpectsRenderObjectForSlot(slot)) {
         ancestorWantsRenderObject = false;
         return false;
       }
@@ -708,7 +708,7 @@ class _MultiChildComponentElement extends Element {
   static const Object _viewSlot = Object();
 
   @override
-  bool debugMustInsertRenderObjectIntoSlot(Object? slot) => slot != _viewSlot;
+  bool debugExpectsRenderObjectForSlot(Object? slot) => slot != _viewSlot;
 
   @override
   void performRebuild() {
