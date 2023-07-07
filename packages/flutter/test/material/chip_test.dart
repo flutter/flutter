@@ -143,9 +143,11 @@ Widget chipWithOptionalDeleteButton({
   String? chipTooltip,
   String? deleteButtonTooltipMessage,
   VoidCallback? onPressed = doNothing,
+  bool? useMaterial3,
 }) {
   return wrapForChip(
     textDirection: textDirection,
+    useMaterial3: useMaterial3,
     child: Wrap(
       children: <Widget>[
         RawChip(
@@ -580,6 +582,7 @@ void main() {
     const TextStyle style = TextStyle(fontSize: 10.0);
     await tester.pumpWidget(
       wrapForChip(
+        useMaterial3: false,
         child: const Row(
           children: <Widget>[
             Chip(label: Text('Test'), labelStyle: style),
@@ -616,6 +619,7 @@ void main() {
   testWidgets('Chip responds to materialTapTargetSize', (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapForChip(
+          useMaterial3: false,
           child: const Column(
             children: <Widget>[
               Chip(
@@ -732,6 +736,7 @@ void main() {
   testWidgets('Chip responds to textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
+        useMaterial3: false,
         child: const Column(
           children: <Widget>[
             Chip(
@@ -810,6 +815,7 @@ void main() {
     final Key keyB = GlobalKey();
     await tester.pumpWidget(
       wrapForChip(
+        useMaterial3: false,
         child: Column(
           children: <Widget>[
             Chip(
@@ -947,6 +953,7 @@ void main() {
     Future<void> pushChip({ Widget? avatar }) async {
       return tester.pumpWidget(
         wrapForChip(
+          useMaterial3: false,
           child: Wrap(
             children: <Widget>[
               RawChip(
@@ -1061,6 +1068,7 @@ void main() {
     Future<void> pushChip({ bool deletable = false }) async {
       return tester.pumpWidget(
         wrapForChip(
+          useMaterial3: false,
           child: Wrap(
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -1212,6 +1220,7 @@ void main() {
 
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
+        useMaterial3: false,
         labelKey: labelKey,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
@@ -1294,6 +1303,7 @@ void main() {
 
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
+        useMaterial3: false,
         labelKey: labelKey,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
@@ -1347,6 +1357,7 @@ void main() {
 
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
+        useMaterial3: false,
         labelKey: labelKey,
         onPressed: null,
         deleteButtonKey: deleteButtonKey,
@@ -1431,6 +1442,7 @@ void main() {
 
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
+        useMaterial3: false,
         labelKey: labelKey,
         deletable: false,
       ),
@@ -1485,6 +1497,7 @@ void main() {
     Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
       return tester.pumpWidget(
         wrapForChip(
+          useMaterial3: false,
           child: Wrap(
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -1565,6 +1578,7 @@ void main() {
     Future<void> pushChip({ bool selectable = false }) async {
       return tester.pumpWidget(
         wrapForChip(
+          useMaterial3: false,
           child: Wrap(
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -1638,6 +1652,7 @@ void main() {
     Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
       return tester.pumpWidget(
         wrapForChip(
+          useMaterial3: false,
           child: Wrap(
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -2573,12 +2588,17 @@ void main() {
   });
 
   testWidgets('selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
-    await tester.pumpWidget(wrapForChip(child: const FilterChip(
-      avatar: CircleAvatar(child: Text('t')),
-      label: Text('test'),
-      selected: true,
-      onSelected: null,
-    )));
+    await tester.pumpWidget(
+      wrapForChip(
+        useMaterial3: false,
+        child: const FilterChip(
+          avatar: CircleAvatar(child: Text('t')),
+          label: Text('test'),
+          selected: true,
+          onSelected: null,
+        ),
+      ),
+    );
     final RenderBox rawChip = tester.firstRenderObject<RenderBox>(
       find.descendant(
         of: find.byType(RawChip),
@@ -3299,6 +3319,7 @@ void main() {
     const OutlinedBorder shape = ContinuousRectangleBorder();
 
     await tester.pumpWidget(wrapForChip(
+      useMaterial3: false,
       child: const RawChip(
         label: Text('text'),
         backgroundColor: backgroundColor,
