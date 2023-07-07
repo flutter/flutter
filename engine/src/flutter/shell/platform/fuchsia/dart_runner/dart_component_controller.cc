@@ -15,6 +15,8 @@
 #include <lib/fidl/cpp/string.h>
 #include <lib/sys/cpp/service_directory.h>
 #include <lib/syslog/global.h>
+#include <lib/vfs/cpp/composed_service_dir.h>
+#include <lib/vfs/cpp/remote_dir.h>
 #include <lib/zx/clock.h>
 #include <lib/zx/thread.h>
 #include <sys/stat.h>
@@ -25,6 +27,7 @@
 #include <regex>
 #include <utility>
 
+#include "dart_api.h"
 #include "runtime/dart/utils/files.h"
 #include "runtime/dart/utils/handle_exception.h"
 #include "runtime/dart/utils/inlines.h"
@@ -104,24 +107,19 @@ DartComponentController::DartComponentController(
         controller)
     : loop_(new async::Loop(&kLoopConfig)),
       label_(GetLabelFromUrl(start_info.resolved_url())),
-      url_(std::move(start_info.resolved_url())),
-      runner_incoming_services_(runner_incoming_services),
+      url_(start_info.resolved_url()),
+      runner_incoming_services_(std::move(runner_incoming_services)),
+      dart_outgoing_dir_(new vfs::PseudoDir()),
       start_info_(std::move(start_info)),
-      binding_(this) {
+      binding_(this, std::move(controller)) {
+  binding_.set_error_handler([this](zx_status_t status) { Kill(); });
+
   // TODO(fxb/84537): This data path is configured based how we build Flutter
   // applications in tree currently, but the way we build the Flutter
   // application may change. We should avoid assuming the data path and let the
   // CML file specify this data path instead.
   const std::string component_name = GetComponentNameFromUrl(url_);
   data_path_ = "pkg/data/" + component_name;
-
-  if (controller.is_valid()) {
-    binding_.Bind(std::move(controller));
-    binding_.set_error_handler([this](zx_status_t status) { Kill(); });
-  } else {
-    FX_LOG(ERROR, LOG_TAG,
-           "Fuchsia component controller endpoint is not valid.");
-  }
 
   zx_status_t idle_timer_status =
       zx::timer::create(ZX_TIMER_SLACK_LATE, ZX_CLOCK_MONOTONIC, &idle_timer_);
@@ -211,6 +209,84 @@ bool DartComponentController::CreateAndBindNamespace() {
               path.c_str(), zx_status_get_string(ns_bind_status));
       return false;
     }
+  }
+
+  dart_outgoing_dir_request_ = dart_outgoing_dir_ptr_.NewRequest();
+
+  fuchsia::io::DirectoryHandle dart_public_dir;
+  // TODO(anmittal): when fixing enumeration using new c++ vfs, make sure that
+  // flutter_public_dir is only accessed once we receive OnOpen Event.
+  // That will prevent FL-175 for public directory
+  fdio_service_connect_at(dart_outgoing_dir_ptr_.channel().get(), "svc",
+                          dart_public_dir.NewRequest().TakeChannel().release());
+
+  auto composed_service_dir = std::make_unique<vfs::ComposedServiceDir>();
+  composed_service_dir->set_fallback(std::move(dart_public_dir));
+
+  // Clone and check if client is servicing the directory.
+  dart_outgoing_dir_ptr_->Clone(
+      fuchsia::io::OpenFlags::DESCRIBE |
+          fuchsia::io::OpenFlags::CLONE_SAME_RIGHTS,
+      dart_outgoing_dir_ptr_to_check_on_open_.NewRequest());
+
+  // Collect our standard set of directories.
+  std::vector<std::string> other_dirs = {"debug", "ctrl", "diagnostics"};
+
+  dart_outgoing_dir_ptr_to_check_on_open_.events().OnOpen =
+      [this, other_dirs](zx_status_t status, auto unused) {
+        dart_outgoing_dir_ptr_to_check_on_open_.Unbind();
+        if (status != ZX_OK) {
+          FML_LOG(ERROR) << "could not bind out directory for dart component("
+                         << label_ << "): " << zx_status_get_string(status);
+          return;
+        }
+
+        // add other directories as RemoteDirs.
+        for (auto& dir_str : other_dirs) {
+          fuchsia::io::DirectoryHandle dir;
+          auto request = dir.NewRequest().TakeChannel();
+          auto status = fdio_open_at(
+              dart_outgoing_dir_ptr_.channel().get(), dir_str.c_str(),
+              static_cast<uint32_t>(fuchsia::io::OpenFlags::DIRECTORY |
+                                    fuchsia::io::OpenFlags::RIGHT_READABLE),
+              request.release());
+          if (status == ZX_OK) {
+            dart_outgoing_dir_->AddEntry(
+                dir_str.c_str(),
+                std::make_unique<vfs::RemoteDir>(dir.TakeChannel()));
+          } else {
+            FML_LOG(ERROR) << "could not add out directory entry(" << dir_str
+                           << ") for flutter component(" << label_
+                           << "): " << zx_status_get_string(status);
+          }
+        }
+      };
+  dart_outgoing_dir_ptr_to_check_on_open_.set_error_handler(
+      [this](zx_status_t status) {
+        dart_outgoing_dir_ptr_to_check_on_open_.Unbind();
+      });
+
+  // Expose the "Echo" service here on behalf of the running dart program, so
+  // that integration tests can make use of it.
+  //
+  // The flutter/engine repository doesn't support connecting to FIDL from Dart,
+  // so for the tests sake we connect to the FIDL from C++ here and proxy the
+  // Echo to dart using native hooks.
+  composed_service_dir->AddService(
+      dart::test::Echo::Name_,
+      std::make_unique<vfs::Service>([this](zx::channel channel,
+                                            async_dispatcher_t* dispatcher) {
+        echo_binding_.AddBinding(
+            this, fidl::InterfaceRequest<dart::test::Echo>(std::move(channel)));
+      }));
+  dart_outgoing_dir_->AddEntry("svc", std::move(composed_service_dir));
+
+  if (start_info_.has_outgoing_dir()) {
+    dart_outgoing_dir_->Serve(
+        fuchsia::io::OpenFlags::RIGHT_READABLE |
+            fuchsia::io::OpenFlags::RIGHT_WRITABLE |
+            fuchsia::io::OpenFlags::DIRECTORY,
+        start_info_.mutable_outgoing_dir()->TakeChannel());
   }
 
   return true;
@@ -390,11 +466,9 @@ bool DartComponentController::RunDartMain() {
   stdout_fd_ = fileno(stdout);
   stderr_fd_ = fileno(stderr);
 
-  fidl::InterfaceRequest<fuchsia::io::Directory> outgoing_dir =
-      std::move(*start_info_.mutable_outgoing_dir());
   InitBuiltinLibrariesForIsolate(
       url_, namespace_, stdout_fd_, stderr_fd_, nullptr /* environment */,
-      outgoing_dir.TakeChannel(), false /* service_isolate */);
+      dart_outgoing_dir_request_.TakeChannel(), false /* service_isolate */);
 
   Dart_ExitScope();
   Dart_ExitIsolate();
@@ -463,6 +537,29 @@ bool DartComponentController::RunDartMain() {
   return true;
 }
 
+void DartComponentController::EchoString(fidl::StringPtr value,
+                                         EchoStringCallback callback) {
+  Dart_EnterScope();
+
+  Dart_Handle builtin_lib = Dart_LookupLibrary(ToDart("dart:fuchsia.builtin"));
+  FML_CHECK(!tonic::CheckAndHandleError(builtin_lib));
+
+  Dart_Handle receive_echo_string = ToDart("_receiveEchoString");
+  Dart_Handle string_to_echo =
+      value.has_value() ? tonic::ToDart(*value) : Dart_Null();
+  Dart_Handle result =
+      Dart_Invoke(builtin_lib, receive_echo_string, 1, &string_to_echo);
+  FML_CHECK(!tonic::CheckAndHandleError(result));
+
+  fidl::StringPtr echo_string;
+  if (!Dart_IsNull(result)) {
+    echo_string = tonic::StdStringFromDart(result);
+  }
+  callback(std::move(echo_string));
+
+  Dart_ExitScope();
+}
+
 void DartComponentController::Kill() {
   if (Dart_CurrentIsolate()) {
     tonic::DartMicrotaskQueue* queue =
@@ -480,6 +577,10 @@ void DartComponentController::Kill() {
 
     Dart_ShutdownIsolate();
   }
+}
+
+void DartComponentController::Stop() {
+  Kill();
 }
 
 void DartComponentController::MessageEpilogue(Dart_Handle result) {
@@ -508,10 +609,6 @@ void DartComponentController::MessageEpilogue(Dart_Handle result) {
     FX_LOGF(INFO, LOG_TAG, "Idle timer set failed: %s",
             zx_status_get_string(status));
   }
-}
-
-void DartComponentController::Stop() {
-  Kill();
 }
 
 void DartComponentController::OnIdleTimer(async_dispatcher_t* dispatcher,

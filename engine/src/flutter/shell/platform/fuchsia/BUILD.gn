@@ -90,6 +90,7 @@ if (enable_unittests) {
     testonly = true
 
     deps = [
+      "dart-pkg/zircon:tests",
       "dart_runner:tests",
       "flutter:tests",
     ]

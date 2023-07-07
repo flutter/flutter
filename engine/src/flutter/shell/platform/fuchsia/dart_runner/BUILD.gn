@@ -65,6 +65,7 @@ template("runner_sources") {
       "$fuchsia_sdk_root/pkg:trace",
       "$fuchsia_sdk_root/pkg:vfs_cpp",
       "$fuchsia_sdk_root/pkg:zx",
+      "fidl:dart_test",
       "//flutter/common",
       "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
       "//flutter/shell/platform/fuchsia/dart-pkg/zircon",

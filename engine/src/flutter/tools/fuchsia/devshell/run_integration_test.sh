@@ -205,7 +205,7 @@ fi
 for test_package_path in "${test_package_paths[@]}"
 do
   engine-info "... Publishing $test_package_path to package repository ($fx_build_dir/amber-files)..."
-  "$jiri_bin"/fx pm publish -a -repo "$fx_build_dir/amber-files/" -f "$test_package_path"
+  "$jiri_bin"/ffx repository publish "$fx_build_dir/amber-files/" --package-archive "$test_package_path"
 done
 
 test_package_name_for_url="$(echo "${test_packages[0]}" | sed "s/\-0.far//")"

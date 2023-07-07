@@ -4,6 +4,9 @@
 
 import("//build/fuchsia/sdk.gni")
 import("//flutter/testing/testing.gni")
+import("//flutter/tools/fuchsia/dart/dart_library.gni")
+import("//flutter/tools/fuchsia/flutter/flutter_component.gni")
+import("//flutter/tools/fuchsia/gn-sdk/package.gni")
 
 config("zircon_config") {
   include_dirs = [ "." ]
@@ -37,9 +40,54 @@ source_set("zircon") {
   ]
 }
 
+dart_library("zircon_lib") {
+  testonly = true
+  package_name = "zircon"
+  language_version = "2.12"
+  source_dir = "lib"
+
+  sources = [
+    "src/handle.dart",
+    "src/handle_disposition.dart",
+    "src/handle_waiter.dart",
+    "src/init.dart",
+    "src/system.dart",
+    "src/zd_channel.dart",
+    "src/zd_handle.dart",
+    "zircon.dart",
+  ]
+}
+
+dart_library("zircon_tests_lib") {
+  testonly = true
+  package_name = "zircon_tests"
+  language_version = "2.12"
+  source_dir = "."
+  package_root = "test"
+
+  sources = [ "zircon_tests.dart" ]
+  deps = [ "//flutter/shell/platform/fuchsia/dart:litetest" ]
+}
+
+flutter_component("zircon_tests_component") {
+  testonly = true
+  main_package = "zircon_tests"
+  component_name = "zircon_tests"
+  main_dart = "zircon_tests.dart"
+  manifest = rebase_path("test/meta/zircon_tests.cml")
+
+  deps = [ ":zircon_tests_lib" ]
+}
+
+fuchsia_package("zircon_tests_package") {
+  testonly = true
+  package_name = "zircon_tests"
+  deps = [ ":zircon_tests_component" ]
+}
+
 if (enable_unittests) {
-  source_set("test") {
+  source_set("tests") {
     testonly = true
-    deps = [ "test" ]
+    deps = [ ":zircon_tests_package" ]
   }
 }

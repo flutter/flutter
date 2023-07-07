@@ -10,11 +10,11 @@
     },
     // Capabilities provided by this component.
     capabilities: [
-        { protocol: "flutter.example.echo.Echo" },
+        { protocol: "dart.test.Echo" },
     ],
     expose: [
         {
-            protocol: "flutter.example.echo.Echo",
+            protocol: "dart.test.Echo",
             from: "self",
         },
     ],

@@ -1,8 +1,8 @@
 # mouse-input
 
-`mouse-input-test` exercises mouse input through a child view (in this case, the `mouse-input-view` Dart component) and 
-asserting the location as well as what button was used (mouse down, mouse up, wheel, etc) during the event. We do this by 
-attaching the child view, injecting mouse input, and validating that the view reports the event back with the expected 
+`mouse-input-test` exercises mouse input through a child view (in this case, the `mouse-input-view` Dart component) and
+asserting the location as well as what button was used (mouse down, mouse up, wheel, etc) during the event. We do this by
+attaching the child view, injecting mouse input, and validating that the view reports the event back with the expected
 payload.
 
 ```shell
@@ -24,9 +24,9 @@ Reference the Flutter integration test [documentation](https://github.com/flutte
 
 ## Playing around with `mouse-input-view`
 
-Build Fuchsia with `workstation_eng.qemu-x64`
+Build Fuchsia with `terminal.qemu-x64`
 ```shell
-fx set workstation_eng.qemu-x64 && fx build
+fx set terminal.qemu-x64 && fx build
 ```
 
 Build flutter/engine

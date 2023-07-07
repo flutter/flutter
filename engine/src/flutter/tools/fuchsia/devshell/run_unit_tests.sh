@@ -92,7 +92,7 @@ test_names=()
 for test_package in $test_packages
 do
   engine-info "... publishing ${test_package} ..."
-  $ENGINE_DIR/fuchsia/sdk/linux/tools/x64/pm publish -a -r $FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files -f "${test_package}"
+  ${FUCHSIA_DIR}/.jiri_root/bin/ffx repository publish $FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files --package-archive "${test_package}"
   test_names+=("$(basename ${test_package} | sed -e "s/-0.far//")")
 done
 

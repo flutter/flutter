@@ -15,7 +15,6 @@ dart_library("lib") {
   deps = [
     "//flutter/shell/platform/fuchsia/dart:args",
     "//flutter/shell/platform/fuchsia/dart:vector_math",
-    "//flutter/tools/fuchsia/dart:zircon",
   ]
 }
 

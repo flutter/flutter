@@ -5,8 +5,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
-
-import 'package:zircon/zircon.dart';
+import 'dart:zircon';
 
 void main() {
   print('Launching mouse-input-view');
