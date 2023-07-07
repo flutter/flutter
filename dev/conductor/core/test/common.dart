@@ -34,7 +34,6 @@ class TestStdio extends Stdio {
   TestStdio({
     this.verbose = false,
     List<String>? stdin,
-    super.filter,
   }) : stdin = stdin ?? <String>[];
 
   String get error => logs.where((String log) => log.startsWith(r'[error] ')).join('\n');

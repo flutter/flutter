@@ -513,14 +513,34 @@ void main() {
     });
   });
 
-  test('Stdio logger can filter out confidential pattern', () async {
+  test('VerboseStdio logger can filter out confidential pattern', () async {
     const String token = 'secret';
     const String replacement = 'replacement';
-    final TestStdio stdio = TestStdio(verbose: true, filter: (String msg) => msg.replaceAll(token, replacement));
+    final VerboseStdio stdio = VerboseStdio(
+      stdin: _NoOpStdin(),
+      stderr: _NoOpStdout(),
+      stdout: _NoOpStdout(),
+      filter: (String msg) => msg.replaceAll(token, replacement),
+    );
     stdio.printStatus('Hello');
     expect(stdio.logs.last, '[status] Hello');
 
     stdio.printStatus('Using $token');
     expect(stdio.logs.last, '[status] Using $replacement');
+
+    stdio.printWarning('Using $token');
+    expect(stdio.logs.last, '[warning] Using $replacement');
+
+    stdio.printError('Using $token');
+    expect(stdio.logs.last, '[error] Using $replacement');
+
+    stdio.printTrace('Using $token');
+    expect(stdio.logs.last, '[trace] Using $replacement');
   });
+}
+
+class _NoOpStdin extends Fake implements io.Stdin {}
+class _NoOpStdout extends Fake implements io.Stdout {
+  @override
+  void writeln([Object? object]) {}
 }

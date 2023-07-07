@@ -15,9 +15,8 @@ import 'package:meta/meta.dart';
 /// User input probably should be part of this class–however it is currently
 /// part of context.dart.
 abstract class Stdio {
-  Stdio({this.filter});
+  Stdio();
 
-  final String Function(String)? filter;
   final List<String> logs = <String>[];
 
   /// Error messages printed to STDERR.
@@ -73,7 +72,7 @@ class VerboseStdio extends Stdio {
     required this.stdout,
     required this.stderr,
     required this.stdin,
-    super.filter,
+    this.filter,
   });
 
   factory VerboseStdio.local() => VerboseStdio(
@@ -85,6 +84,7 @@ class VerboseStdio extends Stdio {
   final io.Stdout stdout;
   final io.Stdout stderr;
   final io.Stdin stdin;
+  final String Function(String)? filter;
 
   @override
   void printError(String message) {
@@ -92,6 +92,15 @@ class VerboseStdio extends Stdio {
       message = filter!(message);
     }
     super.printError(message);
+    stderr.writeln(message);
+  }
+
+  @override
+  void printWarning(String message) {
+    if (filter != null) {
+      message = filter!(message);
+    }
+    super.printWarning(message);
     stderr.writeln(message);
   }
 
