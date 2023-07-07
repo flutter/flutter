@@ -411,9 +411,7 @@ void main() {
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
 
-    // The default size of a tooltip with the text A.
-    const Size defaultTooltipSize = Size(15.0, 20.0);
-    expect(tester.getSize(find.text(label).last), defaultTooltipSize);
+    expect(tester.getSize(find.text(label).last), const Size(15.0, 20.0));
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
