@@ -338,6 +338,8 @@ class IOSDeployDebugger {
     RegExp lldbRun = RegExp(r'\(lldb\)\s*run');
 
     final Completer<bool> debuggerCompleter = Completer<bool>();
+
+    bool receivedLogs = false;
     try {
       _iosDeployProcess = await _processUtils.start(
         _launchCommand,
@@ -386,8 +388,6 @@ class IOSDeployDebugger {
         if (lldbRun.hasMatch(line)) {
           _logger.printTrace(line);
           _debuggerState = _IOSDeployDebuggerState.launching;
-          // TODO(vashworth): Remove all debugger state comments when https://github.com/flutter/flutter/issues/126412 is resolved.
-          _logger.printTrace('Debugger state set to launching.');
           return;
         }
         // Next line after "run" must be "success", or the attach failed.
@@ -396,7 +396,6 @@ class IOSDeployDebugger {
           _logger.printTrace(line);
           final bool attachSuccess = line == 'success';
           _debuggerState = attachSuccess ? _IOSDeployDebuggerState.attached : _IOSDeployDebuggerState.detached;
-          _logger.printTrace('Debugger state set to ${attachSuccess ? 'attached' : 'detached'}.');
           if (!debuggerCompleter.isCompleted) {
             debuggerCompleter.complete(attachSuccess);
           }
@@ -425,7 +424,6 @@ class IOSDeployDebugger {
           // Even though we're not "detached", just stopped, mark as detached so the backtrace
           // is only show in verbose.
           _debuggerState = _IOSDeployDebuggerState.detached;
-          _logger.printTrace('Debugger state set to detached.');
 
           // If we paused the app and are waiting to resume it, complete the completer
           final Completer<void>? processResumeCompleter = _processResumeCompleter;
@@ -465,7 +463,6 @@ class IOSDeployDebugger {
           _logger.printTrace(line);
           // we marked this detached when we received [_backTraceAll]
           _debuggerState = _IOSDeployDebuggerState.attached;
-          _logger.printTrace('Debugger state set to attached.');
           return;
         }
 
@@ -480,6 +477,16 @@ class IOSDeployDebugger {
           // This will still cause "legit" logged newlines to be doubled...
         } else if (!_debuggerOutput.isClosed) {
           _debuggerOutput.add(line);
+
+          // Sometimes the `ios-deploy` process does not return logs from the
+          // application after attaching, such as the Dart VM url. In CI,
+          // `idevicesyslog` is used as a fallback to get logs. Print a
+          // message to indicate whether logs were received from `ios-deploy`
+          // to help with debugging.
+          if (!receivedLogs) {
+            _logger.printTrace('Received logs from ios-deploy.');
+            receivedLogs = true;
+          }
         }
         lastLineFromDebugger = line;
       });
