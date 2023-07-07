@@ -1029,7 +1029,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
     _effectiveFocusNode.canRequestFocus = widget.focusNode == null
         ? widget.canRequestFocus && _isEnabled
-        : _isEnabled;
+        : widget.focusNode!.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
@@ -1039,7 +1039,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       case NavigationMode.traditional:
         return widget.focusNode == null
             ? widget.canRequestFocus && _isEnabled
-            : _isEnabled;
+            : widget.focusNode!.canRequestFocus && _isEnabled;
       case NavigationMode.directional:
         return true;
     }
