@@ -226,6 +226,7 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
             .storage_mode = StorageMode::kDevicePrivate,
             .load_action = LoadAction::kDontCare,
             .store_action = StoreAction::kDontCare,
+            .clear_color = clear_color,
         },                                 // color_attachment_config
         GetDefaultStencilConfig(readable)  // stencil_attachment_config
     );
