@@ -19,7 +19,7 @@ void main() {
     expect(tester.takeException(), isFlutterError.having(
       (FlutterError error) => error.message,
       'message',
-      startsWith('RenderObject for ColoredBox cannot find ancestor RenderObject to attach to.'),
+      startsWith('The render object for ColoredBox cannot find ancestor render object to attach to.'),
     ));
   });
 
@@ -46,7 +46,7 @@ void main() {
     expect(tester.takeException(), isFlutterError.having(
       (FlutterError error) => error.message,
       'message',
-      contains('cannot find ancestor RenderObject to attach to.'),
+      contains('cannot find ancestor render object to attach to.'),
     ));
   });
 
@@ -121,7 +121,7 @@ void main() {
     expect(tester.takeException(), isFlutterError.having(
       (FlutterError error) => error.message,
       'message',
-      startsWith('RenderObject for ColoredBox cannot find ancestor RenderObject to attach to.'),
+      startsWith('The render object for ColoredBox cannot find ancestor render object to attach to.'),
     ));
   });
 
@@ -148,7 +148,7 @@ void main() {
     expect(tester.takeException(), isFlutterError.having(
       (FlutterError error) => error.message,
       'message',
-      contains('cannot find ancestor RenderObject to attach to.'),
+      contains('cannot find ancestor render object to attach to.'),
     ));
   });
 
@@ -163,7 +163,7 @@ void main() {
     expect(tester.takeException(), isFlutterError.having(
       (FlutterError error) => error.message,
       'message',
-      startsWith('RenderObject for SizedBox cannot find ancestor RenderObject to attach to.'),
+      startsWith('The render object for SizedBox cannot find ancestor render object to attach to.'),
     ));
   });
 
@@ -190,7 +190,7 @@ void main() {
     expect(tester.takeException(), isFlutterError.having(
       (FlutterError error) => error.message,
       'message',
-      contains('cannot find ancestor RenderObject to attach to.'),
+      contains('cannot find ancestor render object to attach to.'),
     ));
   });
 
@@ -301,7 +301,7 @@ void main() {
     expect(tester.takeException(), isFlutterError.having(
       (FlutterError error) => error.message,
       'message',
-      startsWith('RenderObject for ColoredBox cannot find ancestor RenderObject to attach to.'),
+      startsWith('The render object for ColoredBox cannot find ancestor render object to attach to.'),
     ));
   });
 
