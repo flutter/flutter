@@ -307,6 +307,10 @@ class TextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
+    @Deprecated(
+      'Use `focusNode` instead. '
+      'This feature was deprecated after v3.12.0-14.0.pre.',
+    )
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
@@ -1019,7 +1023,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (widget.controller == null) {
       _createLocalController();
     }
-    _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
+    _effectiveFocusNode.canRequestFocus = widget.focusNode == null
+        ? widget.canRequestFocus && _isEnabled
+        : _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
@@ -1027,7 +1033,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
-        return widget.canRequestFocus && _isEnabled;
+        return widget.focusNode == null
+            ? widget.canRequestFocus && _isEnabled
+            : _isEnabled;
       case NavigationMode.directional:
         return true;
     }
