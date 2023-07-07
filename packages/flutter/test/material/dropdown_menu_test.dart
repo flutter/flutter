@@ -1043,7 +1043,7 @@ void main() {
 
     final Finder textFieldFinder = find.byType(TextField);
     final TextField result = tester.widget<TextField>(textFieldFinder);
-    expect(result.canRequestFocus, false);
+    expect(result.focusNode!.canRequestFocus, false);
   }, variant: TargetPlatformVariant.mobile());
 
   testWidgets('The text input field should be focused on desktop platforms '
@@ -1111,7 +1111,7 @@ void main() {
 
     final Finder textFieldFinder1 = find.byType(TextField);
     final TextField textField1 = tester.widget<TextField>(textFieldFinder1);
-    expect(textField1.canRequestFocus, false);
+    expect(textField1.focusNode!.canRequestFocus, false);
     // Open the dropdown menu.
     await tester.tap(textFieldFinder1);
     await tester.pump();
@@ -1140,7 +1140,7 @@ void main() {
 
     final Finder textFieldFinder = find.byType(TextField);
     final TextField textField = tester.widget<TextField>(textFieldFinder);
-    expect(textField.canRequestFocus, false);
+    expect(textField.focusNode!.canRequestFocus, false);
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.moveTo(tester.getCenter(textFieldFinder));
