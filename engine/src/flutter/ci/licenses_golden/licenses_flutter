@@ -2886,6 +2886,7 @@ ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/shim.dart +
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/snapshot.cc.tmpl + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/snapshot.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/snapshot.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/fidl/echo.fidl + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/logging.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/main.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/meta/common.shard.cml + ../../../flutter/LICENSE
@@ -5588,6 +5589,7 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/shim.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/snapshot.cc.tmpl
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/snapshot.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/snapshot.h
+FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/fidl/echo.fidl
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/logging.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/main.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/meta/common.shard.cml

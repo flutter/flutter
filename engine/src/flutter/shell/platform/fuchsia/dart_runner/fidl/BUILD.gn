@@ -5,8 +5,8 @@
 import("//build/fuchsia/sdk.gni")
 import("//flutter/tools/fuchsia/fidl/fidl.gni")
 
-fidl("echo") {
-  name = "flutter.example.echo"
-  meta = "//flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo/meta.json"
+fidl("dart_test") {
+  name = "dart.test"
+  meta = "meta.json"
   sources = [ "echo.fidl" ]
 }

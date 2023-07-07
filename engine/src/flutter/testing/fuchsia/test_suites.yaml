@@ -1,12 +1,6 @@
 # This configuration file specifies several test suites with their package and
 # test command for femu_test.py.
 
-- test_command: test run fuchsia-pkg://fuchsia.com/flutter-embedder-test#meta/flutter-embedder-test.cm
-  packages:
-    - flutter-embedder-test-0.far
-    - oot_flutter_jit_runner-0.far
-    - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/embedder/child-view/child-view/child-view.far
-    - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/embedder/parent-view/parent-view/parent-view.far
 - test_command: test run fuchsia-pkg://fuchsia.com/dart_runner_tests#meta/dart_runner_tests.cm
   package: dart_runner_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/flutter_runner_tests#meta/flutter_runner_tests.cm
@@ -54,6 +48,12 @@
   emulator_arch:
     - 'x64'
     - 'arm64'
+- test_command: test run fuchsia-pkg://fuchsia.com/flutter-embedder-test#meta/flutter-embedder-test.cm
+  packages:
+    - flutter-embedder-test-0.far
+    - oot_flutter_jit_runner-0.far
+    - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/embedder/child-view/child-view/child-view.far
+    - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/embedder/parent-view/parent-view/parent-view.far
 - test_command: test run fuchsia-pkg://fuchsia.com/touch-input-test#meta/touch-input-test.cm
   packages:
     - touch-input-test-0.far

@@ -96,6 +96,7 @@ dart_library("expect") {
   deps = [ ":meta" ]
 
   sources = [
+    "config.dart",
     "expect.dart",
     "minitest.dart",
   ]

@@ -10,7 +10,6 @@ import 'dart:ui';
 
 import 'package:args/args.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math_64;
-import 'package:zircon/zircon.dart';
 
 final _argsCsvFilePath = '/config/data/args.csv';
 

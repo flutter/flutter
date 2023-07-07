@@ -50,3 +50,11 @@ _setupHooks() {
 
 @pragma('vm:entry-point')
 _getPrintClosure() => _print;
+
+typedef EchoStringCallback = String? Function(String? str);
+late EchoStringCallback? receiveEchoStringCallback;
+
+@pragma('vm:entry-point')
+String? _receiveEchoString(String? str) {
+  return receiveEchoStringCallback?.call(str);
+}

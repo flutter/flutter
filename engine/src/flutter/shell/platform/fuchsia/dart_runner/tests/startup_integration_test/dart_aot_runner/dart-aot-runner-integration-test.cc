@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// The generated C++ bindings for the Echo FIDL protocol
-#include <flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo/flutter/example/echo/cpp/fidl.h>
-
+#include <dart/test/cpp/fidl.h>
 #include <fuchsia/tracing/provider/cpp/fidl.h>
-
 #include <lib/async-loop/testing/cpp/real_loop.h>
 #include <lib/sys/component/cpp/testing/realm_builder.h>
 #include <lib/sys/component/cpp/testing/realm_builder_types.h>
@@ -92,16 +89,15 @@ TEST_F(RealmBuilderTest, DartRunnerStartsUp) {
 
   // Route the Echo FIDL protocol, this allows the Dart echo server to
   // communicate with the Realm Builder
-  realm_builder.AddRoute(
-      Route{.capabilities = {Protocol{"flutter.example.echo.Echo"}},
-            .source = kDartAotEchoServerRef,
-            .targets = {ParentRef()}});
+  realm_builder.AddRoute(Route{.capabilities = {Protocol{"dart.test.Echo"}},
+                               .source = kDartAotEchoServerRef,
+                               .targets = {ParentRef()}});
 
   // Build the Realm with the provided child and protocols
   auto realm = realm_builder.Build(dispatcher());
   FML_LOG(INFO) << "Realm built: " << realm.component().GetChildName();
   // Connect to the Dart echo server
-  auto echo = realm.component().ConnectSync<flutter::example::echo::Echo>();
+  auto echo = realm.component().ConnectSync<dart::test::Echo>();
   fidl::StringPtr response;
   // Attempt to ping the Dart echo server for a response
   echo->EchoString("hello", &response);
