@@ -41,9 +41,9 @@ Reference the Flutter integration test [documentation](https://github.com/flutte
 
 ## Playing around with `touch-input-view`
 
-Build Fuchsia with `workstation_eng.qemu-x64`
+Build Fuchsia with `terminal.qemu-x64`
 ```shell
-fx set workstation_eng.qemu-x64 && fx build
+fx set terminal.qemu-x64 && fx build
 ```
 
 Build flutter/engine

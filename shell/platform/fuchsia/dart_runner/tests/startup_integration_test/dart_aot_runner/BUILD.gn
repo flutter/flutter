@@ -31,9 +31,9 @@ executable("dart-aot-runner-integration-test-bin") {
     "$fuchsia_sdk_root/pkg:fidl_cpp",
     "$fuchsia_sdk_root/pkg:sys_component_cpp_testing",
     "$fuchsia_sdk_root/pkg:zx",
+    "../dart_echo_server:aot_echo_package",
     "//flutter/fml",
-    "//flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo:echo",
-    "//flutter/shell/platform/fuchsia/dart_runner/tests/startup_integration_test/dart_echo_server:aot_echo_package",
+    "//flutter/shell/platform/fuchsia/dart_runner/fidl:dart_test",
     "//third_party/googletest:gtest",
     "//third_party/googletest:gtest_main",
   ]

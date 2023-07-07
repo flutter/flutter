@@ -12,10 +12,7 @@ dart_library("lib") {
   package_name = "mouse-input-view"
   sources = [ "mouse-input-view.dart" ]
 
-  deps = [
-    "//flutter/shell/platform/fuchsia/dart:args",
-    "//flutter/tools/fuchsia/dart:zircon",
-  ]
+  deps = [ "//flutter/shell/platform/fuchsia/dart:args" ]
 }
 
 flutter_component("component") {

@@ -154,9 +154,9 @@ if [[ "${fuchsia_cpu}" == x64 ]]
 then
   if [[ "${runtime_mode}" == debug ]]
   then
-    echo "  fx set workstation_eng.x64"
+    echo "  fx set terminal.x64"
   else
-    echo "  fx set workstation_eng.x64 --release"
+    echo "  fx set terminal.x64 --release"
   fi
 fi
 echo '  fx build'

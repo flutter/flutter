@@ -15,14 +15,6 @@ dart_library("lib") {
 
   source_dir = "."
   sources = [ "main.dart" ]
-
-  deps = [
-    "//flutter/shell/platform/fuchsia/dart_runner/tests/fidl/flutter.example.echo:echo",
-    "//flutter/tools/fuchsia/dart:fidl",
-    "//flutter/tools/fuchsia/dart:fuchsia_services",
-    "//flutter/tools/fuchsia/fidl:fuchsia.logger",
-    "//flutter/tools/fuchsia/fidl:fuchsia.test",
-  ]
 }
 
 # Dart component that serves the test Echo FIDL protocol, built using the Dart AOT runner
