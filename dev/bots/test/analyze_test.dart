@@ -222,15 +222,15 @@ void main() {
         '║ packages/flutter/lib/bar.dart:43: nullableDouble?.clamp(0, 2)',
         '║ packages/flutter/lib/bar.dart:48: nullableInt?.clamp',
         '║ packages/flutter/lib/bar.dart:50: nullableDouble?.clamp',
-        '║ ',
-        '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".',
-        '║ For non-double uses of "clamp", use "// ignore_clamp_double_lint" on the line to silence this message.',
       ]
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
     expect(result,
       '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
+      '║ \n'
+      '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".\n'
+      '║ For non-double uses of "clamp", use "// ignore_clamp_double_lint" on the line to silence this message.\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });
@@ -242,15 +242,10 @@ void main() {
     ), shouldHaveErrors: true);
 
     final String badAnnotations = <String>[
-      '║ Overriding a framework class member that was not annotated with @_debugAssert and marking the override @_debugAssert is not allowed.',
-      '║ A framework method/getter/setter not marked as debug-only itself cannot have a debug-only override.',
-      '║ ',
       '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.value is not annotated wtih @_debugAssert, but its override MixinOnBaseClass.value is.',
       '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.~ is not annotated wtih @_debugAssert, but its override MixinOnBaseClass.~ is.',
       '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.run is not annotated wtih @_debugAssert, but its override ClassWithBadAnnotation1.run is.',
       '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.run is not annotated wtih @_debugAssert, but its override ClassWithBadAnnotation2.run is.',
-      '║ ',
-      '║ Consider either removing the @_debugAssert annotation, or adding the annotation to the class member that is being overridden instead.',
     ]
     .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
     .join('\n');
@@ -258,18 +253,27 @@ void main() {
     expect(result,
       startsWith(
         '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+        '║ Overriding a framework class member that was not annotated with @_debugAssert and marking the override @_debugAssert is not allowed.\n'
+        '║ A framework method/getter/setter not marked as debug-only itself cannot have a debug-only override.\n'
+        '║ \n'
         '$badAnnotations\n'
+        '║ \n'
+        '║ Consider either removing the @_debugAssert annotation, or adding the annotation to the class member that is being overridden instead.\n'
         '╚═══════════════════════════════════════════════════════════════════════════════\n'
       )
     );
 
-    expect(result, containsAll(<String>[
+    final String badAccesses1 = <String>[
       '║ packages/flutter/lib/debug_only_constructors.dart:10: ClassFromDebugLibWithNamedConstructor.constructor accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_constructors.dart:41: _DebugOnlyClass2.new accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_constructors.dart:43: _DebugOnlyClass3.named accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_constructors.dart:55: ProductionClass31.new accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_constructors.dart:56: ProductionClass31.new accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_constructors.dart:57: ProductionClass32.new accessed outside of an assert.\n',
+    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+     .join();
+
+    final String badAccesses2 = <String>[
       '║ packages/flutter/lib/debug_only_access.dart:15: globalVaraibleFromDebugLib accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:15: globalVaraibleFromDebugLib= accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:16: globalFunctionFromDebugLib accessed outside of an assert.\n',
@@ -311,6 +315,10 @@ void main() {
       '║ packages/flutter/lib/debug_only_access.dart:45: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:46: MixinFromDebugLib.[] accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:46: MixinFromDebugLib.debugGetSet accessed outside of an assert.',
-    ]));
+    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+     .join();
+
+    expect(result, contains(badAccesses1));
+    expect(result, contains(badAccesses2));
   });
 }

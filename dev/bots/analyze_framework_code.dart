@@ -20,7 +20,7 @@ Future<void> runVerifiersInResolvedDirectory(String workingDirectory, List<Resol
   final String flutterLibPath = path.canonicalize('$workingDirectory/packages/flutter/lib');
   final AnalysisContextCollection collection = AnalysisContextCollection(
     includedPaths: <String>[flutterLibPath],
-    excludedPaths: <String>['$flutterLibPath/fix_data'],
+    excludedPaths: <String>[path.canonicalize('$flutterLibPath/fix_data')],
   );
 
   final List<String> analyzerErrors = <String>[];
@@ -152,6 +152,7 @@ final ResolvedUnitVerifier verifyDebugAssertAccess = _DebugAssertVerifier();
 class _DebugAssertVerifier extends ResolvedUnitVerifier {
   final List<String> accessErrors = <String>[];
   final List<String> annotationErrors = <String>[];
+  final Map<ExecutableElement, bool> lookup = <ExecutableElement, bool>{};
   @override
   void reportError() {
     if (annotationErrors.isNotEmpty) {
@@ -175,8 +176,6 @@ class _DebugAssertVerifier extends ResolvedUnitVerifier {
     if (unit.libraryElement.metadata.any(_DebugAssertVisitor._isDebugAssertAnnotationElement)) {
       return;
     }
-
-    final Map<ExecutableElement, bool> lookup = <ExecutableElement, bool>{};
     final _DebugAssertVisitor visitor = _DebugAssertVisitor(lookup);
     unit.unit.visitChildren(visitor);
     final String relativePath = path.relative(unit.path, from: workingDirectory);
