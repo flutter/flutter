@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the UuidValue.fromList constructor from the Class UuidValue class from the uuid library, for the Dart programming language.">
+  <title>UuidValue.fromList constructor - UuidValue class - uuid library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../"
+      data-using-base-href="false">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <button id="sidenav-left-toggle" type="button">&nbsp;</button>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">uuid</a></li>
+    <li><a href="../../uuid/uuid-library.html">uuid</a></li>
+    <li><a href="../../uuid/UuidValue-class.html">UuidValue</a></li>
+    <li class="self-crumb">UuidValue.fromList factory constructor</li>
+  </ol>
+  <div class="self-name">UuidValue.fromList</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<main>
+
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-constructor">UuidValue.fromList</span> constructor 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+</h1></div>
+
+    <section class="multi-line-signature">
+      <span class="name ">UuidValue.fromList</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="fromList-param-byteList"><span class="type-annotation"><a href="https://api.dart.dev/dev/2.16.0-124.0.dev/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.dart.dev/dev/2.16.0-124.0.dev/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">byteList</span>, </span></li>
+<li><span class="parameter" id="fromList-param-offset">{<span class="type-annotation"><a href="https://api.dart.dev/dev/2.16.0-124.0.dev/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">offset</span>}</span></li>
+</ol>)
+    </section>
+
+    
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">factory UuidValue.fromList(List&lt;int&gt; byteList, {int? offset}) {
+  return UuidValue(Uuid.unparse(byteList, offset: offset ?? 0));
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../../index.html">uuid</a></li>
+  <li><a href="../../uuid/uuid-library.html">uuid</a></li>
+  <li><a href="../../uuid/UuidValue-class.html">UuidValue</a></li>
+  <li class="self-crumb">UuidValue.fromList factory constructor</li>
+</ol>
+
+
+    <h5>UuidValue class</h5>
+    <ol>
+
+    <li class="section-title"><a href="../../uuid/UuidValue-class.html#constructors">Constructors</a></li>
+    <li><a href="../../uuid/UuidValue/UuidValue.html">UuidValue</a></li>
+    <li><a href="../../uuid/UuidValue/UuidValue.fromByteList.html">fromByteList</a></li>
+    <li><a href="../../uuid/UuidValue/UuidValue.fromList.html">fromList</a></li>
+
+
+    <li class="section-title">
+      <a href="../../uuid/UuidValue-class.html#instance-properties">Properties</a>
+    </li>
+    <li><a href="../../uuid/UuidValue/hashCode.html">hashCode</a></li>
+    <li class="inherited"><a href="https://api.dart.dev/dev/2.16.0-124.0.dev/dart-core/Object/runtimeType.html">runtimeType</a></li>
+    <li><a href="../../uuid/UuidValue/uuid.html">uuid</a></li>
+
+    <li class="section-title"><a href="../../uuid/UuidValue-class.html#instance-methods">Methods</a></li>
+    <li><a href="../../uuid/UuidValue/equals.html">equals</a></li>
+    <li class="inherited"><a href="https://api.dart.dev/dev/2.16.0-124.0.dev/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+    <li><a href="../../uuid/UuidValue/toBytes.html">toBytes</a></li>
+    <li><a href="../../uuid/UuidValue/toString.html">toString</a></li>
+
+    <li class="section-title"><a href="../../uuid/UuidValue-class.html#operators">Operators</a></li>
+    <li><a href="../../uuid/UuidValue/operator_equals.html">operator ==</a></li>
+
+
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-left-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    uuid
+      3.0.6
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/script.js?v1"></script>
+
+
+
+</body>
+
+</html>
+

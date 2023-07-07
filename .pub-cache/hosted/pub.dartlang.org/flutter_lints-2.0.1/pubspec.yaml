@@ -1,0 +1,12 @@
+name: flutter_lints
+description: Recommended lints for Flutter apps, packages, and plugins to encourage good coding practices.
+repository: https://github.com/flutter/packages/tree/main/packages/flutter_lints
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+flutter_lints%22
+version: 2.0.1
+
+environment:
+  sdk: '>=2.17.0-0 <3.0.0'
+
+dependencies:
+  lints: ^2.0.0
+  # Code is not allowed in this package. Do not add any dependencies or dev_dependencies.

@@ -1,0 +1,64 @@
+# Uncomment this line to define a global platform for your project
+platform :ios, '11.0'
+
+require 'yaml'
+
+pubspec = YAML.load_file(File.join('..', File.join('..', 'pubspec.yaml')))
+
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+  end
+
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    return matches[1].strip if matches
+  end
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+flutter_ios_podfile_setup
+
+target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
+  if defined?($FirebaseSDKVersion)
+    Pod::UI.puts "#{pubspec['name']}: Using user specified Firebase SDK version for FirebaseFirestore framework: '#{$FirebaseSDKVersion}'"
+    firebase_sdk_version = $FirebaseSDKVersion
+  else
+    firebase_core_script = File.join(File.expand_path('..', File.expand_path('..', File.expand_path('..', File.expand_path('..', File.dirname(__FILE__))))), 'firebase_core/firebase_core/ios/firebase_sdk_version.rb')
+    if File.exist?(firebase_core_script)
+      require firebase_core_script
+      firebase_sdk_version = firebase_sdk_version!
+      Pod::UI.puts "#{pubspec['name']}: Using Firebase SDK version '#{firebase_sdk_version}' defined in 'firebase_core for FirebaseFirestore framework'"
+    else
+      raise "Error - unable to locate firebase_ios_sdk.rb script in firebase_core, and no FirebaseSDKVersion specified"
+    end
+  end
+
+  pod 'FirebaseFirestore', :git => 'https://github.com/invertase/firestore-ios-sdk-frameworks.git', :tag => "#{firebase_sdk_version}"
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
+    end
+    flutter_additional_ios_build_settings(target)
+  end
+end

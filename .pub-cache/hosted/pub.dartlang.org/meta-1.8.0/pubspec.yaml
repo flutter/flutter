@@ -1,0 +1,10 @@
+name: meta
+# Note, because version `2.0.0` was mistakenly released, the next major version must be `3.x.y`.
+version: 1.8.0
+description: >-
+ Annotations used to express developer intentions that can't otherwise be
+ deduced by statically analyzing source code.
+repository: https://github.com/dart-lang/sdk/tree/main/pkg/meta
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"

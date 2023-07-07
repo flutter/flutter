@@ -454,6 +454,8 @@ void main() {
         FrameworkRepository.defaultBranch,
         '--label',
         'tool',
+        '--label',
+        'autosubmit',
       ]),
       const FakeCommand(command: <String>[
         'gh',

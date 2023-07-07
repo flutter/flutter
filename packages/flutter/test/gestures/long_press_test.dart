@@ -259,7 +259,9 @@ void main() {
     });
 
     testGesture('non-allowed pointer does not inadvertently reset the recognizer', (GestureTester tester) {
-      gesture = LongPressGestureRecognizer(kind: PointerDeviceKind.touch);
+      gesture = LongPressGestureRecognizer(
+        supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+      );
       setUpHandlers();
 
       // Accept a long-press gesture
@@ -495,7 +497,9 @@ void main() {
   });
 
   testGesture('Can filter long press based on device kind', (GestureTester tester) {
-    final LongPressGestureRecognizer mouseLongPress = LongPressGestureRecognizer(kind: PointerDeviceKind.mouse);
+    final LongPressGestureRecognizer mouseLongPress = LongPressGestureRecognizer(
+      supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse },
+    );
 
     bool mouseLongPressDown = false;
     mouseLongPress.onLongPress = () {
@@ -696,20 +700,5 @@ void main() {
     expect(recognized, <String>[]);
     longPress.dispose();
     recognized.clear();
-  });
-
-  testWidgets('LongPressGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        LongPressGestureRecognizer(
-          kind: PointerDeviceKind.touch,
-          supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
   });
 }

@@ -1,0 +1,43 @@
+#data
+<button>1</foo>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <button>
+|       "1"
+
+#data
+<foo>1<p>2</foo>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <foo>
+|       "1"
+|       <p>
+|         "2"
+
+#data
+<dd>1</foo>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <dd>
+|       "1"
+
+#data
+<foo>1<dd>2</foo>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <foo>
+|       "1"
+|       <dd>
+|         "2"

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui show Image, Codec, FrameInfo;
+import 'dart:ui' as ui show Codec, FrameInfo, Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -23,9 +23,7 @@ class ImageInfo {
   /// Both the [image] and the [scale] must not be null.
   ///
   /// The [debugLabel] may be used to identify the source of this image.
-  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel })
-    : assert(image != null),
-      assert(scale != null);
+  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel });
 
   /// Creates an [ImageInfo] with a cloned [image].
   ///
@@ -62,9 +60,11 @@ class ImageInfo {
   /// {@tool snippet}
   ///
   /// The following sample shows how to appropriately check whether the
-  /// [ImageInfo] reference refers to new image data or not.
+  /// [ImageInfo] reference refers to new image data or not (in this case in a
+  /// setter).
   ///
   /// ```dart
+  /// ImageInfo? get imageInfo => _imageInfo;
   /// ImageInfo? _imageInfo;
   /// set imageInfo (ImageInfo? value) {
   ///   // If the image reference is exactly the same, do nothing.
@@ -78,9 +78,12 @@ class ImageInfo {
   ///     value.dispose();
   ///     return;
   ///   }
+  ///   // It is a new image. Dispose of the old one and take a reference
+  ///   // to the new one.
   ///   _imageInfo?.dispose();
   ///   _imageInfo = value;
-  ///   // Perform work to determine size, or paint the image.
+  ///   // Perform work to determine size, paint the image, etc.
+  ///   // ...
   /// }
   /// ```
   /// {@end-tool}
@@ -162,7 +165,7 @@ class ImageStreamListener {
     this.onImage, {
     this.onChunk,
     this.onError,
-  }) : assert(onImage != null);
+  });
 
   /// Callback for getting notified that an image is available.
   ///
@@ -618,7 +621,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   ///
   /// This callback will never fire if [removeListener] is never called.
   void addOnLastListenerRemovedCallback(VoidCallback callback) {
-    assert(callback != null);
     _checkDisposed();
     _onLastListenerRemovedCallbacks.add(callback);
   }
@@ -626,7 +628,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// Removes a callback previously supplied to
   /// [addOnLastListenerRemovedCallback].
   void removeOnLastListenerRemovedCallback(VoidCallback callback) {
-    assert(callback != null);
     _checkDisposed();
     _onLastListenerRemovedCallbacks.remove(callback);
   }
@@ -784,8 +785,7 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// argument on [FlutterErrorDetails] set to true, meaning that by default the
   /// message is only dumped to the console in debug mode (see [
   /// FlutterErrorDetails]).
-  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector? informationCollector })
-      : assert(image != null) {
+  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector? informationCollector }) {
     image.then<void>(setImage, onError: (Object error, StackTrace stack) {
       reportError(
         context: ErrorDescription('resolving a single-frame image stream'),
@@ -854,8 +854,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     String? debugLabel,
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
-  }) : assert(codec != null),
-       _informationCollector = informationCollector,
+  }) : _informationCollector = informationCollector,
        _scale = scale {
     this.debugLabel = debugLabel;
     codec.then<void>(_handleCodecReady, onError: (Object error, StackTrace stack) {

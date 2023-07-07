@@ -1,0 +1,22 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.flutter.plugins.deviceinfoexample">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application android:label="device_info_example" android:icon="@mipmap/ic_launcher">
+        <activity android:name="io.flutter.embedding.android.FlutterActivity"
+          android:theme="@android:style/Theme.Black.NoTitleBar"
+          android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale"
+          android:hardwareAccelerated="true"
+          android:windowSoftInputMode="adjustResize">
+          <meta-data
+            android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
+            android:value="true" />
+          <intent-filter>
+            <action android:name="android.intent.action.MAIN"/>
+            <category android:name="android.intent.category.LAUNCHER"/>
+          </intent-filter>
+        </activity>
+        <meta-data android:name="flutterEmbedding" android:value="2"/>
+    </application>
+</manifest>

@@ -1,0 +1,4 @@
+name: Cloud Firestore Example
+mode: flutter
+files:
+  - name: lib/main.dart

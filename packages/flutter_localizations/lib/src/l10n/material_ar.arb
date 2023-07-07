@@ -30,9 +30,9 @@
   "rowsPerPageTitle": "عدد الصفوف في الصفحة:",
   "tabLabel": "علامة التبويب $tabIndex من $tabCount",
   "selectedRowCountTitleOther": "تم اختيار $selectedRowCount عنصر",
-  "cancelButtonLabel": "إلغاء",
-  "closeButtonLabel": "إغلاق",
-  "continueButtonLabel": "متابعة",
+  "cancelButtonLabel": "الإلغاء",
+  "closeButtonLabel": "الإغلاق",
+  "continueButtonLabel": "المتابعة",
   "copyButtonLabel": "نسخ",
   "cutButtonLabel": "قص",
   "okButtonLabel": "حسنًا",
@@ -78,7 +78,7 @@
   "invalidDateFormatLabel": "التنسيق غير صالح.",
   "invalidDateRangeLabel": "النطاق غير صالح.",
   "dateOutOfRangeLabel": "التاريخ خارج النطاق.",
-  "saveButtonLabel": "حفظ",
+  "saveButtonLabel": "الحفظ",
   "datePickerHelpText": "اختيار التاريخ",
   "dateRangePickerHelpText": "اختيار النطاق",
   "calendarModeButtonLabel": "التبديل إلى التقويم",
@@ -139,5 +139,10 @@
   "keyboardKeySpace": "مفتاح المسافة",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "قائمة شريط القوائم"
+  "menuBarMenuLabel": "قائمة شريط القوائم",
+  "currentDateLabel": "تاريخ اليوم",
+  "scrimLabel": "تمويه",
+  "bottomSheetLabel": "بطاقة سفلية",
+  "scrimOnTapHint": "إغلاق \"$modalRouteContentName\"",
+  "keyboardKeyShift": "Shift"
 }

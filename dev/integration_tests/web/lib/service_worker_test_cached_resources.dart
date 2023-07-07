@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart';
 
 Future<void> main() async {
-  runApp(Scaffold(
+  runApp(const Scaffold(
     body: Center(
       child: Column(
-        children: const <Widget>[
+        children: <Widget>[
           Icon(Icons.ac_unit),
           Text('Hello, World', textDirection: TextDirection.ltr),
         ],

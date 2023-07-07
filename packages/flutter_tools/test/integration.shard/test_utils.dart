@@ -45,7 +45,7 @@ void writeFile(String path, String content, {bool writeFutureModifiedDate = fals
 void writeBytesFile(String path, List<int> content) {
   fileSystem.file(path)
     ..createSync(recursive: true)
-    ..writeAsBytesSync(content);
+    ..writeAsBytesSync(content, flush: true);
 }
 
 void writePackages(String folder) {
@@ -98,4 +98,29 @@ Future<void> pollForServiceExtensionValue<T>({
     "Did not find expected value for service extension '$extension'. All call"
     " attempts responded with '$continuePollingValue'.",
   );
+}
+
+abstract final class AppleTestUtils {
+  static const List<String> requiredSymbols = <String>[
+    '_kDartIsolateSnapshotData',
+    '_kDartIsolateSnapshotInstructions',
+    '_kDartVmSnapshotData',
+    '_kDartVmSnapshotInstructions'
+  ];
+
+  static List<String> getExportedSymbols(String dwarfPath) {
+    final ProcessResult nm = processManager.runSync(
+      <String>[
+        'nm',
+        '--debug-syms',  // nm docs: 'Show all symbols, even debugger only'
+        '--defined-only',
+        '--just-symbol-name',
+        dwarfPath,
+        '-arch',
+        'arm64',
+      ],
+    );
+    final String nmOutput = (nm.stdout as String).trim();
+    return nmOutput.isEmpty ? const <String>[] : nmOutput.split('\n');
+  }
 }

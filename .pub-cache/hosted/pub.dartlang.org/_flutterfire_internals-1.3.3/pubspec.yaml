@@ -1,0 +1,23 @@
+name: _flutterfire_internals
+description: A package hosting Dart code shared between FlutterFire plugins.
+homepage: https://firebase.google.com/docs/firestore
+repository: https://github.com/firebase/flutterfire/tree/master/packages/_flutterfire_internals
+version: 1.3.3
+
+environment:
+  sdk: '>=2.18.0 <4.0.0'
+  flutter: '>=3.3.0'
+
+dependencies:
+  collection: ^1.0.0
+  firebase_core: ^2.14.0
+  firebase_core_platform_interface: ^4.8.0
+  flutter:
+    sdk: flutter
+  meta: ^1.8.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.0.0
+  test: any

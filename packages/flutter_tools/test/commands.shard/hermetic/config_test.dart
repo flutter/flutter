@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
@@ -23,10 +21,10 @@ import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FakeAndroidStudio fakeAndroidStudio;
-  FakeAndroidSdk fakeAndroidSdk;
-  FakeFlutterVersion fakeFlutterVersion;
-  TestUsage testUsage;
+  late FakeAndroidStudio fakeAndroidStudio;
+  late FakeAndroidSdk fakeAndroidSdk;
+  late FakeFlutterVersion fakeFlutterVersion;
+  late TestUsage testUsage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -46,6 +44,19 @@ void main() {
   }
 
   group('config', () {
+    testUsingContext('throws error on excess arguments', () {
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      expect(() => commandRunner.run(<String>[
+        'config',
+        '--android-studio-dir=/opt/My', 'Android', 'Studio',
+      ]), throwsToolExit());
+      verifyNoAnalytics();
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
+
     testUsingContext('machine flag', () async {
       final ConfigCommand command = ConfigCommand();
       await command.handleMachine();
@@ -288,7 +299,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
   @override
-  String channel;
+  late String channel;
 
   @override
   void ensureVersionFile() {}

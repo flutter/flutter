@@ -58,10 +58,7 @@ class InputDatePickerFormField extends StatefulWidget {
     this.fieldLabelText,
     this.keyboardType,
     this.autofocus = false,
-  }) : assert(firstDate != null),
-       assert(lastDate != null),
-       assert(autofocus != null),
-       initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
+  }) : initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate) {
     assert(
@@ -179,7 +176,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     if (_selectedDate != null) {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
       _inputText = localizations.formatCompactDate(_selectedDate!);
-      TextEditingValue textEditingValue = _controller.value.copyWith(text: _inputText);
+      TextEditingValue textEditingValue = TextEditingValue(text: _inputText!);
       // Select the new text if we are auto focused and haven't selected the text before.
       if (widget.autofocus && !_autoSelected) {
         textEditingValue = textEditingValue.copyWith(selection: TextSelection(
@@ -191,7 +188,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       _controller.value = textEditingValue;
     } else {
       _inputText = '';
-      _controller.value = _controller.value.copyWith(text: _inputText);
+      _controller.value = TextEditingValue(text: _inputText!);
     }
   }
 
@@ -237,11 +234,16 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final InputDecorationTheme inputTheme = Theme.of(context).inputDecorationTheme;
+    final InputDecorationTheme inputTheme = theme.inputDecorationTheme;
+    final InputBorder inputBorder = inputTheme.border
+      ?? (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
+
     return TextFormField(
       decoration: InputDecoration(
-        border: inputTheme.border ?? const UnderlineInputBorder(),
+        border: inputBorder,
         filled: inputTheme.filled,
         hintText: widget.fieldHintText ?? localizations.dateHelpText,
         labelText: widget.fieldLabelText ?? localizations.dateInputLabel,

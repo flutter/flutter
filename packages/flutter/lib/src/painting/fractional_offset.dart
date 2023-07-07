@@ -56,17 +56,13 @@ class FractionalOffset extends Alignment {
   ///
   /// The [dx] and [dy] arguments must not be null.
   const FractionalOffset(double dx, double dy)
-    : assert(dx != null),
-      assert(dy != null),
-      super(dx * 2.0 - 1.0, dy * 2.0 - 1.0);
+    : super(dx * 2.0 - 1.0, dy * 2.0 - 1.0);
 
   /// Creates a fractional offset from a specific offset and size.
   ///
   /// The returned [FractionalOffset] describes the position of the
   /// [Offset] in the [Size], as a fraction of the [Size].
   factory FractionalOffset.fromOffsetAndSize(Offset offset, Size size) {
-    assert(size != null);
-    assert(offset != null);
     return FractionalOffset(
       offset.dx / size.width,
       offset.dy / size.height,
@@ -180,9 +176,8 @@ class FractionalOffset extends Alignment {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static FractionalOffset? lerp(FractionalOffset? a, FractionalOffset? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return FractionalOffset(ui.lerpDouble(0.5, b!.dx, t)!, ui.lerpDouble(0.5, b.dy, t)!);

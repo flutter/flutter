@@ -19,7 +19,7 @@ class DeviceException implements Exception {
   final String message;
 
   @override
-  String toString() => message == null ? '$DeviceException' : '$DeviceException: $message';
+  String toString() => '$DeviceException: $message';
 }
 
 /// Gets the artifact path relative to the current directory.
@@ -58,6 +58,7 @@ enum DeviceOperatingSystem {
   fake,
   fuchsia,
   ios,
+  linux,
   macos,
   windows,
 }
@@ -79,6 +80,8 @@ abstract class DeviceDiscovery {
         return IosDeviceDiscovery();
       case DeviceOperatingSystem.fuchsia:
         return FuchsiaDeviceDiscovery();
+      case DeviceOperatingSystem.linux:
+        return LinuxDeviceDiscovery();
       case DeviceOperatingSystem.macos:
         return MacosDeviceDiscovery();
       case DeviceOperatingSystem.windows:
@@ -252,8 +255,9 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
       .map<AndroidDevice>((String id) => AndroidDevice(deviceId: id))
       .toList();
 
-    if (allDevices.isEmpty)
+    if (allDevices.isEmpty) {
       throw const DeviceException('No Android devices detected');
+    }
 
     if (cpu != null) {
       for (final AndroidDevice device in allDevices) {
@@ -268,8 +272,9 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
       _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
     }
 
-    if (_workingDevice == null)
+    if (_workingDevice == null) {
       throw const DeviceException('Cannot find a suitable Android device');
+    }
 
     print('Device chosen: $_workingDevice');
   }
@@ -300,11 +305,13 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     final List<String> results = <String>[];
     for (final String line in output) {
       // Skip lines like: * daemon started successfully *
-      if (line.startsWith('* daemon '))
+      if (line.startsWith('* daemon ')) {
         continue;
+      }
 
-      if (line.startsWith('List of devices'))
+      if (line.startsWith('List of devices')) {
         continue;
+      }
 
       if (_kDeviceRegex.hasMatch(line)) {
         final Match match = _kDeviceRegex.firstMatch(line)!;
@@ -350,6 +357,40 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     // a better method, but so far that's the best one I've found.
     await exec(adbPath, <String>['kill-server']);
   }
+}
+
+class LinuxDeviceDiscovery implements DeviceDiscovery {
+  factory LinuxDeviceDiscovery() {
+    return _instance ??= LinuxDeviceDiscovery._();
+  }
+
+  LinuxDeviceDiscovery._();
+
+  static LinuxDeviceDiscovery? _instance;
+
+  static const LinuxDevice _device = LinuxDevice();
+
+  @override
+  Future<Map<String, HealthCheckResult>> checkDevices() async {
+    return <String, HealthCheckResult>{};
+  }
+
+  @override
+  Future<void> chooseWorkingDevice() async { }
+
+  @override
+  Future<void> chooseWorkingDeviceById(String deviceId) async { }
+
+  @override
+  Future<List<String>> discoverDevices() async {
+    return <String>['linux'];
+  }
+
+  @override
+  Future<void> performPreflightTasks() async { }
+
+  @override
+  Future<Device> get workingDevice  async => _device;
 }
 
 class MacosDeviceDiscovery implements DeviceDiscovery {
@@ -551,15 +592,17 @@ class AndroidDevice extends Device {
   /// Wake up the device if it is not awake using [togglePower].
   @override
   Future<void> wakeUp() async {
-    if (!(await isAwake()))
+    if (!(await isAwake())) {
       await togglePower();
+    }
   }
 
   /// Send the device to sleep mode if it is not asleep using [togglePower].
   @override
   Future<void> sendToSleep() async {
-    if (!(await isAsleep()))
+    if (!(await isAsleep())) {
       await togglePower();
+    }
   }
 
   /// Sends `KEYCODE_HOME` (3), which causes the device to go to the home screen.
@@ -840,8 +883,9 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       .map<IosDevice>((String id) => IosDevice(deviceId: id))
       .toList();
 
-    if (allDevices.isEmpty)
+    if (allDevices.isEmpty) {
       throw const DeviceException('No iOS devices detected');
+    }
 
     // TODO(yjbanov): filter out and warn about those with low battery level
     _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
@@ -1039,6 +1083,58 @@ class IosDevice extends Device {
   }
 }
 
+class LinuxDevice extends Device {
+  const LinuxDevice();
+
+  @override
+  String get deviceId => 'linux';
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    return <String, dynamic>{};
+  }
+
+  @override
+  Future<void> home() async { }
+
+  @override
+  Future<bool> isAsleep() async {
+    return false;
+  }
+
+  @override
+  Future<bool> isAwake() async {
+    return true;
+  }
+
+  @override
+  Stream<String> get logcat => const Stream<String>.empty();
+
+  @override
+  Future<void> clearLogs() async {}
+
+  @override
+  Future<void> reboot() async { }
+
+  @override
+  Future<void> sendToSleep() async { }
+
+  @override
+  Future<void> stop(String packageName) async { }
+
+  @override
+  Future<void> tap(int x, int y) async { }
+
+  @override
+  Future<void> togglePower() async { }
+
+  @override
+  Future<void> unlock() async { }
+
+  @override
+  Future<void> wakeUp() async { }
+}
+
 class MacosDevice extends Device {
   const MacosDevice();
 
@@ -1211,8 +1307,9 @@ String get adbPath {
 
   final String adbPath = path.join(androidHome, 'platform-tools/adb');
 
-  if (!canRun(adbPath))
+  if (!canRun(adbPath)) {
     throw DeviceException('adb not found at: $adbPath');
+  }
 
   return path.absolute(adbPath);
 }

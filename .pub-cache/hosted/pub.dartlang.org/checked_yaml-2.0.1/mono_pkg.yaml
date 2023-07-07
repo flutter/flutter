@@ -1,0 +1,15 @@
+# See https://github.com/google/mono_repo.dart for details on this file
+dart:
+- beta # change this to 1.12.0 when it's released!
+- dev
+
+stages:
+- analyzer_and_format:
+  - group:
+    - dartfmt
+    - dartanalyzer: --fatal-infos .
+
+- unit_test:
+  - test
+- ensure_build:
+  - test: --run-skipped -t presubmit-only test/ensure_build_test.dart

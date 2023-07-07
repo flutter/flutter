@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -11,20 +9,22 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/test/runner.dart';
+import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
-import 'package:meta/meta.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
+import '../../src/logging_logger.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const String _pubspecContents = '''
@@ -56,20 +56,24 @@ final String _packageConfigContents = json.encode(<String, Object>{
 
 void main() {
   Cache.disableLocking();
-  MemoryFileSystem fs;
+  late MemoryFileSystem fs;
+  late LoggingLogger logger;
 
   setUp(() {
-    fs = MemoryFileSystem.test();
-    fs.file('/package/pubspec.yaml').createSync(recursive: true);
-    fs.file('/package/pubspec.yaml').writeAsStringSync(_pubspecContents);
-    (fs.directory('/package/.dart_tool')
+    fs = MemoryFileSystem.test(style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
+    final Directory package = fs.directory('package');
+    package.childFile('pubspec.yaml').createSync(recursive: true);
+    package.childFile('pubspec.yaml').writeAsStringSync(_pubspecContents);
+    (package.childDirectory('.dart_tool')
         .childFile('package_config.json')
       ..createSync(recursive: true))
         .writeAsString(_packageConfigContents);
-    fs.directory('/package/test').childFile('some_test.dart').createSync(recursive: true);
-    fs.directory('/package/integration_test').childFile('some_integration_test.dart').createSync(recursive: true);
+    package.childDirectory('test').childFile('some_test.dart').createSync(recursive: true);
+    package.childDirectory('integration_test').childFile('some_integration_test.dart').createSync(recursive: true);
 
-    fs.currentDirectory = '/package';
+    fs.currentDirectory = package.path;
+
+    logger = LoggingLogger();
   });
 
   testUsingContext('Missing dependencies in pubspec',
@@ -90,6 +94,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
+    Logger: () => logger,
   });
 
   testUsingContext('Missing dependencies in pubspec for integration tests',
@@ -146,6 +151,30 @@ dev_dependencies:
       fakePackageTest.lastArgs,
       contains('--test-randomize-ordering-seed=random'),
     );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext(
+      'Confirmation that the reporter and timeout args are not set by default',
+      () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    expect(fakePackageTest.lastArgs, isNot(contains('-r')));
+    expect(fakePackageTest.lastArgs, isNot(contains('compact')));
+    expect(fakePackageTest.lastArgs, isNot(contains('--timeout')));
+    expect(fakePackageTest.lastArgs, isNot(contains('30s')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
@@ -269,7 +298,7 @@ dev_dependencies:
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
-  testUsingContext('Pipes enable-observatory', () async {
+  testUsingContext('Pipes enable-vmService', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
     final TestCommand testCommand = TestCommand(testRunner: testRunner);
@@ -284,7 +313,7 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableObservatoryValue,
+      testRunner.lastEnableVmServiceValue,
       true,
     );
 
@@ -297,7 +326,7 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableObservatoryValue,
+      testRunner.lastEnableVmServiceValue,
       true,
     );
 
@@ -308,13 +337,65 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableObservatoryValue,
+      testRunner.lastEnableVmServiceValue,
       false,
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext('Verbose prints phase timings', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner, verbose: true);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--',
+      'test/fake_test.dart',
+    ]);
+
+    // Expect one message for each phase.
+    final List<String> logPhaseMessages = logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+    expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
+
+    // As we force the `runTests` command to take at least 1 ms expect at least
+    // one phase to take a non-zero amount of time.
+    final List<String> logPhaseMessagesNonZero = logPhaseMessages.where((String m) => !m.contains(Duration.zero.toString())).toList();
+    expect(logPhaseMessagesNonZero, isNotEmpty);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    Logger: () => logger,
+  });
+
+  testUsingContext('Non-verbose does not prints phase timings', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--',
+      'test/fake_test.dart',
+    ]);
+
+    final List<String> logPhaseMessages = logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+    expect(logPhaseMessages, isEmpty);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    Logger: () => logger,
   });
 
   testUsingContext('Pipes different args when running Integration Tests', () async {
@@ -642,7 +723,7 @@ dev_dependencies:
       '--no-pub',
     ]);
 
-    final bool fileExists = await fs.isFile('build/unit_test_assets/AssetManifest.json');
+    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     expect(fileExists, true);
 
   }, overrides: <Type, Generator>{
@@ -663,7 +744,7 @@ dev_dependencies:
       '--no-test-assets',
     ]);
 
-    final bool fileExists = await fs.isFile('build/unit_test_assets/AssetManifest.json');
+    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     expect(fileExists, false);
 
   }, overrides: <Type, Generator>{
@@ -725,58 +806,101 @@ dev_dependencies:
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
+
+  group('File Reporter', () {
+    testUsingContext('defaults to unset null value', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+      ]);
+      expect(testRunner.lastFileReporterValue, null);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('when set --file-reporter value is passed on', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--file-reporter=json:out.jsonl'
+      ]);
+      expect(testRunner.lastFileReporterValue, 'json:out.jsonl');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
-  FakeFlutterTestRunner(this.exitCode);
+  FakeFlutterTestRunner(this.exitCode, [this.leastRunTime]);
 
   int exitCode;
-  bool lastEnableObservatoryValue;
-  DebuggingOptions lastDebuggingOptionsValue;
+  Duration? leastRunTime;
+  bool? lastEnableVmServiceValue;
+  late DebuggingOptions lastDebuggingOptionsValue;
+  String? lastFileReporterValue;
+  String? lastReporterOption;
 
   @override
   Future<int> runTests(
     TestWrapper testWrapper,
-    List<String> testFiles, {
-    @required DebuggingOptions debuggingOptions,
-    Directory workDir,
+    List<Uri> testFiles, {
+    required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
-    String tags,
-    String excludeTags,
-    bool enableObservatory = false,
+    String? tags,
+    String? excludeTags,
+    bool enableVmService = false,
     bool ipv6 = false,
     bool machine = false,
-    String precompiledDillPath,
-    Map<String, String> precompiledDillFiles,
-    BuildMode buildMode,
-    bool trackWidgetCreation = false,
+    String? precompiledDillPath,
+    Map<String, String>? precompiledDillFiles,
     bool updateGoldens = false,
-    TestWatcher watcher,
-    int concurrency,
-    String testAssetDirectory,
-    FlutterProject flutterProject,
-    String icudtlPath,
-    Directory coverageDirectory,
+    TestWatcher? watcher,
+    required int? concurrency,
+    String? testAssetDirectory,
+    FlutterProject? flutterProject,
+    String? icudtlPath,
+    Directory? coverageDirectory,
     bool web = false,
-    String randomSeed,
-    @override List<String> extraFrontEndOptions,
-    String reporter,
-    String timeout,
+    String? randomSeed,
+    String? reporter,
+    String? fileReporter,
+    String? timeout,
     bool runSkipped = false,
-    int shardIndex,
-    int totalShards,
-    Device integrationTestDevice,
-    String integrationTestUserIdentifier,
+    int? shardIndex,
+    int? totalShards,
+    Device? integrationTestDevice,
+    String? integrationTestUserIdentifier,
+    TestTimeRecorder? testTimeRecorder,
   }) async {
-    lastEnableObservatoryValue = enableObservatory;
+    lastEnableVmServiceValue = enableVmService;
     lastDebuggingOptionsValue = debuggingOptions;
+    lastFileReporterValue = fileReporter;
+    lastReporterOption = reporter;
+
+    if (leastRunTime != null) {
+      await Future<void>.delayed(leastRunTime!);
+    }
+
     return exitCode;
   }
 }
 
 class FakePackageTest implements TestWrapper {
-  List<String> lastArgs;
+  List<String>? lastArgs;
 
   @override
   Future<void> main(List<String> args) async {
@@ -791,13 +915,22 @@ class FakePackageTest implements TestWrapper {
 }
 
 class _FakeDeviceManager extends DeviceManager {
-  _FakeDeviceManager(this._connectedDevices);
+  _FakeDeviceManager(this._connectedDevices) : super(logger: testLogger);
 
   final List<Device> _connectedDevices;
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => _connectedDevices;
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
+
+  List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.wireless) {
+      return <Device>[];
+    }
+    return _connectedDevices;
+  }
 }

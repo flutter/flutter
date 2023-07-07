@@ -49,6 +49,22 @@ class Counter with ChangeNotifier {
 }
 
 void main() {
+  testWidgets('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
+    final TestNotifier test = TestNotifier();
+    bool callbackDidFinish = false;
+    void foo() {
+      test.dispose();
+      callbackDidFinish = true;
+    }
+
+    test.addListener(foo);
+    test.notify();
+    final AssertionError error = tester.takeException() as AssertionError;
+    expect(error.toString().contains('dispose()'), isTrue);
+    // Make sure it crashes during dispose call.
+    expect(callbackDidFinish, isFalse);
+  });
+
   testWidgets('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
     void listener() {
@@ -343,6 +359,20 @@ void main() {
     try {
       source.dispose();
       source.removeListener(() {});
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNull);
+  });
+
+  test('Can check hasListener on a disposed ChangeNotifier', () {
+    final HasListenersTester<int> source = HasListenersTester<int>(0);
+    source.addListener(() { });
+    expect(source.testHasListeners, isTrue);
+    FlutterError? error;
+    try {
+      source.dispose();
+      expect(source.testHasListeners, isFalse);
     } on FlutterError catch (e) {
       error = e;
     }

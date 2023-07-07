@@ -1,0 +1,1 @@
+include: package:pedantic/analysis_options.yaml

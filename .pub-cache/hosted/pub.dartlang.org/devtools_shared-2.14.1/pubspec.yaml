@@ -1,0 +1,19 @@
+name: devtools_shared
+description: Package of shared structures between devtools_app, dds, and other tools.
+
+version: 2.14.1
+
+repository: https://github.com/flutter/devtools/tree/master/packages/devtools_shared
+
+environment:
+  sdk: '>=2.17.0 <3.0.0'
+
+dependencies:
+  path: ^1.8.0
+  shelf: ^1.1.0
+  usage: ^4.0.0
+  vm_service: ^9.0.0
+  webkit_inspection_protocol: '>=0.5.0 <2.0.0'
+
+dev_dependencies:
+  test: ^1.21.2

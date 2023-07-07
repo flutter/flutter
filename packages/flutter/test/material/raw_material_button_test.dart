@@ -32,7 +32,7 @@ void main() {
     await tester.tap(find.text('BUTTON'));
     await tester.pump(const Duration(milliseconds: 10));
 
-    final RenderBox splash = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(splash, paints..circle(color: splashColor));
 
     await tester.pumpAndSettle();
@@ -72,7 +72,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
 
     if (!kIsWeb) {
-      final RenderBox splash = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+      final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
       expect(splash, paints..circle(color: splashColor));
     }
 
@@ -90,7 +90,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump(const Duration(milliseconds: 10));
 
-    final RenderBox splash = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(splash, paints..circle(color: splashColor));
 
     await tester.pumpAndSettle();
@@ -195,7 +195,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     // centered in material button.
     expect(box, paints..circle(x: 44.0, y: 18.0, color: splashColor));
     await gesture.up();
@@ -226,7 +226,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(top);
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     // paints above material
     expect(box, paints..circle(x: 44.0, y: 0.0, color: splashColor));
     await gesture.up();
@@ -240,12 +240,12 @@ void main() {
             RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
               onPressed: () { },
-              child: SizedBox(
+              child: const SizedBox(
                 width: 400.0,
                 height: 400.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: const <Widget>[
+                  children: <Widget>[
                     SizedBox(
                       height: 50.0,
                       width: 400.0,
@@ -326,7 +326,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(box, isNot(paints..rect(color: focusColor)));
 
     focusNode.requestFocus();
@@ -369,28 +369,30 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets("Disabled RawMaterialButton can't be traversed to when disabled.", (WidgetTester tester) async {
+  testWidgets("Disabled RawMaterialButton can't be traversed to.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: '$RawMaterialButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: '$RawMaterialButton 2');
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Center(
-          child: Column(
-            children: <Widget>[
-              RawMaterialButton(
-                autofocus: true,
-                focusNode: focusNode1,
-                onPressed: () {},
-                child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
-              ),
-              RawMaterialButton(
-                autofocus: true,
-                focusNode: focusNode2,
-                onPressed: null,
-                child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
-              ),
-            ],
+        home: FocusScope(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                RawMaterialButton(
+                  autofocus: true,
+                  focusNode: focusNode1,
+                  onPressed: () {},
+                  child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+                ),
+                RawMaterialButton(
+                  autofocus: true,
+                  focusNode: focusNode2,
+                  onPressed: null,
+                  child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -425,7 +427,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     expect(box, isNot(paints..rect(color: hoverColor)));

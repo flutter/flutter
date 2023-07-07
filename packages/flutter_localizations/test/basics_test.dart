@@ -22,9 +22,9 @@ void main() {
     ));
 
     final LocalizationTrackerState outerTracker = tester.state(find.byKey(const ValueKey<String>('outer'), skipOffstage: false));
-    expect(outerTracker.captionFontSize, 12.0);
+    expect(outerTracker.bodySmallFontSize, 12.0);
     final LocalizationTrackerState innerTracker = tester.state(find.byKey(const ValueKey<String>('inner'), skipOffstage: false));
-    expect(innerTracker.captionFontSize, 13.0);
+    expect(innerTracker.bodySmallFontSize, 13.0);
   });
 
   testWidgets('Localizations is compatible with ChangeNotifier.dispose() called during didChangeDependencies', (WidgetTester tester) async {
@@ -92,11 +92,11 @@ class LocalizationTracker extends StatefulWidget {
 }
 
 class LocalizationTrackerState extends State<LocalizationTracker> {
-  late double captionFontSize;
+  late double bodySmallFontSize;
 
   @override
   Widget build(BuildContext context) {
-    captionFontSize = Theme.of(context).textTheme.caption!.fontSize!;
+    bodySmallFontSize = Theme.of(context).textTheme.bodySmall!.fontSize!;
     return Container();
   }
 }

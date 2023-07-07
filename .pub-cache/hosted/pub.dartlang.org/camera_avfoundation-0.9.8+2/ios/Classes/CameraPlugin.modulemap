@@ -1,0 +1,20 @@
+framework module camera_avfoundation {
+  umbrella header "camera_avfoundation-umbrella.h"
+
+  export *
+  module * { export * }
+
+  explicit module Test {
+    header "CameraPlugin_Test.h"
+    header "CameraPermissionUtils.h"
+    header "CameraProperties.h"
+    header "FLTCam.h"
+    header "FLTCam_Test.h"
+    header "FLTSavePhotoDelegate_Test.h"
+    header "FLTThreadSafeEventChannel.h"
+    header "FLTThreadSafeFlutterResult.h"
+    header "FLTThreadSafeMethodChannel.h"
+    header "FLTThreadSafeTextureRegistry.h"
+    header "QueueUtils.h"
+  }
+}

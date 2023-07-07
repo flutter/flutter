@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('FloatingActionButton', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.FloatingActionButtonExampleApp(),
     );
 
     expect(find.byType(FloatingActionButton), findsOneWidget);

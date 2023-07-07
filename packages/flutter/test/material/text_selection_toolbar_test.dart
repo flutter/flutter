@@ -4,16 +4,14 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
+const double _kToolbarContentDistance = 8.0;
+
 // A custom text selection menu that just displays a single custom button.
 class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls {
-  static const double _kToolbarContentDistanceBelow = 20.0;
-  static const double _kToolbarContentDistance = 8.0;
-
   @override
   Widget buildToolbar(
     BuildContext context,
@@ -35,7 +33,7 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
     );
     final Offset anchorBelow = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
+      globalEditableRegion.top + endTextSelectionPoint.point.dy + TextSelectionToolbar.kToolbarContentDistanceBelow,
     );
 
     return TextSelectionToolbar(
@@ -155,23 +153,23 @@ void main() {
     // When the toolbar doesn't fit above aboveAnchor, it positions itself below
     // belowAnchor.
     double toolbarY = tester.getTopLeft(findToolbar()).dy;
-    expect(toolbarY, equals(anchorBelowY));
+    expect(toolbarY, equals(anchorBelowY + TextSelectionToolbar.kToolbarContentDistanceBelow));
 
     // Even when it barely doesn't fit.
-    setState(() {
-      anchorAboveY = 50.0;
-    });
-    await tester.pump();
-    toolbarY = tester.getTopLeft(findToolbar()).dy;
-    expect(toolbarY, equals(anchorBelowY));
-
-    // When it does fit above aboveAnchor, it positions itself there.
     setState(() {
       anchorAboveY = 60.0;
     });
     await tester.pump();
     toolbarY = tester.getTopLeft(findToolbar()).dy;
-    expect(toolbarY, equals(anchorAboveY - height));
+    expect(toolbarY, equals(anchorBelowY + TextSelectionToolbar.kToolbarContentDistanceBelow));
+
+    // When it does fit above aboveAnchor, it positions itself there.
+    setState(() {
+      anchorAboveY = 70.0;
+    });
+    await tester.pump();
+    toolbarY = tester.getTopLeft(findToolbar()).dy;
+    expect(toolbarY, equals(anchorAboveY - height - _kToolbarContentDistance));
   });
 
   testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {

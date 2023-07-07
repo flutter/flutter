@@ -1,0 +1,157 @@
+#data
+<a><b><big><em><strong><div>X</a>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       <b>
+|         <big>
+|           <em>
+|             <strong>
+|     <big>
+|       <em>
+|         <strong>
+|           <div>
+|             <a>
+|               "X"
+
+#data
+<a><b><div id=1><div id=2><div id=3><div id=4><div id=5><div id=6><div id=7><div id=8>A</a>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       <b>
+|     <b>
+|       <div>
+|         id="1"
+|         <a>
+|         <div>
+|           id="2"
+|           <a>
+|           <div>
+|             id="3"
+|             <a>
+|             <div>
+|               id="4"
+|               <a>
+|               <div>
+|                 id="5"
+|                 <a>
+|                 <div>
+|                   id="6"
+|                   <a>
+|                   <div>
+|                     id="7"
+|                     <a>
+|                     <div>
+|                       id="8"
+|                       <a>
+|                         "A"
+
+#data
+<a><b><div id=1><div id=2><div id=3><div id=4><div id=5><div id=6><div id=7><div id=8><div id=9>A</a>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       <b>
+|     <b>
+|       <div>
+|         id="1"
+|         <a>
+|         <div>
+|           id="2"
+|           <a>
+|           <div>
+|             id="3"
+|             <a>
+|             <div>
+|               id="4"
+|               <a>
+|               <div>
+|                 id="5"
+|                 <a>
+|                 <div>
+|                   id="6"
+|                   <a>
+|                   <div>
+|                     id="7"
+|                     <a>
+|                     <div>
+|                       id="8"
+|                       <a>
+|                         <div>
+|                           id="9"
+|                           "A"
+
+#data
+<a><b><div id=1><div id=2><div id=3><div id=4><div id=5><div id=6><div id=7><div id=8><div id=9><div id=10>A</a>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       <b>
+|     <b>
+|       <div>
+|         id="1"
+|         <a>
+|         <div>
+|           id="2"
+|           <a>
+|           <div>
+|             id="3"
+|             <a>
+|             <div>
+|               id="4"
+|               <a>
+|               <div>
+|                 id="5"
+|                 <a>
+|                 <div>
+|                   id="6"
+|                   <a>
+|                   <div>
+|                     id="7"
+|                     <a>
+|                     <div>
+|                       id="8"
+|                       <a>
+|                         <div>
+|                           id="9"
+|                           <div>
+|                             id="10"
+|                             "A"
+
+#data
+<cite><b><cite><i><cite><i><cite><i><div>X</b>TEST
+#errors
+Line: 1 Col: 6 Unexpected start tag (cite). Expected DOCTYPE.
+Line: 1 Col: 46 End tag (b) violates step 1, paragraph 3 of the adoption agency algorithm.
+Line: 1 Col: 50 Expected closing tag. Unexpected end of file.
+#document
+| <html>
+|   <head>
+|   <body>
+|     <cite>
+|       <b>
+|         <cite>
+|           <i>
+|             <cite>
+|               <i>
+|                 <cite>
+|                   <i>
+|       <i>
+|         <i>
+|           <div>
+|             <b>
+|               "X"
+|             "TEST"

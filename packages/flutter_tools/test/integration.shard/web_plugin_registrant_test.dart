@@ -9,6 +9,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -68,29 +69,41 @@ void main() {
     expect(contents, contains('SharedPreferencesPlugin.registerWith(registrar);'));
     expect(contents, contains('registrar.registerMessageHandler();'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          usage: globals.flutterUsage,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
-        ),
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: globals.stdio,
+    ),
   });
 
+<<<<<<< HEAD
   testUsingContext('generated plugin registrant passes analysis without null safety', () async {
+=======
+  testUsingContext('generated plugin registrant passes analysis with null safety', () async {
+>>>>>>> 796c8ef79279f9c774545b3771238c3098dbefab
     await _createProject(projectDir, <String>[]);
     // We need a dependency so the plugin registrant is not completely empty.
     await _editPubspecFile(projectDir,
       _composeEditors(<PubspecEditor>[
         _addDependencyEditor('shared_preferences', version: '^2.0.0'),
 
+<<<<<<< HEAD
         // This turns null safety off
         _setDartSDKVersionEditor('>=2.11.0 <3.0.0'),
       ]));
 
     // The generated main.dart file has a bunch of stuff that is invalid without null safety, so
     // replace it with a no-op dummy main file. We aren't testing it in this scenario anyway.
+=======
+        _setDartSDKVersionEditor('>=2.12.0 <4.0.0'),
+      ]));
+
+    // Replace main file with a no-op dummy. We aren't testing it in this scenario anyway.
+>>>>>>> 796c8ef79279f9c774545b3771238c3098dbefab
     await _replaceMainFile(projectDir, 'void main() {}');
 
     // The plugin registrant is created on build...
@@ -115,6 +128,7 @@ void main() {
     expect(contents, contains('SharedPreferencesPlugin.registerWith(registrar);'));
     expect(contents, contains('registrar.registerMessageHandler();'));
   }, overrides: <Type, Generator>{
+<<<<<<< HEAD
     Pub: () => Pub(
           fileSystem: globals.fs,
           logger: globals.logger,
@@ -123,6 +137,17 @@ void main() {
           botDetector: globals.botDetector,
           platform: globals.platform,
         ),
+=======
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: globals.stdio,
+    ),
+>>>>>>> 796c8ef79279f9c774545b3771238c3098dbefab
   });
 
 
@@ -146,14 +171,15 @@ void main() {
     final String contents = registrant.readAsStringSync();
     expect(contents, contains('void registerPlugins() {}'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          usage: globals.flutterUsage,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
-        ),
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: globals.stdio,
+    ),
   });
 
   // See: https://github.com/dart-lang/dart-services/pull/874
@@ -176,14 +202,15 @@ void main() {
     final Directory buildDir = projectDir.childDirectory('.dart_tool/flutter_build');
     expect(buildDir, isNot(exists));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          usage: globals.flutterUsage,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
-        ),
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: globals.stdio,
+    ),
   });
 
   testUsingContext(
@@ -225,14 +252,15 @@ void main() {
     );
     await _analyzeEntity(buildDir.childFile('web_plugin_registrant.dart'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          usage: globals.flutterUsage,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
-        ),
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: globals.stdio,
+    ),
   });
 }
 
@@ -407,7 +435,7 @@ Future<void> _analyzeEntity(FileSystemEntity target) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
     args,
     workingDirectory: target is Directory ? target.path : target.dirname,
   );
@@ -446,7 +474,7 @@ Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory work
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
     args,
     workingDirectory: workingDir.path,
   );

@@ -1,0 +1,26 @@
+#data
+<p><font size=4><font size=4><font size=4><script>document.getElementsByTagName("font")[2].setAttribute("size", "5");</script><font size=4><p>X
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <font>
+|         size="4"
+|         <font>
+|           size="4"
+|           <font>
+|             size="5"
+|             <script>
+|               "document.getElementsByTagName("font")[2].setAttribute("size", "5");"
+|             <font>
+|               size="4"
+|     <p>
+|       <font>
+|         size="4"
+|         <font>
+|           size="4"
+|           <font>
+|             size="4"
+|             "X"

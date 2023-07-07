@@ -129,5 +129,10 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "เมนูในแถบเมนู"
+  "menuBarMenuLabel": "เมนูในแถบเมนู",
+  "currentDateLabel": "วันนี้",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "ปิด $modalRouteContentName",
+  "keyboardKeyShift": "Shift"
 }

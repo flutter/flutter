@@ -10,11 +10,7 @@ import 'platform_channel.dart';
 export 'platform_channel.dart' show BasicMessageChannel, MethodChannel;
 
 /// Platform channels used by the Flutter system.
-class SystemChannels {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SystemChannels._();
-
+abstract final class SystemChannels {
   /// A JSON [MethodChannel] for navigation.
   ///
   /// The following incoming methods are defined for this channel (registered
@@ -120,6 +116,11 @@ class SystemChannels {
   ///  * `SystemNavigator.pop`: Tells the operating system to close the
   ///    application, or the closest equivalent. See [SystemNavigator.pop].
   ///
+  ///  * `System.exitApplication`: Tells the engine to send a request back to
+  ///    the application to request an application exit (using
+  ///    `System.requestAppExit` below), and if it is not canceled, to terminate
+  ///    the application using the platform UI toolkit's termination API.
+  ///
   /// The following incoming methods are defined for this channel (registered
   /// using [MethodChannel.setMethodCallHandler]):
   ///
@@ -128,6 +129,9 @@ class SystemChannels {
   ///    through [SystemChrome.setEnabledSystemUIMode]. See
   ///    [SystemChrome.setSystemUIChangeCallback] to respond to this change in
   ///    application state.
+  ///
+  ///  * `System.requestAppExit`: The application has requested that it be
+  ///    terminated. See [ServicesBinding.exitApplication].
   ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
@@ -220,6 +224,34 @@ class SystemChannels {
   static const MethodChannel textInput = OptionalMethodChannel(
       'flutter/textinput',
       JSONMethodCodec(),
+  );
+
+  /// A [MethodChannel] for handling spell check for text input.
+  ///
+  /// This channel exposes the spell check framework for supported platforms.
+  /// Currently supported on Android and iOS only.
+  ///
+  /// Spell check requests are initiated by `SpellCheck.initiateSpellCheck`.
+  /// These requests may either be completed or canceled. If the request is
+  /// completed, the shell side will respond with the results of the request.
+  /// Otherwise, the shell side will respond with null.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked by
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `SpellCheck.initiateSpellCheck`: Sends request for specified text to be
+  ///     spell checked and returns the result, either a [List<SuggestionSpan>]
+  ///     representing the spell check results of the text or null if the request
+  ///     was canceled. The arguments are the [String] to be spell checked
+  ///     and the [Locale] for the text to be spell checked with.
+  static const MethodChannel spellCheck = OptionalMethodChannel(
+      'flutter/spellcheck',
+  );
+
+  /// A JSON [MethodChannel] for handling undo events.
+  static const MethodChannel undoManager = OptionalMethodChannel(
+    'flutter/undomanager',
+    JSONMethodCodec(),
   );
 
   /// A JSON [BasicMessageChannel] for keyboard events.
@@ -406,10 +438,10 @@ class SystemChannels {
   ///    encoding the list of top level menu items in window "0", which each
   ///    have a hierarchy of `Map<String, Object?>` containing the required
   ///    data, sent via a [StandardMessageCodec]. It is typically generated from
-  ///    a list of [MenuItem]s, and ends up looking like this example:
+  ///    a list of [PlatformMenuItem]s, and ends up looking like this example:
   ///
   /// ```dart
-  /// List<Map<String, Object?>> menu = <String, Object?>{
+  /// Map<String, Object?> menu = <String, Object?>{
   ///   '0': <Map<String, Object?>>[
   ///     <String, Object?>{
   ///       'id': 1,
@@ -443,4 +475,17 @@ class SystemChannels {
   ///
   ///  * [DefaultPlatformMenuDelegate], which uses this channel.
   static const MethodChannel menu = OptionalMethodChannel('flutter/menu');
+
+  /// A [MethodChannel] for configuring the browser's context menu on web.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `enableContextMenu`: enables the browser's context menu. When a Flutter
+  ///    app starts, the browser's context menu is already enabled.
+  ///  * `disableContextMenu`: disables the browser's context menu.
+  static const MethodChannel contextMenu = OptionalMethodChannel(
+    'flutter/contextmenu',
+    JSONMethodCodec(),
+  );
 }

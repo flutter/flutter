@@ -42,7 +42,7 @@ import 'flutter_cache.dart';
 import 'flutter_device_manager.dart';
 import 'flutter_features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
-import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
+import 'fuchsia/fuchsia_sdk.dart' show FuchsiaArtifacts, FuchsiaSdk;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow, fuchsiaWorkflow;
 import 'globals.dart' as globals;
 import 'ios/ios_workflow.dart';
@@ -94,6 +94,7 @@ Future<T> runInContext<T>(
         usage: globals.flutterUsage,
         gradleUtils: globals.gradleUtils!,
         platform: globals.platform,
+        androidStudio: globals.androidStudio,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         operatingSystemUtils: globals.os,
@@ -120,7 +121,6 @@ Future<T> runInContext<T>(
       AndroidWorkflow: () => AndroidWorkflow(
         androidSdk: globals.androidSdk,
         featureFlags: featureFlags,
-        operatingSystemUtils: globals.os,
       ),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         userMessages: globals.userMessages,
@@ -152,6 +152,7 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         osUtils: globals.os,
+        projectFactory: globals.projectFactory,
       ),
       CocoaPods: () => CocoaPods(
         fileSystem: globals.fs,
@@ -204,12 +205,11 @@ Future<T> runInContext<T>(
         ),
         fuchsiaSdk: globals.fuchsiaSdk!,
         operatingSystemUtils: globals.os,
-        terminal: globals.terminal,
         customDevicesConfig: globals.customDevicesConfig,
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        dartExecutable: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+        dartExecutable: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
@@ -237,7 +237,6 @@ Future<T> runInContext<T>(
         fuchsiaArtifacts: globals.fuchsiaArtifacts!,
       ),
       GradleUtils: () => GradleUtils(
-        fileSystem: globals.fs,
         operatingSystemUtils: globals.os,
         logger: globals.logger,
         platform: globals.platform,
@@ -276,7 +275,7 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         platform: globals.platform,
       ),
-      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+      MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
         logger: globals.logger,
         flutterUsage: globals.flutterUsage,
       ),
@@ -313,7 +312,6 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         usage: globals.flutterUsage,
       ),
-      ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
       Usage: () => Usage(

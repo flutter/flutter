@@ -48,12 +48,12 @@ class EmulatorsCommand extends FlutterCommand {
     final ArgResults argumentResults = argResults!;
     if (argumentResults.wasParsed('launch')) {
       final bool coldBoot = argumentResults.wasParsed('cold');
-      await _launchEmulator(stringArgDeprecated('launch')!, coldBoot: coldBoot);
+      await _launchEmulator(stringArg('launch')!, coldBoot: coldBoot);
     } else if (argumentResults.wasParsed('create')) {
-      await _createEmulator(name: stringArgDeprecated('name'));
+      await _createEmulator(name: stringArg('name'));
     } else {
       final String? searchText =
-          argumentResults.rest != null && argumentResults.rest.isNotEmpty
+          argumentResults.rest.isNotEmpty
               ? argumentResults.rest.first
               : null;
       await _listEmulators(searchText);

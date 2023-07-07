@@ -1,0 +1,455 @@
+#data
+<!doctype html><p><button><button>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|       <button>
+
+#data
+<!doctype html><p><button><address>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <address>
+
+#data
+<!doctype html><p><button><blockquote>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <blockquote>
+
+#data
+<!doctype html><p><button><menu>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <menu>
+
+#data
+<!doctype html><p><button><p>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <p>
+
+#data
+<!doctype html><p><button><ul>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <ul>
+
+#data
+<!doctype html><p><button><h1>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <h1>
+
+#data
+<!doctype html><p><button><h6>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <h6>
+
+#data
+<!doctype html><p><button><listing>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <listing>
+
+#data
+<!doctype html><p><button><pre>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <pre>
+
+#data
+<!doctype html><p><button><form>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <form>
+
+#data
+<!doctype html><p><button><li>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <li>
+
+#data
+<!doctype html><p><button><dd>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <dd>
+
+#data
+<!doctype html><p><button><dt>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <dt>
+
+#data
+<!doctype html><p><button><plaintext>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <plaintext>
+
+#data
+<!doctype html><p><button><table>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <table>
+
+#data
+<!doctype html><p><button><hr>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <hr>
+
+#data
+<!doctype html><p><button><xmp>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <xmp>
+
+#data
+<!doctype html><p><button></p>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <button>
+|         <p>
+
+#data
+<!doctype html><address><button></address>a
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <address>
+|       <button>
+|     "a"
+
+#data
+<!doctype html><address><button></address>a
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <address>
+|       <button>
+|     "a"
+
+#data
+<p><table></p>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <p>
+|       <table>
+
+#data
+<!doctype html><svg>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+
+#data
+<!doctype html><p><figcaption>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|     <figcaption>
+
+#data
+<!doctype html><p><summary>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|     <summary>
+
+#data
+<!doctype html><form><table><form>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <form>
+|       <table>
+
+#data
+<!doctype html><table><form><form>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <form>
+
+#data
+<!doctype html><table><form></table><form>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <form>
+
+#data
+<!doctype html><svg><foreignObject><p>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg foreignObject>
+|         <p>
+
+#data
+<!doctype html><svg><title>abc
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg title>
+|         "abc"
+
+#data
+<option><span><option>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <option>
+|       <span>
+|         <option>
+
+#data
+<option><option>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <option>
+|     <option>
+
+#data
+<math><annotation-xml><div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math annotation-xml>
+|     <div>
+
+#data
+<math><annotation-xml encoding="application/svg+xml"><div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math annotation-xml>
+|         encoding="application/svg+xml"
+|     <div>
+
+#data
+<math><annotation-xml encoding="application/xhtml+xml"><div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math annotation-xml>
+|         encoding="application/xhtml+xml"
+|         <div>
+
+#data
+<math><annotation-xml encoding="aPPlication/xhtmL+xMl"><div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math annotation-xml>
+|         encoding="aPPlication/xhtmL+xMl"
+|         <div>
+
+#data
+<math><annotation-xml encoding="text/html"><div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math annotation-xml>
+|         encoding="text/html"
+|         <div>
+
+#data
+<math><annotation-xml encoding="Text/htmL"><div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math annotation-xml>
+|         encoding="Text/htmL"
+|         <div>
+
+#data
+<math><annotation-xml encoding=" text/html "><div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math annotation-xml>
+|         encoding=" text/html "
+|     <div>

@@ -430,9 +430,7 @@ class _SymbolNode {
   _SymbolNode(
     this.name, {
     this.byteSize = 0,
-  })  : assert(name != null),
-        assert(byteSize != null),
-        _children = <String, _SymbolNode>{};
+  })  : _children = <String, _SymbolNode>{};
 
   /// The human friendly identifier for this node.
   String name;

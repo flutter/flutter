@@ -1,0 +1,16 @@
+name: google_identity_services_web
+description: A Dart JS-interop layer for Google Identity Services. Google's new sign-in SDK for Web that supports multiple types of credentials.
+repository: https://github.com/flutter/packages/tree/main/packages/google_identity_services_web
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+google_identiy_services_web%22
+version: 0.2.1
+
+environment:
+  sdk: ">=2.17.0 <4.0.0"
+
+dependencies:
+  js: ^0.6.4
+  meta: ^1.3.0
+
+dev_dependencies:
+  path: ^1.8.1
+  test: ^1.21.1

@@ -15,9 +15,7 @@ import '../painting/image_test_utils.dart';
 const Duration animationDuration = Duration(milliseconds: 50);
 
 class FadeInImageParts {
-  const FadeInImageParts(this.fadeInImageElement, this.placeholder, this.target)
-      : assert(fadeInImageElement != null),
-        assert(target != null);
+  const FadeInImageParts(this.fadeInImageElement, this.placeholder, this.target);
 
   final ComponentElement fadeInImageElement;
   final FadeInImageElements? placeholder;
@@ -52,6 +50,7 @@ class FadeInImageElements {
   RawImage get rawImage => rawImageElement.widget as RawImage;
   double get opacity => rawImage.opacity?.value ?? 1.0;
   BoxFit? get fit => rawImage.fit;
+  FilterQuality? get filterQuality => rawImage.filterQuality;
 }
 
 class LoadTestImageProvider extends ImageProvider<Object> {
@@ -553,6 +552,37 @@ Future<void> main() async {
 
         expect(findFadeInImage(tester).target.fit, equals(BoxFit.cover));
         expect(findFadeInImage(tester).placeholder!.fit, equals(BoxFit.fill));
+      });
+    });
+
+    group("placeholder's FilterQuality", () {
+      testWidgets("should be the image's FilterQuality when not set", (WidgetTester tester) async {
+        final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+        final TestImageProvider imageProvider = TestImageProvider(targetImage);
+
+        await tester.pumpWidget(FadeInImage(
+          placeholder: placeholderProvider,
+          image: imageProvider,
+          filterQuality: FilterQuality.medium,
+        ));
+
+        expect(findFadeInImage(tester).placeholder!.filterQuality, equals(findFadeInImage(tester).target.filterQuality));
+        expect(findFadeInImage(tester).placeholder!.filterQuality, equals(FilterQuality.medium));
+      });
+
+      testWidgets('should be the given value when set', (WidgetTester tester) async {
+        final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+        final TestImageProvider imageProvider = TestImageProvider(targetImage);
+
+        await tester.pumpWidget(FadeInImage(
+          placeholder: placeholderProvider,
+          image: imageProvider,
+          filterQuality: FilterQuality.medium,
+          placeholderFilterQuality: FilterQuality.high,
+        ));
+
+        expect(findFadeInImage(tester).target.filterQuality, equals(FilterQuality.medium));
+        expect(findFadeInImage(tester).placeholder!.filterQuality, equals(FilterQuality.high));
       });
     });
   });

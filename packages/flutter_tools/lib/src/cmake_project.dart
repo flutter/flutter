@@ -61,6 +61,13 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   @override
   File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
 
+  /// The native entrypoint's CMake specification.
+  File get runnerCmakeFile => runnerDirectory.childFile('CMakeLists.txt');
+
+  /// The native entrypoint's resource file. Used to configure things
+  /// like the application icon, name, and version.
+  File get runnerResourceFile => runnerDirectory.childFile('Runner.rc');
+
   @override
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
@@ -75,6 +82,11 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   /// generated on the fly. All generated files that are not intended to be
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
+
+  /// The directory in the project that is owned by the app. As much as
+  /// possible, Flutter tooling should not edit files in this directory after
+  /// initial project creation.
+  Directory get runnerDirectory => _editableDirectory.childDirectory('runner');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }

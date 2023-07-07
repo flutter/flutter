@@ -1,0 +1,22 @@
+name: google_sign_in_platform_interface
+description: A common platform interface for the google_sign_in plugin.
+repository: https://github.com/flutter/packages/tree/main/packages/google_sign_in/google_sign_in_platform_interface
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+google_sign_in%22
+# NOTE: We strongly prefer non-breaking changes, even at the expense of a
+# less-clean API. See https://flutter.dev/go/platform-interface-breaking-changes
+version: 2.4.1
+
+environment:
+  sdk: ">=2.18.0 <4.0.0"
+  flutter: ">=3.3.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.1.0
+  quiver: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: 5.4.1

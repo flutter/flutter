@@ -1,0 +1,28 @@
+name: path_provider_example
+description: Demonstrates how to use the path_provider plugin.
+publish_to: none
+
+environment:
+  sdk: ">=2.14.0 <3.0.0"
+  flutter: ">=2.8.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  path_provider_ios:
+    # When depending on this package from a real application you should use:
+    #   path_provider_ios: ^x.y.z
+    # See https://dart.dev/tools/pub/dependencies#version-constraints
+    # The example app is bundled with the plugin so we use a path dependency on
+    # the parent directory to use the current plugin's version.
+    path: ../
+  path_provider_platform_interface: ^2.0.0
+
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

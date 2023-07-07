@@ -1,0 +1,28 @@
+name: path_provider_windows
+description: Windows implementation of the path_provider plugin
+repository: https://github.com/flutter/plugins/tree/main/packages/path_provider/path_provider_windows
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+path_provider%22
+version: 2.1.3
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+  flutter: ">=3.0.0"
+
+flutter:
+  plugin:
+    implements: path_provider
+    platforms:
+      windows:
+        dartPluginClass: PathProviderWindows
+
+dependencies:
+  ffi: ^2.0.0
+  flutter:
+    sdk: flutter
+  path: ^1.8.0
+  path_provider_platform_interface: ^2.0.0
+  win32: ">=2.1.0 <4.0.0"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

@@ -1,0 +1,19 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_dynamic_calls
+    - avoid_unused_constructor_parameters
+    - cancel_subscriptions
+    - directives_ordering
+    - omit_local_variable_types
+    - package_api_docs
+    - prefer_single_quotes
+    - test_types_in_equals
+    - throw_in_finally
+    - unawaited_futures

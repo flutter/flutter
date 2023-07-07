@@ -6,12 +6,15 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_ffx.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   late FakeFuchsiaArtifacts fakeFuchsiaArtifacts;
@@ -25,6 +28,22 @@ void main() {
     logger = BufferLogger.test();
     ffx = memoryFileSystem.file('ffx');
     fakeFuchsiaArtifacts.ffx = ffx;
+  });
+
+  testUsingContext('isFuchsiaSupportedPlatform returns true when opted in on Linux and macOS', () {
+    expect(isFuchsiaSupportedPlatform(FakePlatform(operatingSystem: 'macos')), true);
+    expect(isFuchsiaSupportedPlatform(FakePlatform()), true);
+    expect(isFuchsiaSupportedPlatform(FakePlatform(operatingSystem: 'windows')), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
+  });
+
+  testUsingContext('isFuchsiaSupportedPlatform returns false when opted out on Linux and macOS', () {
+    expect(isFuchsiaSupportedPlatform(FakePlatform(operatingSystem: 'macos')), false);
+    expect(isFuchsiaSupportedPlatform(FakePlatform()), false);
+    expect(isFuchsiaSupportedPlatform(FakePlatform(operatingSystem: 'windows')), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
   });
 
   group('ffx list', () {

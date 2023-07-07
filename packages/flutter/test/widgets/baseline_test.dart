@@ -11,7 +11,6 @@ void main() {
       const Center(
         child: DefaultTextStyle(
           style: TextStyle(
-            fontFamily: 'Ahem',
             fontSize: 100.0,
           ),
           child: Text('X', textDirection: TextDirection.ltr),
@@ -25,11 +24,11 @@ void main() {
     await tester.pumpWidget(
       const Center(
         child: Baseline(
-          baseline: 180.0,
+          baseline: 175.0,
           baselineType: TextBaseline.alphabetic,
           child: DefaultTextStyle(
             style: TextStyle(
-              fontFamily: 'Ahem',
+              fontFamily: 'FlutterTest',
               fontSize: 100.0,
             ),
             child: Text('X', textDirection: TextDirection.ltr),
@@ -40,7 +39,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
     expect(
       tester.renderObject<RenderBox>(find.byType(Baseline)).size,
-      within<Size>(from: const Size(100.0, 200.0), distance: 0.001),
+      const Size(100.0, 200),
     );
   });
 
@@ -151,9 +150,7 @@ class RenderBaselineDetector extends RenderBox {
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (callback != null) {
-      callback();
-    }
+    callback();
     return 20.0;
   }
 

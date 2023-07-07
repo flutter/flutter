@@ -14,6 +14,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'scene_importer.dart';
 import 'shader_compiler.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
@@ -31,6 +32,8 @@ Future<Depfile> copyAssets(
   Map<String, DevFSContent>? additionalContent,
   required TargetPlatform targetPlatform,
   BuildMode? buildMode,
+  required ShaderTarget shaderTarget,
+  List<File> additionalInputs = const <File>[],
 }) async {
   // Check for an SkSL bundle.
   final String? shaderBundlePath = environment.defines[kBundleSkSLPath] ?? environment.inputs[kBundleSkSLPath];
@@ -64,6 +67,7 @@ Future<Depfile> copyAssets(
     // An asset manifest with no assets would have zero inputs if not
     // for this pubspec file.
     pubspecFile,
+    ...additionalInputs,
   ];
   final List<File> outputs = <File>[];
 
@@ -76,6 +80,12 @@ Future<Depfile> copyAssets(
     artifacts: environment.artifacts,
   );
   final ShaderCompiler shaderCompiler = ShaderCompiler(
+    processManager: environment.processManager,
+    logger: environment.logger,
+    fileSystem: environment.fileSystem,
+    artifacts: environment.artifacts,
+  );
+  final SceneImporter sceneImporter = SceneImporter(
     processManager: environment.processManager,
     logger: environment.logger,
     fileSystem: environment.fileSystem,
@@ -119,13 +129,18 @@ Future<Depfile> copyAssets(
                 outputPath: file.path,
                 relativePath: entry.key,
               );
-              break;
             case AssetKind.shader:
               doCopy = !await shaderCompiler.compileShader(
                 input: content.file as File,
                 outputPath: file.path,
+                target: shaderTarget,
+                json: targetPlatform == TargetPlatform.web_javascript,
               );
-              break;
+            case AssetKind.model:
+              doCopy = !await sceneImporter.importScene(
+                input: content.file as File,
+                outputPath: file.path,
+              );
           }
           if (doCopy) {
             await (content.file as File).copy(file.path);
@@ -306,6 +321,7 @@ class CopyAssets extends Target {
       environment,
       output,
       targetPlatform: TargetPlatform.android,
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,

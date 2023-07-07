@@ -1,0 +1,5 @@
+include: package:lint/analysis_options_package.yaml
+linter:
+  rules:
+    # Disable
+    use_build_context_synchronously: false

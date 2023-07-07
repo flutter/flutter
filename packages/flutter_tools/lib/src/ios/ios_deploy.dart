@@ -15,13 +15,14 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../device.dart';
 import 'code_signing.dart';
-import 'iproxy.dart';
 
 // Error message patterns from ios-deploy output
 const String noProvisioningProfileErrorOne = 'Error 0xe8008015';
 const String noProvisioningProfileErrorTwo = 'Error 0xe8000067';
 const String deviceLockedError = 'e80000e2';
+const String deviceLockedErrorMessage = 'the device was not, or could not be, unlocked';
 const String unknownAppLaunchError = 'Error 0xe8000022';
 
 class IOSDeploy {
@@ -87,7 +88,7 @@ class IOSDeploy {
     required String deviceId,
     required String bundlePath,
     required List<String>launchArguments,
-    required IOSDeviceConnectionInterface interfaceType,
+    required DeviceConnectionInterface interfaceType,
     Directory? appDeltaDirectory,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
@@ -101,7 +102,7 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (interfaceType != IOSDeviceConnectionInterface.network)
+      if (interfaceType != DeviceConnectionInterface.wireless)
         '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
@@ -125,7 +126,7 @@ class IOSDeploy {
     required String deviceId,
     required String bundlePath,
     required List<String> launchArguments,
-    required IOSDeviceConnectionInterface interfaceType,
+    required DeviceConnectionInterface interfaceType,
     Directory? appDeltaDirectory,
     required bool uninstallFirst,
   }) {
@@ -148,7 +149,7 @@ class IOSDeploy {
       if (uninstallFirst)
         '--uninstall',
       '--debug',
-      if (interfaceType != IOSDeviceConnectionInterface.network)
+      if (interfaceType != DeviceConnectionInterface.wireless)
         '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
@@ -170,7 +171,7 @@ class IOSDeploy {
     required String deviceId,
     required String bundlePath,
     required List<String> launchArguments,
-    required IOSDeviceConnectionInterface interfaceType,
+    required DeviceConnectionInterface interfaceType,
     required bool uninstallFirst,
     Directory? appDeltaDirectory,
   }) async {
@@ -185,7 +186,7 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (interfaceType != IOSDeviceConnectionInterface.network)
+      if (interfaceType != DeviceConnectionInterface.wireless)
         '--no-wifi',
       if (uninstallFirst)
         '--uninstall',
@@ -287,9 +288,10 @@ class IOSDeployDebugger {
   bool get debuggerAttached => _debuggerState == _IOSDeployDebuggerState.attached;
   _IOSDeployDebuggerState _debuggerState;
 
-  // (lldb)     run
-  // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
-  static final RegExp _lldbRun = RegExp(r'\(lldb\)\s*run');
+  // (lldb)    platform select remote-'ios' --sysroot
+  // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L33
+  // This regex is to get the configurable lldb prompt. By default this prompt will be "lldb".
+  static final RegExp _lldbPlatformSelect = RegExp(r"\s*platform select remote-'ios' --sysroot");
 
   // (lldb)     run
   // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
@@ -323,6 +325,11 @@ class IOSDeployDebugger {
   /// Returns whether or not the debugger successfully attached.
   Future<bool> launchAndAttach() async {
     // Return when the debugger attaches, or the ios-deploy process exits.
+
+    // (lldb)     run
+    // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
+    RegExp lldbRun = RegExp(r'\(lldb\)\s*run');
+
     final Completer<bool> debuggerCompleter = Completer<bool>();
     try {
       _iosDeployProcess = await _processUtils.start(
@@ -335,10 +342,30 @@ class IOSDeployDebugger {
           .transform<String>(const LineSplitter())
           .listen((String line) {
         _monitorIOSDeployFailure(line, _logger);
+
+        // (lldb)    platform select remote-'ios' --sysroot
+        // Use the configurable custom lldb prompt in the regex. The developer can set this prompt to anything.
+        // For example `settings set prompt "(mylldb)"` in ~/.lldbinit results in:
+        // "(mylldb)    platform select remote-'ios' --sysroot"
+        if (_lldbPlatformSelect.hasMatch(line)) {
+          final String platformSelect = _lldbPlatformSelect.stringMatch(line) ?? '';
+          if (platformSelect.isEmpty) {
+            return;
+          }
+          final int promptEndIndex = line.indexOf(platformSelect);
+          if (promptEndIndex == -1) {
+            return;
+          }
+          final String prompt = line.substring(0, promptEndIndex);
+          lldbRun = RegExp(RegExp.escape(prompt) + r'\s*run');
+          _logger.printTrace(line);
+          return;
+        }
+
         // (lldb)     run
         // success
         // 2020-09-15 13:42:25.185474-0700 Runner[477:181141] flutter: The Dart VM service is listening on http://127.0.0.1:57782/
-        if (_lldbRun.hasMatch(line)) {
+        if (lldbRun.hasMatch(line)) {
           _logger.printTrace(line);
           _debuggerState = _IOSDeployDebuggerState.launching;
           return;
@@ -520,7 +547,7 @@ String _monitorIOSDeployFailure(String stdout, Logger logger) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
 
     // Launch issues.
-  } else if (stdout.contains(deviceLockedError)) {
+  } else if (stdout.contains(deviceLockedError) || stdout.contains(deviceLockedErrorMessage)) {
     logger.printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
 Your device is locked. Unlock your device first before running.

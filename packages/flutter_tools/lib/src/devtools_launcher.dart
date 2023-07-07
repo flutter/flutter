@@ -22,7 +22,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   DevtoolsServerLauncher({
     required ProcessManager processManager,
     required String dartExecutable,
-    required Logger? logger,
+    required Logger logger,
     required BotDetector botDetector,
   })  : _processManager = processManager,
         _dartExecutable = dartExecutable,
@@ -31,7 +31,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   final ProcessManager _processManager;
   final String _dartExecutable;
-  final Logger? _logger;
+  final Logger _logger;
   final BotDetector _botDetector;
   final Completer<void> _processStartCompleter = Completer<void>();
 
@@ -73,7 +73,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       _devToolsProcess!.stderr
           .transform(utf8.decoder)
           .transform(const LineSplitter())
-          .listen(_logger!.printError);
+          .listen(_logger.printError);
 
       final bool runningOnBot = await _botDetector.isRunningOnBot;
       devToolsProcessExit = _devToolsProcess!.exitCode.then(
@@ -86,7 +86,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
       devToolsUrl = await completer.future;
     } on Exception catch (e, st) {
-      _logger!.printError('Failed to launch DevTools: $e', stackTrace: st);
+      _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
     }
   }
 

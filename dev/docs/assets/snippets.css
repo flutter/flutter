@@ -1,8 +1,11 @@
 /* Styles for handling custom code snippets */
 .snippet-container {
-  background-color: #2372a3;
   padding: 10px;
   overflow: auto;
+}
+
+.snippet-description {
+  padding: 8px 40px 12px 8px;
 }
 
 .snippet-container pre {
@@ -25,28 +28,8 @@
   position: relative;
 }
 
-.snippet-description {
-  padding: 10px;
-  color: white;
-}
-
-.snippet-description a:link {
-  color: #c7fcf4;
-}
-.snippet-description a:visited {
-  color: #c7dbfc;
-}
-.snippet-description a:hover {
-  color: white;
-}
-.snippet-description a:active {
-  color: #80b0fc;
-}
-
 .snippet-buttons button {
-  background-color: #2372a3;
   border-style: none;
-  color: white;
   padding: 10px 24px;
   cursor: pointer;
   float: left;
@@ -58,7 +41,9 @@
   display: table;
 }
 
-.snippet-buttons button:focus { outline: none; }
+.snippet-buttons button:focus {
+  outline: none;
+}
 
 .snippet-buttons button:hover {
   opacity: 1.0;
@@ -88,18 +73,19 @@
   height: 500px;
 }
 
+/* Styles for the deep-link anchor button */
+
 .anchor-container {
   position: relative;
 }
 
 .anchor-button-overlay {
   position: absolute;
-  top: 0px;
+  top: 5px;
   right: 5px;
   height: 28px;
   width: 28px;
   transition: .3s ease;
-  background-color: #2372a3;
 }
 
 .anchor-button {
@@ -108,7 +94,17 @@
   cursor: pointer;
 }
 
+.anchor-button :focus {
+  outline: 0px;
+}
+
+.anchor-button :hover {
+  transition: .3s ease;
+  opacity: 0.65;
+}
+
 /* Styles for the copy-to-clipboard button */
+
 .copyable-container {
   position: relative;
 }
@@ -120,7 +116,6 @@
   height: 28px;
   width: 28px;
   transition: .3s ease;
-  background-color: #2372a3;
 }
 
 .copy-button {
@@ -135,12 +130,36 @@
 
 .copy-button :hover {
   transition: .3s ease;
-  color: #222;
+  opacity: 1.0;
 }
 
 .copy-image {
   opacity: 0.65;
-  color: #2372a3;
   font-size: 28px;
   padding-top: 4px;
+  color: var(--main-hyperlinks-color);
+}
+
+/* Light/Dark theme modifications */
+
+.dark-theme .snippet-buttons button {
+  background-color: #133e59;
+  color: rgb(149, 149, 149);
+}
+
+.light-theme .snippet-buttons button {
+  background-color: #2372a3;
+  color: white;
+}
+
+.light-theme .snippet-container {
+  --main-hyperlinks-color: #005cc6;
+}
+
+.dark-theme .snippet-container {
+  background-color: rgb(30, 40, 51);
+}
+
+.light-theme .snippet-container {
+  background-color: rgb(215, 235, 252);
 }

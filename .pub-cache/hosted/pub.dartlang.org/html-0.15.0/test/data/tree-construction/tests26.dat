@@ -1,0 +1,313 @@
+#data
+<!DOCTYPE html><body><a href='#1'><nobr>1<nobr></a><br><a href='#2'><nobr>2<nobr></a><br><a href='#3'><nobr>3<nobr></a>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       href="#1"
+|       <nobr>
+|         "1"
+|       <nobr>
+|     <nobr>
+|       <br>
+|       <a>
+|         href="#2"
+|     <a>
+|       href="#2"
+|       <nobr>
+|         "2"
+|       <nobr>
+|     <nobr>
+|       <br>
+|       <a>
+|         href="#3"
+|     <a>
+|       href="#3"
+|       <nobr>
+|         "3"
+|       <nobr>
+
+#data
+<!DOCTYPE html><body><b><nobr>1<nobr></b><i><nobr>2<nobr></i>3
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|       <nobr>
+|         "1"
+|       <nobr>
+|     <nobr>
+|       <i>
+|     <i>
+|       <nobr>
+|         "2"
+|       <nobr>
+|     <nobr>
+|       "3"
+
+#data
+<!DOCTYPE html><body><b><nobr>1<table><nobr></b><i><nobr>2<nobr></i>3
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|       <nobr>
+|         "1"
+|         <nobr>
+|           <i>
+|         <i>
+|           <nobr>
+|             "2"
+|           <nobr>
+|         <nobr>
+|           "3"
+|         <table>
+
+#data
+<!DOCTYPE html><body><b><nobr>1<table><tr><td><nobr></b><i><nobr>2<nobr></i>3
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|       <nobr>
+|         "1"
+|         <table>
+|           <tbody>
+|             <tr>
+|               <td>
+|                 <nobr>
+|                   <i>
+|                 <i>
+|                   <nobr>
+|                     "2"
+|                   <nobr>
+|                 <nobr>
+|                   "3"
+
+#data
+<!DOCTYPE html><body><b><nobr>1<div><nobr></b><i><nobr>2<nobr></i>3
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|       <nobr>
+|         "1"
+|     <div>
+|       <b>
+|         <nobr>
+|         <nobr>
+|       <nobr>
+|         <i>
+|       <i>
+|         <nobr>
+|           "2"
+|         <nobr>
+|       <nobr>
+|         "3"
+
+#data
+<!DOCTYPE html><body><b><nobr>1<nobr></b><div><i><nobr>2<nobr></i>3
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|       <nobr>
+|         "1"
+|       <nobr>
+|     <div>
+|       <nobr>
+|         <i>
+|       <i>
+|         <nobr>
+|           "2"
+|         <nobr>
+|       <nobr>
+|         "3"
+
+#data
+<!DOCTYPE html><body><b><nobr>1<nobr><ins></b><i><nobr>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|       <nobr>
+|         "1"
+|       <nobr>
+|         <ins>
+|     <nobr>
+|       <i>
+|     <i>
+|       <nobr>
+
+#data
+<!DOCTYPE html><body><b><nobr>1<ins><nobr></b><i>2
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|       <nobr>
+|         "1"
+|         <ins>
+|       <nobr>
+|     <nobr>
+|       <i>
+|         "2"
+
+#data
+<!DOCTYPE html><body><b>1<nobr></b><i><nobr>2</i>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|       "1"
+|       <nobr>
+|     <nobr>
+|       <i>
+|     <i>
+|       <nobr>
+|         "2"
+
+#data
+<p><code x</code></p>
+
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <code>
+|         code=""
+|         x<=""
+|     <code>
+|       code=""
+|       x<=""
+|       "
+"
+
+#data
+<!DOCTYPE html><svg><foreignObject><p><i></p>a
+#errors
+45: End tag “p” seen, but there were open elements.
+41: Unclosed element “i”.
+46: End of file seen and there were open elements.
+35: Unclosed element “foreignObject”.
+20: Unclosed element “svg”.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg foreignObject>
+|         <p>
+|           <i>
+|         <i>
+|           "a"
+
+#data
+<!DOCTYPE html><table><tr><td><svg><foreignObject><p><i></p>a
+#errors
+56: End tag “p” seen, but there were open elements.
+52: Unclosed element “i”.
+57: End of file seen and there were open elements.
+46: Unclosed element “foreignObject”.
+31: Unclosed element “svg”.
+22: Unclosed element “table”.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <svg svg>
+|               <svg foreignObject>
+|                 <p>
+|                   <i>
+|                 <i>
+|                   "a"
+
+#data
+<!DOCTYPE html><math><mtext><p><i></p>a
+#errors
+38: End tag “p” seen, but there were open elements.
+34: Unclosed element “i”.
+39: End of file in a foreign namespace context.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mtext>
+|         <p>
+|           <i>
+|         <i>
+|           "a"
+
+#data
+<!DOCTYPE html><table><tr><td><math><mtext><p><i></p>a
+#errors
+53: End tag “p” seen, but there were open elements.
+49: Unclosed element “i”.
+54: End of file in a foreign namespace context.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <math math>
+|               <math mtext>
+|                 <p>
+|                   <i>
+|                 <i>
+|                   "a"
+
+#data
+<!DOCTYPE html><body><div><!/div>a
+#errors
+29: Bogus comment.
+34: End of file seen and there were open elements.
+26: Unclosed element “div”.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       <!-- /div -->
+|       "a"

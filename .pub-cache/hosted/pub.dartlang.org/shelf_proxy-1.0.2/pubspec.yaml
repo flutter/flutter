@@ -1,0 +1,16 @@
+name: shelf_proxy
+version: 1.0.2
+description: A shelf handler for proxying HTTP requests to another server.
+repository: https://github.com/dart-lang/shelf/tree/master/pkgs/shelf_proxy
+
+environment:
+  sdk: '>=2.14.0 <3.0.0'
+
+dependencies:
+  http: ^0.13.0
+  path: ^1.8.0
+  shelf: ^1.0.0
+
+dev_dependencies:
+  lints: ^1.0.0
+  test: ^1.6.0

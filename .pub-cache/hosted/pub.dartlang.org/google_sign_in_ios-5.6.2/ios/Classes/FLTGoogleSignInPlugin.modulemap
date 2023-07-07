@@ -1,0 +1,10 @@
+framework module google_sign_in_ios {
+  umbrella header "google_sign_in_ios-umbrella.h"
+
+  export *
+  module * { export * }
+
+  explicit module Test {
+    header "FLTGoogleSignInPlugin_Test.h"
+  }
+}

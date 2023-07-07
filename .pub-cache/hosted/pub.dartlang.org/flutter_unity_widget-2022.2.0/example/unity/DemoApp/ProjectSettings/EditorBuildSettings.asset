@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/FlutterUnityIntegration/Demo/Scenes/SampleScene.unity
+    guid: 1de23c438491149ecacfae4362bfe5d4
+  - enabled: 1
+    path: Assets/FlutterUnityIntegration/Demo/Scenes/scene_2.unity
+    guid: 78e45f16305ad48beb12bee6b4f6e23c
+  - enabled: 1
+    path: Assets/FlutterUnityIntegration/Demo/Scenes/NativeScene.unity
+    guid: 93c501e08eb4d4ac2a924b592f00449b
+  m_configObjects:
+    UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 8f5889365231748418ef46f4020bd9dd,
+      type: 2}
+    UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: 5719f42c4a6f041e8aa9588ee2976b7c,
+      type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 1356279c9d721447b97eebba41ddf775,
+      type: 2}

@@ -68,12 +68,12 @@
   "invalidDateRangeLabel": "დიაპაზონი არასწორია.",
   "dateOutOfRangeLabel": "დიაპაზონს მიღმაა.",
   "saveButtonLabel": "შენახვა",
-  "datePickerHelpText": "აირჩიეთ თარიღი",
-  "dateRangePickerHelpText": "აირჩიეთ დიაპაზონი",
+  "datePickerHelpText": "თარიღის არჩევა",
+  "dateRangePickerHelpText": "დიაპაზონის არჩევა",
   "calendarModeButtonLabel": "კალენდარზე გადართვა",
   "inputDateModeButtonLabel": "შეყვანაზე გადართვა",
-  "timePickerDialHelpText": "აირჩიეთ დრო",
-  "timePickerInputHelpText": "შეიყვანეთ დრო",
+  "timePickerDialHelpText": "დროის არჩევა",
+  "timePickerInputHelpText": "დროის შეყვანა",
   "timePickerHourLabel": "საათი",
   "timePickerMinuteLabel": "წუთი",
   "invalidTimeLabel": "შეიყვანეთ სწორი დრო",
@@ -128,5 +128,10 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "მენიუს ზოლის მენიუ"
+  "menuBarMenuLabel": "მენიუს ზოლის მენიუ",
+  "currentDateLabel": "დღეს",
+  "scrimLabel": "სკრიმი",
+  "bottomSheetLabel": "ქვედა ფურცელი",
+  "scrimOnTapHint": "$modalRouteContentName-ის დახურვა",
+  "keyboardKeyShift": "ცვლა"
 }

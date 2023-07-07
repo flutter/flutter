@@ -1,0 +1,15 @@
+name: flutter_screenutil
+description: A flutter plugin for adapting screen and font size.Guaranteed to look good on different models
+version: 5.7.0
+homepage: https://github.com/OpenFlutter/flutter_screenutil
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

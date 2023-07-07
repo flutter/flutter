@@ -1,0 +1,21 @@
+name: connectivity_for_web_integration_tests
+publish_to: none
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=2.2.0"
+
+dependencies:
+  connectivity_for_web:
+    path: ../
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  js: ^0.6.3
+  flutter_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter

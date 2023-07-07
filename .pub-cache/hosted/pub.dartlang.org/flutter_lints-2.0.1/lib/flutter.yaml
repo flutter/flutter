@@ -1,0 +1,19 @@
+# Recommended lints for Flutter apps, packages, and plugins.
+
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    - avoid_print
+    - avoid_unnecessary_containers
+    - avoid_web_libraries_in_flutter
+    - no_logic_in_create_state
+    - prefer_const_constructors
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - sized_box_for_whitespace
+    - sort_child_properties_last
+    - use_build_context_synchronously
+    - use_full_hex_values_for_flutter_colors
+    - use_key_in_widget_constructors

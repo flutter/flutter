@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
@@ -80,6 +82,64 @@ void main() {
         <String>[],
       );
     });
+  });
+
+const String packageConfig = '''
+{
+  "configVersion": 2,
+  "packages":[
+    {
+      "name": "my_package",
+      "rootUri": "file:///",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    }
+  ]
+}
+''';
+
+const String pubspecDotYaml = '''
+name: my_package
+''';
+
+  testUsingContext('Bundles material shaders on non-web platforms', () async {
+    final String shaderPath = globals.fs.path.join(
+      Cache.flutterRoot!,
+      'packages', 'flutter', 'lib', 'src', 'material', 'shaders', 'ink_sparkle.frag'
+    );
+    globals.fs.file(shaderPath).createSync(recursive: true);
+    globals.fs.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(packageConfig);
+    globals.fs.file('pubspec.yaml').writeAsStringSync(pubspecDotYaml);
+    final AssetBundle asset = AssetBundleFactory.instance.createBundle();
+
+    await asset.build(packagesPath: '.packages', targetPlatform: TargetPlatform.android_arm);
+
+    expect(asset.entries.keys, contains('shaders/ink_sparkle.frag'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.empty(),
+  });
+
+  testUsingContext('Does bundle material shaders on web platforms', () async {
+    final String shaderPath = globals.fs.path.join(
+      Cache.flutterRoot!,
+      'packages', 'flutter', 'lib', 'src', 'material', 'shaders', 'ink_sparkle.frag'
+    );
+    globals.fs.file(shaderPath).createSync(recursive: true);
+    globals.fs.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(packageConfig);
+    globals.fs.file('pubspec.yaml').writeAsStringSync(pubspecDotYaml);
+    final AssetBundle asset = AssetBundleFactory.instance.createBundle();
+
+    await asset.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript);
+
+    expect(asset.entries.keys, contains('shaders/ink_sparkle.frag'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.empty(),
   });
 }
 

@@ -1,0 +1,33 @@
+{
+    "name": "Dart Debug Extension",
+    "version": "1.30",
+    "minimum_chrome_version": "10.0",
+    "devtools_page": "devtools.html",
+    "manifest_version": 2,
+    "browser_action": {
+        "default_icon": "dart_grey.png"
+    },
+    "permissions": [
+        "debugger",
+        "tabs",
+        "webNavigation",
+        "http://*/*",
+        "https://*/*"
+    ],
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "detector.js"
+            ],
+            "run_at": "document_end"
+        }   
+    ]
+}

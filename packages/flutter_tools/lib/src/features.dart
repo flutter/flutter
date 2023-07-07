@@ -47,6 +47,9 @@ abstract class FeatureFlags {
   /// Whether fast single widget reloads are enabled.
   bool get isSingleWidgetReloadEnabled => false;
 
+  /// Whether WebAssembly compilation for Flutter Web is enabled.
+  bool get isFlutterWebWasmEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -64,119 +67,52 @@ const List<Feature> allFeatures = <Feature>[
   flutterIOSFeature,
   flutterFuchsiaFeature,
   flutterCustomDevicesFeature,
+  flutterWebWasm,
 ];
 
+/// All current Flutter feature flags that can be configured.
+///
+/// [Feature.configSetting] is not `null`.
+Iterable<Feature> get allConfigurableFeatures => allFeatures.where((Feature feature) => feature.configSetting != null);
+
 /// The [Feature] for flutter web.
-const Feature flutterWebFeature = Feature(
+const Feature flutterWebFeature = Feature.fullyEnabled(
   name: 'Flutter for web',
   configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for macOS desktop.
-const Feature flutterMacOSDesktopFeature = Feature(
+const Feature flutterMacOSDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for Linux desktop.
-const Feature flutterLinuxDesktopFeature = Feature(
+const Feature flutterLinuxDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for Windows desktop.
-const Feature flutterWindowsDesktopFeature = Feature(
+const Feature flutterWindowsDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for Android devices.
-const Feature flutterAndroidFeature = Feature(
+const Feature flutterAndroidFeature = Feature.fullyEnabled(
   name: 'Flutter for Android',
   configSetting: 'enable-android',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
-
 /// The [Feature] for iOS devices.
-const Feature flutterIOSFeature = Feature(
+const Feature flutterIOSFeature = Feature.fullyEnabled(
   name: 'Flutter for iOS',
   configSetting: 'enable-ios',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
 );
 
 /// The [Feature] for Fuchsia support.
@@ -218,6 +154,16 @@ const Feature singleWidgetReload = Feature(
   ),
 );
 
+/// Enabling WebAssembly compilation from `flutter build web`
+const Feature flutterWebWasm = Feature(
+  name: 'WebAssembly compilation from flutter build web',
+  environmentOverride: 'FLUTTER_WEB_WASM',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+);
+
 /// A [Feature] is a process for conditionally enabling tool features.
 ///
 /// All settings are optional, and if not provided will generally default to
@@ -237,6 +183,25 @@ class Feature {
     this.beta = const FeatureChannelSetting(),
     this.stable = const FeatureChannelSetting()
   });
+
+  /// Creates a [Feature] that is fully enabled across channels.
+  const Feature.fullyEnabled(
+      {required this.name,
+      this.environmentOverride,
+      this.configSetting,
+      this.extraHelpText})
+      : master = const FeatureChannelSetting(
+          available: true,
+          enabledByDefault: true,
+        ),
+        beta = const FeatureChannelSetting(
+          available: true,
+          enabledByDefault: true,
+        ),
+        stable = const FeatureChannelSetting(
+          available: true,
+          enabledByDefault: true,
+        );
 
   /// The user visible name for this feature.
   final String name;

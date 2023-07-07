@@ -39,8 +39,9 @@ Future<void> main(List<String> rawArgs) async {
 }
 
 Map<String, dynamic> loadBundle(File file) {
-  if (!FileSystemEntity.isFileSync(file.path))
+  if (!FileSystemEntity.isFileSync(file.path)) {
     exitWithError('Unable to find input file: ${file.path}');
+  }
   return json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 }
 
@@ -71,8 +72,9 @@ bool intentionallyOmitted(String key, Map<String, dynamic> bundle) {
 /// the same prefix and suffix "Other".
 bool isPluralVariation(String key, Map<String, dynamic> bundle) {
   final Match? pluralMatch = kPluralRegexp.firstMatch(key);
-  if (pluralMatch == null)
+  if (pluralMatch == null) {
     return false;
+  }
   final String prefix = pluralMatch[1]!;
   return bundle.containsKey('${prefix}Other');
 }

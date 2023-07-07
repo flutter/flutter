@@ -1,0 +1,29 @@
+name: url_launcher_ios
+description: iOS implementation of the url_launcher plugin.
+repository: https://github.com/flutter/plugins/tree/main/packages/url_launcher/url_launcher_ios
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+url_launcher%22
+version: 6.0.17
+
+environment:
+  sdk: ">=2.14.0 <3.0.0"
+  flutter: ">=2.8.0"
+
+flutter:
+  plugin:
+    implements: url_launcher
+    platforms:
+      ios:
+        pluginClass: FLTURLLauncherPlugin
+        dartPluginClass: UrlLauncherIOS
+
+dependencies:
+  flutter:
+    sdk: flutter
+  url_launcher_platform_interface: ^2.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.0.0
+  plugin_platform_interface: ^2.0.0
+  test: ^1.16.3

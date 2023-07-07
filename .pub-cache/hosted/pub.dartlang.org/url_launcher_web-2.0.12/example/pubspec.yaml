@@ -1,0 +1,22 @@
+name: regular_integration_tests
+publish_to: none
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=2.8.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  build_runner: ^2.1.1
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  mockito: ^5.0.0
+  url_launcher_web:
+    path: ../

@@ -1,0 +1,33 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+  language:
+    strict-raw-types: true
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_bool_literals_in_conditional_expressions
+    - avoid_classes_with_only_static_members
+    - avoid_returning_null
+    - avoid_returning_this
+    - avoid_unused_constructor_parameters
+    - cascade_invocations
+    - comment_references
+    - directives_ordering
+    - join_return_with_assignment
+    - no_adjacent_strings_in_list
+    - omit_local_variable_types
+    - only_throw_errors
+    - prefer_const_constructors
+    - prefer_interpolation_to_compose_strings
+    - prefer_single_quotes
+    - test_types_in_equals
+    - throw_in_finally
+    - unawaited_futures
+    - unnecessary_lambdas
+    - unnecessary_null_aware_assignments
+    - unnecessary_parenthesis
+    - unnecessary_statements

@@ -72,21 +72,6 @@ void main() {
     expect(difference.global, const Offset(40, 40));
   });
 
-  testWidgets('EagerGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        EagerGestureRecognizer(
-            kind: PointerDeviceKind.touch,
-            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
-  });
-
   group('PrimaryPointerGestureRecognizer', () {
     testGesture('cleans up state after winning arena', (GestureTester tester) {
       final List<String> resolutions = <String>[];

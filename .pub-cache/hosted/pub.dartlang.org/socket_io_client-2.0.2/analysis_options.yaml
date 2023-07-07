@@ -1,0 +1,18 @@
+include: package:pedantic/analysis_options.yaml
+
+analyzer:
+#   exclude:
+#     - path/to/excluded/files/**
+
+# Lint rules and documentation, see http://dart-lang.github.io/linter/lints
+linter:
+  rules:
+    unsafe_html: false
+    cancel_subscriptions: true
+    close_sinks: true
+    hash_and_equals: true
+    iterable_contains_unrelated_type: true
+    list_remove_unrelated_type: true
+    test_types_in_equals: true
+    unrelated_type_equality_checks: true
+    valid_regexps: true

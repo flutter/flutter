@@ -17,34 +17,16 @@ class MultidexProject extends Project {
     bool useSyntheticPackage = false,
   }) {
     this.dir = dir;
-    if (androidSettings != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'settings.gradle'), androidSettings);
-    }
-    if (androidBuild != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'build.gradle'), androidBuild);
-    }
-    if (androidLocalProperties != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
-    }
-    if (androidGradleProperties != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'gradle.properties'), androidGradleProperties);
-    }
-    if (appBuild != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'build.gradle'), appBuild);
-    }
-    if (appManifest != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), appManifest);
-    }
-    if (appStrings != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml'), appStrings);
-    }
-    if (appStyles != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'styles.xml'), appStyles);
-    }
-    if (appLaunchBackground != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'drawable', 'launch_background.xml'), appLaunchBackground);
-    }
-    if (includeFlutterMultiDexApplication && appMultidexApplication != null) {
+    writeFile(fileSystem.path.join(dir.path, 'android', 'settings.gradle'), androidSettings);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'build.gradle'), androidBuild);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'gradle.properties'), androidGradleProperties);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'build.gradle'), appBuild);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), appManifest);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml'), appStrings);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'styles.xml'), appStyles);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'drawable', 'launch_background.xml'), appLaunchBackground);
+    if (includeFlutterMultiDexApplication) {
       writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'java', fileSystem.path.join('io', 'flutter', 'app', 'FlutterMultiDexApplication.java')), appMultidexApplication);
     }
     return super.setUpIn(dir);
@@ -56,7 +38,7 @@ class MultidexProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.12.0-0 <3.0.0"
+    sdk: '>=3.0.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -128,7 +110,7 @@ class MultidexProject extends Project {
       project.evaluationDependsOn(':app')
   }
 
-  task clean(type: Delete) {
+  tasks.register("clean", Delete) {
       delete rootProject.buildDir
   }
   ''';

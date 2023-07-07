@@ -14,7 +14,7 @@ void main() {
     }
 
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.FloatingActionButtonExampleApp(),
     );
 
     final ThemeData theme = ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true);

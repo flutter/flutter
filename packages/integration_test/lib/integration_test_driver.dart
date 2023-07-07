@@ -35,7 +35,6 @@ Future<void> writeResponseData(
   String testOutputFilename = 'integration_response_data',
   String? destinationDirectory,
 }) async {
-  assert(testOutputFilename != null);
   destinationDirectory ??= testOutputsDirectory;
   await fs.directory(destinationDirectory).create(recursive: true);
   final File file = fs.file(path.join(
@@ -48,7 +47,7 @@ Future<void> writeResponseData(
 
 /// Adaptor to run an integration test using `flutter drive`.
 ///
-/// To an integration test `<test_name>.dart` using `flutter drive`, put a file named
+/// To run an integration test `<test_name>.dart` using `flutter drive`, put a file named
 /// `<test_name>_test.dart` in the app's `test_driver` directory:
 ///
 /// ```dart

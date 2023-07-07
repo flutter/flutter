@@ -53,7 +53,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-         'HostArtifact.engineDartBinary',
+         'Artifact.engineDartBinary',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -99,7 +99,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-         'HostArtifact.engineDartBinary',
+         'Artifact.engineDartBinary',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -145,7 +145,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-         'HostArtifact.engineDartBinary',
+         'Artifact.engineDartBinary',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -191,7 +191,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartBinary',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -200,7 +200,6 @@ void main() {
           '--no-print-incremental-dependencies',
           '-Ddart.vm.profile=true',
           '-Ddart.vm.product=false',
-          '--compact-async',
           '--no-link-platform',
           '--aot',
           '--tfa',
@@ -240,7 +239,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartBinary',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -249,7 +248,6 @@ void main() {
           '--no-print-incremental-dependencies',
           '-Ddart.vm.profile=false',
           '-Ddart.vm.product=true',
-          '--compact-async',
           '--no-link-platform',
           '--aot',
           '--tfa',
@@ -289,7 +287,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartBinary',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -341,7 +339,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartBinary',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',
@@ -391,7 +389,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: const <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartBinary',
           '--disable-dart-dev',
           'Artifact.frontendServerSnapshotForEngineDartSdk',
           '--sdk-root',

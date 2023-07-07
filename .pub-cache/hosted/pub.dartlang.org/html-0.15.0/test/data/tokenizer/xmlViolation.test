@@ -1,0 +1,22 @@
+{"xmlViolationTests": [
+
+{"description":"Non-XML character",
+"input":"a\uFFFFb",
+"ignoreErrorOrder":true,
+"output":["ParseError",["Character","a\uFFFDb"]]},
+
+{"description":"Non-XML space",
+"input":"a\u000Cb",
+"ignoreErrorOrder":true,
+"output":[["Character","a b"]]},
+
+{"description":"Double hyphen in comment",
+"input":"<!-- foo -- bar -->",
+"output":["ParseError",["Comment"," foo - - bar "]]},
+
+{"description":"FF between attributes",
+"input":"<a b=''\u000Cc=''>",
+"output":[["StartTag","a",{"b":"","c":""}]]}
+]}
+
+

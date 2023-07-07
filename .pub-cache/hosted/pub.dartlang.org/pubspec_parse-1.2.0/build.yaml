@@ -1,0 +1,25 @@
+# Read about `build.yaml` at https://pub.dev/packages/build_config
+# To update generated code, run `pub run build_runner build`
+targets:
+  $default:
+    builders:
+      json_serializable:
+        generate_for:
+          - lib/src/pubspec.dart
+          - lib/src/dependency.dart
+        options:
+          any_map: true
+          checked: true
+          create_to_json: false
+          field_rename: snake
+
+      # The end-user of a builder which applies "source_gen|combining_builder"
+      # may configure the builder to ignore specific lints for their project
+      source_gen|combining_builder:
+        options:
+          ignore_for_file:
+          - deprecated_member_use_from_same_package
+          - lines_longer_than_80_chars
+          - require_trailing_commas
+          # https://github.com/google/json_serializable.dart/issues/945
+          - unnecessary_cast

@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "terser": "^4.2.1"
+  },
+  "scripts": {
+    "minify": "node tool/minify.js"
+  }
+}

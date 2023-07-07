@@ -1,0 +1,35 @@
+name: win32_explorer
+description: Drive explorer, built with Flutter
+version: 1.1.0
+
+environment:
+  sdk: '>=2.17.0 <3.0.0'
+
+dependencies:
+  ffi: '>=1.2.1 <3.0.0'
+  flutter:
+    sdk: flutter
+  font_awesome_flutter: ^10.1.0
+  menubar:
+    git:
+      url: https://github.com/google/flutter-desktop-embedding.git
+      path: plugins/menubar
+  path_provider: ^2.0.8
+  win32:
+    path: ../../
+
+dev_dependencies:
+  lints: ^2.0.0
+
+## This package is not intended for publishing; it's just an example.
+publish_to: none
+
+# Because we want to test that path_provider works with the current tip of tree
+# build of Win32, we set a dependency override here. Otherwise path_provider
+# will depend on the win32 release published to pub.dev. 
+dependency_overrides:
+  win32:
+    path: ../../
+
+flutter:
+  uses-material-design: true  

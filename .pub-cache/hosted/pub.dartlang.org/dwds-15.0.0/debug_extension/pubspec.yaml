@@ -1,0 +1,31 @@
+name: extension
+publish_to: none
+version: 1.30.0
+homepage: https://github.com/dart-lang/webdev
+description: >-
+  A chrome extension for Dart debugging.
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  async: ^2.3.0
+  collection: ^1.15.0
+  js: ^0.6.1+1
+  pub_semver: ^2.0.0
+  sse: ^4.1.0
+  web_socket_channel: ^2.0.0
+
+dev_dependencies:
+  build: ^2.0.0
+  build_web_compilers: ^3.0.0
+  build_runner: ^2.0.6
+  built_collection: ^5.0.0
+  dwds: ^11.0.0
+  webdev: ^2.0.0
+
+dependency_overrides:
+  webdev:
+    path: ../../webdev
+  dwds:
+    path: ..

@@ -1,0 +1,15 @@
+# See https://pub.dev/packages/mono_repo for details
+stages:
+  - analyzer_and_format:
+    - group:
+      - format
+      - analyze: --fatal-infos .
+      sdk: dev
+  - unit_test:
+    - test:
+      sdk:
+        - stable
+        - dev
+      os:
+        - windows
+        - linux

@@ -1,0 +1,17 @@
+# Copyright 2020 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: process_runner_example
+version: 2.0.0
+description: A an example for process_runner.
+homepage: https://github.com/google/process_runner/example
+publish_to: none
+
+dependencies:
+  args: ^2.3.0
+  process_runner:
+    path: ..
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io' as io;
 
@@ -15,29 +13,33 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/pre_run_validator.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_devices.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
 void main() {
   group('Flutter Command', () {
-    FakeCache cache;
-    TestUsage usage;
-    FakeClock clock;
-    FakeProcessInfo processInfo;
-    MemoryFileSystem fileSystem;
-    FakeProcessManager processManager;
-    PreRunValidator preRunValidator;
+    late FakeCache cache;
+    late TestUsage usage;
+    late FakeClock clock;
+    late FakeProcessInfo processInfo;
+    late MemoryFileSystem fileSystem;
+    late FakeProcessManager processManager;
+    late PreRunValidator preRunValidator;
 
     setUpAll(() {
       Cache.flutterRoot = '/path/to/sdk/flutter';
@@ -245,7 +247,7 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
-        }
+        },
       );
       await expectLater(
         () => flutterCommand.run(),
@@ -323,9 +325,9 @@ void main() {
     });
 
     group('signals tests', () {
-      FakeIoProcessSignal mockSignal;
-      ProcessSignal signalUnderTest;
-      StreamController<io.ProcessSignal> signalController;
+      late FakeIoProcessSignal mockSignal;
+      late ProcessSignal signalUnderTest;
+      late StreamController<io.ProcessSignal> signalController;
 
       setUp(() {
         mockSignal = FakeIoProcessSignal();
@@ -349,7 +351,7 @@ void main() {
           commandFunction: () async {
             final Completer<void> c = Completer<void>();
             await c.future;
-            return null; // unreachable
+            throw UnsupportedError('Unreachable');
           }
         );
 
@@ -397,7 +399,7 @@ void main() {
           checkLockCompleter.complete();
           final Completer<void> c = Completer<void>();
           await c.future;
-          return null; // unreachable
+          throw UnsupportedError('Unreachable');
         });
 
         unawaited(flutterCommand.run());
@@ -453,7 +455,7 @@ void main() {
       final FlutterCommandResult commandResult = FlutterCommandResult(
         ExitStatus.success,
         // nulls should be cleaned up.
-        timingLabelParts: <String> ['blah1', 'blah2', null, 'blah3'],
+        timingLabelParts: <String?> ['blah1', 'blah2', null, 'blah3'],
         endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500),
       );
 
@@ -670,6 +672,34 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
+
+    group('findTargetDevice', () {
+      final FakeDevice device1 = FakeDevice('device1', 'device1');
+      final FakeDevice device2 = FakeDevice('device2', 'device2');
+
+      testUsingContext('no device found', () async {
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final Device? device = await flutterCommand.findTargetDevice();
+        expect(device, isNull);
+      });
+
+      testUsingContext('finds single device', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final Device? device = await flutterCommand.findTargetDevice();
+        expect(device, device1);
+      });
+
+      testUsingContext('finds multiple devices', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
+        testDeviceManager.specifiedDeviceId = 'all';
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final Device? device = await flutterCommand.findTargetDevice();
+        expect(device, isNull);
+        expect(testLogger.statusText, contains(UserMessages().flutterSpecifyDevice));
+      });
+    });
   });
 }
 
@@ -700,7 +730,7 @@ class FakeTargetCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  String cachedTargetFile;
+  String? cachedTargetFile;
 
   @override
   String get description => '';
@@ -758,7 +788,7 @@ class FakeProcessInfo extends Fake implements ProcessInfo {
 }
 
 class FakeIoProcessSignal extends Fake implements io.ProcessSignal {
-  Stream<io.ProcessSignal> stream;
+  late Stream<io.ProcessSignal> stream;
 
   @override
   Stream<io.ProcessSignal> watch() => stream;
@@ -778,8 +808,8 @@ class FakeCache extends Fake implements Cache {
 
 class FakeSignals implements Signals {
   FakeSignals({
-    this.subForSigTerm,
-    List<ProcessSignal> exitSignals,
+    required this.subForSigTerm,
+    required List<ProcessSignal> exitSignals,
   }) : delegate = Signals.test(exitSignals: exitSignals);
 
   final ProcessSignal subForSigTerm;
@@ -813,15 +843,13 @@ class FakeClock extends Fake implements SystemClock {
 class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
-    PubContext context,
-    String directory,
-    bool skipIfAbsent = false,
+    required PubContext context,
+    required FlutterProject project,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
-    String flutterRootOverride,
+    String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async { }
 }

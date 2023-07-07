@@ -12,6 +12,9 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [Checkbox] widgets.
 ///
 /// Descendant widgets obtain the current [CheckboxThemeData] object using
@@ -127,6 +130,9 @@ class CheckboxThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static CheckboxThemeData lerp(CheckboxThemeData? a, CheckboxThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return CheckboxThemeData(
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       fillColor: MaterialStateProperty.lerp<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),
@@ -189,10 +195,13 @@ class CheckboxThemeData with Diagnosticable {
 
   // Special case because BorderSide.lerp() doesn't support null arguments
   static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
-    if (a == null && b == null) {
+    if (a == null || b == null) {
       return null;
     }
-    return BorderSide.lerp(a!, b!, t);
+    if (identical(a, b)) {
+      return a;
+    }
+    return BorderSide.lerp(a, b, t);
   }
 }
 

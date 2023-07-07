@@ -1,0 +1,19 @@
+targets:
+  $default:
+    sources:
+      include:
+        - lib/**
+        - web/**
+        # Some default includes that aren't really used here but will prevent
+        # false-negative warnings:
+        - $package$
+        - lib/$lib$
+      exclude:
+        - '**/.*/**'
+        - '**/build/**'
+    builders:
+      code_excerpter|code_excerpter:
+        enabled: true
+        generate_for:
+          - '**/*.dart'
+          - '**/*.html'

@@ -9,70 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
-class TestFocus extends StatefulWidget {
-  const TestFocus({
-    super.key,
-    this.debugLabel,
-    this.name = 'a',
-    this.autofocus = false,
-  });
-
-  final String? debugLabel;
-  final String name;
-  final bool autofocus;
-
-  @override
-  TestFocusState createState() => TestFocusState();
-}
-
-class TestFocusState extends State<TestFocus> {
-  late FocusNode focusNode;
-  late String _label;
-  bool built = false;
-
-  @override
-  void dispose() {
-    focusNode.removeListener(_updateLabel);
-    focusNode.dispose();
-    super.dispose();
-  }
-
-  String get label => focusNode.hasFocus ? '${widget.name.toUpperCase()} FOCUSED' : widget.name.toLowerCase();
-
-  @override
-  void initState() {
-    super.initState();
-    focusNode = FocusNode(debugLabel: widget.debugLabel);
-    _label = label;
-    focusNode.addListener(_updateLabel);
-  }
-
-  void _updateLabel() {
-    setState(() {
-      _label = label;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    built = true;
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).requestFocus(focusNode);
-      },
-      child: Focus(
-        autofocus: widget.autofocus,
-        focusNode: focusNode,
-        debugLabel: widget.debugLabel,
-        child: Text(
-          _label,
-          textDirection: TextDirection.ltr,
-        ),
-      ),
-    );
-  }
-}
-
 void main() {
   group('FocusScope', () {
     testWidgets('Can focus', (WidgetTester tester) async {
@@ -484,7 +420,7 @@ void main() {
       expect(find.text('b'), findsOneWidget);
     });
 
-    testWidgets('Adding a new FocusScope attaches the child it to its parent.', (WidgetTester tester) async {
+    testWidgets('Adding a new FocusScope attaches the child to its parent.', (WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final FocusScopeNode parentFocusScope = FocusScopeNode(debugLabel: 'Parent Scope Node');
       final FocusScopeNode childFocusScope = FocusScopeNode(debugLabel: 'Child Scope Node');
@@ -528,6 +464,138 @@ void main() {
       // Node keeps it's focus when moved to the new scope.
       expect(keyA.currentState!.focusNode.hasFocus, isTrue);
       expect(find.text('A FOCUSED'), findsOneWidget);
+    });
+
+    testWidgets('Setting parentNode determines focus tree hierarchy.', (WidgetTester tester) async {
+      final FocusNode topNode = FocusNode(debugLabel: 'Top');
+      final FocusNode parentNode = FocusNode(debugLabel: 'Parent');
+      final FocusNode childNode = FocusNode(debugLabel: 'Child');
+      final FocusNode insertedNode = FocusNode(debugLabel: 'Inserted');
+
+      await tester.pumpWidget(
+        FocusScope(
+          child: Focus.withExternalFocusNode(
+            focusNode: topNode,
+            child: Column(
+              children: <Widget>[
+                Focus.withExternalFocusNode(
+                  focusNode: parentNode,
+                  child: const SizedBox(),
+                ),
+                Focus.withExternalFocusNode(
+                  focusNode: childNode,
+                  parentNode: parentNode,
+                  autofocus: true,
+                  child: const SizedBox(),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(childNode.hasPrimaryFocus, isTrue);
+      expect(parentNode.hasFocus, isTrue);
+      expect(topNode.hasFocus, isTrue);
+
+      // Check that inserting a Focus in between doesn't reparent the child.
+      await tester.pumpWidget(
+        FocusScope(
+          child: Focus.withExternalFocusNode(
+            focusNode: topNode,
+            child: Column(
+              children: <Widget>[
+                Focus.withExternalFocusNode(
+                  focusNode: parentNode,
+                  child: const SizedBox(),
+                ),
+                Focus.withExternalFocusNode(
+                  focusNode: insertedNode,
+                  child: Focus.withExternalFocusNode(
+                    focusNode: childNode,
+                    parentNode: parentNode,
+                    autofocus: true,
+                    child: const SizedBox(),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(childNode.hasPrimaryFocus, isTrue);
+      expect(parentNode.hasFocus, isTrue);
+      expect(topNode.hasFocus, isTrue);
+      expect(insertedNode.hasFocus, isFalse);
+    });
+
+    testWidgets('Setting parentNode determines focus scope tree hierarchy.', (WidgetTester tester) async {
+      final FocusScopeNode topNode = FocusScopeNode(debugLabel: 'Top');
+      final FocusScopeNode parentNode = FocusScopeNode(debugLabel: 'Parent');
+      final FocusScopeNode childNode = FocusScopeNode(debugLabel: 'Child');
+      final FocusScopeNode insertedNode = FocusScopeNode(debugLabel: 'Inserted');
+
+      await tester.pumpWidget(
+        FocusScope.withExternalFocusNode(
+          focusScopeNode: topNode,
+          child: Column(
+            children: <Widget>[
+              FocusScope.withExternalFocusNode(
+                focusScopeNode: parentNode,
+                child: const SizedBox(),
+              ),
+              FocusScope.withExternalFocusNode(
+                focusScopeNode: childNode,
+                parentNode: parentNode,
+                child: const Focus(
+                  autofocus: true,
+                  child: SizedBox(),
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(childNode.hasFocus, isTrue);
+      expect(parentNode.hasFocus, isTrue);
+      expect(topNode.hasFocus, isTrue);
+
+      // Check that inserting a Focus in between doesn't reparent the child.
+      await tester.pumpWidget(
+        FocusScope.withExternalFocusNode(
+          focusScopeNode: topNode,
+          child: Column(
+            children: <Widget>[
+              FocusScope.withExternalFocusNode(
+                focusScopeNode: parentNode,
+                child: const SizedBox(),
+              ),
+              FocusScope.withExternalFocusNode(
+                focusScopeNode: insertedNode,
+                child: FocusScope.withExternalFocusNode(
+                  focusScopeNode: childNode,
+                  parentNode: parentNode,
+                  child: const Focus(
+                    autofocus: true,
+                    child: SizedBox(),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(childNode.hasFocus, isTrue);
+      expect(parentNode.hasFocus, isTrue);
+      expect(topNode.hasFocus, isTrue);
+      expect(insertedNode.hasFocus, isFalse);
     });
 
     // Arguably, this isn't correct behavior, but it is what happens now.
@@ -1605,6 +1673,7 @@ void main() {
       await pumpTest(traverseScope1: true);
       expect(scope1.traversalDescendants, equals(<FocusNode>[focus2, focus1, scope2]));
     });
+
     testWidgets('descendantsAreFocusable works as expected.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -1682,19 +1751,18 @@ void main() {
       await tester.pumpWidget(Focus(includeSemantics: false, child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
     });
 
     testWidgets('Focus updates the onKey handler when the widget updates', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusNode focusNode = FocusNode();
       bool? keyEventHandled;
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyCallback handleCallback = (FocusNode node, RawKeyEvent event) {
+      KeyEventResult handleCallback(FocusNode node, RawKeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
-      };
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyCallback ignoreCallback = (FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
+      }
+      KeyEventResult ignoreCallback(FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
       Focus focusWidget = Focus(
         onKey: ignoreCallback, // This one does nothing.
         focusNode: focusNode,
@@ -1739,13 +1807,11 @@ void main() {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusNode focusNode = FocusNode();
       bool? keyEventHandled;
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyEventCallback handleEventCallback = (FocusNode node, KeyEvent event) {
+      KeyEventResult handleEventCallback(FocusNode node, KeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
-      };
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyEventCallback ignoreEventCallback = (FocusNode node, KeyEvent event) => KeyEventResult.ignored;
+      }
+      KeyEventResult ignoreEventCallback(FocusNode node, KeyEvent event) => KeyEventResult.ignored;
       Focus focusWidget = Focus(
         onKeyEvent: ignoreEventCallback, // This one does nothing.
         focusNode: focusNode,
@@ -1790,20 +1856,16 @@ void main() {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusNode focusNode = FocusNode();
       bool? keyEventHandled;
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyCallback handleCallback = (FocusNode node, RawKeyEvent event) {
+      KeyEventResult handleCallback(FocusNode node, RawKeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
-      };
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyEventCallback handleEventCallback = (FocusNode node, KeyEvent event) {
+      }
+      KeyEventResult handleEventCallback(FocusNode node, KeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
-      };
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyCallback ignoreCallback = (FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyEventCallback ignoreEventCallback = (FocusNode node, KeyEvent event) => KeyEventResult.ignored;
+      }
+      KeyEventResult ignoreCallback(FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
+      KeyEventResult ignoreEventCallback(FocusNode node, KeyEvent event) => KeyEventResult.ignored;
       focusNode.onKey = ignoreCallback;
       focusNode.onKeyEvent = ignoreEventCallback;
       focusNode.descendantsAreFocusable = false;
@@ -1906,6 +1968,7 @@ void main() {
       expect(containerNode.hasFocus, isFalse);
       expect(unfocusableNode.hasFocus, isFalse);
     });
+
     // Regression test for https://github.com/flutter/flutter/issues/61700
     testWidgets("ExcludeFocus doesn't transfer focus to another descendant.", (WidgetTester tester) async {
       final FocusNode parentFocusNode = FocusNode(debugLabel: 'group');
@@ -1981,6 +2044,7 @@ void main() {
       await tester.pumpWidget(ExcludeFocus(child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/92693
@@ -2014,4 +2078,71 @@ void main() {
       expect(childFocusNode.canRequestFocus, isTrue);
     });
   });
+}
+
+class TestFocus extends StatefulWidget {
+  const TestFocus({
+    super.key,
+    this.debugLabel,
+    this.name = 'a',
+    this.autofocus = false,
+    this.parentNode,
+  });
+
+  final String? debugLabel;
+  final String name;
+  final bool autofocus;
+  final FocusNode? parentNode;
+
+  @override
+  TestFocusState createState() => TestFocusState();
+}
+
+class TestFocusState extends State<TestFocus> {
+  late FocusNode focusNode;
+  late String _label;
+  bool built = false;
+
+  @override
+  void dispose() {
+    focusNode.removeListener(_updateLabel);
+    focusNode.dispose();
+    super.dispose();
+  }
+
+  String get label => focusNode.hasFocus ? '${widget.name.toUpperCase()} FOCUSED' : widget.name.toLowerCase();
+
+  @override
+  void initState() {
+    super.initState();
+    focusNode = FocusNode(debugLabel: widget.debugLabel);
+    _label = label;
+    focusNode.addListener(_updateLabel);
+  }
+
+  void _updateLabel() {
+    setState(() {
+      _label = label;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    built = true;
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).requestFocus(focusNode);
+      },
+      child: Focus(
+        autofocus: widget.autofocus,
+        focusNode: focusNode,
+        parentNode: widget.parentNode,
+        debugLabel: widget.debugLabel,
+        child: Text(
+          _label,
+          textDirection: TextDirection.ltr,
+        ),
+      ),
+    );
+  }
 }

@@ -1,0 +1,16 @@
+name: shrine_images
+description: Image assets for the Material Components for Flutter codelabs based on an app called Shrine.
+version: 1.1.2
+author: Will Larche <larche@google.com>
+homepage: https://github.com/material-components/material-components-flutter-codelabs-packages
+
+environment:
+  sdk: ">=2.0.0-dev.28.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

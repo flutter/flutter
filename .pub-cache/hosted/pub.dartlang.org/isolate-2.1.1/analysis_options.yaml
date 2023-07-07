@@ -1,0 +1,13 @@
+include: package:lints/recommended.yaml
+analyzer:
+  errors:
+    deprecated_member_use_from_same_package: ignore # https://github.com/dart-lang/linter/issues/2703
+    void_checks: ignore # https://github.com/dart-lang/linter/issues/2685
+linter:
+  rules:
+    - avoid_unused_constructor_parameters
+    - cancel_subscriptions
+    - directives_ordering
+    - package_api_docs
+    - test_types_in_equals
+    - throw_in_finally

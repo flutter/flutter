@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -46,13 +44,13 @@ void main() {
   });
 
   group('analyze command', () {
-    FileSystem fileSystem;
-    Platform platform;
-    BufferLogger logger;
-    FakeProcessManager processManager;
-    Terminal terminal;
-    AnalyzeCommand command;
-    CommandRunner<void> runner;
+    late FileSystem fileSystem;
+    late Platform platform;
+    late BufferLogger logger;
+    late FakeProcessManager processManager;
+    late Terminal terminal;
+    late AnalyzeCommand command;
+    late CommandRunner<void> runner;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -72,6 +70,7 @@ void main() {
         processManager: processManager,
         terminal: terminal,
         allProjectValidators: <ProjectValidator>[],
+        suppressAnalytics: true,
       );
       runner = createTestCommandRunner(command);
 
@@ -90,13 +89,14 @@ void main() {
           const FakeCommand(
             // artifact paths are from Artifacts.test() and stable
             command: <String>[
-              'HostArtifact.engineDartSdkPath/bin/dart',
+              'Artifact.engineDartSdkPath/bin/dart',
               '--disable-dart-dev',
-              'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
               '--sdk',
-              'HostArtifact.engineDartSdkPath',
+              'Artifact.engineDartSdkPath',
+              '--suppress-analytics',
             ],
             exitCode: SIGABRT,
             stderr: stderr,
@@ -130,8 +130,8 @@ void main() {
     // Absolute paths
     expect(inRepo(<String>[tempDir.path], fileSystem), isFalse);
     expect(inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem), isFalse);
-    expect(inRepo(<String>[Cache.flutterRoot], fileSystem), isTrue);
-    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot, 'foo')], fileSystem), isTrue);
+    expect(inRepo(<String>[Cache.flutterRoot!], fileSystem), isTrue);
+    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot!, 'foo')], fileSystem), isTrue);
 
     // Relative paths
     fileSystem.currentDirectory = Cache.flutterRoot;
@@ -158,6 +158,7 @@ void main() {
         'startColumn': 4,
       },
       'message': 'Prefer final for variable declarations if they are not reassigned.',
+      'code': 'var foo = 123;',
       'hasFix': false,
     };
     expect(WrittenError.fromJson(json).toString(),
@@ -165,11 +166,11 @@ void main() {
   });
 }
 
-bool inRepo(List<String> fileList, FileSystem fileSystem) {
+bool inRepo(List<String>? fileList, FileSystem fileSystem) {
   if (fileList == null || fileList.isEmpty) {
     fileList = <String>[fileSystem.path.current];
   }
-  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot));
+  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot!));
   final String prefix = root + fileSystem.path.separator;
   for (String file in fileList) {
     file = fileSystem.path.normalize(fileSystem.path.absolute(file));

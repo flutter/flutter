@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'color_scheme.dart';
 import 'floating_action_button_theme.dart';
+import 'material_state.dart';
 import 'scaffold.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -61,7 +62,7 @@ enum _FloatingActionButtonType {
 ///
 /// {@tool dartpad}
 /// This example shows how to make an extended [FloatingActionButton] in a
-/// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
+/// [Scaffold], with a pink [backgroundColor], a thumbs up [Icon] and a
 /// [Text] label that reads "Approve".
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
@@ -126,10 +127,6 @@ class FloatingActionButton extends StatelessWidget {
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
-       assert(mini != null),
-       assert(clipBehavior != null),
-       assert(isExtended != null),
-       assert(autofocus != null),
        _floatingActionButtonType = mini ? _FloatingActionButtonType.small : _FloatingActionButtonType.regular,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
@@ -173,8 +170,6 @@ class FloatingActionButton extends StatelessWidget {
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
        _floatingActionButtonType = _FloatingActionButtonType.small,
        mini = true,
        isExtended = false,
@@ -220,8 +215,6 @@ class FloatingActionButton extends StatelessWidget {
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
        _floatingActionButtonType = _FloatingActionButtonType.large,
        mini = false,
        isExtended = false,
@@ -272,9 +265,6 @@ class FloatingActionButton extends StatelessWidget {
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
-       assert(isExtended != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
        mini = false,
        _floatingActionButtonType = _FloatingActionButtonType.extended,
        child = icon,
@@ -500,7 +490,7 @@ class FloatingActionButton extends StatelessWidget {
   /// The text style for an extended [FloatingActionButton]'s label.
   ///
   /// If null, [FloatingActionButtonThemeData.extendedTextStyle] is used. If
-  /// that is also null, then [TextTheme.button] with a letter spacing of 1.2
+  /// that is also null, then [TextTheme.labelLarge] with a letter spacing of 1.2
   /// is used.
   final TextStyle? extendedTextStyle;
 
@@ -569,13 +559,10 @@ class FloatingActionButton extends StatelessWidget {
     switch(_floatingActionButtonType) {
       case _FloatingActionButtonType.regular:
         sizeConstraints = floatingActionButtonTheme.sizeConstraints ?? defaults.sizeConstraints!;
-        break;
       case _FloatingActionButtonType.small:
         sizeConstraints = floatingActionButtonTheme.smallSizeConstraints ?? defaults.smallSizeConstraints!;
-        break;
       case _FloatingActionButtonType.large:
         sizeConstraints = floatingActionButtonTheme.largeSizeConstraints ?? defaults.largeSizeConstraints!;
-        break;
       case _FloatingActionButtonType.extended:
         sizeConstraints = floatingActionButtonTheme.extendedSizeConstraints ?? defaults.extendedSizeConstraints!;
         final double iconLabelSpacing = extendedIconLabelSpacing ?? floatingActionButtonTheme.extendedIconLabelSpacing ?? 8.0;
@@ -598,12 +585,11 @@ class FloatingActionButton extends StatelessWidget {
             ),
           ),
         );
-        break;
     }
 
     Widget result = RawMaterialButton(
       onPressed: onPressed,
-      mouseCursor: mouseCursor,
+      mouseCursor: _EffectiveMouseCursor(mouseCursor, floatingActionButtonTheme.mouseCursor),
       elevation: elevation,
       focusElevation: focusElevation,
       hoverElevation: hoverElevation,
@@ -662,6 +648,26 @@ class FloatingActionButton extends StatelessWidget {
     properties.add(FlagProperty('isExtended', value: isExtended, ifTrue: 'extended'));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
+}
+
+// This MaterialStateProperty is passed along to RawMaterialButton which
+// resolves the property against MaterialState.pressed, MaterialState.hovered,
+// MaterialState.focused, MaterialState.disabled.
+class _EffectiveMouseCursor extends MaterialStateMouseCursor {
+  const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
+
+  final MouseCursor? widgetCursor;
+  final MaterialStateProperty<MouseCursor?>? themeCursor;
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states)
+      ?? themeCursor?.resolve(states)
+      ?? MaterialStateMouseCursor.clickable.resolve(states);
+  }
+
+  @override
+  String get debugDescription => 'MaterialStateMouseCursor(FloatActionButton)';
 }
 
 // This widget's size matches its child's size unless its constraints
@@ -773,7 +779,7 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
   @override double? get iconSize => _isLarge ? 36.0 : 24.0;
 
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
-  @override TextStyle? get extendedTextStyle => _theme.textTheme.button!.copyWith(letterSpacing: 1.2);
+  @override TextStyle? get extendedTextStyle => _theme.textTheme.labelLarge!.copyWith(letterSpacing: 1.2);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - FAB
@@ -783,7 +789,7 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_162
 
 class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   _FABDefaultsM3(this.context, this.type, this.hasChild)
@@ -829,13 +835,13 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   ShapeBorder? get shape {
     switch (type) {
       case _FloatingActionButtonType.regular:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
       case _FloatingActionButtonType.small:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0), bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
       case _FloatingActionButtonType.large:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0), bottomLeft: Radius.circular(28.0), bottomRight: Radius.circular(28.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
       case _FloatingActionButtonType.extended:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
      }
   }
 

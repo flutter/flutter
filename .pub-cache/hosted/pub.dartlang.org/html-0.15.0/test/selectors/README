@@ -1,0 +1,9 @@
+Contents of this folder are ported from
+https://github.com/w3c/web-platform-tests/tree/master/selectors-api
+
+It is based on commit 96c61ac7c21f7f37526d1c03c4c6087734524130
+
+It is used to test the implementation of querySelector/querySelectorAll.
+
+Not all code was ported; as the current implementation doesn't yet support
+all features of those methods.

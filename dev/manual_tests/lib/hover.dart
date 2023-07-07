@@ -11,24 +11,6 @@ void main() {
   ));
 }
 
-class DemoButton extends StatelessWidget {
-  const DemoButton({super.key, required this.name});
-
-  final String name;
-
-  void _handleOnPressed() {
-    print('Button $name pressed.');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () => _handleOnPressed(),
-      child: Text(name),
-    );
-  }
-}
-
 class HoverDemo extends StatefulWidget {
   const HoverDemo({super.key});
 
@@ -47,7 +29,7 @@ class _HoverDemoState extends State<HoverDemo> {
     );
 
     return DefaultTextStyle(
-      style: textTheme.headline4!,
+      style: textTheme.headlineMedium!,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Hover Demo'),

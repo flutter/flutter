@@ -1,0 +1,10 @@
+# Copyright 2021 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# in the LICENSE file.
+
+include: ../../../../analysis_options.yaml
+linter:
+  rules:
+    avoid_print: false
+    depend_on_referenced_packages: false
+    library_private_types_in_public_api: false

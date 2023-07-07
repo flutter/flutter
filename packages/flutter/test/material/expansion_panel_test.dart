@@ -310,37 +310,37 @@ void main() {
 
     await tester.pumpWidget(build(false, false, false));
     expect(tester.renderObjectList(find.byType(AnimatedSize)), hasLength(3));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 146.0, 800.0, 0.0));
 
     await tester.pump(const Duration(milliseconds: 200));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 146.0, 800.0, 0.0));
 
     await tester.pumpWidget(build(false, true, false));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 146.0, 800.0, 0.0));
 
     await tester.pump(kSizeAnimationDuration ~/ 2);
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     final Rect rect1 = tester.getRect(find.byType(AnimatedSize).at(1));
     expect(rect1.left, 0.0);
-    expect(rect1.top, inExclusiveRange(113.0, 113.0 + 16.0 + 32.0)); // 16.0 material gap, plus 16.0 top and bottom margins added to the header
+    expect(rect1.top, inExclusiveRange(113.0, 113.0 + 16.0 + 24.0)); // 16.0 material gap, plus 12.0 top and bottom margins added to the header
     expect(rect1.width, 800.0);
     expect(rect1.height, inExclusiveRange(0.0, 100.0));
     final Rect rect2 = tester.getRect(find.byType(AnimatedSize).at(2));
-    expect(rect2, Rect.fromLTWH(0.0, rect1.bottom + 16.0 + 56.0, 800.0, 0.0)); // the 16.0 comes from the MaterialGap being introduced, the 56.0 is the header height.
+    expect(rect2, Rect.fromLTWH(0.0, rect1.bottom + 16.0 + 48.0, 800.0, 0.0)); // the 16.0 comes from the MaterialGap being introduced, the 48.0 is the header height.
 
     await tester.pumpWidget(build(false, false, false));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
 
     await tester.pumpWidget(build(false, false, true));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
 
@@ -348,14 +348,14 @@ void main() {
     await tester.pump();
     await tester.pump();
     await tester.pump();
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
 
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
   });
 
   testWidgets('Radio mode has max of one panel open at a time',  (WidgetTester tester) async {
@@ -1286,7 +1286,7 @@ void main() {
     // No padding applied to closed header
     RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     expect(box.size.height, equals(48.0)); // _kPanelHeaderCollapsedHeight
-    expect(box.size.width, equals(736.0));
+    expect(box.size.width, equals(744.0));
 
     // Now, expand the child panel.
     await tester.tap(find.byKey(firstPanelKey));
@@ -1298,8 +1298,57 @@ void main() {
 
     // Padding is added to expanded header
     box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
-    expect(box.size.height, equals(80.0)); // _kPanelHeaderCollapsedHeight + 32.0 (double default padding)
-    expect(box.size.width, equals(736.0));
+    expect(box.size.height, equals(80.0)); // _kPanelHeaderCollapsedHeight + 24.0 (double default padding)
+    expect(box.size.width, equals(744.0));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/5848.
+  testWidgets('The AnimatedContainer and IconButton have the same height of 48px', (WidgetTester tester) async {
+    const Key firstPanelKey = Key('firstPanelKey');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SingleChildScrollView(
+          child: SimpleExpansionPanelListTestWidget(
+            firstPanelKey: firstPanelKey,
+            canTapOnHeader: true,
+          ),
+        ),
+      ),
+    );
+
+    // The panel is closed.
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    // No padding applied to closed header.
+    final RenderBox boxOfContainer = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    final RenderBox boxOfIconButton = tester.renderObject(find.byType(IconButton).first);
+    expect(boxOfContainer.size.height, equals(boxOfIconButton.size.height));
+    expect(boxOfContainer.size.height, equals(48.0)); // Header should have 48px height according to Material 2 Design spec.
+  });
+
+  testWidgets("The AnimatedContainer's height is at least kMinInteractiveDimension", (WidgetTester tester) async {
+    const Key firstPanelKey = Key('firstPanelKey');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SingleChildScrollView(
+          child: SimpleExpansionPanelListTestWidget(
+            firstPanelKey: firstPanelKey,
+            canTapOnHeader: true,
+          ),
+        ),
+      ),
+    );
+
+    // The panel is closed
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    // No padding applied to closed header
+    final RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    expect(box.size.height, greaterThanOrEqualTo(kMinInteractiveDimension));
   });
 
   testWidgets('Correct custom header padding', (WidgetTester tester) async {
@@ -1324,7 +1373,7 @@ void main() {
     // No padding applied to closed header
     RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     expect(box.size.height, equals(48.0)); // _kPanelHeaderCollapsedHeight
-    expect(box.size.width, equals(736.0));
+    expect(box.size.width, equals(744.0));
 
     // Now, expand the child panel.
     await tester.tap(find.byKey(firstPanelKey));
@@ -1337,7 +1386,7 @@ void main() {
     // Padding is added to expanded header
     box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     expect(box.size.height, equals(128.0)); // _kPanelHeaderCollapsedHeight + 80.0 (double padding)
-    expect(box.size.width, equals(736.0));
+    expect(box.size.width, equals(744.0));
   });
 
   testWidgets('ExpansionPanelList respects dividerColor', (WidgetTester tester) async {
@@ -1388,6 +1437,55 @@ void main() {
 
     // For the last DecoratedBox, we will have a Border.top with the provided dividerColor.
     expect(boxDecoration.border!.top.color, dividerColor);
+  });
+
+  testWidgets('ExpansionPanelList respects expandIconColor', (WidgetTester tester) async {
+    const Color expandIconColor = Colors.blue;
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList(
+          expandIconColor: expandIconColor,
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              canTapOnHeader: true,
+              body: const SizedBox.shrink(),
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const SizedBox.shrink();
+              }
+            )
+          ],
+        ),
+      ),
+    ));
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+
+    expect(expandIcon.color, expandIconColor);
+  });
+
+  testWidgets('ExpansionPanelList.radio respects expandIconColor', (WidgetTester tester) async {
+    const Color expandIconColor = Colors.blue;
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList.radio(
+          expandIconColor: expandIconColor,
+          children: <ExpansionPanelRadio>[
+            ExpansionPanelRadio(
+              canTapOnHeader: true,
+              body: const SizedBox.shrink(),
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const SizedBox.shrink();
+              },
+              value: true
+            )
+          ],
+        ),
+      ),
+    ));
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+
+    expect(expandIcon.color, expandIconColor);
   });
 
   testWidgets('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {

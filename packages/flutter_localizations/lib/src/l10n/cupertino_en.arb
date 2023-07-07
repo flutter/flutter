@@ -165,6 +165,11 @@
     "description": "The label for select-all buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
   },
 
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "@noSpellCheckReplacementsLabel": {
+    "description": "The label shown in the text selection context menu on iOS when a misspelled word is tapped but the spell checker found no reasonable fixes for it."
+  },
+
   "searchTextFieldPlaceholderLabel": "Search",
   "@searchTextFieldPlaceholderLabel": {
     "description": "The default placeholder label used in an iOS styled search bar."

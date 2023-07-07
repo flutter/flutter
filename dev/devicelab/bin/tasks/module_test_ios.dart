@@ -170,7 +170,11 @@ Future<void> main() async {
         '''
 dependencies:
   url_launcher: 6.0.20
+<<<<<<< HEAD
   android_alarm_manager: 0.4.5+11
+=======
+  android_alarm_manager: 2.0.2
+>>>>>>> 796c8ef79279f9c774545b3771238c3098dbefab
   google_sign_in_ios: 5.5.0
   $dartPluginName:
     path: ../$dartPluginName
@@ -437,7 +441,6 @@ end
         if ((await fileType(builtFlutterBinary)).contains('armv7')) {
           throw TaskResult.failure('Unexpected armv7 architecture slice in $builtFlutterBinary');
         }
-        await checkContainsBitcode(builtFlutterBinary);
 
         final String builtAppBinary = path.join(
           archivedAppPath,
@@ -449,7 +452,6 @@ end
         if ((await fileType(builtAppBinary)).contains('armv7')) {
           throw TaskResult.failure('Unexpected armv7 architecture slice in $builtAppBinary');
         }
-        await checkContainsBitcode(builtAppBinary);
 
         // The host app example builds plugins statically, url_launcher_ios.framework
         // should not exist.
@@ -457,6 +459,16 @@ end
           archivedAppPath,
           'Frameworks',
           'url_launcher_ios.framework',
+        ));
+
+        checkFileExists(path.join(
+          '${objectiveCBuildArchiveDirectory.path}.xcarchive',
+          'dSYMs',
+          'App.framework.dSYM',
+          'Contents',
+          'Resources',
+          'DWARF',
+          'App'
         ));
       });
 
@@ -503,6 +515,7 @@ end
                 <String>[
                   '-r',
                   '-9',
+                  '-q',
                   zipPath,
                   'result.xcresult',
                 ],
@@ -539,8 +552,7 @@ end
       );
 
       if (!xcodebuildOutput.contains('flutter --verbose --local-engine-src-path=bogus assemble') || // Verbose output
-          !xcodebuildOutput.contains('Unable to detect a Flutter engine build directory in bogus') ||
-          !xcodebuildOutput.contains('Command PhaseScriptExecution failed with a nonzero exit code')) {
+          !xcodebuildOutput.contains('Unable to detect a Flutter engine build directory in bogus')) {
         return TaskResult.failure('Host Objective-C app build succeeded though flutter script failed');
       }
 

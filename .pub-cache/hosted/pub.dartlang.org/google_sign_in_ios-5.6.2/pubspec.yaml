@@ -1,0 +1,36 @@
+name: google_sign_in_ios
+description: iOS implementation of the google_sign_in plugin.
+repository: https://github.com/flutter/packages/tree/main/packages/google_sign_in/google_sign_in_ios
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+google_sign_in%22
+version: 5.6.2
+
+environment:
+  sdk: ">=2.18.0 <4.0.0"
+  flutter: ">=3.3.0"
+
+flutter:
+  plugin:
+    implements: google_sign_in
+    platforms:
+      ios:
+        dartPluginClass: GoogleSignInIOS
+        pluginClass: FLTGoogleSignInPlugin
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_sign_in_platform_interface: ^2.2.0
+
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+# The example deliberately includes limited-use secrets.
+false_secrets:
+  - /example/ios/Runner/GoogleService-Info.plist
+  - /example/ios/RunnerTests/GoogleSignInTests.m
+  - /example/lib/main.dart

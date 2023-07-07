@@ -1,0 +1,48 @@
+verb: RecommendCafes
+recipe:
+  - verb: List
+    outputs: ["Cafe[]"]
+  - verb: Fetch
+    inputs: ["Cafe[]"]
+    outputs: ["CafeWithMenu[]"]
+  - verb: Flatten
+    inputs: ["CafeWithMenu[]"]
+    outputs: ["DishOffering[]"]
+  - verb: Score
+    inputs: ["DishOffering[]"]
+    outputs: ["DishOffering[]/Scored"]
+  - verb: Display
+    inputs: ["DishOffering[]/Scored"]
+tags:
+  booleans: [ true, false ]
+  dates:
+  - canonical: 2001-12-15T02:59:43.1Z
+  - iso8601: 2001-12-14t21:59:43.10-05:00
+  - spaced: 2001-12-14 21:59:43.10 -5
+  - date: 2002-12-14
+  numbers:
+  - int: 12345
+  - negative: -345
+  - floating-point: 345.678
+  - hexidecimal: 0x123abc
+  - exponential: 12.3015e+02
+  - octal: 0o14
+  strings:
+  - unicode: "Sosa did fine.\u263A"
+  - control: "\b1998\t1999\t2000\n"
+  - hex esc: "\x0d\x0a is \r\n"
+  - single: '"Howdy!" he cried.'
+  - quoted: ' # Not a ''comment''.'
+  - tie-fighter: '|\-*-/|'
+  - plain:
+      This unquoted scalar
+      spans many lines.
+
+  - quoted: "So does this
+      quoted scalar.\n"
+  - accomplishment: >
+      Mark set a major league
+      home run record in 1998.
+  - stats: |
+      65 Home Runs
+      0.278 Batting Average

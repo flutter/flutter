@@ -1,0 +1,56 @@
+syntax = "proto2";
+
+package benchmarks.google_message3;
+
+option cc_enable_arenas = true;
+option java_package = "com.google.protobuf.benchmarks";
+
+message Message11018 {
+}
+
+message Message10800 {
+  optional string field10808 = 1;
+  optional int64 field10809 = 2;
+  optional bool field10810 = 3;
+  optional float field10811 = 4;
+}
+
+message Message10802 {
+}
+
+message Message10748 {
+  optional string field10750 = 1;
+  optional int32 field10751 = 2;
+  optional int32 field10752 = 3;
+  optional int32 field10753 = 4;
+}
+
+message Message7966 {
+  optional string field7969 = 1;
+  optional bool field7970 = 2;
+}
+
+message Message708 {
+  optional .benchmarks.google_message3.Message741 field823 = 1;
+  repeated string field824 = 6;
+  optional string field825 = 2;
+  optional string field826 = 3;
+  repeated string field827 = 4;
+  repeated string field828 = 5;
+}
+
+message Message8942 {
+}
+
+message Message11011 {
+  required bytes field11752 = 1;
+  required bytes field11753 = 2;
+}
+
+message UnusedEmptyMessage {
+}
+
+message Message741 {
+  repeated string field936 = 1;
+}
+

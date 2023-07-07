@@ -24,7 +24,7 @@ class AnnotationEntry<T> {
   const AnnotationEntry({
     required this.annotation,
     required this.localPosition,
-  }) : assert(localPosition != null);
+  });
 
   /// The annotation object that is found.
   final T annotation;
@@ -72,6 +72,8 @@ class AnnotationResult<T> {
     return _entries.map((AnnotationEntry<T> entry) => entry.annotation);
   }
 }
+
+const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 
 /// A composited layer.
 ///
@@ -135,6 +137,17 @@ class AnnotationResult<T> {
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the display.
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
+  /// Creates an instance of Layer.
+  Layer() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterRenderingLibrary,
+        className: '$Layer',
+        object: this,
+      );
+    }
+  }
+
   final Map<int, VoidCallback> _callbacks = <int, VoidCallback>{};
   static int _nextCallbackId = 0;
 
@@ -155,9 +168,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     assert(delta != 0);
     _compositionCallbackCount += delta;
     assert(_compositionCallbackCount >= 0);
-    if (parent != null) {
-      parent!._updateSubtreeCompositionObserverCount(delta);
-    }
+    parent?._updateSubtreeCompositionObserverCount(delta);
   }
 
   void _fireCompositionCallbacks({required bool includeChildren}) {
@@ -167,6 +178,18 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   bool _debugMutationsLocked = false;
+
+  /// Whether or not this layer, or any child layers, can be rasterized with
+  /// [Scene.toImage] or [Scene.toImageSync].
+  ///
+  /// If `false`, calling the above methods may yield an image which is
+  /// incomplete.
+  ///
+  /// This value may change throughout the lifetime of the object, as the
+  /// child layers themselves are added or removed.
+  bool supportsRasterization() {
+    return true;
+  }
 
   /// Describes the clip that would be applied to contents of this layer,
   /// if any.
@@ -308,6 +331,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       _debugDisposed = true;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _engineLayer?.dispose();
     _engineLayer = null;
   }
@@ -518,7 +544,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// should search for annotations, or if the layer has its own annotations to
   /// add.
   ///
-  /// The default implementation simply returns `false`, which means neither
+  /// The default implementation always returns `false`, which means neither
   /// the layer nor its children has annotations, and the annotation search
   /// is not absorbed either (see below for explanation).
   ///
@@ -574,7 +600,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Returns null if no matching annotations are found.
   ///
-  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// By default this method calls [findAnnotations] with `onlyFirst:
   /// true` and returns the annotation of the first result. Prefer overriding
   /// [findAnnotations] instead of this method, because during an annotation
   /// search, only [findAnnotations] is recursively called, while custom
@@ -600,7 +626,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Returns a result with empty entries if no matching annotations are found.
   ///
-  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// By default this method calls [findAnnotations] with `onlyFirst:
   /// false` and returns the annotations of its result. Prefer overriding
   /// [findAnnotations] instead of this method, because during an annotation
   /// search, only [findAnnotations] is recursively called, while custom
@@ -622,9 +648,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   /// Override this method to upload this layer to the engine.
-  ///
-  /// Return the engine layer for retained rendering. When there's no
-  /// corresponding engine layer, null is returned.
   @protected
   void addToScene(ui.SceneBuilder builder);
 
@@ -866,8 +889,7 @@ class TextureLayer extends Layer {
     required this.textureId,
     this.freeze = false,
     this.filterQuality = ui.FilterQuality.low,
-  }) : assert(rect != null),
-       assert(textureId != null);
+  });
 
   /// Bounding rectangle of this layer.
   final Rect rect;
@@ -879,7 +901,7 @@ class TextureLayer extends Layer {
   ///
   /// This is used for resizing embedded Android views: when resizing there
   /// is a short period during which the framework cannot tell if the newest
-  /// texture frame has the previous or new size, to workaround this the
+  /// texture frame has the previous or new size; to work around this, the
   /// framework "freezes" the texture just before resizing the Android view and
   /// un-freezes it when it is certain that a frame with the new size is ready.
   final bool freeze;
@@ -914,8 +936,7 @@ class PlatformViewLayer extends Layer {
   PlatformViewLayer({
     required this.rect,
     required this.viewId,
-  }) : assert(rect != null),
-       assert(viewId != null);
+  });
 
   /// Bounding rectangle of this layer in the global coordinate space.
   final Rect rect;
@@ -924,6 +945,11 @@ class PlatformViewLayer extends Layer {
   ///
   /// A UIView with this identifier must have been created by [PlatformViewsService.initUiKitView].
   final int viewId;
+
+  @override
+  bool supportsRasterization() {
+    return false;
+  }
 
   @override
   void addToScene(ui.SceneBuilder builder) {
@@ -997,7 +1023,6 @@ class PerformanceOverlayLayer extends Layer {
 
   @override
   void addToScene(ui.SceneBuilder builder) {
-    assert(optionsMask != null);
     builder.addPerformanceOverlay(optionsMask, overlayRect);
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
     builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
@@ -1042,6 +1067,16 @@ class ContainerLayer extends Layer {
 
   /// Returns whether this layer has at least one child layer.
   bool get hasChildren => _firstChild != null;
+
+  @override
+  bool supportsRasterization() {
+    for (Layer? child = lastChild; child != null; child = child.previousSibling) {
+      if (!child.supportsRasterization()) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   /// Consider this layer as the root and build a scene (a tree of layers)
   /// in the engine.
@@ -1215,7 +1250,6 @@ class ContainerLayer extends Layer {
       child._nextSibling = null;
       assert(child.attached == attached);
       dropChild(child);
-      assert(child._parentHandle != null);
       child._parentHandle.layer = null;
       child = next;
     }
@@ -1278,7 +1312,6 @@ class ContainerLayer extends Layer {
   /// position.
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
-    assert(transform != null);
   }
 
   /// Returns the descendants of this layer in depth first order.
@@ -1359,7 +1392,6 @@ class OffsetLayer extends ContainerLayer {
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
-    assert(transform != null);
     transform.translate(offset.dx, offset.dy);
   }
 
@@ -1385,6 +1417,14 @@ class OffsetLayer extends ContainerLayer {
     properties.add(DiagnosticsProperty<Offset>('offset', offset));
   }
 
+  ui.Scene _createSceneForImage(Rect bounds, { double pixelRatio = 1.0 }) {
+    final ui.SceneBuilder builder = ui.SceneBuilder();
+    final Matrix4 transform = Matrix4.diagonal3Values(pixelRatio, pixelRatio, 1);
+    transform.translate(-(bounds.left + offset.dx), -(bounds.top + offset.dy));
+    builder.pushTransform(transform.storage);
+    return buildScene(builder);
+  }
+
   /// Capture an image of the current state of this layer and its children.
   ///
   /// The returned [ui.Image] has uncompressed raw RGBA bytes, will be offset
@@ -1397,27 +1437,54 @@ class OffsetLayer extends ContainerLayer {
   /// (the default) will give you a 1:1 mapping between logical pixels and the
   /// output pixels in the image.
   ///
+  /// This API functions like [toImageSync], except that it only returns after
+  /// rasterization is complete.
+  ///
   /// See also:
   ///
   ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage(Rect bounds, { double pixelRatio = 1.0 }) async {
-    assert(bounds != null);
-    assert(pixelRatio != null);
-    final ui.SceneBuilder builder = ui.SceneBuilder();
-    final Matrix4 transform = Matrix4.translationValues(
-      (-bounds.left  - offset.dx) * pixelRatio,
-      (-bounds.top - offset.dy) * pixelRatio,
-      0.0,
-    );
-    transform.scale(pixelRatio, pixelRatio);
-    builder.pushTransform(transform.storage);
-    final ui.Scene scene = buildScene(builder);
+    final ui.Scene scene = _createSceneForImage(bounds, pixelRatio: pixelRatio);
 
     try {
       // Size is rounded up to the next pixel to make sure we don't clip off
       // anything.
       return await scene.toImage(
+        (pixelRatio * bounds.width).ceil(),
+        (pixelRatio * bounds.height).ceil(),
+      );
+    } finally {
+      scene.dispose();
+    }
+  }
+
+  /// Capture an image of the current state of this layer and its children.
+  ///
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes, will be offset
+  /// by the top-left corner of [bounds], and have dimensions equal to the size
+  /// of [bounds] multiplied by [pixelRatio].
+  ///
+  /// The [pixelRatio] describes the scale between the logical pixels and the
+  /// size of the output image. It is independent of the
+  /// [dart:ui.FlutterView.devicePixelRatio] for the device, so specifying 1.0
+  /// (the default) will give you a 1:1 mapping between logical pixels and the
+  /// output pixels in the image.
+  ///
+  /// This API functions like [toImage], except that rasterization begins eagerly
+  /// on the raster thread and the image is returned before this is completed.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
+  ///  * [dart:ui.Scene.toImage] for more information about the image returned.
+  ui.Image toImageSync(Rect bounds, { double pixelRatio = 1.0 }) {
+    final ui.Scene scene = _createSceneForImage(bounds, pixelRatio: pixelRatio);
+
+    try {
+      // Size is rounded up to the next pixel to make sure we don't clip off
+      // anything.
+      return scene.toImageSync(
         (pixelRatio * bounds.width).ceil(),
         (pixelRatio * bounds.height).ceil(),
       );
@@ -1444,7 +1511,6 @@ class ClipRectLayer extends ContainerLayer {
     Clip clipBehavior = Clip.hardEdge,
   }) : _clipRect = clipRect,
        _clipBehavior = clipBehavior,
-       assert(clipBehavior != null),
        assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
@@ -1473,7 +1539,6 @@ class ClipRectLayer extends ContainerLayer {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
-    assert(value != null);
     assert(value != Clip.none);
     if (value != _clipBehavior) {
       _clipBehavior = value;
@@ -1492,7 +1557,6 @@ class ClipRectLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(clipRect != null);
-    assert(clipBehavior != null);
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1536,7 +1600,6 @@ class ClipRRectLayer extends ContainerLayer {
     Clip clipBehavior = Clip.antiAlias,
   }) : _clipRRect = clipRRect,
        _clipBehavior = clipBehavior,
-       assert(clipBehavior != null),
        assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
@@ -1561,7 +1624,6 @@ class ClipRRectLayer extends ContainerLayer {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
-    assert(value != null);
     assert(value != Clip.none);
     if (value != _clipBehavior) {
       _clipBehavior = value;
@@ -1580,7 +1642,6 @@ class ClipRRectLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(clipRRect != null);
-    assert(clipBehavior != null);
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1624,7 +1685,6 @@ class ClipPathLayer extends ContainerLayer {
     Clip clipBehavior = Clip.antiAlias,
   }) : _clipPath = clipPath,
        _clipBehavior = clipBehavior,
-       assert(clipBehavior != null),
        assert(clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
@@ -1649,7 +1709,6 @@ class ClipPathLayer extends ContainerLayer {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
-    assert(value != null);
     assert(value != Clip.none);
     if (value != _clipBehavior) {
       _clipBehavior = value;
@@ -1668,7 +1727,6 @@ class ClipPathLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(clipPath != null);
-    assert(clipBehavior != null);
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1739,13 +1797,14 @@ class ColorFilterLayer extends ContainerLayer {
 }
 
 /// A composite layer that applies an [ImageFilter] to its children.
-class ImageFilterLayer extends ContainerLayer {
+class ImageFilterLayer extends OffsetLayer {
   /// Creates a layer that applies an [ImageFilter] to its children.
   ///
   /// The [imageFilter] property must be non-null before the compositing phase
   /// of the pipeline.
   ImageFilterLayer({
     ui.ImageFilter? imageFilter,
+    super.offset,
   }) : _imageFilter = imageFilter;
 
   /// The image filter to apply to children.
@@ -1767,6 +1826,7 @@ class ImageFilterLayer extends ContainerLayer {
     assert(imageFilter != null);
     engineLayer = builder.pushImageFilter(
       imageFilter!,
+      offset: offset,
       oldLayer: _engineLayer as ui.ImageFilterEngineLayer?,
     );
     addChildrenToScene(builder);
@@ -1861,7 +1921,6 @@ class TransformLayer extends OffsetLayer {
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
-    assert(transform != null);
     assert(_lastEffectiveTransform != null || this.transform != null);
     if (_lastEffectiveTransform == null) {
       transform.multiply(this.transform!);
@@ -2171,7 +2230,6 @@ class PhysicalModelLayer extends ContainerLayer {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsAddToScene();
@@ -2231,7 +2289,6 @@ class PhysicalModelLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(clipPath != null);
-    assert(clipBehavior != null);
     assert(elevation != null);
     assert(color != null);
     assert(shadowColor != null);
@@ -2339,7 +2396,9 @@ class LayerLink {
   Size? leaderSize;
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    return '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+  }
 }
 
 /// A composited layer that can be followed by a [FollowerLayer].
@@ -2356,7 +2415,7 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({ required LayerLink link, Offset offset = Offset.zero }) : assert(link != null), _link = link, _offset = offset;
+  LeaderLayer({ required LayerLink link, Offset offset = Offset.zero }) : _link = link, _offset = offset;
 
   /// The object with which this layer should register.
   ///
@@ -2365,7 +2424,6 @@ class LeaderLayer extends ContainerLayer {
   LayerLink get link => _link;
   LayerLink _link;
   set link(LayerLink value) {
-    assert(value != null);
     if (_link == value) {
       return;
     }
@@ -2386,7 +2444,6 @@ class LeaderLayer extends ContainerLayer {
   Offset get offset => _offset;
   Offset _offset;
   set offset(Offset value) {
-    assert(value != null);
     if (value == _offset) {
       return;
     }
@@ -2415,12 +2472,13 @@ class LeaderLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder) {
-    assert(offset != null);
     if (offset != Offset.zero) {
       engineLayer = builder.pushTransform(
         Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
+    } else {
+      engineLayer = null;
     }
     addChildrenToScene(builder);
     if (offset != Offset.zero) {
@@ -2468,23 +2526,18 @@ class FollowerLayer extends ContainerLayer {
   /// The [unlinkedOffset], [linkedOffset], and [showWhenUnlinked] properties
   /// must be non-null before the compositing phase of the pipeline.
   FollowerLayer({
-    required LayerLink link,
+    required this.link,
     this.showWhenUnlinked = true,
     this.unlinkedOffset = Offset.zero,
     this.linkedOffset = Offset.zero,
-  }) : assert(link != null), _link = link;
+  });
 
   /// The link to the [LeaderLayer].
   ///
   /// The same object should be provided to a [LeaderLayer] that is earlier in
   /// the layer tree. When this layer is composited, it will apply a transform
   /// that moves its children to match the position of the [LeaderLayer].
-  LayerLink get link => _link;
-  set link(LayerLink value) {
-    assert(value != null);
-    _link = value;
-  }
-  LayerLink _link;
+  LayerLink link;
 
   /// Whether to show the layer's contents when the [link] does not point to a
   /// [LeaderLayer].
@@ -2548,7 +2601,7 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
-    if (_link.leader == null) {
+    if (link.leader == null) {
       if (showWhenUnlinked!) {
         return super.findAnnotations(result, localPosition - unlinkedOffset!, onlyFirst: onlyFirst);
       }
@@ -2657,9 +2710,8 @@ class FollowerLayer extends ContainerLayer {
 
   /// Populate [_lastTransform] given the current state of the tree.
   void _establishTransform() {
-    assert(link != null);
     _lastTransform = null;
-    final LeaderLayer? leader = _link.leader;
+    final LeaderLayer? leader = link.leader;
     // Check to see if we are linked.
     if (leader == null) {
       return;
@@ -2723,9 +2775,8 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder) {
-    assert(link != null);
     assert(showWhenUnlinked != null);
-    if (_link.leader == null && !showWhenUnlinked!) {
+    if (link.leader == null && !showWhenUnlinked!) {
       _lastTransform = null;
       _lastOffset = null;
       _inverseDirty = true;
@@ -2757,7 +2808,6 @@ class FollowerLayer extends ContainerLayer {
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
-    assert(transform != null);
     if (_lastTransform != null) {
       transform.multiply(_lastTransform!);
     } else {
@@ -2803,9 +2853,7 @@ class AnnotatedRegionLayer<T extends Object> extends ContainerLayer {
     this.size,
     Offset? offset,
     this.opaque = false,
-  }) : assert(value != null),
-       assert(opaque != null),
-       offset = offset ?? Offset.zero;
+  }) : offset = offset ?? Offset.zero;
 
   /// The annotated object, which is added to the result if all restrictions are
   /// met.

@@ -1,0 +1,19 @@
+name: benchmark
+version: 0.0.1
+description: >
+  Benchmark, not for publishing.
+authors:
+- David Morgan <davidmorgan@google.com>
+homepage: https://github.com/google/built_collection.dart
+
+environment:
+  sdk: '>=2.9.0-18.0 <3.0.0'
+
+dev_dependencies:
+  build_runner: any
+  build_test: any
+  build_web_compilers: any
+
+dependency_overrides:
+  built_collection:
+    path: ..

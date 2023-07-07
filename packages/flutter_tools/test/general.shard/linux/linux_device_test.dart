@@ -67,7 +67,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
-    ).devices, <Device>[]);
+    ).devices(), <Device>[]);
   });
 
   testWithoutContext('LinuxDevice: no devices listed if Linux feature flag disabled', () async {
@@ -78,7 +78,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
-    ).devices, <Device>[]);
+    ).devices(), <Device>[]);
   });
 
   testWithoutContext('LinuxDevice: devices', () async {
@@ -89,7 +89,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
-    ).devices, hasLength(1));
+    ).devices(), hasLength(1));
   });
 
   testWithoutContext('LinuxDevice has well known id "linux"', () async {
@@ -154,9 +154,9 @@ void main() {
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
-    expect(device.executablePathForDevice(mockApp, BuildMode.debug), 'debug/executable');
-    expect(device.executablePathForDevice(mockApp, BuildMode.profile), 'profile/executable');
-    expect(device.executablePathForDevice(mockApp, BuildMode.release), 'release/executable');
+    expect(device.executablePathForDevice(mockApp, BuildInfo.debug), 'debug/executable');
+    expect(device.executablePathForDevice(mockApp, BuildInfo.profile), 'profile/executable');
+    expect(device.executablePathForDevice(mockApp, BuildInfo.release), 'release/executable');
   });
 }
 

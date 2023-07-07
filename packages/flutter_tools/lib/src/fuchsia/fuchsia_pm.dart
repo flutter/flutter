@@ -41,7 +41,7 @@ class FuchsiaPM {
   /// which describe the contents of the Fuchsia package. It must also contain
   /// two other entries:
   ///
-  ///     meta/$APPNAME.cmx=/path/to/cmx/on/the/host/$APPNAME.cmx
+  ///     meta/$APPNAME.cm=/path/to/cm/on/the/host/$APPNAME.cm
   ///     meta/package=/path/to/package/file/from/init/package
   ///
   /// where $APPNAME is the same [appName] passed to [init], and meta/package
@@ -232,12 +232,14 @@ class FuchsiaPackageServer {
     if (_process == null) {
       return false;
     }
-    return (await globals.fuchsiaSdk?.fuchsiaPM.publish(_repo, package.path)) ?? false;
+    return (await globals.fuchsiaSdk?.fuchsiaPM.publish(_repo, package.path)) ??
+        false;
   }
 
   @override
   String toString() {
-    final String p = (_process == null) ? 'stopped' : 'running ${_process?.pid}';
+    final String p =
+        (_process == null) ? 'stopped' : 'running ${_process?.pid}';
     return 'FuchsiaPackageServer at $_host:$_port ($p)';
   }
 }

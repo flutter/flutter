@@ -1,0 +1,35 @@
+# https://dart.dev/guides/language/analysis-options
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    - always_declare_return_types
+    - always_put_required_named_parameters_first
+    - avoid_bool_literals_in_conditional_expressions
+    - avoid_classes_with_only_static_members
+    - avoid_field_initializers_in_const_classes
+    - avoid_slow_async_io
+    - avoid_unused_constructor_parameters
+    - avoid_void_async
+    - cancel_subscriptions
+    - directives_ordering
+    - flutter_style_todos
+    - no_adjacent_strings_in_list
+    - package_api_docs
+    - prefer_asserts_in_initializer_lists
+    - prefer_const_constructors
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - prefer_final_in_for_each
+    - prefer_foreach
+    - prefer_if_elements_to_conditional_expressions
+    - prefer_single_quotes
+    - sort_constructors_first
+    - sort_pub_dependencies
+    - sort_unnamed_constructors_first
+    - test_types_in_equals
+    - throw_in_finally
+    - unnecessary_parenthesis
+    - unnecessary_statements
+    - use_super_parameters

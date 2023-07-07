@@ -16,87 +16,115 @@ import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
+import '../version.dart';
+import 'compiler_config.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
 
-Future<void> buildWeb(
-  FlutterProject flutterProject,
-  String target,
-  BuildInfo buildInfo,
-  bool csp,
-  String serviceWorkerStrategy,
-  bool sourceMaps,
-  bool nativeNullAssertions,
-  String? baseHref,
-  String? dart2jsOptimization,
-) async {
-  final bool hasWebPlugins = (await findPlugins(flutterProject))
-    .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-  final Directory outputDirectory = globals.fs.directory(getWebBuildDirectory());
-  outputDirectory.createSync(recursive: true);
+export 'compiler_config.dart';
 
-  // The migrators to apply to a Web project.
-  final List<ProjectMigrator> migrators = <ProjectMigrator>[
-    ScrubGeneratedPluginRegistrant(flutterProject.web, globals.logger),
-  ];
+class WebBuilder {
+  WebBuilder({
+    required Logger logger,
+    required BuildSystem buildSystem,
+    required Usage usage,
+    required FlutterVersion flutterVersion,
+    required FileSystem fileSystem,
+  })  : _logger = logger,
+        _buildSystem = buildSystem,
+        _flutterUsage = usage,
+        _flutterVersion = flutterVersion,
+        _fileSystem = fileSystem;
 
-  final ProjectMigration migration = ProjectMigration(migrators);
-  if (!migration.run()) {
-    throwToolExit('Failed to run all web migrations.');
-  }
+  final Logger _logger;
+  final BuildSystem _buildSystem;
+  final Usage _flutterUsage;
+  final FlutterVersion _flutterVersion;
+  final FileSystem _fileSystem;
 
-  final Status status = globals.logger.startProgress('Compiling $target for the Web...');
-  final Stopwatch sw = Stopwatch()..start();
-  try {
-    final BuildResult result = await globals.buildSystem.build(WebServiceWorker(globals.fs, globals.cache), Environment(
-      projectDir: globals.fs.currentDirectory,
-      outputDir: outputDirectory,
-      buildDir: flutterProject.directory
-        .childDirectory('.dart_tool')
-        .childDirectory('flutter_build'),
-      defines: <String, String>{
-        kTargetFile: target,
-        kHasWebPlugins: hasWebPlugins.toString(),
-        kCspMode: csp.toString(),
-        if (baseHref != null)
-          kBaseHref : baseHref,
-        kSourceMapsEnabled: sourceMaps.toString(),
-        kNativeNullAssertions: nativeNullAssertions.toString(),
-        if (serviceWorkerStrategy != null)
-         kServiceWorkerStrategy: serviceWorkerStrategy,
-        if (dart2jsOptimization != null)
-         kDart2jsOptimization: dart2jsOptimization,
-        ...buildInfo.toBuildSystemEnvironment(),
-      },
-      artifacts: globals.artifacts!,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      platform: globals.platform,
-      cacheDir: globals.cache.getRoot(),
-      engineVersion: globals.artifacts!.isLocalEngine
-        ? null
-        : globals.flutterVersion.engineRevision,
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      // Web uses a different Dart plugin registry.
-      // https://github.com/flutter/flutter/issues/80406
-      generateDartPluginRegistry: false,
-    ));
-    if (!result.success) {
-      for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
-          stackTrace: measurement.fatal
-            ? measurement.stackTrace
-            : null,
-        );
-      }
-      throwToolExit('Failed to compile application for the Web.');
+  Future<void> buildWeb(
+    FlutterProject flutterProject,
+    String target,
+    BuildInfo buildInfo,
+    String serviceWorkerStrategy, {
+    required WebCompilerConfig compilerConfig,
+    String? baseHref,
+    String? outputDirectoryPath,
+  }) async {
+    if (compilerConfig.isWasm) {
+      globals.logger.printBox(
+        title: 'Experimental feature',
+        '''
+  WebAssembly compilation is experimental.
+  See $kWasmPreviewUri for more information.''',
+      );
     }
-  } on Exception catch (err) {
-    throwToolExit(err.toString());
-  } finally {
-    status.stop();
+
+    final bool hasWebPlugins =
+        (await findPlugins(flutterProject)).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+    final Directory outputDirectory = outputDirectoryPath == null
+        ? _fileSystem.directory(getWebBuildDirectory(compilerConfig.isWasm))
+        : _fileSystem.directory(outputDirectoryPath);
+    outputDirectory.createSync(recursive: true);
+
+    // The migrators to apply to a Web project.
+    final List<ProjectMigrator> migrators = <ProjectMigrator>[
+      ScrubGeneratedPluginRegistrant(flutterProject.web, _logger),
+    ];
+
+    final ProjectMigration migration = ProjectMigration(migrators);
+    migration.run();
+
+    final Status status = _logger.startProgress('Compiling $target for the Web...');
+    final Stopwatch sw = Stopwatch()..start();
+    try {
+      final BuildResult result = await _buildSystem.build(
+          WebServiceWorker(_fileSystem, buildInfo.webRenderer, isWasm: compilerConfig.isWasm),
+          Environment(
+            projectDir: _fileSystem.currentDirectory,
+            outputDir: outputDirectory,
+            buildDir: flutterProject.directory.childDirectory('.dart_tool').childDirectory('flutter_build'),
+            defines: <String, String>{
+              kTargetFile: target,
+              kHasWebPlugins: hasWebPlugins.toString(),
+              if (baseHref != null) kBaseHref: baseHref,
+              kServiceWorkerStrategy: serviceWorkerStrategy,
+              ...compilerConfig.toBuildSystemEnvironment(),
+              ...buildInfo.toBuildSystemEnvironment(),
+            },
+            artifacts: globals.artifacts!,
+            fileSystem: _fileSystem,
+            logger: _logger,
+            processManager: globals.processManager,
+            platform: globals.platform,
+            usage: _flutterUsage,
+            cacheDir: globals.cache.getRoot(),
+            engineVersion: globals.artifacts!.isLocalEngine ? null : _flutterVersion.engineRevision,
+            flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
+            // Web uses a different Dart plugin registry.
+            // https://github.com/flutter/flutter/issues/80406
+            generateDartPluginRegistry: false,
+          ));
+      if (!result.success) {
+        for (final ExceptionMeasurement measurement in result.exceptions.values) {
+          _logger.printError(
+            'Target ${measurement.target} failed: ${measurement.exception}',
+            stackTrace: measurement.fatal ? measurement.stackTrace : null,
+          );
+        }
+        throwToolExit('Failed to compile application for the Web.');
+      }
+    } on Exception catch (err) {
+      throwToolExit(err.toString());
+    } finally {
+      status.stop();
+    }
+    _flutterUsage.sendTiming(
+      'build',
+      compilerConfig.isWasm ? 'dart2wasm' : 'dart2js',
+      Duration(milliseconds: sw.elapsedMilliseconds),
+    );
   }
-  globals.flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 /// Web rendering backend mode.
@@ -140,3 +168,5 @@ const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtif
     NullSafetyMode.unsound: HostArtifact.webPrecompiledSdkSourcemaps,
   },
 };
+
+const String kWasmPreviewUri = 'https://flutter.dev/wasm';

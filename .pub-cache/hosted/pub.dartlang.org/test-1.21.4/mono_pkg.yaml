@@ -1,0 +1,46 @@
+# See https://pub.dev/packages/mono_repo
+
+sdk:
+- dev
+- stable
+
+stages:
+- analyze_and_format:
+  - group:
+    - format
+    - analyze: --fatal-infos
+    sdk:
+    - dev
+    os:
+    - linux
+- unit_test:
+  - command: xvfb-run -s "-screen 0 1024x768x24" dart test --preset travis --total-shards 5 --shard-index 0
+  - command: xvfb-run -s "-screen 0 1024x768x24" dart test --preset travis --total-shards 5 --shard-index 1
+  - command: xvfb-run -s "-screen 0 1024x768x24" dart test --preset travis --total-shards 5 --shard-index 2
+  - command: xvfb-run -s "-screen 0 1024x768x24" dart test --preset travis --total-shards 5 --shard-index 3
+  - command: xvfb-run -s "-screen 0 1024x768x24" dart test --preset travis --total-shards 5 --shard-index 4
+  - command: dart test --preset travis --total-shards 5 --shard-index 0
+    os:
+    - windows
+    sdk:
+    - stable
+  - command: dart test --preset travis --total-shards 5 --shard-index 1
+    os:
+    - windows
+    sdk:
+    - stable
+  - command: dart test --preset travis --total-shards 5 --shard-index 2
+    os:
+    - windows
+    sdk:
+    - stable
+  - command: dart test --preset travis --total-shards 5 --shard-index 3
+    os:
+    - windows
+    sdk:
+    - stable
+  - command: dart test --preset travis --total-shards 5 --shard-index 4
+    os:
+    - windows
+    sdk:
+    - stable

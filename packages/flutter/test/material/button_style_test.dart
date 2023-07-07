@@ -14,6 +14,12 @@ void main() {
     expect(const ButtonStyle().hashCode, const ButtonStyle().copyWith().hashCode);
   });
 
+  test('ButtonStyle lerp special cases', () {
+    expect(ButtonStyle.lerp(null, null, 0), null);
+    const ButtonStyle data = ButtonStyle();
+    expect(identical(ButtonStyle.lerp(data, data, 0.5), data), true);
+  });
+
   test('ButtonStyle defaults', () {
     const ButtonStyle style = ButtonStyle();
     expect(style.textStyle, null);
@@ -27,6 +33,8 @@ void main() {
     expect(style.minimumSize, null);
     expect(style.fixedSize, null);
     expect(style.maximumSize, null);
+    expect(style.iconColor, null);
+    expect(style.iconSize, null);
     expect(style.side, null);
     expect(style.shape, null);
     expect(style.mouseCursor, null);
@@ -62,6 +70,8 @@ void main() {
       minimumSize: MaterialStatePropertyAll<Size>(Size(1.0, 2.0)),
       side: MaterialStatePropertyAll<BorderSide>(BorderSide(width: 4.0, color: Color(0xfffffff6))),
       maximumSize: MaterialStatePropertyAll<Size>(Size(100.0, 200.0)),
+      iconColor: MaterialStatePropertyAll<Color>(Color(0xfffffff6)),
+      iconSize: MaterialStatePropertyAll<double>(48.1),
       shape: MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
       mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden),
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -85,8 +95,10 @@ void main() {
       'padding: MaterialStatePropertyAll(EdgeInsets.all(1.0))',
       'minimumSize: MaterialStatePropertyAll(Size(1.0, 2.0))',
       'maximumSize: MaterialStatePropertyAll(Size(100.0, 200.0))',
-      'side: MaterialStatePropertyAll(BorderSide(Color(0xfffffff6), 4.0, BorderStyle.solid))',
-      'shape: MaterialStatePropertyAll(StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none)))',
+      'iconColor: MaterialStatePropertyAll(Color(0xfffffff6))',
+      'iconSize: MaterialStatePropertyAll(48.1)',
+      'side: MaterialStatePropertyAll(BorderSide(color: Color(0xfffffff6), width: 4.0))',
+      'shape: MaterialStatePropertyAll(StadiumBorder(BorderSide(width: 0.0, style: none)))',
       'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(forbidden))',
       'tapTargetSize: shrinkWrap',
       'animationDuration: 0:00:01.000000',
@@ -106,6 +118,8 @@ void main() {
     const MaterialStateProperty<Size> minimumSize = MaterialStatePropertyAll<Size>(Size(1, 2));
     const MaterialStateProperty<Size> fixedSize = MaterialStatePropertyAll<Size>(Size(3, 4));
     const MaterialStateProperty<Size> maximumSize = MaterialStatePropertyAll<Size>(Size(5, 6));
+    const MaterialStateProperty<Color> iconColor = MaterialStatePropertyAll<Color>(Color(0xfffffff6));
+    const MaterialStateProperty<double> iconSize = MaterialStatePropertyAll<double>(48.0);
     const MaterialStateProperty<BorderSide> side = MaterialStatePropertyAll<BorderSide>(BorderSide());
     const MaterialStateProperty<OutlinedBorder> shape = MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
     const MaterialStateProperty<MouseCursor> mouseCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
@@ -126,6 +140,8 @@ void main() {
       minimumSize: minimumSize,
       fixedSize: fixedSize,
       maximumSize: maximumSize,
+      iconColor: iconColor,
+      iconSize: iconSize,
       side: side,
       shape: shape,
       mouseCursor: mouseCursor,
@@ -149,6 +165,8 @@ void main() {
         minimumSize: minimumSize,
         fixedSize: fixedSize,
         maximumSize: maximumSize,
+        iconColor: iconColor,
+        iconSize: iconSize,
         side: side,
         shape: shape,
         mouseCursor: mouseCursor,

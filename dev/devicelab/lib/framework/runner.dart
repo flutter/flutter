@@ -39,6 +39,7 @@ Future<void> runTasks(
   String? luciBuilder,
   String? resultsPath,
   List<String>? taskArgs,
+  bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
   @visibleForTesting Function(String) print = print,
   @visibleForTesting List<String>? logs,
@@ -59,6 +60,7 @@ Future<void> runTasks(
         gitBranch: gitBranch,
         luciBuilder: luciBuilder,
         isolateParams: isolateParams,
+        useEmulator: useEmulator,
       );
 
       if (!result.succeeded) {
@@ -104,6 +106,7 @@ Future<TaskResult> rerunTask(
   String? resultsPath,
   String? gitBranch,
   String? luciBuilder,
+  bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   section('Running task "$taskName"');
@@ -116,6 +119,7 @@ Future<TaskResult> rerunTask(
     silent: silent,
     taskArgs: taskArgs,
     isolateParams: isolateParams,
+    useEmulator: useEmulator,
   );
 
   print('Task result:');
@@ -149,15 +153,27 @@ Future<TaskResult> runTask(
   bool terminateStrayDartProcesses = false,
   bool silent = false,
   String? localEngine,
+  String? localWebSdk,
   String? localEngineSrcPath,
   String? deviceId,
   List<String>? taskArgs,
+  bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
-  if (!file(taskExecutable).existsSync())
+  if (!file(taskExecutable).existsSync()) {
     throw 'Executable Dart file not found: $taskExecutable';
+  }
+
+  if (useEmulator) {
+    taskArgs ??= <String>[];
+    taskArgs
+      ..add('--android-emulator')
+      ..add('--browser-name=android-chrome');
+  }
+
+  stdout.writeln('Starting process for task: [$taskName]');
 
   final Process runner = await startProcess(
     dartBin,
@@ -166,6 +182,7 @@ Future<TaskResult> runTask(
       '--enable-vm-service=0', // zero causes the system to choose a free port
       '--no-pause-isolates-on-exit',
       if (localEngine != null) '-DlocalEngine=$localEngine',
+      if (localWebSdk != null) '-DlocalWebSdk=$localWebSdk',
       if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
       taskExecutable,
       ...?taskArgs,
@@ -189,12 +206,13 @@ Future<TaskResult> runTask(
       .transform<String>(const LineSplitter())
       .listen((String line) {
     if (!uri.isCompleted) {
-      final Uri? serviceUri = parseServiceUri(line, prefix: RegExp('(Observatory|The Dart VM service is) listening on '));
-      if (serviceUri != null)
+      final Uri? serviceUri = parseServiceUri(line, prefix: RegExp('The Dart VM service is listening on '));
+      if (serviceUri != null) {
         uri.complete(serviceUri);
+      }
     }
     if (!silent) {
-      stdout.writeln('[$taskName] [STDOUT] $line');
+      stdout.writeln('[${DateTime.now()}] [STDOUT] $line');
     }
   });
 
@@ -202,7 +220,7 @@ Future<TaskResult> runTask(
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) {
-    stderr.writeln('[$taskName] [STDERR] $line');
+    stderr.writeln('[${DateTime.now()}] [STDERR] $line');
   });
 
   try {
@@ -255,12 +273,14 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
       }
       final IsolateRef isolate = vm.isolates!.first;
       final Response response = await client.callServiceExtension('ext.cocoonRunnerReady', isolateId: isolate.id);
-      if (response.json!['response'] != 'ready')
+      if (response.json!['response'] != 'ready') {
         throw 'not ready yet';
+      }
       return ConnectionResult(client, isolate);
     } catch (error) {
-      if (stopwatch.elapsed > const Duration(seconds: 10))
+      if (stopwatch.elapsed > const Duration(seconds: 10)) {
         print('VM service still not ready after ${stopwatch.elapsed}: $error\nContinuing to retry...');
+      }
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
   }

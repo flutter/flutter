@@ -1,0 +1,23 @@
+debugAdapterProtocol.json is an unmodified copy of the DAP Specification,
+downloaded from:
+
+  https://raw.githubusercontent.com/microsoft/debug-adapter-protocol/gh-pages/debugAdapterProtocol.json
+
+The licence for this file is included below. This accompanying file is the
+version of the specification that was used to generate a portion of the Dart
+code used to support the protocol.
+
+To regenerate the generated code, run the script in "tool/dap/generate_all.dart"
+with no arguments. To download the latest version of the specification before
+regenerating the code, run the same script with the "--download" argument.
+
+---
+
+Copyright (c) Microsoft Corporation.
+ 
+All rights reserved. 
+
+Distributed under the following terms:
+
+1.	Documentation is licensed under the Creative Commons Attribution 3.0 United States License. Code is licensed under the MIT License.
+2.	This license does not grant you rights to use any trademarks or logos of Microsoft. For Microsoft’s general trademark guidelines, go to http://go.microsoft.com/fwlink/?LinkID=254653

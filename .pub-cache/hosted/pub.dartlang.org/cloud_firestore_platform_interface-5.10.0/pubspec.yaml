@@ -1,0 +1,25 @@
+name: cloud_firestore_platform_interface
+description: A common platform interface for the cloud_firestore plugin.
+version: 5.10.0
+homepage: https://github.com/firebase/flutterfire/tree/master/packages/cloud_firestore/cloud_firestore_platform_interface
+repository: https://github.com/firebase/flutterfire/tree/master/packages/cloud_firestore/cloud_firestore_platform_interface
+
+environment:
+  sdk: ">=2.16.0 <3.0.0"
+  flutter: ">=1.9.1+hotfix.5"
+
+dependencies:
+  _flutterfire_internals: ^1.0.11
+  collection: ^1.15.0
+  firebase_core: ^2.4.0
+  flutter:
+    sdk: flutter
+  meta: ^1.3.0
+  plugin_platform_interface: ^2.1.3
+
+
+dev_dependencies:
+  firebase_core_platform_interface: ^4.5.2
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.0.0

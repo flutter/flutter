@@ -1,0 +1,79 @@
+#data
+<!DOCTYPE html>&NotEqualTilde;
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "≂̸"
+
+#data
+<!DOCTYPE html>&NotEqualTilde;A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "≂̸A"
+
+#data
+<!DOCTYPE html>&ThickSpace;
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "  "
+
+#data
+<!DOCTYPE html>&ThickSpace;A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "  A"
+
+#data
+<!DOCTYPE html>&NotSubset;
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "⊂⃒"
+
+#data
+<!DOCTYPE html>&NotSubset;A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "⊂⃒A"
+
+#data
+<!DOCTYPE html>&Gopf;
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "𝔾"
+
+#data
+<!DOCTYPE html>&Gopf;A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "𝔾A"

@@ -1,0 +1,7 @@
+include: package:lint/analysis_options_package.yaml
+linter:
+  rules:
+    # Disable
+    avoid_positional_boolean_parameters: false
+    unsafe_html: false
+    avoid_web_libraries_in_flutter: false

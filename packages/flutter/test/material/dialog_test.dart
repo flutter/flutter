@@ -6,11 +6,17 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textScaleFactor = 1.0 }) {
+MaterialApp _buildAppWithDialog(
+  Widget dialog, {
+  ThemeData? theme,
+  double textScaleFactor = 1.0,
+  TraversalEdgeBehavior? traversalEdgeBehavior,
+}) {
   return MaterialApp(
     theme: theme,
     home: Material(
@@ -22,6 +28,7 @@ MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textSc
               onPressed: () {
                 showDialog<void>(
                   context: context,
+                  traversalEdgeBehavior: traversalEdgeBehavior,
                   builder: (BuildContext context) {
                     return MediaQuery(
                       data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
@@ -48,7 +55,7 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
 
 // What was the AlertDialog's ButtonBar when many of these tests were written,
 // is now a Padding widget with an OverflowBar child. The Padding widget's size
-// and location  match the original ButtonBar's size and location.
+// and location match the original ButtonBar's size and location.
 Finder _findButtonBar() {
   return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
 }
@@ -133,16 +140,67 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material material3Widget = _getMaterialFromDialog(tester);
-    expect(material3Widget.color, const Color(0xff424242));
+    expect(material3Widget.color, material3Theme.colorScheme.surface);
     expect(material3Widget.shape, _defaultM3DialogShape);
     expect(material3Widget.elevation, 6.0);
   });
 
+  testWidgets('Dialog.fullscreen Defaults', (WidgetTester tester) async {
+    const String dialogTextM2 = 'Fullscreen Dialog - M2';
+    const String dialogTextM3 = 'Fullscreen Dialog - M3';
+
+    await tester.pumpWidget(_buildAppWithDialog(
+      theme: material2Theme,
+      const Dialog.fullscreen(
+        child: Text(dialogTextM2),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(dialogTextM2), findsOneWidget);
+
+    Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.color, Colors.grey[800]);
+
+    // Try to dismiss the fullscreen dialog with the escape key.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.text(dialogTextM2), findsNothing);
+
+    await tester.pumpWidget(_buildAppWithDialog(
+      theme: material3Theme,
+      const Dialog.fullscreen(
+        child: Text(dialogTextM3),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(dialogTextM3), findsOneWidget);
+
+    materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.color, material3Theme.colorScheme.surface);
+
+    // Try to dismiss the fullscreen dialog with the escape key.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.text(dialogTextM3), findsNothing);
+  });
+
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
     const double customElevation = 12.0;
+    const Color shadowColor = Color(0xFF000001);
+    const Color surfaceTintColor = Color(0xFF000002);
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
       elevation: customElevation,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
     );
     await tester.pumpWidget(_buildAppWithDialog(dialog));
 
@@ -151,6 +209,8 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.elevation, customElevation);
+    expect(materialWidget.shadowColor, shadowColor);
+    expect(materialWidget.surfaceTintColor, surfaceTintColor);
   });
 
   testWidgets('Custom Title Text Style', (WidgetTester tester) async {
@@ -1453,7 +1513,7 @@ void main() {
         ElevatedButton(
           key: key1,
           onPressed: () {},
-          child: const Text('Loooooooooog button 1'),
+          child: const Text('Loooooooooong button 1'),
         ),
         ElevatedButton(
           key: key2,
@@ -2445,6 +2505,7 @@ void main() {
       label: 'Custom label',
       flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
+    semantics.dispose();
   });
 
   testWidgets('DialogRoute is state restorable', (WidgetTester tester) async {
@@ -2528,11 +2589,129 @@ void main() {
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, (800 - 20) / 2);
     expect(tester.getTopRight(find.byKey(actionKey)).dx, (800 - 20) / 2 + 20);
   });
+
+  testWidgets('Uses closed loop focus traversal', (WidgetTester tester) async {
+    final FocusNode okNode = FocusNode();
+    final FocusNode cancelNode = FocusNode();
+
+    Future<bool> nextFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const NextFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    Future<bool> previousFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const PreviousFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    final AlertDialog dialog = AlertDialog(
+      content: const Text('Test dialog'),
+      actions: <Widget>[
+        TextButton(
+          focusNode: okNode,
+          onPressed: () {},
+          child: const Text('OK'),
+        ),
+        TextButton(
+          focusNode: cancelNode,
+          onPressed: () {},
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Start at OK
+    okNode.requestFocus();
+    await tester.pump();
+    expect(okNode.hasFocus, true);
+    expect(cancelNode.hasFocus, false);
+
+    // OK -> Cancel
+    expect(await nextFocus(), true);
+    expect(okNode.hasFocus, false);
+    expect(cancelNode.hasFocus, true);
+
+    // Cancel -> OK
+    expect(await nextFocus(), true);
+    expect(okNode.hasFocus, true);
+    expect(cancelNode.hasFocus, false);
+
+    // Cancel <- OK
+    expect(await previousFocus(), true);
+    expect(okNode.hasFocus, false);
+    expect(cancelNode.hasFocus, true);
+
+    // OK <- Cancel
+    expect(await previousFocus(), true);
+    expect(okNode.hasFocus, true);
+    expect(cancelNode.hasFocus, false);
+  });
+
+  testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {
+    final FocusNode okNode = FocusNode();
+    final FocusNode cancelNode = FocusNode();
+
+    Future<bool> nextFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const NextFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    final AlertDialog dialog = AlertDialog(
+      content: const Text('Test dialog'),
+      actions: <Widget>[
+        TextButton(
+          focusNode: okNode,
+          onPressed: () {},
+          child: const Text('OK'),
+        ),
+        TextButton(
+          focusNode: cancelNode,
+          onPressed: () {},
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog, traversalEdgeBehavior: TraversalEdgeBehavior.leaveFlutterView));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Start at OK
+    okNode.requestFocus();
+    await tester.pump();
+    expect(okNode.hasFocus, true);
+    expect(cancelNode.hasFocus, false);
+
+    // OK -> Cancel
+    expect(await nextFocus(), true);
+    expect(okNode.hasFocus, false);
+    expect(cancelNode.hasFocus, true);
+
+    // Cancel -> nothing
+    expect(await nextFocus(), false);
+    expect(okNode.hasFocus, false);
+    expect(cancelNode.hasFocus, false);
+  });
 }
 
 class _RestorableDialogTestWidget extends StatelessWidget {
   const _RestorableDialogTestWidget();
 
+  @pragma('vm:entry-point')
   static Route<Object?> _materialDialogBuilder(BuildContext context, Object? arguments) {
     return DialogRoute<void>(
       context: context,

@@ -1,0 +1,10 @@
+framework module webview_flutter_wkwebview {
+  umbrella header "webview-umbrella.h"
+  
+  export *
+  module * { export * }
+
+  explicit module Test {
+    header "FWFInstanceManager_Test.h"
+  }
+}

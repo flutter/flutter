@@ -1,0 +1,37 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude: [example/explorer/**]
+  language: 
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+  errors: 
+    todo: ignore
+      
+linter:
+  rules:
+    # Some additional lints we want to enforce
+    always_declare_return_types: true
+    cascade_invocations: true
+    directives_ordering: true
+    omit_local_variable_types: true
+    prefer_const_constructors: true
+    prefer_const_literals_to_create_immutables: true
+    prefer_final_in_for_each: true
+    prefer_final_locals: true
+    prefer_relative_imports: true
+    sort_child_properties_last: true
+    sort_unnamed_constructors_first: true
+    unawaited_futures: true
+    unnecessary_lambdas: true
+    unnecessary_parenthesis: true
+    use_super_parameters: true
+
+    # This is a good lint, but
+    # https://github.com/microsoft/win32metadata/issues/99 makes it impossible
+    # to resolve today.
+    library_private_types_in_public_api: false
+
+    # Unnecessary in most cases, but avoids accidental name clashes.
+    unnecessary_this: false

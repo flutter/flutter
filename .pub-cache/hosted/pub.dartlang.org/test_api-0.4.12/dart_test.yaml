@@ -1,0 +1,50 @@
+# Fold frames from helper packages we use in our tests, but not from test
+# itself.
+fold_stack_frames:
+  except:
+  - shelf_test_handler
+  - stream_channel
+  - test_descriptor
+  - test_process
+
+presets:
+  # "-P terse-trace" folds frames from test's implementation to make the output
+  # less verbose when
+  terse-trace:
+    fold_stack_frames:
+      except: [test]
+
+tags:
+  browser:
+    timeout: 2x
+
+    # Browsers can sometimes randomly time out while starting, especially on
+    # Travis which is pretty slow. Don't retry locally because it makes
+    # debugging more annoying.
+    presets: {travis: {retry: 3}}
+
+  dart2js:
+    add_tags: [browser]
+    timeout: 2x
+
+  firefox: {add_tags: [dart2js]}
+  chrome: {add_tags: [dart2js]}
+  phantomjs: {add_tags: [dart2js]}
+
+  safari:
+    add_tags: [dart2js]
+    test_on: mac-os
+
+  ie:
+    add_tags: [dart2js]
+    test_on: windows
+
+  # Tests that run pub. These tests may need to be excluded when there are local
+  # dependency_overrides.
+  pub:
+    timeout: 2x
+
+  # Tests that use Node.js. These tests may need to be excluded on systems that
+  # don't have Node installed.
+  node:
+    timeout: 2x

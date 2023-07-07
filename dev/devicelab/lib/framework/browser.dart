@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show json, utf8, LineSplitter, JsonEncoder;
+import 'dart:convert' show JsonEncoder, LineSplitter, json, utf8;
 import 'dart:io' as io;
 import 'dart:math' as math;
 
@@ -303,12 +303,6 @@ class BlinkTraceSummary {
         (BlinkTraceEvent event) => event.isBeginMeasuredFrame,
         orElse: () => throw noMeasuredFramesFound(),
       );
-
-      if (firstMeasuredFrameEvent == null) {
-        // This happens in benchmarks that do not measure frames, such as some
-        // of the text layout benchmarks.
-        return null;
-      }
 
       final int tabPid = firstMeasuredFrameEvent.pid!;
 

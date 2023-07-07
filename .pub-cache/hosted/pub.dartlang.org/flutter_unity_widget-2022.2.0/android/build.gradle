@@ -1,0 +1,71 @@
+group 'com.xraph.plugin.flutter_unity_widget'
+version '4.0-SNAPSHOT'
+
+buildscript {
+    ext.kotlin_version = '1.6.20'
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+
+        // DO NOT MODIFY
+        // BUILD_ADD_UNITY_LIBS
+
+        // FOR DEV ONLY
+        flatDir {
+            dirs "libs"
+        }
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 29
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+    defaultConfig {
+        minSdkVersion 19
+    }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+}
+
+def lifecycle_version = '2.4.1'
+def annotation_version = '1.3.0'
+
+dependencies {
+    implementation project(':unityLibrary')
+    implementation(name: 'unity-classes', ext:'jar')
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "androidx.lifecycle:lifecycle-common:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-process:$lifecycle_version"
+    implementation "androidx.annotation:annotation:$annotation_version"
+
+    compileOnly rootProject.findProject(":flutter_plugin_android_lifecycle")
+
+    // FOR DEV ONLY
+//    implementation(name: 'flutter', ext:'jar')
+}

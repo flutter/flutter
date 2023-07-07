@@ -1,0 +1,13 @@
+name: term_glyph
+version: 1.2.1
+description: Useful Unicode glyphs and ASCII substitutes.
+repository: https://github.com/dart-lang/term_glyph
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dev_dependencies:
+  csv: ^5.0.0
+  dart_style: ^2.0.0
+  lints: ^1.0.0
+  test: ^1.16.0

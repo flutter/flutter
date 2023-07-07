@@ -98,4 +98,19 @@ use-deferred-loading: string
       throwsException,
     );
   });
+
+  testWithoutContext('parseLocalizationsOptions tool exits on malformed Yaml', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+template-arb-file: {name}_en.arb
+''');
+
+    expect(
+      () => parseLocalizationsOptions(
+        file: configFile,
+        logger: BufferLogger.test(),
+      ),
+      throwsToolExit(),
+    );
+  });
 }

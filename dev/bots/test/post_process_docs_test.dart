@@ -118,7 +118,11 @@ void main() async {
           ),
         ],
       );
+<<<<<<< HEAD
       await runProcessWithValidations(command, '', processManager: processManager);
+=======
+      await runProcessWithValidations(command, '', processManager: processManager, verbose: false);
+>>>>>>> 796c8ef79279f9c774545b3771238c3098dbefab
       expect(processManager, hasNoRemainingExpectations);
     });
 
@@ -133,7 +137,11 @@ void main() async {
         ],
       );
       try {
+<<<<<<< HEAD
         await runProcessWithValidations(command, '', processManager: processManager);
+=======
+        await runProcessWithValidations(command, '', processManager: processManager, verbose: false);
+>>>>>>> 796c8ef79279f9c774545b3771238c3098dbefab
         throw Exception('Exception was not thrown');
       } on CommandException catch (e) {
         expect(e, isA<Exception>());

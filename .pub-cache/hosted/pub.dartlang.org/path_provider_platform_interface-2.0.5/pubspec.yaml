@@ -1,0 +1,21 @@
+name: path_provider_platform_interface
+description: A common platform interface for the path_provider plugin.
+repository: https://github.com/flutter/plugins/tree/main/packages/path_provider/path_provider_platform_interface
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+path_provider%22
+# NOTE: We strongly prefer non-breaking changes, even at the expense of a
+# less-clean API. See https://flutter.dev/go/platform-interface-breaking-changes
+version: 2.0.5
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=2.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  platform: ^3.0.0
+  plugin_platform_interface: ^2.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

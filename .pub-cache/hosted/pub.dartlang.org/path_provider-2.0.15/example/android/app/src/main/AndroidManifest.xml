@@ -1,0 +1,20 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.flutter.plugins.pathproviderexample">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application android:label="path_provider_example" android:icon="@mipmap/ic_launcher">
+        <activity android:name="io.flutter.embedding.android.FlutterActivity"
+                  android:launchMode="singleTop"
+                  android:theme="@android:style/Theme.Black.NoTitleBar"
+                  android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection"
+                  android:hardwareAccelerated="true"
+                  android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <meta-data android:name="flutterEmbedding" android:value="2"/>
+    </application>
+</manifest>

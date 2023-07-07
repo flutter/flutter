@@ -1,0 +1,26 @@
+name: google_fonts
+description: A Flutter package to use fonts from fonts.google.com.
+version: 3.0.1
+repository: https://github.com/material-foundation/google-fonts-flutter
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=2.10.0-0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^0.13.0
+  path_provider: ^2.0.0
+  crypto: ^3.0.0
+
+dev_dependencies:
+  flutter_lints: ^2.0.1
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.0.0
+  mustache_template: ^2.0.0
+  path_provider_platform_interface: ^2.0.1
+  plugin_platform_interface: ^2.0.2
+  protobuf: ^2.0.1
+  test: ^1.19.5

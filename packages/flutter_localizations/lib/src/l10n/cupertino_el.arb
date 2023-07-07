@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Επιλογή όλων",
   "tabSemanticsLabel": "Καρτέλα $tabIndex από $tabCount",
   "modalBarrierDismissLabel": "Παράβλεψη",
-  "searchTextFieldPlaceholderLabel": "Αναζήτηση"
+  "searchTextFieldPlaceholderLabel": "Αναζήτηση",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

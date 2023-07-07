@@ -1,0 +1,14 @@
+name: stack_trace
+version: 1.10.0
+description: A package for manipulating stack traces and printing them readably.
+homepage: https://github.com/dart-lang/stack_trace
+
+environment:
+  sdk: ">=2.12.0-0 <3.0.0"
+
+dependencies:
+  path: ^1.8.0
+
+dev_dependencies:
+  pedantic: ^1.10.0-nullsafety
+  test: ^1.16.0-nullsafety

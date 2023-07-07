@@ -14,7 +14,8 @@ import 'framework.dart';
 ///
 /// The state of this container is a single selectable and will register
 /// itself to the [registrar] if provided. Otherwise, it will register to the
-/// [SelectionRegistrar] from the context.
+/// [SelectionRegistrar] from the context. Consider using a [SelectionArea]
+/// widget to provide a root registrar.
 ///
 /// The containers handle the [SelectionEvent]s from the registered
 /// [SelectionRegistrar] and delegate the events to the [delegate].
@@ -28,7 +29,7 @@ import 'framework.dart';
 /// This sample demonstrates how to create a [SelectionContainer] that only
 /// allows selecting everything or nothing with no partial selection.
 ///
-/// ** See code in examples/api/lib/material/selection_area/custom_container.dart **
+/// ** See code in examples/api/lib/material/selection_container/selection_container.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -47,11 +48,17 @@ class SelectionContainer extends StatefulWidget {
     this.registrar,
     required SelectionContainerDelegate this.delegate,
     required this.child,
-  }) : assert(delegate != null),
-       assert(child != null);
+  });
 
   /// Creates a selection container that disables selection for the
   /// subtree.
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to disable selection for a Text under a
+  /// SelectionArea.
+  ///
+  /// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
+  /// {@end-tool}
   ///
   /// The [child] must not be null.
   const SelectionContainer.disabled({
@@ -232,7 +239,7 @@ class SelectionRegistrarScope extends InheritedWidget {
     super.key,
     required SelectionRegistrar this.registrar,
     required super.child,
-  }) : assert(registrar != null);
+  });
 
   /// Creates a selection registrar scope that disables selection for the
   /// subtree.
@@ -291,12 +298,26 @@ abstract class SelectionContainerDelegate implements SelectionHandler, Selection
     return box.getTransformTo(ancestor);
   }
 
+  /// Whether the [SelectionContainer] has undergone layout and has a size.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderBox.hasSize], which is used internally by this method.
+  bool get hasSize {
+    assert(
+    _selectionContainerContext?.findRenderObject() != null,
+    'The _selectionContainerContext must have a renderObject, such as after the first build has completed.',
+    );
+    final RenderBox box = _selectionContainerContext!.findRenderObject()! as RenderBox;
+    return box.hasSize;
+  }
+
   /// Gets the size of the [SelectionContainer] of this delegate.
   ///
   /// Can only be called after [SelectionContainer] is laid out.
   Size get containerSize {
     assert(
-      _selectionContainerContext?.findRenderObject() != null,
+      hasSize,
       'containerSize cannot be called before SelectionContainer is laid out.',
     );
     final RenderBox box = _selectionContainerContext!.findRenderObject()! as RenderBox;

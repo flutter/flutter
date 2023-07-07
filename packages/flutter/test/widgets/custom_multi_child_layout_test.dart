@@ -153,7 +153,7 @@ class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
   const LayoutWithMissingId({
     super.key,
     required super.child,
-  }) : assert(child != null);
+  });
 
   @override
   void applyParentData(RenderObject renderObject) {}
@@ -372,7 +372,9 @@ void main() {
           '   in its parent data.\n'
           '   The following child has no ID: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT:\n'
           '     creator: ConstrainedBox ← Container ← LayoutWithMissingId ←\n'
-          '       CustomMultiChildLayout ← Center ← [root]\n'
+          '       CustomMultiChildLayout ← Center ← MediaQuery ←\n'
+          '       _MediaQueryFromView ← _ViewScope ← View-[GlobalObjectKey\n'
+          '       TestFlutterView#00000] ← [root]\n'
           '     parentData: offset=Offset(0.0, 0.0); id=null\n'
           '     constraints: MISSING\n'
           '     size: MISSING\n'

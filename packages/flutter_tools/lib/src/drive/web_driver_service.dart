@@ -82,7 +82,6 @@ class WebDriverService extends DriverService {
           disablePortPublication: debuggingOptions.disablePortPublication,
         ),
       stayResident: true,
-      urlTunneller: null,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
       usage: globals.flutterUsage,
@@ -96,15 +95,15 @@ class WebDriverService extends DriverService {
     );
 
     bool isAppStarted = false;
-    await Future.any<Object>(<Future<Object>>[
+    await Future.any(<Future<Object?>>[
       runFuture.then((int? result) {
         _runResult = result;
         return null;
-      } as FutureOr<Object> Function(int?)),
+      }),
       appStartedCompleter.future.then((_) {
         isAppStarted = true;
         return null;
-      } as FutureOr<Object> Function(void)),
+      }),
     ]);
 
     if (_runResult != null) {
@@ -258,10 +257,10 @@ Map<String, dynamic> getDesiredCapabilities(
           async_io.LogType.browser: 'INFO',
           async_io.LogType.performance: 'ALL',
         },
-        'chromeOptions': <String, dynamic>{
+        'goog:chromeOptions': <String, dynamic>{
           if (chromeBinary != null)
             'binary': chromeBinary,
-          'w3c': false,
+          'w3c': true,
           'args': <String>[
             '--bwsi',
             '--disable-background-timer-throttling',

@@ -1,0 +1,36 @@
+# This is a set of core lints used to identify critical issues. See
+# https://github.com/dart-lang/lints for more information.
+#
+# For documentation about customizing static analysis for your project, see
+# https://dart.dev/guides/language/analysis-options.
+
+linter:
+  rules:
+    - avoid_empty_else
+    - avoid_relative_lib_imports
+    - avoid_shadowing_type_parameters
+    - avoid_types_as_parameter_names
+    - await_only_futures
+    - camel_case_extensions
+    - camel_case_types
+    - curly_braces_in_flow_control_structures
+    - depend_on_referenced_packages
+    - empty_catches
+    - file_names
+    - hash_and_equals
+    - iterable_contains_unrelated_type
+    - list_remove_unrelated_type
+    - no_duplicate_case_values
+    - non_constant_identifier_names
+    - null_check_on_nullable_type_parameter
+    - package_prefixed_library_names
+    - prefer_generic_function_type_aliases
+    - prefer_is_empty
+    - prefer_is_not_empty
+    - prefer_iterable_whereType
+    - prefer_typing_uninitialized_variables
+    - provide_deprecation_message
+    - unnecessary_overrides
+    - unrelated_type_equality_checks
+    - valid_regexps
+    - void_checks

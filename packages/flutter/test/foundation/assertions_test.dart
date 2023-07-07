@@ -16,6 +16,13 @@ void main() {
     expect(log[1], contains('debugPrintStack'));
   });
 
+  test('should show message of ErrorDescription', () {
+    const String descriptionMessage = 'This is the message';
+    final ErrorDescription errorDescription = ErrorDescription(descriptionMessage);
+
+    expect(errorDescription.toString(), descriptionMessage);
+  });
+
   test('debugPrintStack', () {
     final List<String> log = captureOutput(() {
       final FlutterErrorDetails details = FlutterErrorDetails(
@@ -60,21 +67,6 @@ void main() {
     );
     expect(
       FlutterErrorDetails(
-        exception: NullThrownError(), // ignore: deprecated_member_use
-        library: 'LIBRARY',
-        context: ErrorDescription('CONTEXTING'),
-        informationCollector: () sync* {
-          yield ErrorDescription('INFO');
-        },
-      ).toString(),
-      '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
-      'The null value was thrown CONTEXTING.\n'
-      '\n'
-      'INFO\n'
-      '═════════════════════════════════════════════════════════════════\n',
-    );
-    expect(
-      FlutterErrorDetails(
         exception: 'MESSAGE',
         context: ErrorDescription('CONTEXTING'),
         informationCollector: () sync* {
@@ -110,13 +102,6 @@ void main() {
       '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
       'The following message was thrown:\n'
       'MESSAGE\n'
-      '═════════════════════════════════════════════════════════════════\n',
-    );
-    expect(
-      // ignore: deprecated_member_use
-      FlutterErrorDetails(exception: NullThrownError()).toString(),
-      '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
-      'The null value was thrown.\n'
       '═════════════════════════════════════════════════════════════════\n',
     );
   });

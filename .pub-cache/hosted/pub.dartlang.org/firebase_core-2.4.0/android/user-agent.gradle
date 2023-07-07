@@ -1,0 +1,22 @@
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
+String libraryVersionName = "UNKNOWN"
+String libraryName = "flutter-fire-core"
+File pubspec = new File(project.projectDir.parentFile,  'pubspec.yaml')
+
+if (pubspec.exists()) {
+    String yaml = pubspec.text
+    // Using \s*['|"]?([^\n|'|"]*)['|"]? to extract version number.
+    Matcher versionMatcher = Pattern.compile("^version:\\s*['|\"]?([^\\n|'|\"]*)['|\"]?\$", Pattern.MULTILINE).matcher(yaml)
+    if (versionMatcher.find()) libraryVersionName = versionMatcher.group(1).replaceAll("\\+", "-")
+}
+
+android {
+    defaultConfig {
+        // BuildConfig.VERSION_NAME
+        buildConfigField 'String', 'LIBRARY_VERSION', "\"${libraryVersionName}\""
+        // BuildConfig.LIBRARY_NAME
+        buildConfigField 'String', 'LIBRARY_NAME', "\"${libraryName}\""
+    }
+}

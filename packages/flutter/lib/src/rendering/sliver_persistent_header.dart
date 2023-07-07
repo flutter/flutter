@@ -37,7 +37,7 @@ class OverScrollHeaderStretchConfiguration {
   OverScrollHeaderStretchConfiguration({
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
-  }) : assert(stretchTriggerOffset != null);
+  });
 
   /// The offset of overscroll required to trigger the [onStretchTrigger].
   final double stretchTriggerOffset;
@@ -152,7 +152,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
       return 0.0;
     }
     assert(child!.hasSize);
-    assert(constraints.axis != null);
     switch (constraints.axis) {
       case Axis.vertical:
         return child!.size.height;
@@ -217,7 +216,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   /// The `overlapsContent` argument is passed to [updateChild].
   @protected
   void layoutChild(double scrollOffset, double maxExtent, { bool overlapsContent = false }) {
-    assert(maxExtent != null);
     final double shrinkOffset = math.min(scrollOffset, maxExtent);
     if (_needsUpdateChild || _lastShrinkOffset != shrinkOffset || _lastOverlapsContent != overlapsContent) {
       invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
@@ -228,7 +226,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
       _lastOverlapsContent = overlapsContent;
       _needsUpdateChild = false;
     }
-    assert(minExtent != null);
     assert(() {
       if (minExtent <= maxExtent) {
         return true;
@@ -294,7 +291,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    assert(child != null);
     assert(child == this.child);
     applyPaintTransformForBoxChild(child as RenderBox, transform);
   }
@@ -302,20 +298,15 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && geometry!.visible) {
-      assert(constraints.axisDirection != null);
       switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
         case AxisDirection.up:
           offset += Offset(0.0, geometry!.paintExtent - childMainAxisPosition(child!) - childExtent);
-          break;
         case AxisDirection.down:
           offset += Offset(0.0, childMainAxisPosition(child!));
-          break;
         case AxisDirection.left:
           offset += Offset(geometry!.paintExtent - childMainAxisPosition(child!) - childExtent, 0.0);
-          break;
         case AxisDirection.right:
           offset += Offset(childMainAxisPosition(child!), 0.0);
-          break;
       }
       context.paintChild(child!, offset);
     }
@@ -459,16 +450,12 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
         newRect = _trim(localBounds, bottom: childExtent);
-        break;
       case AxisDirection.right:
         newRect = _trim(localBounds, left: 0);
-        break;
       case AxisDirection.down:
         newRect = _trim(localBounds, top: 0);
-        break;
       case AxisDirection.left:
         newRect = _trim(localBounds, right: childExtent);
-        break;
     }
 
     super.showOnScreen(
@@ -496,8 +483,7 @@ class FloatingHeaderSnapConfiguration {
   FloatingHeaderSnapConfiguration({
     this.curve = Curves.ease,
     this.duration = const Duration(milliseconds: 300),
-  }) : assert(curve != null),
-       assert(duration != null);
+  });
 
   /// The snap animation curve.
   final Curve curve;
@@ -607,9 +593,6 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   }
 
   void _updateAnimation(Duration duration, double endValue, Curve curve) {
-    assert(duration != null);
-    assert(endValue != null);
-    assert(curve != null);
     assert(
       vsync != null,
       'vsync must not be null if the floating header changes size animatedly.',
@@ -732,19 +715,15 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       case AxisDirection.up:
         targetExtent = childExtent - (childBounds?.top ?? 0);
         targetRect = _trim(childBounds, bottom: childExtent);
-        break;
       case AxisDirection.right:
         targetExtent = childBounds?.right ?? childExtent;
         targetRect = _trim(childBounds, left: 0);
-        break;
       case AxisDirection.down:
         targetExtent = childBounds?.bottom ?? childExtent;
         targetRect = _trim(childBounds, top: 0);
-        break;
       case AxisDirection.left:
         targetExtent = childExtent - (childBounds?.left ?? 0);
         targetRect = _trim(childBounds, right: childExtent);
-        break;
     }
 
     // A stretch header can have a bigger childExtent than maxExtent.

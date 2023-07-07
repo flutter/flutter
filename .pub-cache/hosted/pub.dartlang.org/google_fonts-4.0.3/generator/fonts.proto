@@ -1,0 +1,101 @@
+// Copyright 2019 The Flutter team. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Generate .dart files with 
+// protoc --dart_out=. generator/fonts.proto
+syntax = "proto2";
+
+package fonts;
+
+// Details required for a checked download
+// A Downloadable Font will typically have a hash but no filename.
+// A System Font will typically have only a filename.
+// Hash is 20 bytes sha1 up to v12, 32 byte sha256 for v13+,
+message FileSpec {
+  optional string filename = 1;
+  optional int64 file_size = 2;
+  optional bytes hash = 3;
+}
+
+// To allow expression of variation font capability, e.g. weight 300-700
+message IntRange {
+  optional int32 start = 1;
+  optional int32 end = 2 [default = 0];
+}
+
+// To allow expression of variation font capability, e.g. weight 300-700
+// If end is <= start it's a point (e.g. for a non-variational font).
+// Where possible prefer end = 0 for point to save the field in binary proto.
+message FloatRange {
+  optional float start = 1;
+  optional float end = 2 [default = 0];
+}
+
+// Describes a single optentype font file, which may be a variation font or a
+// single font from a TTC.
+message Font {
+  optional FileSpec file = 1;
+
+  // numeric weight per https://drafts.csswg.org/css-fonts/#propdef-font-weight
+  // if varfont, range of 'wght' per
+  // https://www.microsoft.com/typography/otspec/fvar.htm#VAT
+  optional IntRange weight = 2;
+
+  // names converted to values per
+  // https://www.microsoft.com/typography/otspec/os2.htm#wdc
+  // if varfont, range of 'wdth' per
+  // https://www.microsoft.com/typography/otspec/fvar.htm#VAT
+  optional FloatRange width = 3;
+
+  // 0.0 or 1.0 per https://www.microsoft.com/typography/otspec/os2.htm#fss
+  // bit 0. if varfont, range of 'ital' per
+  // https://www.microsoft.com/typography/otspec/fvar.htm#VAT
+  optional FloatRange italic = 4;
+
+  // We don't use optical size for matching. We could one day.
+  // if varfont, range, per 'opsz'
+  // https://www.microsoft.com/typography/otspec/fvar.htm#VAT
+  reserved 5;
+
+  // We don't use 'slnt'. We could one day.
+  reserved 6;
+
+  // Google Fonts doesn't have any [yet?] but Android does
+  optional int32 ttc_index = 7;
+
+  // We don't care about custom axes because we don't use them for matching
+}
+
+message FontFamily {
+  optional string name = 1;
+  optional int32 version = 2;
+
+  // Even for a variation font we may have several entries, for example Roboto
+  // as a varfont may
+  // span two files, one for regular and one for italic
+  repeated Font fonts = 4;
+}
+
+// A set of potentially available families.
+message Directory {
+  // sorted by name
+  repeated FontFamily family = 1;
+
+  // sorted name lookup info for binary search
+  // see go/fonts-gmscore-namelookup for bit packing scheme
+  repeated int32 name_lookup = 2;
+
+  // strings for full and postscript names, broken up.
+  // see go/fonts-gmscore-namelookup.
+  repeated string strings = 3;
+
+  // Name-lookup style family + font indices to prefetch, highest priority
+  // first.
+  repeated int32 prefetch = 4;
+
+  optional int32 version = 5;
+
+  // Description of current directory version.
+  optional string description = 6;
+}

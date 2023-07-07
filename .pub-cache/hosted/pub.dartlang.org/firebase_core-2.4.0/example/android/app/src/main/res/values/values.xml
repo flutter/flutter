@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id" translatable="false">406099696497-a12gakvts4epfk5pkio7dphc1anjiggc.apps.googleusercontent.com</string>
+    <string name="firebase_database_url" translatable="false">https://flutterfire-e2e-tests-default-rtdb.europe-west1.firebasedatabase.app</string>
+    <string name="gcm_defaultSenderId" translatable="false">406099696497</string>
+    <string name="google_api_key" translatable="false">AIzaSyCdRjCVZlhrq72RuEklEyyxYlBRCYhI2Sw</string>
+    <string name="google_app_id" translatable="false">1:406099696497:android:0d4ed619c031c0ac3574d0</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCdRjCVZlhrq72RuEklEyyxYlBRCYhI2Sw</string>
+    <string name="google_storage_bucket" translatable="false">flutterfire-e2e-tests.appspot.com</string>
+    <string name="project_id" translatable="false">flutterfire-e2e-tests</string>
+</resources>

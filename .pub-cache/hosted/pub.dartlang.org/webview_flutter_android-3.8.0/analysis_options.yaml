@@ -1,0 +1,8 @@
+# TODO(stuartmorgan): Remove this file and fix all the unawaited_futures
+# violations. See https://github.com/flutter/flutter/issues/127323
+
+include: ../../../analysis_options.yaml
+
+linter:
+  rules:
+    unawaited_futures: false

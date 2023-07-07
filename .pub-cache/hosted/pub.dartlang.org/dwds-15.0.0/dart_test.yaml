@@ -1,0 +1,5 @@
+concurrency: 1
+retry: 3
+
+tags:
+  extension:  # Extension tests require configuration, so we may exclude.

@@ -234,9 +234,7 @@ class ScrollDragController implements Drag {
     this.onDragCanceled,
     this.carriedVelocity,
     this.motionStartDistanceThreshold,
-  }) : assert(delegate != null),
-       assert(details != null),
-       assert(
+  }) : assert(
          motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
          'motionStartDistanceThreshold must be a positive number or null',
        ),
@@ -244,6 +242,7 @@ class ScrollDragController implements Drag {
        _lastDetails = details,
        _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0,
        _lastNonStationaryTimestamp = details.sourceTimeStamp,
+       _kind = details.kind,
        _offsetSinceLastStop = motionStartDistanceThreshold == null ? null : 0.0;
 
   /// The object that will actuate the scroll view as the user drags.
@@ -424,6 +423,8 @@ class ScrollDragController implements Drag {
     onDragCanceled?.call();
   }
 
+  /// The type of input device driving the drag.
+  final PointerDeviceKind? _kind;
   /// The most recently observed [DragStartDetails], [DragUpdateDetails], or
   /// [DragEndDetails] object.
   dynamic get lastDetails => _lastDetails;
@@ -483,7 +484,7 @@ class DragScrollActivity extends ScrollActivity {
   }
 
   @override
-  bool get shouldIgnorePointer => true;
+  bool get shouldIgnorePointer => _controller?._kind != PointerDeviceKind.trackpad;
 
   @override
   bool get isScrolling => true;
@@ -526,6 +527,7 @@ class BallisticScrollActivity extends ScrollActivity {
     super.delegate,
     Simulation simulation,
     TickerProvider vsync,
+    this.shouldIgnorePointer,
   ) {
     _controller = AnimationController.unbounded(
       debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
@@ -576,7 +578,7 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   @override
-  bool get shouldIgnorePointer => true;
+  final bool shouldIgnorePointer;
 
   @override
   bool get isScrolling => true;
@@ -617,11 +619,7 @@ class DrivenScrollActivity extends ScrollActivity {
     required Duration duration,
     required Curve curve,
     required TickerProvider vsync,
-  }) : assert(from != null),
-       assert(to != null),
-       assert(duration != null),
-       assert(duration > Duration.zero),
-       assert(curve != null) {
+  }) : assert(duration > Duration.zero) {
     _completer = Completer<void>();
     _controller = AnimationController.unbounded(
       value: from,

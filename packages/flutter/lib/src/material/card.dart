@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'card_theme.dart';
+import 'color_scheme.dart';
 import 'material.dart';
 import 'theme.dart';
 
@@ -71,15 +72,15 @@ class Card extends StatelessWidget {
     this.clipBehavior,
     this.child,
     this.semanticContainer = true,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(borderOnForeground != null);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// The card's background color.
   ///
   /// Defines the card's [Material.color].
   ///
-  /// If this property is null then [CardTheme.color] of [ThemeData.cardTheme]
-  /// is used. If that's null then [ThemeData.cardColor] is used.
+  /// If this property is null then the ambient [CardTheme.color] is used. If that is null,
+  /// and [ThemeData.useMaterial3] is true, then [ColorScheme.surface] of
+  /// [ThemeData.colorScheme] is used. Otherwise, [ThemeData.cardColor] is used.
   final Color? color;
 
   /// The color to paint the shadow below the card.
@@ -214,28 +215,28 @@ class _CardDefaultsM2 extends CardTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_162
 
-// Generated version v0_101
 class _CardDefaultsM3 extends CardTheme {
-  const _CardDefaultsM3(this.context)
+  _CardDefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
         elevation: 1.0,
         margin: const EdgeInsets.all(4.0),
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0), bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0))),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
       );
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get color => Theme.of(context).colorScheme.surface;
+  Color? get color => _colors.surface;
 
   @override
-  Color? get shadowColor => Theme.of(context).colorScheme.shadow;
+  Color? get shadowColor => _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 }
 
 // END GENERATED TOKEN PROPERTIES - Card

@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -453,8 +454,10 @@ void main() {
     testWidgets('multiple baseline aligned children', (WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
-      const double fontSize1 = 54;
-      const double fontSize2 = 14;
+      // The point size of the font must be a multiple of 4 until
+      // https://github.com/flutter/flutter/issues/122066 is resolved.
+      const double fontSize1 = 52;
+      const double fontSize2 = 12;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -465,11 +468,11 @@ void main() {
               children: <Widget>[
                 Text('big text',
                   key: key1,
-                  style: const TextStyle(fontSize: fontSize1),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1),
                 ),
                 Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
                   key: key2,
-                  style: const TextStyle(fontSize: fontSize2),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2),
                 ),
               ],
             ),
@@ -487,29 +490,28 @@ void main() {
       // lines, but being aligned by the first line's baseline, they hang far
       // below the baseline. The size of the parent row is just enough to
       // contain both of them.
-      const double ahemBaselineLocation = 0.8; // https://web-platform-tests.org/writing-tests/ahem.html
-      const double aboveBaseline1 = fontSize1 * ahemBaselineLocation;
-      const double belowBaseline1 = fontSize1 * (1 - ahemBaselineLocation);
-      const double aboveBaseline2 = fontSize2 * ahemBaselineLocation;
-      const double belowBaseline2 = fontSize2 * (1 - ahemBaselineLocation) + fontSize2 * 6;
+      const double ascentRatio = 0.75;
+      const double aboveBaseline1 = fontSize1 * ascentRatio;
+      const double belowBaseline1 = fontSize1 * (1 - ascentRatio);
+      const double aboveBaseline2 = fontSize2 * ascentRatio;
+      const double belowBaseline2 = fontSize2 * (1 - ascentRatio) + fontSize2 * 6;
       final double aboveBaseline = math.max(aboveBaseline1, aboveBaseline2);
       final double belowBaseline = math.max(belowBaseline1, belowBaseline2);
       expect(rowBox.size.height, greaterThan(textBox1.size.height));
       expect(rowBox.size.height, greaterThan(textBox2.size.height));
-      expect(rowBox.size.height, moreOrLessEquals(aboveBaseline + belowBaseline, epsilon: .001));
+      expect(rowBox.size.height, aboveBaseline + belowBaseline, );
       expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
-      expect(
-        tester.getTopLeft(find.byKey(key2)).dy,
-        moreOrLessEquals(aboveBaseline1 - aboveBaseline2, epsilon: .001),
-      );
+      expect(tester.getTopLeft(find.byKey(key2)).dy, aboveBaseline1 - aboveBaseline2);
     });
 
     testWidgets('baseline aligned children account for a larger, no-baseline child size', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/58898
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
-      const double fontSize1 = 54;
-      const double fontSize2 = 14;
+      // The point size of the font must be a multiple of 4 until
+      // https://github.com/flutter/flutter/issues/122066 is resolved.
+      const double fontSize1 = 52;
+      const double fontSize2 = 12;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -520,11 +522,11 @@ void main() {
               children: <Widget>[
                 Text('big text',
                   key: key1,
-                  style: const TextStyle(fontSize: fontSize1),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1),
                 ),
                 Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
                   key: key2,
-                  style: const TextStyle(fontSize: fontSize2),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2),
                 ),
                 const FlutterLogo(size: 250),
               ],
@@ -543,16 +545,16 @@ void main() {
       // lines, but being aligned by the first line's baseline, they hang far
       // below the baseline. The FlutterLogo extends further than both Texts,
       // so the size of the parent row should contain the FlutterLogo as well.
-      const double ahemBaselineLocation = 0.8; // https://web-platform-tests.org/writing-tests/ahem.html
-      const double aboveBaseline1 = fontSize1 * ahemBaselineLocation;
-      const double aboveBaseline2 = fontSize2 * ahemBaselineLocation;
+      const double ascentRatio = 0.75;
+      const double aboveBaseline1 = fontSize1 * ascentRatio;
+      const double aboveBaseline2 = fontSize2 * ascentRatio;
       expect(rowBox.size.height, greaterThan(textBox1.size.height));
       expect(rowBox.size.height, greaterThan(textBox2.size.height));
       expect(rowBox.size.height, 250);
       expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
       expect(
         tester.getTopLeft(find.byKey(key2)).dy,
-        moreOrLessEquals(aboveBaseline1 - aboveBaseline2, epsilon: .001),
+        aboveBaseline1 - aboveBaseline2,
       );
     });
   });
@@ -576,6 +578,53 @@ void main() {
 
     await tester.pumpWidget(const UnconstrainedBox(clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('UnconstrainedBox warns only when clipBehavior is Clip.none', (WidgetTester tester) async {
+    for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
+      // Clear any render objects that were there before so that we can see more
+      // than one error. Otherwise, it just throws the first one and skips the
+      // rest, since the render objects haven't changed.
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 200, maxWidth: 200),
+            child: clip == null
+              ? const UnconstrainedBox(child: SizedBox(width: 400, height: 400))
+              : UnconstrainedBox(
+                clipBehavior: clip,
+                child: const SizedBox(width: 400, height: 400),
+              ),
+          ),
+        ),
+      );
+
+      final RenderConstraintsTransformBox renderObject = tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
+
+      // Defaults to Clip.none
+      expect(renderObject.clipBehavior, equals(clip ?? Clip.none), reason: 'for clip = $clip');
+
+      switch(clip) {
+        case null:
+        case Clip.none:
+          // the UnconstrainedBox overflows.
+          final dynamic exception = tester.takeException();
+          expect(exception, isFlutterError, reason: 'for clip = $clip');
+          // ignore: avoid_dynamic_calls
+          expect(exception.diagnostics.first.level, DiagnosticLevel.summary, reason: 'for clip = $clip');
+          expect(
+            // ignore: avoid_dynamic_calls
+            exception.diagnostics.first.toString(),
+            startsWith('A RenderConstraintsTransformBox overflowed'),
+            reason: 'for clip = $clip',
+          );
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          expect(tester.takeException(), isNull, reason: 'for clip = $clip');
+      }
+    }
   });
 
   group('ConstraintsTransformBox', () {
@@ -608,10 +657,10 @@ void main() {
     });
 
     testWidgets('ColoredBox - no size, no child', (WidgetTester tester) async {
-      await tester.pumpWidget(Flex(
+      await tester.pumpWidget(const Flex(
         direction: Axis.horizontal,
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           SizedBox.shrink(
             child: ColoredBox(color: colorToPaint),
           ),
@@ -631,10 +680,10 @@ void main() {
     testWidgets('ColoredBox - no size, child', (WidgetTester tester) async {
       const ValueKey<int> key = ValueKey<int>(0);
       const Widget child = SizedBox.expand(key: key);
-      await tester.pumpWidget(Flex(
+      await tester.pumpWidget(const Flex(
         direction: Axis.horizontal,
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           SizedBox.shrink(
             child: ColoredBox(color: colorToPaint, child: child),
           ),
@@ -861,12 +910,12 @@ void main() {
 
   testWidgets('Wrap implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    Wrap(
+    const Wrap(
       spacing: 8.0, // gap between adjacent Text widget
       runSpacing: 4.0, // gap between lines
       textDirection: TextDirection.ltr,
       verticalDirection: VerticalDirection.up,
-      children: const <Widget>[
+      children: <Widget>[
         Text('Hamilton'),
         Text('Lafayette'),
         Text('Mulligan'),

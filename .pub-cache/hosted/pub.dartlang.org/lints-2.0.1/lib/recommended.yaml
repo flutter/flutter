@@ -1,0 +1,69 @@
+# This set of lints builds on top of `package:lints/core.yaml`; it includes
+# lints that help identify additional issues that may lead to problems when
+# running or consuming Dart code, as well as lints that enforce writing Dart
+# using a single, idiomatic style. See https://github.com/dart-lang/lints for
+# more information.
+#
+# For documentation about customizing static analysis for your project, see
+# https://dart.dev/guides/language/analysis-options.
+
+include: package:lints/core.yaml
+
+linter:
+  rules:
+    - always_require_non_null_named_parameters
+    - annotate_overrides
+    - avoid_function_literals_in_foreach_calls
+    - avoid_init_to_null
+    - avoid_null_checks_in_equality_operators
+    - avoid_renaming_method_parameters
+    - avoid_return_types_on_setters
+    - avoid_returning_null_for_void
+    - avoid_single_cascade_in_expression_statements
+    - constant_identifier_names
+    - control_flow_in_finally
+    - empty_constructor_bodies
+    - empty_statements
+    - exhaustive_cases
+    - implementation_imports
+    - library_names
+    - library_prefixes
+    - library_private_types_in_public_api
+    - no_leading_underscores_for_library_prefixes
+    - no_leading_underscores_for_local_identifiers
+    - null_closures
+    - overridden_fields
+    - package_names
+    - prefer_adjacent_string_concatenation
+    - prefer_collection_literals
+    - prefer_conditional_assignment
+    - prefer_contains
+    - prefer_equal_for_default_values
+    - prefer_final_fields
+    - prefer_for_elements_to_map_fromIterable
+    - prefer_function_declarations_over_variables
+    - prefer_if_null_operators
+    - prefer_initializing_formals
+    - prefer_inlined_adds
+    - prefer_interpolation_to_compose_strings
+    - prefer_is_not_operator
+    - prefer_null_aware_operators
+    - prefer_spread_collections
+    - prefer_void_to_null
+    - recursive_getters
+    - slash_for_doc_comments
+    - type_init_formals
+    - unnecessary_brace_in_string_interps
+    - unnecessary_const
+    - unnecessary_constructor_name
+    - unnecessary_getters_setters
+    - unnecessary_late
+    - unnecessary_new
+    - unnecessary_null_aware_assignments
+    - unnecessary_null_in_if_null_operators
+    - unnecessary_nullable_for_final_variable_declarations
+    - unnecessary_string_escapes
+    - unnecessary_string_interpolations
+    - unnecessary_this
+    - use_function_type_syntax_for_parameters
+    - use_rethrow_when_possible

@@ -1,0 +1,83 @@
+{
+    "context": {
+        "date": "2021-11-09T15:08:32-08:00",
+        "host_name": "test",
+        "executable": "benchmarks",
+        "num_cpus": 16,
+        "mhz_per_cpu": 2300,
+        "cpu_scaling_enabled": false,
+        "caches": [
+          {
+            "type": "Data",
+            "level": 1,
+            "size": 32768,
+            "num_sharing": 2
+          },
+          {
+            "type": "Instruction",
+            "level": 1,
+            "size": 32768,
+            "num_sharing": 2
+          },
+          {
+            "type": "Unified",
+            "level": 2,
+            "size": 262144,
+            "num_sharing": 2
+          },
+          {
+            "type": "Unified",
+            "level": 3,
+            "size": 16777216,
+            "num_sharing": 16
+          }
+        ],
+        "load_avg": [2.59033,17.2754,24.2168],
+        "library_build_type": "release"
+    },
+    "benchmarks": [
+        {
+            "name": "BM_PaintRecordInit",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "BM_PaintRecordInit",
+            "run_type": "iteration",
+            "repetitions": 1,
+            "repetition_index": 0,
+            "threads": 1,
+            "iterations": 3072884,
+            "real_time": 101,
+            "cpu_time": 101,
+            "time_unit": "ns"
+        },
+        {
+            "name": "SkParagraphFixture/ShortLayout",
+            "family_index": 22,
+            "per_family_instance_index": 0,
+            "run_name": "SkParagraphFixture/ShortLayout",
+            "run_type": "iteration",
+            "repetitions": 1,
+            "repetition_index": 0,
+            "threads": 1,
+            "iterations": 200874,
+            "real_time": 4460,
+            "cpu_time": 4460,
+            "time_unit": "ns"
+        },
+        {
+            "name": "SkParagraphFixture/TextBigO_BigO",
+            "family_index": 26,
+            "per_family_instance_index": 0,
+            "run_name": "SkParagraphFixture/TextBigO",
+            "run_type": "aggregate",
+            "repetitions": 1,
+            "threads": 1,
+            "aggregate_name": "BigO",
+            "aggregate_unit": "time",
+            "cpu_coefficient": 6548,
+            "real_coefficient": 6548,
+            "big_o": "N",
+            "time_unit": "ns"
+        }
+    ]
+}

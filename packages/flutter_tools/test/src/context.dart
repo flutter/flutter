@@ -44,7 +44,7 @@ import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
-export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, FakeCommand;
+export 'fake_process_manager.dart' show FakeCommand, FakeProcessManager, ProcessManager;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context.get<Logger>()! as BufferLogger;
@@ -122,7 +122,6 @@ void testUsingContext(
           TemplateRenderer: () => const MustacheTemplateRenderer(),
         },
         body: () {
-          final String flutterRoot = getFlutterRoot();
           return runZonedGuarded<Future<dynamic>>(() {
             try {
               return context.run<dynamic>(
@@ -134,7 +133,7 @@ void testUsingContext(
                   if (initializeFlutterRoot) {
                     // Provide a sane default for the flutterRoot directory. Individual
                     // tests can override this either in the test or during setup.
-                    Cache.flutterRoot ??= flutterRoot;
+                    Cache.flutterRoot ??= getFlutterRoot();
                   }
                   return await testMethod();
                 },
@@ -155,7 +154,7 @@ void testUsingContext(
       );
     }, overrides: <Type, Generator>{
       // This has to go here so that runInContext will pick it up when it tries
-      // to do bot detection before running the closure.  This is important
+      // to do bot detection before running the closure. This is important
       // because the test may be giving us a fake HttpClientFactory, which may
       // throw in unexpected/abnormal ways.
       // If a test needs a BotDetector that does not always return true, it
@@ -182,7 +181,8 @@ void _printBufferedErrors(AppContext testContext) {
 }
 
 class FakeDeviceManager implements DeviceManager {
-  List<Device> devices = <Device>[];
+  List<Device> attachedDevices = <Device>[];
+  List<Device> wirelessDevices = <Device>[];
 
   String? _specifiedDeviceId;
 
@@ -208,24 +208,45 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => devices;
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({ Duration? timeout }) async => devices;
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
 
   @override
-  Future<List<Device>> getDevicesById(String deviceId) async {
-    return devices.where((Device device) => device.id == deviceId).toList();
+  Future<List<Device>> refreshExtendedWirelessDeviceDiscoverers({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
+
+  @override
+  Future<List<Device>> getDevicesById(
+    String deviceId, {
+    DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
+  }) async {
+    return filteredDevices(filter).where((Device device) {
+      return device.id == deviceId || device.id.startsWith(deviceId);
+    }).toList();
   }
 
   @override
-  Future<List<Device>> getDevices() {
+  Future<List<Device>> getDevices({
+    DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
+  }) {
     return hasSpecifiedDeviceId
-        ? getDevicesById(specifiedDeviceId!)
-        : getAllConnectedDevices();
+        ? getDevicesById(specifiedDeviceId!, filter: filter)
+        : getAllDevices(filter: filter);
   }
 
-  void addDevice(Device device) => devices.add(device);
+  void addAttachedDevice(Device device) => attachedDevices.add(device);
+  void addWirelessDevice(Device device) => wirelessDevices.add(device);
 
   @override
   bool get canListAnything => true;
@@ -237,14 +258,29 @@ class FakeDeviceManager implements DeviceManager {
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 
   @override
-  bool isDeviceSupportedForProject(Device device, FlutterProject? flutterProject) {
-    return device.isSupportedForProject(flutterProject!);
+  DeviceDiscoverySupportFilter deviceSupportFilter({
+    bool includeDevicesUnsupportedByProject = false,
+    FlutterProject? flutterProject,
+  }) {
+    return TestDeviceDiscoverySupportFilter();
   }
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, { Duration? timeout }) async {
-    return devices;
+  Device? getSingleEphemeralDevice(List<Device> devices) => null;
+
+  List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.attached) {
+      return attachedDevices;
+    }
+    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.wireless) {
+      return wirelessDevices;
+    }
+    return attachedDevices + wirelessDevices;
   }
+}
+
+class TestDeviceDiscoverySupportFilter extends Fake implements DeviceDiscoverySupportFilter {
+  TestDeviceDiscoverySupportFilter();
 }
 
 class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidator {

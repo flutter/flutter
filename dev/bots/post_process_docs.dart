@@ -12,9 +12,12 @@ import 'package:platform/platform.dart' as platform;
 
 import 'package:process/process.dart';
 
+<<<<<<< HEAD
 const String kDocsRoot = 'dev/docs';
 const String kPublishRoot = '$kDocsRoot/doc';
 
+=======
+>>>>>>> 796c8ef79279f9c774545b3771238c3098dbefab
 class CommandException implements Exception {}
 
 Future<void> main() async {
@@ -97,13 +100,27 @@ Future<void> runProcessWithValidations(
   List<String> command,
   String workingDirectory, {
   @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
+<<<<<<< HEAD
+=======
+  bool verbose = true,
+>>>>>>> 796c8ef79279f9c774545b3771238c3098dbefab
 }) async {
   final ProcessResult result =
       processManager.runSync(command, stdoutEncoding: utf8, workingDirectory: workingDirectory);
   if (result.exitCode == 0) {
+<<<<<<< HEAD
     print('Stdout: ${result.stdout}');
   } else {
     print('StdErr: ${result.stderr}');
+=======
+    if (verbose) {
+      print('stdout: ${result.stdout}');
+    }
+  } else {
+    if (verbose) {
+      print('stderr: ${result.stderr}');
+    }
+>>>>>>> 796c8ef79279f9c774545b3771238c3098dbefab
     throw CommandException();
   }
 }

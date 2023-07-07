@@ -1,0 +1,219 @@
+#data
+<!DOCTYPE html><body><foo>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <foo>
+|       "A"
+
+#data
+<!DOCTYPE html><body><area>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <area>
+|     "A"
+
+#data
+<!DOCTYPE html><body><base>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <base>
+|     "A"
+
+#data
+<!DOCTYPE html><body><basefont>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <basefont>
+|     "A"
+
+#data
+<!DOCTYPE html><body><bgsound>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <bgsound>
+|     "A"
+
+#data
+<!DOCTYPE html><body><br>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <br>
+|     "A"
+
+#data
+<!DOCTYPE html><body><col>A
+#errors
+26: Stray start tag “col”.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "A"
+
+#data
+<!DOCTYPE html><body><command>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <command>
+|     "A"
+
+#data
+<!DOCTYPE html><body><embed>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <embed>
+|     "A"
+
+#data
+<!DOCTYPE html><body><frame>A
+#errors
+26: Stray start tag “frame”.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "A"
+
+#data
+<!DOCTYPE html><body><hr>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <hr>
+|     "A"
+
+#data
+<!DOCTYPE html><body><img>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <img>
+|     "A"
+
+#data
+<!DOCTYPE html><body><input>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <input>
+|     "A"
+
+#data
+<!DOCTYPE html><body><keygen>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <keygen>
+|     "A"
+
+#data
+<!DOCTYPE html><body><link>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <link>
+|     "A"
+
+#data
+<!DOCTYPE html><body><meta>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <meta>
+|     "A"
+
+#data
+<!DOCTYPE html><body><param>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <param>
+|     "A"
+
+#data
+<!DOCTYPE html><body><source>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <source>
+|     "A"
+
+#data
+<!DOCTYPE html><body><track>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <track>
+|     "A"
+
+#data
+<!DOCTYPE html><body><wbr>A
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <wbr>
+|     "A"

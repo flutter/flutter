@@ -5,13 +5,14 @@
 import 'template.dart';
 
 class CardTemplate extends TokenTemplate {
-  const CardTemplate(super.blockName, super.fileName, super.tokens);
+  const CardTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+  });
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
 class _${blockName}DefaultsM3 extends CardTheme {
-  const _${blockName}DefaultsM3(this.context)
+  _${blockName}DefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
         elevation: ${elevation("md.comp.elevated-card.container")},
@@ -20,15 +21,16 @@ class _${blockName}DefaultsM3 extends CardTheme {
       );
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
   Color? get color => ${componentColor("md.comp.elevated-card.container")};
 
   @override
-  Color? get shadowColor => ${color("md.comp.elevated-card.container.shadow-color")};
+  Color? get shadowColor => ${colorOrTransparent("md.comp.elevated-card.container.shadow-color")};
 
   @override
-  Color? get surfaceTintColor => ${color("md.comp.elevated-card.container.surface-tint-layer.color")};
+  Color? get surfaceTintColor => ${colorOrTransparent("md.comp.elevated-card.container.surface-tint-layer.color")};
 }
 ''';
 }

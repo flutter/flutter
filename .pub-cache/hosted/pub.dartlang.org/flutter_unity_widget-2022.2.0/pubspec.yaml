@@ -1,0 +1,50 @@
+name: flutter_unity_widget
+description: Flutter Unity 3D widget for embedding Unity game scenes in flutter. This library now supports Unity as a Library.
+version: 2022.2.0
+#authors:
+#  - Rex Raphael <rex.raphael@outlook.com>
+#  - Thomas Stockx <thomas@stockxit.com>
+#  - Kris Pypen <kris.pypen@gmail.com>
+homepage: https://github.com/juicycleff/flutter-unity-view-widget/tree/master
+
+environment:
+  sdk: ">=2.16.0 <3.0.0"
+  flutter: ">=3.3.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  flutter_plugin_android_lifecycle: ^2.0.7
+  stream_transform: ^2.0.0
+  plugin_platform_interface: ^2.1.2
+  webviewx: ^0.2.1
+#  ffi: ^1.2.1 // required for windows support
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.1
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+  # This section identifies this Flutter project as a plugin project.
+  # The 'pluginClass' and Android 'package' identifiers should not ordinarily
+  # be modified. They are used by the tooling to maintain consistency when
+  # adding or updating assets for this project.
+  plugin:
+    platforms:
+      android:
+        package: com.xraph.plugin.flutter_unity_widget
+        pluginClass: FlutterUnityWidgetPlugin
+      ios:
+        pluginClass: FlutterUnityWidgetPlugin
+      windows:
+        pluginClass: FlutterUnityWidgetPlugin
+      web:
+        pluginClass: UnityWidgetController
+        fileName: flutter_unity_widget.dart

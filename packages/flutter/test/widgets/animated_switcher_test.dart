@@ -415,6 +415,25 @@ void main() {
       );
     }
   });
+
+  testWidgets('AnimatedSwitcher does not duplicate animations if the same child is entered twice.', (WidgetTester tester) async {
+    Future<void> pumpChild(Widget child) async {
+      return tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 1000),
+            child: child,
+          ),
+        ),
+      );
+    }
+    await pumpChild(const Text('1', key: Key('1')));
+    await pumpChild(const Text('2', key: Key('2')));
+    await pumpChild(const Text('1', key: Key('1')));
+    await tester.pump(const Duration(milliseconds: 1000));
+    expect(find.text('1'), findsOneWidget);
+  });
 }
 
 class StatefulTest extends StatefulWidget {

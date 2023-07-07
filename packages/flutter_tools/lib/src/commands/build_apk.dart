@@ -14,7 +14,9 @@ import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
-  BuildApkCommand({bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
+  BuildApkCommand({
+    required super.logger, bool verboseHelp = false
+  }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -41,6 +43,9 @@ class BuildApkCommand extends BuildSubCommand {
         help: 'Whether to split the APKs per ABIs. '
               'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
       )
+      ..addFlag('config-only',
+          help: 'Generate build files used by flutter but '
+                'do not build any artifacts.')
       ..addMultiOption('target-platform',
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
@@ -53,7 +58,9 @@ class BuildApkCommand extends BuildSubCommand {
   final String name = 'apk';
 
   @override
-  DeprecationBehavior get deprecationBehavior => boolArgDeprecated('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
+  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
+
+  bool get configOnly => boolArg('config-only');
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -73,11 +80,11 @@ class BuildApkCommand extends BuildSubCommand {
   Future<CustomDimensions> get usageValues async {
     String buildMode;
 
-    if (boolArgDeprecated('release')) {
+    if (boolArg('release')) {
       buildMode = 'release';
-    } else if (boolArgDeprecated('debug')) {
+    } else if (boolArg('debug')) {
       buildMode = 'debug';
-    } else if (boolArgDeprecated('profile')) {
+    } else if (boolArg('profile')) {
       buildMode = 'profile';
     } else {
       // The build defaults to release.
@@ -87,7 +94,7 @@ class BuildApkCommand extends BuildSubCommand {
     return CustomDimensions(
       commandBuildApkTargetPlatform: stringsArg('target-platform').join(','),
       commandBuildApkBuildMode: buildMode,
-      commandBuildApkSplitPerAbi: boolArgDeprecated('split-per-abi'),
+      commandBuildApkSplitPerAbi: boolArg('split-per-abi'),
     );
   }
 
@@ -99,9 +106,9 @@ class BuildApkCommand extends BuildSubCommand {
     final BuildInfo buildInfo = await getBuildInfo();
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
       buildInfo,
-      splitPerAbi: boolArgDeprecated('split-per-abi'),
+      splitPerAbi: boolArg('split-per-abi'),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
-      multidexEnabled: boolArgDeprecated('multidex'),
+      multidexEnabled: boolArg('multidex'),
     );
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);
@@ -110,6 +117,7 @@ class BuildApkCommand extends BuildSubCommand {
       project: FlutterProject.current(),
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
+      configOnly: configOnly,
     );
     return FlutterCommandResult.success();
   }

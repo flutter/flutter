@@ -1,0 +1,7 @@
+name: flutter_gallery_assets
+description: Images and fonts for the Flutter gallery app
+version: 1.0.2
+repository: https://github.com/flutter/flutter_gallery_assets
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: '>=0.1.0'

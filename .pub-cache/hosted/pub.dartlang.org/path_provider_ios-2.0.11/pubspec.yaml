@@ -1,0 +1,34 @@
+name: path_provider_ios
+description: iOS implementation of the path_provider plugin.
+repository: https://github.com/flutter/plugins/tree/main/packages/path_provider/path_provider_ios
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+path_provider%22
+version: 2.0.11
+
+environment:
+  sdk: ">=2.14.0 <3.0.0"
+  flutter: ">=2.8.0"
+
+flutter:
+  plugin:
+    implements: path_provider
+    platforms:
+      ios:
+        pluginClass: FLTPathProviderPlugin
+        dartPluginClass: PathProviderIOS
+
+dependencies:
+  flutter:
+    sdk: flutter
+  path_provider_platform_interface: ^2.0.0
+
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  path: ^1.8.0
+  pigeon: ^3.1.5
+  plugin_platform_interface: ^2.0.0
+  test: ^1.16.0

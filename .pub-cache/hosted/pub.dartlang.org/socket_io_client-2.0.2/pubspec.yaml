@@ -1,0 +1,22 @@
+name: socket_io_client
+description: Dartlang port of socket.io-client for web, flutter, dartvm to use
+version: 2.0.2
+homepage: https://www.zkoss.org
+repository: https://github.com/rikulo/socket.io-client-dart
+issue_tracker: https://github.com/rikulo/socket.io-client-dart/issues
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  logging: '^1.0.1'
+  socket_io_common: '^2.0.3'
+  js: '^0.6.3'
+
+dev_dependencies:
+  test: ">=1.3.0 <2.0.0"
+#  build_runner: any
+#  build_web_compilers: any
+#  socket_io: any // support Socket.io v2.* only
+
+  
