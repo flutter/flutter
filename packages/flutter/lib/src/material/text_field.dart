@@ -773,6 +773,10 @@ class TextField extends StatefulWidget {
   /// Defaults to true. If false, the text field will not request focus
   /// when tapped, or when its context menu is displayed. If false it will not
   /// be possible to move the focus to the text field with tab key.
+  @Deprecated(
+    'Use `focusNode` instead. '
+    'This feature was deprecated after v3.12.0-14.0.pre.',
+  )
   final bool canRequestFocus;
 
   /// {@macro flutter.widgets.undoHistory.controller}
