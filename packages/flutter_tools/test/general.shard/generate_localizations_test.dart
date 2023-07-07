@@ -59,6 +59,13 @@ void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
     .writeAsStringSync(singleMessageArbFileString);
   l10nDirectory.childFile(esArbFileName)
     .writeAsStringSync(singleEsMessageArbFileString);
+  fs.file('pubspec.yaml')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('''
+flutter:
+  generate: true
+''');
+
 }
 
 void main() {
@@ -763,7 +770,7 @@ class FooEn extends Foo {
       _standardFlutterDirectoryL10nSetup(fs);
 
       // Missing flutter: generate: true should throw exception.
-      fs.file(fs.path.join(syntheticPackagePath, 'pubspec.yaml'))
+      fs.file('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 flutter:
