@@ -493,7 +493,7 @@ class WebAssetServer implements AssetReader {
 
   /// Write a single file into the in-memory cache.
   void writeFile(String filePath, String contents) {
-    writeBytes(filePath, utf8.encode(contents) as Uint8List);
+    writeBytes(filePath, const Utf8Encoder().convert(contents));
   }
 
   void writeBytes(String filePath, Uint8List contents) {
