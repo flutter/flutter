@@ -135,8 +135,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addMultiOption('coverage-package',
         help: 'A regular expression matching packages names '
               'to include in the coverage report (if coverage is enabled). '
-              'Current package is always included. '
-              'By default, the coverage will be collected only for the current package.',
+              'If unset, matches the current package name.',
         valueHelp: 'package-name-regexp',
         splitCommas: false,
       )
@@ -527,7 +526,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     PackageConfig packageConfig,
   ) {
     final String projectName = flutterProject.manifest.appName;
-    final Set<String> packagesToInclude = <String>{projectName};
+    final Set<String> packagesToInclude = <String>{
+      if (packagesRegExps.isEmpty) projectName,
+    };
     for (final String regExpStr in packagesRegExps) {
       final RegExp regExp = RegExp(regExpStr);
       packagesToInclude.addAll(

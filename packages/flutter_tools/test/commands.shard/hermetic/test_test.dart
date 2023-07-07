@@ -255,75 +255,6 @@ dev_dependencies:
   });
 
   testUsingContext('Coverage provides current library name to Coverage Collector by default', () async {
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        FakeVmServiceRequest(
-          method: 'getVM',
-          jsonResponse: (VM.parse(<String, Object>{})!
-            ..isolates = <IsolateRef>[
-              IsolateRef.parse(<String, Object>{
-                'id': '1',
-              })!,
-            ]
-          ).toJson(),
-        ),
-        FakeVmServiceRequest(
-          method: 'getVersion',
-          jsonResponse: Version(major: 3, minor: 57).toJson(),
-        ),
-        FakeVmServiceRequest(
-          method: 'getSourceReport',
-          args: <String, Object>{
-            'isolateId': '1',
-            'reports': <Object>['Coverage'],
-            'forceCompile': true,
-            'reportLines': true,
-            'libraryFilters': <String>['package:/'],
-          },
-          jsonResponse: SourceReport(
-            ranges: <SourceReportRange>[
-              SourceReportRange(
-                scriptIndex: 0,
-                startPos: 0,
-                endPos: 0,
-                compiled: true,
-                coverage: SourceReportCoverage(
-                  hits: <int>[1, 3],
-                  misses: <int>[2],
-                ),
-              ),
-            ],
-            scripts: <ScriptRef>[
-              ScriptRef(
-                uri: 'package:/some.dart',
-                id: '1',
-              ),
-            ],
-          ).toJson(),
-        ),
-      ],
-    );
-    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
-
-    final TestCommand testCommand = TestCommand(testRunner: testRunner);
-    final CommandRunner<void> commandRunner =
-        createTestCommandRunner(testCommand);
-    await commandRunner.run(const <String>[
-      'test',
-      '--no-pub',
-      '--coverage',
-      '--',
-      'test/some_test.dart',
-    ]);
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-    expect((testRunner.lastTestWatcher! as CoverageCollector).libraryNames, <String>{''});
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-  });
-
-  testUsingContext('Coverage provides library names matching regexps to Coverage Collector', () async {
     const String currentPackageName = '';
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
@@ -348,7 +279,62 @@ dev_dependencies:
             'reports': <Object>['Coverage'],
             'forceCompile': true,
             'reportLines': true,
-            'libraryFilters': <String>['package:$currentPackageName/', 'package:test_api/'],
+            'libraryFilters': <String>['package:$currentPackageName/'],
+          },
+          jsonResponse: SourceReport(
+            ranges: <SourceReportRange>[],
+          ).toJson(),
+        ),
+      ],
+    );
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--coverage',
+      '--',
+      'test/some_test.dart',
+    ]);
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    expect(
+      (testRunner.lastTestWatcher! as CoverageCollector).libraryNames,
+      <String>{currentPackageName},
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext('Coverage provides library names matching regexps to Coverage Collector', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          method: 'getVM',
+          jsonResponse: (VM.parse(<String, Object>{})!
+            ..isolates = <IsolateRef>[
+              IsolateRef.parse(<String, Object>{
+                'id': '1',
+              })!,
+            ]
+          ).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getVersion',
+          jsonResponse: Version(major: 3, minor: 57).toJson(),
+        ),
+        FakeVmServiceRequest(
+          method: 'getSourceReport',
+          args: <String, Object>{
+            'isolateId': '1',
+            'reports': <Object>['Coverage'],
+            'forceCompile': true,
+            'reportLines': true,
+            'libraryFilters': <String>['package:test_api/'],
           },
           jsonResponse: SourceReport(
             ranges: <SourceReportRange>[],
@@ -372,12 +358,31 @@ dev_dependencies:
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
     expect(
       (testRunner.lastTestWatcher! as CoverageCollector).libraryNames,
-      <String>{'test_api', currentPackageName},
+      <String>{'test_api'},
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext('Coverage provides error message if regular expression syntax is invalid', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    expect(() => commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--coverage',
+      r'--coverage-package="$+"',
+      '--',
+      'test/some_test.dart',
+    ]), throwsA(isA<FormatException>().having((FormatException e) => e.message, 'message', r'Nothing to repeat"$+"',)));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('Pipes start-paused to package:test',
