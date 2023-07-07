@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:conductor_core/src/stdio.dart';
 import 'package:test/test.dart';
 
+export 'package:test/fake.dart';
 export 'package:test/test.dart' hide isInstanceOf;
 export '../../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 
@@ -33,7 +34,8 @@ class TestStdio extends Stdio {
   TestStdio({
     this.verbose = false,
     List<String>? stdin,
-  }) : stdin = stdin ?? <String>[];
+    super.filter,
+  }) : stdin = stdin ?? const <String>[];
 
   String get error => logs.where((String log) => log.startsWith(r'[error] ')).join('\n');
 
