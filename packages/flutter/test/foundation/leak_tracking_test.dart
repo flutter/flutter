@@ -26,7 +26,7 @@ Future<void> main() async {
     final Leaks cleanedLeaks = leakCleaner.clean(leaks);
 
     expect(leaks.total, leakTotal);
-    expect(cleanedLeaks.total, 1);
+    expect(cleanedLeaks.total, 3);
   });
 
   test('$LeakCleaner catches extra leaks', () {
@@ -85,7 +85,7 @@ Future<void> main() async {
         ),
       );
 
-      tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 2));
+      tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 2, expectedNotGCed: 2));
     });
 
     group('respects notGCed allow lists', () {
@@ -128,7 +128,7 @@ Future<void> main() async {
         ),
       );
 
-      tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1));
+      tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1, expectedNotGCed: 1));
     });
   },
   skip: isBrowser); // [intended] Leak detection is off for web.
