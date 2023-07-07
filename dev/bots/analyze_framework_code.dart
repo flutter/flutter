@@ -11,6 +11,7 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/source/line_info.dart';
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path;
 
 import 'utils.dart';
@@ -183,7 +184,7 @@ class _DebugAssertVerifier extends ResolvedUnitVerifier {
       final LineInfo lineInfo = unit.lineInfo;
       final int lineNumber = lineInfo.getLocation(node.offset).lineNumber;
       final String name = switch (element) {
-        ConstructorElement(:final InterfaceElement enclosingElement, isDefaultConstructor: true) => '${enclosingElement.name}.new',
+        ConstructorElement(:final InterfaceElement enclosingElement, name: '') => '${enclosingElement.name}.new',
         ExecutableElement(:final InterfaceElement enclosingElement, :final String name) => '${enclosingElement.name}.$name',
         Element(:final String? name) => name ?? '',
       };
@@ -257,12 +258,14 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     if (annotated) {
       return true;
     }
+
     // Subclasses can inherit default constructors from the superclass. Since
     // constructors can't be invoked by the class members (unlike methods that
     // can have "bad annotations"), if any superclass in the class hierarchy has
     // a default constructor (excluding synthesized ones) that has the
     // annotation, then the default constructor is debug-only.
-    final ConstructorElement? superConstructor = constructorElement.enclosingElement.thisType.superclass?.element.unnamedConstructor;
+    final ConstructorElement? superConstructor = constructorElement.enclosingElement.thisType.superclass?.element.constructors
+      .firstWhereOrNull((ConstructorElement constructor) => constructor.isDefaultConstructor);
     return superConstructor != null && _defaultConstructorHasDebugAnnotation(superConstructor);
   }
 

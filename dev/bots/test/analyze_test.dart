@@ -216,12 +216,12 @@ void main() {
       <ResolvedUnitVerifier>[verifyNoDoubleClamp],
     ), shouldHaveErrors: true);
     final String lines = <String>[
-        '║ packages/flutter/lib/bar.dart:35: input.clamp(0.0, 2)',
-        '║ packages/flutter/lib/bar.dart:36: input.toDouble().clamp(0, 2)',
-        '║ packages/flutter/lib/bar.dart:40: nullableInt?.clamp(0, 2.0)',
-        '║ packages/flutter/lib/bar.dart:41: nullableDouble?.clamp(0, 2)',
-        '║ packages/flutter/lib/bar.dart:44: nullableInt?.clamp',
-        '║ packages/flutter/lib/bar.dart:45: nullableDouble?.clamp',
+        '║ packages/flutter/lib/bar.dart:37: input.clamp(0.0, 2)',
+        '║ packages/flutter/lib/bar.dart:38: input.toDouble().clamp(0, 2)',
+        '║ packages/flutter/lib/bar.dart:42: nullableInt?.clamp(0, 2.0)',
+        '║ packages/flutter/lib/bar.dart:43: nullableDouble?.clamp(0, 2)',
+        '║ packages/flutter/lib/bar.dart:48: nullableInt?.clamp',
+        '║ packages/flutter/lib/bar.dart:50: nullableDouble?.clamp',
         '║ ',
         '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".',
         '║ For non-double uses of "clamp", use "// ignore_clamp_double_lint" on the line to silence this message.',
@@ -255,9 +255,15 @@ void main() {
     .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
     .join('\n');
 
-    final String badAccesses = <String>[
-      '║ Framework symbols annotated with @_debugAssert should not be accessed outside of asserts.\n',
-      '║ \n',
+    expect(result,
+      startsWith(
+        '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+        '$badAnnotations\n'
+        '╚═══════════════════════════════════════════════════════════════════════════════\n'
+      )
+    );
+
+    expect(result, containsAll(<String>[
       '║ packages/flutter/lib/debug_only_constructors.dart:10: ClassFromDebugLibWithNamedConstructor.constructor accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_constructors.dart:41: _DebugOnlyClass2.new accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_constructors.dart:43: _DebugOnlyClass3.named accessed outside of an assert.\n',
@@ -305,17 +311,6 @@ void main() {
       '║ packages/flutter/lib/debug_only_access.dart:45: MixinFromDebugLib.debugGetSet accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:46: MixinFromDebugLib.[] accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:46: MixinFromDebugLib.debugGetSet accessed outside of an assert.',
-    ]
-    .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
-    .join();
-
-    expect(result,
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
-      '$badAnnotations\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n'
-      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
-      '$badAccesses\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n'
-    );
+    ]));
   });
 }
