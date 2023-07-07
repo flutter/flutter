@@ -529,13 +529,17 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final Set<String> packagesToInclude = <String>{
       if (packagesRegExps.isEmpty) projectName,
     };
-    for (final String regExpStr in packagesRegExps) {
-      final RegExp regExp = RegExp(regExpStr);
-      packagesToInclude.addAll(
-        packageConfig.packages
-            .map((Package e) => e.name)
-            .where((String e) => regExp.hasMatch(e)),
-      );
+    try {
+      for (final String regExpStr in packagesRegExps) {
+        final RegExp regExp = RegExp(regExpStr);
+        packagesToInclude.addAll(
+          packageConfig.packages
+              .map((Package e) => e.name)
+              .where((String e) => regExp.hasMatch(e)),
+        );
+      }
+    } on FormatException catch (e) {
+      throwToolExit('Regular expression syntax is invalid. $e');
     }
     return packagesToInclude;
   }

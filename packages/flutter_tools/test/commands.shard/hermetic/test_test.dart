@@ -379,7 +379,7 @@ dev_dependencies:
       r'--coverage-package="$+"',
       '--',
       'test/some_test.dart',
-    ]), throwsA(isA<FormatException>().having((FormatException e) => e.message, 'message', r'Nothing to repeat"$+"',)));
+    ]), throwsToolExit(message: r'Regular expression syntax is invalid. FormatException: Nothing to repeat"$+"'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
