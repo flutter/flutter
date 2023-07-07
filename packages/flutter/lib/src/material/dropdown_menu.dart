@@ -609,7 +609,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                   key: _anchorKey,
                   mouseCursor: effectiveMouseCursor,
                   focusNode: _focusNode,
-                  readOnly: true,
+                  readOnly: !canRequestFocus(),
                   enableInteractiveSelection: canRequestFocus(),
                   textAlignVertical: TextAlignVertical.center,
                   style: effectiveTextStyle,

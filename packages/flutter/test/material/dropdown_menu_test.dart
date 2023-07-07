@@ -1337,7 +1337,6 @@ void main() {
     // Item 5 should show up.
     expect(find.text('Item 5').hitTestable(), findsOneWidget);
   });
-
 }
 
 enum TestMenu {
