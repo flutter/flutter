@@ -482,13 +482,16 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _scheduleDismissTooltip({ required Duration withDelay }) {
     assert(mounted);
     assert(
-      !(_timer?.isActive ?? false) || _controller.status != AnimationStatus.reverse,
+      !(_timer?.isActive ?? false) || _backingController?.status != AnimationStatus.reverse,
       'timer must not be active when the tooltip is fading out',
     );
 
     _timer?.cancel();
     _timer = null;
-    switch (_controller.status) {
+    // Use _backingController instead of _controller to prevent the lazy getter
+    // from instaniating an AnimationController unnecessarily.
+    switch (_backingController?.status) {
+      case null:
       case AnimationStatus.reverse:
       case AnimationStatus.dismissed:
         break;
@@ -740,7 +743,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
 
     final TooltipThemeData tooltipTheme = _tooltipTheme;
-    return _TooltipOverlay(
+    final _TooltipOverlay overlayChild = _TooltipOverlay(
       richMessage: widget.richMessage ?? TextSpan(text: widget.message),
       height: widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight(),
       padding: widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding(),
@@ -755,13 +758,21 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       verticalOffset: widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
       preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
     );
+
+    return SelectionContainer.maybeOf(context) == null
+      ? overlayChild
+      : SelectionContainer.disabled(child: overlayChild);
   }
 
   @override
   void dispose() {
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
     Tooltip._openedTooltips.remove(this);
+    // Remove the onCancel callbacks to prevent the registered callbacks from
+    // triggering unnecessary sideeffects (such as animation).
+    _longPressRecognizer?.onLongPressCancel = null;
     _longPressRecognizer?.dispose();
+    _tapRecognizer?.onTapCancel = null;
     _tapRecognizer?.dispose();
     _timer?.cancel();
     _backingController?.dispose();
