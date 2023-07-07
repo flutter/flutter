@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   const TextTheme defaultGeometryTheme = Typography.englishLike2014;
   const TextTheme defaultGeometryThemeM3 = Typography.englishLike2021;

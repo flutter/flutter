@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   group('TimeOfDay.format', () {
     testWidgetsWithLeakTracking('respects alwaysUse24HourFormat option', (WidgetTester tester) async {

@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 const Duration defaultButtonDuration = Duration(milliseconds: 200);
 
 void main() {

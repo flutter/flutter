@@ -9,8 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../foundation/leak_tracking.dart';
 
-import '../foundation/leak_tracking.dart';
-
 PopupMenuThemeData _popupMenuThemeM2() {
   return PopupMenuThemeData(
     color: Colors.orange,

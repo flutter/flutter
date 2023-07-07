@@ -9,8 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../foundation/leak_tracking.dart';
 
-import '../foundation/leak_tracking.dart';
-
 void main() {
   test('FloatingActionButtonThemeData copyWith, ==, hashCode basics', () {
     expect(const FloatingActionButtonThemeData(), const FloatingActionButtonThemeData().copyWith());

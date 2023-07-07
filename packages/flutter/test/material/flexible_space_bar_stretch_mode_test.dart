@@ -12,8 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../foundation/leak_tracking.dart';
 
-import '../foundation/leak_tracking.dart';
-
 final Key blockKey = UniqueKey();
 const double expandedAppbarHeight = 250.0;
 final Key finderKey = UniqueKey();
