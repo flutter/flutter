@@ -15,8 +15,6 @@ import 'package:meta/meta.dart';
 /// User input probably should be part of this class–however it is currently
 /// part of context.dart.
 abstract class Stdio {
-  Stdio();
-
   final List<String> logs = <String>[];
 
   /// Error messages printed to STDERR.
@@ -84,6 +82,8 @@ class VerboseStdio extends Stdio {
   final io.Stdout stdout;
   final io.Stdout stderr;
   final io.Stdin stdin;
+
+  /// If provided, all messages will be passed through this function before being logged.
   final String Function(String)? filter;
 
   @override
