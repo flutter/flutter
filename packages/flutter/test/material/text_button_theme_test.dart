@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('TextButtonTheme lerp special cases', () {
     expect(TextButtonThemeData.lerp(null, null, 0), null);

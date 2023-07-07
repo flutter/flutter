@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('SearchBarThemeData copyWith, ==, hashCode basics', () {
     expect(const SearchBarThemeData(), const SearchBarThemeData().copyWith());

@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   testWidgetsWithLeakTracking('TextField works correctly when changing helperText', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Material(child: TextField(decoration: InputDecoration(helperText: 'Awesome')))));

@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/87099
   testWidgetsWithLeakTracking('TextField.autofocus should skip the element that never layout', (WidgetTester tester) async {

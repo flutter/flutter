@@ -14,6 +14,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   testWidgetsWithLeakTracking('IconData object test', (WidgetTester tester) async {
     expect(Icons.account_balance, isNot(equals(Icons.account_box)));

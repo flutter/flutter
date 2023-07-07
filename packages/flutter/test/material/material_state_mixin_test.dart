@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 const Key key = Key('testContainer');
 const Color trueColor = Colors.red;
 const Color falseColor = Colors.green;
