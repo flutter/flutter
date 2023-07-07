@@ -484,7 +484,8 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       ));
     }
 
-    // Remove JetBrains Toolbox results
+    // Remove JetBrains Toolbox link apps. These tiny apps just
+    // link to the full app, will get detected elsewhere in our search.
     validators.removeWhere((DoctorValidator validator) {
       final String identifierKey = plistParser.getValueFromFile(
         (validator as IntelliJValidatorOnMac).plistFile,
