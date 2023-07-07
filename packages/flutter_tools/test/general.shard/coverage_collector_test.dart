@@ -523,11 +523,11 @@ void main() {
     try {
       tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
       final File packagesFile = writeFooBarPackagesJson(tempDir);
-      final Directory fooDir = Directory('${tempDir.path}/foo')..createSync();
-      File('${fooDir.path}/foo.dart').createSync();
+      File('${tempDir.path}/foo/foo.dart').createSync(recursive: true);
+      File('${tempDir.path}/bar/bar.dart').createSync(recursive: true);
 
       final String packagesPath = packagesFile.path;
-      final CoverageCollector collector = CoverageCollector(
+      CoverageCollector collector = CoverageCollector(
           libraryNames: <String>{'foo', 'bar'},
           verbose: false,
           packagesPath: packagesPath,
@@ -538,8 +538,24 @@ void main() {
         serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: <String>['package:foo/', 'package:bar/']).vmService,
       );
 
-      final String? report = await collector.finalizeCoverage();
+      String? report = await collector.finalizeCoverage();
       expect(report, contains('foo.dart'));
+      expect(report, contains('bar.dart'));
+
+      collector = CoverageCollector(
+          libraryNames: <String>{'foo'},
+          verbose: false,
+          packagesPath: packagesPath,
+          resolver: await CoverageCollector.getResolver(packagesPath)
+      );
+      await collector.collectCoverage(
+        TestTestDevice(),
+        serviceOverride: createFakeVmServiceHostWithFooAndBar(libraryFilters: <String>['package:foo/']).vmService,
+      );
+
+      report = await collector.finalizeCoverage();
+      expect(report, contains('foo.dart'));
+      expect(report, isNot(contains('bar.dart')));
     } finally {
       tempDir?.deleteSync(recursive: true);
     }

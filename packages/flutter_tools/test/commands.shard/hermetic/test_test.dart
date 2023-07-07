@@ -351,24 +351,7 @@ dev_dependencies:
             'libraryFilters': <String>['package:$currentPackageName/', 'package:test_api/'],
           },
           jsonResponse: SourceReport(
-            ranges: <SourceReportRange>[
-              SourceReportRange(
-                scriptIndex: 0,
-                startPos: 0,
-                endPos: 0,
-                compiled: true,
-                coverage: SourceReportCoverage(
-                  hits: <int>[1, 3],
-                  misses: <int>[2],
-                ),
-              ),
-            ],
-            scripts: <ScriptRef>[
-              ScriptRef(
-                uri: 'package:test_api/some.dart',
-                id: '1',
-              ),
-            ],
+            ranges: <SourceReportRange>[],
           ).toJson(),
         ),
       ],
@@ -377,7 +360,7 @@ dev_dependencies:
 
     final TestCommand testCommand = TestCommand(testRunner: testRunner);
     final CommandRunner<void> commandRunner =
-    createTestCommandRunner(testCommand);
+        createTestCommandRunner(testCommand);
     await commandRunner.run(const <String>[
       'test',
       '--no-pub',
