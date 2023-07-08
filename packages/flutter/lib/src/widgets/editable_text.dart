@@ -3616,15 +3616,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _bringIntoViewBySelectionState(oldTextSelection, value.selection, cause);
     }
     final String currentText = _value.text;
-    try {
-      widget.onChanged?.call(currentText);
-    } catch (exception, stack) {
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'widgets',
-        context: ErrorDescription('while calling onChanged'),
-      ));
+    if (oldValue.text != currentText || textCommitted) {
+      try {
+        widget.onChanged?.call(currentText);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while calling onChanged'),
+        ));
+      }
     }
     endBatchEdit();
   }
