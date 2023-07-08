@@ -677,16 +677,16 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   std::optional<uint32_t> GetUIIsolateReturnCode();
 
   //----------------------------------------------------------------------------
-  /// @brief      Updates the viewport metrics for the currently running Flutter
-  ///             application. The viewport metrics detail the size of the
-  ///             rendering viewport in texels as well as edge insets if
-  ///             present.
+  /// @brief      Updates the viewport metrics for a view. The viewport metrics
+  ///             detail the size of the rendering viewport in texels as well as
+  ///             edge insets if present.
   ///
   /// @see        `ViewportMetrics`
   ///
-  /// @param[in]  metrics  The metrics
+  /// @param[in]  view_id  The ID for the view that `metrics` describes.
+  /// @param[in]  metrics  The metrics.
   ///
-  void SetViewportMetrics(const ViewportMetrics& metrics);
+  void SetViewportMetrics(int64_t view_id, const ViewportMetrics& metrics);
 
   //----------------------------------------------------------------------------
   /// @brief      Updates the display metrics for the currently running Flutter
