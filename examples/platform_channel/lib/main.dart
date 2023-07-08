@@ -89,7 +89,6 @@ void main() {
   runApp(MaterialApp(
     title: 'Flutter platform_channel',
     theme: ThemeData(
-      primarySwatch: Colors.grey,
       useMaterial3: true,
     ),
     home: const PlatformChannel(),
