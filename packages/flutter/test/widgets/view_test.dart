@@ -69,24 +69,24 @@ void main() {
     );
   });
 
-  testWidgets('child of view finds view, viewHooks, mediaQuery', (WidgetTester tester) async {
+  testWidgets('child of view finds view, parentPipelineOwner, mediaQuery', (WidgetTester tester) async {
     FlutterView? outsideView;
     FlutterView? insideView;
-    ViewHooks? outsideHooks;
-    ViewHooks? insideHooks;
+    PipelineOwner? outsideParent;
+    PipelineOwner? insideParent;
 
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: Builder(
         builder: (BuildContext context) {
           outsideView = View.maybeOf(context);
-          outsideHooks = ViewHooks.of(context);
+          outsideParent = View.pipelineOwnerOf(context);
           return View(
             view: tester.view,
             child: Builder(
               builder: (BuildContext context) {
                 insideView = View.maybeOf(context);
-                insideHooks = ViewHooks.of(context);
+                insideParent = View.pipelineOwnerOf(context);
                 return const SizedBox();
               },
             ),
@@ -97,20 +97,18 @@ void main() {
     expect(outsideView, isNull);
     expect(insideView, equals(tester.view));
 
-    expect(outsideHooks, isNotNull);
-    expect(insideHooks, isNotNull);
-    expect(outsideHooks, isNot(equals(insideHooks)));
-    expect(outsideHooks!.renderViewManager, equals(insideHooks!.renderViewManager));
-    expect(outsideHooks!.pipelineOwner, isNot(equals(insideHooks!.pipelineOwner)));
+    expect(outsideParent, isNotNull);
+    expect(insideParent, isNotNull);
+    expect(outsideParent, isNot(equals(insideParent)));
 
-    expect(outsideHooks!.pipelineOwner, tester.binding.rootPipelineOwner);
-    expect(insideHooks!.pipelineOwner, equals(tester.renderObject(find.byType(SizedBox)).owner));
+    expect(outsideParent, tester.binding.rootPipelineOwner);
+    expect(insideParent, equals(tester.renderObject(find.byType(SizedBox)).owner));
 
     final List<PipelineOwner> pipelineOwners = <PipelineOwner> [];
     tester.binding.rootPipelineOwner.visitChildren((PipelineOwner child) {
       pipelineOwners.add(child);
     });
-    expect(pipelineOwners.single, equals(insideHooks!.pipelineOwner));
+    expect(pipelineOwners.single, equals(insideParent));
   });
 
   testWidgets('cannot have multiple views with same FlutterView', (WidgetTester tester) async {
@@ -138,24 +136,6 @@ void main() {
         contains('Multiple widgets used the same GlobalKey'),
       ),
     );
-  });
-
-  testWidgets('ViewHooks tests', (WidgetTester tester) async {
-    final PipelineOwner owner1 = PipelineOwner();
-    final PipelineOwner owner2 = PipelineOwner();
-    final RenderViewManager manager1 = FakeRenderViewManager();
-    final RenderViewManager manager2 = FakeRenderViewManager();
-
-    final ViewHooks hooks11 = ViewHooks(renderViewManager: manager1, pipelineOwner: owner1);
-    final ViewHooks hooks12 = ViewHooks(renderViewManager: manager1, pipelineOwner: owner2);
-    final ViewHooks hooks21 = ViewHooks(renderViewManager: manager2, pipelineOwner: owner1);
-    final ViewHooks hooks22 = ViewHooks(renderViewManager: manager2, pipelineOwner: owner2);
-    expect(hooks11, isNot(hooks12));
-    expect(hooks11, isNot(hooks21));
-    expect(hooks11, isNot(hooks22));
-    expect(ViewHooks(renderViewManager: hooks11.renderViewManager, pipelineOwner: hooks11.pipelineOwner), hooks11);
-    expect(hooks12.copyWith(pipelineOwner: hooks11.pipelineOwner), hooks11);
-    expect(hooks21.copyWith(renderViewManager: hooks11.renderViewManager), hooks11);
   });
 
   testWidgets('ViewCollection must have one view', (WidgetTester tester) async {
@@ -420,6 +400,53 @@ void main() {
       child: const SizedBox(),
     ), throwsAssertionError);
   });
+
+  testWidgets('attaches itself correctly', (WidgetTester tester) async {
+    final Key viewKey = UniqueKey();
+    late final PipelineOwner parentPipelineOwner;
+    await tester.pumpWidget(
+      ViewAnchor(
+        view: Builder(
+          builder: (BuildContext context) {
+            parentPipelineOwner = View.pipelineOwnerOf(context);
+            return View(
+              key: viewKey,
+              view: FakeView(tester.view),
+              child: const SizedBox(),
+            );
+          },
+        ),
+        child: const ColoredBox(color: Colors.green),
+      ),
+    );
+
+    expect(parentPipelineOwner, isNot(RendererBinding.instance.rootPipelineOwner));
+
+    final RenderView rawView = tester.renderObject<RenderView>(find.byKey(viewKey));
+    expect(RendererBinding.instance.renderViews,  contains(rawView));
+
+    final List<PipelineOwner> children = <PipelineOwner>[];
+    parentPipelineOwner.visitChildren((PipelineOwner child) {
+      children.add(child);
+    });
+    final PipelineOwner rawViewOwner = rawView.owner!;
+    expect(children, contains(rawViewOwner));
+
+    // Remove that View from the tree.
+    await tester.pumpWidget(
+      const ViewAnchor(
+        child: ColoredBox(color: Colors.green),
+      ),
+    );
+
+    expect(rawView.owner, isNull);
+    expect(RendererBinding.instance.renderViews, isNot(contains(rawView)));
+    children.clear();
+    parentPipelineOwner.visitChildren((PipelineOwner child) {
+      children.add(child);
+    });
+    expect(children, isNot(contains(rawViewOwner)));
+  });
 }
 
 Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
@@ -427,8 +454,6 @@ Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, require
   tester.binding.scheduleFrame();
   return tester.binding.pump();
 }
-
-class FakeRenderViewManager extends Fake implements RenderViewManager { }
 
 class FakeView extends TestFlutterView{
   FakeView(FlutterView view, { this.viewId = 100 }) : super(

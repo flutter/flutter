@@ -86,13 +86,13 @@ void main() {
     expect(tester.widget<ErrorWidget>(find.byType(ErrorWidget)).message, startsWith('Bad state: Behave!'));
   });
 
-  testWidgets('RawView attaches/detaches itself to surrounding ViewHooks', (WidgetTester tester) async {
-    late final ViewHooks hooks;
+  testWidgets('RawView attaches/detaches itself to surrounding pipeline owner', (WidgetTester tester) async {
+    late final PipelineOwner parentOwner;
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: Builder(
         builder: (BuildContext context) {
-          hooks = ViewHooks.of(context);
+          parentOwner = View.pipelineOwnerOf(context);
           return RawView(
             view: tester.view,
             builder: (BuildContext context, PipelineOwner owner) {
@@ -102,26 +102,24 @@ void main() {
         }
       ),
     );
-    final RendererBinding manager = hooks.renderViewManager as RendererBinding;
-    final PipelineOwner pipelineOwner = hooks.pipelineOwner;
 
     final RenderView rawView = tester.renderObject<RenderView>(find.byType(RawView));
 
-    expect(manager.renderViews, contains(rawView));
+    expect(RendererBinding.instance.renderViews, contains(rawView));
     final List<PipelineOwner> children = <PipelineOwner>[];
-    pipelineOwner.visitChildren((PipelineOwner child) {
+    parentOwner.visitChildren((PipelineOwner child) {
       children.add(child);
     });
     final PipelineOwner rawViewOwner = rawView.owner!;
     expect(children, contains(rawViewOwner));
 
     // Remove that RawView from the tree.
-    late final ViewHooks hooks2;
+    late final PipelineOwner parentOwner2;
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: Builder(
         builder: (BuildContext context) {
-          hooks2 = ViewHooks.of(context);
+          parentOwner2 = View.pipelineOwnerOf(context);
           return RawView(
             view: FakeView(tester.view),
             builder: (BuildContext context, PipelineOwner owner) {
@@ -132,11 +130,11 @@ void main() {
       ),
     );
 
-    expect(hooks2, hooks);
+    expect(parentOwner2, parentOwner);
     expect(rawView.owner, isNull);
-    expect(manager.renderViews, isNot(contains(rawView)));
+    expect(RendererBinding.instance.renderViews, isNot(contains(rawView)));
     children.clear();
-    pipelineOwner.visitChildren((PipelineOwner child) {
+    parentOwner.visitChildren((PipelineOwner child) {
       children.add(child);
     });
     expect(children, isNot(contains(rawViewOwner)));

@@ -24,8 +24,8 @@ import 'media_query.dart';
 /// Each [FlutterView] can be associated with at most one [View] widget in the
 /// widget tree. Two or more [View] widgets configured with the same
 /// [FlutterView] must never exist within the same widget tree at the same time.
-/// Internally, this limitation is enforced by a [GlobalObjectKey] that derives
-/// its identity from the [view] provided to this widget.
+/// This limitation is enforced by a [GlobalObjectKey] that derives its identity
+/// from the [view] provided to this widget.
 ///
 /// Since the [View] widget bootstraps its own independent render tree, neither
 /// it not any of its descendants will insert a [RenderObject] into an existing
@@ -34,9 +34,10 @@ import 'media_query.dart';
 /// of the surrounding render tree. In practical terms, this means it can
 /// typically be used at the root of the widget tree outside of any other [View]
 /// widget, as a child of a [ViewCollection] widget, or in the [ViewAnchor.view]
-/// slot of a [ViewAnchor] widget. It might not be a direct child, though, since
-/// other non-[RenderObjectWidget]s (e.g. [InheritedWidget]s) are allowed to be
-/// present between those widgets and the [View] widget.
+/// slot of a [ViewAnchor] widget. It is not required be a direct child, though,
+/// since other non-[RenderObjectWidget]s (e.g. [InheritedWidget]s or
+/// [Builder]s) are allowed to be present between those widgets and the [View]
+/// widget.
 ///
 /// In technical terms, whether a [View] is allowed to occupy a certain slot of
 /// an element is determined by that element's
@@ -146,6 +147,17 @@ class View extends StatelessWidget {
     return result!;
   }
 
+  /// Returns the [PipelineOwner] parent to which a child [View] should attach
+  /// its [PipelineOwner] to.
+  ///
+  /// If `context` has a [View] ancestor, it returns the [PipelineOwner]
+  /// responsible for managing the render tree of that view. If there is no
+  /// [View] ancestor, [RendererBinding.rootPipelineOwner] is returned instead.
+  static PipelineOwner pipelineOwnerOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_PipelineOwnerScope>()?.pipelineOwner
+        ?? RendererBinding.instance.rootPipelineOwner;
+  }
+
   @override
   Widget build(BuildContext context) {
     return RawView._deprecated(
@@ -155,8 +167,8 @@ class View extends StatelessWidget {
       builder: (BuildContext context, PipelineOwner owner) {
         return _ViewScope(
           view: view,
-          child: _ViewHooksScope(
-            hooks: ViewHooks.of(context).copyWith(pipelineOwner: owner),
+          child: _PipelineOwnerScope(
+            pipelineOwner: owner,
             child: MediaQuery.fromView(
               view: view,
               child: child,
@@ -175,8 +187,7 @@ class View extends StatelessWidget {
 ///
 /// The builder is given the [PipelineOwner] that the [RawView] uses to manage
 /// its render tree. Typical builder implementations make that pipeline owner
-/// available as an attachment point for potential child views by inserting
-/// updated [ViewHooks] into the widget tree.
+/// available as an attachment point for potential child views.
 ///
 /// Used by [RawView.builder].
 typedef RawViewContentBuilder = Widget Function(BuildContext context, PipelineOwner owner);
@@ -185,12 +196,11 @@ typedef RawViewContentBuilder = Widget Function(BuildContext context, PipelineOw
 /// tree.
 ///
 /// It instantiates the [RenderView] as the root of that render tree and adds it
-/// to the [RenderViewManager] obtained from the surrounding [ViewHooks] via
-/// [ViewHooks.of] (typically, that is the [RendererBinding]). It also owns the
-/// [PipelineOwner] that manages this render tree and adds it as a child to the
-/// surrounding [ViewHooks.pipelineOwner]. This ensures that the render tree
-/// bootstrapped by this widget participates properly in frame production and
-/// hit testing.
+/// to the [RendererBinding] via [RendererBinding.addRenderView]. It also owns
+/// the [PipelineOwner] that manages this render tree and adds it as a child to
+/// the surrounding parent [PipelineOwner] obtained with [View.pipelineOwnerOf].
+/// This ensures that the render tree bootstrapped by this widget participates
+/// properly in frame production and hit testing.
 ///
 /// The [RawView] widget faces the same limitations in terms of where it can
 /// appear in the widget tree as the [View] widget. See the [View] widget for
@@ -198,7 +208,8 @@ typedef RawViewContentBuilder = Widget Function(BuildContext context, PipelineOw
 ///
 /// The [RawView] widget is rarely used directly. Instead, consider using the
 /// [View] widget, which also inserts a proper [MediaQuery] for the [view] into
-/// the tree and provides updated [ViewHooks] to potential child views.
+/// the tree and injects the [PipelineOwner] of this view into the tree for
+/// potential child views.
 class RawView extends RenderObjectWidget {
   /// Create a [RawView] widget to bootstrap a render tree that is rendered into
   /// the provided [FlutterView].
@@ -228,8 +239,7 @@ class RawView extends RenderObjectWidget {
   /// Determines the content [Widget] that is drawn into the [view].
   ///
   /// The [builder] is given the [PipelineOwner] responsible for the render tree
-  /// bootstrapped by this widget. Typically, the [builder] inserts updated
-  /// [ViewHooks] into the tree that contain this pipeline owner as an
+  /// bootstrapped by this widget and typically makes it available as an
   /// attachment point for potential child views.
   final RawViewContentBuilder builder;
 
@@ -303,7 +313,7 @@ class _RawViewElement extends RenderTreeRootElement {
     super.mount(parent, newSlot);
     assert(_effectivePipelineOwner.rootNode == null);
     _effectivePipelineOwner.rootNode = renderObject;
-    _attachToViewHooks();
+    _attachView();
     _updateChild();
     renderObject.prepareInitialFrame();
     if (_effectivePipelineOwner.semanticsOwner != null) {
@@ -311,35 +321,35 @@ class _RawViewElement extends RenderTreeRootElement {
     }
   }
 
-  ViewHooks? _currentViewHooks;
+  PipelineOwner? _parentPipelineOwner; // Is null if view is currently not attached.
 
-  void _attachToViewHooks([ViewHooks? viewHooks]) {
-    assert(_currentViewHooks == null);
-    viewHooks ??= ViewHooks.of(this);
-    viewHooks.pipelineOwner.adoptChild(_effectivePipelineOwner);
-    viewHooks.renderViewManager.addRenderView(renderObject);
-    _currentViewHooks = viewHooks;
+  void _attachView([PipelineOwner? parentPipelineOwner]) {
+    assert(_parentPipelineOwner == null);
+    parentPipelineOwner ??= View.pipelineOwnerOf(this);
+    parentPipelineOwner.adoptChild(_effectivePipelineOwner);
+    RendererBinding.instance.addRenderView(renderObject);
+    _parentPipelineOwner = parentPipelineOwner;
   }
 
-  void _detachFromViewHooks() {
-    final ViewHooks? viewHooks = _currentViewHooks;
-    if (viewHooks != null) {
-      viewHooks.renderViewManager.removeRenderView(renderObject);
-      viewHooks.pipelineOwner.dropChild(_effectivePipelineOwner);
-      _currentViewHooks = null;
+  void _detachView() {
+    final PipelineOwner? parentPipelineOwner = _parentPipelineOwner;
+    if (parentPipelineOwner != null) {
+      RendererBinding.instance.removeRenderView(renderObject);
+      parentPipelineOwner.dropChild(_effectivePipelineOwner);
+      _parentPipelineOwner = null;
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_currentViewHooks == null) {
+    if (_parentPipelineOwner == null) {
       return;
     }
-    final ViewHooks newHooks = ViewHooks.of(this);
-    if (newHooks != _currentViewHooks) {
-      _detachFromViewHooks();
-      _attachToViewHooks(newHooks);
+    final PipelineOwner newParentPipelineOwner = View.pipelineOwnerOf(this);
+    if (newParentPipelineOwner != _parentPipelineOwner) {
+      _detachView();
+      _attachView(newParentPipelineOwner);
     }
   }
 
@@ -354,12 +364,12 @@ class _RawViewElement extends RenderTreeRootElement {
     super.activate();
     assert(_effectivePipelineOwner.rootNode == null);
     _effectivePipelineOwner.rootNode = renderObject;
-    _attachToViewHooks();
+    _attachView();
   }
 
   @override
   void deactivate() {
-    _detachFromViewHooks();
+    _detachView();
     assert(_effectivePipelineOwner.rootNode == renderObject);
     _effectivePipelineOwner.rootNode = null; // To satisfy the assert in the super class.
     super.deactivate();
@@ -422,93 +432,16 @@ class _ViewScope extends InheritedWidget {
   bool updateShouldNotify(_ViewScope oldWidget) => view != oldWidget.view;
 }
 
-class _ViewHooksScope extends InheritedWidget {
-  const _ViewHooksScope({
-    required this.hooks,
+class _PipelineOwnerScope extends InheritedWidget {
+  const _PipelineOwnerScope({
+    required this.pipelineOwner,
     required super.child,
   });
 
-  final ViewHooks hooks;
-
-  @override
-  bool updateShouldNotify(_ViewHooksScope oldWidget) => hooks != oldWidget.hooks;
-}
-
-/// Attachment points for a [View] and the render tree that defines its content.
-///
-/// To participate in frame production, the [View] widget (or more specifically
-/// the underlying [RawView] widget) needs to add the [RenderView] root of its
-/// render tree to a [RenderViewManager] (typically, the [RendererBinding]) and
-/// add the [PipelineOwner] managing that tree to the pipeline owner tree. The
-/// [ViewHooks] define these attachment points for the [View]/[RawView] widget.
-/// They can be looked up from a [BuildContext] with [ViewHooks.of].
-@immutable
-class ViewHooks {
-  /// Creates a [ViewHooks] instance with the provided [renderViewManager]
-  /// and [pipelineOwner].
-  const ViewHooks({
-    required this.renderViewManager,
-    required this.pipelineOwner,
-  });
-
-  /// The closest [ViewHooks] instance that encloses the given `context`.
-  ///
-  /// Calling this method establishes a dependency and the provided `context`
-  /// and causes it to rebuild whenever the [ViewHooks] change.
-  ///
-  /// When no [ViewHooks] are available in the provided `context`, a default
-  /// ViewHooks instance with [renderViewManager] set to
-  /// [RendererBinding.instance] and [pipelineOwner] set to
-  /// [RendererBinding.rootPipelineOwner] is returned.
-  static ViewHooks of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_ViewHooksScope>()?.hooks
-        ?? ViewHooks(
-          renderViewManager: RendererBinding.instance,
-          pipelineOwner: RendererBinding.instance.rootPipelineOwner,
-        );
-  }
-
-  /// The [RenderViewManager] to which the [RawView] widget should add the
-  /// [RenderView] root of its render tree by calling
-  /// [RenderViewManager.addRenderView].
-  final RenderViewManager renderViewManager;
-
-  /// The parent [PipelineOwner] to which the [RawView] widget should add the
-  /// [PipelineOwner] managing its render tree by calling
-  /// [PipelineOwner.adoptChild].
   final PipelineOwner pipelineOwner;
 
-  /// Create a clone of the current [ViewHooks] but with provided parameters
-  /// replaced.
-  ViewHooks copyWith({
-    RenderViewManager? renderViewManager,
-    PipelineOwner? pipelineOwner,
-  }) {
-    assert(renderViewManager != null || pipelineOwner != null);
-    return ViewHooks(
-      renderViewManager: renderViewManager ?? this.renderViewManager,
-      pipelineOwner: pipelineOwner ?? this.pipelineOwner,
-    );
-  }
-
   @override
-  int get hashCode => Object.hash(renderViewManager, pipelineOwner);
-
-  @override
-  bool operator ==(Object other) {
-    return other is ViewHooks
-        && renderViewManager == other.renderViewManager
-        && pipelineOwner == other.pipelineOwner;
-  }
-
-  @override
-  String toString() {
-    return
-      '${objectRuntimeType(this, 'ViewHooks')}('
-        'pipelineOwner: $pipelineOwner, '
-        'renderViewManager: $renderViewManager'
-      ')';
-  }
+  bool updateShouldNotify(_PipelineOwnerScope oldWidget) => pipelineOwner != oldWidget.pipelineOwner;
 }
 
 class _MultiChildComponentWidget extends Widget {

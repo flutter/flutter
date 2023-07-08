@@ -33,7 +33,7 @@ export 'package:flutter/gestures.dart' show HitTestResult;
 /// described above is left as a responsibility for a higher level abstraction.
 /// The widgets library, for example, introduces the [View] widget, which
 /// registers its [RenderView] and [PipelineOwner] with this binding.
-mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable implements RenderViewManager {
+mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable {
   @override
   void initInstances() {
     super.initInstances();
@@ -326,7 +326,16 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   Iterable<RenderView> get renderViews => _viewIdToRenderView.values;
   final Map<Object, RenderView> _viewIdToRenderView = <Object, RenderView>{};
 
-  @override
+  /// Adds a [RenderView] to this binding.
+  ///
+  /// The binding will interact with the [RenderView] in the following ways:
+  ///
+  ///  * setting and updating [RenderView.configuration],
+  ///  * calling [RenderView.compositeFrame] when it is time to produce a new
+  ///    frame, and
+  ///  * forwarding relevant pointer events to the [RenderView] for hit testing.
+  ///
+  /// To remove a [RenderView] from the binding, call [removeRenderView].
   void addRenderView(RenderView view) {
     final Object viewId = view.flutterView.viewId;
     assert(!_viewIdToRenderView.containsValue(view));
@@ -335,7 +344,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     view.configuration = createViewConfigurationFor(view);
   }
 
-  @override
+  /// Removes a [RenderView] previously added with [addRenderView] from the
+  /// binding.
   void removeRenderView(RenderView view) {
     final Object viewId = view.flutterView.viewId;
     assert(_viewIdToRenderView[viewId] == view);
