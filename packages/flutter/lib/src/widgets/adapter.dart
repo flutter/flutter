@@ -15,12 +15,10 @@ import 'framework.dart';
 /// [RenderObject] that the container expects as its child.
 ///
 /// The [RenderObjectToWidgetAdapter] is an alternative to [RootWidget] for
-/// bootstrapping the element tree. Unlike [RootWidget] it requires the
+/// bootstrapping an element tree. Unlike [RootWidget] it requires the
 /// existence of a render tree (the [container]) to attach the element tree to.
 class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWidget {
   /// Creates a bridge from a [RenderObject] to an [Element] tree.
-  ///
-  /// Used by [WidgetsBinding] to attach the root widget to the [RenderView].
   RenderObjectToWidgetAdapter({
     this.child,
     required this.container,
