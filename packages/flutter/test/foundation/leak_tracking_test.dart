@@ -18,7 +18,7 @@ Leaks _leaksOfAllTypes() => Leaks(<LeakType, List<LeakReport>> {
 });
 
 Future<void> main() async {
-  test('Trivial $LeakCleaner returns only non-disposed leaks.', () {
+  test('Trivial $LeakCleaner returns all leaks.', () {
     final LeakCleaner leakCleaner = LeakCleaner(const LeakTrackingTestConfig());
     final Leaks leaks = _leaksOfAllTypes();
     final int leakTotal = leaks.total;
