@@ -19,7 +19,9 @@
 namespace flutter {
 namespace testing {
 
-TEST_F(ShellTest, PlatformConfigurationInitialization) {
+class PlatformConfigurationTest : public ShellTest {};
+
+TEST_F(PlatformConfigurationTest, Initialization) {
   auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
 
   auto nativeValidateConfiguration = [message_latch](
@@ -63,7 +65,7 @@ TEST_F(ShellTest, PlatformConfigurationInitialization) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, PlatformConfigurationWindowMetricsUpdate) {
+TEST_F(PlatformConfigurationTest, WindowMetricsUpdate) {
   auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
 
   auto nativeValidateConfiguration = [message_latch](
@@ -113,7 +115,46 @@ TEST_F(ShellTest, PlatformConfigurationWindowMetricsUpdate) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, PlatformConfigurationOnErrorHandlesError) {
+TEST_F(PlatformConfigurationTest, GetWindowReturnsNullForNonexistentId) {
+  auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
+
+  auto nativeValidateConfiguration =
+      [message_latch](Dart_NativeArguments args) {
+        PlatformConfiguration* configuration =
+            UIDartState::Current()->platform_configuration();
+
+        ASSERT_EQ(configuration->get_window(1), nullptr);
+        ASSERT_EQ(configuration->get_window(2), nullptr);
+
+        message_latch->Signal();
+      };
+
+  Settings settings = CreateSettingsForFixture();
+  TaskRunners task_runners("test",                  // label
+                           GetCurrentTaskRunner(),  // platform
+                           CreateNewThread(),       // raster
+                           CreateNewThread(),       // ui
+                           CreateNewThread()        // io
+  );
+
+  AddNativeCallback("ValidateConfiguration",
+                    CREATE_NATIVE_ENTRY(nativeValidateConfiguration));
+
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+
+  ASSERT_TRUE(shell->IsSetup());
+  auto run_configuration = RunConfiguration::InferFromSettings(settings);
+  run_configuration.SetEntrypoint("validateConfiguration");
+
+  shell->RunEngine(std::move(run_configuration), [&](auto result) {
+    ASSERT_EQ(result, Engine::RunStatus::Success);
+  });
+
+  message_latch->Wait();
+  DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(PlatformConfigurationTest, OnErrorHandlesError) {
   auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
   bool did_throw = false;
 
@@ -159,7 +200,7 @@ TEST_F(ShellTest, PlatformConfigurationOnErrorHandlesError) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, PlatformConfigurationOnErrorDoesNotHandleError) {
+TEST_F(PlatformConfigurationTest, OnErrorDoesNotHandleError) {
   auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
   std::string ex;
   std::string st;
@@ -211,7 +252,7 @@ TEST_F(ShellTest, PlatformConfigurationOnErrorDoesNotHandleError) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, PlatformConfigurationOnErrorThrows) {
+TEST_F(PlatformConfigurationTest, OnErrorThrows) {
   auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
   std::vector<std::string> errors;
   size_t throw_count = 0;
@@ -266,7 +307,7 @@ TEST_F(ShellTest, PlatformConfigurationOnErrorThrows) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, PlatformConfigurationSetDartPerformanceMode) {
+TEST_F(PlatformConfigurationTest, SetDartPerformanceMode) {
   auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
   auto finish = [message_latch](Dart_NativeArguments args) {
     // call needs to happen on the UI thread.

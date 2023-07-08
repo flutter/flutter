@@ -100,6 +100,7 @@ bool EmbedderEngine::NotifyDestroyed() {
 }
 
 bool EmbedderEngine::SetViewportMetrics(
+    int64_t view_id,
     const flutter::ViewportMetrics& metrics) {
   if (!IsValid()) {
     return false;
@@ -109,7 +110,7 @@ bool EmbedderEngine::SetViewportMetrics(
   if (!platform_view) {
     return false;
   }
-  platform_view->SetViewportMetrics(metrics);
+  platform_view->SetViewportMetrics(view_id, metrics);
   return true;
 }
 
