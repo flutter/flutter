@@ -3252,8 +3252,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   ///
   /// See also:
   ///
-  /// * [computeTransformToRenderObject] which does the same, but the target
-  ///   `RenderObject` does not have to be an ancestor.
+  ///  * [computeTransformToRenderObject] which does the same, but the target
+  ///    `RenderObject` does not have to be an ancestor.
   Matrix4 getTransformTo(RenderObject? ancestor) {
     assert(attached);
     final Matrix4 identity = Matrix4.identity();
@@ -3265,6 +3265,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
   }
 
+  // Computes the paint transform from this to toRenderObject and applies it on
+  // `transform`.
   Matrix4 _computePaintTransform(RenderObject toRenderObject, Matrix4 transform) {
     if (!identical(this, toRenderObject)) {
       final RenderObject? parent = this.parent;
@@ -3280,9 +3282,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   Matrix4 _computePaintTransformToGlobalCoordinates(RenderObject parent, Matrix4 transform) {
     final RenderObject? parentParent = parent.parent;
     if (parentParent != null) {
-      assert(parent is! RenderView);
       parent.applyPaintTransform(this, parent._computePaintTransformToGlobalCoordinates(parentParent, transform));
     }
+    assert(parentParent != null || parent is RenderView);
+    assert(parentParent == null || parent is! RenderView);
     return transform;
   }
 
@@ -3294,9 +3297,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   ///
   /// See also:
   ///
-  ///   * [getTransformTo] which does the same, but only searches up the tree.
-  ///   * [paintsChild] which this method uses to determine whether
-  ///     a `RenderObject` is in an offscreen subtree.
+  ///  * [getTransformTo] which does the same, but only searches up the tree.
+  ///  * [paintsChild] which this method uses to determine whether
+  ///    a `RenderObject` is in an offscreen subtree.
   Matrix4? computeTransformToRenderObject(RenderObject toRenderObject) {
     final Matrix4 transform = Matrix4.identity();
     final Matrix4 inverseTransform = Matrix4.identity();
