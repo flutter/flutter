@@ -305,6 +305,7 @@ void main() {
       processManager: processManager,
       plistParser: FakePlistParser(<String, String>{
         PlistParser.kCFBundleShortVersionStringKey: '2020.10',
+        PlistParser.kCFBundleIdentifierKey: 'com.jetbrains.intellij',
       }),
     ).whereType<IntelliJValidatorOnMac>();
     expect(validators.length, 2);
@@ -370,6 +371,47 @@ void main() {
     );
 
     expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
+  });
+
+  testWithoutContext('Remove JetBrains Toolbox', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final List<String> installPaths = <String>[
+      fileSystem.path.join('/', 'foo', 'bar', 'Applications',
+          'JetBrains Toolbox', 'IntelliJ IDEA Ultimate.app'),
+      fileSystem.path.join('/', 'foo', 'bar', 'Applications',
+          'JetBrains Toolbox', 'IntelliJ IDEA Community Edition.app')
+    ];
+
+    for (final String installPath in installPaths) {
+      fileSystem.directory(installPath).createSync(recursive: true);
+    }
+
+    final FakeProcessManager processManager =
+    FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'mdfind',
+        'kMDItemCFBundleIdentifier="com.jetbrains.intellij.ce"',
+      ], stdout: 'skip'),
+      const FakeCommand(command: <String>[
+        'mdfind',
+        'kMDItemCFBundleIdentifier="com.jetbrains.intellij*"',
+      ], stdout: 'skip')
+    ]);
+
+    final Iterable<DoctorValidator> installed =
+    IntelliJValidatorOnMac.installed(
+      fileSystem: fileSystem,
+      fileSystemUtils:
+      FileSystemUtils(fileSystem: fileSystem, platform: macPlatform),
+      userMessages: UserMessages(),
+      plistParser: FakePlistParser(<String, String>{
+        'JetBrainsToolboxApp': '/path/to/JetBrainsToolboxApp',
+        'CFBundleIdentifier': 'com.jetbrains.toolbox.linkapp',
+      }),
+      processManager: processManager,
+    );
+
+    expect(installed.length, 0);
   });
 }
 
