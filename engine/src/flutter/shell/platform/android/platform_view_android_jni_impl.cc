@@ -37,6 +37,8 @@
 
 namespace flutter {
 
+static constexpr int64_t kFlutterImplicitViewId = 0ll;
+
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_callback_info_class =
     nullptr;
 
@@ -338,7 +340,8 @@ static void SetViewportMetrics(JNIEnv* env,
       0,  // Display ID
   };
 
-  ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(metrics);
+  ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(
+      kFlutterImplicitViewId, metrics);
 }
 
 static void UpdateDisplayMetrics(JNIEnv* env,

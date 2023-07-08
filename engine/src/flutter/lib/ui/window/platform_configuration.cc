@@ -308,6 +308,15 @@ void PlatformConfiguration::ReportTimings(std::vector<int64_t> timings) {
                                                }));
 }
 
+Window* PlatformConfiguration::get_window(int window_id) {
+  auto found = windows_.find(window_id);
+  if (found != windows_.end()) {
+    return found->second.get();
+  } else {
+    return nullptr;
+  }
+}
+
 void PlatformConfiguration::CompletePlatformMessageEmptyResponse(
     int response_id) {
   if (!response_id) {

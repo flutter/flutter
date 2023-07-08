@@ -292,8 +292,9 @@ tonic::DartErrorHandleType Engine::GetUIIsolateLastError() {
   return runtime_controller_->GetLastError();
 }
 
-void Engine::SetViewportMetrics(const ViewportMetrics& metrics) {
-  runtime_controller_->SetViewportMetrics(metrics);
+void Engine::SetViewportMetrics(int64_t view_id,
+                                const ViewportMetrics& metrics) {
+  runtime_controller_->SetViewportMetrics(view_id, metrics);
   ScheduleFrame();
 }
 

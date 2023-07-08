@@ -104,14 +104,15 @@ class PlatformView {
         const fml::closure& closure) = 0;
 
     //--------------------------------------------------------------------------
-    /// @brief      Notifies the delegate the viewport metrics of the platform
-    ///             view have been updated. The rasterizer will need to be
-    ///             reconfigured to render the frame in the updated viewport
-    ///             metrics.
+    /// @brief      Notifies the delegate the viewport metrics of a view have
+    ///             been updated. The rasterizer will need to be reconfigured to
+    ///             render the frame in the updated viewport metrics.
     ///
+    /// @param[in]  view_id  The ID for the view that `metrics` describes.
     /// @param[in]  metrics  The updated viewport metrics.
     ///
     virtual void OnPlatformViewSetViewportMetrics(
+        int64_t view_id,
         const ViewportMetrics& metrics) = 0;
 
     //--------------------------------------------------------------------------
@@ -465,16 +466,17 @@ class PlatformView {
                                CustomAccessibilityActionUpdates actions);
 
   //----------------------------------------------------------------------------
-  /// @brief      Used by embedders to specify the updated viewport metrics. In
-  ///             response to this call, on the raster thread, the rasterizer
-  ///             may need to be reconfigured to the updated viewport
+  /// @brief      Used by embedders to specify the updated viewport metrics for
+  ///             a view. In response to this call, on the raster thread, the
+  ///             rasterizer may need to be reconfigured to the updated viewport
   ///             dimensions. On the UI thread, the framework may need to start
   ///             generating a new frame for the updated viewport metrics as
   ///             well.
   ///
+  /// @param[in]  view_id  The ID for the view that `metrics` describes.
   /// @param[in]  metrics  The updated viewport metrics.
   ///
-  void SetViewportMetrics(const ViewportMetrics& metrics);
+  void SetViewportMetrics(int64_t view_id, const ViewportMetrics& metrics);
 
   //----------------------------------------------------------------------------
   /// @brief      Used by embedders to notify the shell that a platform view

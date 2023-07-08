@@ -21,6 +21,8 @@
 namespace flutter {
 
 namespace {
+constexpr int64_t kImplicitViewId = 0ll;
+
 class MockDelegate : public Engine::Delegate {
  public:
   MOCK_METHOD2(OnEngineUpdateSemantics,
@@ -330,7 +332,8 @@ TEST_F(EngineTest, SpawnResetsViewportMetrics) {
     const double kViewHeight = 1024;
     old_viewport_metrics.physical_width = kViewWidth;
     old_viewport_metrics.physical_height = kViewHeight;
-    mock_runtime_controller->SetViewportMetrics(old_viewport_metrics);
+    mock_runtime_controller->SetViewportMetrics(kImplicitViewId,
+                                                old_viewport_metrics);
     auto engine = std::make_unique<Engine>(
         /*delegate=*/delegate_,
         /*dispatcher_maker=*/dispatcher_maker_,

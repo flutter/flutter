@@ -954,7 +954,8 @@ void Shell::OnPlatformViewScheduleFrame() {
 }
 
 // |PlatformView::Delegate|
-void Shell::OnPlatformViewSetViewportMetrics(const ViewportMetrics& metrics) {
+void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
+                                             const ViewportMetrics& metrics) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
@@ -978,9 +979,9 @@ void Shell::OnPlatformViewSetViewportMetrics(const ViewportMetrics& metrics) {
       });
 
   task_runners_.GetUITaskRunner()->PostTask(
-      [engine = engine_->GetWeakPtr(), metrics]() {
+      [engine = engine_->GetWeakPtr(), view_id, metrics]() {
         if (engine) {
-          engine->SetViewportMetrics(metrics);
+          engine->SetViewportMetrics(view_id, metrics);
         }
       });
 

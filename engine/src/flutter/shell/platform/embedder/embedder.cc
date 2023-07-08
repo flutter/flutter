@@ -83,6 +83,8 @@ extern const intptr_t kPlatformStrongDillSize;
 const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
 const int32_t kFlutterSemanticsCustomActionIdBatchEnd = -1;
 
+static constexpr int64_t kFlutterImplicitViewId = 0;
+
 // A message channel to send platform-independent FlutterKeyData to the
 // framework.
 //
@@ -2186,6 +2188,8 @@ FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
   if (engine == nullptr || flutter_metrics == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
+  // TODO(dkwingsmt): Use a real view ID when multiview is supported.
+  int64_t view_id = kFlutterImplicitViewId;
 
   flutter::ViewportMetrics metrics;
 
@@ -2227,7 +2231,7 @@ FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
   }
 
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)->SetViewportMetrics(
-             metrics)
+             view_id, metrics)
              ? kSuccess
              : LOG_EMBEDDER_ERROR(kInvalidArguments,
                                   "Viewport metrics were invalid.");

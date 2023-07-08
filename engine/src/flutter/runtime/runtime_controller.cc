@@ -20,7 +20,7 @@
 
 namespace flutter {
 
-const uint64_t kFlutterImplicitViewId = 0llu;
+constexpr uint64_t kFlutterImplicitViewId = 0ll;
 
 RuntimeController::RuntimeController(RuntimeDelegate& p_client,
                                      const TaskRunners& task_runners)
@@ -115,7 +115,10 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
 }
 
 bool RuntimeController::FlushRuntimeStateToIsolate() {
-  return SetViewportMetrics(platform_data_.viewport_metrics) &&
+  // TODO(dkwingsmt): Needs a view ID here (or platform_data should probably
+  // have multiple view metrics).
+  return SetViewportMetrics(kFlutterImplicitViewId,
+                            platform_data_.viewport_metrics) &&
          SetLocales(platform_data_.locale_data) &&
          SetSemanticsEnabled(platform_data_.semantics_enabled) &&
          SetAccessibilityFeatures(
@@ -125,13 +128,19 @@ bool RuntimeController::FlushRuntimeStateToIsolate() {
          SetDisplays(platform_data_.displays);
 }
 
-bool RuntimeController::SetViewportMetrics(const ViewportMetrics& metrics) {
+bool RuntimeController::SetViewportMetrics(int64_t view_id,
+                                           const ViewportMetrics& metrics) {
   TRACE_EVENT0("flutter", "SetViewportMetrics");
   platform_data_.viewport_metrics = metrics;
 
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    platform_configuration->get_window(0)->UpdateWindowMetrics(metrics);
-    return true;
+    Window* window = platform_configuration->get_window(view_id);
+    if (window) {
+      window->UpdateWindowMetrics(metrics);
+      return true;
+    } else {
+      FML_LOG(WARNING) << "View ID " << view_id << " does not exist.";
+    }
   }
 
   return false;

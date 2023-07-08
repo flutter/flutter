@@ -21,8 +21,8 @@ class MockDelegate : public PlatformView::Delegate {
   MOCK_METHOD0(OnPlatformViewScheduleFrame, void());
   MOCK_METHOD1(OnPlatformViewSetNextFrameCallback,
                void(const fml::closure& closure));
-  MOCK_METHOD1(OnPlatformViewSetViewportMetrics,
-               void(const ViewportMetrics& metrics));
+  MOCK_METHOD2(OnPlatformViewSetViewportMetrics,
+               void(int64_t view_id, const ViewportMetrics& metrics));
   MOCK_METHOD1(OnPlatformViewDispatchPlatformMessage,
                void(std::unique_ptr<PlatformMessage> message));
   MOCK_METHOD1(OnPlatformViewDispatchPointerDataPacket,

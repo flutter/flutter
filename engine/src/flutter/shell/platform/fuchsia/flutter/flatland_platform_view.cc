@@ -8,6 +8,8 @@
 
 namespace flutter_runner {
 
+static constexpr int64_t kFlutterImplicitViewId = 0ll;
+
 FlatlandPlatformView::FlatlandPlatformView(
     flutter::PlatformView::Delegate& delegate,
     flutter::TaskRunners task_runners,
@@ -84,8 +86,7 @@ void FlatlandPlatformView::OnGetLayout(
   }
 
   float pixel_ratio = view_pixel_ratio_ ? *view_pixel_ratio_ : 1.0f;
-
-  SetViewportMetrics({
+  flutter::ViewportMetrics metrics{
       pixel_ratio,  // device_pixel_ratio
       std::round(view_logical_size_.value()[0] *
                  pixel_ratio),  // physical_width
@@ -108,7 +109,8 @@ void FlatlandPlatformView::OnGetLayout(
       {},                       // p_physical_display_features_type
       {},                       // p_physical_display_features_state
       0,                        // p_display_id
-  });
+  };
+  SetViewportMetrics(kFlutterImplicitViewId, metrics);
 
   parent_viewport_watcher_->GetLayout(
       fit::bind_member(this, &FlatlandPlatformView::OnGetLayout));
