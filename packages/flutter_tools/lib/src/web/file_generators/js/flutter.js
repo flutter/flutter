@@ -156,17 +156,15 @@ _flutter.loader = null;
     }
 
     /**
-     * Returns the latest service worker for the given `serviceWorkerRegistrationPromise`.
+     * Returns the latest service worker for the given `ServiceWorkerRegistration`.
      *
      * This might return the current service worker, if there's no new service worker
      * awaiting to be installed/updated.
      *
-     * @param {Promise<ServiceWorkerRegistration>} serviceWorkerRegistrationPromise
-     * @returns {Promise<ServiceWorker>}
+     * @param {ServiceWorkerRegistration} reg
+     * @returns {ServiceWorker}
      */
-    async _getNewServiceWorker(serviceWorkerRegistrationPromise) {
-      const reg = await serviceWorkerRegistrationPromise;
-
+    _getNewServiceWorker(reg) {
       if (!reg.active && (reg.installing || reg.waiting)) {
         // No active web worker and we have installed or are installing
         // one for the first time. Simply wait for it to activate.
@@ -189,11 +187,11 @@ _flutter.loader = null;
      * Returns a Promise that resolves when the `latestServiceWorker` changes its
      * state to "activated".
      *
-     * @param {Promise<ServiceWorker>} latestServiceWorkerPromise
+     * @param {ServiceWorker} latestServiceWorker
      * @returns {Promise<void>}
      */
-    async _waitForServiceWorkerActivation(latestServiceWorkerPromise) {
-      const serviceWorker = await latestServiceWorkerPromise;
+    _waitForServiceWorkerActivation(latestServiceWorker) {
+      const serviceWorker = latestServiceWorker;
 
       if (!serviceWorker || serviceWorker.state == "activated") {
         if (!serviceWorker) {
