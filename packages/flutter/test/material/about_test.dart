@@ -201,7 +201,7 @@ void main() {
     await tester.tap(find.text('Another package'));
     await tester.pumpAndSettle();
     expect(find.text('Another license'), findsOneWidget);
-  });
+  }, leakTrackingTestConfig: LeakTrackingTestConfig.debug());
 
   testWidgetsWithLeakTracking('LicensePage control test with all properties', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
