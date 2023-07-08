@@ -137,7 +137,7 @@ void main() {
           true);
     });
 
-    testUsingContext('throws ToolExit when Local engine is not specified',
+    testUsingContext('throws ToolExit when local engine is not specified',
         () async {
       final CreateLocalEngineRepoCommand command =
           CreateLocalEngineRepoCommand();
