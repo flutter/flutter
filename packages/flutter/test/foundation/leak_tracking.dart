@@ -35,6 +35,9 @@ class WeakSet {
   }
 }
 
+/// If true, the leak tracker will collect debug information for leaks.
+bool collectDebugInformationForLeaks = false;
+
 /// Wrapper for [testWidgets] with memory leak tracking.
 ///
 /// The method will fail if instrumented objects in [callback] are
@@ -54,13 +57,18 @@ void testWidgetsWithLeakTracking(
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
-  LeakTrackingTestConfig leakTrackingConfig = const LeakTrackingTestConfig(),
+  LeakTrackingTestConfig? leakTrackingTestConfig,
 }) {
+  final LeakTrackingTestConfig config = leakTrackingTestConfig ??
+      (collectDebugInformationForLeaks
+          ? LeakTrackingTestConfig.debug()
+          : const LeakTrackingTestConfig());
+
   Future<void> wrappedCallback(WidgetTester tester) async {
     await _withFlutterLeakTracking(
       () async => callback(tester),
       tester,
-      leakTrackingConfig,
+      config,
     );
   }
 
