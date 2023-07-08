@@ -8,7 +8,7 @@
 
 #import "flutter/testing/testing.h"
 
-constexpr int64_t kDefaultViewId = 0ll;
+constexpr int64_t kImplicitViewId = 0ll;
 
 @interface TestReshapeListener : NSObject <FlutterViewReshapeListener>
 
@@ -30,6 +30,6 @@ TEST(FlutterView, ShouldInheritContentsScaleReturnsYes) {
                                                 commandQueue:queue
                                              reshapeListener:listener
                                           threadSynchronizer:threadSynchronizer
-                                                      viewId:kDefaultViewId];
+                                                      viewId:kImplicitViewId];
   EXPECT_EQ([view layer:view.layer shouldInheritContentsScale:3.0 fromWindow:view.window], YES);
 }

@@ -25,7 +25,7 @@
 // CREATE_NATIVE_ENTRY and MOCK_ENGINE_PROC are leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
-constexpr int64_t kDefaultViewId = 0ll;
+constexpr int64_t kImplicitViewId = 0ll;
 
 @interface FlutterEngine (Test)
 /**
@@ -354,7 +354,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   FlutterSemanticsNode2* nodes[] = {&root, &child1};
   update.nodes = nodes;
   update.custom_action_count = 0;
-  // This call updates semantics for the default view, which does not exist,
+  // This call updates semantics for the implicit view, which does not exist,
   // and therefore this call is invalid. But the engine should not crash.
   update_semantics_callback(&update, (__bridge void*)engine);
 
@@ -632,7 +632,7 @@ TEST_F(FlutterEngineTest, ThreadSynchronizerNotBlockingRasterThreadAfterShutdown
   [threadSynchronizer shutdown];
 
   std::thread rasterThread([&threadSynchronizer] {
-    [threadSynchronizer performCommitForView:kDefaultViewId
+    [threadSynchronizer performCommitForView:kImplicitViewId
                                         size:CGSizeMake(100, 100)
                                       notify:^{
                                       }];

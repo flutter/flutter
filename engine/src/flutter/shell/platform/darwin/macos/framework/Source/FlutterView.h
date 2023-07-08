@@ -20,7 +20,7 @@ typedef int64_t FlutterViewId;
  * backward compatibility, single-view APIs will always operate on the view with
  * this ID. Also, the first view assigned to the engine will also have this ID.
  */
-constexpr FlutterViewId kFlutterDefaultViewId = 0ll;
+constexpr FlutterViewId kFlutterImplicitViewId = 0ll;
 
 /**
  * Listener for view resizing.

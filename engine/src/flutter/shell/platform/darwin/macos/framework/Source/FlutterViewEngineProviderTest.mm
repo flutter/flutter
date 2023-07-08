@@ -27,7 +27,7 @@ TEST(FlutterViewEngineProviderUnittests, GetViewReturnsTheCorrectView) {
       .andDo(^(NSInvocation* invocation) {
         FlutterViewId viewId;
         [invocation getArgument:&viewId atIndex:2];
-        if (viewId == kFlutterDefaultViewId) {
+        if (viewId == kFlutterImplicitViewId) {
           if (mockFlutterViewController != nil) {
             [invocation setReturnValue:&mockFlutterViewController];
           }
