@@ -144,7 +144,7 @@ _flutter.loader = null;
 
       const serviceWorkerActivation = navigator.serviceWorker
         .register(url)
-        .then(this._getNewServiceWorker)
+        .then((reg) => this._getNewServiceWorker(reg, serviceWorkerVersion))
         .then(this._waitForServiceWorkerActivation);
 
       // Timeout race promise
@@ -162,9 +162,10 @@ _flutter.loader = null;
      * awaiting to be installed/updated.
      *
      * @param {Promise<ServiceWorkerRegistration>} serviceWorkerRegistrationPromise
+     * @param {String} serviceWorkerVersion
      * @returns {Promise<ServiceWorker>}
      */
-    async _getNewServiceWorker(serviceWorkerRegistrationPromise) {
+    async _getNewServiceWorker(serviceWorkerRegistrationPromise, serviceWorkerVersion) {
       const reg = await serviceWorkerRegistrationPromise;
 
       if (!reg.active && (reg.installing || reg.waiting)) {
