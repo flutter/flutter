@@ -1610,10 +1610,6 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
 
   RouteInformation get routeInformation => _routeInformation;
   late RouteInformation _routeInformation;
-  set routeInformation(RouteInformation newValue) {
-    _routeInformation = newValue;
-    notifyListeners();
-  }
 
   SimpleRouterDelegateBuilder builder;
   SimpleNavigatorRouterDelegatePopPage<void> onPopPage;
@@ -1711,10 +1707,6 @@ class SimpleAsyncRouterDelegate extends RouterDelegate<RouteInformation> with Ch
 
   RouteInformation? get routeInformation => _routeInformation;
   RouteInformation? _routeInformation;
-  set routeInformation(RouteInformation? newValue) {
-    _routeInformation = newValue;
-    notifyListeners();
-  }
 
   SimpleRouterDelegateBuilder builder;
   late Future<void> setNewRouteFuture;
