@@ -1185,7 +1185,7 @@ Directory _getLocalEngineRepo({
   final String buildMode = androidBuildInfo.buildInfo.modeName;
   createLocalEngineRepo(
     engineOutPath: engineOutPath,
-    repoPath: localEngineRepo.path,
+    localEngineRepoPath: localEngineRepo.path,
     fileSystem: fileSystem,
     mode: buildMode,
   );
@@ -1194,7 +1194,7 @@ Directory _getLocalEngineRepo({
 
 void createLocalEngineRepo({
   required String engineOutPath,
-  required String repoPath,
+  required String localEngineRepoPath,
   required FileSystem fileSystem,
   String? mode
 }) {
@@ -1215,7 +1215,7 @@ void createLocalEngineRepo({
         'flutter_embedding_$buildMode.$artifact',
       ),
       fileSystem.path.join(
-        repoPath,
+        localEngineRepoPath,
         'io',
         'flutter',
         'flutter_embedding_$buildMode',
@@ -1231,7 +1231,7 @@ void createLocalEngineRepo({
         '${abi}_$buildMode.$artifact',
       ),
       fileSystem.path.join(
-        repoPath,
+        localEngineRepoPath,
         'io',
         'flutter',
         '${abi}_$buildMode',
@@ -1251,7 +1251,7 @@ void createLocalEngineRepo({
         '$artifact.maven-metadata.xml',
       ),
       fileSystem.path.join(
-        repoPath,
+        localEngineRepoPath,
         'io',
         'flutter',
         artifact,
@@ -1280,6 +1280,8 @@ String _getBuildModeByLocalEnginePath(String engineOutPath) {
     result = 'debug';
   } else if (engineOutPath.contains('release')) {
     result = 'release';
+  } else if (engineOutPath.contains('profile')) {
+    result = 'profile';
   }
   return result;
 }

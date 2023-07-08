@@ -32,8 +32,8 @@ class CreateLocalEngineRepoCommand extends FlutterCommand {
     globals.terminal.usesTerminalUi = true;
 
     final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
-    final FileSystem _fileSystem = globals.fs;
-    if (localEngineInfo == null) {
+    final FileSystem fileSystem = globals.fs;
+    if (localEngineInfo == null || localEngineInfo.engineOutPath.isEmpty) {
       throwToolExit('Local engine is not specified');
     }
 
@@ -42,9 +42,9 @@ class CreateLocalEngineRepoCommand extends FlutterCommand {
 
     globals.logger.printStatus('Create local engine repo at $outPath');
     createLocalEngineRepo(
-      repoPath: outPath,
+      localEngineRepoPath: outPath,
       engineOutPath: localEngineInfo.engineOutPath,
-      fileSystem: _fileSystem,
+      fileSystem: fileSystem,
     );
     return FlutterCommandResult.success();
   }
