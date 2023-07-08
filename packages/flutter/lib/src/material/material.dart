@@ -740,68 +740,11 @@ abstract class InkFeature {
     onRemoved?.call();
   }
 
-  // Returns the paint transform that allows `fromRenderObject` to perform paint
-  // in `toRenderObject`'s coordinate space.
-  //
-  // Returns null if either `fromRenderObject` or `toRenderObject` is not in the
-  // same render tree, or either of them is in an offscreen subtree (see
-  // RenderObject.paintsChild).
-  static Matrix4? _getPaintTransform(
-    RenderObject fromRenderObject,
-    RenderObject toRenderObject,
-  ) {
-    // The paths to fromRenderObject and toRenderObject's common ancestor.
-    final List<RenderObject> fromPath = <RenderObject>[fromRenderObject];
-    final List<RenderObject> toPath = <RenderObject>[toRenderObject];
-
-    RenderObject from = fromRenderObject;
-    RenderObject to = toRenderObject;
-
-    while (!identical(from, to)) {
-      final int fromDepth = from.depth;
-      final int toDepth = to.depth;
-
-      if (fromDepth >= toDepth) {
-        final RenderObject? fromParent = from.parent;
-        // Return early if the 2 render objects are not in the same render tree,
-        // or either of them is offscreen and thus won't get painted.
-        if (fromParent is! RenderObject || !fromParent.paintsChild(from)) {
-          return null;
-        }
-        fromPath.add(fromParent);
-        from = fromParent;
-      }
-
-      if (fromDepth <= toDepth) {
-        final RenderObject? toParent = to.parent;
-        if (toParent is! RenderObject || !toParent.paintsChild(to)) {
-          return null;
-        }
-        toPath.add(toParent);
-        to = toParent;
-      }
-    }
-    assert(identical(from, to));
-
-    final Matrix4 transform = Matrix4.identity();
-    final Matrix4 inverseTransform = Matrix4.identity();
-
-    for (int index = toPath.length - 1; index > 0; index -= 1) {
-      toPath[index].applyPaintTransform(toPath[index - 1], transform);
-    }
-    for (int index = fromPath.length - 1; index > 0; index -= 1) {
-      fromPath[index].applyPaintTransform(fromPath[index - 1], inverseTransform);
-    }
-
-    final double det = inverseTransform.invert();
-    return det != 0 ? (inverseTransform..multiply(transform)) : null;
-  }
-
   void _paint(Canvas canvas) {
     assert(referenceBox.attached);
     assert(!_debugDisposed);
     // determine the transform that gets our coordinate system to be like theirs
-    final Matrix4? transform = _getPaintTransform(_controller, referenceBox);
+    final Matrix4? transform = referenceBox.computeTransformToRenderObject(_controller);
     if (transform != null) {
       paintFeature(canvas, transform);
     }

@@ -148,13 +148,42 @@ void main() {
     expect(() => data3.detach(), throwsAssertionError);
   });
 
-  test('RenderObject.getTransformTo asserts is argument is not descendant', () {
+  test('RenderObject.getTransformTo asserts its argument is not descendant', () {
     final PipelineOwner owner = PipelineOwner();
     final TestRenderObject renderObject1 = TestRenderObject();
     renderObject1.attach(owner);
     final TestRenderObject renderObject2 = TestRenderObject();
     renderObject2.attach(owner);
     expect(() => renderObject1.getTransformTo(renderObject2), throwsAssertionError);
+  });
+
+  test('RenderObject.computeTransformToRenderObject works for siblings and descendants', () {
+    final PipelineOwner owner = PipelineOwner();
+    final TestRenderObject renderObject1 = TestRenderObject()..attach(owner);
+    final TestRenderObject renderObject11 = TestRenderObject();
+    final TestRenderObject renderObject12 = TestRenderObject();
+
+    renderObject1
+      ..add(renderObject11)
+      ..add(renderObject12);
+    expect(renderObject11.computeTransformToRenderObject(renderObject12), equals(Matrix4.identity()));
+    expect(renderObject1.computeTransformToRenderObject(renderObject11), equals(Matrix4.identity()));
+    expect(renderObject1.computeTransformToRenderObject(renderObject12), equals(Matrix4.identity()));
+    expect(renderObject11.computeTransformToRenderObject(renderObject1), equals(Matrix4.identity()));
+    expect(renderObject12.computeTransformToRenderObject(renderObject1), equals(Matrix4.identity()));
+
+    expect(renderObject1.computeTransformToRenderObject(renderObject1), equals(Matrix4.identity()));
+    expect(renderObject11.computeTransformToRenderObject(renderObject11), equals(Matrix4.identity()));
+    expect(renderObject12.computeTransformToRenderObject(renderObject12), equals(Matrix4.identity()));
+  });
+
+  test('RenderObject.computeTransformToRenderObject returns null if target is not in the same render tree', () {
+    final PipelineOwner owner = PipelineOwner();
+    final TestRenderObject renderObject1 = TestRenderObject();
+    renderObject1.attach(owner);
+    final TestRenderObject renderObject2 = TestRenderObject();
+    renderObject2.attach(owner);
+    expect(renderObject1.computeTransformToRenderObject(renderObject2), isNull);
   });
 
   test('PaintingContext.pushClipRect reuses the layer', () {
@@ -368,7 +397,8 @@ class _TestCustomLayerBox extends RenderBox {
 
 class TestParentData extends ParentData with ContainerParentDataMixin<RenderBox> { }
 
-class TestRenderObject extends RenderObject {
+class TestRenderObjectParentData extends ParentData with ContainerParentDataMixin<TestRenderObject> { }
+class TestRenderObject extends RenderObject with ContainerRenderObjectMixin<TestRenderObject, TestRenderObjectParentData> {
   TestRenderObject({this.allowPaintBounds = false});
 
   final bool allowPaintBounds;
@@ -383,6 +413,13 @@ class TestRenderObject extends RenderObject {
   Rect get paintBounds {
     assert(allowPaintBounds); // For some tests, this should not get called.
     return Rect.zero;
+  }
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! TestRenderObjectParentData) {
+      child.parentData = TestRenderObjectParentData();
+    }
   }
 
   @override
