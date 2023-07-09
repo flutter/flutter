@@ -26,6 +26,8 @@ const String defaultManifestPath = 'pubspec.yaml';
 
 const String kFontManifestJson = 'FontManifest.json';
 
+late ByteData globalAssetManifest;
+
 // Should match '2x', '/1x', '1.5x', etc.
 final RegExp _assetVariantDirectoryRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 
@@ -720,6 +722,7 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     final ByteData message = const StandardMessageCodec().encodeMessage(result)!;
+    globalAssetManifest = message;
     return DevFSByteContent(message.buffer.asUint8List(0, message.lengthInBytes));
   }
 
