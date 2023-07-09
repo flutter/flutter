@@ -17,8 +17,14 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_decoration.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
+
+// Examples can assume:
+// late BuildContext context;
+// late List<DataColumn> _columns;
+// late DataTableSource _source;
 
 /// A Material Design data table that shows data using multiple pages.
 ///
@@ -78,7 +84,10 @@ class PaginatedDataTable extends StatefulWidget {
     double? dataRowHeight,
     double? dataRowMinHeight,
     double? dataRowMaxHeight,
+    this.dataTextStyle,
+    this.headingRowColor,
     this.headingRowHeight = 56.0,
+    this.headingTextStyle,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
     this.showCheckboxColumn = true,
@@ -91,6 +100,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.arrowHeadColor,
     required this.source,
+    this.dividerThickness,
     this.checkboxHorizontalMargin,
     this.controller,
     this.primary,
@@ -176,10 +186,53 @@ class PaginatedDataTable extends StatefulWidget {
   /// specified.
   final double dataRowMaxHeight;
 
+  /// {@macro flutter.material.dataTable.dataTextStyle}
+  final TextStyle? dataTextStyle;
+
+  /// {@template flutter.material.paginatedDataTable.headingRowColor}
+  /// The background color for the heading row.
+  ///
+  /// The effective background color can be made to depend on the
+  /// [MaterialState] state, i.e. if the row is pressed, hovered, focused when
+  /// sorted. The color is painted as an overlay to the row. To make sure that
+  /// the row's [InkWell] is visible (when pressed, hovered and focused), it is
+  /// recommended to use a translucent color.
+  /// {@endtemplate}
+  ///
+  /// If null, [DataTableThemeData.headingRowColor] is used.
+  ///
+  /// {@template flutter.material.paginatedDataTable.headingRowColor}
+  /// ```dart
+  /// PaginatedDataTable(
+  ///   columns: _columns,
+  ///   source: _source,
+  ///   headingRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.hovered)) {
+  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///     }
+  ///     return null;  // Use the default value.
+  ///   }),
+  /// )
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * The Material Design specification for overlay colors and how they
+  ///    match a component's state:
+  ///    <https://material.io/design/interaction/states.html#anatomy>.
+  /// {@endtemplate}
+  final MaterialStateProperty<Color?>? headingRowColor;
+
   /// The height of the heading row.
   ///
   /// This value is optional and defaults to 56.0 if not specified.
   final double headingRowHeight;
+
+  /// {@macro flutter.material.dataTable.headingTextStyle}
+  final TextStyle? headingTextStyle;
+
+  /// {@macro flutter.material.dataTable.dividerThickness}
+  final double? dividerThickness;
 
   /// The horizontal margin between the edges of the table and the content
   /// in the first and last cells of each row.
@@ -548,10 +601,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     dataRowMinHeight: widget.dataRowMinHeight,
                     dataRowMaxHeight: widget.dataRowMaxHeight,
                     headingRowHeight: widget.headingRowHeight,
+                    headingTextStyle: widget.headingTextStyle,
+                    dataTextStyle: widget.dataTextStyle,
+                    headingRowColor: widget.headingRowColor,
                     horizontalMargin: widget.horizontalMargin,
                     checkboxHorizontalMargin: widget.checkboxHorizontalMargin,
                     columnSpacing: widget.columnSpacing,
                     showCheckboxColumn: widget.showCheckboxColumn,
+                    dividerThickness: widget.dividerThickness,
                     showBottomBorder: true,
                     rows: _getRows(_firstRowIndex, widget.rowsPerPage),
                   ),
