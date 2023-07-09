@@ -2956,6 +2956,9 @@ Future<TimeOfDay?> showTimePicker({
   required BuildContext context,
   required TimeOfDay initialTime,
   TransitionBuilder? builder,
+  bool barrierDismissible = true,
+  Color? barrierColor = Colors.black54,
+  String? barrierLabel,
   bool useRootNavigator = true,
   TimePickerEntryMode initialEntryMode = TimePickerEntryMode.dial,
   String? cancelText,
@@ -2985,6 +2988,9 @@ Future<TimeOfDay?> showTimePicker({
   );
   return showDialog<TimeOfDay>(
     context: context,
+    barrierDismissible: barrierDismissible,
+    barrierColor: barrierColor,
+    barrierLabel: barrierLabel,
     useRootNavigator: useRootNavigator,
     builder: (BuildContext context) {
       return builder == null ? dialog : builder(context, dialog);

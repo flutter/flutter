@@ -13,6 +13,7 @@ import 'back_button.dart';
 import 'button_style.dart';
 import 'calendar_date_picker.dart';
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'date.dart';
 import 'date_picker_theme.dart';
 import 'debug.dart';
@@ -168,6 +169,9 @@ Future<DateTime?> showDatePicker({
   String? cancelText,
   String? confirmText,
   Locale? locale,
+  bool barrierDismissible = true,
+  Color? barrierColor = Colors.black54,
+  String? barrierLabel,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   TextDirection? textDirection,
@@ -242,6 +246,9 @@ Future<DateTime?> showDatePicker({
 
   return showDialog<DateTime>(
     context: context,
+    barrierDismissible: barrierDismissible,
+    barrierColor: barrierColor,
+    barrierLabel: barrierLabel,
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
     builder: (BuildContext context) {
@@ -1023,6 +1030,9 @@ Future<DateTimeRange?> showDateRangePicker({
   String? fieldStartLabelText,
   String? fieldEndLabelText,
   Locale? locale,
+  bool barrierDismissible = true,
+  Color? barrierColor = Colors.black54,
+  String? barrierLabel,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   TextDirection? textDirection,
@@ -1101,6 +1111,9 @@ Future<DateTimeRange?> showDateRangePicker({
 
   return showDialog<DateTimeRange>(
     context: context,
+    barrierDismissible: barrierDismissible,
+    barrierColor: barrierColor,
+    barrierLabel: barrierLabel,
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
     useSafeArea: false,
