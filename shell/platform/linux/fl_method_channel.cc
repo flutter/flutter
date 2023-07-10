@@ -75,10 +75,6 @@ static void channel_closed_cb(gpointer user_data) {
   g_autoptr(FlMethodChannel) self = FL_METHOD_CHANNEL(user_data);
 
   self->channel_closed = TRUE;
-  // Clear the messenger so that disposing the channel will not clear the
-  // messenger's mapped channel, since `channel_closed_cb` means the messenger
-  // has abandoned this channel.
-  self->messenger = nullptr;
 
   // Disconnect handler.
   if (self->method_call_handler_destroy_notify != nullptr) {
@@ -92,10 +88,9 @@ static void channel_closed_cb(gpointer user_data) {
 static void fl_method_channel_dispose(GObject* object) {
   FlMethodChannel* self = FL_METHOD_CHANNEL(object);
 
-  if (self->messenger != nullptr) {
-    fl_binary_messenger_set_message_handler_on_channel(
-        self->messenger, self->name, nullptr, nullptr, nullptr);
-  }
+  // Note we don't have to clear the handler in messenger as it holds
+  // a reference to this object so the following code is only run after
+  // the messenger has closed the channel already.
 
   g_clear_object(&self->messenger);
   g_clear_pointer(&self->name, g_free);
