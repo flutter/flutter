@@ -355,7 +355,7 @@ class SnackBar extends StatefulWidget {
   ///       right padding.
   final EdgeInsetsGeometry? padding;
 
-  /// The [constraints] of the snack bar.
+ /// Optional size constraints for the snack bar.
   ///
   /// Defaults to null. If [width] is specified, this property will be ignored.
   final BoxConstraints? constraints;
