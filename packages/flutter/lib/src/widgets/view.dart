@@ -28,7 +28,7 @@ import 'media_query.dart';
 /// from the [view] provided to this widget.
 ///
 /// Since the [View] widget bootstraps its own independent render tree, neither
-/// it not any of its descendants will insert a [RenderObject] into an existing
+/// it nor any of its descendants will insert a [RenderObject] into an existing
 /// render tree. Therefore, the [View] widget can only be used in those parts of
 /// the widget tree where it is not required to participate in the construction
 /// of the surrounding render tree. In practical terms, this means it can
