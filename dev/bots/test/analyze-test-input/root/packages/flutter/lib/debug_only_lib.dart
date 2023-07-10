@@ -40,3 +40,10 @@ class ClassFromDebugLibWithImplicitDefaultConstructor { }
 class ClassFromDebugLibWithExplicitDefaultConstructor {
   ClassFromDebugLibWithExplicitDefaultConstructor();
 }
+
+class ClassFromDebugLibWithExplicitConstructorAndFormalParameters {
+  //ignore: avoid_unused_constructor_parameters
+  ClassFromDebugLibWithExplicitConstructorAndFormalParameters(int value);
+  //ignore: avoid_unused_constructor_parameters
+  ClassFromDebugLibWithExplicitConstructorAndFormalParameters.named(String value);
+}

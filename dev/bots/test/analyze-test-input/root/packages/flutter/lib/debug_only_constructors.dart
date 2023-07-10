@@ -2,25 +2,38 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'debug_only.dart';
+import 'debug_only_lib.dart';
 
 const Object _debugAssert = Object();
 
 class ProductionClass11 extends ClassFromDebugLibWithNamedConstructor {
-  ProductionClass11() : super.constructor(); // bad: debug only constructor
+  ProductionClass11() : super.constructor(); // bad: debug-only constructor invoked
 }
 
 class ProductionClass21 extends ClassFromDebugLibWithImplicitDefaultConstructor {
-  ProductionClass21();
+  ProductionClass21(); // Good: super() is synthesized thus not considered debug-only.
 }
 
 class ProductionClass22 extends ClassFromDebugLibWithImplicitDefaultConstructor { }
 
 class ProductionClass31 extends ClassFromDebugLibWithExplicitDefaultConstructor {
-  ProductionClass31();
+  ProductionClass31();       // Bad: super() is not synthesized.
+  ProductionClass31.named(); // Bad: super() is not synthesized.
 }
 
 class ProductionClass32 extends ClassFromDebugLibWithExplicitDefaultConstructor { }
+
+class ProductionClass41 extends ClassFromDebugLibWithExplicitConstructorAndFormalParameters {
+  ProductionClass41.named(super.value); // Bad: super(int value) is not synthesized.
+}
+
+class ProductionClass5 {
+  ProductionClass5(this.debugOnlyField);                      // Bad: accessing debug-only field.
+  ProductionClass5.named(int value) : debugOnlyField = value; // Bad: accessing debug-only field.
+
+  @_debugAssert
+  final int debugOnlyField;
+}
 
 class ProductionClass33 implements ClassFromDebugLibWithExplicitDefaultConstructor { }
 
@@ -32,6 +45,8 @@ class _DebugOnlyClass2 implements ProductionClassWithFactoryConstructors {
 class _DebugOnlyClass3 implements ProductionClassWithFactoryConstructors {
   @_debugAssert
   const _DebugOnlyClass3.named();
+  // ignore: unused_element
+  const _DebugOnlyClass3.nonDebug() : this.named(); // Bad: named is a debug-only constructor.
 }
 
 class ProductionClassWithFactoryConstructors {
@@ -52,8 +67,7 @@ void testConstructors() {
   ProductionClass21(); // good: the constructor isn't defined by the super class.
   ProductionClass22(); // good: the constructor isn't defined by the super class.
   // With explicit default constructor.
-  ProductionClass31(); // bad: the constructor is defined by the super class thus marked as debug-only.
-  takeAnything(ProductionClass31.new); // Also bad for the same reason.
   ProductionClass32(); // bad: the constructor is defined by the super class thus marked as debug-only.
+  takeAnything(ProductionClass32.new); // Also bad for the same reason.
   ProductionClass33(); // good: the debug-only constructor is not inherited.
 }

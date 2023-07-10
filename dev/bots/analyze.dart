@@ -17,7 +17,9 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'allowlist.dart';
-import 'analyze_framework_code.dart';
+import 'custom_rules/analyze.dart';
+import 'custom_rules/debug_assert.dart';
+import 'custom_rules/no_double_clamp.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -168,12 +170,12 @@ Future<void> run(List<String> arguments) async {
     // Only run the private lints when the code is free of type errors. The
     // lints are easier to write when they can assume, for example, there is no
     // inheritance cycles.
-    final List<ResolvedUnitVerifier> verifiers = <ResolvedUnitVerifier>[verifyNoDoubleClamp, verifyDebugAssertAccess];
-    final String rules = verifiers.map((ResolvedUnitVerifier verifier) => '\n * $verifier').join();
-    printProgress('Analyzing code in the framework with the following rules:$rules');
-    await runVerifiersInResolvedDirectory(flutterRoot, verifiers);
+    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp, debugAssert];
+    final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the framework with the following rules:$ruleNames');
+    await analyzeDirectoryWithRules(flutterRoot, rules);
   } else {
-    printProgress('Skipped analyzing code in the framework because dart analysis finished with a non-zero exit code.');
+    printProgress('Skipped performing further analysis in the framework because "flutter analyze" finished with a non-zero exit code.');
   }
 
   printProgress('Executable allowlist...');

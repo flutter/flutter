@@ -7,7 +7,9 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../analyze.dart';
-import '../analyze_framework_code.dart';
+import '../custom_rules/analyze.dart';
+import '../custom_rules/debug_assert.dart';
+import '../custom_rules/no_double_clamp.dart';
 import '../utils.dart';
 import 'common.dart';
 
@@ -211,9 +213,9 @@ void main() {
   });
 
   test('analyze.dart - clampDouble', () async {
-    final String result = await capture(() => runVerifiersInResolvedDirectory(
+    final String result = await capture(() => analyzeDirectoryWithRules(
       testRootPath,
-      <ResolvedUnitVerifier>[verifyNoDoubleClamp],
+      <AnalyzeRule>[noDoubleClamp],
     ), shouldHaveErrors: true);
     final String lines = <String>[
         '║ packages/flutter/lib/bar.dart:37: input.clamp(0.0, 2)',
@@ -236,9 +238,9 @@ void main() {
   });
 
   test('analyze.dart - debugAssert', () async {
-    final String result = await capture(() => runVerifiersInResolvedDirectory(
+    final String result = await capture(() => analyzeDirectoryWithRules(
       testRootPath,
-      <ResolvedUnitVerifier>[verifyDebugAssertAccess],
+      <AnalyzeRule>[debugAssert],
     ), shouldHaveErrors: true);
 
     final String badAnnotations = <String>[
@@ -263,17 +265,22 @@ void main() {
       )
     );
 
-    final String badAccesses1 = <String>[
+    final String badConstructorAccesses = <String>[
       '║ packages/flutter/lib/debug_only_constructors.dart:10: ClassFromDebugLibWithNamedConstructor.constructor accessed outside of an assert.\n',
-      '║ packages/flutter/lib/debug_only_constructors.dart:41: _DebugOnlyClass2.new accessed outside of an assert.\n',
-      '║ packages/flutter/lib/debug_only_constructors.dart:43: _DebugOnlyClass3.named accessed outside of an assert.\n',
-      '║ packages/flutter/lib/debug_only_constructors.dart:55: ProductionClass31.new accessed outside of an assert.\n',
-      '║ packages/flutter/lib/debug_only_constructors.dart:56: ProductionClass31.new accessed outside of an assert.\n',
-      '║ packages/flutter/lib/debug_only_constructors.dart:57: ProductionClass32.new accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:20: ClassFromDebugLibWithExplicitDefaultConstructor.new accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:21: ClassFromDebugLibWithExplicitDefaultConstructor.new accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:27: ClassFromDebugLibWithExplicitConstructorAndFormalParameters.new accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:31: debugOnlyField accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:32: debugOnlyField accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:49: _DebugOnlyClass3.named accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:56: _DebugOnlyClass2.new accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:58: _DebugOnlyClass3.named accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:70: ProductionClass32.new accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_constructors.dart:71: ProductionClass32.new accessed outside of an assert.\n',
     ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
      .join();
 
-    final String badAccesses2 = <String>[
+    final String otherBadAccesses = <String>[
       '║ packages/flutter/lib/debug_only_access.dart:15: globalVaraibleFromDebugLib accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:15: globalVaraibleFromDebugLib= accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:16: globalFunctionFromDebugLib accessed outside of an assert.\n',
@@ -318,7 +325,7 @@ void main() {
     ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
      .join();
 
-    expect(result, contains(badAccesses1));
-    expect(result, contains(badAccesses2));
+    expect(result, contains(badConstructorAccesses));
+    expect(result, contains(otherBadAccesses));
   });
 }
