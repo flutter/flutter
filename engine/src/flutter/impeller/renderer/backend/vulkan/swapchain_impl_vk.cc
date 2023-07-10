@@ -198,7 +198,10 @@ SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
                                : caps.maxImageCount  // max zero means no limit
   );
   swapchain_info.imageArrayLayers = 1u;
-  swapchain_info.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
+  // Swapchain images are primarily used as color attachments (via resolve) or
+  // blit targets.
+  swapchain_info.imageUsage = vk::ImageUsageFlagBits::eColorAttachment |
+                              vk::ImageUsageFlagBits::eTransferDst;
   swapchain_info.preTransform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
   swapchain_info.compositeAlpha = composite.value();
   // If we set the clipped value to true, Vulkan expects we will never read back
