@@ -3431,7 +3431,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
-  void _onHistoryChanged() {
+  void _handleHistoryChanged() {
     final NavigationNotification notification = NavigationNotification(
       canHandlePop: _usingPagesAPI
           ? widget.pages.length > 1
@@ -3488,7 +3488,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       SystemNavigator.selectSingleEntryHistory();
     }
 
-    _history.addListener(_onHistoryChanged);
+    _history.addListener(_handleHistoryChanged);
   }
 
   // Use [_nextPagelessRestorationScopeId] to get the next id.
@@ -3783,7 +3783,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _rawNextPagelessRestorationScopeId.dispose();
     _serializableHistory.dispose();
     userGestureInProgressNotifier.dispose();
-    _history.removeListener(_onHistoryChanged);
+    _history.removeListener(_handleHistoryChanged);
     _history.dispose();
     super.dispose();
     // don't unlock, so that the object becomes unusable
