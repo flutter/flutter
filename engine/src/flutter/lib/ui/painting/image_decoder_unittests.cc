@@ -455,8 +455,9 @@ TEST_F(ImageDecoderFixtureTest, ImpellerUploadToSharedNoGpu) {
   ASSERT_EQ(no_gpu_access_context->command_buffer_count_, 0ul);
   ASSERT_EQ(result.second, "");
 
-  result = ImageDecoderImpeller::UploadTextureToShared(
-      no_gpu_access_context, bitmap, gpu_disabled_switch, true);
+  result = ImageDecoderImpeller::UploadTextureToStorage(
+      no_gpu_access_context, bitmap, gpu_disabled_switch,
+      impeller::StorageMode::kHostVisible, true);
   ASSERT_EQ(no_gpu_access_context->command_buffer_count_, 0ul);
   ASSERT_EQ(result.second, "");
 }
