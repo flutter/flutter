@@ -36,6 +36,18 @@ G_DECLARE_FINAL_TYPE(FlDartProject, fl_dart_project, FL, DART_PROJECT, GObject)
 FlDartProject* fl_dart_project_new();
 
 /**
+ * fl_dart_project_set_aot_library_path:
+ * @project: an #FlDartProject.
+ * @path: the absolute path to the AOT library in the Flutter application.
+ *
+ * Sets the path to the AOT library in the Flutter application, which is
+ * the path to libapp.so. By default this is lib/libapp.so relative to the
+ * executable directory.
+ */
+void fl_dart_project_set_aot_library_path(FlDartProject* project,
+                                          const gchar* path);
+
+/**
  * fl_dart_project_get_aot_library_path:
  * @project: an #FlDartProject.
  *
