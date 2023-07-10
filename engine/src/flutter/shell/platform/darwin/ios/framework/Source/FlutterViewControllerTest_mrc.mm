@@ -7,6 +7,7 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
 FLUTTER_ASSERT_NOT_ARC
@@ -31,7 +32,9 @@ FLUTTER_ASSERT_NOT_ARC
 @property(nonatomic, retain) VSyncClient* touchRateCorrectionVSyncClient;
 
 - (void)createTouchRateCorrectionVSyncClientIfNeeded;
-- (void)setupKeyboardAnimationVsyncClient;
+- (void)setupKeyboardAnimationVsyncClient:
+    (FlutterKeyboardAnimationCallback)keyboardAnimationCallback;
+- (void)startKeyBoardAnimation:(NSTimeInterval)duration;
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches;
 
 @end
@@ -53,7 +56,9 @@ FLUTTER_ASSERT_NOT_ARC
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
                                                                                 nibName:nil
                                                                                  bundle:nil];
-  [viewController setupKeyboardAnimationVsyncClient];
+  FlutterKeyboardAnimationCallback callback = ^(fml::TimePoint targetTime) {
+  };
+  [viewController setupKeyboardAnimationVsyncClient:callback];
   XCTAssertNotNil(viewController.keyboardAnimationVSyncClient);
   CADisplayLink* link = [viewController.keyboardAnimationVSyncClient getDisplayLink];
   XCTAssertNotNil(link);
@@ -171,6 +176,28 @@ FLUTTER_ASSERT_NOT_ARC
       triggerTouchRateCorrectionIfNeeded:[[NSSet alloc]
                                              initWithObjects:fakeTouchMove, fakeTouchEnd, nil]];
   XCTAssertFalse(link.isPaused);
+}
+
+- (void)testFlutterViewControllerStartKeyboardAnimationWillCreateVsyncClientCorrectly {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  viewController.targetViewInsetBottom = 100;
+  [viewController startKeyBoardAnimation:0.25];
+  XCTAssertNotNil(viewController.keyboardAnimationVSyncClient);
+}
+
+- (void)
+    testSetupKeyboardAnimationVsyncClientWillNotCreateNewVsyncClientWhenKeyboardAnimationCallbackIsNil {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  [viewController setupKeyboardAnimationVsyncClient:nil];
+  XCTAssertNil(viewController.keyboardAnimationVSyncClient);
 }
 
 @end
