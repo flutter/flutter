@@ -315,7 +315,7 @@ void main() {
   final Clip clip = details.decorationClipBehavior;
 
   // Changes made in https://github.com/flutter/flutter/pull/129942
-  Curve curve = Easing.legacy;
-  Curve curve = Easing.legacyAccelerate;
-  Curve curve = Easing.legacyDecelerate;
+  const Curve curve = Easing.legacy;
+  const Curve curve = Easing.legacyAccelerate;
+  const Curve curve = Easing.legacyDecelerate;
 }

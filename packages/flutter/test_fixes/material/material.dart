@@ -319,7 +319,7 @@ void main() {
   final Clip clip = details.clipBehavior;
 
   // Changes made in https://github.com/flutter/flutter/pull/129942
-  Curve curve = standardEasing;
-  Curve curve = accelerateEasing;
-  Curve curve = decelerateEasing;
+  const Curve curve = standardEasing;
+  const Curve curve = accelerateEasing;
+  const Curve curve = decelerateEasing;
 }
