@@ -169,6 +169,10 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     );
 
     if (result ?? false) {
+      // Since this is the root route, quit the app where possible by invoking
+      // the SystemNavigator. If this wasn't the root route, then
+      // Navigator.maybePop could be used instead.
+      // See https://github.com/flutter/flutter/issues/11490
       SystemNavigator.pop();
     }
   }
