@@ -800,7 +800,7 @@ void main() {
       expect(size.width, width);
     });
 
-    testWidgets('maxWidth ignore', (WidgetTester tester) async {
+    testWidgets('constraints.maxWidth is ignored if width is not null and greater than constraints.maxWidth', (WidgetTester tester) async {
       const double maxWidth = 100;
       const double width = maxWidth + 1;
 
