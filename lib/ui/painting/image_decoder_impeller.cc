@@ -32,6 +32,42 @@
 
 namespace flutter {
 
+class MallocDeviceBuffer : public impeller::DeviceBuffer {
+ public:
+  explicit MallocDeviceBuffer(impeller::DeviceBufferDescriptor desc)
+      : impeller::DeviceBuffer(desc) {
+    data_ = static_cast<uint8_t*>(malloc(desc.size));
+  }
+
+  ~MallocDeviceBuffer() override { free(data_); }
+
+  bool SetLabel(const std::string& label) override { return true; }
+
+  bool SetLabel(const std::string& label, impeller::Range range) override {
+    return true;
+  }
+
+  uint8_t* OnGetContents() const override { return data_; }
+
+  bool OnCopyHostBuffer(const uint8_t* source,
+                        impeller::Range source_range,
+                        size_t offset) override {
+    memcpy(data_ + offset, source + source_range.offset, source_range.length);
+    return true;
+  }
+
+ private:
+  uint8_t* data_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(MallocDeviceBuffer);
+};
+
+#ifdef FML_OS_ANDROID
+static constexpr bool kShouldUseMallocDeviceBuffer = true;
+#else
+static constexpr bool kShouldUseMallocDeviceBuffer = false;
+#endif  // FML_OS_ANDROID
+
 namespace {
 /**
  *  Loads the gamut as a set of three points (triangle).
@@ -336,17 +372,20 @@ ImageDecoderImpeller::UploadTextureToPrivate(
           })
           .SetIfTrue([&result, context, bitmap, gpu_disabled_switch] {
             // create_mips is false because we already know the GPU is disabled.
-            result = UploadTextureToShared(context, bitmap, gpu_disabled_switch,
-                                           /*create_mips=*/false);
+            result =
+                UploadTextureToStorage(context, bitmap, gpu_disabled_switch,
+                                       impeller::StorageMode::kHostVisible,
+                                       /*create_mips=*/false);
           }));
   return result;
 }
 
 std::pair<sk_sp<DlImage>, std::string>
-ImageDecoderImpeller::UploadTextureToShared(
+ImageDecoderImpeller::UploadTextureToStorage(
     const std::shared_ptr<impeller::Context>& context,
     std::shared_ptr<SkBitmap> bitmap,
     const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
+    impeller::StorageMode storage_mode,
     bool create_mips) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!context) {
@@ -366,7 +405,7 @@ ImageDecoderImpeller::UploadTextureToShared(
   }
 
   impeller::TextureDescriptor texture_descriptor;
-  texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
+  texture_descriptor.storage_mode = storage_mode;
   texture_descriptor.format = pixel_format.value();
   texture_descriptor.size = {image_info.width(), image_info.height()};
   texture_descriptor.mip_count =
@@ -483,14 +522,16 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
                                                  gpu_disabled_switch]() {
           sk_sp<DlImage> image;
           std::string decode_error;
-          if (context->GetCapabilities()->SupportsBufferToTextureBlits()) {
+          if (!kShouldUseMallocDeviceBuffer &&
+              context->GetCapabilities()->SupportsBufferToTextureBlits()) {
             std::tie(image, decode_error) = UploadTextureToPrivate(
                 context, bitmap_result.device_buffer, bitmap_result.image_info,
                 bitmap_result.sk_bitmap, gpu_disabled_switch);
             result(image, decode_error);
           } else {
-            std::tie(image, decode_error) = UploadTextureToShared(
+            std::tie(image, decode_error) = UploadTextureToStorage(
                 context, bitmap_result.sk_bitmap, gpu_disabled_switch,
+                impeller::StorageMode::kDevicePrivate,
                 /*create_mips=*/true);
             result(image, decode_error);
           }
@@ -525,7 +566,10 @@ bool ImpellerAllocator::allocPixelRef(SkBitmap* bitmap) {
   descriptor.size = ((bitmap->height() - 1) * bitmap->rowBytes()) +
                     (bitmap->width() * bitmap->bytesPerPixel());
 
-  auto device_buffer = allocator_->CreateBuffer(descriptor);
+  std::shared_ptr<impeller::DeviceBuffer> device_buffer =
+      kShouldUseMallocDeviceBuffer
+          ? std::make_shared<MallocDeviceBuffer>(descriptor)
+          : allocator_->CreateBuffer(descriptor);
 
   struct ImpellerPixelRef final : public SkPixelRef {
     ImpellerPixelRef(int w, int h, void* s, size_t r)

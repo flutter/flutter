@@ -9,6 +9,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
+#include "impeller/core/formats.h"
 #include "impeller/geometry/size.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 
@@ -90,10 +91,11 @@ class ImageDecoderImpeller final : public ImageDecoder {
   /// @param gpu_disabled_switch Whether the GPU is available for mipmap
   /// creation.
   /// @return            A DlImage.
-  static std::pair<sk_sp<DlImage>, std::string> UploadTextureToShared(
+  static std::pair<sk_sp<DlImage>, std::string> UploadTextureToStorage(
       const std::shared_ptr<impeller::Context>& context,
       std::shared_ptr<SkBitmap> bitmap,
       const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
+      impeller::StorageMode storage_mode,
       bool create_mips = true);
 
  private:
