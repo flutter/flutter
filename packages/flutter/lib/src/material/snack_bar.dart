@@ -357,7 +357,7 @@ class SnackBar extends StatefulWidget {
 
   /// The [constraints] of the snack bar.
   ///
-  /// If [width] is specified, `minWidth` and `maxWidth` is ignored.
+  /// Defaults to null. If [width] is specified, this property will be ignored.
   final BoxConstraints? constraints;
 
   /// The width of the snack bar.
