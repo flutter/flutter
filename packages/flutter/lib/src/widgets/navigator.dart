@@ -3341,6 +3341,8 @@ class _NavigatorReplaceObservation extends _NavigatorObservation {
 }
 
 /// A ChangeNotifier that notifies when its List of _RouteEntries is mutated.
+///
+/// It notifies after the mutation has taken place.
 class _History extends ChangeNotifier {
   final List<_RouteEntry> _value = <_RouteEntry>[];
 
@@ -3432,8 +3434,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
   void _handleHistoryChanged() {
+    final bool navigatorCanPop = canPop();
+    late final bool routeBlocksPop;
+    if (!navigatorCanPop) {
+      final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+      routeBlocksPop = lastEntry != null
+          && lastEntry.route.popDisposition == RoutePopDisposition.doNotPop;
+    } else {
+      routeBlocksPop = false;
+    }
     final NavigationNotification notification = NavigationNotification(
-      canHandlePop: canPop(),
+      canHandlePop: navigatorCanPop || routeBlocksPop,
     );
     notification.dispatch(context);
   }

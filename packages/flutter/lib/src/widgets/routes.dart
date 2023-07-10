@@ -1549,8 +1549,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    method checks.
   @override
   RoutePopDisposition get popDisposition {
-    final _ModalScopeState<T>? scope = _scopeKey.currentState;
-    assert(scope != null);
     final bool canPop = _popInterfaces.every((PopInterface popInterface) {
       return popInterface.canPopNotifier.value;
     });
