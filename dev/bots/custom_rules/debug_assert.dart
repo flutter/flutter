@@ -23,7 +23,8 @@ import 'analyze.dart';
 final AnalyzeRule debugAssert = _DebugAssert();
 
 class _DebugOnlySymbolAccessError {
-  const _DebugOnlySymbolAccessError(this.unit, this.node, this.symbol) : assert(symbol is ClassMemberElement);
+  _DebugOnlySymbolAccessError(this.unit, this.node, this.symbol)
+    : assert(symbol is ExecutableElement || symbol is FieldElement, '$symbol (${symbol.runtimeType}) unexpected element type.');
 
   final ResolvedUnitResult unit;
   final AstNode node;

@@ -47,7 +47,7 @@ class _NoDoubleClamp implements AnalyzeRule {
     unit.unit.visitChildren(visitor);
     final List<AstNode> violationsInUnit = visitor.clampAccessNodes;
     if (violationsInUnit.isNotEmpty) {
-      _errors.putIfAbsent(unit, List<AstNode>.empty).addAll(violationsInUnit);
+      _errors.putIfAbsent(unit, () => <AstNode>[]).addAll(violationsInUnit);
     }
   }
 
