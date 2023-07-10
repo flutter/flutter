@@ -895,7 +895,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         reportParentConstraints: true,
       );
       if (constraintsError != null) {
-        throw constraintsError;
+      throw constraintsError;
       }
       return true;
     }());
