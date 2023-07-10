@@ -10,15 +10,13 @@ import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class CreateLocalEngineRepoCommand extends FlutterCommand {
-  CreateLocalEngineRepoCommand({this.verbose = false}) {
+  CreateLocalEngineRepoCommand() {
     argParser.addOption(
       'local-repo-path',
       help:
           'Path to your engine artifact repo directory, Defaults to engineOutPath',
     );
   }
-
-  final bool verbose;
 
   @override
   final String name = 'create-local-engine-repo';
