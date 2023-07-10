@@ -192,6 +192,11 @@
     "description": "The label for cut buttons and menu items."
   },
 
+  "scanTextButtonLabel": "Scan text",
+  "@scanTextButtonLabel": {
+    "description": "The label for scan text buttons and menu items for starting the insertion of text via OCR."
+  },
+
   "okButtonLabel": "OK",
   "@okButtonLabel": {
     "description": "The label for OK buttons and menu items."

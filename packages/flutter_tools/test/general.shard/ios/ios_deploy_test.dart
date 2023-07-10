@@ -341,6 +341,33 @@ void main () {
         await iosDeployDebugger.launchAndAttach();
         expect(logger.errorText, contains('Try launching from within Xcode'));
       });
+
+      testWithoutContext('debugger attached and received logs', () async {
+        final StreamController<List<int>> stdin = StreamController<List<int>>();
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['ios-deploy'],
+            stdout: '(lldb)     run\r\nsuccess\r\nLog on attach1\r\n\r\nLog on attach2\r\n',
+            stdin: IOSink(stdin.sink),
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        final List<String> receivedLogLines = <String>[];
+        final Stream<String> logLines = iosDeployDebugger.logLines
+          ..listen(receivedLogLines.add);
+
+        expect(iosDeployDebugger.logLines, emitsInOrder(<String>[
+          'Log on attach1',
+          'Log on attach2',
+        ]));
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await logLines.drain();
+
+        expect(LineSplitter.split(logger.traceText), containsOnce('Received logs from ios-deploy.'));
+      });
     });
 
     testWithoutContext('detach', () async {

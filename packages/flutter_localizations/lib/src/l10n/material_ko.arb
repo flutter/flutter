@@ -25,6 +25,7 @@
   "continueButtonLabel": "계속",
   "copyButtonLabel": "복사",
   "cutButtonLabel": "잘라냄",
+  "scanTextButtonLabel": "스캔 텍스트",
   "okButtonLabel": "확인",
   "pasteButtonLabel": "붙여넣기",
   "selectAllButtonLabel": "전체 선택",

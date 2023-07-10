@@ -77,7 +77,7 @@ class MatchesGoldenFile extends AsyncMatcher {
       } on TestFailure catch (ex) {
         return ex.message;
       }
-    }, additionalTime: const Duration(seconds: 22));
+    });
     _renderElement(view, _findRepaintBoundary(e));
     return result;
   }
