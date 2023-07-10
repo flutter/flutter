@@ -904,8 +904,11 @@ transforms:
       uris: [ 'material.dart' ]
       variable: 'standardEasing'
     changes:
-      - kind: 'rename'
-        newName: 'Easing.legacy'
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'material.dart' ]
+          field: legacy
+          inClass: Easing
 
   # Changes made in https://github.com/flutter/flutter/pull/129942
   - title: "Migrate to 'Easing.legacyAccelerate'"
@@ -914,8 +917,11 @@ transforms:
       uris: [ 'material.dart' ]
       variable: 'accelerateEasing'
     changes:
-      - kind: 'rename'
-        newName: 'Easing.legacyAccelerate'
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'material.dart' ]
+          field: legacyAccelerate
+          inClass: Easing
 
   # Changes made in https://github.com/flutter/flutter/pull/129942
   - title: "Migrate to 'Easing.legacyDecelerate'"
@@ -924,7 +930,10 @@ transforms:
       uris: [ 'material.dart' ]
       variable: 'decelerateEasing'
     changes:
-      - kind: 'rename'
-        newName: 'Easing.legacyDecelerate'
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'material.dart' ]
+          field: legacyDecelerate
+          inClass: Easing
 
 # Before adding a new fix: read instructions at the top of this file.
