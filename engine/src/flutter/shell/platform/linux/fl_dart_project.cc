@@ -62,6 +62,13 @@ G_MODULE_EXPORT FlDartProject* fl_dart_project_new() {
   return self;
 }
 
+G_MODULE_EXPORT void fl_dart_project_set_aot_library_path(FlDartProject* self,
+                                                          const gchar* path) {
+  g_return_if_fail(FL_IS_DART_PROJECT(self));
+  g_clear_pointer(&self->aot_library_path, g_free);
+  self->aot_library_path = g_strdup(path);
+}
+
 G_MODULE_EXPORT const gchar* fl_dart_project_get_aot_library_path(
     FlDartProject* self) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(self), nullptr);

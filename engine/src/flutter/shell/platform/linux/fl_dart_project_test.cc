@@ -28,6 +28,14 @@ TEST(FlDartProjectTest, GetPaths) {
                expected_icu_data_path);
 }
 
+TEST(FlDartProjectTest, OverrideAotLibraryPath) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+
+  char aot_library_path[] = "/normal/tuesday/night/for/shia/labeouf";
+  fl_dart_project_set_aot_library_path(project, aot_library_path);
+  EXPECT_STREQ(fl_dart_project_get_aot_library_path(project), aot_library_path);
+}
+
 TEST(FlDartProjectTest, OverrideAssetsPath) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
 
