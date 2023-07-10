@@ -71,7 +71,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// before calling [prepareInitialFrame]. This decouples creating the
   /// [RenderView] object from configuring it. Typically, the object is created
   /// by the element backing the [RawView] and configured by the
-  /// [RenderViewManager] when the [RenderView] is registered with it.
+  /// [RendererBinding] when the [RenderView] is registered with it.
   RenderView({
     RenderBox? child,
     ViewConfiguration? configuration,
@@ -87,15 +87,16 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   /// The constraints used for the root layout.
   ///
-  /// The configuration is set and updated by the [RenderViewManager]. If set
-  /// elsewhere, the [RenderViewManager] this [RenderView] is registered with
-  /// may override it at any time.
+  /// Typically, this configuration is set by the [RendererBinding], when the
+  /// [RenderView] is registered with it. It will also update the configuration
+  /// if necessary. Therefore, if used in conjunction with the [RendererBinding]
+  /// this property must not be set manually as the [RendererBinding] will just
+  /// override it.
   ///
   /// For tests that want to change the size of the view, set
   /// [TestFlutterView.physicalSize] on the appropriate [TestFlutterView]
   /// (typically [WidgetTester.view]) instead of setting a configuration
-  /// directly on the [RenderView]. The [RenderViewManager] will honor a size
-  /// set that way and will not override it.
+  /// directly on the [RenderView].
   ViewConfiguration get configuration => _configuration!;
   ViewConfiguration? _configuration;
   set configuration(ViewConfiguration value) {
