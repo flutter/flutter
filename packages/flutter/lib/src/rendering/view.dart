@@ -70,8 +70,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Providing a [configuration] is optional, but a configuration must be set
   /// before calling [prepareInitialFrame]. This decouples creating the
   /// [RenderView] object from configuring it. Typically, the object is created
-  /// by the element backing the [RawView] and configured by the
-  /// [RendererBinding] when the [RenderView] is registered with it.
+  /// by the [View] widget and configured by the [RendererBinding] when the
+  /// [RenderView] is registered with it by the [View] widget.
   RenderView({
     RenderBox? child,
     ViewConfiguration? configuration,

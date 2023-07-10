@@ -144,7 +144,10 @@ void main() {
               ),
             );
           }
-          return Container();
+          return View(
+            view: tester.view,
+            child: const SizedBox(),
+          );
         },
       ),
     );
@@ -342,14 +345,7 @@ void main() {
 }
 
 Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
-  tester.binding.attachRootWidget(Builder(
-    builder: (BuildContext context) {
-      return RawView(
-        view: tester.view,
-        builder: (_, __) => widget,
-      );
-    },
-  ));
+  tester.binding.attachRootWidget(widget);
   tester.binding.scheduleFrame();
   return tester.binding.pump();
 }

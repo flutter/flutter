@@ -1252,7 +1252,20 @@ class RootElement extends Element with RootElementMixin {
   }
 
   void _rebuild() {
-    _child = updateChild(_child, (widget as RootWidget).child, /* slot */ null);
+    try {
+      _child = updateChild(_child, (widget as RootWidget).child, /* slot */ null);
+    } catch (exception, stack) {
+      final FlutterErrorDetails details = FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widgets library',
+        context: ErrorDescription('attaching to the render tree'),
+      );
+      FlutterError.reportError(details);
+      // No error widget possible here since it wouldn't have a view to render into.
+      _child = null;
+    }
+
   }
 
   @override

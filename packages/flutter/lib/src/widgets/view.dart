@@ -42,10 +42,6 @@ import 'media_query.dart';
 /// In technical terms, whether a [View] is allowed to occupy a certain slot of
 /// an element is determined by that element's
 /// [Element.debugExpectsRenderObjectForSlot].
-///
-/// See also:
-///
-///  * [RawView], which is the workhorse behind this widget.
 class View extends StatelessWidget {
   /// Create a [View] widget to bootstrap a render tree that is rendered into
   /// the provided [FlutterView].
@@ -160,7 +156,7 @@ class View extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RawView._deprecated(
+    return _RawView(
       view: view,
       deprecatedPipelineOwner: _deprecatedPipelineOwner,
       deprecatedRenderView: _deprecatedRenderView,
@@ -180,17 +176,17 @@ class View extends StatelessWidget {
   }
 }
 
-/// A builder for the content [Widget] of a [RawView].
+/// A builder for the content [Widget] of a [_RawView].
 ///
 /// The widget returned by the builder defines the content that is drawn into
-/// the [FlutterView] configured on the [RawView].
+/// the [FlutterView] configured on the [_RawView].
 ///
-/// The builder is given the [PipelineOwner] that the [RawView] uses to manage
+/// The builder is given the [PipelineOwner] that the [_RawView] uses to manage
 /// its render tree. Typical builder implementations make that pipeline owner
 /// available as an attachment point for potential child views.
 ///
-/// Used by [RawView.builder].
-typedef RawViewContentBuilder = Widget Function(BuildContext context, PipelineOwner owner);
+/// Used by [_RawView.builder].
+typedef _RawViewContentBuilder = Widget Function(BuildContext context, PipelineOwner owner);
 
 /// The workhorse behind the [View] widget that actually bootstraps a render
 /// tree.
@@ -201,29 +197,13 @@ typedef RawViewContentBuilder = Widget Function(BuildContext context, PipelineOw
 /// the surrounding parent [PipelineOwner] obtained with [View.pipelineOwnerOf].
 /// This ensures that the render tree bootstrapped by this widget participates
 /// properly in frame production and hit testing.
-///
-/// The [RawView] widget faces the same limitations in terms of where it can
-/// appear in the widget tree as the [View] widget. See the [View] widget for
-/// details.
-///
-/// The [RawView] widget is rarely used directly. Instead, consider using the
-/// [View] widget, which also inserts a proper [MediaQuery] for the [view] into
-/// the tree and injects the [PipelineOwner] of this view into the tree for
-/// potential child views.
-class RawView extends RenderObjectWidget {
+class _RawView extends RenderObjectWidget {
   /// Create a [RawView] widget to bootstrap a render tree that is rendered into
   /// the provided [FlutterView].
   ///
   /// The content rendered into that [view] is determined by the [Widget]
   /// returned by [builder].
-  RawView({
-    required this.view,
-    required this.builder,
-  }) : _deprecatedPipelineOwner = null,
-       _deprecatedRenderView = null,
-       super(key: GlobalObjectKey(view));
-
-  RawView._deprecated({
+  _RawView({
     required this.view,
     required PipelineOwner? deprecatedPipelineOwner,
     required RenderView? deprecatedRenderView,
@@ -231,6 +211,7 @@ class RawView extends RenderObjectWidget {
   }) : _deprecatedPipelineOwner = deprecatedPipelineOwner,
        _deprecatedRenderView = deprecatedRenderView,
        assert(deprecatedRenderView == null || deprecatedRenderView.flutterView == view),
+       // TODO(goderbauer): Replace this with GlobalObjectKey(view) when the deprecated properties are removed.
        super(key: _DeprecatedRawViewKey(view, deprecatedPipelineOwner, deprecatedRenderView));
 
   /// The [FlutterView] into which the [Widget] returned by [builder] is drawn.
@@ -241,7 +222,7 @@ class RawView extends RenderObjectWidget {
   /// The [builder] is given the [PipelineOwner] responsible for the render tree
   /// bootstrapped by this widget and typically makes it available as an
   /// attachment point for potential child views.
-  final RawViewContentBuilder builder;
+  final _RawViewContentBuilder builder;
 
   final PipelineOwner? _deprecatedPipelineOwner;
   final RenderView? _deprecatedRenderView;
@@ -269,7 +250,7 @@ class _RawViewElement extends RenderTreeRootElement {
     onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
   );
 
-  PipelineOwner get _effectivePipelineOwner => (widget as RawView)._deprecatedPipelineOwner ?? _pipelineOwner;
+  PipelineOwner get _effectivePipelineOwner => (widget as _RawView)._deprecatedPipelineOwner ?? _pipelineOwner;
 
   void _handleSemanticsOwnerCreated() {
     (_effectivePipelineOwner.rootNode as RenderView?)?.scheduleInitialSemantics();
@@ -280,7 +261,7 @@ class _RawViewElement extends RenderTreeRootElement {
   }
 
   void _handleSemanticsUpdate(SemanticsUpdate update) {
-    (widget as RawView).view.updateSemantics(update);
+    (widget as _RawView).view.updateSemantics(update);
   }
 
   @override
@@ -290,7 +271,7 @@ class _RawViewElement extends RenderTreeRootElement {
 
   void _updateChild() {
     try {
-      final Widget child = (widget as RawView).builder(this, _effectivePipelineOwner);
+      final Widget child = (widget as _RawView).builder(this, _effectivePipelineOwner);
       _child = updateChild(_child, child, null);
     } catch (e, stack) {
       final FlutterErrorDetails details = FlutterErrorDetails(
@@ -376,7 +357,7 @@ class _RawViewElement extends RenderTreeRootElement {
   }
 
   @override
-  void update(RawView newWidget) {
+  void update(_RawView newWidget) {
     super.update(newWidget);
     _updateChild();
   }
@@ -416,7 +397,7 @@ class _RawViewElement extends RenderTreeRootElement {
 
   @override
   void unmount() {
-    if (_effectivePipelineOwner != (widget as RawView)._deprecatedPipelineOwner) {
+    if (_effectivePipelineOwner != (widget as _RawView)._deprecatedPipelineOwner) {
       _effectivePipelineOwner.dispose();
     }
     super.unmount();
@@ -710,7 +691,7 @@ class _MultiChildComponentElement extends Element {
 
 // A special [GlobalKey] to support passing the deprecated
 // [RendererBinding.renderView] and [RendererBinding.pipelineOwner] to the
-// [RawView]. Will be removed when those deprecated properties are removed.
+// [_RawView]. Will be removed when those deprecated properties are removed.
 @optionalTypeArgs
 class _DeprecatedRawViewKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   const _DeprecatedRawViewKey(this.view, this.owner, this.renderView) : super.constructor();

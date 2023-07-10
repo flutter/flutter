@@ -1044,65 +1044,61 @@ void main() {
     expect(box.debugDisposed, isTrue);
   });
 
-  testWidgets('RawView can be wrapped and unwrapped', (WidgetTester tester) async {
-    final Widget rawView = RawView(
+  testWidgets('View can be wrapped and unwrapped', (WidgetTester tester) async {
+    final Widget view = View(
       view: tester.view,
-      builder: (BuildContext context, PipelineOwner owner) {
-        return const SizedBox();
-      },
+      child: const SizedBox(),
     );
 
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
-      widget: rawView,
+      widget: view,
     );
 
-    final RenderObject renderView = tester.renderObject(find.byType(RawView));
+    final RenderObject renderView = tester.renderObject(find.byType(View));
     final RenderObject renderSizedBox = tester.renderObject(find.byType(SizedBox));
 
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: ViewCollection(
-        views: <Widget>[rawView],
+        views: <Widget>[view],
       ),
     );
 
-    expect(tester.renderObject(find.byType(RawView)), same(renderView));
+    expect(tester.renderObject(find.byType(View)), same(renderView));
     expect(tester.renderObject(find.byType(SizedBox)), same(renderSizedBox));
 
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
-      widget: rawView,
+      widget: view,
     );
 
-    expect(tester.renderObject(find.byType(RawView)), same(renderView));
+    expect(tester.renderObject(find.byType(View)), same(renderView));
     expect(tester.renderObject(find.byType(SizedBox)), same(renderSizedBox));
   });
 
-  testWidgets('ViewAnchor with RawView can be wrapped and unwrapped', (WidgetTester tester) async {
+  testWidgets('ViewAnchor with View can be wrapped and unwrapped', (WidgetTester tester) async {
     final Widget viewAnchor = ViewAnchor(
-      view: RawView(
+      view: View(
         view: FakeView(tester.view),
-        builder: (BuildContext context, PipelineOwner owner) {
-          return const SizedBox();
-        },
+        child: const SizedBox(),
       ),
       child: const ColoredBox(color: Colors.green),
     );
 
     await tester.pumpWidget(viewAnchor);
 
-    final List<RenderObject> renderViews = tester.renderObjectList(find.byType(RawView)).toList();
+    final List<RenderObject> renderViews = tester.renderObjectList(find.byType(View)).toList();
     final RenderObject renderSizedBox = tester.renderObject(find.byType(SizedBox));
 
     await tester.pumpWidget(ColoredBox(color: Colors.yellow, child: viewAnchor));
 
-    expect(tester.renderObjectList(find.byType(RawView)), renderViews);
+    expect(tester.renderObjectList(find.byType(View)), renderViews);
     expect(tester.renderObject(find.byType(SizedBox)), same(renderSizedBox));
 
     await tester.pumpWidget(viewAnchor);
 
-    expect(tester.renderObjectList(find.byType(RawView)), renderViews);
+    expect(tester.renderObjectList(find.byType(View)), renderViews);
     expect(tester.renderObject(find.byType(SizedBox)), same(renderSizedBox));
   });
 

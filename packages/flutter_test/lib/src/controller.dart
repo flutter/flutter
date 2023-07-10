@@ -344,10 +344,10 @@ abstract class WidgetController {
   }
 
   FlutterView _viewOf(Finder finder) {
-    return firstWidget<RawView>(
+    return firstWidget<View>(
       find.ancestor(
         of: finder,
-        matching: find.byType(RawView),
+        matching: find.byType(View),
       ),
     ).view;
   }
