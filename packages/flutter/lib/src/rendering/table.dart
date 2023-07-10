@@ -354,7 +354,6 @@ enum TableCellVerticalAlignment {
   baseline,
 
   /// Cells with this alignment are sized to be as tall as the row, then made to fit the row.
-  /// If all the cells have this alignment, then the row will have zero height.
   fill
 }
 
@@ -1057,10 +1056,9 @@ class RenderTable extends RenderBox {
             case TableCellVerticalAlignment.top:
             case TableCellVerticalAlignment.middle:
             case TableCellVerticalAlignment.bottom:
+            case TableCellVerticalAlignment.fill:
               final Size childSize = child.getDryLayout(BoxConstraints.tightFor(width: widths[x]));
               rowHeight = math.max(rowHeight, childSize.height);
-            case TableCellVerticalAlignment.fill:
-              break;
           }
         }
       }
@@ -1135,10 +1133,9 @@ class RenderTable extends RenderBox {
             case TableCellVerticalAlignment.top:
             case TableCellVerticalAlignment.middle:
             case TableCellVerticalAlignment.bottom:
+            case TableCellVerticalAlignment.fill:
               child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
               rowHeight = math.max(rowHeight, child.size.height);
-            case TableCellVerticalAlignment.fill:
-              break;
           }
         }
       }
