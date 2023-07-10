@@ -277,4 +277,28 @@ void main() {
     );
   });
 
+
+test('Table all cells with vertically fill', () {
+    const BoxConstraints firstConstraints = BoxConstraints.tightFor(width: 100, height: 100);
+    const BoxConstraints secondConstraints = BoxConstraints.tightFor(width: 200, height: 200);
+
+    final RenderTable table = RenderTable(
+      textDirection: TextDirection.rtl,
+      defaultVerticalAlignment: TableCellVerticalAlignment.fill,
+      children: <List<RenderBox>>[
+        <RenderBox>[
+          RenderConstrainedBox(additionalConstraints: firstConstraints),
+          RenderConstrainedBox(additionalConstraints: secondConstraints),
+        ]
+      ],
+      columnWidths: const <int, TableColumnWidth>{
+        0: FlexColumnWidth(),
+        1: FlexColumnWidth(),
+      },
+    );
+
+    layout(table);
+    expect(table.defaultVerticalAlignment, TableCellVerticalAlignment.fill);
+    expect(table.hasSize, true);
+  });
 }
