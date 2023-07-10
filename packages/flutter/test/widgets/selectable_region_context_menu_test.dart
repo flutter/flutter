@@ -18,7 +18,6 @@ extension on web.CSSRuleList {
   Iterable<web.CSSRule> get iterable => _genIterable(this);
 }
 
-typedef ItemGetter<T> = T? Function(int index);
 Iterable<T> _genIterable<T>(dynamic jsCollection) {
   // ignore: avoid_dynamic_calls
   return Iterable<T>.generate(jsCollection.length as int, (int index) => jsCollection.item(index) as T,);
@@ -159,8 +158,7 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  SelectionGeometry get value => _value;
-  SelectionGeometry _value = const SelectionGeometry(
+  final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
     startSelectionPoint: SelectionPoint(
@@ -174,15 +172,6 @@ class RenderSelectionSpy extends RenderProxyBox
       handleType: TextSelectionHandleType.left,
     ),
   );
-  set value(SelectionGeometry other) {
-    if (other == _value) {
-      return;
-    }
-    _value = other;
-    for (final VoidCallback callback in listeners) {
-      callback();
-    }
-  }
 
   @override
   void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }
