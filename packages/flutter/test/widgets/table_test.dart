@@ -1079,7 +1079,7 @@ void main() {
     );
   });
 
-    testWidgets('Table widget - Cells with vertically fill', (WidgetTester tester) async {
+    testWidgets('Set defaultVerticalAlignment to fill vertically and check their heights', (WidgetTester tester) async {
 
     final Widget table = Directionality(
       textDirection: TextDirection.ltr,

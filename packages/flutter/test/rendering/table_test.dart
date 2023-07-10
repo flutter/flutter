@@ -278,7 +278,7 @@ void main() {
   });
 
 
-test('Table all cells with vertically fill', () {
+test('TableRows with differents constraints, but vertically fill', () {
     const BoxConstraints firstConstraints = BoxConstraints.tightFor(width: 100, height: 100);
     const BoxConstraints secondConstraints = BoxConstraints.tightFor(width: 200, height: 200);
 
@@ -297,8 +297,13 @@ test('Table all cells with vertically fill', () {
       },
     );
 
-    layout(table);
+    const Size size = Size(300.0, 300.0);
+
+    // Layout the table with a fixed size of 300.0 x 300.0
+    layout(table, constraints: BoxConstraints.tight(size));
+
+    // Check if the table has a size and the children are vertically filled
+    expect(table.size, equals(size));
     expect(table.defaultVerticalAlignment, TableCellVerticalAlignment.fill);
-    expect(table.hasSize, true);
   });
 }
