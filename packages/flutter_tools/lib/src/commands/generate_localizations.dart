@@ -5,6 +5,7 @@
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../localizations/gen_l10n.dart';
@@ -217,6 +218,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    // Validate the rest of the args.
+    if (argResults!.rest.isNotEmpty) {
+      throwToolExit('Unexpected positional argument "${argResults!.rest.first}".');
+    }
     // Keep in mind that this is also defined in the following locations:
     // 1. flutter_tools/lib/src/build_system/targets/localizations.dart
     // 2. flutter_tools/test/general.shard/build_system/targets/localizations_test.dart

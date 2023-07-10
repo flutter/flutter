@@ -480,4 +480,17 @@ format: true
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
+
+  testUsingContext('throws error when unexpected positional argument is provided', () {
+    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+    );
+    expect(
+      () async => createTestCommandRunner(command).run(<String>['gen-l10n', '--synthetic-package', 'false']),
+      throwsToolExit(message: 'Unexpected positional argument "false".')
+    );
+  });
 }
