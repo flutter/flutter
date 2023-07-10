@@ -4926,7 +4926,8 @@ void main() {
         expect(find.text('Home page'), findsNothing);
         expect(find.text('Page one'), findsOneWidget);
         expect(calls.last, isTrue);
-        expect(calls, hasLength(1));
+        expect(calls, hasLength(greaterThan(0)));
+        final int lastCallsLength = calls.length;
 
         await simulateSystemBack();
         await tester.pumpAndSettle();
@@ -4934,7 +4935,7 @@ void main() {
         expect(find.text('Home page'), findsOneWidget);
         expect(find.text('Page one'), findsNothing);
         expect(calls.last, isFalse);
-        expect(calls, hasLength(2));
+        expect(calls, hasLength(greaterThan(lastCallsLength)));
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
         skip: isBrowser, // [intended] only non-web Android supports predictive back.

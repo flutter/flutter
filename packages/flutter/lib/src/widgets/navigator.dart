@@ -3433,9 +3433,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   void _handleHistoryChanged() {
     final NavigationNotification notification = NavigationNotification(
-      canHandlePop: _usingPagesAPI
-          ? widget.pages.length > 1
-          : canPop(),
+      canHandlePop: canPop(),
     );
     notification.dispatch(context);
   }
