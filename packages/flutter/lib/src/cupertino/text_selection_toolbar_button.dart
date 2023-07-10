@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -103,6 +105,7 @@ class CupertinoTextSelectionToolbarButton extends StatefulWidget {
         return localizations.pasteButtonLabel;
       case ContextMenuButtonType.selectAll:
         return localizations.selectAllButtonLabel;
+      case ContextMenuButtonType.liveTextInput:
       case ContextMenuButtonType.delete:
       case ContextMenuButtonType.custom:
         return '';
@@ -131,6 +134,7 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
 
   @override
   Widget build(BuildContext context) {
+    final Widget content = _getContentWidget(context);
     final Widget child = CupertinoButton(
       color: isPressed
         ? _kToolbarPressedColor.resolveFrom(context)
@@ -145,15 +149,7 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
       // There's no foreground fade on iOS toolbar anymore, just the background
       // is darkened.
       pressedOpacity: 1.0,
-      child: widget.child ?? Text(
-         widget.text ?? CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
-         overflow: TextOverflow.ellipsis,
-         style: _kToolbarButtonFontStyle.copyWith(
-           color: widget.onPressed != null
-               ? _kToolbarTextColor.resolveFrom(context)
-               : CupertinoColors.inactiveGray,
-         ),
-       ),
+      child: content,
     );
 
     if (widget.onPressed != null) {
@@ -169,5 +165,86 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
     } else {
       return child;
     }
+  }
+
+  Widget _getContentWidget(BuildContext context) {
+    if (widget.child != null) {
+      return widget.child!;
+    }
+    final Widget textWidget = Text(
+      widget.text ?? CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
+      overflow: TextOverflow.ellipsis,
+      style: _kToolbarButtonFontStyle.copyWith(
+        color: widget.onPressed != null
+            ? _kToolbarTextColor.resolveFrom(context)
+            : CupertinoColors.inactiveGray,
+      ),
+    );
+    if (widget.buttonItem == null) {
+      return textWidget;
+    }
+    switch (widget.buttonItem!.type) {
+      case ContextMenuButtonType.cut:
+      case ContextMenuButtonType.copy:
+      case ContextMenuButtonType.paste:
+      case ContextMenuButtonType.selectAll:
+      case ContextMenuButtonType.delete:
+      case ContextMenuButtonType.custom:
+        return textWidget;
+      case ContextMenuButtonType.liveTextInput:
+        return SizedBox(
+          width: 13.0,
+          height: 13.0,
+          child: CustomPaint(
+            painter: _LiveTextIconPainter(color: _kToolbarTextColor.resolveFrom(context)),
+          ),
+        );
+    }
+  }
+}
+
+class _LiveTextIconPainter extends CustomPainter {
+  _LiveTextIconPainter({required this.color});
+
+  final Color color;
+
+  final Paint _painter = Paint()
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round
+    ..strokeWidth = 1.0
+    ..style = PaintingStyle.stroke;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    _painter.color = color;
+    canvas.save();
+    canvas.translate(size.width / 2.0, size.height / 2.0);
+
+    final Offset origin = Offset(-size.width / 2.0, -size.height / 2.0);
+    // Path for the one corner.
+    final Path path = Path()
+      ..moveTo(origin.dx, origin.dy + 3.5)
+      ..lineTo(origin.dx, origin.dy + 1.0)
+      ..arcToPoint(Offset(origin.dx + 1.0, origin.dy), radius: const Radius.circular(1))
+      ..lineTo(origin.dx + 3.5, origin.dy);
+
+    // Rotate to draw corner four times.
+    final Matrix4 rotationMatrix = Matrix4.identity()..rotateZ(pi / 2.0);
+    for (int i = 0; i < 4; i += 1) {
+      canvas.drawPath(path, _painter);
+      canvas.transform(rotationMatrix.storage);
+    }
+
+    // Draw three lines.
+    canvas.drawLine(const Offset(-3.0, -3.0), const Offset(3.0, -3.0), _painter);
+    canvas.drawLine(const Offset(-3.0, 0.0), const Offset(3.0, 0.0), _painter);
+    canvas.drawLine(const Offset(-3.0, 3.0), const Offset(1.0, 3.0), _painter);
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _LiveTextIconPainter oldDelegate) {
+    return oldDelegate.color != color;
   }
 }
