@@ -7,9 +7,6 @@
 
 #include <gmodule.h>
 
-// Added here to stop the compiler from optimizing this function away.
-G_MODULE_EXPORT GType fl_method_codec_get_type();
-
 G_DEFINE_TYPE(FlMethodCodec, fl_method_codec, G_TYPE_OBJECT)
 
 static void fl_method_codec_class_init(FlMethodCodecClass* klass) {}

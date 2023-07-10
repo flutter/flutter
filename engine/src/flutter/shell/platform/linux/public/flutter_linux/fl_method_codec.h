@@ -10,12 +10,14 @@
 #endif
 
 #include <glib-object.h>
+#include <gmodule.h>
 
 #include "fl_method_response.h"
 #include "fl_value.h"
 
 G_BEGIN_DECLS
 
+G_MODULE_EXPORT
 G_DECLARE_DERIVABLE_TYPE(FlMethodCodec,
                          fl_method_codec,
                          FL,

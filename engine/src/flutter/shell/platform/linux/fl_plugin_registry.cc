@@ -6,9 +6,6 @@
 
 #include <gmodule.h>
 
-// Added here to stop the compiler from optimizing this function away.
-G_MODULE_EXPORT GType fl_plugin_registry_get_type();
-
 G_DEFINE_INTERFACE(FlPluginRegistry, fl_plugin_registry, G_TYPE_OBJECT)
 
 void fl_plugin_registry_default_init(FlPluginRegistryInterface* self) {}

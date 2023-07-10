@@ -10,12 +10,14 @@
 #endif
 
 #include <glib-object.h>
+#include <gmodule.h>
 
 #include "fl_method_response.h"
 #include "fl_value.h"
 
 G_BEGIN_DECLS
 
+G_MODULE_EXPORT
 G_DECLARE_FINAL_TYPE(FlMethodCall, fl_method_call, FL, METHOD_CALL, GObject)
 
 /**

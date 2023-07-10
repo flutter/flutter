@@ -10,6 +10,7 @@
 #endif
 
 #include <glib-object.h>
+#include <gmodule.h>
 
 #include "fl_binary_messenger.h"
 #include "fl_dart_project.h"
@@ -17,6 +18,7 @@
 
 G_BEGIN_DECLS
 
+G_MODULE_EXPORT
 G_DECLARE_FINAL_TYPE(FlEngine, fl_engine, FL, ENGINE, GObject)
 
 /**
