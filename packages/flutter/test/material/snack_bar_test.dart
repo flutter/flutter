@@ -761,7 +761,7 @@ void main() {
       expect(size.height, maxHeight);
     });
 
-    testWidgets('minWidth ignore', (WidgetTester tester) async {
+    testWidgets('constraints.minWidth is ignored if width is not null and less than constrains.minWidth', (WidgetTester tester) async {
       const double minWidth = 100;
       const double width = minWidth - 1;
       await tester.pumpWidget(
