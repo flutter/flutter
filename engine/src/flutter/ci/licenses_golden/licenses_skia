@@ -1,4 +1,4 @@
-Signature: 15c995f16f5bf31480af1094d0480766
+Signature: 67abad62d2448056ba909f1b3a1d22cc
 
 ====================================================================================================
 LIBRARY: etc1
@@ -388,7 +388,6 @@ FILE: ../../../third_party/skia/relnotes/canvas_flush.md
 FILE: ../../../third_party/skia/relnotes/const_context.md
 FILE: ../../../third_party/skia/relnotes/runtimeeffect_const.md
 FILE: ../../../third_party/skia/relnotes/runtimeeffect_image.md
-FILE: ../../../third_party/skia/relnotes/tiledimages.md
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
