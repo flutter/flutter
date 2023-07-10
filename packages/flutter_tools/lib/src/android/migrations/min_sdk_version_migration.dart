@@ -27,6 +27,10 @@ class MinSdkVersionMigration extends ProjectMigrator {
 
   @override
   void migrate() {
+    // Skip applying migration in modules as the FlutterExtension is not applied.
+    if (_project.isModule) {
+      return;
+    }
     try {
       processFileLines(_project.appGradleFile);
     } on FileSystemException {

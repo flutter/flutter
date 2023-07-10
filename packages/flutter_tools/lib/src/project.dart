@@ -511,14 +511,20 @@ class AndroidProject extends FlutterProjectPlatform {
     }
     try {
       for (final String line in appGradleFile.readAsLinesSync()) {
-        // There are multiple syntaxes for applying gradle plugins. The flutter
-        // gradle plugin is being applied if any of the following are present.
-        // The following syntaxes correspond to (in order):
-        // https://docs.gradle.org/current/userguide/plugins.html#sec:script_plugins
-        // https://docs.gradle.org/current/userguide/plugins.html#sec:buildsrc_plugins_dsl
-        //
+        // This syntax corresponds to applying the Flutter Gradle Plugin with a
+        // script.
+        // See https://docs.gradle.org/current/userguide/plugins.html#sec:script_plugins.
         final bool fileBasedApply = line.contains(RegExp(r'apply from: .*/flutter.gradle'));
+
+        // This syntax corresponds to applying the Flutter Gradle Plugin using
+        // the declarative "plugins {}" block after including it in the
+        // pluginManagement block of the settings.gradle file.
+        // See https://docs.gradle.org/current/userguide/composite_builds.html#included_plugin_builds,
+        // as well as the settings.gradle and build.gradle templates.
         final bool declarativeApply = line.contains('dev.flutter.flutter-gradle-plugin');
+
+        // This case allows for flutter run/build to work for modules. It does
+        // not guarantee the Flutter Gradle Plugin is applied.
         final bool managed = line.contains("def flutterPluginVersion = 'managed'");
         if (fileBasedApply || declarativeApply || managed) {
           return true;

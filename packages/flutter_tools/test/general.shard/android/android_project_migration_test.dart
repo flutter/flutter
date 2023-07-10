@@ -401,6 +401,21 @@ tasks.register("clean", Delete) {
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(code));
       });
+
+      testWithoutContext('do nothing when project is a module', () {
+        project = FakeAndroidProject(
+          root: memoryFileSystem.currentDirectory.childDirectory('android'),
+          module: true,
+        );
+        migration = MinSdkVersionMigration(
+            project,
+            bufferLogger
+        );
+        const String minSdkVersion16 = 'minSdkVersion 16';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion16));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdkVersion16));
+      });
     });
   });
 }
