@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_DART_PROJECT_H_
 
 #include <glib-object.h>
+#include <gmodule.h>
 
 #if !defined(__FLUTTER_LINUX_INSIDE__) && !defined(FLUTTER_LINUX_COMPILATION)
 #error "Only <flutter_linux/flutter_linux.h> can be included directly."
@@ -13,6 +14,7 @@
 
 G_BEGIN_DECLS
 
+G_MODULE_EXPORT
 G_DECLARE_FINAL_TYPE(FlDartProject, fl_dart_project, FL, DART_PROJECT, GObject)
 
 /**

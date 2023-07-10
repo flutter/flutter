@@ -16,9 +16,6 @@ typedef struct {
 
 static void fl_pixel_buffer_texture_iface_init(FlTextureInterface* iface);
 
-// Added here to stop the compiler from optimising this function away.
-G_MODULE_EXPORT GType fl_pixel_buffer_texture_get_type();
-
 G_DEFINE_TYPE_WITH_CODE(
     FlPixelBufferTexture,
     fl_pixel_buffer_texture,
