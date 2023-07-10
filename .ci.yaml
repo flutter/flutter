@@ -243,8 +243,6 @@ targets:
 
   - name: Linux packages_autoroller
     presubmit: false
-    # TODO(fujino): https://github.com/flutter/flutter/issues/129744
-    bringup: true
     recipe: pub_autoroller/pub_autoroller
     timeout: 30
     enabled_branches:
