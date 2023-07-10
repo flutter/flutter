@@ -717,11 +717,9 @@ _XCResultIssueHandlingResult _handleXCResultIssue({required XCResultIssue issue,
   } else if (message.toLowerCase().contains('provisioning profile')) {
     return _XCResultIssueHandlingResult(requiresProvisioningProfile: false, hasProvisioningProfileIssue: true);
   } else if (message.toLowerCase().contains('ineligible destinations')) {
-    final RegExp pattern = RegExp(r'error:(.*?) is not installed\. To use with Xcode, first download and install the platform');
-    final RegExpMatch? match = pattern.firstMatch(message);
-    if (match != null) {
-      final String? version = match.group(1);
-      return _XCResultIssueHandlingResult(requiresProvisioningProfile: false, hasProvisioningProfileIssue: false, missingPlatform: version);
+    final String? missingPlatform = _parseMissingPlatform(message);
+    if (missingPlatform != null) {
+      return _XCResultIssueHandlingResult(requiresProvisioningProfile: false, hasProvisioningProfileIssue: false, missingPlatform: missingPlatform);
     }
   }
   return _XCResultIssueHandlingResult(requiresProvisioningProfile: false, hasProvisioningProfileIssue: false);
@@ -802,15 +800,21 @@ void _parseIssueInStdout(XcodeBuildExecution xcodeBuildExecution, Logger logger,
   }
 
   if (stderr != null && stderr.contains('Ineligible destinations')) {
-    final RegExp pattern = RegExp(r'error:(.*?) is not installed\. To use with Xcode, first download and install the platform');
-    final RegExpMatch? match = pattern.firstMatch(stderr);
-    if (match != null) {
-      final String? version = match.group(1);
+    final String? version = _parseMissingPlatform(stderr);
       if (version != null) {
         logger.printError(missingPlatformInstructions(version), emphasis: true);
       }
-    }
   }
+}
+
+String? _parseMissingPlatform(String message) {
+  final RegExp pattern = RegExp(r'error:(.*?) is not installed\. To use with Xcode, first download and install the platform');
+  final RegExpMatch? match = pattern.firstMatch(message);
+  if (match != null) {
+    final String? version = match.group(1);
+    return version;
+  }
+  return null;
 }
 
 // The result of [_handleXCResultIssue].
