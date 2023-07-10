@@ -40,9 +40,6 @@ struct _FlEventChannelResponseHandle {
   FlBinaryMessengerResponseHandle* response_handle;
 };
 
-// Added here to stop the compiler from optimizing this function away.
-G_MODULE_EXPORT GType fl_event_channel_get_type();
-
 G_DEFINE_TYPE(FlEventChannel, fl_event_channel, G_TYPE_OBJECT)
 
 // Handle method calls from the Dart side of the channel.

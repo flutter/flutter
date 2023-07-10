@@ -10,11 +10,13 @@
 #endif
 
 #include <glib-object.h>
+#include <gmodule.h>
 
 #include "fl_plugin_registrar.h"
 
 G_BEGIN_DECLS
 
+G_MODULE_EXPORT
 G_DECLARE_INTERFACE(FlPluginRegistry,
                     fl_plugin_registry,
                     FL,

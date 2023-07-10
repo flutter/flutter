@@ -10,6 +10,7 @@
 #endif
 
 #include <glib-object.h>
+#include <gmodule.h>
 
 #include "fl_binary_messenger.h"
 #include "fl_texture_registrar.h"
@@ -17,6 +18,7 @@
 
 G_BEGIN_DECLS
 
+G_MODULE_EXPORT
 G_DECLARE_INTERFACE(FlPluginRegistrar,
                     fl_plugin_registrar,
                     FL,

@@ -10,6 +10,7 @@
 #endif
 
 #include <glib-object.h>
+#include <gmodule.h>
 
 #include "fl_value.h"
 
@@ -36,6 +37,7 @@ typedef enum {
 
 GQuark fl_method_response_error_quark(void) G_GNUC_CONST;
 
+G_MODULE_EXPORT
 G_DECLARE_DERIVABLE_TYPE(FlMethodResponse,
                          fl_method_response,
                          FL,
@@ -46,18 +48,21 @@ struct _FlMethodResponseClass {
   GObjectClass parent_class;
 };
 
+G_MODULE_EXPORT
 G_DECLARE_FINAL_TYPE(FlMethodSuccessResponse,
                      fl_method_success_response,
                      FL,
                      METHOD_SUCCESS_RESPONSE,
                      FlMethodResponse)
 
+G_MODULE_EXPORT
 G_DECLARE_FINAL_TYPE(FlMethodErrorResponse,
                      fl_method_error_response,
                      FL,
                      METHOD_ERROR_RESPONSE,
                      FlMethodResponse)
 
+G_MODULE_EXPORT
 G_DECLARE_FINAL_TYPE(FlMethodNotImplementedResponse,
                      fl_method_not_implemented_response,
                      FL,

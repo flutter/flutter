@@ -11,6 +11,7 @@
 
 #include <gio/gio.h>
 #include <glib-object.h>
+#include <gmodule.h>
 
 #include "fl_binary_messenger.h"
 #include "fl_method_call.h"
@@ -19,6 +20,7 @@
 
 G_BEGIN_DECLS
 
+G_MODULE_EXPORT
 G_DECLARE_FINAL_TYPE(FlMethodChannel,
                      fl_method_channel,
                      FL,

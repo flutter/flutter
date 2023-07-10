@@ -26,9 +26,6 @@ struct _FlPluginRegistrarImpl {
   FlTextureRegistrar* texture_registrar;
 };
 
-// Added here to stop the compiler from optimizing this function away.
-G_MODULE_EXPORT GType fl_plugin_registrar_get_type();
-
 static void fl_plugin_registrar_impl_iface_init(
     FlPluginRegistrarInterface* iface);
 

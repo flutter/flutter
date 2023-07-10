@@ -8,9 +8,6 @@
 #include <gmodule.h>
 #include <cstdio>
 
-// Added here to stop the compiler from optimising this function away.
-G_MODULE_EXPORT GType fl_texture_get_type();
-
 G_DEFINE_INTERFACE(FlTexture, fl_texture, G_TYPE_OBJECT)
 
 static void fl_texture_default_init(FlTextureInterface* self) {}

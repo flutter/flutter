@@ -10,10 +10,12 @@
 #endif
 
 #include <glib-object.h>
+#include <gmodule.h>
 #include <stdint.h>
 
 G_BEGIN_DECLS
 
+G_MODULE_EXPORT
 G_DECLARE_INTERFACE(FlTexture, fl_texture, FL, TEXTURE, GObject)
 
 /**

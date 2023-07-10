@@ -31,9 +31,6 @@ struct _FlMethodChannel {
   GDestroyNotify method_call_handler_destroy_notify;
 };
 
-// Added here to stop the compiler from optimizing this function away.
-G_MODULE_EXPORT GType fl_method_channel_get_type();
-
 G_DEFINE_TYPE(FlMethodChannel, fl_method_channel, G_TYPE_OBJECT)
 
 // Called when a binary message is received on this channel.

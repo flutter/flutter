@@ -11,18 +11,21 @@
 
 #include <gio/gio.h>
 #include <glib-object.h>
+#include <gmodule.h>
 
 #include "fl_binary_messenger.h"
 #include "fl_message_codec.h"
 
 G_BEGIN_DECLS
 
+G_MODULE_EXPORT
 G_DECLARE_FINAL_TYPE(FlBasicMessageChannel,
                      fl_basic_message_channel,
                      FL,
                      BASIC_MESSAGE_CHANNEL,
                      GObject)
 
+G_MODULE_EXPORT
 G_DECLARE_FINAL_TYPE(FlBasicMessageChannelResponseHandle,
                      fl_basic_message_channel_response_handle,
                      FL,

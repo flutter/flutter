@@ -15,9 +15,6 @@ typedef struct {
 
 static void fl_texture_gl_texture_iface_init(FlTextureInterface* iface);
 
-// Added here to stop the compiler from optimising this function away.
-G_MODULE_EXPORT GType fl_texture_gl_get_type();
-
 G_DEFINE_TYPE_WITH_CODE(FlTextureGL,
                         fl_texture_gl,
                         G_TYPE_OBJECT,

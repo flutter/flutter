@@ -11,6 +11,7 @@
 
 #include <gio/gio.h>
 #include <glib-object.h>
+#include <gmodule.h>
 
 G_BEGIN_DECLS
 
@@ -29,12 +30,14 @@ typedef enum {
 
 GQuark fl_binary_messenger_codec_error_quark(void) G_GNUC_CONST;
 
+G_MODULE_EXPORT
 G_DECLARE_INTERFACE(FlBinaryMessenger,
                     fl_binary_messenger,
                     FL,
                     BINARY_MESSENGER,
                     GObject)
 
+G_MODULE_EXPORT
 G_DECLARE_DERIVABLE_TYPE(FlBinaryMessengerResponseHandle,
                          fl_binary_messenger_response_handle,
                          FL,

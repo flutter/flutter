@@ -10,6 +10,7 @@
 #endif
 
 #include <glib-object.h>
+#include <gmodule.h>
 
 #include "fl_value.h"
 
@@ -37,6 +38,7 @@ typedef enum {
 
 GQuark fl_message_codec_error_quark(void) G_GNUC_CONST;
 
+G_MODULE_EXPORT
 G_DECLARE_DERIVABLE_TYPE(FlMessageCodec,
                          fl_message_codec,
                          FL,

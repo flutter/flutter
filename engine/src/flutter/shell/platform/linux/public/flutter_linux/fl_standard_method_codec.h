@@ -9,10 +9,13 @@
 #error "Only <flutter_linux/flutter_linux.h> can be included directly."
 #endif
 
+#include <gmodule.h>
+
 #include "fl_method_codec.h"
 
 G_BEGIN_DECLS
 
+G_MODULE_EXPORT
 G_DECLARE_FINAL_TYPE(FlStandardMethodCodec,
                      fl_standard_method_codec,
                      FL,
