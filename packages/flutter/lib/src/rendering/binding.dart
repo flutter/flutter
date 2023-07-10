@@ -295,23 +295,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// content into the [FlutterView] associated with that [RenderView].
   /// {@endtemplate}
   PipelineOwner createRootPipelineOwner() {
-    return PipelineOwner(onSemanticsUpdate: (ui.SemanticsUpdate update) {
-      assert(() {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary(
-            'The global pipeline owner produced an unexpected semantics update.',
-          ),
-          ErrorDescription(
-            'By default, the RendererBinding.rootPipelineOwner is not configured '
-            'to handle semantics because it is not expected to own a root node.',
-          ),
-          ErrorHint(
-            'Override RendererBinding.createRootPipelineOwner to create a '
-            'pipeline owner that is configured for semantics.',
-          ),
-        ]);
-      }());
-    });
+    return _DefaultRootPipelineOwner();
   }
 
   /// The [PipelineOwner] that is the root of the PipelineOwner tree.
@@ -804,6 +788,41 @@ class _BindingPipelineManifold extends ChangeNotifier implements PipelineManifol
   void dispose() {
     _binding.removeSemanticsEnabledListener(notifyListeners);
     super.dispose();
+  }
+}
+
+// A [PipelineOwner] that cannot have a root node.
+class _DefaultRootPipelineOwner extends PipelineOwner {
+  _DefaultRootPipelineOwner() : super(onSemanticsUpdate: _onSemanticsUpdate);
+
+  @override
+  set rootNode(RenderObject? _) {
+    assert(() {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          'Cannot set a rootNode on the default root pipeline owner.',
+        ),
+        ErrorDescription(
+          'By default, the RendererBinding.rootPipelineOwner is not configured '
+          'to manage a root node because this pipeline owner does not define a '
+          'proper onSemanticsUpdate callback to handle semantics for that node.',
+        ),
+        ErrorHint(
+          'Typically, the root pipeline owner does not manage a root node. '
+          'Instead, properly configured child pipeline owners (which do manage '
+          'root nodes) are added to it. Alternatively, if you do want to set a '
+          'root node for the root pipeline owner, override '
+          'RendererBinding.createRootPipelineOwner to create a '
+          'pipeline owner that is configured to properly handle semantics for '
+          'the provided root node.'
+        ),
+      ]);
+    }());
+  }
+
+  static void _onSemanticsUpdate(ui.SemanticsUpdate _) {
+    // Neve called because we don't have a root node.
+    assert(false);
   }
 }
 

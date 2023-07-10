@@ -42,4 +42,16 @@ void main() {
     ));
     RendererBinding.instance.removeRenderView(RendererBinding.instance.renderView);
   });
+
+  test('root pipeline owner cannot manage root node', () {
+    final RenderObject rootNode = RenderProxyBox();
+    expect(
+      () => RendererBinding.instance.rootPipelineOwner.rootNode = rootNode,
+      throwsA(isFlutterError.having(
+        (FlutterError e) => e.message,
+        'message',
+        contains('Cannot set a rootNode on the default root pipeline owner.'),
+      )),
+    );
+  });
 }

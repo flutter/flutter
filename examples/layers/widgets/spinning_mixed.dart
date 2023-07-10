@@ -108,7 +108,8 @@ void main() {
     view: binding.platformDispatcher.implicitView!,
     child: root,
   );
-  binding.rootPipelineOwner.rootNode = view;
+  final PipelineOwner pipelineOwner = PipelineOwner()..rootNode = view;
+  binding.rootPipelineOwner.adoptChild(pipelineOwner);
   binding.addRenderView(view);
   view.prepareInitialFrame();
 
