@@ -1102,23 +1102,23 @@ void main() {
         ),
     );
 
-    // load and check if render object was created
+    // load and check if render object was created.
     await tester.pumpWidget(table);
     expect(find.byWidget(table), findsOneWidget);
 
     final RenderBox boxA = tester.renderObject(find.text('A'));
     final RenderBox boxB = tester.renderObject(find.text('B'));
 
-    // boxA and boxB must be the same height, even though boxB is larger than boxA initially
+    // boxA and boxB must be the same height, even though boxB is larger than boxA initially.
     expect(boxA.size.height, equals(boxB.size.height));
 
     final RenderBox boxC = tester.renderObject(find.text('C'));
     final RenderBox boxD = tester.renderObject(find.text('D'));
 
-    // boxC and boxD must be the same height, even though boxB is larger than boxA initially
+    // boxC and boxD must be the same height, even though boxB is larger than boxA initially.
     expect(boxC.size.height, equals(boxD.size.height));
 
-    // boxD has 300 of height, and boxA has 100 of height, so boxD should be bigger than boxA
+    // boxD (300.0h) should be higher than boxA (100.0h).
     expect(boxD.size.height, greaterThan(boxA.size.height));
   });
 

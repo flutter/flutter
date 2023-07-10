@@ -299,10 +299,10 @@ test('TableRows with differents constraints, but vertically fill', () {
 
     const Size size = Size(300.0, 300.0);
 
-    // Layout the table with a fixed size of 300.0 x 300.0
+    // Layout the table with a fixed size.
     layout(table, constraints: BoxConstraints.tight(size));
 
-    // Check if the table has a size and the children are vertically filled
+    // Check if the table has a size and the children are vertically filled.
     expect(table.size, equals(size));
     expect(table.defaultVerticalAlignment, TableCellVerticalAlignment.fill);
   });
