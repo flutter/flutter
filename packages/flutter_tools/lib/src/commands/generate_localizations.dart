@@ -219,8 +219,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     // Validate the rest of the args.
-    if (argResults?.rest.isNotEmpty ?? false) {
-      throwToolExit('Unrecognized');
+    if (argResults!.rest.isNotEmpty) {
+      throwToolExit('Unexpected positional argument "${argResults!.rest.first}".');
     }
     // Keep in mind that this is also defined in the following locations:
     // 1. flutter_tools/lib/src/build_system/targets/localizations.dart
