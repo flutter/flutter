@@ -58,26 +58,26 @@ class _IncorrectAnnotationError {
 }
 
 class _DebugAssert extends AnalyzeRule {
-  final List<_IncorrectAnnotationError> annotationErrors = <_IncorrectAnnotationError>[];
-  final List<_DebugOnlySymbolAccessError> accessErrors = <_DebugOnlySymbolAccessError>[];
+  final List<_IncorrectAnnotationError> _annotationErrors = <_IncorrectAnnotationError>[];
+  final List<_DebugOnlySymbolAccessError> _accessErrors = <_DebugOnlySymbolAccessError>[];
 
-  final Map<ExecutableElement, bool> lookup = <ExecutableElement, bool>{};
+  final Map<ExecutableElement, bool> _lookup = <ExecutableElement, bool>{};
 
   @override
   void reportViolations(String workingDirectory) {
-    if (annotationErrors.isNotEmpty) {
+    if (_annotationErrors.isNotEmpty) {
       foundError(<String>[
         '${bold}Overriding a framework class member that was not annotated with @_debugAssert and marking the override @_debugAssert is not allowed.$reset',
         '${bold}A framework method/getter/setter not marked as debug-only itself cannot have a debug-only override.$reset\n',
-        ...annotationErrors.map((_IncorrectAnnotationError e) => e.errorMessage(workingDirectory)),
+        ..._annotationErrors.map((_IncorrectAnnotationError e) => e.errorMessage(workingDirectory)),
         '\n${bold}Consider either removing the @_debugAssert annotation, or adding the annotation to the class member that is being overridden instead.$reset',
       ]);
     }
 
-    if (accessErrors.isNotEmpty) {
+    if (_accessErrors.isNotEmpty) {
       foundError(<String>[
         '${bold}Framework symbols annotated with @_debugAssert must not be accessed outside of asserts.$reset\n',
-        ...accessErrors.map((_DebugOnlySymbolAccessError e) => e.errorMessage(workingDirectory)),
+        ..._accessErrors.map((_DebugOnlySymbolAccessError e) => e.errorMessage(workingDirectory)),
       ]);
     }
   }
@@ -87,10 +87,10 @@ class _DebugAssert extends AnalyzeRule {
     if (unit.libraryElement.metadata.any(_DebugAssertVisitor._isDebugAssertAnnotationElement)) {
       return;
     }
-    final _DebugAssertVisitor visitor = _DebugAssertVisitor(unit, lookup);
+    final _DebugAssertVisitor visitor = _DebugAssertVisitor(unit, _lookup);
     unit.unit.visitChildren(visitor);
-    annotationErrors.addAll(visitor.incorrectAnnotations);
-    accessErrors.addAll(visitor.accessViolations);
+    _annotationErrors.addAll(visitor.incorrectAnnotations);
+    _accessErrors.addAll(visitor.accessViolations);
   }
 
   @override

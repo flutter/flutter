@@ -21,11 +21,11 @@ import 'analyze.dart';
 final AnalyzeRule noDoubleClamp = _NoDoubleClamp();
 
 class _NoDoubleClamp implements AnalyzeRule {
-  final Map<ResolvedUnitResult, List<AstNode>> errors = <ResolvedUnitResult, List<AstNode>>{};
+  final Map<ResolvedUnitResult, List<AstNode>> _errors = <ResolvedUnitResult, List<AstNode>>{};
 
   @override
   void reportViolations(String workingDirectory) {
-    if (errors.isEmpty) {
+    if (_errors.isEmpty) {
       return;
     }
 
@@ -34,7 +34,7 @@ class _NoDoubleClamp implements AnalyzeRule {
     }
 
     foundError(<String>[
-      for (final MapEntry<ResolvedUnitResult, List<AstNode>> entry in errors.entries)
+      for (final MapEntry<ResolvedUnitResult, List<AstNode>> entry in _errors.entries)
         for (final AstNode node in entry.value)
           '${locationInFile(entry.key, node)}: ${node.parent}',
       '\n${bold}For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".$reset',
@@ -47,7 +47,7 @@ class _NoDoubleClamp implements AnalyzeRule {
     unit.unit.visitChildren(visitor);
     final List<AstNode> violationsInUnit = visitor.clampAccessNodes;
     if (violationsInUnit.isNotEmpty) {
-      errors.putIfAbsent(unit, List<AstNode>.empty).addAll(violationsInUnit);
+      _errors.putIfAbsent(unit, List<AstNode>.empty).addAll(violationsInUnit);
     }
   }
 
