@@ -261,15 +261,16 @@ void main() {
     buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
     expect(buttonSize.width, parentWidth);
 
-    // If expandedInsets is not zero, the position of the text field should be adjusted
-    // based on the value.
+    // If expandedInsets is not zero, the width of the text field should be adjusted
+    // based on the EdgeInsets.left and EdgeInsets.right. The top and bottom values
+    // will be ignored.
     await tester.pumpWidget(Container());
     await tester.pumpWidget(buildMenuAnchor(expandedInsets: const EdgeInsets.only(left: 35.0, top: 50.0, right: 20.0)));
     box = tester.firstRenderObject(find.byType(TextField));
     expect(box.size.width, parentWidth - 35.0 - 20.0);
     final Rect containerRect = tester.getRect(find.byType(SizedBox).first);
     final Rect dropdownMenuRect = tester.getRect(find.byType(TextField));
-    expect(dropdownMenuRect.top, containerRect.top + 50.0);
+    expect(dropdownMenuRect.top, containerRect.top);
 
 
     await tester.tap(find.byType(TextField));

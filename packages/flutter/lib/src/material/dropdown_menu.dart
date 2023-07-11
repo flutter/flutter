@@ -278,13 +278,18 @@ class DropdownMenu<T> extends StatefulWidget {
   /// contain space for padding.
   final List<DropdownMenuEntry<T>> dropdownMenuEntries;
 
-  /// Enables the text field to expand and provides margins.
+  /// Defines the menu text field's width to be equal to its parent's width
+  /// plus the horizontal width of the specified insets.
   ///
-  /// If this is null, the width of the text field will be determined by the width
-  /// of menu items or [DropdownMenu.width]. If this is not null, the text field
-  /// will be expanded to its parent size. The values of [expandedInsets] are
-  /// margins for the text field. In other words, If this is [EdgeInsets.zero],
-  /// the width of the text field will be the same as its parent's width.
+  /// If this property is null, the width of the text field will be determined
+  /// by the width of menu items or [DropdownMenu.width]. If this property is not null,
+  /// the text field's width will match the parent's width plus the specified insets.
+  /// The values of [expandedInsets] are margins for the text field. In other words,
+  /// If this is [EdgeInsets.zero], the width of the text field will be the same
+  /// as its parent's width.
+  ///
+  /// The [expandedInsets]'s top and bottom are ignored, only its left and right
+  /// properties are used.
   ///
   /// Defaults to null.
   final EdgeInsets? expandedInsets;
@@ -647,7 +652,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           width: widget.width,
           children: <Widget>[
             textField,
-            for (final Widget c in _initialMenu!) c,
+            for (final Widget item in _initialMenu!) item,
             trailingButton,
             leadingButton,
           ],
@@ -658,7 +663,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (widget.expandedInsets != null) {
       menuAnchor = Container(
         alignment: AlignmentDirectional.topStart,
-        padding: widget.expandedInsets,
+        padding: widget.expandedInsets?.copyWith(top: 0.0, bottom: 0.0),
         child: menuAnchor,
       );
     }
