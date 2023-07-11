@@ -1802,13 +1802,13 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: activeColor)); // checkbox fill
   });
 
-  testWidgets('Checkbox MaterialStateBorderSide applies unconditionally', (WidgetTester tester) async {
+  testWidgets('Material2 - Checkbox MaterialStateBorderSide applies unconditionally', (WidgetTester tester) async {
     const Color borderColor = Color(0xfff44336);
     const BorderSide side = BorderSide(
       width: 4,
       color: borderColor,
     );
-    final bool material3 = theme.useMaterial3;
+    final ThemeData theme = ThemeData(useMaterial3: false);
 
     Widget buildApp({ bool? value, bool enabled = true }) {
       return MaterialApp(
@@ -1832,9 +1832,63 @@ void main() {
         paints
         ..drrect(
           color: borderColor,
-          outer: material3 ? RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(2)) : RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
+          outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
           inner: RRect.fromLTRBR(19, 19, 29, 29, Radius.zero),
         ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(value: false));
+    await tester.pumpAndSettle();
+    expectBorder();
+
+
+    await tester.pumpWidget(buildApp(value: false, enabled: false));
+    await tester.pumpAndSettle();
+    expectBorder();
+
+    await tester.pumpWidget(buildApp(value: true));
+    await tester.pumpAndSettle();
+    expectBorder();
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expectBorder();
+  });
+
+  testWidgets('Material3 - Checkbox MaterialStateBorderSide applies unconditionally', (WidgetTester tester) async {
+    const Color borderColor = Color(0xfff44336);
+    const BorderSide side = BorderSide(
+      width: 4,
+      color: borderColor,
+    );
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    Widget buildApp({ bool? value, bool enabled = true }) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Checkbox(
+              value: value,
+              tristate: value == null,
+              onChanged: enabled ? (bool? newValue) { } : null,
+              side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) => side),
+            ),
+          ),
+        ),
+      );
+    }
+
+    void expectBorder() {
+      expect(
+        tester.renderObject<RenderBox>(find.byType(Checkbox)),
+        paints
+          ..drrect(
+            color: borderColor,
+            outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(2)),
+            inner: RRect.fromLTRBR(19, 19, 29, 29, Radius.zero),
+          ),
       );
     }
 
@@ -1910,7 +1964,7 @@ void main() {
     expect(find.text(tapTooltip), findsOneWidget);
   });
 
-  testWidgets('Checkbox has default error color when isError is set to true - M3', (WidgetTester tester) async {
+  testWidgets('Checkbox has default error color when isError is set to true - M3 only', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     final ThemeData themeData = ThemeData(useMaterial3: true);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -1982,7 +2036,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Checkbox MaterialStateBorderSide applies in error states - M3', (WidgetTester tester) async {
+  testWidgets('Checkbox MaterialStateBorderSide applies in error states - M3 only', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     final ThemeData themeData = ThemeData(useMaterial3: true);
     const Color borderColor = Color(0xffffeb3b);
@@ -2061,7 +2115,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Checkbox has correct default shape - M3', (WidgetTester tester) async {
+  testWidgets('Checkbox has correct default shape - M3 only', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(useMaterial3: true);
 
     Widget buildApp() {
@@ -2127,7 +2181,8 @@ void main() {
     }
   });
 
-  testWidgets('Checkbox respects fillColor when it is unchecked', (WidgetTester tester) async {
+  testWidgets('Material2 - Checkbox respects fillColor when it is unchecked', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
     const Color activeBackgroundColor = Color(0xff123456);
     const Color inactiveBackgroundColor = Color(0xff654321);
 
@@ -2163,7 +2218,7 @@ void main() {
       getCheckboxRenderer(),
       paints
         ..drrect(
-          color: theme.useMaterial3 ? theme.colorScheme.onSurfaceVariant : theme.unselectedWidgetColor,
+          color: theme.unselectedWidgetColor,
         ),
     );
     expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
@@ -2174,7 +2229,61 @@ void main() {
       getCheckboxRenderer(),
       paints
         ..drrect(
-          color: theme.useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : theme.disabledColor,
+          color: theme.disabledColor,
+        ),
+    );
+    expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
+  });
+
+  testWidgets('Material3 - Checkbox respects fillColor when it is unchecked', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const Color activeBackgroundColor = Color(0xff123456);
+    const Color inactiveBackgroundColor = Color(0xff654321);
+
+    Widget buildApp({ bool enabled = true }) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Checkbox(
+              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                if (states.contains(MaterialState.selected)) {
+                  return activeBackgroundColor;
+                }
+                return inactiveBackgroundColor;
+              }),
+              value: false,
+              onChanged: enabled ? (bool? newValue) { } : null,
+            ),
+          ),
+        ),
+      );
+    }
+
+    RenderBox getCheckboxRenderer() {
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
+    }
+
+    // Checkbox is unselected, so the default BorderSide appears and fillColor is checkbox's background color.
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(
+      getCheckboxRenderer(),
+      paints
+        ..drrect(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+    );
+    expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
+
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      getCheckboxRenderer(),
+      paints
+        ..drrect(
+          color: theme.colorScheme.onSurface.withOpacity(0.38),
         ),
     );
     expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
