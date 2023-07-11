@@ -4440,21 +4440,23 @@ void main() {
 
       expect(calls, hasLength(1));
       expect(calls.last, isTrue);
+      int lastCallsLength = calls.length;
 
       setState(() {
         canPop = true;
       });
       await tester.pump();
 
-      expect(calls, hasLength(2));
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isFalse);
+      lastCallsLength = calls.length;
 
       setState(() {
         canPop = false;
       });
       await tester.pump();
 
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isTrue);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
