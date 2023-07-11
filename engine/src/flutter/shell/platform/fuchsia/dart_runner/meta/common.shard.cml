@@ -32,9 +32,15 @@
                 "fuchsia.logger.LogSink",  // For syslog
                 "fuchsia.net.name.Lookup",  // For fdio sockets
                 "fuchsia.posix.socket.Provider",  // For fdio sockets
+            ],
+            from: "parent",
+        },
+        {
+            protocol: [
                 "fuchsia.tracing.provider.Registry",  // For trace-provider
             ],
             from: "parent",
+            availability: "optional",
         },
     ],
     expose: [
