@@ -3234,12 +3234,19 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   }
 
   /// {@template flutter.rendering.RenderObject.getTransformTo}
-  /// Applies the paint transform up the tree to `ancestor`.
+  /// Applies the paint transform from thie [RenderObject] to the `target`
+  /// [RenderObject].
   ///
   /// Returns a matrix that maps the local paint coordinate system to the
-  /// coordinate system of `ancestor`.
+  /// coordinate system of `target`.
   ///
-  /// If `ancestor` is null, this method returns a matrix that maps from the
+  /// This method may return a singular matrix when any [RenderObject] between
+  /// this [RenderObjct] and `target` provides a singular paint matrix, or a
+  /// zero matrix when `respectPaintsChild` is true and
+  /// [RenderObject.paintsChild] returns false. The method asserts when the
+  /// `target` is not in the same [RenderPipeline] as this [RenderObject].
+  ///
+  /// If `target` is null, this method returns a matrix that maps from the
   /// local paint coordinate system to the coordinate system of the
   /// [PipelineOwner.rootNode].
   /// {@endtemplate}
@@ -3249,86 +3256,60 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// the global coordinate system in logical pixels. To get physical pixels,
   /// use [applyPaintTransform] from the [RenderView] to further transform the
   /// coordinate.
-  ///
-  /// See also:
-  ///
-  ///  * [computeTransformToRenderObject] which does the same, but the target
-  ///    `RenderObject` does not have to be an ancestor.
-  Matrix4 getTransformTo(RenderObject? ancestor) {
+  Matrix4 getTransformTo(RenderObject target, { bool respectPaintsChild = false }) {
     assert(attached);
-    final Matrix4 identity = Matrix4.identity();
-    if (ancestor != null) {
-      return _computePaintTransform(ancestor, identity);
-    } else  {
-      final RenderObject? parent = this.parent;
-      return parent != null ? _computePaintTransformToGlobalCoordinates(parent, identity) : identity;
-    }
-  }
+    // The paths to fromRenderObject and toRenderObject's common ancestor.
+    List<RenderObject>? fromPath;
+    List<RenderObject>? toPath;
 
-  // Computes the paint transform from this to toRenderObject and applies it on
-  // `transform`.
-  Matrix4 _computePaintTransform(RenderObject toRenderObject, Matrix4 transform) {
-    if (!identical(this, toRenderObject)) {
-      final RenderObject? parent = this.parent;
-      assert(
-        toRenderObject.depth <= depth && parent != null,
-        '$toRenderObject is not an ancestor of the given RenderObject. Consider using computeTransformToRenderObject instead.',
-      );
-      parent!.applyPaintTransform(this, parent._computePaintTransform(toRenderObject, transform));
-    }
-    return transform;
-  }
+    RenderObject from = this;
+    RenderObject to = target ?? owner!.rootNode!;
 
-  Matrix4 _computePaintTransformToGlobalCoordinates(RenderObject parent, Matrix4 transform) {
-    final RenderObject? parentParent = parent.parent;
-    if (parentParent != null) {
-      parent.applyPaintTransform(this, parent._computePaintTransformToGlobalCoordinates(parentParent, transform));
-    }
-    assert(parentParent != null || parent is RenderView);
-    assert(parentParent == null || parent is! RenderView);
-    return transform;
-  }
+    while (!identical(from, to)) {
+      final int fromDepth = from.depth;
+      final int toDepth = to.depth;
 
-  /// Returns the paint transform that allows this `RenderObject` to perform
-  /// paint in `toRenderObject`'s coordinate system.
-  ///
-  /// Returns null if `toRenderObject` is not in the same render tree, or either
-  /// of the two `RenderObject`s is in an offscreen subtree.
-  ///
-  /// See also:
-  ///
-  ///  * [getTransformTo] which does the same, but only searches up the tree.
-  ///  * [paintsChild] which this method uses to determine whether
-  ///    a `RenderObject` is in an offscreen subtree.
-  Matrix4? computeTransformToRenderObject(RenderObject toRenderObject) {
-    final Matrix4 transform = Matrix4.identity();
-    final Matrix4 inverseTransform = Matrix4.identity();
-    if (_computePaintTranfrom(this, transform, toRenderObject, inverseTransform) && inverseTransform.invert() != 0) {
-      return inverseTransform..multiply(transform);
+      if (fromDepth >= toDepth) {
+        assert(from.parent != null, '$target and $this are not in the same render tree.');
+        final RenderObject fromParent = from.parent!;
+        if (respectPaintsChild && !fromParent.paintsChild(from)) {
+          return Matrix4.zero();
+        }
+        (fromPath ??= <RenderObject>[this]).add(fromParent);
+        from = fromParent;
+      }
+      if (fromDepth <= toDepth) {
+        assert(to.parent != null, '$target and $this are not in the same render tree.');
+        final RenderObject toParent = to.parent!;
+        if (respectPaintsChild && !toParent.paintsChild(to)) {
+          return Matrix4.zero();
+        }
+        (toPath ??= <RenderObject>[target]).add(toParent);
+        to = toParent;
+      }
     }
-    return null;
-  }
 
-  static bool _computePaintTranfrom(RenderObject fromRenderObject, Matrix4 fromTransform, RenderObject toRenderObject, Matrix4 toTransform) {
-    if (identical(fromRenderObject, toRenderObject)) {
-      return true;
+    Matrix4? fromTransform;
+    if (fromPath != null) {
+      assert(fromPath.length > 1);
+      fromTransform = Matrix4.identity();
+      for (int index = fromPath.length - 1; index > 0; index -= 1) {
+        fromPath[index].applyPaintTransform(fromPath[index - 1], fromTransform);
+      }
     }
-    final bool fromLowerThanTo = fromRenderObject.depth >= toRenderObject.depth;
+    if (toPath == null) {
+      return fromTransform ?? Matrix4.identity();
+    }
 
-    final (RenderObject lower, Matrix4 lowerTransform) = fromLowerThanTo ? (fromRenderObject, fromTransform) : (toRenderObject, toTransform);
-    final RenderObject? parent = lower.parent;
-    // Return early if the 2 render objects are not in the same render tree,
-    // or either of them is offscreen and thus won't get painted.
-    if (parent == null || !parent.paintsChild(lower)) {
-      return false;
+    assert(toPath.length > 1);
+    final Matrix4 toTransform = Matrix4.identity();
+    for (int index = toPath.length - 1; index > 0; index -= 1) {
+      toPath[index].applyPaintTransform(toPath[index - 1], toTransform);
     }
-    final bool commonAncestorFound = fromLowerThanTo
-      ? _computePaintTranfrom(parent, fromTransform, toRenderObject, toTransform)
-      : _computePaintTranfrom(fromRenderObject, fromTransform, parent, toTransform);
-    if (commonAncestorFound) {
-      parent.applyPaintTransform(lower, lowerTransform);
+    if (toTransform.invert() == 0) {
+      return Matrix4.zero();
     }
-    return commonAncestorFound;
+    return (fromTransform?..multiply(toTransform)) ?? toTransform;
   }
 
   /// Returns a rect in this object's coordinate system that describes
