@@ -2083,9 +2083,9 @@ class CanvasCompareTester {
     }
 
     {
-      // This sequence renders the SkCanvas calls to an SkPictureRecorder and
-      // renders the DisplayList calls to a DisplayListBuilder and then
-      // renders both back under a transform (scale(2x)) to see if their
+      // This sequence uses an SkPicture generated previously from the SkCanvas
+      // calls and a DisplayList generated previously from the DlCanvas calls
+      // and renders both back under a transform (scale(2x)) to see if their
       // rendering is affected differently by a change of matrix between
       // recording time and rendering time.
       const int test_width_2 = kTestWidth * 2;

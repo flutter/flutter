@@ -17,12 +17,8 @@
 #include "flutter/flow/testing/mock_raster_cache.h"
 #include "flutter/testing/assertions_skia.h"
 #include "gtest/gtest.h"
-#include "include/core/SkMatrix.h"
-#include "include/core/SkPoint.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkPicture.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "third_party/skia/include/core/SkMatrix.h"
+#include "third_party/skia/include/core/SkPoint.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
 // NOLINTBEGIN(bugprone-unchecked-optional-access)

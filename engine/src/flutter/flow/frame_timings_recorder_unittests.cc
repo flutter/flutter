@@ -7,7 +7,6 @@
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/flow/testing/mock_raster_cache.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"

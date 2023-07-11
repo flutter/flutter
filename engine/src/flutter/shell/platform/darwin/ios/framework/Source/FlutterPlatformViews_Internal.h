@@ -14,7 +14,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 @class FlutterTouchInterceptingView;
 
