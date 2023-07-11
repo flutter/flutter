@@ -645,13 +645,4 @@ constexpr vk::ImageAspectFlags ToImageAspectFlags(PixelFormat format) {
   FML_UNREACHABLE();
 }
 
-struct LayoutTransition {
-  vk::CommandBuffer cmd_buffer = {};
-  vk::ImageLayout new_layout = vk::ImageLayout::eUndefined;
-  vk::PipelineStageFlags src_stage = vk::PipelineStageFlagBits::eNone;
-  vk::AccessFlags src_access = vk::AccessFlagBits::eNone;
-  vk::PipelineStageFlags dst_stage = vk::PipelineStageFlagBits::eNone;
-  vk::AccessFlags dst_access = vk::AccessFlagBits::eNone;
-};
-
 }  // namespace impeller

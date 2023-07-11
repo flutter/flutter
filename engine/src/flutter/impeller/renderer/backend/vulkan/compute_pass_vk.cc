@@ -32,17 +32,17 @@ void ComputePassVK::OnSetLabel(const std::string& label) {
 
 static bool UpdateBindingLayouts(const Bindings& bindings,
                                  const vk::CommandBuffer& buffer) {
-  LayoutTransition transition;
-  transition.cmd_buffer = buffer;
-  transition.src_access = vk::AccessFlagBits::eTransferWrite;
-  transition.src_stage = vk::PipelineStageFlagBits::eTransfer;
-  transition.dst_access = vk::AccessFlagBits::eShaderRead;
-  transition.dst_stage = vk::PipelineStageFlagBits::eComputeShader;
+  BarrierVK barrier;
+  barrier.cmd_buffer = buffer;
+  barrier.src_access = vk::AccessFlagBits::eTransferWrite;
+  barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
+  barrier.dst_access = vk::AccessFlagBits::eShaderRead;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eComputeShader;
 
-  transition.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+  barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
   for (const auto& [_, texture] : bindings.textures) {
-    if (!TextureVK::Cast(*texture.resource).SetLayout(transition)) {
+    if (!TextureVK::Cast(*texture.resource).SetLayout(barrier)) {
       return false;
     }
   }

@@ -7,6 +7,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/base/thread.h"
 #include "impeller/core/texture_descriptor.h"
+#include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
@@ -22,7 +23,7 @@ class TextureSourceVK {
 
   virtual vk::ImageView GetImageView() const = 0;
 
-  bool SetLayout(const LayoutTransition& transition) const;
+  bool SetLayout(const BarrierVK& barrier) const;
 
   vk::ImageLayout SetLayoutWithoutEncoding(vk::ImageLayout layout) const;
 
