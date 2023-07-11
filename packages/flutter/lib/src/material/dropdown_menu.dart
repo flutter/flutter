@@ -284,7 +284,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// If this property is null, the width of the text field will be determined
   /// by the width of menu items or [DropdownMenu.width]. If this property is not null,
   /// the text field's width will match the parent's width plus the specified insets.
-  /// If this is [EdgeInsets.zero], the width of the text field will be the same
+  /// If the value of this property is [EdgeInsets.zero], the width of the text field will be the same
   /// as its parent's width.
   ///
   /// The [expandedInsets]' top and bottom are ignored, only its left and right
