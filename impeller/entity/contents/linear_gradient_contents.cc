@@ -82,6 +82,7 @@ bool LinearGradientContents::RenderTexture(const ContentContext& renderer,
   frag_info.start_point = start_point_;
   frag_info.end_point = end_point_;
   frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
+  frag_info.decal_border_color = decal_border_color_;
   frag_info.texture_sampler_y_coord_scale = gradient_texture->GetYCoordScale();
   frag_info.alpha = GetOpacity();
   frag_info.half_texel = Vector2(0.5 / gradient_texture->GetSize().width,
@@ -138,6 +139,7 @@ bool LinearGradientContents::RenderSSBO(const ContentContext& renderer,
   frag_info.start_point = start_point_;
   frag_info.end_point = end_point_;
   frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
+  frag_info.decal_border_color = decal_border_color_;
   frag_info.alpha = GetOpacity();
 
   auto& host_buffer = pass.GetTransientsBuffer();
@@ -181,6 +183,15 @@ bool LinearGradientContents::RenderSSBO(const ContentContext& renderer,
     restore.SetRestoreCoverage(GetCoverage(entity));
     return restore.Render(renderer, entity, pass);
   }
+  return true;
+}
+
+bool LinearGradientContents::ApplyColorFilter(
+    const ColorFilterProc& color_filter_proc) {
+  for (Color& color : colors_) {
+    color = color_filter_proc(color);
+  }
+  decal_border_color_ = color_filter_proc(decal_border_color_);
   return true;
 }
 

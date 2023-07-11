@@ -89,11 +89,20 @@ std::shared_ptr<Contents> Paint::WithColorFilter(
   if (color_source.GetType() == ColorSource::Type::kImage) {
     return input;
   }
-  if (color_filter) {
-    input =
-        color_filter->GetColorFilter(FilterInput::Make(input), absorb_opacity);
+
+  if (!color_filter) {
+    return input;
   }
-  return input;
+
+  // Attempt to apply the color filter on the CPU first.
+  // Note: This is not just an optimization; some color sources rely on
+  //       CPU-applied color filters to behave properly.
+  if (input->ApplyColorFilter(color_filter->GetCPUColorFilterProc())) {
+    return input;
+  }
+
+  return color_filter->WrapWithGPUColorFilter(FilterInput::Make(input),
+                                              absorb_opacity);
 }
 
 /// A color matrix which inverts colors.

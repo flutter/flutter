@@ -665,7 +665,7 @@ static Paint::ImageFilterProc ToImageFilterProc(
         // "absorb opacity" flag to false. For image filters, the snapshot
         // opacity needs to be deferred until the result of the filter chain is
         // being blended with the layer.
-        return filter->GetColorFilter(std::move(input), false);
+        return filter->WrapWithGPUColorFilter(std::move(input), false);
       };
       break;
     }
