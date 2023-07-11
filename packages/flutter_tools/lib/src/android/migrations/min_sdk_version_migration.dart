@@ -14,6 +14,7 @@ import '../gradle_utils.dart';
 /// flutter sdk as the minimum supported by flutter.
 @visibleForTesting
 const String replacementMinSdkText = 'minSdkVersion flutter.minSdkVersion';
+
 @visibleForTesting
 const String appGradleNotFoundWarning = 'Module level build.gradle file not found, skipping minSdkVersion migration.';
 
