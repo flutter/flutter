@@ -709,6 +709,7 @@ void main() {
         theme: themeData,
         home: Scaffold(
           appBar: AppBar(
+            leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
             title: const Text('X'),
           ),
           drawer: const Column(), // Doesn't really matter. Triggers a hamburger regardless.
@@ -1383,13 +1384,19 @@ void main() {
   group('SliverAppBar elevation', () {
     Widget buildSliverAppBar(bool forceElevated, {double? elevation, double? themeElevation}) {
       return MaterialApp(
-        theme: ThemeData(appBarTheme: AppBarTheme(elevation: themeElevation)),
+        theme: ThemeData(
+          appBarTheme: AppBarTheme(
+            elevation: themeElevation,
+            scrolledUnderElevation: themeElevation,
+          ),
+        ),
         home: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
               title: const Text('Title'),
               forceElevated: forceElevated,
               elevation: elevation,
+              scrolledUnderElevation: elevation,
             ),
           ],
         ),
@@ -1408,8 +1415,10 @@ void main() {
 
       // Default elevation should be used by the material, but
       // the AppBar's elevation should not be specified by SliverAppBar.
+      // When useMaterial3 is true, and forceElevated is true, the default elevation
+      // should be the value of `scrolledUnderElevation` which is 3.0
       await tester.pumpWidget(buildSliverAppBar(true));
-      expect(getMaterial().elevation, useMaterial3 ? 0.0 : 4.0);
+      expect(getMaterial().elevation, useMaterial3 ? 3.0 : 4.0);
       expect(getAppBar().elevation, null);
 
       // SliverAppBar should use the specified elevation.
@@ -1807,7 +1816,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         // Test was designed against InkSplash so need to make sure that is used.
-        theme: ThemeData(splashFactory: InkSplash.splashFactory),
+        theme: ThemeData(
+          useMaterial3: false,
+          splashFactory: InkSplash.splashFactory
+        ),
         home: Center(
           child: AppBar(
             title: const Text('Abc'),
@@ -2462,7 +2474,7 @@ void main() {
   });
 
   testWidgets('AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
-    final ThemeData darkTheme = ThemeData.dark();
+    final ThemeData darkTheme = ThemeData.dark(useMaterial3: false);
     await tester.pumpWidget(MaterialApp(
       theme: darkTheme,
       home: Scaffold(
@@ -2480,7 +2492,7 @@ void main() {
   });
 
   testWidgets('AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData(primarySwatch: Colors.lightBlue);
+    final ThemeData lightTheme = ThemeData(primarySwatch: Colors.lightBlue, useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: lightTheme,
@@ -2511,7 +2523,7 @@ void main() {
 
     // Using a light theme.
     {
-      await tester.pumpWidget(buildAppBar(ThemeData.from(colorScheme: const ColorScheme.light())));
+      await tester.pumpWidget(buildAppBar(ThemeData(useMaterial3: false)));
       final Material appBarMaterial = tester.widget<Material>(
         find.descendant(
           of: find.byType(AppBar),
@@ -2531,7 +2543,7 @@ void main() {
 
     // Using a dark theme.
     {
-      await tester.pumpWidget(buildAppBar(ThemeData.from(colorScheme: const ColorScheme.dark())));
+      await tester.pumpWidget(buildAppBar(ThemeData.dark(useMaterial3: false)));
       final Material appBarMaterial = tester.widget<Material>(
         find.descendant(
           of: find.byType(AppBar),
@@ -4255,7 +4267,7 @@ void main() {
     // By default, title widget should be to the right of the
     // leading widget and title spacing should be respected.
     Offset titleOffset = tester.getTopLeft(collapsedTitle);
-    Offset iconButtonOffset = tester.getTopRight(find.widgetWithIcon(IconButton, Icons.menu));
+    Offset iconButtonOffset = tester.getTopRight(find.ancestor(of: find.widgetWithIcon(IconButton, Icons.menu), matching: find.byType(ConstrainedBox)));
     expect(titleOffset.dx, iconButtonOffset.dx + titleSpacing);
 
     await tester.pumpWidget(buildWidget(centerTitle: true));
@@ -4280,7 +4292,7 @@ void main() {
     // The title widget should be to the right of the leading
     // widget with no spacing.
     titleOffset = tester.getTopLeft(collapsedTitle);
-    iconButtonOffset = tester.getTopRight(find.widgetWithIcon(IconButton, Icons.menu));
+    iconButtonOffset = tester.getTopRight(find.ancestor(of: find.widgetWithIcon(IconButton, Icons.menu), matching: find.byType(ConstrainedBox)));
     expect(titleOffset.dx, iconButtonOffset.dx);
 
     // Set centerTitle to true so the end of the title can reach
@@ -4348,7 +4360,7 @@ void main() {
     // By default, title widget should be to the right of the leading
     // widget and title spacing should be respected.
     Offset titleOffset = tester.getTopLeft(collapsedTitle);
-    Offset iconButtonOffset = tester.getTopRight(find.widgetWithIcon(IconButton, Icons.menu));
+    Offset iconButtonOffset = tester.getTopRight(find.ancestor(of: find.widgetWithIcon(IconButton, Icons.menu), matching: find.byType(ConstrainedBox)));
     expect(titleOffset.dx, iconButtonOffset.dx + titleSpacing);
 
     await tester.pumpWidget(buildWidget(centerTitle: true));
@@ -4372,7 +4384,7 @@ void main() {
     // The title widget should be to the right of the leading
     // widget with no spacing.
     titleOffset = tester.getTopLeft(collapsedTitle);
-    iconButtonOffset = tester.getTopRight(find.widgetWithIcon(IconButton, Icons.menu));
+    iconButtonOffset = tester.getTopRight(find.ancestor(of: find.widgetWithIcon(IconButton, Icons.menu), matching: find.byType(ConstrainedBox)));
     expect(titleOffset.dx, iconButtonOffset.dx);
 
     // Set centerTitle to true so the end of the title can reach

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../base/common.dart';
+import '../base/process.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
@@ -160,36 +161,35 @@ class ChannelCommand extends FlutterCommand {
 
   static Future<void> _checkout(String branchName) async {
     // Get latest refs from upstream.
-    int result = await globals.processUtils.stream(
+    RunResult runResult = await globals.processUtils.run(
       <String>['git', 'fetch'],
       workingDirectory: Cache.flutterRoot,
-      prefix: 'git: ',
     );
 
-    if (result == 0) {
-      result = await globals.processUtils.stream(
+    if (runResult.processResult.exitCode == 0) {
+      runResult = await globals.processUtils.run(
         <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/$branchName'],
         workingDirectory: Cache.flutterRoot,
-        prefix: 'git: ',
       );
-      if (result == 0) {
+      if (runResult.processResult.exitCode == 0) {
         // branch already exists, try just switching to it
-        result = await globals.processUtils.stream(
+        runResult = await globals.processUtils.run(
           <String>['git', 'checkout', branchName, '--'],
           workingDirectory: Cache.flutterRoot,
-          prefix: 'git: ',
         );
       } else {
         // branch does not exist, we have to create it
-        result = await globals.processUtils.stream(
+        runResult = await globals.processUtils.run(
           <String>['git', 'checkout', '--track', '-b', branchName, 'origin/$branchName'],
           workingDirectory: Cache.flutterRoot,
-          prefix: 'git: ',
         );
       }
     }
-    if (result != 0) {
-      throwToolExit('Switching channels failed with error code $result.', exitCode: result);
+    if (runResult.processResult.exitCode != 0) {
+      throwToolExit(
+        'Switching channels failed\n$runResult.',
+        exitCode: runResult.processResult.exitCode,
+      );
     } else {
       // Remove the version check stamp, since it could contain out-of-date
       // information that pertains to the previous channel.

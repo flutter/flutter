@@ -242,6 +242,7 @@ void main() {
       const Color customColor2 = Color(0xdeadbeef);
       const Color customColor3 = Color(0xdecaface);
       final ThemeData theme = ThemeData(
+        useMaterial3: false,
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
         sliderTheme: const SliderThemeData(
@@ -276,6 +277,7 @@ void main() {
               value = d;
             };
         return MaterialApp(
+          theme: theme,
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: Material(
@@ -894,6 +896,7 @@ void main() {
     debugDisableShadows = false;
     try {
       final ThemeData theme = ThemeData(
+        useMaterial3: false,
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
       );
@@ -904,6 +907,7 @@ void main() {
       );
       Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
         return MaterialApp(
+          theme: theme,
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
@@ -1076,6 +1080,7 @@ void main() {
     debugDisableShadows = false;
     try {
       final ThemeData theme = ThemeData(
+        useMaterial3: false,
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
       );
@@ -1086,6 +1091,7 @@ void main() {
       );
       Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
         return MaterialApp(
+          theme: theme,
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
@@ -2081,7 +2087,7 @@ void main() {
 
     testWidgets('Slider defaults', (WidgetTester tester) async {
       debugDisableShadows = false;
-      final ThemeData theme  = ThemeData();
+      final ThemeData theme  = ThemeData(useMaterial3: false);
       const double trackHeight = 4.0;
       final ColorScheme colorScheme = theme.colorScheme;
       final Color activeTrackColor = Color(colorScheme.primary.value);
@@ -2111,6 +2117,7 @@ void main() {
                 value = d;
               };
           return MaterialApp(
+            theme: theme,
             home: Directionality(
               textDirection: TextDirection.ltr,
               child: Material(
@@ -2232,6 +2239,7 @@ void main() {
       debugDisableShadows = false;
       try {
         final ThemeData theme = ThemeData(
+          useMaterial3: false,
           platform: TargetPlatform.android,
         );
         Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
