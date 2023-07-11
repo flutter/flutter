@@ -232,7 +232,6 @@ void main() {
       '$lines\n'
       '║ \n'
       '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".\n'
-      '║ For non-double uses of "clamp", use "// ignore_clamp_double_lint" on the line to silence this message.\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });

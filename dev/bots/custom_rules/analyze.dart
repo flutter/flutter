@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Directory;
+
 import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
@@ -16,6 +18,9 @@ import '../utils.dart';
 /// corresponding ".dart" file and logs an error using [foundError].
 Future<void> analyzeDirectoryWithRules(String workingDirectory, List<AnalyzeRule> rules) async {
   final String flutterLibPath = path.canonicalize('$workingDirectory/packages/flutter/lib');
+  if (!Directory(flutterLibPath).existsSync()) {
+    foundError(<String>['Analyzer error: the specified $flutterLibPath does not exist.']);
+  }
   final AnalysisContextCollection collection = AnalysisContextCollection(
     includedPaths: <String>[flutterLibPath],
     excludedPaths: <String>[path.canonicalize('$flutterLibPath/fix_data')],
