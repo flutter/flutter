@@ -50,8 +50,6 @@ import 'widget_span.dart';
 
 export 'package:flutter/services.dart' show KeyboardInsertedContent, SelectionChangedCause, SmartDashesType, SmartQuotesType, TextEditingValue, TextInputType, TextSelection;
 
-const Object _debugAssert = Object();
-
 // Examples can assume:
 // late BuildContext context;
 // late WidgetTester tester;
@@ -1557,7 +1555,7 @@ class EditableText extends StatefulWidget {
   /// to appear in the first place.
   ///
   /// Defaults to false, resulting in a typical blinking cursor.
-  @_debugAssert
+  @debugAssert
   static bool debugDeterministicCursor = false;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}

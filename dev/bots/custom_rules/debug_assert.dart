@@ -14,14 +14,17 @@ import 'package:path/path.dart' as path;
 import '../utils.dart';
 import 'analyze.dart';
 
-/// An [AnalyzeRule] that verifies annotated getters, setters, constructors,
-/// functions, methods are only directly or indirectly called inside asserts.
+/// An [AnalyzeRule] that verifies getters, setters, constructors, functions,
+/// methods annotated with @debugAssert are only directly or indirectly called
+/// inside asserts.
 ///
 /// The annotation can also be applied to [InterfaceElement]s (classes, mixins
 /// and extensions) or libraries, in which case all non-synthetic elements
-/// defined within that scope will be marked as debug-only.
+/// defined within that scope will be considered to have the @debugAssert
+/// annotation.
 final AnalyzeRule debugAssert = _DebugAssert();
 
+/// An error that represents an @debugAssert violation.
 class _DebugOnlySymbolAccessError {
   _DebugOnlySymbolAccessError(this.unit, this.node, this.symbol)
     : assert(symbol is ExecutableElement || symbol is FieldElement, '$symbol (${symbol.runtimeType}) unexpected element type.');
@@ -43,6 +46,7 @@ class _DebugOnlySymbolAccessError {
   }
 }
 
+/// An error that represents an invalid @debugAssert annotation.
 class _IncorrectAnnotationError {
   const _IncorrectAnnotationError(this.supertypeSymbol, this.symbol);
   final Element supertypeSymbol;
@@ -53,7 +57,7 @@ class _IncorrectAnnotationError {
     final String? relativePath = source == null ? null :  path.relative(path.relative(source, from: workingDirectory));
     final String superSymbol = '${supertypeSymbol.enclosingElement?.name}.${supertypeSymbol.name}';
     final String overrideSymbol = '${symbol.enclosingElement?.name}.${symbol.name}';
-    return '$relativePath: class member $bold$superSymbol$reset is not annotated wtih $bold@_debugAssert$reset,'
+    return '$relativePath: class member $bold$superSymbol$reset is not annotated wtih $bold@debugAssert$reset,'
            ' but its override $bold$overrideSymbol$reset is.';
   }
 }
@@ -68,16 +72,16 @@ class _DebugAssert extends AnalyzeRule {
   void reportViolations(String workingDirectory) {
     if (_annotationErrors.isNotEmpty) {
       foundError(<String>[
-        '${bold}Overriding a framework class member that was not annotated with @_debugAssert and marking the override @_debugAssert is not allowed.$reset',
+        '${bold}Overriding a framework class member that was not annotated with @debugAssert and marking the override @debugAssert is not allowed.$reset',
         '${bold}A framework method/getter/setter not marked as debug-only itself cannot have a debug-only override.$reset\n',
         ..._annotationErrors.map((_IncorrectAnnotationError e) => e.errorMessage(workingDirectory)),
-        '\n${bold}Consider either removing the @_debugAssert annotation, or adding the annotation to the class member that is being overridden instead.$reset',
+        '\n${bold}Consider either removing the @debugAssert annotation, or adding the annotation to the class member that is being overridden instead.$reset',
       ]);
     }
 
     if (_accessErrors.isNotEmpty) {
       foundError(<String>[
-        '${bold}Framework symbols annotated with @_debugAssert must not be accessed outside of asserts.$reset\n',
+        '${bold}Framework symbols annotated with @debugAssert must not be accessed outside of asserts.$reset\n',
         ..._accessErrors.map((_DebugOnlySymbolAccessError e) => e.errorMessage(workingDirectory)),
       ]);
     }
@@ -95,7 +99,7 @@ class _DebugAssert extends AnalyzeRule {
   }
 
   @override
-  String toString() => 'No "_debugAssert" access in production code';
+  String toString() => 'No "debugAssert" access in production code';
 }
 
 class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
@@ -109,7 +113,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
 
   static bool _isDebugAssertAnnotationElement(ElementAnnotation? annotation) {
     final Element? annotationElement = annotation?.element;
-    return annotationElement is PropertyAccessorElement && annotationElement.name == '_debugAssert';
+    return annotationElement is PropertyAccessorElement && annotationElement.name == 'debugAssert';
   }
 
   bool _overriddableClassMemberHasDebugAnnotation(ExecutableElement classMember, InterfaceElement enclosingElement) {
@@ -156,11 +160,10 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     assert(!constructorElement.isFactory);
     assert(constructorElement.isDefaultConstructor);
 
-    // Subclasses can "inherit" default constructors from the superclass. Since
+    // Subclasses may "inherit" default constructors from the superclass. Since
     // constructors can't be invoked by the class members (unlike methods that
-    // can have "bad annotations"), if any superclass in the class hierarchy has
-    // a default constructor (excluding synthesized ones) that has the
-    // annotation, then the default constructor is debug-only.
+    // can have "bad annotations"). Defer to the first non-synthetic default
+    // constructor in the class hierarchy.
     final ConstructorElement? superConstructor = constructorElement.enclosingElement.thisType
       .superclass?.element.constructors
       .firstWhereOrNull((ConstructorElement constructor) => constructor.isDefaultConstructor);
@@ -177,9 +180,8 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     switch (element) {
       // Constructors are static in nature so there won't be any "bad annotations"
       // (see the non-static ExecutableElement case), but a default synthetic
-      // constructor shouldn't be considered debug-only unless any of its
-      // superclasses's default constructor is not synthetic and has the debug
-      // annotation.
+      // constructor should defer to its superclass since it's not explictly
+      // defined.
       case ConstructorElement(isSynthetic: true):
         return _syntheticConstructorHasDebugAnnotation(element);
       // The easier cases: non-overridable class members: static members,
@@ -195,7 +197,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
       //   int get b => a;
       // }
       // class B extends A {
-      //   @_debugAssert
+      //   @debugAssert
       //   int get a => 0;
       // }
       case ExecutableElement(:final InterfaceElement enclosingElement):
@@ -233,7 +235,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     } else if (node.metadata.any((Annotation m) => _isDebugAssertAnnotationElement(m.elementAnnotation))) {
       return;
     }
-    // Only continue searching if the declaration doesn't have @_debugAssert.
+    // Only continue searching if the declaration doesn't have @debugAssert.
     return super.visitAnnotatedNode(node);
   }
 
@@ -244,9 +246,9 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
       accessViolations.add(_DebugOnlySymbolAccessError(unit, node, element));
     }
     // Most symbols will be inspected in this method, with the exceptions of:
-    //  * unamed constructors invocations.
+    //  * unamed constructor invocations.
     //  * implicit super/redirecting constructor invocations in another constructor.
-    //  * initializing formal parameters.
+    //  * initializing formal field parameters.
     //  * prefix, binary, postfix operators, index access (e.g., ==, ~, list[index]),
     //    as they're tokens not identifiers.
     //  * assignments (to account for compound assignments the staticElement field is intentionally set to null)

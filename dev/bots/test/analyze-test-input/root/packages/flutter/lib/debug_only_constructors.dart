@@ -4,7 +4,7 @@
 
 import 'debug_only_lib.dart';
 
-const Object _debugAssert = Object();
+const Object debugAssert = Object();
 
 class ProductionClass11 extends ClassFromDebugLibWithNamedConstructor {
   ProductionClass11() : super.constructor(); // bad: debug-only constructor invoked
@@ -31,19 +31,19 @@ class ProductionClass5 {
   ProductionClass5(this.debugOnlyField);                      // Bad: accessing debug-only field.
   ProductionClass5.named(int value) : debugOnlyField = value; // Bad: accessing debug-only field.
 
-  @_debugAssert
+  @debugAssert
   final int debugOnlyField;
 }
 
 class ProductionClass33 implements ClassFromDebugLibWithExplicitDefaultConstructor { }
 
 class _DebugOnlyClass1 implements ProductionClassWithFactoryConstructors { }
-@_debugAssert
+@debugAssert
 class _DebugOnlyClass2 implements ProductionClassWithFactoryConstructors {
   _DebugOnlyClass2();
 }
 class _DebugOnlyClass3 implements ProductionClassWithFactoryConstructors {
-  @_debugAssert
+  @debugAssert
   const _DebugOnlyClass3.named();
   // ignore: unused_element
   const _DebugOnlyClass3.nonDebug() : this.named(); // Bad: named is a debug-only constructor.

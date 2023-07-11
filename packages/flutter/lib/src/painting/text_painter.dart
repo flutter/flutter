@@ -26,8 +26,6 @@ import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
-const Object _debugAssert = Object();
-
 // The default font size if none is specified. This should be kept in
 // sync with the default values in text_style.dart, as well as the
 // defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
@@ -614,7 +612,7 @@ class TextPainter {
   // the color of the text), on ui.Paragraph or ui.ParagraphBuilder.
   double _inputWidth = double.nan;
 
-  @_debugAssert
+  @debugAssert
   bool get _debugAssertTextLayoutIsValid {
     assert(!debugDisposed);
     if (_layoutCache == null) {
@@ -627,7 +625,7 @@ class TextPainter {
     return true;
   }
 
-  @_debugAssert
+  @debugAssert
   StackTrace? _debugMarkNeedsLayoutCallStack;
 
   /// Marks this text painter's layout information as dirty and removes cached
@@ -1546,7 +1544,7 @@ class TextPainter {
   /// Whether this object has been disposed or not.
   ///
   /// Only for use when asserts are enabled.
-  @_debugAssert
+  @debugAssert
   bool get debugDisposed {
     bool? disposed;
     assert(() {

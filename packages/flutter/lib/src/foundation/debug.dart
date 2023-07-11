@@ -12,6 +12,48 @@ export 'dart:ui' show Brightness;
 
 export 'print.dart' show DebugPrintCallback;
 
+/// An annotation that prevents annotated getters, setters, constructors,
+/// functions, methods and fields to be called/accessed directly or indirectly
+/// outside of an assert.
+///
+/// The annotation can also be added to classes, mixins, extensions, or
+/// libraries, in which case all non-synthetic memebers defined within that
+/// scope will be considered to have this annotation.
+///
+/// BAD:
+/// ```dart
+/// @debugAssert
+/// int getDebugValue() => 42;
+/// void doStuff() {
+///   // Bad: accessing debug-only function in a regular function.
+///   final int value = getDebugValue();
+/// }
+/// ```
+/// GOOD:
+/// ```dart
+/// @debugAssert
+/// int getDebugValue() => 42;
+///
+/// @debugAssert
+/// void debugFunction() {
+///   // Accessing debug-only function in another debug function is allowed.
+///   final int value = getDebugValue();
+/// }
+/// ```
+/// GOOD:
+/// ```dart
+/// @debugAssert
+/// int getDebugValue() => 42;
+/// void doStuff() {
+///   // Calling debug-only function in an assert is allowed.
+///   assert(getDebugValue() == 42, '${getDebugValue()} evaluates to 42.');
+/// }
+/// ```
+///
+/// This annotation should only be used in the framework code and has no effect
+/// when used outside of the "flutter/lib/src" directory.
+const Null debugAssert = null;
+
 /// Returns true if none of the foundation library debug variables have been
 /// changed.
 ///

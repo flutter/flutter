@@ -12,12 +12,13 @@ import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 
-/// Analyzes the given `workingDirectory` with the given set of [AnalyzeRule]s.
+/// Analyzes the given `flutterRootDirectory` with the given set of
+/// [AnalyzeRule]s.
 ///
 /// If a compilation unit can not be resolved, this function ignores the
 /// corresponding dart source file and logs an error using [foundError].
-Future<void> analyzeDirectoryWithRules(String workingDirectory, List<AnalyzeRule> rules) async {
-  final String flutterLibPath = path.canonicalize('$workingDirectory/packages/flutter/lib');
+Future<void> analyzeDirectoryWithRules(String flutterRootDirectory, List<AnalyzeRule> rules) async {
+  final String flutterLibPath = path.canonicalize('$flutterRootDirectory/packages/flutter/lib');
   if (!Directory(flutterLibPath).existsSync()) {
     foundError(<String>['Analyzer error: the specified $flutterLibPath does not exist.']);
   }
@@ -47,7 +48,7 @@ Future<void> analyzeDirectoryWithRules(String workingDirectory, List<AnalyzeRule
     foundError(analyzerErrors);
   }
   for (final AnalyzeRule verifier in rules) {
-    verifier.reportViolations(workingDirectory);
+    verifier.reportViolations(flutterRootDirectory);
   }
 }
 
@@ -59,12 +60,14 @@ Future<void> analyzeDirectoryWithRules(String workingDirectory, List<AnalyzeRule
 /// a collection of resolved compilation units ([ResolvedUnitResult]s) follow
 /// the defined best practices.
 abstract class AnalyzeRule {
+  /// Applies this rule to the given resolved compilation unit (which is
+  /// typically a file) and collects information about violations occurred in
+  /// the compilation unit if any.
+  void applyTo(ResolvedUnitResult unit);
+
   /// Reports all violations in the resolved compilation units [applyTo] was
-  /// called all.
+  /// called on.
   ///
   /// The implementation typically calls [foundErrors] to report violations.
   void reportViolations(String workingDirectory);
-  /// Applies this rule to the given resolved compilation unit (which is
-  /// typically a file).
-  void applyTo(ResolvedUnitResult unit);
 }

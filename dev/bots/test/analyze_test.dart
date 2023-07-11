@@ -243,10 +243,10 @@ void main() {
     ), shouldHaveErrors: true);
 
     final String badAnnotations = <String>[
-      '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.value is not annotated wtih @_debugAssert, but its override MixinOnBaseClass.value is.',
-      '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.~ is not annotated wtih @_debugAssert, but its override MixinOnBaseClass.~ is.',
-      '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.run is not annotated wtih @_debugAssert, but its override ClassWithBadAnnotation1.run is.',
-      '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.run is not annotated wtih @_debugAssert, but its override ClassWithBadAnnotation2.run is.',
+      '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.value is not annotated wtih @debugAssert, but its override MixinOnBaseClass.value is.',
+      '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.~ is not annotated wtih @debugAssert, but its override MixinOnBaseClass.~ is.',
+      '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.run is not annotated wtih @debugAssert, but its override ClassWithBadAnnotation1.run is.',
+      '║ packages/flutter/lib/debug_only_access.dart: class member BaseClass.run is not annotated wtih @debugAssert, but its override ClassWithBadAnnotation2.run is.',
     ]
     .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
     .join('\n');
@@ -254,12 +254,12 @@ void main() {
     expect(result,
       startsWith(
         '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
-        '║ Overriding a framework class member that was not annotated with @_debugAssert and marking the override @_debugAssert is not allowed.\n'
+        '║ Overriding a framework class member that was not annotated with @debugAssert and marking the override @debugAssert is not allowed.\n'
         '║ A framework method/getter/setter not marked as debug-only itself cannot have a debug-only override.\n'
         '║ \n'
         '$badAnnotations\n'
         '║ \n'
-        '║ Consider either removing the @_debugAssert annotation, or adding the annotation to the class member that is being overridden instead.\n'
+        '║ Consider either removing the @debugAssert annotation, or adding the annotation to the class member that is being overridden instead.\n'
         '╚═══════════════════════════════════════════════════════════════════════════════\n'
       )
     );

@@ -4,7 +4,7 @@
 
 import 'debug_only_lib.dart';
 
-const Null _debugAssert = null;
+const Null debugAssert = null;
 
 final ProductionClassWithDebugOnlyMixin x = ProductionClassWithDebugOnlyMixin();
 ProductionClassWithDebugOnlyMixin? xx;
@@ -71,7 +71,7 @@ mixin class BaseClass {
   int operator ~() => ~value;
 }
 
-@_debugAssert
+@debugAssert
 class _DebugOnlyClass extends BaseClass {
   void debugOnlyMemberMethod() {}
 }
@@ -91,17 +91,17 @@ mixin MixinOnBaseClass implements BaseClass {
     stop();
   }
 
-  @_debugAssert
+  @debugAssert
   @override
   int get value => -1;         // bad annotation.
 
-  @_debugAssert
+  @debugAssert
   @override
   int operator ~() => ~value;  // bad annotation.
 }
 
 class ClassWithBadAnnotation1 extends BaseClass with MixinOnBaseClass {
-  @_debugAssert
+  @debugAssert
   @override
   void run() {  }             // bad annotation.
 
@@ -109,7 +109,7 @@ class ClassWithBadAnnotation1 extends BaseClass with MixinOnBaseClass {
 }
 
 class ClassWithBadAnnotation2 with MixinOnBaseClass {
-  @_debugAssert
+  @debugAssert
   @override
   void run() {  }             // bad annotation.
 
@@ -120,17 +120,17 @@ class ClassWithBadAnnotation2 with MixinOnBaseClass {
   int get value => -1;
 }
 
-@_debugAssert
+@debugAssert
 extension DebugOnly on ProductionClassWithDebugOnlyMixin {
   void debugOnlyExtensionMethod() {  }
 }
 
-@_debugAssert
+@debugAssert
 enum DebugOnlyEnum with BaseClass {
   foo
 }
 
-@_debugAssert
+@debugAssert
 mixin DebugOnlyMixinOnRegularEnum {
   void debugOnlyMethod() {}
 }

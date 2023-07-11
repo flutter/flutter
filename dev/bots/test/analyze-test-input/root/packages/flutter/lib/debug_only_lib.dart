@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@_debugAssert
+@debugAssert
 library;
 
-const String _debugAssert = '';
+const String debugAssert = '';
 
 String globalVaraibleFromDebugLib = '';
 
