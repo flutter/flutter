@@ -29,7 +29,7 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
 
   vk::ImageView GetImageView() const;
 
-  bool SetLayout(const LayoutTransition& transition) const;
+  bool SetLayout(const BarrierVK& barrier) const;
 
   vk::ImageLayout SetLayoutWithoutEncoding(vk::ImageLayout layout) const;
 
