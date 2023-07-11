@@ -331,8 +331,10 @@ TEST(MessageLoop, CanCreateConcurrentMessageLoop) {
     task_runner->PostTask([&]() {
       std::this_thread::sleep_for(std::chrono::seconds(1));
       std::cout << "Ran on thread: " << std::this_thread::get_id() << std::endl;
-      std::scoped_lock lock(thread_ids_mutex);
-      thread_ids.insert(std::this_thread::get_id());
+      {
+        std::scoped_lock lock(thread_ids_mutex);
+        thread_ids.insert(std::this_thread::get_id());
+      }
       latch.CountDown();
     });
   }
