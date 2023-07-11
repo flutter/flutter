@@ -31,6 +31,10 @@ ContentContextOptions OptionsFromPassAndEntity(const RenderPass& pass,
 
 class Contents {
  public:
+  /// A procedure that filters a given unpremultiplied color to produce a new
+  /// unpremultiplied color.
+  using ColorFilterProc = std::function<Color(Color)>;
+
   struct StencilCoverage {
     enum class Type { kNoChange, kAppend, kRestore };
 
@@ -131,6 +135,23 @@ class Contents {
   ///        subpass clear colors.
   virtual std::optional<Color> AsBackgroundColor(const Entity& entity,
                                                  ISize target_size) const;
+
+  /// @brief      If possible, applies a color filter to this contents inputs on
+  ///             the CPU.
+  ///
+  ///             This method will either fully apply the color filter or
+  ///             perform no action. Partial/incorrect application of the color
+  ///             filter will never occur.
+  ///
+  /// @param[in]  color_filter_proc  A function that filters a given
+  ///                                unpremultiplied color to produce a new
+  ///                                unpremultiplied color.
+  ///
+  /// @return     True if the color filter was able to be fully applied to all
+  ///             all relevant inputs. Otherwise, this operation is a no-op and
+  ///             false is returned.
+  [[nodiscard]] virtual bool ApplyColorFilter(
+      const ColorFilterProc& color_filter_proc);
 
  private:
   std::optional<Rect> coverage_hint_;

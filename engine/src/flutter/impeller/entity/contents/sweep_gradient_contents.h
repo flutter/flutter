@@ -33,6 +33,10 @@ class SweepGradientContents final : public ColorSourceContents {
               const Entity& entity,
               RenderPass& pass) const override;
 
+  // |Contents|
+  [[nodiscard]] bool ApplyColorFilter(
+      const ColorFilterProc& color_filter_proc) override;
+
   void SetCenterAndAngles(Point center, Degrees start_angle, Degrees end_angle);
 
   void SetColors(std::vector<Color> colors);
@@ -60,6 +64,7 @@ class SweepGradientContents final : public ColorSourceContents {
   std::vector<Color> colors_;
   std::vector<Scalar> stops_;
   Entity::TileMode tile_mode_;
+  Color decal_border_color_ = Color::BlackTransparent();
 
   FML_DISALLOW_COPY_AND_ASSIGN(SweepGradientContents);
 };

@@ -82,6 +82,7 @@ bool SweepGradientContents::RenderSSBO(const ContentContext& renderer,
   frag_info.bias = bias_;
   frag_info.scale = scale_;
   frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
+  frag_info.decal_border_color = decal_border_color_;
   frag_info.alpha = GetOpacity();
 
   auto& host_buffer = pass.GetTransientsBuffer();
@@ -147,6 +148,7 @@ bool SweepGradientContents::RenderTexture(const ContentContext& renderer,
   frag_info.scale = scale_;
   frag_info.texture_sampler_y_coord_scale = gradient_texture->GetYCoordScale();
   frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
+  frag_info.decal_border_color = decal_border_color_;
   frag_info.alpha = GetOpacity();
   frag_info.half_texel = Vector2(0.5 / gradient_texture->GetSize().width,
                                  0.5 / gradient_texture->GetSize().height);
@@ -189,6 +191,15 @@ bool SweepGradientContents::RenderTexture(const ContentContext& renderer,
     restore.SetRestoreCoverage(GetCoverage(entity));
     return restore.Render(renderer, entity, pass);
   }
+  return true;
+}
+
+bool SweepGradientContents::ApplyColorFilter(
+    const ColorFilterProc& color_filter_proc) {
+  for (Color& color : colors_) {
+    color = color_filter_proc(color);
+  }
+  decal_border_color_ = color_filter_proc(decal_border_color_);
   return true;
 }
 
