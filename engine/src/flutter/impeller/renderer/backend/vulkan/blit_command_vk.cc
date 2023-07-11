@@ -33,27 +33,27 @@ bool BlitCopyTextureToTextureCommandVK::Encode(
     return false;
   }
 
-  LayoutTransition src_tran;
-  src_tran.cmd_buffer = cmd_buffer;
-  src_tran.new_layout = vk::ImageLayout::eTransferSrcOptimal;
-  src_tran.src_access = vk::AccessFlagBits::eTransferWrite |
-                        vk::AccessFlagBits::eShaderWrite |
-                        vk::AccessFlagBits::eColorAttachmentWrite;
-  src_tran.src_stage = vk::PipelineStageFlagBits::eTransfer |
-                       vk::PipelineStageFlagBits::eFragmentShader |
-                       vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  src_tran.dst_access = vk::AccessFlagBits::eTransferRead;
-  src_tran.dst_stage = vk::PipelineStageFlagBits::eTransfer;
+  BarrierVK src_barrier;
+  src_barrier.cmd_buffer = cmd_buffer;
+  src_barrier.new_layout = vk::ImageLayout::eTransferSrcOptimal;
+  src_barrier.src_access = vk::AccessFlagBits::eTransferWrite |
+                           vk::AccessFlagBits::eShaderWrite |
+                           vk::AccessFlagBits::eColorAttachmentWrite;
+  src_barrier.src_stage = vk::PipelineStageFlagBits::eTransfer |
+                          vk::PipelineStageFlagBits::eFragmentShader |
+                          vk::PipelineStageFlagBits::eColorAttachmentOutput;
+  src_barrier.dst_access = vk::AccessFlagBits::eTransferRead;
+  src_barrier.dst_stage = vk::PipelineStageFlagBits::eTransfer;
 
-  LayoutTransition dst_tran;
-  dst_tran.cmd_buffer = cmd_buffer;
-  dst_tran.new_layout = vk::ImageLayout::eTransferDstOptimal;
-  dst_tran.src_access = {};
-  dst_tran.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
-  dst_tran.dst_access = vk::AccessFlagBits::eShaderRead;
-  dst_tran.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
+  BarrierVK dst_barrier;
+  dst_barrier.cmd_buffer = cmd_buffer;
+  dst_barrier.new_layout = vk::ImageLayout::eTransferDstOptimal;
+  dst_barrier.src_access = {};
+  dst_barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  dst_barrier.dst_access = vk::AccessFlagBits::eShaderRead;
+  dst_barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
 
-  if (!src.SetLayout(src_tran) || !dst.SetLayout(dst_tran)) {
+  if (!src.SetLayout(src_barrier) || !dst.SetLayout(dst_barrier)) {
     VALIDATION_LOG << "Could not complete layout transitions.";
     return false;
   }
@@ -74,11 +74,11 @@ bool BlitCopyTextureToTextureCommandVK::Encode(
 
   // Issue the copy command now that the images are already in the right
   // layouts.
-  cmd_buffer.copyImage(src.GetImage(),       //
-                       src_tran.new_layout,  //
-                       dst.GetImage(),       //
-                       dst_tran.new_layout,  //
-                       image_copy            //
+  cmd_buffer.copyImage(src.GetImage(),          //
+                       src_barrier.new_layout,  //
+                       dst.GetImage(),          //
+                       dst_barrier.new_layout,  //
+                       image_copy               //
   );
 
   return true;
@@ -104,18 +104,18 @@ bool BlitCopyTextureToBufferCommandVK::Encode(CommandEncoderVK& encoder) const {
     return false;
   }
 
-  LayoutTransition transition;
-  transition.cmd_buffer = cmd_buffer;
-  transition.new_layout = vk::ImageLayout::eTransferSrcOptimal;
-  transition.src_access = vk::AccessFlagBits::eShaderWrite |
-                          vk::AccessFlagBits::eTransferWrite |
-                          vk::AccessFlagBits::eColorAttachmentWrite;
-  transition.src_stage = vk::PipelineStageFlagBits::eFragmentShader |
-                         vk::PipelineStageFlagBits::eTransfer |
-                         vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  transition.dst_access = vk::AccessFlagBits::eShaderRead;
-  transition.dst_stage = vk::PipelineStageFlagBits::eVertexShader |
-                         vk::PipelineStageFlagBits::eFragmentShader;
+  BarrierVK barrier;
+  barrier.cmd_buffer = cmd_buffer;
+  barrier.new_layout = vk::ImageLayout::eTransferSrcOptimal;
+  barrier.src_access = vk::AccessFlagBits::eShaderWrite |
+                       vk::AccessFlagBits::eTransferWrite |
+                       vk::AccessFlagBits::eColorAttachmentWrite;
+  barrier.src_stage = vk::PipelineStageFlagBits::eFragmentShader |
+                      vk::PipelineStageFlagBits::eTransfer |
+                      vk::PipelineStageFlagBits::eColorAttachmentOutput;
+  barrier.dst_access = vk::AccessFlagBits::eShaderRead;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eVertexShader |
+                      vk::PipelineStageFlagBits::eFragmentShader;
 
   const auto& dst = DeviceBufferVK::Cast(*destination);
 
@@ -130,15 +130,15 @@ bool BlitCopyTextureToBufferCommandVK::Encode(CommandEncoderVK& encoder) const {
   image_copy.setImageExtent(
       vk::Extent3D(source_region.size.width, source_region.size.height, 1));
 
-  if (!src.SetLayout(transition)) {
+  if (!src.SetLayout(barrier)) {
     VALIDATION_LOG << "Could not encode layout transition.";
     return false;
   }
 
-  cmd_buffer.copyImageToBuffer(src.GetImage(),         //
-                               transition.new_layout,  //
-                               dst.GetBuffer(),        //
-                               image_copy              //
+  cmd_buffer.copyImageToBuffer(src.GetImage(),      //
+                               barrier.new_layout,  //
+                               dst.GetBuffer(),     //
+                               image_copy           //
   );
 
   return true;
@@ -165,15 +165,15 @@ bool BlitCopyBufferToTextureCommandVK::Encode(CommandEncoderVK& encoder) const {
     return false;
   }
 
-  LayoutTransition dst_tran;
-  dst_tran.cmd_buffer = cmd_buffer;
-  dst_tran.new_layout = vk::ImageLayout::eTransferDstOptimal;
-  dst_tran.src_access = {};
-  dst_tran.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
-  dst_tran.dst_access =
+  BarrierVK dst_barrier;
+  dst_barrier.cmd_buffer = cmd_buffer;
+  dst_barrier.new_layout = vk::ImageLayout::eTransferDstOptimal;
+  dst_barrier.src_access = {};
+  dst_barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  dst_barrier.dst_access =
       vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eTransferWrite;
-  dst_tran.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
-                       vk::PipelineStageFlagBits::eTransfer;
+  dst_barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
+                          vk::PipelineStageFlagBits::eTransfer;
 
   vk::BufferImageCopy image_copy;
   image_copy.setBufferOffset(source.range.offset);
@@ -186,15 +186,15 @@ bool BlitCopyBufferToTextureCommandVK::Encode(CommandEncoderVK& encoder) const {
   image_copy.setImageExtent(vk::Extent3D(destination->GetSize().width,
                                          destination->GetSize().height, 1));
 
-  if (!dst.SetLayout(dst_tran)) {
+  if (!dst.SetLayout(dst_barrier)) {
     VALIDATION_LOG << "Could not encode layout transition.";
     return false;
   }
 
-  cmd_buffer.copyBufferToImage(src.GetBuffer(),      //
-                               dst.GetImage(),       //
-                               dst_tran.new_layout,  //
-                               image_copy            //
+  cmd_buffer.copyBufferToImage(src.GetBuffer(),         //
+                               dst.GetImage(),          //
+                               dst_barrier.new_layout,  //
+                               image_copy               //
   );
 
   return true;

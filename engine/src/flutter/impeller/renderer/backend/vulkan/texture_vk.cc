@@ -71,15 +71,15 @@ bool TextureVK::OnSetContents(const uint8_t* contents,
 
   const auto& vk_cmd_buffer = encoder->GetCommandBuffer();
 
-  LayoutTransition transition;
-  transition.cmd_buffer = vk_cmd_buffer;
-  transition.new_layout = vk::ImageLayout::eTransferDstOptimal;
-  transition.src_access = {};
-  transition.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
-  transition.dst_access = vk::AccessFlagBits::eTransferWrite;
-  transition.dst_stage = vk::PipelineStageFlagBits::eTransfer;
+  BarrierVK barrier;
+  barrier.cmd_buffer = vk_cmd_buffer;
+  barrier.new_layout = vk::ImageLayout::eTransferDstOptimal;
+  barrier.src_access = {};
+  barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  barrier.dst_access = vk::AccessFlagBits::eTransferWrite;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eTransfer;
 
-  if (!SetLayout(transition)) {
+  if (!SetLayout(barrier)) {
     return false;
   }
 
@@ -101,7 +101,7 @@ bool TextureVK::OnSetContents(const uint8_t* contents,
   vk_cmd_buffer.copyBufferToImage(
       DeviceBufferVK::Cast(*staging_buffer).GetBuffer(),  // src buffer
       GetImage(),                                         // dst image
-      transition.new_layout,                              // dst image layout
+      barrier.new_layout,                                 // dst image layout
       1u,                                                 // region count
       &copy                                               // regions
   );
@@ -136,8 +136,8 @@ std::shared_ptr<const TextureSourceVK> TextureVK::GetTextureSource() const {
   return source_;
 }
 
-bool TextureVK::SetLayout(const LayoutTransition& transition) const {
-  return source_ ? source_->SetLayout(transition) : false;
+bool TextureVK::SetLayout(const BarrierVK& barrier) const {
+  return source_ ? source_->SetLayout(barrier) : false;
 }
 
 vk::ImageLayout TextureVK::SetLayoutWithoutEncoding(

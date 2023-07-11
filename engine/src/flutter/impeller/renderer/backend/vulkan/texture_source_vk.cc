@@ -27,17 +27,17 @@ vk::ImageLayout TextureSourceVK::SetLayoutWithoutEncoding(
   return old_layout;
 }
 
-bool TextureSourceVK::SetLayout(const LayoutTransition& transition) const {
-  const auto old_layout = SetLayoutWithoutEncoding(transition.new_layout);
-  if (transition.new_layout == old_layout) {
+bool TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
+  const auto old_layout = SetLayoutWithoutEncoding(barrier.new_layout);
+  if (barrier.new_layout == old_layout) {
     return true;
   }
 
   vk::ImageMemoryBarrier image_barrier;
-  image_barrier.srcAccessMask = transition.src_access;
-  image_barrier.dstAccessMask = transition.dst_access;
+  image_barrier.srcAccessMask = barrier.src_access;
+  image_barrier.dstAccessMask = barrier.dst_access;
   image_barrier.oldLayout = old_layout;
-  image_barrier.newLayout = transition.new_layout;
+  image_barrier.newLayout = barrier.new_layout;
   image_barrier.image = GetImage();
   image_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
   image_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -47,12 +47,12 @@ bool TextureSourceVK::SetLayout(const LayoutTransition& transition) const {
   image_barrier.subresourceRange.baseArrayLayer = 0u;
   image_barrier.subresourceRange.layerCount = ToArrayLayerCount(desc_.type);
 
-  transition.cmd_buffer.pipelineBarrier(transition.src_stage,  // src stage
-                                        transition.dst_stage,  // dst stage
-                                        {},            // dependency flags
-                                        nullptr,       // memory barriers
-                                        nullptr,       // buffer barriers
-                                        image_barrier  // image barriers
+  barrier.cmd_buffer.pipelineBarrier(barrier.src_stage,  // src stage
+                                     barrier.dst_stage,  // dst stage
+                                     {},                 // dependency flags
+                                     nullptr,            // memory barriers
+                                     nullptr,            // buffer barriers
+                                     image_barrier       // image barriers
   );
 
   return true;
