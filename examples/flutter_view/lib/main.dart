@@ -16,8 +16,8 @@ class FlutterView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Flutter View',
       theme: ThemeData(
-        title: 'Flutter View',
         useMaterial3: true,
       ),
       home: const MyHomePage(),
