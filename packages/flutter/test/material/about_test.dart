@@ -151,7 +151,6 @@ void main() {
     expect(find.text('About flutter_tester'), findsOneWidget);
   });
 
-
   testWidgetsWithLeakTracking('LicensePage control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
@@ -213,7 +212,6 @@ void main() {
   ));
 
   testWidgetsWithLeakTracking('LicensePage control test with all properties', (WidgetTester tester) async {
-    /// ???
     const FlutterLogo logo = FlutterLogo();
 
     LicenseRegistry.addLicense(() {
