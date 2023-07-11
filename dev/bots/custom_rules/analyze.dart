@@ -15,7 +15,7 @@ import '../utils.dart';
 /// Analyzes the given `workingDirectory` with the given set of [AnalyzeRule]s.
 ///
 /// If a compilation unit can not be resolved, this function ignores the
-/// corresponding ".dart" file and logs an error using [foundError].
+/// corresponding dart source file and logs an error using [foundError].
 Future<void> analyzeDirectoryWithRules(String workingDirectory, List<AnalyzeRule> rules) async {
   final String flutterLibPath = path.canonicalize('$workingDirectory/packages/flutter/lib');
   if (!Directory(flutterLibPath).existsSync()) {

@@ -18,8 +18,8 @@ import 'analyze.dart';
 /// functions, methods are only directly or indirectly called inside asserts.
 ///
 /// The annotation can also be applied to [InterfaceElement]s (classes, mixins
-/// and extensions), in which case all explicitly defined class members will be
-/// marked as debug-only. If the annotation is
+/// and extensions) or libraries, in which case all non-synthetic elements
+/// defined within that scope will be marked as debug-only.
 final AnalyzeRule debugAssert = _DebugAssert();
 
 class _DebugOnlySymbolAccessError {
