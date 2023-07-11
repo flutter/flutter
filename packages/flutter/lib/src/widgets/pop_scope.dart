@@ -150,17 +150,12 @@ class _PopScopeState extends State<PopScope> implements PopInterface {
 ///  * [PopScope], which provides similar functionality in a widget.
 ///  * [ModalRoute.registerPopInterface], which unregisters instances of this.
 ///  * [ModalRoute.unregisterPopInterface], which unregisters instances of this.
-sealed class PopInterface {
-  /// Creates an instance of [PopInterface].
-  PopInterface({
-    required this.onPopInvoked,
-  });
-
+abstract class PopInterface {
   /// {@macro flutter.widgets.PopScope.onPopInvoked}
-  final PopInvokedCallback? onPopInvoked;
+  PopInvokedCallback? get onPopInvoked;
 
   /// {@macro flutter.widgets.PopScope.canPop}
-  late final ValueNotifier<bool> canPopNotifier;
+  ValueNotifier<bool> get canPopNotifier;
 
   @override
   String toString() {
