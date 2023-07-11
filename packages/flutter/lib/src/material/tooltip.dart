@@ -768,8 +768,10 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void dispose() {
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
     Tooltip._openedTooltips.remove(this);
+    // _longPressRecognizer.dispose() and _tapRecognizer.dispose() may call
+    // their registered onCancel callbacks if there's a gesture in progress.
     // Remove the onCancel callbacks to prevent the registered callbacks from
-    // triggering unnecessary sideeffects (such as animation).
+    // triggering unnecessary side effects (such as animations).
     _longPressRecognizer?.onLongPressCancel = null;
     _longPressRecognizer?.dispose();
     _tapRecognizer?.onTapCancel = null;
