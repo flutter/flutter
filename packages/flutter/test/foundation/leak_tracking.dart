@@ -60,10 +60,6 @@ void testWidgetsWithLeakTracking(
   dynamic tags,
   LeakTrackingTestConfig? leakTrackingTestConfig,
 }) {
-  if (description == 'LicensePage control test'){
-    debugger();
-  }
-
   final LeakTrackingTestConfig config = leakTrackingTestConfig ??
       (collectDebugInformationForLeaks
           ? LeakTrackingTestConfig.debug()
