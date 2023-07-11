@@ -416,6 +416,22 @@ tasks.register("clean", Delete) {
         migration.migrate();
         expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdkVersion16));
       });
+
+      testWithoutContext('do nothing when minSdkVersion is set '
+          'to a constant', () {
+        const String minSdkVersionConstant = 'minSdkVersion kMinSdkversion';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersionConstant));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdkVersionConstant));
+      });
+
+      testWithoutContext('do nothing when minSdkVersion is set '
+          'using = syntax', () {
+        const String equalsSyntaxMinSdkVersion16 = 'minSdkVersion = 16';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(equalsSyntaxMinSdkVersion16));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(equalsSyntaxMinSdkVersion16));
+      });
     });
   });
 }
