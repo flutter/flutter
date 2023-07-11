@@ -166,4 +166,8 @@ bool Entity::Render(const ContentContext& renderer,
   return contents_->Render(renderer, *this, parent_pass);
 }
 
+Scalar Entity::DeriveTextScale() const {
+  return GetTransformation().GetMaxBasisLengthXY();
+}
+
 }  // namespace impeller

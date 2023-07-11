@@ -16,28 +16,29 @@
 namespace impeller {
 
 //------------------------------------------------------------------------------
-/// @brief      A font along with a glyph in that font. Used in glyph atlases as
-///             keys.
+/// @brief      A font along with a glyph in that font rendered at a particular
+///             scale. Used in glyph atlases as keys.
 ///
 struct FontGlyphPair {
   struct Hash;
   struct Equal;
 
   using Set = std::unordered_set<FontGlyphPair, Hash, Equal>;
-  using Vector = std::vector<FontGlyphPair>;
 
   Font font;
   Glyph glyph;
+  Scalar scale;
 
   struct Hash {
     std::size_t operator()(const FontGlyphPair& p) const {
-      return fml::HashCombine(p.font.GetHash(), p.glyph.index, p.glyph.type);
+      return fml::HashCombine(p.font.GetHash(), p.glyph.index, p.glyph.type,
+                              p.scale);
     }
   };
   struct Equal {
     bool operator()(const FontGlyphPair& lhs, const FontGlyphPair& rhs) const {
       return lhs.font.IsEqual(rhs.font) && lhs.glyph.index == rhs.glyph.index &&
-             lhs.glyph.type == rhs.glyph.type;
+             lhs.glyph.type == rhs.glyph.type && lhs.scale == rhs.scale;
     }
   };
 };

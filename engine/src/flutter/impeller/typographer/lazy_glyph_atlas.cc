@@ -15,12 +15,12 @@ LazyGlyphAtlas::LazyGlyphAtlas() = default;
 
 LazyGlyphAtlas::~LazyGlyphAtlas() = default;
 
-void LazyGlyphAtlas::AddTextFrame(const TextFrame& frame) {
+void LazyGlyphAtlas::AddTextFrame(const TextFrame& frame, Scalar scale) {
   FML_DCHECK(atlas_map_.empty());
   if (frame.GetAtlasType() == GlyphAtlas::Type::kAlphaBitmap) {
-    alpha_frames_.emplace_back(frame);
+    frame.CollectUniqueFontGlyphPairs(alpha_set_, scale);
   } else {
-    color_frames_.emplace_back(frame);
+    frame.CollectUniqueFontGlyphPairs(color_set_, scale);
   }
 }
 
@@ -39,19 +39,9 @@ std::shared_ptr<GlyphAtlas> LazyGlyphAtlas::CreateOrGetGlyphAtlas(
   if (!text_context || !text_context->IsValid()) {
     return nullptr;
   }
-  size_t i = 0;
-  auto frames =
-      type == GlyphAtlas::Type::kAlphaBitmap ? alpha_frames_ : color_frames_;
-  TextRenderContext::FrameIterator iterator = [&]() -> const TextFrame* {
-    if (i >= frames.size()) {
-      return nullptr;
-    }
-    const auto& result = frames[i];
-    i++;
-    return &result;
-  };
+  auto& set = type == GlyphAtlas::Type::kAlphaBitmap ? alpha_set_ : color_set_;
   auto atlas =
-      text_context->CreateGlyphAtlas(type, std::move(atlas_context), iterator);
+      text_context->CreateGlyphAtlas(type, std::move(atlas_context), set);
   if (!atlas || !atlas->IsValid()) {
     VALIDATION_LOG << "Could not create valid atlas.";
     return nullptr;
