@@ -1050,6 +1050,9 @@ mixin TextSelectionDelegate {
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
 
+  /// Whether look up is enabled, must not be null.
+  bool get lookUpEnabled => true;
+
   /// Whether Live Text input is enabled.
   ///
   /// See also:

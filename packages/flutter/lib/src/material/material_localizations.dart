@@ -115,6 +115,9 @@ abstract class MaterialLocalizations {
   /// Label for "select all" edit buttons and menu items.
   String get selectAllButtonLabel;
 
+  /// Label for "look up" edit buttons and menu items.
+  String get lookUpButtonLabel;
+
   /// Label for the [AboutDialog] button that shows the [LicensePage].
   String get viewLicensesButtonLabel;
 
@@ -1173,6 +1176,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Select all';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get viewLicensesButtonLabel => 'View licenses';
