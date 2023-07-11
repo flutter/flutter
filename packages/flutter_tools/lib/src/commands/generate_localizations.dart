@@ -200,6 +200,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       'suppress-warnings',
       help: 'When specified, all warnings will be suppressed.\n'
     );
+    argParser.addFlag(
+      'use-deprecated-parser',
+      help: 'When specified, uses the old regex-based parser. This is not recommended as it is no longer maintained.',
+    );
   }
 
   final FileSystem _fileSystem;
