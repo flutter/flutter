@@ -61,7 +61,6 @@ bool LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
       .ui_time                       = frame.context().ui_time(),
       .texture_registry              = frame.context().texture_registry(),
       .raster_cached_entries         = &raster_cache_items_,
-      .display_list_enabled          = frame.display_list_builder() != nullptr,
       // clang-format on
   };
 
