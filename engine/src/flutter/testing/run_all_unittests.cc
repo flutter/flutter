@@ -23,8 +23,8 @@ std::optional<fml::TimeDelta> GetTestTimeout() {
 
   std::string timeout_seconds;
   if (!command_line.GetOptionValue("timeout", &timeout_seconds)) {
-    // No timeout specified. Default to 120s.
-    return fml::TimeDelta::FromSeconds(120u);
+    // No timeout specified. Default to 300s.
+    return fml::TimeDelta::FromSeconds(300u);
   }
 
   const auto seconds = std::stoi(timeout_seconds);

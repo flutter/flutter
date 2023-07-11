@@ -3,7 +3,8 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Linux"
+                "os=Linux",
+                "cores=32"
             ],
             "gn": [
                 "--runtime-mode",
