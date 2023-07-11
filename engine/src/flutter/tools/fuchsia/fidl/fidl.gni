@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import("//build/fuchsia/sdk.gni")
-import("//flutter/tools/fuchsia/dart/toolchain.gni")
 import("//flutter/tools/fuchsia/fidl/toolchain.gni")
 
 # Declares a FIDL library.
@@ -24,15 +23,7 @@ template("fidl") {
          "All FIDL dependencies are inherently " +
              "public, use 'public_deps' instead of 'deps'.")
 
-  if (current_toolchain == dart_toolchain) {
-    import("//flutter/tools/fuchsia/dart/fidl_dart.gni")
-
-    not_needed(invoker, [ "meta" ])
-
-    fidl_dart(target_name) {
-      forward_variables_from(invoker, "*")
-    }
-  } else if (current_toolchain == fidl_toolchain) {
+  if (current_toolchain == fidl_toolchain) {
     import("//flutter/tools/fuchsia/fidl/fidl_library.gni")
 
     not_needed(invoker, [ "meta" ])
@@ -51,6 +42,7 @@ template("fidl") {
       forward_variables_from(invoker, "*")
     }
   } else {
+    not_needed(invoker, "*")
     not_needed("*")
   }
 }
