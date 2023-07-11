@@ -589,3 +589,52 @@ Uri? _tryReadUri(YamlMap yamlMap, String key, Logger logger) {
   }
   return uri;
 }
+
+/// Return the input string as a Dart-parsable string.
+///
+/// ```
+/// foo => 'foo'
+/// foo "bar" => 'foo "bar"'
+/// foo 'bar' => "foo 'bar'"
+/// foo 'bar' "baz" => '''foo 'bar' "baz"'''
+/// ```
+///
+/// This function is used by tools that take in a JSON-formatted file to
+/// generate Dart code. For this reason, characters with special meaning
+/// in JSON files are escaped. For example, the backspace character (\b)
+/// has to be properly escaped by this function so that the generated
+/// Dart code correctly represents this character:
+/// ```
+/// foo\bar => 'foo\\bar'
+/// foo\nbar => 'foo\\nbar'
+/// foo\\nbar => 'foo\\\\nbar'
+/// foo\\bar => 'foo\\\\bar'
+/// foo\ bar => 'foo\\ bar'
+/// foo$bar = 'foo\$bar'
+/// ```
+String deprecatedGenerateString(String value) {
+  const String backslash = '__BACKSLASH__';
+  assert(
+    !value.contains(backslash),
+    'Input string cannot contain the sequence: '
+    '"__BACKSLASH__", as it is used as part of '
+    'backslash character processing.'
+  );
+
+  value = value
+    // Replace backslashes with a placeholder for now to properly parse
+    // other special characters.
+    .replaceAll(r'\', backslash)
+    .replaceAll(r'$', r'\$')
+    .replaceAll("'", r"\'")
+    .replaceAll('"', r'\"')
+    .replaceAll('\n', r'\n')
+    .replaceAll('\f', r'\f')
+    .replaceAll('\t', r'\t')
+    .replaceAll('\r', r'\r')
+    .replaceAll('\b', r'\b')
+    // Reintroduce escaped backslashes into generated Dart string.
+    .replaceAll(backslash, r'\\');
+
+  return "'$value'";
+}

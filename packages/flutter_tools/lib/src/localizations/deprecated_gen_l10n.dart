@@ -68,7 +68,7 @@ String generateDateFormattingLogic(Message message) {
       }
       return dateFormatCustomTemplate
         .replaceAll('@(placeholder)', placeholder.name)
-        .replaceAll('@(format)', generateString(placeholderFormat));
+        .replaceAll('@(format)', deprecatedGenerateString(placeholderFormat));
     });
 
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
@@ -96,7 +96,7 @@ String generateNumberFormattingLogic(Message message) {
           if (parameter.value is num) {
             return '${parameter.name}: ${parameter.value}';
           } else {
-            return '${parameter.name}: ${generateString(parameter.value.toString())}';
+            return '${parameter.name}: ${deprecatedGenerateString(parameter.value.toString())}';
           }
         },
       );
@@ -195,7 +195,7 @@ String _generatePluralMethod(Message message, String translationForMessage) {
     final RegExp expRE = RegExp('($pluralKey)\\s*{([^}]+)}');
     final RegExpMatch? match = expRE.firstMatch(easyMessage);
     if (match != null && match.groupCount == 2) {
-      final String argValue = _replacePlaceholdersWithVariables(generateString(match.group(2)!), message.placeholders, '##');
+      final String argValue = _replacePlaceholdersWithVariables(deprecatedGenerateString(match.group(2)!), message.placeholders, '##');
       pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
     }
   }
@@ -235,9 +235,9 @@ String _generatePluralMethod(Message message, String translationForMessage) {
 }
 
 String _replaceWithVariable(String translation, String variable) {
-  String prefix = generateString(translation.substring(0, translation.indexOf('{')));
+  String prefix = deprecatedGenerateString(translation.substring(0, translation.indexOf('{')));
   prefix = prefix.substring(0, prefix.length - 1);
-  String suffix = generateString(translation.substring(translation.lastIndexOf('}') + 1));
+  String suffix = deprecatedGenerateString(translation.substring(translation.lastIndexOf('}') + 1));
   suffix = suffix.substring(1);
 
   // escape variable when the suffix can be combined with the variable
@@ -351,7 +351,7 @@ bool _needsCurlyBracketStringInterpolation(String messageString, String placehol
 
 String _generateMethod(Message message, String translationForMessage) {
   String generateMessage() {
-    return _replacePlaceholdersWithVariables(generateString(translationForMessage), message.placeholders);
+    return _replacePlaceholdersWithVariables(deprecatedGenerateString(translationForMessage), message.placeholders);
   }
 
   if (message.isPlural) {
@@ -388,7 +388,7 @@ String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
   final String comment = message.description ?? 'No description provided for @${message.resourceId}.';
   final String templateLocaleTranslationComment = '''
   /// In $templateArbLocale, this message translates to:
-  /// **${generateString(message.value)}**''';
+  /// **${deprecatedGenerateString(message.value)}**''';
 
   if (message.placeholders.isNotEmpty) {
     return baseClassMethodTemplate

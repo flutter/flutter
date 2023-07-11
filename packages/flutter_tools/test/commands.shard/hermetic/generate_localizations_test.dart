@@ -493,4 +493,37 @@ format: true
       throwsToolExit(message: 'Unexpected positional argument "false".')
     );
   });
+
+  testUsingContext('uses old parser when use-deprecated-parser is true', () async {
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "{} {placeholder}",
+  "@helloWorld": {
+    "description": "Sample description",
+    "placeholder": { "type": "String" }
+  }
+}''');
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+    );
+    await createTestCommandRunner(command).run(<String>['gen-l10n', '--use-deprecated-parser']);
+
+    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    expect(outputDirectory.existsSync(), isTrue);
+    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), isTrue);
+    expect(
+      outputDirectory.childFile('app_localizations.dart').readAsStringSync(),
+      contains(''),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }
