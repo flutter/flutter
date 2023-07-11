@@ -502,7 +502,7 @@ format: true
   "helloWorld": "{} {placeholder}",
   "@helloWorld": {
     "description": "Sample description",
-    "placeholder": { "type": "String" }
+    "placeholders": { "placeholder": { "type": "String" } }
   }
 }''');
     final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
@@ -517,10 +517,15 @@ format: true
 
     final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
     expect(outputDirectory.existsSync(), isTrue);
-    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), isTrue);
     expect(
-      outputDirectory.childFile('app_localizations.dart').readAsStringSync(),
-      contains(''),
+      outputDirectory.childFile('app_localizations_en.dart').readAsStringSync(),
+      contains(r'''
+  @override
+  String helloWorld(String placeholder) {
+    return '{} $placeholder';
+  }
+'''),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

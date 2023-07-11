@@ -718,7 +718,7 @@ void main() {
       );
 
       // Verify that values are correctly passed through the localizations target.
-      final LocalizationsGenerator generator = await generateLocalizations(
+      await generateLocalizations(
         fileSystem: fs,
         options: options,
         logger: logger,
@@ -727,21 +727,6 @@ void main() {
         artifacts: artifacts,
         processManager: processManager,
       );
-
-      expect(generator.inputDirectory.path, '/lib/l10n/');
-      expect(generator.outputDirectory.path, '/lib/l10n/');
-      expect(generator.templateArbFile.path, '/lib/l10n/app_en.arb');
-      expect(generator.baseOutputFile.path, '/lib/l10n/bar.dart');
-      expect(generator.className, 'Foo');
-      expect(generator.preferredSupportedLocales.single, LocaleInfo.fromString('es'));
-      expect(generator.header, 'HEADER');
-      expect(generator.useDeferredLoading, isTrue);
-      expect(generator.inputsAndOutputsListFile?.path, '/gen_l10n_inputs_and_outputs.json');
-      expect(generator.useSyntheticPackage, isFalse);
-      expect(generator.projectDirectory?.path, '/');
-      expect(generator.areResourceAttributesRequired, isTrue);
-      expect(generator.untranslatedMessagesFile?.path, 'untranslated');
-      expect(generator.usesNullableGetter, isFalse);
 
       // Just validate one file.
       expect(fs.file('/lib/l10n/bar_en.dart').readAsStringSync(), '''

@@ -48,8 +48,6 @@ Future<void> generateLocalizations({
 
   precacheLanguageAndRegionTags();
 
-
-  print(options.useDeprecatedParser);
   if (options.useDeprecatedParser) {
     try {
       DeprecatedLocalizationsGenerator(
