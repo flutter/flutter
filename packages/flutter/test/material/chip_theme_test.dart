@@ -176,7 +176,7 @@ void main() {
             child: Center(
               child: RawChip(
                 label: const SizedBox(width: 100, height: 100),
-                avatar: Icon(Icons.ac_unit),
+                avatar: const Icon(Icons.ac_unit),
                 onSelected: (bool newValue) { },
               ),
             ),
@@ -384,14 +384,14 @@ void main() {
                 child: Material(
                   child: Center(
                     child: RawChip(
-                      avatar: Icon(Icons.cabin),
+                      avatar: const Icon(Icons.cabin),
                       backgroundColor: backgroundColor,
                       elevation: elevation,
-                      padding: EdgeInsets.all(50),
-                      labelPadding: EdgeInsets.all(25),
-                      labelStyle: TextStyle(fontSize: fontSize),
+                      padding: const EdgeInsets.all(50),
+                      labelPadding: const EdgeInsets.all(25),
+                      labelStyle: const TextStyle(fontSize: fontSize),
                       shape: shape,
-                      label: SizedBox(width: 100, height: 100),
+                      label: const SizedBox(width: 100, height: 100),
                       iconTheme: customIconTheme,
                       onSelected: (bool newValue) { },
                     ),
