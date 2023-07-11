@@ -8,9 +8,8 @@
 
 namespace flutter {
 
-TransformLayer::TransformLayer(const SkMatrix& transform)
-    : transform_(transform) {
-  // Checks (in some degree) that SkMatrix transform_ is valid and initialized.
+TransformLayer::TransformLayer(const SkM44& transform) : transform_(transform) {
+  // Checks (in some degree) that SkM44 transform_ is valid and initialized.
   //
   // If transform_ is uninitialized, this assert may look flaky as it doesn't
   // fail all the time, and some rerun may make it pass. But don't ignore it and
@@ -47,7 +46,7 @@ void TransformLayer::Preroll(PrerollContext* context) {
   SkRect child_paint_bounds = SkRect::MakeEmpty();
   PrerollChildren(context, &child_paint_bounds);
 
-  transform_.mapRect(&child_paint_bounds);
+  transform_.asM33().mapRect(&child_paint_bounds);
   set_paint_bounds(child_paint_bounds);
 }
 
