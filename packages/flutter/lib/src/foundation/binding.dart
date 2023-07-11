@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
+import 'dart:developer';
 import 'dart:io' show exit;
 import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window; // ignore: deprecated_member_use
 
@@ -930,7 +931,8 @@ abstract class BindingBase {
     required ServiceExtensionCallback callback,
   }) {
     final String methodName = 'ext.flutter.$name';
-    developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
+
+    Future<ServiceExtensionResponse> hanlder(String method, Map<String, String> parameters) async {
       assert(method == methodName);
       assert(() {
         if (debugInstrumentationEnabled) {
@@ -974,7 +976,9 @@ abstract class BindingBase {
       result['type'] = '_extensionType';
       result['method'] = method;
       return developer.ServiceExtensionResponse.result(json.encode(result));
-    });
+    }
+
+    developer.registerExtension(methodName, hanlder);
   }
 
   @override
