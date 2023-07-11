@@ -12,6 +12,7 @@
 #include "display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/paint_region.h"
 #include "flutter/fml/macros.h"
+#include "third_party/skia/include/core/SkM44.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkRect.h"
 
@@ -70,6 +71,7 @@ class DiffContext {
 
   // Pushes additional transform for current subtree
   void PushTransform(const SkMatrix& transform);
+  void PushTransform(const SkM44& transform);
 
   // Pushes cull rect for current subtree
   bool PushCullRect(const SkRect& clip);

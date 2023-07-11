@@ -27,6 +27,8 @@ class DisplayListMatrixClipTracker {
   DisplayListMatrixClipTracker(const SkRect& cull_rect, const SkMatrix& matrix);
   DisplayListMatrixClipTracker(const SkRect& cull_rect, const SkM44& matrix);
 
+  static bool is_3x3(const SkM44& m44);
+
   SkRect base_device_cull_rect() const { return saved_[0]->device_cull_rect(); }
 
   bool using_4x4_matrix() const { return current_->is_4x4(); }

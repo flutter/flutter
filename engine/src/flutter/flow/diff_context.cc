@@ -57,6 +57,10 @@ void DiffContext::PushTransform(const SkMatrix& transform) {
   clip_tracker_.transform(transform);
 }
 
+void DiffContext::PushTransform(const SkM44& transform) {
+  clip_tracker_.transform(transform);
+}
+
 void DiffContext::MakeCurrentTransformIntegral() {
   // TODO(knopp): This is duplicated from LayerStack. Maybe should be part of
   // clip tracker?
