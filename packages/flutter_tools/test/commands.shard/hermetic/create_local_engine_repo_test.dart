@@ -29,7 +29,7 @@ void main() {
     });
 
     testUsingContext('createLocalEngineRepo', () async {
-      String engineOutPath = 'out/android_release_arm';
+      const String engineOutPath = 'out/android_release_arm';
       fileSystem.file('$engineOutPath/flutter_embedding_release.pom')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -59,7 +59,7 @@ void main() {
           .file('$engineOutPath/flutter_embedding_release.maven-metadata.xml')
           .createSync(recursive: true);
 
-      final repoPath = fileSystem.directory('localEngineRepo');
+      final Directory repoPath = fileSystem.directory('localEngineRepo');
       createLocalEngineRepo(
         engineOutPath: engineOutPath,
         localEngineRepoPath: repoPath.path,

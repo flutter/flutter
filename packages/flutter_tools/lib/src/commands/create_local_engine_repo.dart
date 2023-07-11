@@ -36,7 +36,7 @@ class CreateLocalEngineRepoCommand extends FlutterCommand {
     }
 
     final String? localRepoPath = stringArg('local-repo-path');
-    String outPath = localRepoPath ?? localEngineInfo.engineOutPath;
+    final String outPath = localRepoPath ?? localEngineInfo.engineOutPath;
 
     globals.logger.printStatus('Create local engine repo at $outPath');
     createLocalEngineRepo(
