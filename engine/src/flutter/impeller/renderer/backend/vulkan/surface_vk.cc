@@ -18,12 +18,6 @@ std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
     return nullptr;
   }
 
-  // Some Vulkan devices may not support memoryless (lazily allocated) textures.
-  // In this case we will cache the MSAA texture on the swapchain image to avoid
-  // thrasing the VMA heap.
-  bool supports_memoryless =
-      context->GetCapabilities()->SupportsMemorylessTextures();
-
   TextureDescriptor msaa_tex_desc;
   msaa_tex_desc.storage_mode = StorageMode::kDeviceTransient;
   msaa_tex_desc.type = TextureType::kTexture2DMultisample;
@@ -33,16 +27,14 @@ std::unique_ptr<SurfaceVK> SurfaceVK::WrapSwapchainImage(
   msaa_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
 
   std::shared_ptr<Texture> msaa_tex;
-  if (supports_memoryless || !swapchain_image->HasMSAATexture()) {
+  if (!swapchain_image->HasMSAATexture()) {
     msaa_tex = context->GetResourceAllocator()->CreateTexture(msaa_tex_desc);
     msaa_tex->SetLabel("ImpellerOnscreenColorMSAA");
     if (!msaa_tex) {
       VALIDATION_LOG << "Could not allocate MSAA color texture.";
       return nullptr;
     }
-    if (!supports_memoryless) {
-      swapchain_image->SetMSAATexture(msaa_tex);
-    }
+    swapchain_image->SetMSAATexture(msaa_tex);
   } else {
     msaa_tex = swapchain_image->GetMSAATexture();
   }
