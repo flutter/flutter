@@ -82,12 +82,6 @@ struct PrerollContext {
   int renderable_state_flags = 0;
 
   std::vector<RasterCacheItem*>* raster_cached_entries;
-
-  // This flag will be set to true iff the frame will be constructing
-  // a DisplayList for the layer tree. This flag is mostly of note to
-  // the embedders that must decide between creating SkPicture or
-  // DisplayList objects for the inter-view slices of the layer tree.
-  bool display_list_enabled = false;
 };
 
 struct PaintContext {
