@@ -451,8 +451,6 @@
 ../../../fuchsia/sdk/linux/arch/x64/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/dart/fidl/meta.json
 ../../../fuchsia/sdk/linux/dart/fuchsia/meta.json
-../../../fuchsia/sdk/linux/dart/fuchsia_services/meta.json
-../../../fuchsia/sdk/linux/dart/fuchsia_vfs/meta.json
 ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
 ../../../fuchsia/sdk/linux/dart/zircon/meta.json
 ../../../fuchsia/sdk/linux/data/config/symbol_index/meta.json
