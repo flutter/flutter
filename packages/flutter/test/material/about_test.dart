@@ -152,6 +152,8 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('LicensePage control test', (WidgetTester tester) async {
+    /// ???
+
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -201,7 +203,9 @@ void main() {
     await tester.tap(find.text('Another package'));
     await tester.pumpAndSettle();
     expect(find.text('Another license'), findsOneWidget);
-  }, leakTrackingTestConfig: LeakTrackingTestConfig.debug());
+  },
+  leakTrackingTestConfig: LeakTrackingTestConfig.debug(),
+  );
 
   testWidgetsWithLeakTracking('LicensePage control test with all properties', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();

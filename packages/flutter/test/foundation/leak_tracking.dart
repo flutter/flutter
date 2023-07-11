@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:core';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -59,6 +60,10 @@ void testWidgetsWithLeakTracking(
   dynamic tags,
   LeakTrackingTestConfig? leakTrackingTestConfig,
 }) {
+  if (description == 'LicensePage control test'){
+    debugger();
+  }
+
   final LeakTrackingTestConfig config = leakTrackingTestConfig ??
       (collectDebugInformationForLeaks
           ? LeakTrackingTestConfig.debug()
