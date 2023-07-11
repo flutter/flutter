@@ -310,6 +310,82 @@ void main() {
       expect(edgeEvent.globalPosition, const Offset(200.0, 50.0));
     });
 
+  testWidgets(
+    'touch long press cancel does not send ClearSelectionEvent',
+    (WidgetTester tester) async {
+      final UniqueKey spy = UniqueKey();
+      await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionControls,
+              child: SelectionSpy(key: spy),
+            ),
+          ),
+      );
+      await tester.pumpAndSettle();
+
+      final RenderSelectionSpy renderSelectionSpy =
+          tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
+      renderSelectionSpy.events.clear();
+      final TestGesture gesture =
+          await tester.startGesture(const Offset(200.0, 200.0));
+
+      addTearDown(gesture.removePointer);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.cancel();
+      expect(
+        renderSelectionSpy.events.any((SelectionEvent element) => element is ClearSelectionEvent),
+        isFalse,
+      );
+    },
+  );
+
+    testWidgets(
+      'scrolling after the selection does not send ClearSelectionEvent',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/128765
+        final UniqueKey spy = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SizedBox(
+              height: 750,
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  height: 2000,
+                  child: SelectableRegion(
+                    focusNode: FocusNode(),
+                    selectionControls: materialTextSelectionControls,
+                    child: SelectionSpy(key: spy),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
+        renderSelectionSpy.events.clear();
+        final TestGesture selectGesture = await tester.startGesture(const Offset(200.0, 200.0));
+        addTearDown(selectGesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+        await selectGesture.up();
+        expect(renderSelectionSpy.events.length, 1);
+        expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
+
+        renderSelectionSpy.events.clear();
+         final TestGesture scrollGesture =
+            await tester.startGesture(const Offset(250.0, 850.0));
+        await tester.pump(const Duration(milliseconds: 500));
+        await scrollGesture.moveTo(Offset.zero);
+        await scrollGesture.up();
+        await tester.pumpAndSettle();
+        expect(renderSelectionSpy.events.length, 0);
+      },
+    );
+
     testWidgets('mouse long press does not send select-word event', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
@@ -1172,6 +1248,7 @@ void main() {
       final UniqueKey outerText = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
@@ -2392,6 +2469,51 @@ void main() {
       skip: !kIsWeb, // [intended]
     );
   });
+
+  testWidgets('Multiple selectables on a single line should be in screen order', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/127942.
+    final UniqueKey outerText = UniqueKey();
+    const TextStyle textStyle = TextStyle(fontSize: 10);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionControls,
+          child: Scaffold(
+            body: Center(
+              child: Text.rich(
+                const TextSpan(
+                  children: <InlineSpan>[
+                    TextSpan(text: 'Hello my name is ', style: textStyle),
+                    WidgetSpan(
+                      child: Text('Dash', style: textStyle),
+                      alignment: PlaceholderAlignment.middle,
+                    ),
+                    TextSpan(text: '.', style: textStyle),
+                  ],
+                ),
+                key: outerText,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 0), kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+
+    // Select all.
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyA, control: true));
+
+    // keyboard copy.
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
+
+    final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+    expect(clipboardData['text'], 'Hello my name is Dash.');
+  });
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
@@ -2449,8 +2571,7 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  SelectionGeometry get value => _value;
-  SelectionGeometry _value = const SelectionGeometry(
+  final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
     startSelectionPoint: SelectionPoint(
@@ -2464,15 +2585,6 @@ class RenderSelectionSpy extends RenderProxyBox
       handleType: TextSelectionHandleType.left,
     ),
   );
-  set value(SelectionGeometry other) {
-    if (other == _value) {
-      return;
-    }
-    _value = other;
-    for (final VoidCallback callback in listeners) {
-      callback();
-    }
-  }
 
   @override
   void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }
