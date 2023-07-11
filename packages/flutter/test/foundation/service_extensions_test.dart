@@ -117,11 +117,14 @@ Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingR
 
 void main() {
   final List<String?> console = <String?>[];
+  late PipelineOwner owner;
 
   setUpAll(() async {
     binding = TestServiceExtensionsBinding();
     final RenderView view = RenderView(view: binding.platformDispatcher.views.single);
-    binding.rootPipelineOwner.rootNode = view;
+    owner = PipelineOwner(onSemanticsUpdate: (ui.SemanticsUpdate _) { })
+      ..rootNode = view;
+    binding.rootPipelineOwner.adoptChild(owner);
     binding.addRenderView(view);
     view.prepareInitialFrame();
     binding.scheduleFrame();
@@ -181,6 +184,8 @@ void main() {
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
+    binding.rootPipelineOwner.dropChild(owner);
+    owner.dispose();
   });
 
   // The following list is alphabetical, one test per extension.
