@@ -4,6 +4,7 @@
 
 #include "impeller/entity/contents/color_source_text_contents.h"
 
+#include "color_source_text_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/renderer/render_pass.h"
@@ -31,6 +32,12 @@ std::optional<Rect> ColorSourceTextContents::GetCoverage(
 
 void ColorSourceTextContents::SetTextPosition(Point position) {
   position_ = position;
+}
+
+void ColorSourceTextContents::PopulateGlyphAtlas(
+    const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
+    Scalar scale) const {
+  text_contents_->PopulateGlyphAtlas(lazy_glyph_atlas, scale);
 }
 
 bool ColorSourceTextContents::Render(const ContentContext& renderer,
