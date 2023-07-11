@@ -132,6 +132,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+        primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page', port: port),
