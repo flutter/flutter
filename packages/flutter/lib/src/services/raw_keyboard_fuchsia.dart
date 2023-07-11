@@ -4,9 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Platform-specific key event data for Fuchsia.
 ///
@@ -24,9 +28,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
     this.hidUsage = 0,
     this.codePoint = 0,
     this.modifiers = 0,
-  }) : assert(hidUsage != null),
-       assert(codePoint != null),
-       assert(modifiers != null);
+  });
 
   /// The USB HID usage.
   ///
@@ -103,7 +105,6 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   @override
   bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
-    assert(side != null);
     switch (key) {
       case ModifierKey.controlModifier:
         return _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
@@ -168,10 +169,12 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RawKeyEventDataFuchsia
         && other.hidUsage == hidUsage
         && other.codePoint == codePoint

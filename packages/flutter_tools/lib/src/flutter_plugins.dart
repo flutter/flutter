@@ -104,6 +104,7 @@ const String _kFlutterPluginsNameKey = 'name';
 const String _kFlutterPluginsPathKey = 'path';
 const String _kFlutterPluginsDependenciesKey = 'dependencies';
 const String _kFlutterPluginsHasNativeBuildKey = 'native_build';
+const String _kFlutterPluginsSharedDarwinSource = 'shared_darwin_source';
 
 /// Filters [plugins] to those supported by [platformKey].
 List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String platformKey) {
@@ -119,6 +120,8 @@ List<Map<String, Object>> _filterPluginsByPlatform(List<Plugin> plugins, String 
     pluginInfo.add(<String, Object>{
       _kFlutterPluginsNameKey: plugin.name,
       _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
+      if (platformPlugin is DarwinPlugin && (platformPlugin as DarwinPlugin).sharedDarwinSource)
+        _kFlutterPluginsSharedDarwinSource: (platformPlugin as DarwinPlugin).sharedDarwinSource,
       if (platformPlugin is NativeOrDartPlugin)
         _kFlutterPluginsHasNativeBuildKey: (platformPlugin as NativeOrDartPlugin).hasMethodChannel() || (platformPlugin as NativeOrDartPlugin).hasFfi(),
       _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
@@ -358,7 +361,6 @@ List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String typ
 /// Returns the version of the Android embedding that the current
 /// [project] is using.
 AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
-  assert(project.android != null);
   return project.android.getEmbeddingVersion();
 }
 
@@ -422,7 +424,6 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         );
       }
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
-      break;
     case AndroidEmbeddingVersion.v1:
       globals.printWarning(
         'This app is using a deprecated version of the Android embedding.\n'
@@ -436,13 +437,12 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         if (!supportsEmbeddingV1 && supportsEmbeddingV2) {
           throwToolExit(
             'The plugin `${plugin['name']}` requires your app to be migrated to '
-            'the Android embedding v2. Follow the steps on https://flutter.dev/go/android-project-migration '
+            'the Android embedding v2. Follow the steps on the migration doc above '
             'and re-run this command.'
           );
         }
       }
       templateContent = _androidPluginRegistryTemplateOldEmbedding;
-      break;
   }
   globals.printTrace('Generating $registryPath');
   _renderTemplateToFile(
@@ -550,23 +550,33 @@ Depends on all your plugins, and provides a function to register them.
 end
 ''';
 
-const String _dartPluginRegistryTemplate = '''
+const String _noopDartPluginRegistryTemplate = '''
+// Flutter web plugin registrant file.
 //
 // Generated file. Do not edit.
 //
 
-// ignore_for_file: directives_ordering
-// ignore_for_file: lines_longer_than_80_chars
-// ignore_for_file: depend_on_referenced_packages
+// ignore_for_file: type=lint
+
+void registerPlugins() {}
+''';
+
+const String _dartPluginRegistryTemplate = '''
+// Flutter web plugin registrant file.
+//
+// Generated file. Do not edit.
+//
+
+// @dart = 2.13
+// ignore_for_file: type=lint
 
 {{#methodChannelPlugins}}
 import 'package:{{name}}/{{file}}';
 {{/methodChannelPlugins}}
-
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-// ignore: public_member_api_docs
-void registerPlugins(Registrar registrar) {
+void registerPlugins([final Registrar? pluginRegistrar]) {
+  final Registrar registrar = pluginRegistrar ?? webPluginRegistrar;
 {{#methodChannelPlugins}}
   {{class}}.registerWith(registrar);
 {{/methodChannelPlugins}}
@@ -693,7 +703,6 @@ const String _dartPluginRegisterWith = r'''
           '`{{pluginName}}` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
-        rethrow;
       }
 ''';
 
@@ -759,7 +768,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(methodChannelPlugins, IOSPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'os': 'ios',
-    'deploymentTarget': '9.0',
+    'deploymentTarget': '11.0',
     'framework': 'Flutter',
     'methodChannelPlugins': iosPlugins,
   };
@@ -899,9 +908,8 @@ List<Plugin> _filterPluginsByVariant(List<Plugin> plugins, String platformKey, P
     if (platformPlugin == null) {
       return false;
     }
-    assert(variant == null || platformPlugin is VariantPlatformPlugin);
-    return variant == null ||
-        (platformPlugin as VariantPlatformPlugin).supportedVariants.contains(variant);
+    assert(platformPlugin is VariantPlatformPlugin);
+    return (platformPlugin as VariantPlatformPlugin).supportedVariants.contains(variant);
   }).toList();
 }
 
@@ -922,25 +930,6 @@ Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugin
   await _writePluginCmakefile(project.windows.generatedPluginCmakeFile, context, templateRenderer);
 }
 
-/// The tooling currently treats UWP and win32 as identical, other than variant
-/// filtering, for the purposes of tooling support and initial UWP bootstrap.
-@visibleForTesting
-Future<void> writeWindowsUwpPluginFiles(FlutterProject project, List<Plugin> plugins, TemplateRenderer templateRenderer) async {
-  final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, WindowsPlugin.kConfigKey);
-  final List<Plugin> uwpPlugins = _filterPluginsByVariant(methodChannelPlugins, WindowsPlugin.kConfigKey, PluginPlatformVariant.winuwp);
-  final List<Map<String, Object?>> windowsMethodChannelPlugins = _extractPlatformMaps(uwpPlugins, WindowsPlugin.kConfigKey);
-  final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, WindowsPlugin.kConfigKey)..removeWhere(methodChannelPlugins.contains);
-  final List<Map<String, Object?>> windowsFfiPlugins = _extractPlatformMaps(ffiPlugins, WindowsPlugin.kConfigKey);
-  final Map<String, Object> context = <String, Object>{
-    'os': 'windows',
-    'methodChannelPlugins': windowsMethodChannelPlugins,
-    'ffiPlugins': windowsFfiPlugins,
-    'pluginsDir': _cmakeRelativePluginSymlinkDirectoryPath(project.windowsUwp),
-  };
-  await _writeCppPluginRegistrant(project.windowsUwp.managedDirectory, context, templateRenderer);
-  await _writePluginCmakefile(project.windowsUwp.generatedPluginCmakeFile, context, templateRenderer);
-}
-
 Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, Object> templateContext, TemplateRenderer templateRenderer) async {
   _renderTemplateToFile(
     _cppPluginRegistryHeaderTemplate,
@@ -956,22 +945,22 @@ Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, Object
   );
 }
 
-Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins, Directory destination) async {
   final List<Map<String, Object?>> webPlugins = _extractPlatformMaps(plugins, WebPlugin.kConfigKey);
   final Map<String, Object> context = <String, Object>{
     'methodChannelPlugins': webPlugins,
   };
-  final File pluginFile = project.web.libDirectory.childFile('generated_plugin_registrant.dart');
-  if (webPlugins.isEmpty) {
-    ErrorHandlingFileSystem.deleteIfExists(pluginFile);
-  } else {
-    _renderTemplateToFile(
-      _dartPluginRegistryTemplate,
-      context,
-      pluginFile,
-      globals.templateRenderer,
-    );
-  }
+
+  final File pluginFile = destination.childFile('web_plugin_registrant.dart');
+
+  final String template = webPlugins.isEmpty ? _noopDartPluginRegistryTemplate : _dartPluginRegistryTemplate;
+
+  _renderTemplateToFile(
+    template,
+    context,
+    pluginFile,
+    globals.templateRenderer,
+  );
 }
 
 /// For each platform that uses them, creates symlinks within the platform
@@ -1006,13 +995,6 @@ void createPluginSymlinks(FlutterProject project, {bool force = false, @visibleF
       force: force,
     );
   }
-  if (localFeatureFlags.isWindowsUwpEnabled && project.windowsUwp.existsSync()) {
-    _createPlatformPluginSymlinks(
-      project.windowsUwp.pluginSymlinkDirectory,
-      platformPlugins[project.windows.pluginConfigKey] as List<Object?>?,
-      force: force,
-    );
-  }
 }
 
 /// Handler for symlink failures which provides specific instructions for known
@@ -1021,20 +1003,32 @@ void createPluginSymlinks(FlutterProject project, {bool force = false, @visibleF
 void handleSymlinkException(FileSystemException e, {
   required Platform platform,
   required OperatingSystemUtils os,
+  required String destination,
+  required String source,
 }) {
-  if (platform.isWindows && (e.osError?.errorCode ?? 0) == 1314) {
-    final String? versionString = RegExp(r'[\d.]+').firstMatch(os.name)?.group(0);
-    final Version? version = Version.parse(versionString);
-    // Windows 10 14972 is the oldest version that allows creating symlinks
-    // just by enabling developer mode; before that it requires running the
-    // terminal as Administrator.
-    // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
-    final String instructions = (version != null && version >= Version(10, 0, 14972))
-        ? 'Please enable Developer Mode in your system settings. Run\n'
-          '  start ms-settings:developers\n'
-          'to open settings.'
-        : 'You must build from a terminal run as administrator.';
-    throwToolExit('Building with plugins requires symlink support.\n\n$instructions');
+  if (platform.isWindows) {
+    // ERROR_ACCESS_DENIED
+    if (e.osError?.errorCode == 5) {
+      throwToolExit(
+        'ERROR_ACCESS_DENIED file system exception thrown while trying to '
+        'create a symlink from $source to $destination',
+      );
+    }
+    // ERROR_PRIVILEGE_NOT_HELD, user cannot symlink
+    if (e.osError?.errorCode == 1314) {
+      final String? versionString = RegExp(r'[\d.]+').firstMatch(os.name)?.group(0);
+      final Version? version = Version.parse(versionString);
+      // Windows 10 14972 is the oldest version that allows creating symlinks
+      // just by enabling developer mode; before that it requires running the
+      // terminal as Administrator.
+      // https://blogs.windows.com/windowsdeveloper/2016/12/02/symlinks-windows-10/
+      final String instructions = (version != null && version >= Version(10, 0, 14972))
+          ? 'Please enable Developer Mode in your system settings. Run\n'
+            '  start ms-settings:developers\n'
+            'to open settings.'
+          : 'You must build from a terminal run as administrator.';
+      throwToolExit('Building with plugins requires symlink support.\n\n$instructions');
+    }
   }
 }
 
@@ -1060,7 +1054,13 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<Object?>? pl
     try {
       link.createSync(path);
     } on FileSystemException catch (e) {
-      handleSymlinkException(e, platform: globals.platform, os: globals.os);
+      handleSymlinkException(
+        e,
+        platform: globals.platform,
+        os: globals.os,
+        destination: 'dest',
+        source: 'source',
+      );
       rethrow;
     }
   }
@@ -1094,7 +1094,45 @@ Future<void> refreshPluginsList(
   }
 }
 
+/// Injects plugins found in `pubspec.yaml` into the platform-specific projects
+/// only at build-time.
+///
+/// This method is similar to [injectPlugins], but used only for platforms where
+/// the plugin files are not required when the app is created (currently: Web).
+///
+/// This method will create files in the temporary flutter build directory
+/// specified by `destination`.
+///
+/// In the Web platform, `destination` can point to a real filesystem (`flutter build`)
+/// or an in-memory filesystem (`flutter run`).
+///
+/// This method is also used by [WebProject.ensureReadyForPlatformSpecificTooling]
+/// to inject a copy of the plugin registrant for web into .dart_tool/dartpad so
+/// dartpad can get the plugin registrant without needing to build the complete
+/// project. See: https://github.com/dart-lang/dart-services/pull/874
+Future<void> injectBuildTimePluginFiles(
+  FlutterProject project, {
+  required Directory destination,
+  bool webPlatform = false,
+}) async {
+  final List<Plugin> plugins = await findPlugins(project);
+  // Sort the plugins by name to keep ordering stable in generated files.
+  plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
+  if (webPlatform) {
+    await _writeWebPluginRegistrant(project, plugins, destination);
+  }
+}
+
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
+///
+/// The injected files are required by the flutter app as soon as possible, so
+/// it can be built.
+///
+/// Files written by this method end up in platform-specific locations that are
+/// configured by each [FlutterProject] subclass (except for the Web).
+///
+/// Web tooling uses [injectBuildTimePluginFiles] instead, which places files in the
+/// current build (temp) directory, and doesn't modify the users' working copy.
 ///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 Future<void> injectPlugins(
@@ -1104,8 +1142,6 @@ Future<void> injectPlugins(
   bool linuxPlatform = false,
   bool macOSPlatform = false,
   bool windowsPlatform = false,
-  bool winUwpPlatform = false,
-  bool webPlatform = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
@@ -1125,9 +1161,6 @@ Future<void> injectPlugins(
   if (windowsPlatform) {
     await writeWindowsPluginFiles(project, plugins, globals.templateRenderer);
   }
-  if (winUwpPlatform) {
-    await writeWindowsUwpPluginFiles(project, plugins, globals.templateRenderer);
-  }
   if (!project.isModule) {
     final List<XcodeBasedProject> darwinProjects = <XcodeBasedProject>[
       if (iosPlatform) project.ios,
@@ -1144,9 +1177,6 @@ Future<void> injectPlugins(
       }
     }
   }
-  if (webPlatform) {
-    await _writeWebPluginRegistrant(project, plugins);
-  }
 }
 
 /// Returns whether the specified Flutter [project] has any plugin dependencies.
@@ -1158,13 +1188,13 @@ bool hasPlugins(FlutterProject project) {
 
 /// Resolves the platform implementation for Dart-only plugins.
 ///
-///   * If there are multiple direct pub dependencies on packages that implement the
-///     frontend plugin for the current platform, fail.
+///   * If there is only one dependency on a package that implements the
+///     frontend plugin for the current platform, use that.
 ///   * If there is a single direct dependency on a package that implements the
-///     frontend plugin for the target platform, this package is the selected implementation.
-///   * If there is no direct dependency on a package that implements the frontend
-///     plugin for the target platform, and the frontend plugin has a default implementation
-///     for the target platform the default implementation is selected.
+///     frontend plugin for the current platform, use that.
+///   * If there is no direct dependency on a package that implements the
+///     frontend plugin, but there is a default for the current platform,
+///     use that.
 ///   * Else fail.
 ///
 ///  For more details, https://flutter.dev/go/federated-plugins.
@@ -1181,11 +1211,15 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     MacOSPlugin.kConfigKey,
     WindowsPlugin.kConfigKey,
   ];
-  final Map<String, PluginInterfaceResolution> directDependencyResolutions
-      = <String, PluginInterfaceResolution>{};
+  final Map<String, List<PluginInterfaceResolution>> possibleResolutions
+      = <String, List<PluginInterfaceResolution>>{};
   final Map<String, String> defaultImplementations = <String, String>{};
-  bool didFindError = false;
+  // Generates a key for the maps above.
+  String getResolutionKey({required String platform, required String packageName}) {
+    return '$packageName:$platform';
+  }
 
+  bool hasPubspecError = false;
   for (final Plugin plugin in plugins) {
     for (final String platform in platforms) {
       if (plugin.platforms[platform] == null &&
@@ -1224,11 +1258,12 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
               '\n'
             );
           }
-          didFindError = true;
+          hasPubspecError = true;
           continue;
         }
+        final String defaultImplementationKey = getResolutionKey(platform: platform, packageName: plugin.name);
         if (defaultImplementation != null) {
-          defaultImplementations['$platform/${plugin.name}'] = defaultImplementation;
+          defaultImplementations[defaultImplementationKey] = defaultImplementation;
           continue;
         } else {
           // An app-facing package (i.e., one with no 'implements') with an
@@ -1248,52 +1283,87 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
             minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
           if (!isDesktop || hasMinVersionForImplementsRequirement) {
             implementsPackage = plugin.name;
-            defaultImplementations['$platform/${plugin.name}'] = plugin.name;
+            defaultImplementations[defaultImplementationKey] = plugin.name;
+          } else {
+            // If it doesn't meet any of the conditions, it isn't eligible for
+            // auto-registration.
+            continue;
           }
         }
       }
+      // If there's no Dart implementation, there's nothing to register.
       if (plugin.pluginDartClassPlatforms[platform] == null ||
           plugin.pluginDartClassPlatforms[platform] == 'none') {
         continue;
       }
-      final String resolutionKey = '$platform/$implementsPackage';
-      if (directDependencyResolutions.containsKey(resolutionKey)) {
-        final PluginInterfaceResolution? currResolution = directDependencyResolutions[resolutionKey];
-        if (currResolution != null && currResolution.plugin.isDirectDependency) {
-          if (plugin.isDirectDependency) {
-            if (throwOnPluginPubspecError) {
-              globals.printError(
-                'Plugin `${plugin.name}` implements an interface for `$platform`, which was already '
-                'implemented by plugin `${currResolution.plugin.name}`.\n'
-                'To fix this issue, remove either dependency from pubspec.yaml.'
-                '\n\n'
-              );
-            }
-            didFindError = true;
-          }
-          // Use the plugin implementation added by the user as a direct dependency.
-          continue;
-        }
+
+      // If it hasn't been skipped, it's a candidate for auto-registration, so
+      // add it as a possible resolution.
+      final String resolutionKey = getResolutionKey(platform: platform, packageName: implementsPackage);
+      if (!possibleResolutions.containsKey(resolutionKey)) {
+        possibleResolutions[resolutionKey] = <PluginInterfaceResolution>[];
       }
-      directDependencyResolutions[resolutionKey] = PluginInterfaceResolution(
+      possibleResolutions[resolutionKey]!.add(PluginInterfaceResolution(
         plugin: plugin,
         platform: platform,
-      );
+      ));
     }
   }
-  if (didFindError && throwOnPluginPubspecError) {
+  if (hasPubspecError && throwOnPluginPubspecError) {
     throwToolExit('Please resolve the errors');
   }
+
+  // Now resolve all the possible resolutions to a single option for each
+  // plugin, or throw if that's not possible.
+  bool hasResolutionError = false;
   final List<PluginInterfaceResolution> finalResolution = <PluginInterfaceResolution>[];
-  for (final MapEntry<String, PluginInterfaceResolution> resolution in directDependencyResolutions.entries) {
-    if (resolution.value.plugin.isDirectDependency) {
-      finalResolution.add(resolution.value);
-    } else if (defaultImplementations.containsKey(resolution.key)) {
-      // Pick the default implementation.
-      if (defaultImplementations[resolution.key] == resolution.value.plugin.name) {
-        finalResolution.add(resolution.value);
+  for (final MapEntry<String, List<PluginInterfaceResolution>> entry in possibleResolutions.entries) {
+    final List<PluginInterfaceResolution> candidates = entry.value;
+    // If there's only one candidate, use it.
+    if (candidates.length == 1) {
+      finalResolution.add(candidates.first);
+      continue;
+    }
+    // Next, try direct dependencies of the resolving application.
+    final Iterable<PluginInterfaceResolution> directDependencies = candidates.where((PluginInterfaceResolution r) {
+      return r.plugin.isDirectDependency;
+    });
+    if (directDependencies.isNotEmpty) {
+      if (directDependencies.length > 1) {
+        globals.printError(
+          'Plugin ${entry.key} has conflicting direct dependency implementations:\n'
+          '${directDependencies.map((PluginInterfaceResolution r) => '  ${r.plugin.name}\n').join()}'
+          'To fix this issue, remove all but one of these dependencies from pubspec.yaml.\n'
+        );
+        hasResolutionError = true;
+      } else {
+        finalResolution.add(directDependencies.first);
+      }
+      continue;
+    }
+    // Next, defer to the default implementation if there is one.
+    final String? defaultPackageName = defaultImplementations[entry.key];
+    if (defaultPackageName != null) {
+      final int defaultIndex = candidates
+          .indexWhere((PluginInterfaceResolution r) => r.plugin.name == defaultPackageName);
+      if (defaultIndex != -1) {
+        finalResolution.add(candidates[defaultIndex]);
+        continue;
       }
     }
+    // Otherwise, require an explicit choice.
+    if (candidates.length > 1) {
+      globals.printError(
+        'Plugin ${entry.key} has multiple possible implementations:\n'
+        '${candidates.map((PluginInterfaceResolution r) => '  ${r.plugin.name}\n').join()}'
+        'To fix this issue, add one of these dependencies to pubspec.yaml.\n'
+      );
+      hasResolutionError = true;
+      continue;
+    }
+  }
+  if (hasResolutionError) {
+    throwToolExit('Please resolve the errors');
   }
   return finalResolution;
 }

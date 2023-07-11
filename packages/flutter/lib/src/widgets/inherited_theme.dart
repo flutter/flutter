@@ -4,6 +4,9 @@
 
 import 'framework.dart';
 
+// Examples can assume:
+// TooltipThemeData data = const TooltipThemeData();
+
 /// An [InheritedWidget] that defines visual properties like colors
 /// and text styles, which the [child]'s subtree depends on.
 ///
@@ -32,9 +35,9 @@ abstract class InheritedTheme extends InheritedWidget {
   /// const constructors so that they can be used in const expressions.
 
   const InheritedTheme({
-    Key? key,
-    required Widget child,
-  }) : super(key: key, child: child);
+    super.key,
+    required super.child,
+  });
 
   /// Return a copy of this inherited theme with the specified [child].
   ///
@@ -61,8 +64,6 @@ abstract class InheritedTheme extends InheritedWidget {
   /// the wrapped `child` - unless this method is called again to re-wrap the
   /// child.
   static Widget captureAll(BuildContext context, Widget child, {BuildContext? to}) {
-    assert(child != null);
-    assert(context != null);
 
     return capture(from: context, to: to).wrap(child);
   }
@@ -85,7 +86,6 @@ abstract class InheritedTheme extends InheritedWidget {
   /// This method can be expensive if there are many widgets between `from` and
   /// `to` (it walks the element tree between those nodes).
   static CapturedThemes capture({ required BuildContext from, required BuildContext? to }) {
-    assert(from != null);
 
     if (from == to) {
       // Nothing to capture.
@@ -143,10 +143,9 @@ class CapturedThemes {
 
 class _CaptureAll extends StatelessWidget {
   const _CaptureAll({
-    Key? key,
     required this.themes,
     required this.child,
-  }) : assert(themes != null), assert(child != null), super(key: key);
+  });
 
   final List<InheritedTheme> themes;
   final Widget child;
@@ -154,8 +153,9 @@ class _CaptureAll extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget wrappedChild = child;
-    for (final InheritedTheme theme in themes)
+    for (final InheritedTheme theme in themes) {
       wrappedChild = theme.wrap(context, wrappedChild);
+    }
     return wrappedChild;
   }
 }

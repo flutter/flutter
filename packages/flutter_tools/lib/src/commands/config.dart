@@ -19,7 +19,7 @@ class ConfigCommand extends FlutterCommand {
       negatable: false,
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
-    argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
+    argParser.addOption('android-studio-dir', help: 'The Android Studio install directory. If unset, flutter will search for valid installs at well-known locations.');
     argParser.addOption('build-dir', help: 'The relative path to override a projects build directory.',
         valueHelp: 'out/');
     argParser.addFlag('machine',
@@ -101,6 +101,16 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final List<String> rest = argResults?.rest ?? <String>[];
+    if (rest.isNotEmpty) {
+      throwToolExit(exitCode: 2,
+          'error: flutter config: Too many arguments.\n'
+          '\n'
+          'If a value has a space in it, enclose in quotes on the command line\n'
+          'to make a single argument.  For example:\n'
+          '    flutter config --android-studio-dir "/opt/Android Studio"');
+    }
+
     if (boolArg('machine')) {
       await handleMachine();
       return FlutterCommandResult.success();
@@ -129,6 +139,11 @@ class ConfigCommand extends FlutterCommand {
       }
       globals.flutterUsage.enabled = value;
       globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
+
+      // TODO(eliasyishak): Set the telemetry for the unified_analytics
+      //  package as well, the above will be removed once we have
+      //  fully transitioned to using the new package
+      await globals.analytics.setTelemetry(value);
     }
 
     if (argResults?.wasParsed('android-sdk') ?? false) {

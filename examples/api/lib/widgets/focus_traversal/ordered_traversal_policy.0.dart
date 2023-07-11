@@ -2,25 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for OrderedTraversalPolicy
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [OrderedTraversalPolicy].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const OrderedTraversalPolicyExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class OrderedTraversalPolicyExampleApp extends StatelessWidget {
+  const OrderedTraversalPolicyExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('OrderedTraversalPolicy Sample')),
         body: const Center(
-          child: MyStatelessWidget(),
+          child: OrderedTraversalPolicyExample(),
         ),
       ),
     );
@@ -29,11 +26,11 @@ class MyApp extends StatelessWidget {
 
 class DemoButton extends StatelessWidget {
   const DemoButton({
-    Key? key,
+    super.key,
     required this.name,
     this.autofocus = false,
     required this.order,
-  }) : super(key: key);
+  });
 
   final String name;
   final bool autofocus;
@@ -57,32 +54,32 @@ class DemoButton extends StatelessWidget {
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class OrderedTraversalPolicyExample extends StatelessWidget {
+  const OrderedTraversalPolicyExample({super.key});
 
   @override
   Widget build(BuildContext context) {
     return FocusTraversalGroup(
       policy: OrderedTraversalPolicy(),
-      child: Column(
+      child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               DemoButton(name: 'Six', order: 6),
             ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               DemoButton(name: 'Five', order: 5),
               DemoButton(name: 'Four', order: 4),
             ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               DemoButton(name: 'Three', order: 3),
               DemoButton(name: 'Two', order: 2),
               DemoButton(name: 'One', order: 1, autofocus: true),

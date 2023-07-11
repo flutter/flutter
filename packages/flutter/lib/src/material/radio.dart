@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/cupertino.dart';
 
+import 'color_scheme.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'material_state.dart';
@@ -12,10 +14,18 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'toggleable.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// enum SingingCharacter { lafayette }
+// late SingingCharacter? _character;
+// late StateSetter setState;
+
+enum _RadioType { material, adaptive }
+
 const double _kOuterRadius = 8.0;
 const double _kInnerRadius = 4.5;
 
-/// A material design radio button.
+/// A Material Design radio button.
 ///
 /// Used to select between a number of mutually exclusive values. When one radio
 /// button in a group is selected, the other radio buttons in the group cease to
@@ -33,7 +43,7 @@ const double _kInnerRadius = 4.5;
 /// to what you could get with the RadioListTile widget.
 ///
 /// The currently selected character is passed into `groupValue`, which is
-/// maintained by the example's `State`. In this case, the first `Radio`
+/// maintained by the example's `State`. In this case, the first [Radio]
 /// will start off selected because `_character` is initialized to
 /// `SingingCharacter.lafayette`.
 ///
@@ -55,7 +65,7 @@ const double _kInnerRadius = 4.5;
 ///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.io/design/components/selection-controls.html#radio-buttons>
 class Radio<T> extends StatefulWidget {
-  /// Creates a material design radio button.
+  /// Creates a Material Design radio button.
   ///
   /// The radio button itself does not maintain any state. Instead, when the
   /// radio button is selected, the widget calls the [onChanged] callback. Most
@@ -69,7 +79,7 @@ class Radio<T> extends StatefulWidget {
   ///   selected.
   /// * [onChanged] is called when the user selects this radio button.
   const Radio({
-    Key? key,
+    super.key,
     required this.value,
     required this.groupValue,
     required this.onChanged,
@@ -85,9 +95,40 @@ class Radio<T> extends StatefulWidget {
     this.visualDensity,
     this.focusNode,
     this.autofocus = false,
-  }) : assert(autofocus != null),
-       assert(toggleable != null),
-       super(key: key);
+  }) : _radioType = _RadioType.material;
+
+  /// Creates an adaptive [Radio] based on whether the target platform is iOS
+  /// or macOS, following Material design's
+  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
+  ///
+  /// On iOS and macOS, this constructor creates a [CupertinoRadio], which has
+  /// matching functionality and presentation as Material checkboxes, and are the
+  /// graphics expected on iOS. On other platforms, this creates a Material
+  /// design [Radio].
+  ///
+  /// If a [CupertinoRadio] is created, the following parameters are ignored:
+  /// [mouseCursor], [fillColor], [hoverColor], [overlayColor], [splashRadius],
+  /// [materialTapTargetSize], [visualDensity].
+  ///
+  /// The target platform is based on the current [Theme]: [ThemeData.platform].
+  const Radio.adaptive({
+    super.key,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
+    this.mouseCursor,
+    this.toggleable = false,
+    this.activeColor,
+    this.fillColor,
+    this.focusColor,
+    this.hoverColor,
+    this.overlayColor,
+    this.splashRadius,
+    this.materialTapTargetSize,
+    this.visualDensity,
+    this.focusNode,
+    this.autofocus = false,
+  }) : _radioType = _RadioType.adaptive;
 
   /// The value represented by this radio button.
   final T value;
@@ -117,7 +158,7 @@ class Radio<T> extends StatefulWidget {
   /// Radio<SingingCharacter>(
   ///   value: SingingCharacter.lafayette,
   ///   groupValue: _character,
-  ///   onChanged: (SingingCharacter newValue) {
+  ///   onChanged: (SingingCharacter? newValue) {
   ///     setState(() {
   ///       _character = newValue;
   ///     });
@@ -176,7 +217,7 @@ class Radio<T> extends StatefulWidget {
 
   /// The color to use when this radio button is selected.
   ///
-  /// Defaults to [ThemeData.toggleableActiveColor].
+  /// Defaults to [ColorScheme.secondary].
   ///
   /// If [fillColor] returns a non-null color in the [MaterialState.selected]
   /// state, it will be used instead of this color.
@@ -201,7 +242,7 @@ class Radio<T> extends StatefulWidget {
   ///   value: 1,
   ///   groupValue: 1,
   ///   onChanged: (_){},
-  ///   fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);
   ///     }
@@ -215,7 +256,7 @@ class Radio<T> extends StatefulWidget {
   /// If null, then the value of [activeColor] is used in the selected state. If
   /// that is also null, then the value of [RadioThemeData.fillColor] is used.
   /// If that is also null, then [ThemeData.disabledColor] is used in
-  /// the disabled state, [ThemeData.toggleableActiveColor] is used in the
+  /// the disabled state, [ColorScheme.secondary] is used in the
   /// selected state, and [ThemeData.unselectedWidgetColor] is used in the
   /// default state.
   final MaterialStateProperty<Color?>? fillColor;
@@ -258,10 +299,12 @@ class Radio<T> extends StatefulWidget {
   /// [ThemeData.focusColor] is used.
   final Color? focusColor;
 
+  /// {@template flutter.material.radio.hoverColor}
   /// The color for the radio's [Material] when a pointer is hovering over it.
   ///
   /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
   /// state, it will be used instead.
+  /// {@endtemplate}
   ///
   /// If null, then the value of [RadioThemeData.overlayColor] is used in the
   /// hovered state. If that is also null, then the value of
@@ -269,7 +312,7 @@ class Radio<T> extends StatefulWidget {
   final Color? hoverColor;
 
   /// {@template flutter.material.radio.overlayColor}
-  /// The color for the checkbox's [Material].
+  /// The color for the radio's [Material].
   ///
   /// Resolves in the following states:
   ///  * [MaterialState.pressed].
@@ -282,7 +325,7 @@ class Radio<T> extends StatefulWidget {
   /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
   /// pressed, focused and hovered state. If that is also null,
   /// the value of [RadioThemeData.overlayColor] is used. If that is also null,
-  /// then the value of [ThemeData.toggleableActiveColor] with alpha
+  /// then the value of [ColorScheme.secondary] with alpha
   /// [kRadialReactionAlpha], [ThemeData.focusColor] and [ThemeData.hoverColor]
   /// is used in the pressed, focused and hovered state.
   final MaterialStateProperty<Color?>? overlayColor;
@@ -300,6 +343,8 @@ class Radio<T> extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
+
+  final _RadioType _radioType;
 
   bool get _selected => value == groupValue;
 
@@ -355,38 +400,50 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
     });
   }
 
-  MaterialStateProperty<Color> get _defaultFillColor {
-    final ThemeData themeData = Theme.of(context);
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return themeData.disabledColor;
-      }
-      if (states.contains(MaterialState.selected)) {
-        return themeData.toggleableActiveColor;
-      }
-      return themeData.unselectedWidgetColor;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ThemeData themeData = Theme.of(context);
+    switch (widget._radioType) {
+      case _RadioType.material:
+        break;
+
+      case _RadioType.adaptive:
+        final ThemeData theme = Theme.of(context);
+        switch (theme.platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            break;
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return CupertinoRadio<T>(
+              value: widget.value,
+              groupValue: widget.groupValue,
+              onChanged: widget.onChanged,
+              toggleable: widget.toggleable,
+              activeColor: widget.activeColor,
+              focusColor: widget.focusColor,
+              focusNode: widget.focusNode,
+              autofocus: widget.autofocus,
+            );
+        }
+    }
+
     final RadioThemeData radioTheme = RadioTheme.of(context);
+    final RadioThemeData defaults = Theme.of(context).useMaterial3 ? _RadioDefaultsM3(context) : _RadioDefaultsM2(context);
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = widget.materialTapTargetSize
       ?? radioTheme.materialTapTargetSize
-      ?? themeData.materialTapTargetSize;
+      ?? defaults.materialTapTargetSize!;
     final VisualDensity effectiveVisualDensity = widget.visualDensity
       ?? radioTheme.visualDensity
-      ?? themeData.visualDensity;
+      ?? defaults.visualDensity!;
     Size size;
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
-        break;
     }
     size += effectiveVisualDensity.baseSizeAdjustment;
 
@@ -400,36 +457,47 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
     // so that they can be lerped between.
     final Set<MaterialState> activeStates = states..add(MaterialState.selected);
     final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
-    final Color effectiveActiveColor = widget.fillColor?.resolve(activeStates)
+    final Color? activeColor = widget.fillColor?.resolve(activeStates)
       ?? _widgetFillColor.resolve(activeStates)
-      ?? radioTheme.fillColor?.resolve(activeStates)
-      ?? _defaultFillColor.resolve(activeStates);
-    final Color effectiveInactiveColor = widget.fillColor?.resolve(inactiveStates)
+      ?? radioTheme.fillColor?.resolve(activeStates);
+    final Color effectiveActiveColor = activeColor ?? defaults.fillColor!.resolve(activeStates)!;
+    final Color? inactiveColor = widget.fillColor?.resolve(inactiveStates)
       ?? _widgetFillColor.resolve(inactiveStates)
-      ?? radioTheme.fillColor?.resolve(inactiveStates)
-      ?? _defaultFillColor.resolve(inactiveStates);
+      ?? radioTheme.fillColor?.resolve(inactiveStates);
+    final Color effectiveInactiveColor = inactiveColor ?? defaults.fillColor!.resolve(inactiveStates)!;
 
     final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
-    final Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
+    Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
       ?? widget.focusColor
       ?? radioTheme.overlayColor?.resolve(focusedStates)
-      ?? themeData.focusColor;
+      ?? defaults.overlayColor!.resolve(focusedStates)!;
 
     final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
-    final Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
-        ?? widget.hoverColor
-        ?? radioTheme.overlayColor?.resolve(hoveredStates)
-        ?? themeData.hoverColor;
+    Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
+      ?? widget.hoverColor
+      ?? radioTheme.overlayColor?.resolve(hoveredStates)
+      ?? defaults.overlayColor!.resolve(hoveredStates)!;
 
     final Set<MaterialState> activePressedStates = activeStates..add(MaterialState.pressed);
     final Color effectiveActivePressedOverlayColor = widget.overlayColor?.resolve(activePressedStates)
-        ?? radioTheme.overlayColor?.resolve(activePressedStates)
-        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+      ?? radioTheme.overlayColor?.resolve(activePressedStates)
+      ?? activeColor?.withAlpha(kRadialReactionAlpha)
+      ?? defaults.overlayColor!.resolve(activePressedStates)!;
 
     final Set<MaterialState> inactivePressedStates = inactiveStates..add(MaterialState.pressed);
     final Color effectiveInactivePressedOverlayColor = widget.overlayColor?.resolve(inactivePressedStates)
-        ?? radioTheme.overlayColor?.resolve(inactivePressedStates)
-        ?? effectiveActiveColor.withAlpha(kRadialReactionAlpha);
+      ?? radioTheme.overlayColor?.resolve(inactivePressedStates)
+      ?? inactiveColor?.withAlpha(kRadialReactionAlpha)
+      ?? defaults.overlayColor!.resolve(inactivePressedStates)!;
+
+    if (downPosition != null) {
+      effectiveHoverOverlayColor = states.contains(MaterialState.selected)
+        ? effectiveActivePressedOverlayColor
+        : effectiveInactivePressedOverlayColor;
+      effectiveFocusOverlayColor = states.contains(MaterialState.selected)
+        ? effectiveActivePressedOverlayColor
+        : effectiveInactivePressedOverlayColor;
+    }
 
     return Semantics(
       inMutuallyExclusiveGroup: true,
@@ -480,3 +548,134 @@ class _RadioPainter extends ToggleablePainter {
     }
   }
 }
+
+// Hand coded defaults based on Material Design 2.
+class _RadioDefaultsM2 extends RadioThemeData {
+  _RadioDefaultsM2(this.context);
+
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
+
+  @override
+  MaterialStateProperty<Color> get fillColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _theme.disabledColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return _colors.secondary;
+      }
+      return _theme.unselectedWidgetColor;
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color> get overlayColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return fillColor.resolve(states).withAlpha(kRadialReactionAlpha);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _theme.focusColor;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _theme.hoverColor;
+      }
+      return Colors.transparent;
+    });
+  }
+
+  @override
+  MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
+
+  @override
+  VisualDensity get visualDensity => _theme.visualDensity;
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - Radio<T>
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_162
+
+class _RadioDefaultsM3 extends RadioThemeData {
+  _RadioDefaultsM3(this.context);
+
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
+
+  @override
+  MaterialStateProperty<Color> get fillColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.disabled)) {
+          return _colors.onSurface.withOpacity(0.38);
+        }
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.primary;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return _colors.primary;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return _colors.primary;
+        }
+        return _colors.primary;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurface;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSurface;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSurface;
+      }
+      return _colors.onSurfaceVariant;
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color> get overlayColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurface.withOpacity(0.12);
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return _colors.primary.withOpacity(0.08);
+        }
+        if (states.contains(MaterialState.focused)) {
+          return _colors.primary.withOpacity(0.12);
+        }
+        return Colors.transparent;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.primary.withOpacity(0.12);
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSurface.withOpacity(0.08);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSurface.withOpacity(0.12);
+      }
+      return Colors.transparent;
+    });
+  }
+
+  @override
+  MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
+
+  @override
+  VisualDensity get visualDensity => _theme.visualDensity;
+}
+
+// END GENERATED TOKEN PROPERTIES - Radio<T>

@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -22,7 +25,7 @@ class FakeDyldEnvironmentArtifact extends ArtifactSet {
   FakeDyldEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
   @override
   Map<String, String> get environment => <String, String>{
-    'DYLD_LIBRARY_PATH': '/path/to/libraries'
+    'DYLD_LIBRARY_PATH': '/path/to/libraries',
   };
 
   @override
@@ -32,7 +35,7 @@ class FakeDyldEnvironmentArtifact extends ArtifactSet {
   String get name => 'fake';
 
   @override
-  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async {
+  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils, {bool offline = false}) async {
   }
 }
 
@@ -66,51 +69,6 @@ class FakeProcess implements Process {
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     return true;
   }
-}
-
-/// A process that prompts the user to proceed, then asynchronously writes
-/// some lines to stdout before it exits.
-class PromptingProcess implements Process {
-  PromptingProcess({
-    bool stdinError = false,
-  }) : _stdin = CompleterIOSink(throwOnAdd: stdinError);
-
-  Future<void> showPrompt(String prompt, List<String> outputLines) async {
-    try {
-      _stdoutController.add(utf8.encode(prompt));
-      final List<int> bytesOnStdin = await _stdin.future;
-      // Echo stdin to stdout.
-      _stdoutController.add(bytesOnStdin);
-      if (bytesOnStdin.isNotEmpty && bytesOnStdin[0] == utf8.encode('y')[0]) {
-        for (final String line in outputLines) {
-          _stdoutController.add(utf8.encode('$line\n'));
-        }
-      }
-    } finally {
-      await _stdoutController.close();
-    }
-  }
-
-  final StreamController<List<int>> _stdoutController = StreamController<List<int>>();
-  final CompleterIOSink _stdin;
-
-  @override
-  Stream<List<int>> get stdout => _stdoutController.stream;
-
-  @override
-  Stream<List<int>> get stderr => const Stream<List<int>>.empty();
-
-  @override
-  IOSink get stdin => _stdin;
-
-  @override
-  Future<int> get exitCode async {
-    await _stdoutController.done;
-    return 0;
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 /// An IOSink that completes a future with the first line written to it.
@@ -228,7 +186,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   bool get hasTerminal => _hasTerminal;
   set hasTerminal(bool value) {
-    assert(value != null);
     _hasTerminal = value;
   }
   bool _hasTerminal = true;
@@ -239,7 +196,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   bool get supportsAnsiEscapes => _supportsAnsiEscapes;
   set supportsAnsiEscapes(bool value) {
-    assert(value != null);
     _supportsAnsiEscapes = value;
   }
   bool _supportsAnsiEscapes = true;
@@ -267,9 +223,9 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
 
 /// A Stdio that collects stdout and supports simulated stdin.
 class FakeStdio extends Stdio {
-  final MemoryStdout _stdout = MemoryStdout();
+  final MemoryStdout _stdout = MemoryStdout()..terminalColumns = 80;
   final MemoryIOSink _stderr = MemoryIOSink();
-  final StreamController<List<int>> _stdin = StreamController<List<int>>();
+  final FakeStdin _stdin = FakeStdin();
 
   @override
   MemoryStdout get stdout => _stdout;
@@ -278,14 +234,47 @@ class FakeStdio extends Stdio {
   MemoryIOSink get stderr => _stderr;
 
   @override
-  Stream<List<int>> get stdin => _stdin.stream;
+  Stream<List<int>> get stdin => _stdin;
 
   void simulateStdin(String line) {
-    _stdin.add(utf8.encode('$line\n'));
+    _stdin.controller.add(utf8.encode('$line\n'));
   }
+
+  @override
+  bool hasTerminal = true;
 
   List<String> get writtenToStdout => _stdout.writes.map<String>(_stdout.encoding.decode).toList();
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
+}
+
+class FakeStdin extends Fake implements Stdin {
+  final StreamController<List<int>> controller = StreamController<List<int>>();
+
+  @override
+  bool echoMode = true;
+
+  @override
+  bool lineMode = true;
+
+  @override
+  Stream<S> transform<S>(StreamTransformer<List<int>, S> transformer) {
+    return controller.stream.transform(transformer);
+  }
+
+  @override
+  StreamSubscription<List<int>> listen(
+    void Function(List<int> event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
+    return controller.stream.listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
+  }
 }
 
 class FakePlistParser implements PlistParser {
@@ -309,6 +298,16 @@ class FakePlistParser implements PlistParser {
   @override
   String? getStringValueFromFile(String plistFilePath, String key) {
     return _underlyingValues[key] as String?;
+  }
+
+  @override
+  bool replaceKey(String plistFilePath, {required String key, String? value}) {
+    if (value == null) {
+      _underlyingValues.remove(key);
+      return true;
+    }
+    setProperty(key, value);
+    return true;
   }
 }
 
@@ -360,7 +359,7 @@ class FakeFlutterVersion implements FlutterVersion {
   final String engineRevisionShort;
 
   @override
-  final String repositoryUrl;
+  final String? repositoryUrl;
 
   @override
   final String frameworkVersion;
@@ -425,7 +424,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
-    this.isWindowsUwpEnabled = false,
+    this.isFlutterWebWasmEnabled = false,
   });
 
   @override
@@ -456,7 +455,7 @@ class TestFeatureFlags implements FeatureFlags {
   final bool areCustomDevicesEnabled;
 
   @override
-  final bool isWindowsUwpEnabled;
+  final bool isFlutterWebWasmEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -479,24 +478,9 @@ class TestFeatureFlags implements FeatureFlags {
         return isFuchsiaEnabled;
       case flutterCustomDevicesFeature:
         return areCustomDevicesEnabled;
-      case windowsUwpEmbedding:
-        return isWindowsUwpEnabled;
     }
     return false;
   }
-}
-
-class FakeStatusLogger extends DelegatingLogger {
-  FakeStatusLogger(super.delegate);
-
-  late Status status;
-
-  @override
-  Status startProgress(String message, {
-    String? progressId,
-    bool multilineOutput = false,
-    int progressIndicatorPadding = kDefaultStatusPadding,
-  }) => status;
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
@@ -591,4 +575,30 @@ class FakeStopwatchFactory implements StopwatchFactory {
   Stopwatch createStopwatch([String name = '']) {
     return stopwatches[name] ?? FakeStopwatch();
   }
+}
+
+class FakeFlutterProjectFactory implements FlutterProjectFactory {
+  @override
+  FlutterProject fromDirectory(Directory directory) {
+    return FlutterProject.fromDirectoryTest(directory);
+  }
+
+  @override
+  Map<String, FlutterProject> get projects => throw UnimplementedError();
+}
+
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  late bool platformToolsAvailable;
+
+  @override
+  late bool licensesAvailable;
+
+  @override
+  AndroidSdkVersion? latestVersion;
+}
+
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  String get javaPath => 'java';
 }

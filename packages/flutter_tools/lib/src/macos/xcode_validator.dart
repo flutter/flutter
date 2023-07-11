@@ -26,7 +26,7 @@ class XcodeValidator extends DoctorValidator {
     final String? xcodeSelectPath = _xcode.xcodeSelectPath;
 
     if (_xcode.isInstalled) {
-      xcodeStatus = ValidationType.installed;
+      xcodeStatus = ValidationType.success;
       if (xcodeSelectPath != null) {
         messages.add(ValidationMessage(_userMessages.xcodeLocation(xcodeSelectPath)));
       }
@@ -36,6 +36,9 @@ class XcodeValidator extends DoctorValidator {
         if (xcodeVersionInfo.contains(',')) {
           xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
         }
+      }
+      if (_xcode.buildVersion != null) {
+        messages.add(ValidationMessage('Build ${_xcode.buildVersion}'));
       }
       if (!_xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;

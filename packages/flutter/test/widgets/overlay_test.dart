@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -40,7 +41,7 @@ void main() {
     expect(
       theater.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        '_RenderTheatre#744c9\n'
+        '_RenderTheater#744c9\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
@@ -113,7 +114,7 @@ void main() {
     expect(
       theater.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        '_RenderTheatre#385b3\n'
+        '_RenderTheater#385b3\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
@@ -694,7 +695,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('OverlayState.of() called without Overlay being exist', (WidgetTester tester) async {
+  testWidgets('OverlayState.of() throws when called if an Overlay does not exist', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -712,7 +713,8 @@ void main() {
               expect(error.diagnostics[2].level, DiagnosticLevel.hint);
               expect(error.diagnostics[2].toStringDeep(), equalsIgnoringHashCodes(
                 'The most common way to add an Overlay to an application is to\n'
-                'include a MaterialApp or Navigator widget in the runApp() call.\n',
+                'include a MaterialApp, CupertinoApp or Navigator widget in the\n'
+                'runApp() call.\n'
               ));
               expect(error.diagnostics[3], isA<DiagnosticsProperty<Widget>>());
               expect(error.diagnostics[3].value, debugRequiredFor);
@@ -723,12 +725,13 @@ void main() {
                 '   Container widgets require an Overlay widget ancestor for correct\n'
                 '   operation.\n'
                 '   The most common way to add an Overlay to an application is to\n'
-                '   include a MaterialApp or Navigator widget in the runApp() call.\n'
+                '   include a MaterialApp, CupertinoApp or Navigator widget in the\n'
+                '   runApp() call.\n'
                 '   The specific widget that failed to find an overlay was:\n'
                 '     Container\n'
                 '   The context from which that widget was searching for an overlay\n'
                 '   was:\n'
-                '     Builder\n',
+                '     Builder\n'
               ));
             }
             return Container();
@@ -736,6 +739,47 @@ void main() {
         ),
       ),
     );
+  });
+
+  testWidgets("OverlayState.maybeOf() works when an Overlay does and doesn't exist", (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    OverlayState? foundState;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                foundState = Overlay.maybeOf(context);
+                return Container();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(foundState, isNotNull);
+    foundState = null;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Builder(
+          builder: (BuildContext context) {
+            foundState = Overlay.maybeOf(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(foundState, isNull);
   });
 
   testWidgets('OverlayEntry.opaque can be changed when OverlayEntry is not part of an Overlay (yet)', (WidgetTester tester) async {
@@ -1020,14 +1064,13 @@ void main() {
   });
 
   testWidgets('Overlay can set and update clipBehavior', (WidgetTester tester) async {
-
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
             OverlayEntry(
-              builder: (BuildContext context) => Container(),
+              builder: (BuildContext context) => Positioned(left: 2000, right: 2500, child: Container()),
             ),
           ],
         ),
@@ -1035,9 +1078,9 @@ void main() {
     );
 
     // By default, clipBehavior should be Clip.hardEdge
-    final dynamic renderObject = tester.renderObject(find.byType(Overlay));
+    final RenderObject renderObject = tester.renderObject(find.byType(Overlay));
     // ignore: avoid_dynamic_calls
-    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+    expect((renderObject as dynamic).clipBehavior, equals(Clip.hardEdge));
 
     for (final Clip clip in Clip.values) {
       await tester.pumpWidget(
@@ -1053,14 +1096,281 @@ void main() {
           ),
         ),
       );
+
       // ignore: avoid_dynamic_calls
-      expect(renderObject.clipBehavior, clip);
+      expect((renderObject as dynamic).clipBehavior, clip);
+      bool visited = false;
+      renderObject.visitChildren((RenderObject child) {
+        visited = true;
+        switch(clip) {
+          case Clip.none:
+            expect(renderObject.describeApproximatePaintClip(child), null);
+          case Clip.hardEdge:
+          case Clip.antiAlias:
+          case Clip.antiAliasWithSaveLayer:
+            expect(
+              renderObject.describeApproximatePaintClip(child),
+              const Rect.fromLTRB(0, 0, 800, 600),
+            );
+        }
+      });
+      expect(visited, true);
     }
+  });
+
+  testWidgets('Overlay always applies clip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) => Positioned(left: 10, right: 10, child: Container()),
+            ),
+          ],
+        ),
+      ),
+    );
+    final RenderObject renderObject = tester.renderObject(find.byType(Overlay));
+    // ignore: avoid_dynamic_calls
+    expect((renderObject as dynamic).paint, paints
+      ..save()
+      ..clipRect(rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0))
+      ..restore(),
+    );
+  });
+
+  group('OverlayEntry listenable', () {
+    final GlobalKey overlayKey = GlobalKey();
+    final Widget emptyOverlay = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Overlay(key: overlayKey),
+    );
+
+    testWidgets('mounted state can be listened', (WidgetTester tester) async {
+      await tester.pumpWidget(emptyOverlay);
+      final OverlayState overlay = overlayKey.currentState! as OverlayState;
+      final List<bool> mountedLog = <bool>[];
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext context) => Container(),
+      );
+
+      entry.addListener(() {
+        mountedLog.add(entry.mounted);
+      });
+
+      overlay.insert(entry);
+      expect(mountedLog, isEmpty);
+
+      // Pump a frame. The Overlay entry will be mounted.
+      await tester.pump();
+      expect(mountedLog, <bool>[true]);
+
+      entry.remove();
+      expect(mountedLog, <bool>[true]);
+      await tester.pump();
+      expect(mountedLog, <bool>[true, false]);
+
+      // Insert & remove again.
+      overlay.insert(entry);
+      await tester.pump();
+      entry.remove();
+      await tester.pump();
+
+      expect(mountedLog, <bool>[true, false, true, false]);
+    });
+
+    testWidgets('throw if disposed before removal', (WidgetTester tester) async {
+      await tester.pumpWidget(emptyOverlay);
+      final OverlayState overlay = overlayKey.currentState! as OverlayState;
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext context) => Container(),
+      );
+
+      overlay.insert(entry);
+      Object? error;
+      try {
+        entry.dispose();
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error, isAssertionError);
+    });
+
+    test('dispose works', () {
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext context) => Container(),
+      );
+
+      entry.dispose();
+
+      Object? error;
+      try {
+        entry.addListener(() {  });
+      } catch (e) {
+        error = e;
+      }
+      expect(error, isAssertionError);
+    });
+
+    testWidgets('delayed dispose', (WidgetTester tester) async {
+      await tester.pumpWidget(emptyOverlay);
+      final OverlayState overlay = overlayKey.currentState! as OverlayState;
+      final List<bool> mountedLog = <bool>[];
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext context) => Container(),
+      );
+      entry.addListener(() {
+        mountedLog.add(entry.mounted);
+      });
+
+      overlay.insert(entry);
+      await tester.pump();
+      expect(mountedLog, <bool>[true]);
+
+      entry.remove();
+      // Call dispose on the entry. The listeners should be notified for one
+      // last time after this.
+      entry.dispose();
+      expect(mountedLog, <bool>[true]);
+      await tester.pump();
+      expect(mountedLog, <bool>[true, false]);
+      expect(tester.takeException(), isNull);
+
+      // The entry is no longer usable.
+      Object? error;
+      try {
+        entry.addListener(() {  });
+      } catch (e) {
+        error = e;
+      }
+      expect(error, isAssertionError);
+    });
+  });
+
+  group('LookupBoundary', () {
+    testWidgets('hides Overlay from Overlay.maybeOf', (WidgetTester tester) async {
+      OverlayState? overlay;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return LookupBoundary(
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        overlay = Overlay.maybeOf(context);
+                        return Container();
+                      },
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(overlay, isNull);
+    });
+
+    testWidgets('hides Overlay from Overlay.of', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return LookupBoundary(
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        Overlay.of(context);
+                        return Container();
+                      },
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+
+      expect(
+        error.toStringDeep(),
+        'FlutterError\n'
+        '   No Overlay widget found within the closest LookupBoundary.\n'
+        '   There is an ancestor Overlay widget, but it is hidden by a\n'
+        '   LookupBoundary.\n'
+        '   Some widgets require an Overlay widget ancestor for correct\n'
+        '   operation.\n'
+        '   The most common way to add an Overlay to an application is to\n'
+        '   include a MaterialApp, CupertinoApp or Navigator widget in the\n'
+        '   runApp() call.\n'
+        '   The context from which that widget was searching for an overlay\n'
+        '   was:\n'
+        '     Builder\n'
+      );
+    });
+
+    testWidgets('hides Overlay from debugCheckHasOverlay', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return LookupBoundary(
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        debugCheckHasOverlay(context);
+                        return Container();
+                      },
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+
+      expect(
+        error.toStringDeep(), startsWith(
+          'FlutterError\n'
+          '   No Overlay widget found within the closest LookupBoundary.\n'
+          '   There is an ancestor Overlay widget, but it is hidden by a\n'
+          '   LookupBoundary.\n'
+          '   Builder widgets require an Overlay widget ancestor within the\n'
+          '   closest LookupBoundary.\n'
+          '   An overlay lets widgets float on top of other widget children.\n'
+          '   To introduce an Overlay widget, you can either directly include\n'
+          '   one, or use a widget that contains an Overlay itself, such as a\n'
+          '   Navigator, WidgetApp, MaterialApp, or CupertinoApp.\n'
+          '   The specific widget that could not find a Overlay ancestor was:\n'
+          '     Builder\n'
+          '   The ancestors of this widget were:\n'
+          '     LookupBoundary\n'
+        ),
+      );
+    });
   });
 }
 
 class StatefulTestWidget extends StatefulWidget {
-  const StatefulTestWidget({Key? key}) : super(key: key);
+  const StatefulTestWidget({super.key});
 
   @override
   State<StatefulTestWidget> createState() => StatefulTestState();

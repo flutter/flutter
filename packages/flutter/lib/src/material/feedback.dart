@@ -32,7 +32,7 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class WidgetWithWrappedHandler extends StatelessWidget {
-///   const WidgetWithWrappedHandler({Key? key}) : super(key: key);
+///   const WidgetWithWrappedHandler({super.key});
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -60,7 +60,7 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class WidgetWithExplicitCall extends StatelessWidget {
-///   const WidgetWithExplicitCall({Key? key}) : super(key: key);
+///   const WidgetWithExplicitCall({super.key});
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -81,11 +81,7 @@ import 'theme.dart';
 /// }
 /// ```
 /// {@end-tool}
-class Feedback {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  Feedback._();
-
+abstract final class Feedback {
   /// Provides platform-specific feedback for a tap.
   ///
   /// On Android the click system sound is played. On iOS this is a no-op.
@@ -119,8 +115,9 @@ class Feedback {
   ///  * [forTap] to just trigger the platform-specific feedback without wrapping
   ///    a [GestureTapCallback].
   static GestureTapCallback? wrapForTap(GestureTapCallback? callback, BuildContext context) {
-    if (callback == null)
+    if (callback == null) {
       return null;
+    }
     return () {
       Feedback.forTap(context);
       callback();
@@ -162,8 +159,9 @@ class Feedback {
   ///  * [forLongPress] to just trigger the platform-specific feedback without
   ///    wrapping a [GestureLongPressCallback].
   static GestureLongPressCallback? wrapForLongPress(GestureLongPressCallback? callback, BuildContext context) {
-    if (callback == null)
+    if (callback == null) {
       return null;
+    }
     return () {
       Feedback.forLongPress(context);
       callback();

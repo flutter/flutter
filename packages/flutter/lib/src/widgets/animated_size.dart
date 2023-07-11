@@ -26,20 +26,14 @@ class AnimatedSize extends StatefulWidget {
   ///
   /// The [curve] and [duration] arguments must not be null.
   const AnimatedSize({
-    Key? key,
+    super.key,
     this.child,
     this.alignment = Alignment.center,
     this.curve = Curves.linear,
     required this.duration,
     this.reverseDuration,
-    @Deprecated(
-      'This field is now ignored. '
-      'This feature was deprecated after v2.2.0-10.1.pre.'
-    )
-    TickerProvider? vsync,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(clipBehavior != null),
-       super(key: key);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -108,16 +102,14 @@ class _AnimatedSizeState
 
 class _AnimatedSize extends SingleChildRenderObjectWidget {
   const _AnimatedSize({
-    Key? key,
-    Widget? child,
+    super.child,
     this.alignment = Alignment.center,
     this.curve = Curves.linear,
     required this.duration,
     this.reverseDuration,
     required this.vsync,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(clipBehavior != null),
-       super(key: key, child: child);
+  });
 
   final AlignmentGeometry alignment;
   final Curve curve;

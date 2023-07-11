@@ -2,22 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Curve2D
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Curve2D].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const Curve2DExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class Curve2DExampleApp extends StatelessWidget {
+  const Curve2DExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      home: Curve2DExample(),
     );
   }
 }
@@ -43,12 +40,12 @@ final CatmullRomSpline path = CatmullRomSpline(
 
 class FollowCurve2D extends StatefulWidget {
   const FollowCurve2D({
-    Key? key,
+    super.key,
     required this.path,
     this.curve = Curves.easeInOut,
     required this.child,
     this.duration = const Duration(seconds: 1),
-  }) : super(key: key);
+  });
 
   final Curve2D path;
   final Curve curve;
@@ -59,8 +56,7 @@ class FollowCurve2D extends StatefulWidget {
   State<FollowCurve2D> createState() => _FollowCurve2DState();
 }
 
-class _FollowCurve2DState extends State<FollowCurve2D>
-    with TickerProviderStateMixin {
+class _FollowCurve2DState extends State<FollowCurve2D> with TickerProviderStateMixin {
   // The animation controller for this animation.
   late AnimationController controller;
   // The animation that will be used to apply the widget's animation curve.
@@ -71,7 +67,7 @@ class _FollowCurve2DState extends State<FollowCurve2D>
     super.initState();
     controller = AnimationController(duration: widget.duration, vsync: this);
     animation = CurvedAnimation(parent: controller, curve: widget.curve);
-    // Have the controller repeat indefinitely.  If you want it to "bounce" back
+    // Have the controller repeat indefinitely. If you want it to "bounce" back
     // and forth, set the reverse parameter to true.
     controller.repeat();
     controller.addListener(() => setState(() {}));
@@ -87,8 +83,7 @@ class _FollowCurve2DState extends State<FollowCurve2D>
   @override
   Widget build(BuildContext context) {
     // Scale the path values to match the -1.0 to 1.0 domain of the Alignment widget.
-    final Offset position =
-        widget.path.transform(animation.value) * 2.0 - const Offset(1.0, 1.0);
+    final Offset position = widget.path.transform(animation.value) * 2.0 - const Offset(1.0, 1.0);
     return Align(
       alignment: Alignment(position.dx, position.dy),
       child: widget.child,
@@ -96,8 +91,8 @@ class _FollowCurve2DState extends State<FollowCurve2D>
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class Curve2DExample extends StatelessWidget {
+  const Curve2DExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +105,7 @@ class MyStatelessWidget extends StatelessWidget {
         child: CircleAvatar(
           backgroundColor: Colors.yellow,
           child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.headline6!,
+            style: Theme.of(context).textTheme.titleLarge!,
             child: const Text('B'), // Buzz, buzz!
           ),
         ),

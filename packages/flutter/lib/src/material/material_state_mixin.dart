@@ -24,7 +24,7 @@ import 'material_state.dart';
 ///
 /// ```dart
 /// class MyWidget extends StatefulWidget {
-///   const MyWidget({required this.color, required this.child, Key? key}) : super(key: key);
+///   const MyWidget({super.key, required this.color, required this.child});
 ///
 ///   final MaterialStateColor color;
 ///   final Widget child;
@@ -38,7 +38,7 @@ import 'material_state.dart';
 ///   Widget build(BuildContext context) {
 ///     return InkWell(
 ///       onFocusChange: updateMaterialState(MaterialState.focused),
-///       child: Container(
+///       child: ColoredBox(
 ///         color: widget.color.resolve(materialStates),
 ///         child: widget.child,
 ///       ),
@@ -76,7 +76,7 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   ///
   /// ```dart
   /// class MyWidget extends StatefulWidget {
-  ///   const MyWidget({this.onPressed, Key? key}) : super(key: key);
+  ///   const MyWidget({super.key, this.onPressed});
   ///
   ///   /// Something important this widget must do when pressed.
   ///   final VoidCallback? onPressed;
@@ -88,7 +88,7 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   /// class MyWidgetState extends State<MyWidget> with MaterialStateMixin<MyWidget> {
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return Container(
+  ///     return ColoredBox(
   ///       color: isPressed ? Colors.black : Colors.white,
   ///       child: InkWell(
   ///         onHighlightChanged: updateMaterialState(
@@ -108,8 +108,9 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   @protected
   ValueChanged<bool> updateMaterialState(MaterialState key, {ValueChanged<bool>? onChanged}) {
     return (bool value) {
-      if (materialStates.contains(key) == value)
+      if (materialStates.contains(key) == value) {
         return;
+      }
       setMaterialState(key, value);
       onChanged?.call(value);
     };
@@ -124,15 +125,17 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   /// Mutator to mark a [MaterialState] value as active.
   @protected
   void addMaterialState(MaterialState state) {
-    if (materialStates.add(state))
+    if (materialStates.add(state)) {
       setState((){});
+    }
   }
 
   /// Mutator to mark a [MaterialState] value as inactive.
   @protected
   void removeMaterialState(MaterialState state) {
-    if (materialStates.remove(state))
+    if (materialStates.remove(state)) {
       setState((){});
+    }
   }
 
   /// Getter for whether this class considers [MaterialState.disabled] to be active.

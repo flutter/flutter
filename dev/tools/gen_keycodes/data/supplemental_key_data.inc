@@ -76,6 +76,16 @@
   DOM_KEY_UNI("Tilde",                  TILDE,                  '~'),
   DOM_KEY_UNI("Bar",                    BAR,                    '|'),
 
+  // ============================================================
+  // Unprintable keys (Unicode plane)
+  // ============================================================
+
+  //          Key                       Enum                    Value
+  // Sometimes the Escape key produces "Esc" instead of "Escape". This includes
+  // older IE and Firefox browsers, and the current Cobalt browser.
+  // See: https://github.com/flutter/flutter/issues/106062
+  DOM_KEY_MAP("Esc",                    ESC,                    0x1B),
+
   // The following keys reside in the Flutter plane (0x0100000000).
 
   // ============================================================

@@ -48,7 +48,6 @@ void main() {
 }
 
 Widget buildWidget({ required String blockedText, bool blocking = true }) {
-  assert(blockedText != null);
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Stack(

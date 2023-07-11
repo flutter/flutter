@@ -3,21 +3,22 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:js/js.dart';
 
+import '../services/dom.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
 /// Creates a type for an overridable factory function for testing purposes.
-typedef HttpRequestFactory = html.HttpRequest Function();
+typedef HttpRequestFactory = DomXMLHttpRequest Function();
 
 /// Default HTTP client.
-html.HttpRequest _httpClient() {
-  return html.HttpRequest();
+DomXMLHttpRequest _httpClient() {
+  return createDomXMLHttpRequest();
 }
 
 /// Creates an overridable factory function.
@@ -28,7 +29,7 @@ void debugRestoreHttpRequestFactory() {
   httpRequestFactory = _httpClient;
 }
 
-/// The dart:html implementation of [image_provider.NetworkImage].
+/// The web implementation of [image_provider.NetworkImage].
 ///
 /// NetworkImage on the web does not support decoding to a specified size.
 @immutable
@@ -38,9 +39,7 @@ class NetworkImage
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments [url] and [scale] must not be null.
-  const NetworkImage(this.url, {this.scale = 1.0, this.headers})
-      : assert(url != null),
-        assert(scale != null);
+  const NetworkImage(this.url, {this.scale = 1.0, this.headers});
 
   @override
   final String url;
@@ -66,7 +65,40 @@ class NetworkImage
 
     return MultiFrameImageStreamCompleter(
       chunkEvents: chunkEvents.stream,
-      codec: _loadAsync(key as NetworkImage, decode, chunkEvents),
+      codec: _loadAsync(key as NetworkImage, null, null, decode, chunkEvents),
+      scale: key.scale,
+      debugLabel: key.url,
+      informationCollector: _imageStreamInformationCollector(key),
+    );
+  }
+
+  @override
+  ImageStreamCompleter loadBuffer(image_provider.NetworkImage key, image_provider.DecoderBufferCallback decode) {
+    // Ownership of this controller is handed off to [_loadAsync]; it is that
+    // method's responsibility to close the controller's stream when the image
+    // has been loaded or an error is thrown.
+    final StreamController<ImageChunkEvent> chunkEvents =
+        StreamController<ImageChunkEvent>();
+
+    return MultiFrameImageStreamCompleter(
+      chunkEvents: chunkEvents.stream,
+      codec: _loadAsync(key as NetworkImage, null, decode, null, chunkEvents),
+      scale: key.scale,
+      debugLabel: key.url,
+      informationCollector: _imageStreamInformationCollector(key),
+    );
+  }
+
+  @override
+  ImageStreamCompleter loadImage(image_provider.NetworkImage key, image_provider.ImageDecoderCallback decode) {
+    // Ownership of this controller is handed off to [_loadAsync]; it is that
+    // method's responsibility to close the controller's stream when the image
+    // has been loaded or an error is thrown.
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
+
+    return MultiFrameImageStreamCompleter(
+      chunkEvents: chunkEvents.stream,
+      codec: _loadAsync(key as NetworkImage, decode, null, null, chunkEvents),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
@@ -85,35 +117,38 @@ class NetworkImage
     return collector;
   }
 
-  // TODO(garyq): We should eventually support custom decoding of network images on Web as
-  // well, see https://github.com/flutter/flutter/issues/42789.
-  //
-  // Web does not support decoding network images to a specified size. The decode parameter
+  // Html renderer does not support decoding network images to a specified size. The decode parameter
   // here is ignored and the web-only `ui.webOnlyInstantiateImageCodecFromUrl` will be used
   // directly in place of the typical `instantiateImageCodec` method.
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
-    image_provider.DecoderCallback decode,
+    image_provider.ImageDecoderCallback? decode,
+    image_provider.DecoderBufferCallback? decodeBufferDeprecated,
+    image_provider.DecoderCallback? decodeDeprecated,
     StreamController<ImageChunkEvent> chunkEvents,
   ) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
 
+    final bool containsNetworkImageHeaders = key.headers?.isNotEmpty ?? false;
+
     // We use a different method when headers are set because the
     // `ui.webOnlyInstantiateImageCodecFromUrl` method is not capable of handling headers.
-    if (key.headers?.isNotEmpty ?? false) {
-      final Completer<html.HttpRequest> completer =
-          Completer<html.HttpRequest>();
-      final html.HttpRequest request = httpRequestFactory();
+    if (isCanvasKit || containsNetworkImageHeaders) {
+      final Completer<DomXMLHttpRequest> completer =
+          Completer<DomXMLHttpRequest>();
+      final DomXMLHttpRequest request = httpRequestFactory();
 
-      request.open('GET', key.url, async: true);
+      request.open('GET', key.url, true);
       request.responseType = 'arraybuffer';
-      key.headers!.forEach((String header, String value) {
-        request.setRequestHeader(header, value);
-      });
+      if (containsNetworkImageHeaders) {
+        key.headers!.forEach((String header, String value) {
+          request.setRequestHeader(header, value);
+        });
+      }
 
-      request.onLoad.listen((html.ProgressEvent e) {
+      request.addEventListener('load', allowInterop((DomEvent e) {
         final int? status = request.status;
         final bool accepted = status! >= 200 && status < 300;
         final bool fileUri = status == 0; // file:// URIs have status of 0.
@@ -129,9 +164,9 @@ class NetworkImage
           throw image_provider.NetworkImageLoadException(
               statusCode: request.status ?? 400, uri: resolved);
         }
-      });
+      }));
 
-      request.onError.listen(completer.completeError);
+      request.addEventListener('error', allowInterop(completer.completeError));
 
       request.send();
 
@@ -139,11 +174,21 @@ class NetworkImage
 
       final Uint8List bytes = (request.response as ByteBuffer).asUint8List();
 
-      if (bytes.lengthInBytes == 0)
+      if (bytes.lengthInBytes == 0) {
         throw image_provider.NetworkImageLoadException(
             statusCode: request.status!, uri: resolved);
+      }
 
-      return decode(bytes);
+      if (decode != null) {
+        final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+        return decode(buffer);
+      } else if (decodeBufferDeprecated != null) {
+        final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+        return decodeBufferDeprecated(buffer);
+      } else {
+        assert(decodeDeprecated != null);
+        return decodeDeprecated!(bytes);
+      }
     } else {
       // This API only exists in the web engine implementation and is not
       // contained in the analyzer summary for Flutter.

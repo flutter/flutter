@@ -7,10 +7,11 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=123"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1751,9 +1752,9 @@ void main() {
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
         home: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Draggable<int>(
                   data: 1,
                   feedback: Text('Dragging'),
@@ -2283,9 +2284,9 @@ void main() {
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Column(
-        children: const <Widget>[
+        children: <Widget>[
           Draggable<int>(
             data: 1,
             feedback: Text('Dragging'),
@@ -2839,8 +2840,9 @@ void main() {
             },
             onAccept: accepted.add,
             onWillAccept: (int? data) {
-              if (data == null)
+              if (data == null) {
                 isReceiveNullDataForCheck = true;
+              }
               return data != null;
             },
           ),
@@ -3059,9 +3061,9 @@ void main() {
     const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Column(
-          children: const <Widget>[
+          children: <Widget>[
             Draggable<int>(
               feedback: SizedBox(height: 50.0, child: Text('Draggable')),
               child: SizedBox(height: 50.0, child: Text('Target')),
@@ -3072,6 +3074,95 @@ void main() {
     );
 
     expect(tester.widget<Listener>(find.byType(Listener).first).behavior, hitTestBehavior);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/92083
+  testWidgets('feedback respect the MouseRegion cursor configure', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Column(
+          children: <Widget>[
+            Draggable<int>(
+              ignoringFeedbackPointer: false,
+              feedback: MouseRegion(
+                cursor: SystemMouseCursors.grabbing,
+                child: SizedBox(height: 50.0, child: Text('Draggable')),
+              ),
+              child: SizedBox(height: 50.0, child: Text('Target')),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Offset location = tester.getCenter(find.text('Target'));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: location);
+
+    await gesture.down(location);
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grabbing);
+  });
+
+  testWidgets('configurable feedback ignore pointer behavior', (WidgetTester tester) async {
+    bool onTap = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: <Widget>[
+            Draggable<int>(
+              ignoringFeedbackPointer: false,
+              feedback: GestureDetector(
+                onTap: () => onTap = true,
+                child: const SizedBox(height: 50.0, child: Text('Draggable')),
+              ),
+              child: const SizedBox(height: 50.0, child: Text('Target')),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Offset location = tester.getCenter(find.text('Target'));
+    final TestGesture gesture = await tester.startGesture(location, pointer: 7);
+    final Offset secondLocation = location + const Offset(7.0, 7.0);
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    await tester.tap(find.text('Draggable'));
+    expect(onTap, true);
+  });
+
+  testWidgets('configurable feedback ignore pointer behavior - LongPressDraggable', (WidgetTester tester) async {
+    bool onTap = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: <Widget>[
+            LongPressDraggable<int>(
+              ignoringFeedbackPointer: false,
+              feedback: GestureDetector(
+                onTap: () => onTap = true,
+                child: const SizedBox(height: 50.0, child: Text('Draggable')),
+              ),
+              child: const SizedBox(height: 50.0, child: Text('Target')),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Offset location = tester.getCenter(find.text('Target'));
+    final TestGesture gesture = await tester.startGesture(location, pointer: 7);
+    await tester.pump(kLongPressTimeout);
+
+    final Offset secondLocation = location + const Offset(7.0, 7.0);
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    await tester.tap(find.text('Draggable'));
+    expect(onTap, true);
   });
 
   testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
@@ -3102,9 +3193,49 @@ void main() {
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1), isA<Draggable<int>>());
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).child, widget1);
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).feedback, widget2);
-    expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).dragAnchor, DragAnchor.child);
-    expect(const LongPressDraggable<int>(feedback: widget2, dragAnchor: DragAnchor.pointer, child: widget1).dragAnchor, DragAnchor.pointer);
     expect(LongPressDraggable<int>(feedback: widget2, dragAnchorStrategy: dummyStrategy, child: widget1).dragAnchorStrategy, dummyStrategy);
+  });
+
+  testWidgets('Test allowedButtonsFilter', (WidgetTester tester) async {
+    Widget build(bool Function(int buttons)? allowedButtonsFilter) {
+      return MaterialApp(
+        home: Draggable<int>(
+          key: UniqueKey(),
+          allowedButtonsFilter: allowedButtonsFilter,
+          feedback: const Text('Dragging'),
+          child: const Text('Source'),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(null));
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    expect(find.text('Dragging'), findsNothing);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+    expect(find.text('Dragging'), findsOneWidget);
+    await gesture.up();
+
+    await tester.pumpWidget(build((int buttons) => buttons == kSecondaryButton));
+    expect(find.text('Dragging'), findsNothing);
+    final TestGesture gesture1 = await tester.startGesture(firstLocation, pointer: 8);
+    await tester.pump();
+    expect(find.text('Dragging'), findsNothing);
+    await gesture1.up();
+
+    await tester.pumpWidget(build((int buttons) => buttons & kTertiaryButton != 0 || buttons & kPrimaryButton != 0));
+    expect(find.text('Dragging'), findsNothing);
+    final TestGesture gesture2 = await tester.startGesture(firstLocation, pointer: 8);
+    await tester.pump();
+    expect(find.text('Dragging'), findsOneWidget);
+    await gesture2.up();
+
+    await tester.pumpWidget(build((int buttons) => false));
+    expect(find.text('Dragging'), findsNothing);
+    final TestGesture gesture3 = await tester.startGesture(firstLocation, pointer: 8);
+    await tester.pump();
+    expect(find.text('Dragging'), findsNothing);
+    await gesture3.up();
   });
 }
 

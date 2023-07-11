@@ -31,23 +31,13 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
   }
 }
 
-class MockMultiChildRenderObjectWidget extends MultiChildRenderObjectWidget {
-  MockMultiChildRenderObjectWidget({ Key? key, required List<Widget> children }) : super(key: key, children: children);
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    assert(false);
-    return FakeRenderObject();
-  }
-}
-
 void main() {
   testWidgets('MultiChildRenderObjectElement control test', (WidgetTester tester) async {
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DecoratedBox(decoration: kBoxDecorationA),
           DecoratedBox(decoration: kBoxDecorationB),
           DecoratedBox(decoration: kBoxDecorationC),
@@ -58,9 +48,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DecoratedBox(decoration: kBoxDecorationA),
           DecoratedBox(decoration: kBoxDecorationC),
         ],
@@ -70,9 +60,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationC]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DecoratedBox(decoration: kBoxDecorationA),
           DecoratedBox(key: Key('b'), decoration: kBoxDecorationB),
           DecoratedBox(decoration: kBoxDecorationC),
@@ -83,9 +73,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DecoratedBox(key: Key('b'), decoration: kBoxDecorationB),
           DecoratedBox(decoration: kBoxDecorationC),
           DecoratedBox(key: Key('a'), decoration: kBoxDecorationA),
@@ -96,9 +86,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC, kBoxDecorationA]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DecoratedBox(key: Key('a'), decoration: kBoxDecorationA),
           DecoratedBox(decoration: kBoxDecorationC),
           DecoratedBox(key: Key('b'), decoration: kBoxDecorationB),
@@ -109,9 +99,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationC, kBoxDecorationB]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
@@ -120,7 +110,7 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationC]);
 
     await tester.pumpWidget(
-      Stack(textDirection: TextDirection.ltr),
+      const Stack(textDirection: TextDirection.ltr),
     );
 
     checkTree(tester, <BoxDecoration>[]);
@@ -130,9 +120,9 @@ void main() {
   testWidgets('MultiChildRenderObjectElement with stateless widgets', (WidgetTester tester) async {
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DecoratedBox(decoration: kBoxDecorationA),
           DecoratedBox(decoration: kBoxDecorationB),
           DecoratedBox(decoration: kBoxDecorationC),
@@ -143,9 +133,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DecoratedBox(decoration: kBoxDecorationA),
           DummyWidget(
             child: DecoratedBox(decoration: kBoxDecorationB),
@@ -158,9 +148,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DecoratedBox(decoration: kBoxDecorationA),
           DummyWidget(
             child: DummyWidget(
@@ -175,9 +165,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB, kBoxDecorationC]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DummyWidget(
             child: DummyWidget(
               child: DecoratedBox(decoration: kBoxDecorationB),
@@ -194,9 +184,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationA, kBoxDecorationC]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DummyWidget(
             child: DecoratedBox(decoration: kBoxDecorationB),
           ),
@@ -211,9 +201,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationA, kBoxDecorationC]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DummyWidget(
             key: Key('b'),
             child: DecoratedBox(decoration: kBoxDecorationB),
@@ -229,9 +219,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationA]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DummyWidget(
             key: Key('a'),
             child: DecoratedBox(decoration: kBoxDecorationA),
@@ -247,7 +237,7 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB]);
 
     await tester.pumpWidget(
-      Stack(textDirection: TextDirection.ltr),
+      const Stack(textDirection: TextDirection.ltr),
     );
 
     checkTree(tester, <BoxDecoration>[]);
@@ -255,9 +245,9 @@ void main() {
 
   testWidgets('MultiChildRenderObjectElement with stateful widgets', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DecoratedBox(decoration: kBoxDecorationA),
           DecoratedBox(decoration: kBoxDecorationB),
         ],
@@ -267,9 +257,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationB]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           FlipWidget(
             left: DecoratedBox(decoration: kBoxDecorationA),
             right: DecoratedBox(decoration: kBoxDecorationB),
@@ -287,9 +277,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           FlipWidget(
             left: DecoratedBox(decoration: kBoxDecorationA),
             right: DecoratedBox(decoration: kBoxDecorationB),
@@ -306,9 +296,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationA]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           FlipWidget(
             key: Key('flip'),
             left: DecoratedBox(decoration: kBoxDecorationA),
@@ -319,9 +309,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           DecoratedBox(key: Key('c'), decoration: kBoxDecorationC),
           FlipWidget(
             key: Key('flip'),
@@ -340,9 +330,9 @@ void main() {
     checkTree(tester, <BoxDecoration>[kBoxDecorationC, kBoxDecorationB]);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           FlipWidget(
             key: Key('flip'),
             left: DecoratedBox(decoration: kBoxDecorationA),
@@ -357,15 +347,8 @@ void main() {
   });
 }
 
-class FakeRenderObject extends RenderBox {
-  @override
-  void performLayout() {
-    size = constraints.biggest;
-  }
-}
-
 class DummyWidget extends StatelessWidget {
-  const DummyWidget({ Key? key, required this.child }) : super(key: key);
+  const DummyWidget({ super.key, required this.child });
 
   final Widget child;
 

@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class ScrollPositionListener extends StatefulWidget {
-  const ScrollPositionListener({ Key? key, required this.child, required this.log}) : super(key: key);
+  const ScrollPositionListener({ super.key, required this.child, required this.log});
 
   final Widget child;
   final ValueChanged<String> log;
@@ -22,7 +22,7 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _position?.removeListener(listener);
-    _position = Scrollable.of(context)?.position;
+    _position = Scrollable.maybeOf(context)?.position;
     _position?.addListener(listener);
     widget.log('didChangeDependencies ${_position?.pixels.toStringAsFixed(1)}');
   }

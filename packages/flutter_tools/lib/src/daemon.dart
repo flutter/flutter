@@ -57,7 +57,7 @@ enum _InputStreamParseState {
 /// message data.
 ///
 /// If the JSON object contains the key [_binaryLengthKey] with an integer
-/// value (will be refered to as N), the following N bytes after the newline
+/// value (will be referred to as N), the following N bytes after the newline
 /// character will contain the binary part of the message.
 @visibleForTesting
 class DaemonInputStreamConverter {
@@ -219,6 +219,10 @@ class DaemonStreams {
       if (binary != null) {
         _outputSink.add(binary);
       }
+    } on StateError catch (error) {
+      _logger.printError('Failed to write daemon command response: $error');
+      // Failed to send, close the connection
+      _outputSink.close();
     } on IOException catch (error) {
       _logger.printError('Failed to write daemon command response: $error');
       // Failed to send, close the connection
@@ -297,7 +301,7 @@ class DaemonConnection {
   }
 
   /// Sends an error response to the other end of the connection.
-  void sendErrorResponse(Object id, Object error, StackTrace trace) {
+  void sendErrorResponse(Object id, Object? error, StackTrace trace) {
     _daemonStreams.send(<String, Object?>{
       'id': id,
       'error': error,

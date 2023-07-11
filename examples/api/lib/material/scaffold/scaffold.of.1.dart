@@ -2,28 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Scaffold.of
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Scaffold.of].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const OfExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class OfExampleApp extends StatelessWidget {
+  const OfExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      home: OfExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class OfExample extends StatelessWidget {
+  const OfExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +50,7 @@ class MyStatelessWidget extends StatelessWidget {
                               onPressed: () {
                                 Navigator.pop(context);
                               },
-                            )
+                            ),
                           ],
                         ),
                       ),

@@ -84,7 +84,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     XmlDocument document;
     try {
       document = XmlDocument.parse(appManifestFile.readAsStringSync());
-    } on XmlParserException {
+    } on XmlException {
       invalidFiles[appManifestFile.path] = 'Error parsing $appManifestFile '
         'Please ensure that the android manifest is a valid XML document and '
         'try again.';
@@ -187,12 +187,6 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     loadingUnitComparisonResults = <String, Object>{};
     final Set<LoadingUnit> unmatchedLoadingUnits = <LoadingUnit>{};
     final List<LoadingUnit> newLoadingUnits = <LoadingUnit>[];
-    if (generatedLoadingUnits == null || cachedLoadingUnits == null) {
-      loadingUnitComparisonResults!['new'] = newLoadingUnits;
-      loadingUnitComparisonResults!['missing'] = unmatchedLoadingUnits;
-      loadingUnitComparisonResults!['match'] = false;
-      return false;
-    }
     unmatchedLoadingUnits.addAll(cachedLoadingUnits);
     final Set<int> addedNewIds = <int>{};
     for (final LoadingUnit genUnit in generatedLoadingUnits) {
@@ -234,7 +228,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
         return loadingUnits;
       }
       if (data['loading-units'] != null) {
-        for (final Object? loadingUnitData in data['loading-units']) {
+        for (final Object? loadingUnitData in data['loading-units'] as List<Object?>) {
           if (loadingUnitData is! YamlMap) {
             invalidFiles[cacheFile.path] = "Invalid loading units yaml file, 'loading-units' "
                                              'is not a list of maps.';
@@ -267,7 +261,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     // Parse out validated yaml.
     if (data.containsKey('loading-units')) {
       if (data['loading-units'] != null) {
-        for (final Object? loadingUnitData in data['loading-units']) {
+        for (final Object? loadingUnitData in data['loading-units'] as List<Object?>) {
           final YamlMap? loadingUnitDataMap = loadingUnitData as YamlMap?;
           final List<String> libraries = <String>[];
           final YamlList? nodes = loadingUnitDataMap?['libraries'] as YamlList?;
@@ -335,7 +329,7 @@ loading-units:
         continue;
       }
       buffer.write('  - id: ${unit.id}\n');
-      if (unit.libraries != null && unit.libraries.isNotEmpty) {
+      if (unit.libraries.isNotEmpty) {
         buffer.write('    libraries:\n');
         for (final String lib in unit.libraries) {
           buffer.write('      - $lib\n');

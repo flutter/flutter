@@ -75,7 +75,6 @@ void main() {
       return false;
     });
     // While ShiftLeft is held (the event of which was skipped), press keyA.
-    // ignore: prefer_const_declarations
     final Map<String, dynamic> rawMessage = kIsWeb ? (
       KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
@@ -332,7 +331,7 @@ void main() {
   // In that case, the key data should not be converted to any [KeyEvent]s,
   // but is only used so that *a* key data comes before the raw key message
   // and makes [KeyEventManager] infer [KeyDataTransitMode.keyDataThenRawKeyData].
-  testWidgets('Empty keyData yields no event but triggers inferrence', (WidgetTester tester) async {
+  testWidgets('Empty keyData yields no event but triggers inference', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
     final List<RawKeyEvent> rawEvents = <RawKeyEvent>[];
     tester.binding.keyboard.addHandler((KeyEvent event) {

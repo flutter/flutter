@@ -430,9 +430,7 @@ class _SymbolNode {
   _SymbolNode(
     this.name, {
     this.byteSize = 0,
-  })  : assert(name != null),
-        assert(byteSize != null),
-        _children = <String, _SymbolNode>{};
+  })  : _children = <String, _SymbolNode>{};
 
   /// The human friendly identifier for this node.
   String name;
@@ -467,7 +465,7 @@ class _SymbolNode {
   Map<String, Object?> toJson() {
     final Map<String, Object?> json = <String, Object?>{
       'n': name,
-      'value': byteSize
+      'value': byteSize,
     };
     final List<Map<String, Object?>> childrenAsJson = <Map<String, Object?>>[];
     for (final _SymbolNode child in children) {

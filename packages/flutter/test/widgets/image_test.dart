@@ -5,11 +5,11 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -34,6 +34,53 @@ void main() {
 
   tearDown(() {
     imageCache.maximumSize = originalCacheSize;
+  });
+
+  testWidgets('Verify Image does not use disposed handles', (WidgetTester tester) async {
+    final ui.Image image100x100 = (await tester.runAsync(() async => createTestImage(width: 100, height: 100)))!;
+
+    final _TestImageProvider imageProvider1 = _TestImageProvider();
+    final _TestImageProvider imageProvider2 = _TestImageProvider();
+
+    final ValueNotifier<_TestImageProvider> imageListenable = ValueNotifier<_TestImageProvider>(imageProvider1);
+    final ValueNotifier<int> innerListenable = ValueNotifier<int>(0);
+
+    bool imageLoaded = false;
+
+    await tester.pumpWidget(ValueListenableBuilder<_TestImageProvider>(
+      valueListenable: imageListenable,
+      builder: (BuildContext context, _TestImageProvider image, Widget? child) => Image(
+        image: image,
+        frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+          if (frame == 0) {
+            imageLoaded = true;
+          }
+          return LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) => ValueListenableBuilder<int>(
+              valueListenable: innerListenable,
+              builder: (BuildContext context, int value, Widget? valueListenableChild) => KeyedSubtree(
+                key: UniqueKey(),
+                child: child,
+              ),
+            ),
+          );
+        },
+      ),
+    ));
+
+    imageLoaded = false;
+    imageProvider1.complete(image10x10);
+    await tester.idle();
+    await tester.pump();
+    expect(imageLoaded, true);
+
+    imageLoaded = false;
+    imageListenable.value = imageProvider2;
+    innerListenable.value += 1;
+    imageProvider2.complete(image100x100);
+    await tester.idle();
+    await tester.pump();
+    expect(imageLoaded, true);
   });
 
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
@@ -1180,8 +1227,9 @@ void main() {
         image: imageProvider,
         loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
           chunkEvents.add(loadingProgress);
-          if (loadingProgress == null)
+          if (loadingProgress == null) {
             return child;
+          }
           return Directionality(
             textDirection: TextDirection.ltr,
             child: Text('loading ${loadingProgress.cumulativeBytesLoaded} / ${loadingProgress.expectedTotalBytes}'),
@@ -1686,7 +1734,7 @@ void main() {
     expect(tester.takeException(), 'threw');
   });
 
-  Future<void> _testRotatedImage(WidgetTester tester, bool isAntiAlias) async {
+  Future<void> testRotatedImage(WidgetTester tester, bool isAntiAlias) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(RepaintBoundary(
       key: key,
@@ -1717,8 +1765,8 @@ void main() {
   testWidgets(
     'Rotated images',
     (WidgetTester tester) async {
-      await _testRotatedImage(tester, true);
-      await _testRotatedImage(tester, false);
+      await testRotatedImage(tester, true);
+      await testRotatedImage(tester, false);
     },
     skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
   );
@@ -1950,7 +1998,13 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('image_test.missing.1.png'),
     );
-    expect(tester.takeException().toString(), startsWith('Unable to load asset: '));
+    expect(
+      tester.takeException().toString(),
+      equals(
+        'Unable to load asset: "missing-asset".\n'
+        'The asset does not exist or has empty data.',
+      ),
+    );
     await tester.pump();
     await expectLater(
       find.byKey(key),
@@ -1977,9 +2031,7 @@ void main() {
 
 @immutable
 class _ConfigurationAwareKey {
-  const _ConfigurationAwareKey(this.provider, this.configuration)
-    : assert(provider != null),
-      assert(configuration != null);
+  const _ConfigurationAwareKey(this.provider, this.configuration);
 
   final ImageProvider provider;
   final ImageConfiguration configuration;
@@ -2121,7 +2173,7 @@ class _DebouncingImageProvider extends ImageProvider<Object> {
   Future<Object> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
 
   @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) => imageProvider.load(key, decode);
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) => imageProvider.loadImage(key, decode);
 }
 
 class _FailingImageProvider extends ImageProvider<int> {
@@ -2130,11 +2182,7 @@ class _FailingImageProvider extends ImageProvider<int> {
     this.failOnLoad = false,
     required this.throws,
     required this.image,
-  }) : assert(failOnLoad != null),
-       assert(failOnObtainKey != null),
-       assert(failOnLoad == true || failOnObtainKey == true),
-       assert(throws != null),
-       assert(image != null);
+  }) : assert(failOnLoad == true || failOnObtainKey == true);
 
   final bool failOnObtainKey;
   final bool failOnLoad;

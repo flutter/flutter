@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Has 4 CupertinoButton variants', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.CupertinoButtonApp(),
     );
 
     expect(find.byType(CupertinoButton), findsNWidgets(4));

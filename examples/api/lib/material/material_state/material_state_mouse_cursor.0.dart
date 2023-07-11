@@ -2,26 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for MaterialStateMouseCursor
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [MaterialStateMouseCursor].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const MaterialStateMouseCursorExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class MaterialStateMouseCursorExampleApp extends StatelessWidget {
+  const MaterialStateMouseCursorExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('MaterialStateMouseCursor Sample')),
         body: const Center(
-          child: MyStatelessWidget(),
+          child: MaterialStateMouseCursorExample(),
         ),
       ),
     );
@@ -29,6 +25,8 @@ class MyApp extends StatelessWidget {
 }
 
 class ListTileCursor extends MaterialStateMouseCursor {
+  const ListTileCursor();
+
   @override
   MouseCursor resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
@@ -41,13 +39,13 @@ class ListTileCursor extends MaterialStateMouseCursor {
   String get debugDescription => 'ListTileCursor()';
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class MaterialStateMouseCursorExample extends StatelessWidget {
+  const MaterialStateMouseCursorExample({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Disabled ListTile'),
+    return const ListTile(
+      title: Text('Disabled ListTile'),
       enabled: false,
       mouseCursor: ListTileCursor(),
     );

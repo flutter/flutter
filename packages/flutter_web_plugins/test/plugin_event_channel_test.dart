@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('chrome') // Uses web-only Flutter SDK
+library;
 
 import 'dart:async';
 import 'dart:ui' as ui;
@@ -93,7 +94,7 @@ void main() {
           PluginEventChannel<String>('test3');
 
       final StreamController<String> controller = StreamController<String>(
-          onListen: expectAsync0<void>(() {}, count: 1));
+          onListen: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(),
@@ -109,7 +110,7 @@ void main() {
           PluginEventChannel<String>('test3');
 
       final StreamController<String> controller = StreamController<String>(
-          onListen: expectAsync0<void>(() {}, count: 1));
+          onListen: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(),

@@ -40,8 +40,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ///
   /// The [childManager] argument must not be null.
   RenderSliverFixedExtentBoxAdaptor({
-    required RenderSliverBoxChildManager childManager,
-  }) : super(childManager: childManager);
+    required super.childManager,
+  });
 
   /// The main-axis extent of each item.
   double get itemExtent;
@@ -257,7 +257,6 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         child.layout(childConstraints);
       }
       trailingChildWithLayout = child;
-      assert(child != null);
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, childParentData.index!);
@@ -310,8 +309,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     // We may have started the layout while scrolled to the end, which would not
     // expose a new child.
-    if (estimatedMaxScrollOffset == trailingScrollOffset)
+    if (estimatedMaxScrollOffset == trailingScrollOffset) {
       childManager.setDidUnderflow(true);
+    }
     childManager.didFinishLayout();
   }
 }
@@ -342,18 +342,17 @@ class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   ///
   /// The [childManager] argument must not be null.
   RenderSliverFixedExtentList({
-    required RenderSliverBoxChildManager childManager,
+    required super.childManager,
     required double itemExtent,
-  }) : _itemExtent = itemExtent,
-       super(childManager: childManager);
+  }) : _itemExtent = itemExtent;
 
   @override
   double get itemExtent => _itemExtent;
   double _itemExtent;
   set itemExtent(double value) {
-    assert(value != null);
-    if (_itemExtent == value)
+    if (_itemExtent == value) {
       return;
+    }
     _itemExtent = value;
     markNeedsLayout();
   }

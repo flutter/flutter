@@ -10,7 +10,7 @@ import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
 class TestSliverChildListDelegate extends SliverChildListDelegate {
-  TestSliverChildListDelegate(List<Widget> children) : super(children);
+  TestSliverChildListDelegate(super.children);
 
   final List<String> log = <String>[];
 
@@ -21,7 +21,7 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
 }
 
 class Alive extends StatefulWidget {
-  const Alive(this.alive, this.index, { Key? key }) : super(key: key);
+  const Alive(this.alive, this.index, { super.key });
   final bool alive;
   final int index;
 
@@ -167,7 +167,7 @@ void main() {
         child: ListView(
           itemExtent: 200.0,
           children: List<Widget>.generate(20, (int i) {
-            return Container(
+            return ColoredBox(
               color: Colors.green,
               child: Text('$i'),
             );
@@ -176,7 +176,7 @@ void main() {
       ),
     );
 
-    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).first);
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(ColoredBox).first);
     expect(box.size.height, equals(200.0));
 
     expect(find.text('0'), findsOneWidget);
@@ -347,9 +347,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 0.0,
+          child: SizedBox.shrink(
             child: ListView(
               padding: const EdgeInsets.all(8.0),
               children: const <Widget>[
@@ -502,7 +500,7 @@ void main() {
             children: <Widget>[
               const Text('top', textDirection: TextDirection.ltr),
               Builder(builder: (BuildContext context) {
-                innerMediaQueryPadding = MediaQuery.of(context).padding;
+                innerMediaQueryPadding = MediaQuery.paddingOf(context);
                 return Container();
               }),
             ],
@@ -664,7 +662,6 @@ void main() {
     final ScrollController controller = ScrollController();
 
     Widget buildListView({ required Axis scrollDirection }) {
-      assert(scrollDirection != null);
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(

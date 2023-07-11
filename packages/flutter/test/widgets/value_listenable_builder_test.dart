@@ -18,8 +18,9 @@ void main() {
       child: ValueListenableBuilder<String?>(
         valueListenable: valueListenable,
         builder: (BuildContext context, String? value, Widget? child) {
-          if (value == null)
+          if (value == null) {
             return const Placeholder();
+          }
           return Text(value);
         },
       ),
@@ -112,7 +113,7 @@ void main() {
 }
 
 class SpyStringValueNotifier extends ValueNotifier<String?> {
-  SpyStringValueNotifier(String? initialValue) : super(initialValue);
+  SpyStringValueNotifier(super.initialValue);
 
   /// Override for test visibility only.
   @override

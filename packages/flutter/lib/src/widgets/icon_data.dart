@@ -49,8 +49,9 @@ class IconData {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is IconData
         && other.codePoint == codePoint
         && other.fontFamily == fontFamily
@@ -71,21 +72,13 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
   ///
   /// The [showName], [style], and [level] arguments must not be null.
   IconDataProperty(
-    String name,
-    IconData? value, {
-    String? ifNull,
-    bool showName = true,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-    DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(showName != null),
-       assert(style != null),
-       assert(level != null),
-       super(name, value,
-         showName: showName,
-         ifNull: ifNull,
-         style: style,
-         level: level,
-       );
+    String super.name,
+    super.value, {
+    super.ifNull,
+    super.showName,
+    super.style,
+    super.level,
+  });
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
@@ -98,3 +91,14 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
     return json;
   }
 }
+
+class _StaticIconProvider {
+  const _StaticIconProvider();
+}
+
+/// Annotation for classes that only provide static const [IconData] instances.
+///
+/// This is a hint to the font tree shaker to ignore the constant instances
+/// of [IconData] appearing in the class when tracking which code points
+/// should be retained in the bundled font.
+const Object staticIconProvider = _StaticIconProvider();

@@ -2,28 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoSliverNavigationBar
-
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [CupertinoSliverNavigationBar].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const SliverNavBarApp());
 
-  static const String _title = 'CupertinoSliverNavigationBar Sample';
+class SliverNavBarApp extends StatelessWidget {
+  const SliverNavBarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: CupertinoNavBarSample(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: SliverNavBarExample(),
     );
   }
 }
 
-class CupertinoNavBarSample extends StatelessWidget {
-  const CupertinoNavBarSample({Key? key}) : super(key: key);
+class SliverNavBarExample extends StatelessWidget {
+  const SliverNavBarExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,12 +47,17 @@ class CupertinoNavBarSample extends StatelessWidget {
                 const Text('Drag me up', textAlign: TextAlign.center),
                 CupertinoButton.filled(
                   onPressed: () {
-                    Navigator.push(context, CupertinoPageRoute<Widget>(builder: (BuildContext context) {
-                      return const NextPage();
-                    }));
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute<Widget>(
+                        builder: (BuildContext context) {
+                          return const NextPage();
+                        },
+                      ),
+                    );
                   },
                   child: const Text('Go to Next Page'),
-                )
+                ),
               ],
             ),
           ),
@@ -65,33 +68,31 @@ class CupertinoNavBarSample extends StatelessWidget {
 }
 
 class NextPage extends StatelessWidget {
-  const NextPage({ Key? key }) : super(key: key);
+  const NextPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final Brightness brightness = CupertinoTheme.brightnessOf(context);
-    return  CupertinoPageScaffold(
+    return CupertinoPageScaffold(
       child: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: CupertinoColors.systemYellow,
             border: Border(
               bottom: BorderSide(
-                color: brightness == Brightness.light
-                  ? CupertinoColors.black
-                  : CupertinoColors.white,
+                color: brightness == Brightness.light ? CupertinoColors.black : CupertinoColors.white,
               ),
             ),
             // The middle widget is visible in both collapsed and expanded states.
             middle: const Text('Contacts Group'),
-            // When the "middle" parameter is implemented, the larget title is only visible
+            // When the "middle" parameter is implemented, the largest title is only visible
             // when the CupertinoSliverNavigationBar is fully expanded.
             largeTitle: const Text('Family'),
           ),
-          SliverFillRemaining(
+          const SliverFillRemaining(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Drag me up', textAlign: TextAlign.center),
                 // When the "leading" parameter is omitted on a route that has a previous page,
                 // the back button is automatically added to the leading position.

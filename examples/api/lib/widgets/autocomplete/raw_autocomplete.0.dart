@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for RawAutocomplete
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
+/// Flutter code sample for [RawAutocomplete].
 
 void main() => runApp(const AutocompleteExampleApp());
 
 class AutocompleteExampleApp extends StatelessWidget {
-  const AutocompleteExampleApp({Key? key}) : super(key: key);
+  const AutocompleteExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +27,7 @@ class AutocompleteExampleApp extends StatelessWidget {
 }
 
 class AutocompleteBasicExample extends StatelessWidget {
-  const AutocompleteBasicExample({Key? key}) : super(key: key);
+  const AutocompleteBasicExample({super.key});
 
   static const List<String> _options = <String>[
     'aardvark',
@@ -44,10 +43,12 @@ class AutocompleteBasicExample extends StatelessWidget {
           return option.contains(textEditingValue.text.toLowerCase());
         });
       },
-      fieldViewBuilder: (BuildContext context,
-          TextEditingController textEditingController,
-          FocusNode focusNode,
-          VoidCallback onFieldSubmitted) {
+      fieldViewBuilder: (
+        BuildContext context,
+        TextEditingController textEditingController,
+        FocusNode focusNode,
+        VoidCallback onFieldSubmitted,
+      ) {
         return TextFormField(
           controller: textEditingController,
           focusNode: focusNode,
@@ -56,8 +57,11 @@ class AutocompleteBasicExample extends StatelessWidget {
           },
         );
       },
-      optionsViewBuilder: (BuildContext context,
-          AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+      optionsViewBuilder: (
+        BuildContext context,
+        AutocompleteOnSelected<String> onSelected,
+        Iterable<String> options,
+      ) {
         return Align(
           alignment: Alignment.topLeft,
           child: Material(

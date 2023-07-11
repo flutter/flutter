@@ -5,16 +5,23 @@
 import '../android/android_device.dart';
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  InstallCommand() {
+  InstallCommand({
+    required bool verboseHelp,
+  }) {
+    addBuildModeFlags(verboseHelp: verboseHelp);
     requiresPubspecYaml();
-    usesDeviceUserOption();
+    usesApplicationBinaryOption();
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
+    usesDeviceUserOption();
+    usesFlavorOption();
     argParser.addFlag('uninstall-only',
       help: 'Uninstall the app if already on the device. Skip install.',
     );
@@ -29,10 +36,16 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   @override
   final String category = FlutterCommandCategory.tools;
 
+  @override
+  bool get refreshWirelessDevices => true;
+
   Device? device;
 
   bool get uninstallOnly => boolArg('uninstall-only');
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+
+  String? get _applicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
+  File? get _applicationBinary => _applicationBinaryPath == null ? null : globals.fs.file(_applicationBinaryPath);
 
   @override
   Future<void> validateCommand() async {
@@ -44,6 +57,9 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     if (userIdentifier != null && device is! AndroidDevice) {
       throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
     }
+    if (_applicationBinaryPath != null && !(_applicationBinary?.existsSync() ?? true)) {
+      throwToolExit('Prebuilt binary $_applicationBinaryPath does not exist');
+    }
   }
 
   @override
@@ -51,6 +67,8 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     final Device targetDevice = device!;
     final ApplicationPackage? package = await applicationPackages?.getPackageForPlatform(
       await targetDevice.targetPlatform,
+      applicationBinary: _applicationBinary,
+      buildInfo: await getBuildInfo(),
     );
     if (package == null) {
       throwToolExit('Could not find or build package');
@@ -90,10 +108,6 @@ Future<bool> installApp(
   String? userIdentifier,
   bool uninstall = true
 }) async {
-  if (package == null) {
-    return false;
-  }
-
   try {
     if (uninstall && await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
       globals.printStatus('Uninstalling old version...');

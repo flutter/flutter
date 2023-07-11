@@ -5,8 +5,10 @@
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
 
 typedef HeaderGenerator = String Function(String regenerateInstructions);
@@ -50,7 +52,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       scriptCode = codes[1].length > codes[2].length ? codes[1] : codes[2];
       countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
     }
-    assert(codes[0] != null && codes[0].isNotEmpty);
+    assert(codes[0].isNotEmpty);
     assert(countryCode == null || countryCode.isNotEmpty);
     assert(scriptCode == null || scriptCode.isNotEmpty);
 
@@ -70,12 +72,10 @@ class LocaleInfo implements Comparable<LocaleInfo> {
             case 'CN':
             case 'SG':
               scriptCode = 'Hans';
-              break;
             case 'TW':
             case 'HK':
             case 'MO':
               scriptCode = 'Hant';
-              break;
           }
           break;
         }
@@ -200,13 +200,10 @@ void precacheLanguageAndRegionTags() {
       switch (type) {
         case 'language':
           _languages[subtag] = description;
-          break;
         case 'region':
           _regions[subtag] = description;
-          break;
         case 'script':
           _scripts[subtag] = description;
-          break;
       }
     }
   }
@@ -215,8 +212,15 @@ void precacheLanguageAndRegionTags() {
 String describeLocale(String tag) {
   final List<String> subtags = tag.split('_');
   assert(subtags.isNotEmpty);
-  assert(_languages.containsKey(subtags[0]));
-  final String language = _languages[subtags[0]]!;
+  final String languageCode = subtags[0];
+  if (!_languages.containsKey(languageCode)) {
+    throw L10nException(
+      '"$languageCode" is not a supported language code.\n'
+      'See https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry '
+      'for the supported list.',
+    );
+  }
+  final String language = _languages[languageCode]!;
   String output = language;
   String? region;
   String? script;
@@ -284,7 +288,33 @@ String generateString(String value) {
     // Reintroduce escaped backslashes into generated Dart string.
     .replaceAll(backslash, r'\\');
 
-  return "'$value'";
+  return value;
+}
+
+/// Given a list of strings, placeholders, or helper function calls, concatenate
+/// them into one expression to be returned.
+///
+/// If `isSingleStringVar` is passed, then we want to convert "'$expr'" to "expr".
+String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = false }) {
+  if (expressions.isEmpty) {
+    return "''";
+  } else if (isSingleStringVar) {
+    // If our expression is "$varName" where varName is a String, this is equivalent to just varName.
+    return expressions[0].substring(1);
+  } else {
+    final String string = expressions.reversed.fold<String>('', (String string, String expression) {
+      if (expression[0] != r'$') {
+        return generateString(expression) + string;
+      }
+      final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
+      if (alphanumeric.hasMatch(expression.substring(1)) && !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
+        return '$expression$string';
+      } else {
+        return '\${${expression.substring(1)}}$string';
+      }
+    });
+    return "'$string'";
+  }
 }
 
 /// Typed configuration from the localizations config file.
@@ -303,7 +333,10 @@ class LocalizationOptions {
     this.useSyntheticPackage = true,
     this.areResourceAttributesRequired = false,
     this.usesNullableGetter = true,
-  }) : assert(useSyntheticPackage != null);
+    this.format = false,
+    this.useEscaping = false,
+    this.suppressWarnings = false,
+  });
 
   /// The `--arb-dir` argument.
   ///
@@ -369,6 +402,21 @@ class LocalizationOptions {
   ///
   /// Whether or not the localizations class getter is nullable.
   final bool usesNullableGetter;
+
+  /// The `format` argument.
+  ///
+  /// Whether or not to format the generated files.
+  final bool format;
+
+  /// The `use-escaping` argument.
+  ///
+  /// Whether or not the ICU escaping syntax is used.
+  final bool useEscaping;
+
+  /// The `suppress-warnings` argument.
+  ///
+  /// Whether or not to suppress warnings.
+  final bool suppressWarnings;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -384,7 +432,12 @@ LocalizationOptions parseLocalizationsOptions({
   if (contents.trim().isEmpty) {
     return const LocalizationOptions();
   }
-  final YamlNode yamlNode = loadYamlNode(file.readAsStringSync());
+  final YamlNode yamlNode;
+  try {
+    yamlNode = loadYamlNode(file.readAsStringSync());
+  } on YamlException catch (err) {
+    throwToolExit(err.message);
+  }
   if (yamlNode is! YamlMap) {
     logger.printError('Expected ${file.path} to contain a map, instead was $yamlNode');
     throw Exception();
@@ -403,6 +456,9 @@ LocalizationOptions parseLocalizationsOptions({
     useSyntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger) ?? true,
     areResourceAttributesRequired: _tryReadBool(yamlNode, 'required-resource-attributes', logger) ?? false,
     usesNullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger) ?? true,
+    format: _tryReadBool(yamlNode, 'format', logger) ?? false,
+    useEscaping: _tryReadBool(yamlNode, 'use-escaping', logger) ?? false,
+    suppressWarnings: _tryReadBool(yamlNode, 'suppress-warnings', logger) ?? false,
   );
 }
 

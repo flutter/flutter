@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -16,14 +17,10 @@ const double _kActivityIndicatorMargin = 16.0;
 
 class _CupertinoSliverRefresh extends SingleChildRenderObjectWidget {
   const _CupertinoSliverRefresh({
-    Key? key,
     this.refreshIndicatorLayoutExtent = 0.0,
     this.hasLayoutExtent = false,
-    Widget? child,
-  }) : assert(refreshIndicatorLayoutExtent != null),
-       assert(refreshIndicatorLayoutExtent >= 0.0),
-       assert(hasLayoutExtent != null),
-       super(key: key, child: child);
+    super.child,
+  }) : assert(refreshIndicatorLayoutExtent >= 0.0);
 
   // The amount of space the indicator should occupy in the sliver in a
   // resting state when in the refreshing mode.
@@ -62,9 +59,7 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
     required double refreshIndicatorExtent,
     required bool hasLayoutExtent,
     RenderBox? child,
-  }) : assert(refreshIndicatorExtent != null),
-       assert(refreshIndicatorExtent >= 0.0),
-       assert(hasLayoutExtent != null),
+  }) : assert(refreshIndicatorExtent >= 0.0),
        _refreshIndicatorExtent = refreshIndicatorExtent,
        _hasLayoutExtent = hasLayoutExtent {
     this.child = child;
@@ -75,10 +70,10 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   double get refreshIndicatorLayoutExtent => _refreshIndicatorExtent;
   double _refreshIndicatorExtent;
   set refreshIndicatorLayoutExtent(double value) {
-    assert(value != null);
     assert(value >= 0.0);
-    if (value == _refreshIndicatorExtent)
+    if (value == _refreshIndicatorExtent) {
       return;
+    }
     _refreshIndicatorExtent = value;
     markNeedsLayout();
   }
@@ -89,9 +84,9 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   bool get hasLayoutExtent => _hasLayoutExtent;
   bool _hasLayoutExtent;
   set hasLayoutExtent(bool value) {
-    assert(value != null);
-    if (value == _hasLayoutExtent)
+    if (value == _hasLayoutExtent) {
       return;
+    }
     _hasLayoutExtent = value;
     markNeedsLayout();
   }
@@ -297,21 +292,18 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// The [onRefresh] argument will be called when pulled far enough to trigger
   /// a refresh.
   const CupertinoSliverRefreshControl({
-    Key? key,
+    super.key,
     this.refreshTriggerPullDistance = _defaultRefreshTriggerPullDistance,
     this.refreshIndicatorExtent = _defaultRefreshIndicatorExtent,
     this.builder = buildRefreshIndicator,
     this.onRefresh,
-  }) : assert(refreshTriggerPullDistance != null),
-       assert(refreshTriggerPullDistance > 0.0),
-       assert(refreshIndicatorExtent != null),
+  }) : assert(refreshTriggerPullDistance > 0.0),
        assert(refreshIndicatorExtent >= 0.0),
        assert(
          refreshTriggerPullDistance >= refreshIndicatorExtent,
          'The refresh indicator cannot take more space in its final state '
          'than the amount initially created by overscrolling.',
-       ),
-       super(key: key);
+       );
 
   /// The amount of overscroll the scrollable must be dragged to trigger a reload.
   ///
@@ -378,15 +370,15 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     double refreshTriggerPullDistance,
     double refreshIndicatorExtent,
   ) {
-    final double percentageComplete = (pulledExtent / refreshTriggerPullDistance).clamp(0.0, 1.0);
+    final double percentageComplete = clampDouble(pulledExtent / refreshTriggerPullDistance, 0.0, 1.0);
 
-    // Place the indicator at the top of the sliver that opens up. Note that we're using
-    // a Stack/Positioned widget because the CupertinoActivityIndicator does some internal
-    // translations based on the current size (which grows as the user drags) that makes
-    // Padding calculations difficult. Rather than be reliant on the internal implementation
-    // of the activity indicator, the Positioned widget allows us to be explicit where the
-    // widget gets placed. Also note that the indicator should appear over the top of the
-    // dragged widget, hence the use of Overflow.visible.
+    // Place the indicator at the top of the sliver that opens up. We're using a
+    // Stack/Positioned widget because the CupertinoActivityIndicator does some
+    // internal translations based on the current size (which grows as the user drags)
+    // that makes Padding calculations difficult. Rather than be reliant on the
+    // internal implementation of the activity indicator, the Positioned widget allows
+    // us to be explicit where the widget gets placed. The indicator should appear
+    // over the top of the dragged widget, hence the use of Clip.none.
     return Center(
       child: Stack(
         clipBehavior: Clip.none,
@@ -406,7 +398,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     switch (refreshState) {
       case RefreshIndicatorMode.drag:
         // While we're dragging, we draw individual ticks of the spinner while simultaneously
-        // easing the opacity in. Note that the opacity curve values here were derived using
+        // easing the opacity in. The opacity curve values here were derived using
         // Xcode through inspecting a native app running on iOS 13.5.
         const Curve opacityCurve = Interval(0.0, 0.35, curve: Curves.easeInOut);
         return Opacity(
@@ -422,7 +414,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
         return CupertinoActivityIndicator(radius: radius * percentageComplete);
       case RefreshIndicatorMode.inactive:
         // Anything else doesn't show anything.
-        return Container();
+        return const SizedBox.shrink();
     }
   }
 
@@ -541,7 +533,6 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
         } else {
           nextState = RefreshIndicatorMode.inactive;
         }
-        break;
     }
 
     return nextState;

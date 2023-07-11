@@ -39,7 +39,7 @@ class SafeArea extends StatelessWidget {
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be
   /// null.
   const SafeArea({
-    Key? key,
+    super.key,
     this.left = true,
     this.top = true,
     this.right = true,
@@ -47,11 +47,7 @@ class SafeArea extends StatelessWidget {
     this.minimum = EdgeInsets.zero,
     this.maintainBottomViewPadding = false,
     required this.child,
-  }) : assert(left != null),
-       assert(top != null),
-       assert(right != null),
-       assert(bottom != null),
-       super(key: key);
+  });
 
   /// Whether to avoid system intrusions on the left.
   final bool left;
@@ -94,11 +90,11 @@ class SafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData data = MediaQuery.of(context);
-    EdgeInsets padding = data.padding;
+    EdgeInsets padding = MediaQuery.paddingOf(context);
     // Bottom padding has been consumed - i.e. by the keyboard
-    if (maintainBottomViewPadding)
-      padding = padding.copyWith(bottom: data.viewPadding.bottom);
+    if (maintainBottomViewPadding) {
+      padding = padding.copyWith(bottom: MediaQuery.viewPaddingOf(context).bottom);
+    }
 
     return Padding(
       padding: EdgeInsets.only(
@@ -143,7 +139,7 @@ class SafeArea extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [SafeArea], for insetting widgets to avoid operating system intrusions.
+///  * [SafeArea], for insetting box widgets to avoid operating system intrusions.
 ///  * [SliverPadding], for insetting slivers in general.
 ///  * [MediaQuery], from which the window padding is obtained.
 ///  * [dart:ui.FlutterView.padding], which reports the padding from the operating
@@ -153,18 +149,14 @@ class SliverSafeArea extends StatelessWidget {
   ///
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be null.
   const SliverSafeArea({
-    Key? key,
+    super.key,
     this.left = true,
     this.top = true,
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
     required this.sliver,
-  }) : assert(left != null),
-       assert(top != null),
-       assert(right != null),
-       assert(bottom != null),
-       super(key: key);
+  });
 
   /// Whether to avoid system intrusions on the left.
   final bool left;
@@ -193,7 +185,7 @@ class SliverSafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final EdgeInsets padding = MediaQuery.of(context).padding;
+    final EdgeInsets padding = MediaQuery.paddingOf(context);
     return SliverPadding(
       padding: EdgeInsets.only(
         left: math.max(left ? padding.left : 0.0, minimum.left),

@@ -25,8 +25,9 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   @override
   void createChild(int index, { required RenderBox? after }) {
-    if (index < 0 || index >= children.length)
+    if (index < 0 || index >= children.length) {
       return;
+    }
     try {
       _currentlyUpdatingChildIndex = index;
       _renderObject.insert(children[index], after: after);

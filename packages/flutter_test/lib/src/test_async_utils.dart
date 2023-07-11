@@ -44,10 +44,7 @@ class _AsyncScope {
 ///   // ...
 /// });
 /// ```
-class TestAsyncUtils {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  TestAsyncUtils._();
+abstract final class TestAsyncUtils {
   static const String _className = 'TestAsyncUtils';
 
   static final List<_AsyncScope> _scopeStack = <_AsyncScope>[];
@@ -78,8 +75,9 @@ class TestAsyncUtils {
       final List<DiagnosticsNode> information = <DiagnosticsNode>[];
       while (_scopeStack.isNotEmpty) {
         closedScope = _scopeStack.removeLast();
-        if (closedScope == scope)
+        if (closedScope == scope) {
           break;
+        }
         if (!leaked) {
           information.add(ErrorSummary('Asynchronous call to guarded function leaked.'));
           information.add(ErrorHint('You must use "await" with all Future-returning test APIs.'));
@@ -107,8 +105,9 @@ class TestAsyncUtils {
         }
         throw FlutterError.fromParts(information);
       }
-      if (error != null)
+      if (error != null) {
         return Future<T>.error(error! as Object, stack);
+      }
       return Future<T>.value(resultValue);
     }
     return result.then<T>(
@@ -123,8 +122,9 @@ class TestAsyncUtils {
   static Zone? get _currentScopeZone {
     Zone? zone = Zone.current;
     while (zone != null) {
-      if (zone[_scopeStack] == true)
+      if (zone[_scopeStack] == true) {
         return zone;
+      }
       zone = zone.parent;
     }
     return null;
@@ -174,8 +174,9 @@ class TestAsyncUtils {
       skipCount += 1;
       scope = candidateScope;
       if (skipCount >= _scopeStack.length) {
-        if (zone == null)
+        if (zone == null) {
           break;
+        }
         // Some people have reported reaching this point, but it's not clear
         // why. For now, just silently return.
         // TODO(ianh): If we ever get a test case that shows how we reach
@@ -183,10 +184,7 @@ class TestAsyncUtils {
         return;
       }
       candidateScope = _scopeStack[_scopeStack.length - skipCount - 1];
-      assert(candidateScope != null);
-      assert(candidateScope.zone != null);
     } while (candidateScope.zone != zone);
-    assert(scope != null);
     final List<DiagnosticsNode> information = <DiagnosticsNode>[
       ErrorSummary('Guarded function conflict.'),
       ErrorHint('You must use "await" with all Future-returning test APIs.'),
@@ -263,6 +261,11 @@ class TestAsyncUtils {
         '\nWhen the first $originalName was called, this was the stack',
         scope.creationStack,
       ));
+    } else {
+      information.add(DiagnosticsStackTrace(
+        '\nWhen the first function was called, this was the stack',
+        scope.creationStack,
+      ));
     }
     throw FlutterError.fromParts(information);
   }
@@ -274,7 +277,7 @@ class TestAsyncUtils {
     if (_scopeStack.isNotEmpty) {
       final List<DiagnosticsNode> information = <DiagnosticsNode>[
         ErrorSummary('Asynchronous call to guarded function leaked.'),
-        ErrorHint('You must use "await" with all Future-returning test APIs.')
+        ErrorHint('You must use "await" with all Future-returning test APIs.'),
       ];
       for (final _AsyncScope scope in _scopeStack) {
         final _StackEntry? guarder = _findResponsibleMethod(scope.creationStack, 'guard', information);
@@ -298,6 +301,10 @@ class TestAsyncUtils {
 
   static _StackEntry? _findResponsibleMethod(StackTrace rawStack, String method, List<DiagnosticsNode> information) {
     assert(method == 'guard' || method == 'guardSync');
+    // Web/JavaScript stack traces use a different format.
+    if (kIsWeb) {
+      return null;
+    }
     final List<String> stack = rawStack.toString().split('\n').where(_stripAsynchronousSuspensions).toList();
     assert(stack.last == '');
     stack.removeLast();

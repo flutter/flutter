@@ -5,10 +5,15 @@
 import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
+import 'color_scheme.dart';
 import 'divider.dart';
 import 'material.dart';
 import 'scaffold.dart';
+import 'text_theme.dart';
 import 'theme.dart';
+
+// Examples can assume:
+// late BuildContext context;
 
 const Duration _materialBannerTransitionDuration = Duration(milliseconds: 250);
 const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
@@ -18,15 +23,20 @@ const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
 /// The [ScaffoldMessengerState.showMaterialBanner] function returns a
 /// [ScaffoldFeatureController]. The value of the controller's closed property
 /// is a Future that resolves to a MaterialBannerClosedReason. Applications that need
-/// to know how a material banner was closed can use this value.
+/// to know how a [MaterialBanner] was closed can use this value.
 ///
 /// Example:
 ///
 /// ```dart
 /// ScaffoldMessenger.of(context).showMaterialBanner(
-///   MaterialBanner( ... )
+///   const MaterialBanner(
+///     content: Text('Message...'),
+///     actions: <Widget>[
+///       // ...
+///     ],
+///   )
 /// ).closed.then((MaterialBannerClosedReason reason) {
-///    ...
+///    // ...
 /// });
 /// ```
 enum MaterialBannerClosedReason {
@@ -87,24 +97,24 @@ class MaterialBanner extends StatefulWidget {
   /// The [actions].length must be greater than 0. The [elevation] must be null or
   /// non-negative.
   const MaterialBanner({
-    Key? key,
+    super.key,
     required this.content,
     this.contentTextStyle,
     required this.actions,
     this.elevation,
     this.leading,
     this.backgroundColor,
+    this.surfaceTintColor,
+    this.shadowColor,
+    this.dividerColor,
     this.padding,
+    this.margin,
     this.leadingPadding,
     this.forceActionsBelow = false,
     this.overflowAlignment = OverflowBarAlignment.end,
     this.animation,
-    this.onVisible
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(content != null),
-       assert(actions != null),
-       assert(forceActionsBelow != null),
-       super(key: key);
+    this.onVisible,
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// The content of the [MaterialBanner].
   ///
@@ -114,7 +124,7 @@ class MaterialBanner extends StatefulWidget {
   /// Style for the text in the [content] of the [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.contentTextStyle] is used. If that is
-  /// also `null`, [TextTheme.bodyText2] of [ThemeData.textTheme] is used.
+  /// also `null`, [TextTheme.bodyMedium] of [ThemeData.textTheme] is used.
   final TextStyle? contentTextStyle;
 
   /// The set of actions that are displayed at the bottom or trailing side of
@@ -146,6 +156,29 @@ class MaterialBanner extends StatefulWidget {
   /// also `null`, [ColorScheme.surface] of [ThemeData.colorScheme] is used.
   final Color? backgroundColor;
 
+  /// The color used as an overlay on [backgroundColor] to indicate elevation.
+  ///
+  /// If null, [MaterialBannerThemeData.surfaceTintColor] is used. If that
+  /// is also null, the default value is [ColorScheme.surfaceTint].
+  ///
+  /// See [Material.surfaceTintColor] for more details on how this
+  /// overlay is applied.
+  final Color? surfaceTintColor;
+
+  /// The color of the shadow below the [MaterialBanner].
+  ///
+  /// If this property is null, then [MaterialBannerThemeData.shadowColor] of
+  /// [ThemeData.bannerTheme] is used. If that is also null, the default value
+  /// is null.
+  final Color? shadowColor;
+
+  /// The color of the divider.
+  ///
+  /// If this property is null, then [MaterialBannerThemeData.dividerColor] of
+  /// [ThemeData.bannerTheme] is used. If that is also null, the default value
+  /// is [ColorScheme.surfaceVariant].
+  final Color? dividerColor;
+
   /// The amount of space by which to inset the [content].
   ///
   /// If the [actions] are below the [content], this defaults to
@@ -154,6 +187,12 @@ class MaterialBanner extends StatefulWidget {
   /// If the [actions] are trailing the [content], this defaults to
   /// `EdgeInsetsDirectional.only(start: 16.0, top: 2.0)`.
   final EdgeInsetsGeometry? padding;
+
+  /// Empty space to surround the [MaterialBanner].
+  ///
+  /// If the [margin] is null then this defaults to
+  /// 0 if the banner's [elevation] is 0, 10 otherwise.
+  final EdgeInsetsGeometry? margin;
 
   /// The amount of space by which to inset the [leading] widget.
   ///
@@ -184,7 +223,7 @@ class MaterialBanner extends StatefulWidget {
 
   // API for ScaffoldMessengerState.showMaterialBanner():
 
-  /// Creates an animation controller useful for driving a material banner's entrance and exit animation.
+  /// Creates an animation controller useful for driving a [MaterialBanner]'s entrance and exit animation.
   static AnimationController createAnimationController({ required TickerProvider vsync }) {
     return AnimationController(
       duration: _materialBannerTransitionDuration,
@@ -206,7 +245,11 @@ class MaterialBanner extends StatefulWidget {
       elevation: elevation,
       leading: leading,
       backgroundColor: backgroundColor,
+      surfaceTintColor: surfaceTintColor,
+      shadowColor: shadowColor,
+      dividerColor: dividerColor,
       padding: padding,
+      margin: margin,
       leadingPadding: leadingPadding,
       forceActionsBelow: forceActionsBelow,
       overflowAlignment: overflowAlignment,
@@ -260,12 +303,13 @@ class _MaterialBannerState extends State<MaterialBanner> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
 
     assert(widget.actions.isNotEmpty);
 
     final ThemeData theme = Theme.of(context);
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
+    final MaterialBannerThemeData defaults = theme.useMaterial3 ? _BannerDefaultsM3(context) : _BannerDefaultsM2(context);
 
     final bool isSingleRow = widget.actions.length == 1 && !widget.forceActionsBelow;
     final EdgeInsetsGeometry padding = widget.padding ?? bannerTheme.padding ?? (isSingleRow
@@ -287,18 +331,29 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
 
     final double elevation = widget.elevation ?? bannerTheme.elevation ?? 0.0;
+    final EdgeInsetsGeometry margin = widget.margin ?? EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0);
     final Color backgroundColor = widget.backgroundColor
         ?? bannerTheme.backgroundColor
-        ?? theme.colorScheme.surface;
+        ?? defaults.backgroundColor!;
+    final Color? surfaceTintColor = widget.surfaceTintColor
+        ?? bannerTheme.surfaceTintColor
+        ?? defaults.surfaceTintColor;
+    final Color? shadowColor = widget.shadowColor
+        ?? bannerTheme.shadowColor;
+    final Color? dividerColor = widget.dividerColor
+        ?? bannerTheme.dividerColor
+        ?? defaults.dividerColor;
     final TextStyle? textStyle = widget.contentTextStyle
         ?? bannerTheme.contentTextStyle
-        ?? theme.textTheme.bodyText2;
+        ?? defaults.contentTextStyle;
 
     Widget materialBanner = Container(
-      margin: EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0),
+      margin: margin,
       child: Material(
         elevation: elevation,
         color: backgroundColor,
+        surfaceTintColor: surfaceTintColor,
+        shadowColor: shadowColor,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -324,17 +379,17 @@ class _MaterialBannerState extends State<MaterialBanner> {
             ),
             if (!isSingleRow)
               buttonBar,
-
             if (elevation == 0)
-              const Divider(height: 0),
+              Divider(height: 0, color: dividerColor),
           ],
         ),
       ),
     );
 
     // This provides a static banner for backwards compatibility.
-    if (widget.animation == null)
+    if (widget.animation == null) {
       return materialBanner;
+    }
 
     materialBanner = SafeArea(
       child: materialBanner,
@@ -355,7 +410,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
       onDismiss: () {
         ScaffoldMessenger.of(context).removeCurrentMaterialBanner(reason: MaterialBannerClosedReason.dismiss);
       },
-      child: mediaQueryData.accessibleNavigation
+      child: accessibleNavigation
           ? materialBanner
           : SlideTransition(
         position: slideOutAnimation,
@@ -364,7 +419,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
 
     final Widget materialBannerTransition;
-    if (mediaQueryData.accessibleNavigation) {
+    if (accessibleNavigation) {
       materialBannerTransition = materialBanner;
     } else {
       materialBannerTransition = AnimatedBuilder(
@@ -386,3 +441,50 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
   }
 }
+
+class _BannerDefaultsM2 extends MaterialBannerThemeData {
+  _BannerDefaultsM2(this.context)
+    : _theme = Theme.of(context),
+      super(elevation: 0.0);
+
+  final BuildContext context;
+  final ThemeData _theme;
+
+  @override
+  Color? get backgroundColor => _theme.colorScheme.surface;
+
+  @override
+  TextStyle? get contentTextStyle => _theme.textTheme.bodyMedium;
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - Banner
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_162
+
+class _BannerDefaultsM3 extends MaterialBannerThemeData {
+  _BannerDefaultsM3(this.context)
+    : super(elevation: 1.0);
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
+
+  @override
+  Color? get backgroundColor => _colors.surface;
+
+  @override
+  Color? get surfaceTintColor => _colors.surfaceTint;
+
+  @override
+  Color? get dividerColor => _colors.outlineVariant;
+
+  @override
+  TextStyle? get contentTextStyle => _textTheme.bodyMedium;
+}
+
+// END GENERATED TOKEN PROPERTIES - Banner

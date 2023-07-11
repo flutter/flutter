@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for RawAutocomplete
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
+/// Flutter code sample for [RawAutocomplete].
 
 void main() => runApp(const AutocompleteExampleApp());
 
 class AutocompleteExampleApp extends StatelessWidget {
-  const AutocompleteExampleApp({Key? key}) : super(key: key);
+  const AutocompleteExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +55,7 @@ class User {
 }
 
 class AutocompleteCustomTypeExample extends StatelessWidget {
-  const AutocompleteCustomTypeExample({Key? key}) : super(key: key);
+  const AutocompleteCustomTypeExample({super.key});
 
   static const List<User> _userOptions = <User>[
     User(name: 'Alice', email: 'alice@example.com'),
@@ -73,16 +72,16 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
         return _userOptions.where((User option) {
           // Search based on User.toString, which includes both name and
           // email, even though the display string is just the name.
-          return option
-              .toString()
-              .contains(textEditingValue.text.toLowerCase());
+          return option.toString().contains(textEditingValue.text.toLowerCase());
         });
       },
       displayStringForOption: _displayStringForOption,
-      fieldViewBuilder: (BuildContext context,
-          TextEditingController textEditingController,
-          FocusNode focusNode,
-          VoidCallback onFieldSubmitted) {
+      fieldViewBuilder: (
+        BuildContext context,
+        TextEditingController textEditingController,
+        FocusNode focusNode,
+        VoidCallback onFieldSubmitted,
+      ) {
         return TextFormField(
           controller: textEditingController,
           focusNode: focusNode,
@@ -91,8 +90,7 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
           },
         );
       },
-      optionsViewBuilder: (BuildContext context,
-          AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
+      optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
         return Align(
           alignment: Alignment.topLeft,
           child: Material(

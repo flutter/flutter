@@ -7,7 +7,6 @@ import 'dart:math' as math;
 
 import 'package:process/process.dart';
 
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -26,6 +25,7 @@ class AnalysisServer {
     required Logger logger,
     required Platform platform,
     required Terminal terminal,
+    required this.suppressAnalytics,
     String? protocolTrafficLog,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
@@ -42,6 +42,7 @@ class AnalysisServer {
   final Platform _platform;
   final Terminal _terminal;
   final String? _protocolTrafficLog;
+  final bool suppressAnalytics;
 
   Process? _process;
   final StreamController<bool> _analyzingController =
@@ -67,6 +68,7 @@ class AnalysisServer {
       '--disable-server-feature-search',
       '--sdk',
       sdkPath,
+      if (suppressAnalytics) '--suppress-analytics',
       if (_protocolTrafficLog != null)
         '--protocol-traffic-log=$_protocolTrafficLog',
     ];

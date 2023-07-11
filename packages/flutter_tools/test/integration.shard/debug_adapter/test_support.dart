@@ -6,9 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dds/dap.dart';
-import 'package:dds/src/dap/logging.dart';
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -33,7 +31,6 @@ final bool useInProcessDap = Platform.environment['DAP_TEST_INTERNAL'] == 'true'
 /// Service traffic (wrapped in a custom 'dart.log' event).
 final bool verboseLogging = Platform.environment['DAP_TEST_VERBOSE'] == 'true';
 
-const String startOfErrorOutputMarker = '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════';
 const String endOfErrorOutputMarker = '════════════════════════════════════════════════════════════════════════════════════════════════════';
 
 /// Expects the lines in [actual] to match the relevant matcher in [expected],
@@ -65,6 +62,11 @@ class SimpleFlutterRunner {
     unawaited(process.exitCode.then(_handleExitCode));
   }
 
+  final StreamController<String> _output = StreamController<String>.broadcast();
+
+  /// A broadcast stream of any non-JSON output from the process.
+  Stream<String> get output => _output.stream;
+
   void _handleExitCode(int code) {
       if (!_vmServiceUriCompleter.isCompleted) {
         _vmServiceUriCompleter.completeError('Flutter process ended without producing a VM Service URI');
@@ -93,8 +95,9 @@ class SimpleFlutterRunner {
         }
       }
     } on FormatException {
-      // `flutter run` writes a lot of text to stdout so just ignore anything
-      // that's not valid JSON.
+      // `flutter run` writes a lot of text to stdout that isn't daemon messages
+      //  (not valid JSON), so just pass that one for tests that may want it.
+      _output.add(outputLine);
     }
   }
 

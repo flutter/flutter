@@ -1428,8 +1428,9 @@ void main() {
           Locale('de', 'DE'),
         ],
         localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) {
-          if (locale == null)
+          if (locale == null) {
             return const Locale('und', 'US');
+          }
           return const Locale('en', 'US');
         },
         buildContent: (BuildContext context) {

@@ -2,29 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for showCupertinoDialog
-
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [showCupertinoDialog].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const CupertinoDialogApp());
 
-  static const String _title = 'Flutter Code Sample';
+class CupertinoDialogApp extends StatelessWidget {
+  const CupertinoDialogApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
+      theme: CupertinoThemeData(brightness: Brightness.light),
       restorationScopeId: 'app',
-      title: _title,
-      home: MyStatelessWidget(),
+      home: CupertinoDialogExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class CupertinoDialogExample extends StatelessWidget {
+  const CupertinoDialogExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,26 +31,37 @@ class MyStatelessWidget extends StatelessWidget {
         middle: Text('Home'),
       ),
       child: Center(
-          child: CupertinoButton(
-        onPressed: () {
-          Navigator.of(context).restorablePush(_dialogBuilder);
-        },
-        child: const Text('Open Dialog'),
-      )),
+        child: CupertinoButton(
+          onPressed: () {
+            Navigator.of(context).restorablePush(_dialogBuilder);
+          },
+          child: const Text('Open Dialog'),
+        ),
+      ),
     );
   }
 
-  static Route<Object?> _dialogBuilder(
-      BuildContext context, Object? arguments) {
+  @pragma('vm:entry-point')
+  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return CupertinoDialogRoute<void>(
       context: context,
       builder: (BuildContext context) {
-        return const CupertinoAlertDialog(
-          title: Text('Title'),
-          content: Text('Content'),
+        return CupertinoAlertDialog(
+          title: const Text('Title'),
+          content: const Text('Content'),
           actions: <Widget>[
-            CupertinoDialogAction(child: Text('Yes')),
-            CupertinoDialogAction(child: Text('No')),
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Yes'),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('No'),
+            ),
           ],
         );
       },

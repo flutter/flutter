@@ -16,6 +16,8 @@ void main() {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
     final bool material3 = theme.useMaterial3;
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
+    final bool material3 = theme.useMaterial3;
 
     // Enabled TextButton
     await tester.pumpWidget(
@@ -257,7 +259,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -327,7 +328,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(textColor(), hoverColor);
@@ -395,7 +395,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(iconColor(), hoverColor);
@@ -444,10 +443,8 @@ void main() {
       ),
     );
 
-
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(TextButton)));
     await tester.pumpAndSettle();
 
@@ -492,11 +489,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: TextButton(
-            style: ButtonStyle(
+            style: const ButtonStyle(
               // Specifying minimumSize to mimic the original minimumSize for
               // RaisedButton so that the semantics tree's rect and transform
               // match the original version of this test.
-              minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+              minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
             ),
             onPressed: () { },
             child: const Text('ABC'),
@@ -573,12 +570,8 @@ void main() {
       ),
     );
 
-    // Scaled text rendering is different on Linux and Mac by one pixel.
-    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.byType(TextButton)).width, isIn(<double>[70.0, 71.0]));
-    expect(tester.getSize(find.byType(TextButton)).height, isIn(<double>[47.0, 48.0]));
-    expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
-    expect(tester.getSize(find.byType(Text)).height, isIn(<double>[18.0, 19.0]));
+    expect(tester.getSize(find.byType(TextButton)), const Size(71.0, 48.0));
+    expect(tester.getSize(find.byType(Text)), const Size(55.0, 18.0));
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
@@ -600,13 +593,9 @@ void main() {
       ),
     );
 
-    // Scaled text rendering is different on Linux and Mac by one pixel.
-    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.byType(TextButton)).width, isIn(<double>[133.0, 134.0]));
-    expect(tester.getSize(find.byType(TextButton)).height, equals(48.0));
-    expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
-    expect(tester.getSize(find.byType(Text)).height, equals(42.0));
-  });
+    expect(tester.getSize(find.byType(TextButton)), const Size(134.0, 48.0));
+    expect(tester.getSize(find.byType(Text)), const Size(126.0, 42.0));
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/61016
 
   testWidgets('TextButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
@@ -735,7 +724,6 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byKey(childKey)));
     await tester.pumpAndSettle();
     expect(hovering, isTrue);
@@ -787,7 +775,6 @@ void main() {
     await tester.pumpWidget(buildFrame(enabled: true));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
 
     await gesture.moveTo(tester.getCenter(find.byType(TextButton)));
     await tester.pumpAndSettle();
@@ -1202,6 +1189,59 @@ void main() {
     expect(paddingWidget.padding, const EdgeInsets.all(22));
   });
 
+  testWidgets('M3 TextButton has correct default padding', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home:  Scaffold(
+                body: Center(
+                  child: TextButton(
+                    key: key,
+                    onPressed: () {},
+                    child: const Text('TextButton'),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 12,vertical: 8));
+  });
+
+  testWidgets('M3 TextButton.icon has correct default padding', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: Scaffold(
+                body: Center(
+                  child: TextButton.icon(
+                    key: key,
+                    onPressed: () {},
+                    icon: const Icon(Icons.add),
+                    label: const Text('TextButton'),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byType(Padding),
+      ),
+    );
+   expect(paddingWidget.padding, const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8));
+  });
+
   testWidgets('Fixed size TextButtons', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1256,7 +1296,7 @@ void main() {
     await tester.pumpWidget(buildFrame(splashFactory: NoSplash.splashFactory));
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
-      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      final MaterialInkController material = Material.of(tester.element(find.text('test')));
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 0));
       await gesture.up();
@@ -1267,7 +1307,7 @@ void main() {
     await tester.pumpWidget(buildFrame(splashFactory: InkRipple.splashFactory));
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
-      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      final MaterialInkController material = Material.of(tester.element(find.text('test')));
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 1));
       await gesture.up();
@@ -1474,7 +1514,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: Offset.zero);
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -1531,6 +1570,223 @@ void main() {
     );
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('TextButton.styleFrom can be used to set foreground and background colors', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.purple,
+            ),
+            onPressed: () {},
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(TextButton),
+      matching: find.byType(Material),
+    ));
+    expect(material.color, Colors.purple);
+    expect(material.textStyle!.color, Colors.white);
+  });
+
+  Future<void> testStatesController(Widget? icon, WidgetTester tester) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+    final MaterialStatesController controller = MaterialStatesController();
+    controller.addListener(valueChanged);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: icon == null
+            ? TextButton(
+                statesController: controller,
+                onPressed: () { },
+                child: const Text('button'),
+              )
+            : TextButton.icon(
+                statesController: controller,
+                onPressed: () { },
+                icon: icon,
+                label: const Text('button'),
+              ),
+        ),
+      ),
+    );
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 0);
+
+    final Offset center = tester.getCenter(find.byType(Text));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 1);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 2);
+
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 3);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 4);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 5);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 6);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 8); // adds hovered and pressed - two changes
+
+    // If the button is rebuilt disabled, then the pressed state is
+    // removed.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+        child: icon == null
+          ? TextButton(
+              statesController: controller,
+              onPressed: null,
+              child: const Text('button'),
+            )
+          : TextButton.icon(
+              statesController: controller,
+              onPressed: null,
+              icon: icon,
+              label: const Text('button'),
+            ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
+    expect(count, 10); // removes pressed and adds disabled - two changes
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(count, 11);
+    await gesture.removePointer();
+  }
+
+  testWidgets('TextButton statesController', (WidgetTester tester) async {
+    testStatesController(null, tester);
+  });
+
+  testWidgets('TextButton.icon statesController', (WidgetTester tester) async {
+    testStatesController(const Icon(Icons.add), tester);
+  });
+
+  testWidgets('Disabled TextButton statesController', (WidgetTester tester) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+    final MaterialStatesController controller = MaterialStatesController();
+    controller.addListener(valueChanged);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: TextButton(
+            statesController: controller,
+            onPressed: null,
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(count, 1);
+  });
+
+  testWidgets('icon color can be different from the text color', (WidgetTester tester) async {
+    final Key iconButtonKey = UniqueKey();
+    const ColorScheme colorScheme = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: TextButton.icon(
+            key: iconButtonKey,
+            style: TextButton.styleFrom(iconColor: Colors.red),
+            icon: const Icon(Icons.add),
+            onPressed: () {},
+            label: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    Finder buttonMaterial = find.descendant(
+      of: find.byKey(iconButtonKey),
+      matching: find.byType(Material),
+    );
+
+    Material material = tester.widget<Material>(buttonMaterial);
+    expect(material.textStyle!.color, colorScheme.primary);
+
+    Color? iconColor() => _iconStyle(tester, Icons.add)?.color;
+    expect(iconColor(), equals(Colors.red));
+
+    // disabled button
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: TextButton.icon(
+            key: iconButtonKey,
+            style: TextButton.styleFrom(iconColor: Colors.red, disabledIconColor: Colors.blue),
+            icon: const Icon(Icons.add),
+            onPressed: null,
+            label: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    buttonMaterial = find.descendant(
+      of: find.byKey(iconButtonKey),
+      matching: find.byType(Material),
+    );
+
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(), equals(Colors.blue));
   });
 }
 

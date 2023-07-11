@@ -16,11 +16,24 @@ class UserMessages {
   // Messages used in FlutterValidator
   String flutterStatusInfo(String? channel, String? version, String os, String locale) =>
       'Channel ${channel ?? 'unknown'}, ${version ?? 'Unknown'}, on $os, locale $locale';
-  String flutterVersion(String version, String flutterRoot) =>
-      'Flutter version $version at $flutterRoot';
+  String flutterVersion(String version, String channel, String flutterRoot) =>
+      'Flutter version $version on channel $channel at $flutterRoot';
+  String get flutterUnknownChannel =>
+    'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
+    "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.";
+  String get flutterUnknownVersion =>
+    'Cannot resolve current version, possibly due to local changes.\n'
+    'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.';
   String flutterRevision(String revision, String age, String date) =>
-      'Framework revision $revision ($age), $date';
+    'Framework revision $revision ($age), $date';
   String flutterUpstreamRepositoryUrl(String url) => 'Upstream repository $url';
+  String get flutterUpstreamRepositoryUnknown =>
+    'Unknown upstream repository.\n'
+    'Reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install.';
+  String flutterUpstreamRepositoryUrlEnvMismatch(String url) => 'Upstream repository $url is not the same as FLUTTER_GIT_URL';
+  String flutterUpstreamRepositoryUrlNonStandard(String url) =>
+    'Upstream repository $url is not a standard remote.\n'
+    'Set environment variable "FLUTTER_GIT_URL" to $url to dismiss this error.';
   String flutterGitUrl(String url) => 'FLUTTER_GIT_URL = $url';
   String engineRevision(String revision) => 'Engine revision $revision';
   String dartRevision(String revision) => 'Dart version $revision';
@@ -29,11 +42,14 @@ class UserMessages {
   String flutterMirrorURL(String url) => 'Flutter download mirror $url';
   String get flutterBinariesDoNotRun =>
       'Downloaded executables cannot execute on host.\n'
-      'See https://github.com/flutter/flutter/issues/6207 for more information';
+      'See https://github.com/flutter/flutter/issues/6207 for more information.';
   String get flutterBinariesLinuxRepairCommands =>
       'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
       'On Fedora: dnf install libstdc++.i686\n'
       'On Arch: pacman -S lib32-gcc-libs';
+  String get flutterValidatorErrorIntentional =>
+      'If those were intentional, you can disregard the above warnings; however it is '
+      'recommended to use "git" directly to perform update checks and upgrades.';
 
   // Messages used in NoIdeValidator
   String get noIdeStatusInfo => 'No supported IDEs installed';
@@ -99,8 +115,8 @@ class UserMessages {
       'You can download the JDK from https://www.oracle.com/technetwork/java/javase/downloads/.';
   String androidJdkLocation(String location) => 'Java binary at: $location';
   String get androidLicensesAll => 'All Android licenses accepted.';
-  String get androidLicensesSome => 'Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
-  String get androidLicensesNone => 'Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
+  String get androidLicensesSome => 'Some Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
+  String get androidLicensesNone => 'Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
   String androidLicensesUnknown(Platform platform) =>
       'Android license status unknown.\n'
       'Run `flutter doctor --android-licenses` to accept the SDK licenses.\n'
@@ -160,10 +176,10 @@ class UserMessages {
       'Launch Xcode and install additional required components when prompted or run:\n'
       '  sudo xcodebuild -runFirstLaunch';
   String get xcodeMissing =>
-      'Xcode not installed; this is necessary for iOS development.\n'
+      'Xcode not installed; this is necessary for iOS and macOS development.\n'
       'Download at https://developer.apple.com/xcode/download/.';
   String get xcodeIncomplete =>
-      'Xcode installation is incomplete; a full installation is necessary for iOS development.\n'
+      'Xcode installation is incomplete; a full installation is necessary for iOS and macOS development.\n'
       'Download at: https://developer.apple.com/xcode/download/\n'
       'Or install Xcode via the App Store.\n'
       'Once installed, run:\n'
@@ -249,16 +265,15 @@ class UserMessages {
       'for information about installing additional components.';
   String flutterNoMatchingDevice(String deviceId) => 'No supported devices found with name or id '
       "matching '$deviceId'.";
-  String get flutterNoDevicesFound => 'No devices found';
+  String get flutterNoDevicesFound => 'No devices found.';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
   String flutterMissPlatformProjects(List<String> unsupportedDevicesType) =>
       'If you would like your app to run on ${unsupportedDevicesType.join(' or ')}, consider running `flutter create .` to generate projects for these platforms.';
   String get flutterFoundButUnsupportedDevices => 'The following devices were found, but are not supported by this project:';
   String flutterFoundSpecifiedDevices(int count, String deviceId) =>
       'Found $count devices with name or id matching $deviceId:';
-  String get flutterMultipleDevicesFound => 'Multiple devices found:';
   String flutterChooseDevice(int option, String name, String deviceId) => '[$option]: $name ($deviceId)';
-  String get flutterChooseOne => 'Please choose one (To quit, press "q/Q")';
+  String get flutterChooseOne => 'Please choose one (or "q" to quit)';
   String get flutterSpecifyDeviceWithAllOption =>
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";
@@ -294,10 +309,12 @@ class UserMessages {
       'Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
       "Please ensure that $engineSourcePath is a Flutter engine 'src' directory and that "
       "you have compiled the engine in that directory, which should produce an 'out' directory";
-  String get runnerLocalEngineRequired =>
-      'You must specify --local-engine if you are using a locally built engine.';
+  String get runnerLocalEngineOrWebSdkRequired =>
+      'You must specify --local-engine or --local-web-sdk if you are using a locally built engine or web sdk.';
   String runnerNoEngineBuild(String engineBuildPath) =>
       'No Flutter engine build found at $engineBuildPath.';
+  String runnerNoWebSdk(String webSdkPath) =>
+      'No Flutter web sdk found at $webSdkPath.';
   String runnerWrongFlutterInstance(String flutterRoot, String currentDir) =>
       "Warning: the 'flutter' tool you are currently running is not the one from the current directory:\n"
       '  running Flutter  : $flutterRoot\n'

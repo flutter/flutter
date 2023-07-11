@@ -19,6 +19,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
     super.logicalData,
     String modifierBitMapping,
     String lockBitMapping,
+    this._layoutGoals,
   ) : _modifierBitMapping = parseMapOfListOfString(modifierBitMapping),
       _lockBitMapping = parseMapOfListOfString(lockBitMapping);
 
@@ -91,6 +92,24 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   }
   final Map<String, List<String>> _lockBitMapping;
 
+  final Map<String, bool> _layoutGoals;
+  String get _layoutGoalsString {
+    final OutputLines<int> lines = OutputLines<int>('GTK layout goals');
+    _layoutGoals.forEach((String name, bool mandatory) {
+      final PhysicalKeyEntry physicalEntry = keyData.entryByName(name);
+      final LogicalKeyEntry logicalEntry = logicalData.entryByName(name);
+      final String line = 'LayoutGoal{'
+          '${toHex(physicalEntry.xKbScanCode, digits: 2)}, '
+          '${toHex(logicalEntry.value, digits: 2)}, '
+          '${mandatory ? 'true' : 'false'}'
+          '},';
+      lines.add(logicalEntry.value,
+          '    ${line.padRight(39)}'
+          '// ${logicalEntry.name}');
+    });
+    return lines.sortedJoin().trimRight();
+  }
+
   /// This generates the mask values for the part of a key code that defines its plane.
   String get _maskConstants {
     final StringBuffer buffer = StringBuffer();
@@ -110,7 +129,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
 
   @override
   String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
-      'shell', 'platform', 'linux', 'key_mapping.cc');
+      'shell', 'platform', 'linux', 'key_mapping.g.cc');
 
   @override
   Map<String, String> mappings() {
@@ -120,6 +139,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
       'GTK_MODIFIER_BIT_MAP': _gtkModifierBitMap,
       'GTK_MODE_BIT_MAP': _gtkModeBitMap,
       'MASK_CONSTANTS': _maskConstants,
+      'LAYOUT_GOALS': _layoutGoalsString,
     };
   }
 }

@@ -14,6 +14,12 @@ void main() {
     expect(const TextSelectionThemeData().hashCode, const TextSelectionThemeData().copyWith().hashCode);
   });
 
+  test('TextSelectionThemeData lerp special cases', () {
+    expect(TextSelectionThemeData.lerp(null, null, 0), null);
+    const TextSelectionThemeData data = TextSelectionThemeData();
+    expect(identical(TextSelectionThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('TextSelectionThemeData null fields by default', () {
     const TextSelectionThemeData theme = TextSelectionThemeData();
     expect(theme.cursorColor, null);
@@ -261,5 +267,44 @@ void main() {
     final EditableTextState selectableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderSelectable = selectableTextState.renderEditable;
     expect(renderSelectable.cursorColor, cursorColor.withAlpha(0));
+  });
+
+  testWidgets('TextSelectionThem overrides DefaultSelectionStyle', (WidgetTester tester) async {
+    const Color themeSelectionColor = Color(0xffaabbcc);
+    const Color themeCursorColor = Color(0x00ccbbaa);
+    const Color defaultSelectionColor = Color(0xffaa1111);
+    const Color defaultCursorColor = Color(0x00cc2222);
+    final Key defaultSelectionStyle = UniqueKey();
+    final Key themeStyle = UniqueKey();
+    // Test TextField's cursor color.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultSelectionStyle(
+          selectionColor: defaultSelectionColor,
+          cursorColor: defaultCursorColor,
+          child: Container(
+            key: defaultSelectionStyle,
+            child: TextSelectionTheme(
+              data: const TextSelectionThemeData(
+                selectionColor: themeSelectionColor,
+                cursorColor: themeCursorColor,
+              ),
+              child: Placeholder(
+                key: themeStyle,
+              ),
+            ),
+          )
+        ),
+      ),
+    );
+    final BuildContext defaultSelectionStyleContext = tester.element(find.byKey(defaultSelectionStyle));
+    DefaultSelectionStyle style = DefaultSelectionStyle.of(defaultSelectionStyleContext);
+    expect(style.selectionColor, defaultSelectionColor);
+    expect(style.cursorColor, defaultCursorColor);
+
+    final BuildContext themeStyleContext = tester.element(find.byKey(themeStyle));
+    style = DefaultSelectionStyle.of(themeStyleContext);
+    expect(style.selectionColor, themeSelectionColor);
+    expect(style.cursorColor, themeCursorColor);
   });
 }

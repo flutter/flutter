@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 // This is a regression test for https://github.com/flutter/flutter/issues/5840.
 
 class Bar extends StatefulWidget {
-  const Bar({ Key? key }) : super(key: key);
+  const Bar({ super.key });
   @override
   BarState createState() => BarState();
 }
@@ -45,7 +45,7 @@ class BarState extends State<Bar> {
 }
 
 class StatefulCreationCounter extends StatefulWidget {
-  const StatefulCreationCounter({ Key? key }) : super(key: key);
+  const StatefulCreationCounter({ super.key });
 
   @override
   StatefulCreationCounterState createState() => StatefulCreationCounterState();
@@ -96,7 +96,7 @@ void main() {
     Widget deepChild = Container();
 
     await tester.pumpWidget(MediaQuery(
-      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      data: MediaQueryData.fromView(tester.view),
       child: Column(
         children: <Widget>[
           StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -108,17 +108,17 @@ void main() {
               },
             );
           }),
-          Container(
+          ColoredBox(
             color: Colors.green,
-            child: Container(
+            child: ColoredBox(
               color: Colors.green,
-              child: Container(
+              child: ColoredBox(
                 color: Colors.green,
-                child: Container(
+                child: ColoredBox(
                   color: Colors.green,
-                  child: Container(
+                  child: ColoredBox(
                     color: Colors.green,
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.green,
                       child: StatefulBuilder(
                         builder: (BuildContext context, StateSetter setState) {

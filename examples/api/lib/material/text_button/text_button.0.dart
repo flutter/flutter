@@ -2,31 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for TextButton
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [TextButton].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const TextButtonExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class TextButtonExampleApp extends StatelessWidget {
+  const TextButtonExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        appBar: AppBar(title: const Text('TextButton Sample')),
+        body: const TextButtonExample(),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class TextButtonExample extends StatelessWidget {
+  const TextButtonExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +66,8 @@ class MyStatelessWidget extends StatelessWidget {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.all(16.0),
-                    primary: Colors.white,
                     textStyle: const TextStyle(fontSize: 20),
                   ),
                   onPressed: () {},

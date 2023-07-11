@@ -16,6 +16,8 @@ void main() {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
     final bool material3 = theme.useMaterial3;
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
+    final bool material3 = theme.useMaterial3;
 
     // Enabled OutlinedButton
     await tester.pumpWidget(
@@ -202,8 +204,6 @@ void main() {
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: hoverColor));
-
-    await gesture.removePointer();
   });
 
   testWidgets('Does OutlinedButton work with focus', (WidgetTester tester) async {
@@ -368,7 +368,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -438,7 +437,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(textColor(), hoverColor);
@@ -506,7 +504,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(iconColor(), hoverColor);
@@ -576,7 +573,6 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(outlinedButton, paints..drrect(color: hoverColor));
@@ -657,7 +653,6 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byKey(childKey)));
     await tester.pumpAndSettle();
     expect(hovering, isTrue);
@@ -709,7 +704,6 @@ void main() {
     await tester.pumpWidget(buildFrame(enabled: true));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
 
     await gesture.moveTo(tester.getCenter(find.byType(OutlinedButton)));
     await tester.pumpAndSettle();
@@ -837,10 +831,12 @@ void main() {
                 minimumSize: const Size(64, 36),
               ).copyWith(
                 side: MaterialStateProperty.resolveWith<BorderSide>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled))
+                  if (states.contains(MaterialState.disabled)) {
                     return disabledBorderSide;
-                  if (states.contains(MaterialState.pressed))
+                  }
+                  if (states.contains(MaterialState.pressed)) {
                     return pressedBorderSide;
+                  }
                   return enabledBorderSide;
                 }),
               ),
@@ -852,10 +848,6 @@ void main() {
         ),
       );
     }
-
-    // 116 = 16 + 'button'.length * 14 + 16, horizontal padding = 16
-    const Rect clipRect = Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
-    final Path clipPath = Path()..addRect(clipRect);
     final Finder outlinedButton = find.byType(OutlinedButton);
 
     BorderSide getBorderSide() {
@@ -873,12 +865,6 @@ void main() {
     // Expect that the button is disabled and painted with the disabled border color.
     expect(tester.widget<OutlinedButton>(outlinedButton).enabled, false);
     expect(getBorderSide(), disabledBorderSide);
-    _checkPhysicalLayer(
-      tester.element(outlinedButton),
-      fillColor,
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
 
     // Pump a new button with a no-op onPressed callback to make it enabled.
     await tester.pumpWidget(
@@ -896,23 +882,11 @@ void main() {
     // Wait for the border's color to change to pressed
     await tester.pump(const Duration(milliseconds: 200));
     expect(getBorderSide(), pressedBorderSide);
-    _checkPhysicalLayer(
-      tester.element(outlinedButton),
-      fillColor,
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
 
     // Tap gesture completes, button returns to its initial configuration.
     await gesture.up();
     await tester.pumpAndSettle();
     expect(getBorderSide(), enabledBorderSide);
-    _checkPhysicalLayer(
-      tester.element(outlinedButton),
-      fillColor,
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
   });
 
   testWidgets('OutlinedButton has no clip by default', (WidgetTester tester) async {
@@ -944,11 +918,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: OutlinedButton(
-            style: ButtonStyle(
+            style: const ButtonStyle(
               // Specifying minimumSize to mimic the original minimumSize for
               // RaisedButton so that the corresponding button size matches
               // the original version of this test.
-              minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+              minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
             ),
             onPressed: () {},
             child: const Text('ABC'),
@@ -987,24 +961,28 @@ void main() {
       Theme(
         // Force Material 2 typography.
         data: ThemeData(textTheme: Typography.englishLike2014),
+        child: Theme(
+        // Force Material 2 typography.
+        data: ThemeData(textTheme: Typography.englishLike2014),
         child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: Center(
-              child: OutlinedButton(
-                style: ButtonStyle(
-                  // Specifying minimumSize to mimic the original minimumSize for
-                  // RaisedButton so that the corresponding button size matches
-                  // the original version of this test.
-                  minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: Center(
+                child: OutlinedButton(
+                  style: const ButtonStyle(
+                    // Specifying minimumSize to mimic the original minimumSize for
+                    // RaisedButton so that the corresponding button size matches
+                    // the original version of this test.
+                    minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
+                  ),
+                  onPressed: () {},
+                  child: const Text('ABC'),
                 ),
-                onPressed: () {},
-                child: const Text('ABC'),
               ),
             ),
           ),
-        ),
+      ),
       ),
     );
 
@@ -1016,32 +994,33 @@ void main() {
       Theme(
         // Force Material 2 typography.
         data: ThemeData(textTheme: Typography.englishLike2014),
+        child: Theme(
+        // Force Material 2 typography.
+        data: ThemeData(textTheme: Typography.englishLike2014),
         child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 1.3),
-            child: Center(
-              child: OutlinedButton(
-                style: ButtonStyle(
-                  // Specifying minimumSize to mimic the original minimumSize for
-                  // RaisedButton so that the corresponding button size matches
-                  // the original version of this test.
-                  minimumSize: MaterialStateProperty.all<Size>(const Size(88, 36)),
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(textScaleFactor: 1.3),
+              child: Center(
+                child: OutlinedButton(
+                  style: const ButtonStyle(
+                    // Specifying minimumSize to mimic the original minimumSize for
+                    // RaisedButton so that the corresponding button size matches
+                    // the original version of this test.
+                    minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
+                  ),
+                  onPressed: () {},
+                  child: const Text('ABC'),
                 ),
-                onPressed: () {},
-                child: const Text('ABC'),
               ),
             ),
           ),
-        ),
+      ),
       ),
     );
 
     expect(tester.getSize(find.byType(OutlinedButton)), equals(const Size(88.0, 48.0)));
-    // Scaled text rendering is different on Linux and Mac by one pixel.
-    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
-    expect(tester.getSize(find.byType(Text)).height, isIn(<double>[18.0, 19.0]));
+    expect(tester.getSize(find.byType(Text)), const Size(55.0, 18.0));
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
@@ -1063,13 +1042,9 @@ void main() {
       ),
     );
 
-    // Scaled text rendering is different on Linux and Mac by one pixel.
-    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.byType(OutlinedButton)).width, isIn(<double>[133.0, 134.0]));
-    expect(tester.getSize(find.byType(OutlinedButton)).height, equals(48.0));
-    expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
-    expect(tester.getSize(find.byType(Text)).height, equals(42.0));
-  });
+    expect(tester.getSize(find.byType(OutlinedButton)), const Size(134.0, 48.0));
+    expect(tester.getSize(find.byType(Text)), const Size(126.0, 42.0));
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/122066
 
   testWidgets('OutlinedButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
     bool didPressButton = false;
@@ -1416,6 +1391,59 @@ void main() {
     expect(paddingWidget.padding, const EdgeInsets.all(22));
   });
 
+  testWidgets('M3 OutlinedButton has correct padding', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: Scaffold(
+                body: Center(
+                  child: OutlinedButton(
+                    key: key,
+                    onPressed: () {},
+                    child: const Text('OutlinedButton'),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 24));
+  });
+
+  testWidgets('M3 OutlinedButton.icon has correct padding', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: Scaffold(
+                body: Center(
+                  child: OutlinedButton.icon(
+                    key: key,
+                    icon: const Icon(Icons.favorite),
+                    onPressed: () {},
+                    label: const Text('OutlinedButton'),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byType(Padding),
+      ),
+    );
+   expect(paddingWidget.padding, const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 24.0, 0.0));
+  });
+
   testWidgets('Fixed size OutlinedButtons', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1470,7 +1498,7 @@ void main() {
     await tester.pumpWidget(buildFrame(splashFactory: NoSplash.splashFactory));
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
-      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      final MaterialInkController material = Material.of(tester.element(find.text('test')));
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 0));
       await gesture.up();
@@ -1481,7 +1509,7 @@ void main() {
     await tester.pumpWidget(buildFrame(splashFactory: InkRipple.splashFactory));
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
-      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      final MaterialInkController material = Material.of(tester.element(find.text('test')));
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 1));
       await gesture.up();
@@ -1559,7 +1587,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('OultinedButton.icon icon,label layout', (WidgetTester tester) async {
+  testWidgets('OutlinedButton.icon icon,label layout', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     final Key iconKey = UniqueKey();
     final Key labelKey = UniqueKey();
@@ -1596,7 +1624,7 @@ void main() {
     expect(tester.getRect(find.byKey(labelKey)), const Rect.fromLTRB(104.0, 0.0, 154.0, 100.0));
   });
 
-  testWidgets('TextButton maximumSize', (WidgetTester tester) async {
+  testWidgets('OutlinedButton maximumSize', (WidgetTester tester) async {
     final Key key0 = UniqueKey();
     final Key key1 = UniqueKey();
 
@@ -1610,7 +1638,7 @@ void main() {
               children: <Widget>[
                 OutlinedButton(
                   key: key0,
-                  style: TextButton.styleFrom(
+                  style: OutlinedButton.styleFrom(
                     minimumSize: const Size(24, 36),
                     maximumSize: const Size.fromWidth(64),
                   ),
@@ -1619,7 +1647,7 @@ void main() {
                 ),
                 OutlinedButton.icon(
                   key: key1,
-                  style: TextButton.styleFrom(
+                  style: OutlinedButton.styleFrom(
                     minimumSize: const Size(24, 36),
                     maximumSize: const Size.fromWidth(104),
                   ),
@@ -1688,7 +1716,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: Offset.zero);
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -1746,29 +1773,167 @@ void main() {
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
-}
 
-PhysicalModelLayer _findPhysicalLayer(Element element) {
-  expect(element, isNotNull);
-  RenderObject? object = element.renderObject;
-  while (object != null && object is! RenderRepaintBoundary && object is! RenderView) {
-    object = object.parent as RenderObject?;
-  }
-  expect(object!.debugLayer, isNotNull);
-  expect(object.debugLayer!.firstChild, isA<PhysicalModelLayer>());
-  final PhysicalModelLayer layer = object.debugLayer!.firstChild! as PhysicalModelLayer;
-  final Layer child = layer.firstChild!;
-  return child is PhysicalModelLayer ? child : layer;
-}
+  testWidgets('OutlinedButton.styleFrom can be used to set foreground and background colors', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.purple,
+            ),
+            onPressed: () {},
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
 
-void _checkPhysicalLayer(Element element, Color expectedColor, { Path? clipPath, Rect? clipRect }) {
-  final PhysicalModelLayer expectedLayer = _findPhysicalLayer(element);
-  expect(expectedLayer.elevation, 0.0);
-  expect(expectedLayer.color, expectedColor);
-  if (clipPath != null) {
-    expect(clipRect, isNotNull);
-    expect(expectedLayer.clipPath, coversSameAreaAs(clipPath, areaToCompare: clipRect!.inflate(10.0)));
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(OutlinedButton),
+      matching: find.byType(Material),
+    ));
+    expect(material.color, Colors.purple);
+    expect(material.textStyle!.color, Colors.white);
+  });
+
+  Future<void> testStatesController(Widget? icon, WidgetTester tester) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+    final MaterialStatesController controller = MaterialStatesController();
+    controller.addListener(valueChanged);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: icon == null
+            ? OutlinedButton(
+                statesController: controller,
+                onPressed: () { },
+                child: const Text('button'),
+              )
+            : OutlinedButton.icon(
+                statesController: controller,
+                onPressed: () { },
+                icon: icon,
+                label: const Text('button'),
+              ),
+        ),
+      ),
+    );
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 0);
+
+    final Offset center = tester.getCenter(find.byType(Text));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 1);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 2);
+
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 3);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 4);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 5);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 6);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 8); // adds hovered and pressed - two changes
+
+    // If the button is rebuilt disabled, then the pressed state is
+    // removed.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+        child: icon == null
+          ? OutlinedButton(
+              statesController: controller,
+              onPressed: null,
+              child: const Text('button'),
+            )
+          : OutlinedButton.icon(
+              statesController: controller,
+              onPressed: null,
+              icon: icon,
+              label: const Text('button'),
+            ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
+    expect(count, 10); // removes pressed and adds disabled - two changes
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(count, 11);
+    await gesture.removePointer();
   }
+
+  testWidgets('OutlinedButton statesController', (WidgetTester tester) async {
+    testStatesController(null, tester);
+  });
+
+  testWidgets('OutlinedButton.icon statesController', (WidgetTester tester) async {
+    testStatesController(const Icon(Icons.add), tester);
+  });
+
+  testWidgets('Disabled OutlinedButton statesController', (WidgetTester tester) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+    final MaterialStatesController controller = MaterialStatesController();
+    controller.addListener(valueChanged);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: OutlinedButton(
+            statesController: controller,
+            onPressed: null,
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    );
+    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(count, 1);
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {

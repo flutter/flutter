@@ -18,6 +18,15 @@ Future<ui.Image> captureImage(Element element) {
   throw UnsupportedError('captureImage is not supported on the web.');
 }
 
+/// Whether or not [captureImage] is supported.
+///
+/// This can be used to skip tests on platforms that don't support
+/// capturing images.
+///
+/// Currently this is true except when tests are running in the context of a web
+/// browser (`flutter test --platform chrome`).
+const bool canCaptureImage = false;
+
 /// The matcher created by [matchesGoldenFile]. This class is enabled when the
 /// test is running in a web browser using conditional import.
 class MatchesGoldenFile extends AsyncMatcher {
@@ -47,14 +56,15 @@ class MatchesGoldenFile extends AsyncMatcher {
     final Element element = elements.single;
     final RenderObject renderObject = _findRepaintBoundary(element);
     final Size size = renderObject.paintBounds.size;
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-    final Element e = binding.renderViewElement!;
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
+    final Element e = binding.rootElement!;
+    final ui.FlutterView view = binding.platformDispatcher.implicitView!;
 
     // Unlike `flutter_tester`, we don't have the ability to render an element
     // to an image directly. Instead, we will use `window.render()` to render
     // only the element being requested, and send a request to the test server
     // requesting it to take a screenshot through the browser's debug interface.
-    _renderElement(binding.window, renderObject);
+    _renderElement(view, renderObject);
     final String? result = await binding.runAsync<String?>(() async {
       if (autoUpdateGoldenFiles) {
         await webGoldenComparator.update(size.width, size.height, key);
@@ -67,7 +77,7 @@ class MatchesGoldenFile extends AsyncMatcher {
         return ex.message;
       }
     }, additionalTime: const Duration(seconds: 22));
-    _renderElement(binding.window, _findRepaintBoundary(e));
+    _renderElement(view, _findRepaintBoundary(e));
     return result;
   }
 

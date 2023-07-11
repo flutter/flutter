@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show utf8;
-import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeTextChannel implements MethodChannel {
-  FakeTextChannel(this.outgoing) : assert(outgoing != null);
+  FakeTextChannel(this.outgoing);
 
   Future<dynamic> Function(MethodCall) outgoing;
   Future<void> Function(MethodCall)? incoming;

@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -43,42 +44,18 @@ void main() {
     expect(renderPhysicalShape.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('PhysicalModel - creates a physical model layer when it needs compositing', (WidgetTester tester) async {
-    debugDisableShadows = false;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: PhysicalModel(
-          color: Colors.grey,
-          shadowColor: Colors.red,
-          elevation: 1.0,
-          child: Material(child: TextField(controller: TextEditingController())),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects.whereType<RenderPhysicalModel>().first;
-    expect(renderPhysicalModel.needsCompositing, true);
-
-    final PhysicalModelLayer physicalModelLayer = tester.layers.whereType<PhysicalModelLayer>().first;
-    expect(physicalModelLayer.shadowColor, Colors.red);
-    expect(physicalModelLayer.color, Colors.grey);
-    expect(physicalModelLayer.elevation, 1.0);
-    debugDisableShadows = true;
-  });
-
   testWidgets('PhysicalModel - clips when overflows and elevation is 0', (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
-      MediaQuery(
+      const MediaQuery(
         key: key,
-        data: const MediaQueryData(),
+        data: MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Padding(
-            padding: const EdgeInsets.all(50),
+            padding: EdgeInsets.all(50),
             child: Row(
-              children: const <Widget>[
+              children: <Widget>[
                 Material(child: Text('A long long long long long long long string')),
                 Material(child: Text('A long long long long long long long string')),
                 Material(child: Text('A long long long long long long long string')),

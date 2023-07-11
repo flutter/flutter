@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
-import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,7 +15,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -34,7 +31,7 @@ void main() {
   Cache.flutterRoot = getFlutterRoot();
 
   group('build artifacts', () {
-    FileSystem fileSystem;
+    late FileSystem fileSystem;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -124,6 +121,20 @@ void main() {
   });
 
   group('listApkPaths', () {
+    testWithoutContext('Finds APK without flavor in debug', () {
+      final Iterable<String> apks = listApkPaths(
+        const AndroidBuildInfo(BuildInfo(BuildMode.debug, '', treeShakeIcons: false)),
+      );
+      expect(apks, <String>['app-debug.apk']);
+    });
+
+    testWithoutContext('Finds APK with flavor in debug', () {
+      final Iterable<String> apks = listApkPaths(
+        const AndroidBuildInfo(BuildInfo(BuildMode.debug, 'flavor1', treeShakeIcons: false)),
+      );
+      expect(apks, <String>['app-flavor1-debug.apk']);
+    });
+
     testWithoutContext('Finds APK without flavor in release', () {
       final Iterable<String> apks = listApkPaths(
         const AndroidBuildInfo(BuildInfo(BuildMode.release, '', treeShakeIcons: false)),
@@ -185,7 +196,7 @@ void main() {
   group('gradle build', () {
     testUsingContext('do not crash if there is no Android SDK', () async {
       expect(() {
-        updateLocalProperties(project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory));
+        gradle_utils.updateLocalProperties(project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory));
       }, throwsToolExit(
         message: '${globals.logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.',
       ));
@@ -195,8 +206,8 @@ void main() {
   });
 
   group('Gradle local.properties', () {
-    Artifacts localEngineArtifacts;
-    FileSystem fs;
+    late Artifacts localEngineArtifacts;
+    late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -212,7 +223,7 @@ void main() {
       });
     }
 
-    String propertyFor(String key, File file) {
+    String? propertyFor(String key, File file) {
       final Iterable<String> result = file.readAsLinesSync()
           .where((String line) => line.startsWith('$key='))
           .map((String line) => line.split('=')[1]);
@@ -220,17 +231,17 @@ void main() {
     }
 
     Future<void> checkBuildVersion({
-      String manifest,
-      BuildInfo buildInfo,
-      String expectedBuildName,
-      String expectedBuildNumber,
+      required String manifest,
+      BuildInfo? buildInfo,
+      String? expectedBuildName,
+      String? expectedBuildNumber,
     }) async {
       final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync(manifest);
 
 
-      updateLocalProperties(
+      gradle_utils.updateLocalProperties(
         project: FlutterProject.fromDirectoryTest(globals.fs.directory('path/to/project')),
         buildInfo: buildInfo,
         requireAndroidSdk: false,
@@ -404,61 +415,63 @@ flutter:
     });
   });
 
-  group('gradle version', () {
+  group('gradgradle_utils.le version', () {
     testWithoutContext('should be compatible with the Android plugin version', () {
-      // Granular versions.
-      expect(getGradleVersionFor('1.0.0'), '2.3');
-      expect(getGradleVersionFor('1.0.1'), '2.3');
-      expect(getGradleVersionFor('1.0.2'), '2.3');
-      expect(getGradleVersionFor('1.0.4'), '2.3');
-      expect(getGradleVersionFor('1.0.8'), '2.3');
-      expect(getGradleVersionFor('1.1.0'), '2.3');
-      expect(getGradleVersionFor('1.1.2'), '2.3');
-      expect(getGradleVersionFor('1.1.2'), '2.3');
-      expect(getGradleVersionFor('1.1.3'), '2.3');
-      // Version Ranges.
-      expect(getGradleVersionFor('1.2.0'), '2.9');
-      expect(getGradleVersionFor('1.3.1'), '2.9');
+      // Grangradle_utils.ular versions.
+      expect(gradle_utils.getGradleVersionFor('1.0.0'), '2.3');
+      expect(gradle_utils.getGradleVersionFor('1.0.1'), '2.3');
+      expect(gradle_utils.getGradleVersionFor('1.0.2'), '2.3');
+      expect(gradle_utils.getGradleVersionFor('1.0.4'), '2.3');
+      expect(gradle_utils.getGradleVersionFor('1.0.8'), '2.3');
+      expect(gradle_utils.getGradleVersionFor('1.1.0'), '2.3');
+      expect(gradle_utils.getGradleVersionFor('1.1.2'), '2.3');
+      expect(gradle_utils.getGradleVersionFor('1.1.2'), '2.3');
+      expect(gradle_utils.getGradleVersionFor('1.1.3'), '2.3');
+      // Versgradle_utils.ion Ranges.
+      expect(gradle_utils.getGradleVersionFor('1.2.0'), '2.9');
+      expect(gradle_utils.getGradleVersionFor('1.3.1'), '2.9');
 
-      expect(getGradleVersionFor('1.5.0'), '2.2.1');
+      expect(gradle_utils.getGradleVersionFor('1.5.0'), '2.2.1');
 
-      expect(getGradleVersionFor('2.0.0'), '2.13');
-      expect(getGradleVersionFor('2.1.2'), '2.13');
+      expect(gradle_utils.getGradleVersionFor('2.0.0'), '2.13');
+      expect(gradle_utils.getGradleVersionFor('2.1.2'), '2.13');
 
-      expect(getGradleVersionFor('2.1.3'), '2.14.1');
-      expect(getGradleVersionFor('2.2.3'), '2.14.1');
+      expect(gradle_utils.getGradleVersionFor('2.1.3'), '2.14.1');
+      expect(gradle_utils.getGradleVersionFor('2.2.3'), '2.14.1');
 
-      expect(getGradleVersionFor('2.3.0'), '3.3');
+      expect(gradle_utils.getGradleVersionFor('2.3.0'), '3.3');
 
-      expect(getGradleVersionFor('3.0.0'), '4.1');
+      expect(gradle_utils.getGradleVersionFor('3.0.0'), '4.1');
 
-      expect(getGradleVersionFor('3.1.0'), '4.4');
+      expect(gradle_utils.getGradleVersionFor('3.1.0'), '4.4');
 
-      expect(getGradleVersionFor('3.2.0'), '4.6');
-      expect(getGradleVersionFor('3.2.1'), '4.6');
+      expect(gradle_utils.getGradleVersionFor('3.2.0'), '4.6');
+      expect(gradle_utils.getGradleVersionFor('3.2.1'), '4.6');
 
-      expect(getGradleVersionFor('3.3.0'), '4.10.2');
-      expect(getGradleVersionFor('3.3.2'), '4.10.2');
+      expect(gradle_utils.getGradleVersionFor('3.3.0'), '4.10.2');
+      expect(gradle_utils.getGradleVersionFor('3.3.2'), '4.10.2');
 
-      expect(getGradleVersionFor('3.4.0'), '5.6.2');
-      expect(getGradleVersionFor('3.5.0'), '5.6.2');
+      expect(gradle_utils.getGradleVersionFor('3.4.0'), '5.6.2');
+      expect(gradle_utils.getGradleVersionFor('3.5.0'), '5.6.2');
 
-      expect(getGradleVersionFor('4.0.0'), '6.7');
-      expect(getGradleVersionFor('4.1.0'), '6.7');
+      expect(gradle_utils.getGradleVersionFor('4.0.0'), '6.7');
+      expect(gradle_utils.getGradleVersionFor('4.1.0'), '6.7');
 
-      expect(getGradleVersionFor('7.0'), '7.4');
-      expect(getGradleVersionFor('7.1.2'), '7.4');
-      expect(getGradleVersionFor('7.2'), '7.4');
+      expect(gradle_utils.getGradleVersionFor('7.0'), '7.5');
+      expect(gradle_utils.getGradleVersionFor('7.1.2'), '7.5');
+      expect(gradle_utils.getGradleVersionFor('7.2'), '7.5');
+      expect(gradle_utils.getGradleVersionFor('8.0'), '8.0');
+      expect(gradle_utils.getGradleVersionFor(gradle_utils.maxKnownAgpVersion), '8.0');
     });
 
     testWithoutContext('throws on unsupported versions', () {
-      expect(() => getGradleVersionFor('3.6.0'),
+      expect(() => gradle_utils.getGradleVersionFor('3.6.0'),
           throwsA(predicate<Exception>((Exception e) => e is ToolExit)));
     });
   });
 
   group('isAppUsingAndroidX', () {
-    FileSystem fs;
+    late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -504,8 +517,8 @@ flutter:
   });
 
   group('printHowToConsumeAar', () {
-    BufferLogger logger;
-    FileSystem fileSystem;
+    late BufferLogger logger;
+    late FileSystem fileSystem;
 
     setUp(() {
       logger = BufferLogger.test();
@@ -695,8 +708,8 @@ flutter:
     // If this test fails, you probably edited templates/app/android.tmpl.
     // That's fine, but you now need to add a copy of that file to gradle/settings.gradle.legacy_versions, separated
     // from the previous versions by a line that just says ";EOF".
-    final File templateSettingsDotGradle = globals.fs.file(globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'app', 'android.tmpl', 'settings.gradle'));
-    final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(Cache.flutterRoot, 'packages','flutter_tools', 'gradle', 'settings.gradle.legacy_versions'));
+    final File templateSettingsDotGradle = globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates', 'app', 'android.tmpl', 'settings.gradle'));
+    final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'packages','flutter_tools', 'gradle', 'settings.gradle.legacy_versions'));
     expect(
       legacySettingsDotGradleFiles.readAsStringSync().split(';EOF').map<String>((String body) => body.trim()),
       contains(templateSettingsDotGradle.readAsStringSync().trim()),
@@ -704,12 +717,3 @@ flutter:
     // TODO(zanderso): This is an integration test and should be moved to the integration shard.
   }, skip: true); // https://github.com/flutter/flutter/issues/87922
 }
-
-class FakeGradleUtils extends GradleUtils {
-  @override
-  String getExecutable(FlutterProject project) {
-    return 'gradlew';
-  }
-}
-
-class FakeAndroidSdk extends Fake implements AndroidSdk { }

@@ -271,19 +271,19 @@ void main() {
               'name': 'foo',
               'rootUri': 'file:///foo/',
               'packageUri': 'lib/',
-              'languageVersion': '2.2'
+              'languageVersion': '2.2',
             },
             <String, Object>{
               'name': 'bar',
               'rootUri': 'file:///bar/',
               'packageUri': 'lib/',
-              'languageVersion': '2.2'
+              'languageVersion': '2.2',
             },
             <String, Object>{
               'name': 'fizz',
               'rootUri': 'file:///fizz/',
               'packageUri': 'lib/',
-              'languageVersion': '2.2'
+              'languageVersion': '2.2',
             },
           ],
         }
@@ -306,7 +306,7 @@ void main() {
     expect(filePaths, unorderedEquals(<String>[
       '/foo/NOTICES',
       '/bar/NOTICES',
-      '/fizz/LICENSE'
+      '/fizz/LICENSE',
     ]));
   });
 
@@ -329,13 +329,13 @@ void main() {
               'name': 'foo',
               'rootUri': 'file:///foo/',
               'packageUri': 'lib/',
-              'languageVersion': '2.2'
+              'languageVersion': '2.2',
             },
             <String, Object>{
               'name': 'bar',
               'rootUri': 'file:///bar/',
               'packageUri': 'lib/',
-              'languageVersion': '2.2'
+              'languageVersion': '2.2',
             },
           ],
         }
@@ -376,7 +376,7 @@ void main() {
               'name': 'foo',
               'rootUri': 'file:///foo/',
               'packageUri': 'lib/',
-              'languageVersion': '2.2'
+              'languageVersion': '2.2',
             },
           ],
         }
@@ -391,7 +391,7 @@ void main() {
     expect(licenseResult.dependencies, isEmpty);
     expect(licenseResult.errorMessages, <String>[
       'package foo specified an additional license at /foo.txt, but this file does not exist.',
-      'package foo specified an additional license at /foo_2.txt, but this file does not exist.'
+      'package foo specified an additional license at /foo_2.txt, but this file does not exist.',
     ]);
   });
 
@@ -412,7 +412,7 @@ void main() {
               'name': 'foo',
               'rootUri': 'file:///foo/',
               'packageUri': 'lib/',
-              'languageVersion': '2.2'
+              'languageVersion': '2.2',
             },
           ],
         }

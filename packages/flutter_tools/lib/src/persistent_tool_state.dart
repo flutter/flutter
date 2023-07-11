@@ -83,8 +83,9 @@ class _DefaultPersistentToolState implements PersistentToolState {
   static const String _kRedisplayWelcomeMessage = 'redisplay-welcome-message';
   static const Map<Channel, String> _lastActiveVersionKeys = <Channel,String>{
     Channel.master: 'last-active-master-version',
+    Channel.main: 'last-active-main-version',
     Channel.beta: 'last-active-beta-version',
-    Channel.stable: 'last-active-stable-version'
+    Channel.stable: 'last-active-stable-version',
   };
   static const String _kBotKey = 'is-bot';
   static const String _kLicenseHash = 'license-hash';

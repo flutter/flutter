@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 export '../services/restoration.dart';
 
 class BucketSpy extends StatefulWidget {
-  const BucketSpy({Key? key, this.child}) : super(key: key);
+  const BucketSpy({super.key, this.child});
 
   final Widget? child;
 
@@ -21,7 +21,7 @@ class BucketSpyState extends State<BucketSpy> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    bucket = RestorationScope.of(context);
+    bucket = RestorationScope.maybeOf(context);
   }
 
   @override

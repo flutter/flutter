@@ -12,39 +12,39 @@ import 'media_query.dart';
 
 export 'package:flutter/gestures.dart' show
   DragDownDetails,
+  DragEndDetails,
   DragStartDetails,
   DragUpdateDetails,
-  DragEndDetails,
-  GestureTapDownCallback,
-  GestureTapUpCallback,
-  GestureTapCallback,
-  GestureTapCancelCallback,
-  GestureLongPressCallback,
-  GestureLongPressStartCallback,
-  GestureLongPressMoveUpdateCallback,
-  GestureLongPressUpCallback,
-  GestureLongPressEndCallback,
+  ForcePressDetails,
+  GestureDragCancelCallback,
   GestureDragDownCallback,
+  GestureDragEndCallback,
   GestureDragStartCallback,
   GestureDragUpdateCallback,
-  GestureDragEndCallback,
-  GestureDragCancelCallback,
+  GestureForcePressEndCallback,
+  GestureForcePressPeakCallback,
+  GestureForcePressStartCallback,
+  GestureForcePressUpdateCallback,
+  GestureLongPressCallback,
+  GestureLongPressEndCallback,
+  GestureLongPressMoveUpdateCallback,
+  GestureLongPressStartCallback,
+  GestureLongPressUpCallback,
+  GestureScaleEndCallback,
   GestureScaleStartCallback,
   GestureScaleUpdateCallback,
-  GestureScaleEndCallback,
-  GestureForcePressStartCallback,
-  GestureForcePressPeakCallback,
-  GestureForcePressEndCallback,
-  GestureForcePressUpdateCallback,
-  LongPressStartDetails,
-  LongPressMoveUpdateDetails,
+  GestureTapCallback,
+  GestureTapCancelCallback,
+  GestureTapDownCallback,
+  GestureTapUpCallback,
   LongPressEndDetails,
+  LongPressMoveUpdateDetails,
+  LongPressStartDetails,
+  ScaleEndDetails,
   ScaleStartDetails,
   ScaleUpdateDetails,
-  ScaleEndDetails,
   TapDownDetails,
   TapUpDetails,
-  ForcePressDetails,
   Velocity;
 export 'package:flutter/rendering.dart' show RenderSemanticsGestureHandler;
 
@@ -93,9 +93,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
   /// Creates a gesture recognizer factory with the given callbacks.
   ///
   /// The arguments must not be null.
-  const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer)
-    : assert(_constructor != null),
-      assert(_initializer != null);
+  const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer);
 
   final GestureRecognizerFactoryConstructor<T> _constructor;
 
@@ -150,6 +148,56 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// ** See code in examples/api/lib/widgets/gesture_detector/gesture_detector.1.dart **
 /// {@end-tool}
 ///
+/// ### Troubleshooting
+///
+/// Why isn't my parent [GestureDetector.onTap] method called?
+///
+/// Given a parent [GestureDetector] with an onTap callback, and a child
+/// GestureDetector that also defines an onTap callback, when the inner
+/// GestureDetector is tapped, both GestureDetectors send a [GestureRecognizer]
+/// into the gesture arena. This is because the pointer coordinates are within the
+/// bounds of both GestureDetectors. The child GestureDetector wins in this
+/// scenario because it was the first to enter the arena, resolving as first come,
+/// first served. The child onTap is called, and the parent's is not as the gesture has
+/// been consumed.
+/// For more information on gesture disambiguation see:
+/// [Gesture disambiguation](https://docs.flutter.dev/development/ui/advanced/gestures#gesture-disambiguation).
+///
+/// Setting [GestureDetector.behavior] to [HitTestBehavior.opaque]
+/// or [HitTestBehavior.translucent] has no impact on parent-child relationships:
+/// both GestureDetectors send a GestureRecognizer into the gesture arena, only one wins.
+///
+/// Some callbacks (e.g. onTapDown) can fire before a recognizer wins the arena,
+/// and others (e.g. onTapCancel) fire even when it loses the arena. Therefore,
+/// the parent detector in the example above may call some of its callbacks even
+/// though it loses in the arena.
+///
+/// {@tool dartpad}
+/// This example uses a [GestureDetector] that wraps a green [Container] and a second
+/// GestureDetector that wraps a yellow Container. The second GestureDetector is
+/// a child of the green Container.
+/// Both GestureDetectors define an onTap callback. When the callback is called it
+/// adds a red border to the corresponding Container.
+///
+/// When the green Container is tapped, it's parent GestureDetector enters
+/// the gesture arena. It wins because there is no competing GestureDetector and
+/// the green Container shows a red border.
+/// When the yellow Container is tapped, it's parent GestureDetector enters
+/// the gesture arena. The GestureDetector that wraps the green Container also
+/// enters the gesture arena (the pointer events coordinates are inside both
+/// GestureDetectors bounds). The GestureDetector that wraps the yellow Container
+/// wins because it was the first detector to enter the arena.
+///
+/// This example sets [debugPrintGestureArenaDiagnostics] to true.
+/// This flag prints useful information about gesture arenas.
+///
+/// Changing the [GestureDetector.behavior] property to [HitTestBehavior.translucent]
+/// or [HitTestBehavior.opaque] has no impact: both GestureDetectors send a [GestureRecognizer]
+/// into the gesture arena, only one wins.
+///
+/// ** See code in examples/api/lib/widgets/gesture_detector/gesture_detector.2.dart **
+/// {@end-tool}
+///
 /// ## Debugging
 ///
 /// To see how large the hit test box of a [GestureDetector] is for debugging
@@ -165,18 +213,18 @@ class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///
   /// Pan and scale callbacks cannot be used simultaneously because scale is a
-  /// superset of pan. Simply use the scale callbacks instead.
+  /// superset of pan. Use the scale callbacks instead.
   ///
   /// Horizontal and vertical drag callbacks cannot be used simultaneously
-  /// because a combination of a horizontal and vertical drag is a pan. Simply
-  /// use the pan callbacks instead.
+  /// because a combination of a horizontal and vertical drag is a pan.
+  /// Use the pan callbacks instead.
   ///
   /// {@youtube 560 315 https://www.youtube.com/watch?v=WhVXkCFPmK4}
   ///
   /// By default, gesture detectors contribute semantic information to the tree
   /// that is used by assistive technology.
   GestureDetector({
-    Key? key,
+    super.key,
     this.child,
     this.onTapDown,
     this.onTapUp,
@@ -238,9 +286,10 @@ class GestureDetector extends StatelessWidget {
     this.behavior,
     this.excludeFromSemantics = false,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(excludeFromSemantics != null),
-       assert(dragStartBehavior != null),
-       assert(() {
+    this.trackpadScrollCausesScale = false,
+    this.trackpadScrollToScaleFactor = kDefaultTrackpadScrollToScaleFactor,
+    this.supportedDevices,
+  }) : assert(() {
          final bool haveVerticalDrag = onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null;
          final bool haveHorizontalDrag = onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null;
          final bool havePan = onPanStart != null || onPanUpdate != null || onPanEnd != null;
@@ -265,8 +314,7 @@ class GestureDetector extends StatelessWidget {
            }
          }
          return true;
-       }()),
-       super(key: key);
+       }());
 
   /// The widget below this widget in the tree.
   ///
@@ -893,7 +941,7 @@ class GestureDetector extends StatelessWidget {
   /// force to initiate a force press. The amount of force is at least
   /// [ForcePressGestureRecognizer.startPressure].
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressStartCallback? onForcePressStart;
 
@@ -901,7 +949,7 @@ class GestureDetector extends StatelessWidget {
   /// force. The amount of force is at least
   /// [ForcePressGestureRecognizer.peakPressure].
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressPeakCallback? onForcePressPeak;
 
@@ -910,20 +958,24 @@ class GestureDetector extends StatelessWidget {
   /// plane of the screen, pressing the screen with varying forces or both
   /// simultaneously.
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressUpdateCallback? onForcePressUpdate;
 
-  /// The pointer is no longer in contact with the screen.
+  /// The pointer tracked by [onForcePressStart] is no longer in contact with the screen.
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressEndCallback? onForcePressEnd;
 
-  /// How this gesture detector should behave during hit testing.
+  /// How this gesture detector should behave during hit testing when deciding
+  /// how the hit test propagates to children and whether to consider targets
+  /// behind this one.
   ///
   /// This defaults to [HitTestBehavior.deferToChild] if [child] is not null and
   /// [HitTestBehavior.translucent] if child is null.
+  ///
+  /// See [HitTestBehavior] for the allowed values and their meanings.
   final HitTestBehavior? behavior;
 
   /// Whether to exclude these gestures from the semantics tree. For
@@ -955,10 +1007,21 @@ class GestureDetector extends StatelessWidget {
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   final DragStartBehavior dragStartBehavior;
 
+  /// The kind of devices that are allowed to be recognized.
+  ///
+  /// If set to null, events from all device types will be recognized. Defaults to null.
+  final Set<PointerDeviceKind>? supportedDevices;
+
+  /// {@macro flutter.gestures.scale.trackpadScrollCausesScale}
+  final bool trackpadScrollCausesScale;
+
+  /// {@macro flutter.gestures.scale.trackpadScrollToScaleFactor}
+  final Offset trackpadScrollToScaleFactor;
+
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
 
     if (onTapDown != null ||
         onTapUp != null ||
@@ -973,7 +1036,7 @@ class GestureDetector extends StatelessWidget {
         onTertiaryTapCancel != null
     ) {
       gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-        () => TapGestureRecognizer(debugOwner: this),
+        () => TapGestureRecognizer(debugOwner: this, supportedDevices: supportedDevices),
         (TapGestureRecognizer instance) {
           instance
             ..onTapDown = onTapDown
@@ -987,20 +1050,24 @@ class GestureDetector extends StatelessWidget {
             ..onTertiaryTapDown = onTertiaryTapDown
             ..onTertiaryTapUp = onTertiaryTapUp
             ..onTertiaryTapCancel = onTertiaryTapCancel
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
 
-    if (onDoubleTap != null) {
+    if (onDoubleTap != null ||
+        onDoubleTapDown != null ||
+        onDoubleTapCancel != null) {
       gestures[DoubleTapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(
-        () => DoubleTapGestureRecognizer(debugOwner: this),
+        () => DoubleTapGestureRecognizer(debugOwner: this, supportedDevices: supportedDevices),
         (DoubleTapGestureRecognizer instance) {
           instance
             ..onDoubleTapDown = onDoubleTapDown
             ..onDoubleTap = onDoubleTap
             ..onDoubleTapCancel = onDoubleTapCancel
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1027,7 +1094,7 @@ class GestureDetector extends StatelessWidget {
         onTertiaryLongPressUp != null ||
         onTertiaryLongPressEnd != null) {
       gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-        () => LongPressGestureRecognizer(debugOwner: this),
+        () => LongPressGestureRecognizer(debugOwner: this, supportedDevices: supportedDevices),
         (LongPressGestureRecognizer instance) {
           instance
             ..onLongPressDown = onLongPressDown
@@ -1051,7 +1118,8 @@ class GestureDetector extends StatelessWidget {
             ..onTertiaryLongPressMoveUpdate = onTertiaryLongPressMoveUpdate
             ..onTertiaryLongPressUp = onTertiaryLongPressUp
             ..onTertiaryLongPressEnd = onTertiaryLongPressEnd
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1062,7 +1130,7 @@ class GestureDetector extends StatelessWidget {
         onVerticalDragEnd != null ||
         onVerticalDragCancel != null) {
       gestures[VerticalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-        () => VerticalDragGestureRecognizer(debugOwner: this),
+        () => VerticalDragGestureRecognizer(debugOwner: this, supportedDevices: supportedDevices),
         (VerticalDragGestureRecognizer instance) {
           instance
             ..onDown = onVerticalDragDown
@@ -1071,7 +1139,8 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onVerticalDragEnd
             ..onCancel = onVerticalDragCancel
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1082,7 +1151,7 @@ class GestureDetector extends StatelessWidget {
         onHorizontalDragEnd != null ||
         onHorizontalDragCancel != null) {
       gestures[HorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-        () => HorizontalDragGestureRecognizer(debugOwner: this),
+        () => HorizontalDragGestureRecognizer(debugOwner: this, supportedDevices: supportedDevices),
         (HorizontalDragGestureRecognizer instance) {
           instance
             ..onDown = onHorizontalDragDown
@@ -1091,7 +1160,8 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onHorizontalDragEnd
             ..onCancel = onHorizontalDragCancel
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1102,7 +1172,7 @@ class GestureDetector extends StatelessWidget {
         onPanEnd != null ||
         onPanCancel != null) {
       gestures[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-        () => PanGestureRecognizer(debugOwner: this),
+        () => PanGestureRecognizer(debugOwner: this, supportedDevices: supportedDevices),
         (PanGestureRecognizer instance) {
           instance
             ..onDown = onPanDown
@@ -1111,21 +1181,25 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onPanEnd
             ..onCancel = onPanCancel
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
 
     if (onScaleStart != null || onScaleUpdate != null || onScaleEnd != null) {
       gestures[ScaleGestureRecognizer] = GestureRecognizerFactoryWithHandlers<ScaleGestureRecognizer>(
-        () => ScaleGestureRecognizer(debugOwner: this),
+        () => ScaleGestureRecognizer(debugOwner: this, supportedDevices: supportedDevices),
         (ScaleGestureRecognizer instance) {
           instance
             ..onStart = onScaleStart
             ..onUpdate = onScaleUpdate
             ..onEnd = onScaleEnd
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..trackpadScrollCausesScale = trackpadScrollCausesScale
+            ..trackpadScrollToScaleFactor = trackpadScrollToScaleFactor
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1135,14 +1209,15 @@ class GestureDetector extends StatelessWidget {
         onForcePressUpdate != null ||
         onForcePressEnd != null) {
       gestures[ForcePressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
-        () => ForcePressGestureRecognizer(debugOwner: this),
+        () => ForcePressGestureRecognizer(debugOwner: this, supportedDevices: supportedDevices),
         (ForcePressGestureRecognizer instance) {
           instance
             ..onStart = onForcePressStart
             ..onPeak = onForcePressPeak
             ..onUpdate = onForcePressUpdate
             ..onEnd = onForcePressEnd
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1209,15 +1284,13 @@ class RawGestureDetector extends StatefulWidget {
   /// used by assistive technology. The behavior can be configured by
   /// [semantics], or disabled with [excludeFromSemantics].
   const RawGestureDetector({
-    Key? key,
+    super.key,
     this.child,
     this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
     this.excludeFromSemantics = false,
     this.semantics,
-  }) : assert(gestures != null),
-       assert(excludeFromSemantics != null),
-       super(key: key);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -1274,10 +1347,10 @@ class RawGestureDetector extends StatefulWidget {
   /// ```dart
   /// class ForcePressGestureDetectorWithSemantics extends StatelessWidget {
   ///   const ForcePressGestureDetectorWithSemantics({
-  ///     Key? key,
+  ///     super.key,
   ///     required this.child,
   ///     required this.onForcePress,
-  ///   }) : super(key: key);
+  ///   });
   ///
   ///   final Widget child;
   ///   final VoidCallback onForcePress;
@@ -1386,8 +1459,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   /// If this is never called, then the actions are not filtered. If the list of
   /// actions to filter changes, it must be called again.
   void replaceSemanticsActions(Set<SemanticsAction> actions) {
-    if (widget.excludeFromSemantics)
+    if (widget.excludeFromSemantics) {
       return;
+    }
 
     final RenderSemanticsGestureHandler? semanticsGestureHandler = context.findRenderObject() as RenderSemanticsGestureHandler?;
     assert(() {
@@ -1405,8 +1479,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   @override
   void dispose() {
-    for (final GestureRecognizer recognizer in _recognizers!.values)
+    for (final GestureRecognizer recognizer in _recognizers!.values) {
       recognizer.dispose();
+    }
     _recognizers = null;
     super.dispose();
   }
@@ -1424,15 +1499,24 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       gestures[type]!.initializer(_recognizers![type]!);
     }
     for (final Type type in oldRecognizers.keys) {
-      if (!_recognizers!.containsKey(type))
+      if (!_recognizers!.containsKey(type)) {
         oldRecognizers[type]!.dispose();
+      }
     }
   }
 
   void _handlePointerDown(PointerDownEvent event) {
     assert(_recognizers != null);
-    for (final GestureRecognizer recognizer in _recognizers!.values)
+    for (final GestureRecognizer recognizer in _recognizers!.values) {
       recognizer.addPointer(event);
+    }
+  }
+
+  void _handlePointerPanZoomStart(PointerPanZoomStartEvent event) {
+    assert(_recognizers != null);
+    for (final GestureRecognizer recognizer in _recognizers!.values) {
+      recognizer.addPointerPanZoom(event);
+    }
   }
 
   HitTestBehavior get _defaultBehavior {
@@ -1449,6 +1533,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   Widget build(BuildContext context) {
     Widget result = Listener(
       onPointerDown: _handlePointerDown,
+      onPointerPanZoomStart: _handlePointerPanZoomStart,
       behavior: widget.behavior ?? _defaultBehavior,
       child: widget.child,
     );
@@ -1484,12 +1569,10 @@ typedef _AssignSemantics = void Function(RenderSemanticsGestureHandler);
 
 class _GestureSemantics extends SingleChildRenderObjectWidget {
   const _GestureSemantics({
-    Key? key,
-    Widget? child,
+    super.child,
     required this.behavior,
     required this.assignSemantics,
-  }) : assert(assignSemantics != null),
-       super(key: key, child: child);
+  });
 
   final HitTestBehavior behavior;
   final _AssignSemantics assignSemantics;
@@ -1557,11 +1640,11 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
 
   GestureTapCallback? _getTapHandler(Map<Type, GestureRecognizer> recognizers) {
     final TapGestureRecognizer? tap = recognizers[TapGestureRecognizer] as TapGestureRecognizer?;
-    if (tap == null)
+    if (tap == null) {
       return null;
+    }
 
     return () {
-      assert(tap != null);
       tap.onTapDown?.call(TapDownDetails());
       tap.onTapUp?.call(TapUpDetails(kind: PointerDeviceKind.unknown));
       tap.onTap?.call();
@@ -1570,8 +1653,9 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
 
   GestureLongPressCallback? _getLongPressHandler(Map<Type, GestureRecognizer> recognizers) {
     final LongPressGestureRecognizer? longPress = recognizers[LongPressGestureRecognizer] as LongPressGestureRecognizer?;
-    if (longPress == null)
+    if (longPress == null) {
       return null;
+    }
 
     return () {
       longPress.onLongPressDown?.call(const LongPressDownDetails());
@@ -1604,13 +1688,16 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
         pan.onEnd?.call(DragEndDetails());
       };
 
-    if (horizontalHandler == null && panHandler == null)
+    if (horizontalHandler == null && panHandler == null) {
       return null;
+    }
     return (DragUpdateDetails details) {
-      if (horizontalHandler != null)
+      if (horizontalHandler != null) {
         horizontalHandler(details);
-      if (panHandler != null)
+      }
+      if (panHandler != null) {
         panHandler(details);
+      }
     };
   }
 
@@ -1636,13 +1723,16 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
         pan.onEnd?.call(DragEndDetails());
       };
 
-    if (verticalHandler == null && panHandler == null)
+    if (verticalHandler == null && panHandler == null) {
       return null;
+    }
     return (DragUpdateDetails details) {
-      if (verticalHandler != null)
+      if (verticalHandler != null) {
         verticalHandler(details);
-      if (panHandler != null)
+      }
+      if (panHandler != null) {
         panHandler(details);
+      }
     };
   }
 }

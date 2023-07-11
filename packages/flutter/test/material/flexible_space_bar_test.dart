@@ -5,8 +5,10 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -158,7 +160,11 @@ void main() {
       ),
     );
 
-    final Opacity backgroundOpacity = tester.firstWidget(find.byType(Opacity));
+    final dynamic backgroundOpacity = tester.firstWidget(
+      find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_FlexibleSpaceHeaderOpacity')
+    );
+    // accessing private type member.
+    // ignore: avoid_dynamic_calls
     expect(backgroundOpacity.opacity, 1.0);
   });
 
@@ -438,7 +444,7 @@ void main() {
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
-              width = MediaQuery.of(context).size.width;
+              width = MediaQuery.sizeOf(context).width;
               return CustomScrollView(
                 slivers: <Widget>[
                   SliverAppBar(
@@ -473,8 +479,8 @@ void main() {
       Rect.fromLTRB(
         0,
         height - titleFontSize - 10,
-        (width / 1.5).floorToDouble(),
-        height - 10,
+        (width / 1.5).floorToDouble() * 1.5,
+        height,
       ),
     );
   });
@@ -545,8 +551,8 @@ void main() {
       Rect.fromLTRB(
         0,
         height - titleFontSize - bottomMargin,
-        (collapsedWidth / 3).floorToDouble(),
-        height - bottomMargin,
+        (collapsedWidth / 3).floorToDouble() * 3,
+        height,
       ),
     );
   });
@@ -789,6 +795,22 @@ void main() {
     await tester.pumpWidget(buildFrame(TargetPlatform.linux, true));
     expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
   });
+
+  testWidgets('FlexibleSpaceBar rebuilds when scrolling.', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: SubCategoryScreenView(),
+    ));
+
+    expect(RenderRebuildTracker.count, 1);
+
+    // We drag up to fully collapse the space bar.
+    for (int i = 0; i < 20; i++) {
+      await tester.drag(find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
+      await tester.pumpAndSettle();
+    }
+
+    expect(RenderRebuildTracker.count, greaterThan(1));
+  });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
@@ -812,4 +834,84 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(TestDelegate oldDelegate) => false;
+}
+
+class RebuildTracker extends SingleChildRenderObjectWidget {
+  const RebuildTracker({super.key});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderRebuildTracker();
+  }
+}
+
+class RenderRebuildTracker extends RenderProxyBox {
+  static int count = 0;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    count++;
+    super.paint(context, offset);
+  }
+}
+
+class SubCategoryScreenView extends StatefulWidget {
+  const SubCategoryScreenView({
+    super.key,
+  });
+
+  static const Key scrollKey = Key('orange box');
+
+  @override
+  State<SubCategoryScreenView> createState() => _SubCategoryScreenViewState();
+}
+
+class _SubCategoryScreenViewState extends State<SubCategoryScreenView>
+    with TickerProviderStateMixin {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text('Test'),
+      ),
+      body: CustomScrollView(
+        key: SubCategoryScreenView.scrollKey,
+        slivers: <Widget>[
+          SliverAppBar(
+            leading: const SizedBox(),
+            expandedHeight: MediaQuery.of(context).size.width / 1.7,
+            collapsedHeight: 0,
+            toolbarHeight: 0,
+            titleSpacing: 0,
+            leadingWidth: 0,
+            flexibleSpace: const FlexibleSpaceBar(
+              background: AspectRatio(
+                aspectRatio: 1.7,
+                child: RebuildTracker(),
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
+          SliverToBoxAdapter(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+              ),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 300,
+              itemBuilder: (BuildContext context, int index) {
+                return Card(
+                  color: Colors.amber,
+                  child: Center(child: Text('$index')),
+                );
+              },
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
+        ],
+      ),
+    );
+  }
 }

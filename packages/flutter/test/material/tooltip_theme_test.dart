@@ -37,6 +37,12 @@ void main() {
     expect(const TooltipThemeData().hashCode, const TooltipThemeData().copyWith().hashCode);
   });
 
+  test('TooltipThemeData lerp special cases', () {
+    expect(TooltipThemeData.lerp(null, null, 0), null);
+    const TooltipThemeData data = TooltipThemeData();
+    expect(identical(TooltipThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('TooltipThemeData defaults', () {
     const TooltipThemeData theme = TooltipThemeData();
     expect(theme.height, null);
@@ -46,6 +52,7 @@ void main() {
     expect(theme.excludeFromSemantics, null);
     expect(theme.decoration, null);
     expect(theme.textStyle, null);
+    expect(theme.textAlign, null);
     expect(theme.waitDuration, null);
     expect(theme.showDuration, null);
     expect(theme.triggerMode, null);
@@ -78,6 +85,7 @@ void main() {
       excludeFromSemantics: true,
       decoration: BoxDecoration(color: Color(0xffffffff)),
       textStyle: TextStyle(decoration: TextDecoration.underline),
+      textAlign: TextAlign.center,
       waitDuration: wait,
       showDuration: show,
       triggerMode: triggerMode,
@@ -97,8 +105,9 @@ void main() {
       'semantics: excluded',
       'decoration: BoxDecoration(color: Color(0xffffffff))',
       'textStyle: TextStyle(inherit: true, decoration: TextDecoration.underline)',
-      'wait duration: ${wait.toString()}',
-      'show duration: ${show.toString()}',
+      'textAlign: TextAlign.center',
+      'wait duration: $wait',
+      'show duration: $show',
       'triggerMode: $triggerMode',
       'enableFeedback: true',
     ]);
@@ -130,10 +139,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -188,10 +194,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -248,10 +251,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -317,10 +317,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -388,10 +385,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -445,10 +439,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -497,10 +488,7 @@ void main() {
                   child: Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: const SizedBox(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                    child: const SizedBox.shrink(),
                   ),
                 );
               },
@@ -553,10 +541,7 @@ void main() {
                   child: Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: const SizedBox(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                    child: const SizedBox.shrink(),
                   ),
                 );
               },
@@ -651,6 +636,45 @@ void main() {
     expect(textStyle.decoration, TextDecoration.underline);
   });
 
+  testWidgets('Tooltip message textAlign - TooltipTheme', (WidgetTester tester) async {
+    Future<void> pumpTooltipWithTextAlign({TextAlign? textAlign}) async {
+      final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TooltipTheme(
+            data: TooltipThemeData(
+              textAlign: textAlign,
+            ),
+            child: Tooltip(
+              key: tooltipKey,
+              message: tooltipText,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                color: Colors.green[500],
+              ),
+            ),
+          ),
+        ),
+      );
+      tooltipKey.currentState?.ensureTooltipVisible();
+      await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+    }
+
+    // Default value should be TextAlign.start
+    await pumpTooltipWithTextAlign();
+    TextAlign textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+    expect(textAlign, TextAlign.start);
+
+    await pumpTooltipWithTextAlign(textAlign: TextAlign.center);
+    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+    expect(textAlign, TextAlign.center);
+
+    await pumpTooltipWithTextAlign(textAlign: TextAlign.end);
+    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+    expect(textAlign, TextAlign.end);
+  });
+
   testWidgets('Tooltip decoration - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const Decoration customDecoration = ShapeDecoration(
@@ -673,10 +697,7 @@ void main() {
                   return Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: const SizedBox(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                    child: const SizedBox.shrink(),
                   );
                 },
               ),
@@ -692,9 +713,7 @@ void main() {
 
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
-    expect(tip, paints..path(
-      color: const Color(0x80800000),
-    ));
+    expect(tip, paints..rrect(color: const Color(0x80800000)));
   });
 
   testWidgets('Tooltip decoration - TooltipTheme', (WidgetTester tester) async {
@@ -715,10 +734,7 @@ void main() {
                   return Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: const SizedBox(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                    child: const SizedBox.shrink(),
                   );
                 },
               ),
@@ -734,9 +750,7 @@ void main() {
 
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
-    expect(tip, paints..path(
-      color: const Color(0x80800000),
-    ));
+    expect(tip, paints..rrect(color: const Color(0x80800000)));
   });
 
   testWidgets('Tooltip height and padding - ThemeData.tooltipTheme', (WidgetTester tester) async {
@@ -835,7 +849,6 @@ void main() {
     const Duration customWaitDuration = Duration(milliseconds: 500);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
     await gesture.moveTo(Offset.zero);
@@ -883,7 +896,6 @@ void main() {
     const Duration customWaitDuration = Duration(milliseconds: 500);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
     await gesture.moveTo(Offset.zero);
@@ -1066,7 +1078,8 @@ void main() {
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Foo\nBar',
+                      tooltip: 'Foo',
+                      label: 'Bar',
                       textDirection: TextDirection.ltr,
                     ),
                   ],
@@ -1108,7 +1121,8 @@ void main() {
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      label: 'Foo\nBar',
+                      tooltip: 'Foo',
+                      label: 'Bar',
                       textDirection: TextDirection.ltr,
                     ),
                   ],
@@ -1313,7 +1327,8 @@ void main() {
 }
 
 SemanticsNode findDebugSemantics(RenderObject object) {
-  if (object.debugSemantics != null)
+  if (object.debugSemantics != null) {
     return object.debugSemantics!;
+  }
   return findDebugSemantics(object.parent! as RenderObject);
 }

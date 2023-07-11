@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for LinearGradient
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [LinearGradient].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const LinearGradientExampleApp());
+
+class LinearGradientExampleApp extends StatelessWidget {
+  const LinearGradientExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MoodyGradient extends StatelessWidget {
-  const MoodyGradient({Key? key}) : super(key: key);
+  const MoodyGradient({super.key});
 
   @override
   Widget build(BuildContext context) {

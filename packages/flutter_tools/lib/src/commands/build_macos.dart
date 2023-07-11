@@ -16,11 +16,17 @@ import 'build.dart';
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({
+    required super.logger,
     required bool verboseHelp,
   }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-    usesBuildNumberOption();
-    usesBuildNameOption();
+    usesFlavorOption();
+    argParser
+      .addFlag('config-only',
+        help: 'Update the project configuration without performing a build. '
+          'This can be used in CI/CD process that create an archive to avoid '
+          'performing duplicate work.'
+    );
   }
 
   @override
@@ -40,6 +46,8 @@ class BuildMacosCommand extends BuildSubCommand {
   @override
   bool get supported => globals.platform.isMacOS;
 
+  bool get configOnly => boolArg('config-only');
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await getBuildInfo();
@@ -56,6 +64,7 @@ class BuildMacosCommand extends BuildSubCommand {
       buildInfo: buildInfo,
       targetOverride: targetFile,
       verboseLogging: globals.logger.isVerbose,
+      configOnly: configOnly,
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: globals.fs,
         logger: globals.logger,

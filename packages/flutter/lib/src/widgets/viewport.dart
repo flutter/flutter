@@ -57,7 +57,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// The [cacheExtent] must be specified if the [cacheExtentStyle] is
   /// not [CacheExtentStyle.pixel].
   Viewport({
-    Key? key,
+    super.key,
     this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
     this.anchor = 0.0,
@@ -67,13 +67,9 @@ class Viewport extends MultiChildRenderObjectWidget {
     this.cacheExtentStyle = CacheExtentStyle.pixel,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> slivers = const <Widget>[],
-  }) : assert(offset != null),
-       assert(slivers != null),
-       assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
-       assert(cacheExtentStyle != null),
+  }) : assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
        assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
-       assert(clipBehavior != null),
-       super(key: key, children: slivers);
+       super(children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
   ///
@@ -100,6 +96,8 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// vertically centered within the viewport. If the [anchor] is 1.0, and the
   /// [axisDirection] is [AxisDirection.right], then the zero scroll offset is
   /// on the left edge of the viewport.
+  ///
+  /// {@macro flutter.rendering.GrowthDirection.sample}
   final double anchor;
 
   /// Which part of the content inside the viewport should be visible.
@@ -119,6 +117,8 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// the [axisDirection] relative to the [center].
   ///
   /// The [center] must be the key of a child of the viewport.
+  ///
+  /// {@macro flutter.rendering.GrowthDirection.sample}
   final Key? center;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
@@ -142,7 +142,6 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// This depends on the [Directionality] if the `axisDirection` is vertical;
   /// otherwise, the default cross axis direction is downwards.
   static AxisDirection getDefaultCrossAxisDirection(BuildContext context, AxisDirection axisDirection) {
-    assert(axisDirection != null);
     switch (axisDirection) {
       case AxisDirection.up:
         assert(debugCheckHasDirectionality(
@@ -212,7 +211,7 @@ class Viewport extends MultiChildRenderObjectWidget {
 
 class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElementMixin, ViewportElementMixin {
   /// Creates an element that uses the given widget as its configuration.
-  _ViewportElement(Viewport widget) : super(widget);
+  _ViewportElement(Viewport super.widget);
 
   bool _doingMountOrUpdate = false;
   int? _centerSlotIndex;
@@ -329,15 +328,14 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   /// rebuild this widget when the [offset] changes.
   ///
   /// The [offset] argument must not be null.
-  ShrinkWrappingViewport({
-    Key? key,
+  const ShrinkWrappingViewport({
+    super.key,
     this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,
     required this.offset,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> slivers = const <Widget>[],
-  }) : assert(offset != null),
-       super(key: key, children: slivers);
+  }) : super(children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
   ///

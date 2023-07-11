@@ -118,7 +118,7 @@ abstract class ChromiumDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant WebApplicationPackage package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -135,7 +135,7 @@ abstract class ChromiumDevice extends Device {
       if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
         url = debuggingOptions.webLaunchUrl!;
       } else {
-        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a vaild HTTP URL.');
+        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a valid HTTP URL.');
       }
     } else {
       url = platformArgs['uri']! as String;
@@ -149,15 +149,16 @@ abstract class ChromiumDevice extends Device {
             .childDirectory('chrome-device'),
         headless: debuggingOptions.webRunHeadless,
         debugPort: debuggingOptions.webBrowserDebugPort,
+        webBrowserFlags: debuggingOptions.webBrowserFlags,
       );
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
-    return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
+    return LaunchResult.succeeded(vmServiceUri: Uri.parse(url));
   }
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     await _chrome?.close();
@@ -453,7 +454,7 @@ class WebServerDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'Flutter Tools';
 
   @override
-  Future<LaunchResult> startApp(ApplicationPackage package, {
+  Future<LaunchResult> startApp(ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -473,12 +474,12 @@ class WebServerDevice extends Device {
       'Consider using the Chrome or Edge devices for an improved development workflow.'
     );
     _logger.sendEvent('app.webLaunchUrl', <String, Object?>{'url': url, 'launched': false});
-    return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
+    return LaunchResult.succeeded(vmServiceUri: url != null ? Uri.parse(url): null);
   }
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     return true;

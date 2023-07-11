@@ -365,9 +365,7 @@ class _OptionsState extends State<Options> {
 }
 
 class _ControlTile extends StatelessWidget {
-  const _ControlTile({required this.label, required this.child})
-      : assert(label != null),
-        assert(child != null);
+  const _ControlTile({required this.label, required this.child});
 
   final String label;
   final Widget child;
@@ -534,7 +532,7 @@ class _MyHomePageState extends State<MyHomePage> {
         label: _model.rtl ? 'زر مسطح' : 'Text Button',
         child: TextButton(
           style: TextButton.styleFrom(
-            primary: Colors.white,
+            foregroundColor: Colors.white,
             backgroundColor: m2Swatch[200]
           ),
           onPressed: _model.enable ? () {} : null,
@@ -631,13 +629,11 @@ class _MyHomePageState extends State<MyHomePage> {
               data: Theme.of(context).copyWith(visualDensity: _model.density),
               child: Directionality(
                 textDirection: _model.rtl ? TextDirection.rtl : TextDirection.ltr,
-                child: Scrollbar(
-                  child: MediaQuery(
-                    data: MediaQuery.of(context).copyWith(textScaleFactor: _model.size),
-                    child: SizedBox.expand(
-                      child: ListView(
-                        children: tiles,
-                      ),
+                child: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: _model.size),
+                  child: SizedBox.expand(
+                    child: ListView(
+                      children: tiles,
                     ),
                   ),
                 ),

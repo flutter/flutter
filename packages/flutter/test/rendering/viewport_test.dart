@@ -8,8 +8,7 @@
 // (or vice versa).
 
 @Tags(<String>['reduced-test-set'])
-
-import 'dart:ui' as ui;
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -781,19 +780,14 @@ void main() {
     }
 
     testWidgets('Reverse List showOnScreen', (WidgetTester tester) async {
-      final ui.Size originalScreenSize = tester.binding.window.physicalSize;
-      final double originalDevicePixelRatio = tester.binding.window.devicePixelRatio;
-      addTearDown(() {
-        tester.binding.window.devicePixelRatioTestValue = originalDevicePixelRatio;
-        tester.binding.window.physicalSizeTestValue = originalScreenSize;
-      });
+      addTearDown(tester.view.reset);
       const double screenHeight = 400.0;
       const double screenWidth = 400.0;
       const double itemHeight = screenHeight / 10.0;
       const ValueKey<String> centerKey = ValueKey<String>('center');
 
-      tester.binding.window.devicePixelRatioTestValue = 1.0;
-      tester.binding.window.physicalSizeTestValue = const Size(screenWidth, screenHeight);
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(screenWidth, screenHeight);
 
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -1708,9 +1702,8 @@ void main() {
           '   If this widget is always nested in a scrollable widget there is\n'
           '   no need to use a viewport because there will always be enough\n'
           '   horizontal space for the children. In this case, consider using a\n'
-          '   Row instead. Otherwise, consider using the "shrinkWrap" property\n'
-          '   (or a ShrinkWrappingViewport) to size the width of the viewport\n'
-          '   to the sum of the widths of its children.\n',
+          '   Row or Wrap instead. Otherwise, consider using a CustomScrollView\n'
+          '   to concatenate arbitrary slivers into a single scrollable.\n',
       );
     });
 
@@ -1743,9 +1736,9 @@ void main() {
           '   If this widget is always nested in a scrollable widget there is\n'
           '   no need to use a viewport because there will always be enough\n'
           '   vertical space for the children. In this case, consider using a\n'
-          '   Column instead. Otherwise, consider using the "shrinkWrap"\n'
-          '   property (or a ShrinkWrappingViewport) to size the height of the\n'
-          '   viewport to the sum of the heights of its children.\n',
+          '   Column or Wrap instead. Otherwise, consider using a\n'
+          '   CustomScrollView to concatenate arbitrary slivers into a single\n'
+          '   scrollable.\n',
       );
     });
   });
@@ -1845,7 +1838,7 @@ void main() {
   });
 
   group('Overscrolling RenderShrinkWrappingViewport', () {
-    Widget _buildSimpleShrinkWrap({
+    Widget buildSimpleShrinkWrap({
       ScrollController? controller,
       Axis scrollDirection = Axis.vertical,
       ScrollPhysics? physics,
@@ -1867,7 +1860,7 @@ void main() {
       );
     }
 
-    Widget _buildClippingShrinkWrap(
+    Widget buildClippingShrinkWrap(
       ScrollController controller, {
       bool constrain = false,
     }) {
@@ -1875,7 +1868,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: Container(
+          child: ColoredBox(
             color: const Color(0xFF000000),
             child: Column(
               children: <Widget>[
@@ -1912,7 +1905,7 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/89717
       final  ScrollController controller = ScrollController();
       await tester.pumpWidget(
-        _buildClippingShrinkWrap(controller, constrain: true)
+        buildClippingShrinkWrap(controller, constrain: true)
       );
       expect(controller.offset, 0.0);
       expect(tester.getTopLeft(find.text('Item 0')).dy, 100.0);
@@ -1939,7 +1932,7 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/89717
       final  ScrollController controller = ScrollController();
       await tester.pumpWidget(
-        _buildClippingShrinkWrap(controller)
+        buildClippingShrinkWrap(controller)
       );
       expect(controller.offset, 0.0);
       expect(tester.getTopLeft(find.text('Item 0')).dy, 100.0);
@@ -1967,7 +1960,7 @@ void main() {
       // Scrollables should overscroll by default on iOS and macOS
       final  ScrollController controller = ScrollController();
       await tester.pumpWidget(
-        _buildSimpleShrinkWrap(controller: controller),
+        buildSimpleShrinkWrap(controller: controller),
       );
       expect(controller.offset, 0.0);
       expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
@@ -2006,7 +1999,7 @@ void main() {
       // Scrollables should overscroll by default on iOS and macOS
       final  ScrollController controller = ScrollController();
       await tester.pumpWidget(
-        _buildSimpleShrinkWrap(controller: controller, scrollDirection: Axis.horizontal),
+        buildSimpleShrinkWrap(controller: controller, scrollDirection: Axis.horizontal),
       );
       expect(controller.offset, 0.0);
       expect(tester.getTopLeft(find.text('Item 0')).dx, 0.0);
@@ -2045,7 +2038,7 @@ void main() {
       // Scrollables should overscroll when the scroll physics allow
       final  ScrollController controller = ScrollController();
       await tester.pumpWidget(
-        _buildSimpleShrinkWrap(controller: controller, physics: const BouncingScrollPhysics()),
+        buildSimpleShrinkWrap(controller: controller, physics: const BouncingScrollPhysics()),
       );
       expect(controller.offset, 0.0);
       expect(tester.getTopLeft(find.text('Item 0')).dy, 0.0);
@@ -2084,7 +2077,7 @@ void main() {
       // Scrollables should overscroll when the scroll physics allow
       final  ScrollController controller = ScrollController();
       await tester.pumpWidget(
-        _buildSimpleShrinkWrap(
+        buildSimpleShrinkWrap(
           controller: controller,
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
@@ -2158,4 +2151,113 @@ void main() {
     await tester.drag(find.text('b'), const Offset(0, 200));
     await tester.pumpAndSettle();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+  testWidgets('Viewport describeApproximateClip respects clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: CustomScrollView(
+        clipBehavior: Clip.none,
+        slivers: <Widget>[
+          SliverToBoxAdapter(child: SizedBox(width: 20, height: 20)),
+        ]
+      ),
+    ));
+    RenderViewport viewport = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(viewport.clipBehavior, Clip.none);
+    bool visited = false;
+    viewport.visitChildren((RenderObject child) {
+      visited = true;
+      expect(viewport.describeApproximatePaintClip(child as RenderSliver), null);
+    });
+    expect(visited, true);
+
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverToBoxAdapter(child: SizedBox(width: 20, height: 20)),
+        ]
+      ),
+    ));
+    viewport = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(viewport.clipBehavior, Clip.hardEdge);
+    visited = false;
+    viewport.visitChildren((RenderObject child) {
+      visited = true;
+      expect(viewport.describeApproximatePaintClip(child as RenderSliver), Offset.zero & viewport.size);
+    });
+    expect(visited, true);
+  });
+
+  testWidgets('Shrinkwrapping viewport asserts bounded cross axis', (WidgetTester tester) async {
+    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+    FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+    // Vertical
+    await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: <Widget>[
+            ListView(
+              shrinkWrap: true,
+              children: const <Widget>[ SizedBox.square(dimension: 500) ],
+            ),
+          ],
+        ),
+      ));
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isFlutterError);
+    FlutterError error = errors.first.exception as FlutterError;
+    expect(
+      error.toString(),
+      contains('Viewports expand in the cross axis to fill their container'),
+    );
+    errors.clear();
+
+    // Horizontal
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView(
+        children: <Widget>[
+          ListView(
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            children: const <Widget>[ SizedBox.square(dimension: 500) ],
+          ),
+        ],
+      ),
+    ));
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isFlutterError);
+    error = errors.first.exception as FlutterError;
+    expect(
+      error.toString(),
+      contains('Viewports expand in the cross axis to fill their container'),
+    );
+    errors.clear();
+
+    // No children
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: <Widget>[
+          ListView(
+            shrinkWrap: true,
+          ),
+        ],
+      ),
+    ));
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isFlutterError);
+    error = errors.first.exception as FlutterError;
+    expect(
+      error.toString(),
+      contains('Viewports expand in the cross axis to fill their container'),
+    );
+    errors.clear();
+  });
 }

@@ -44,13 +44,16 @@ const int kExitCodeSuccess = 0;
 
 final GetStackPointerCallback getStackPointer = () {
   // Makes sure we are running on an Android arm64 device.
-  if (!io.Platform.isAndroid)
+  if (!io.Platform.isAndroid) {
     throw 'This benchmark test can only be run on Android arm devices.';
+  }
   final io.ProcessResult result = io.Process.runSync('getprop', <String>['ro.product.cpu.abi']);
-  if (result.exitCode != 0)
+  if (result.exitCode != 0) {
     throw 'Failed to retrieve CPU information.';
-  if (!result.stdout.toString().contains('armeabi'))
+  }
+  if (!result.stdout.toString().contains('armeabi')) {
     throw 'This benchmark test can only be run on Android arm devices.';
+  }
 
   // Creates a block of memory to store the assembly code.
   final ffi.Pointer<ffi.Void> region = mmap(ffi.nullptr, kMemorySize, kProtRead | kProtWrite,
@@ -67,7 +70,7 @@ final GetStackPointerCallback getStackPointer = () {
       // "mov r0, sp"  in machine code: 0D00A0E1.
       0x0d, 0x00, 0xa0, 0xe1,
       // "bx lr"       in machine code: 1EFF2FE1.
-      0x1e, 0xff, 0x2f, 0xe1
+      0x1e, 0xff, 0x2f, 0xe1,
     ]
   );
 
@@ -85,9 +88,9 @@ class StackSizePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return const Material(
       child: Column(
-        children: const <Widget>[
+        children: <Widget>[
           SizedBox(
             width: 200,
             height: 100,

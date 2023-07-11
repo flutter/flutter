@@ -18,7 +18,6 @@ import '../build_system/targets/deferred_components.dart';
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
-import '../build_system/targets/web.dart';
 import '../build_system/targets/windows.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -48,8 +47,6 @@ List<Target> _kDefaultTargets = <Target>[
   const ProfileBundleLinuxAssets(TargetPlatform.linux_arm64),
   const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64),
   const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64),
-  // Web targets
-  WebServiceWorker(globals.fs, globals.cache),
   const ReleaseAndroidApplication(),
   // This is a one-off rule for bundle and aot compat.
   const CopyFlutterBundle(),
@@ -79,10 +76,6 @@ List<Target> _kDefaultTargets = <Target>[
   const DebugBundleWindowsAssets(),
   const ProfileBundleWindowsAssets(),
   const ReleaseBundleWindowsAssets(),
-  // Windows UWP targets
-  const DebugBundleWindowsAssetsUwp(),
-  const ProfileBundleWindowsAssetsUwp(),
-  const ReleaseBundleWindowsAssetsUwp(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -145,9 +138,6 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<CustomDimensions> get usageValues async {
     final FlutterProject flutterProject = FlutterProject.current();
-    if (flutterProject == null) {
-      return const CustomDimensions();
-    }
     try {
       return CustomDimensions(
         commandBuildBundleTargetPlatform: environment.defines[kTargetPlatform],
@@ -183,12 +173,12 @@ class AssembleCommand extends FlutterCommand {
     final String name = argumentResults.rest.first;
     final Map<String, Target> targetMap = <String, Target>{
       for (final Target target in _kDefaultTargets)
-        target.name: target
+        target.name: target,
     };
     final List<Target> results = <Target>[
       for (final String targetName in argumentResults.rest)
         if (targetMap.containsKey(targetName))
-          targetMap[targetName]!
+          targetMap[targetName]!,
     ];
     if (results.isEmpty) {
       throwToolExit('No target named "$name" defined.');
@@ -242,6 +232,7 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      usage: globals.flutterUsage,
       platform: globals.platform,
       engineVersion: artifacts.isLocalEngine
         ? null
@@ -266,9 +257,13 @@ class AssembleCommand extends FlutterCommand {
     if (argumentResults.wasParsed(FlutterOptions.kExtraGenSnapshotOptions)) {
       results[kExtraGenSnapshotOptions] = (argumentResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
     }
-    if (argumentResults.wasParsed(FlutterOptions.kDartDefinesOption)) {
-      results[kDartDefines] = (argumentResults[FlutterOptions.kDartDefinesOption] as List<String>).join(',');
+
+    final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
+    final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
+    if(dartDefines.isNotEmpty){
+      results[kDartDefines] = dartDefines.join(',');
     }
+
     results[kDeferredComponents] = 'false';
     if (FlutterProject.current().manifest.deferredComponents != null && isDeferredComponentsTargets() && !isDebug()) {
       results[kDeferredComponents] = 'true';
@@ -330,7 +325,7 @@ class AssembleCommand extends FlutterCommand {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
         if (measurement.fatal || globals.logger.isVerbose) {
           globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
-            stackTrace: measurement.stackTrace
+            stackTrace: globals.logger.isVerbose ? measurement.stackTrace : null,
           );
         }
       }
@@ -390,8 +385,8 @@ void writePerformanceData(Iterable<PerformanceMeasurement> measurements, File ou
           'skipped': measurement.skipped,
           'succeeded': measurement.succeeded,
           'elapsedMilliseconds': measurement.elapsedMilliseconds,
-        }
-    ]
+        },
+    ],
   };
   if (!outFile.parent.existsSync()) {
     outFile.parent.createSync(recursive: true);

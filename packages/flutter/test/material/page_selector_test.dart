@@ -220,8 +220,9 @@ void main() {
     ).evaluate();
 
     // Indicators get an 8 pixel margin, 16 + 8 = 24.
-    for (final Element indicatorElement in indicatorElements)
+    for (final Element indicatorElement in indicatorElements) {
       expect(indicatorElement.size, const Size(24.0, 24.0));
+    }
 
     expect(tester.getSize(find.byType(TabPageSelector)).height, 24.0);
   });
@@ -243,8 +244,9 @@ void main() {
         matching: find.byType(TabPageSelectorIndicator),
       ),
     );
-    for (final TabPageSelectorIndicator indicator in indicators)
+    for (final TabPageSelectorIndicator indicator in indicators) {
       expect(indicator.borderStyle, BorderStyle.solid);
+    }
 
     // No border
     await tester.pumpWidget(buildFrame(tabController, borderStyle: BorderStyle.none));
@@ -254,8 +256,9 @@ void main() {
         matching: find.byType(TabPageSelectorIndicator),
       ),
     );
-    for (final TabPageSelectorIndicator indicator in indicators)
+    for (final TabPageSelectorIndicator indicator in indicators) {
       expect(indicator.borderStyle, BorderStyle.none);
+    }
 
     // Solid border
     await tester.pumpWidget(buildFrame(tabController, borderStyle: BorderStyle.solid));
@@ -265,7 +268,8 @@ void main() {
         matching: find.byType(TabPageSelectorIndicator),
       ),
     );
-    for (final TabPageSelectorIndicator indicator in indicators)
+    for (final TabPageSelectorIndicator indicator in indicators) {
       expect(indicator.borderStyle, BorderStyle.solid);
+    }
   });
 }

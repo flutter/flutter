@@ -106,6 +106,10 @@ class ControlsDetails {
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 typedef ControlsWidgetBuilder = Widget Function(BuildContext context, ControlsDetails details);
 
+/// A builder that creates the icon widget for the [Step] at [stepIndex], given
+/// [stepState].
+typedef StepIconBuilder = Widget? Function(int stepIndex, StepState stepState);
+
 const TextStyle _kStepStyle = TextStyle(
   fontSize: 12.0,
   color: Colors.white,
@@ -138,9 +142,8 @@ class Step {
     required this.content,
     this.state = StepState.indexed,
     this.isActive = false,
-  }) : assert(title != null),
-       assert(content != null),
-       assert(state != null);
+    this.label,
+  });
 
   /// The title of the step that typically describes it.
   final Widget title;
@@ -162,6 +165,10 @@ class Step {
 
   /// Whether or not the step is active. The flag only influences styling.
   final bool isActive;
+
+  /// Only [StepperType.horizontal], Optional widget that appears under the [title].
+  /// By default, uses the `bodyLarge` theme.
+  final Widget? label;
 }
 
 /// A material stepper widget that displays progress through a sequence of
@@ -193,7 +200,7 @@ class Stepper extends StatefulWidget {
   ///
   /// The [steps], [type], and [currentStep] arguments must not be null.
   const Stepper({
-    Key? key,
+    super.key,
     required this.steps,
     this.physics,
     this.type = StepperType.vertical,
@@ -204,11 +211,8 @@ class Stepper extends StatefulWidget {
     this.controlsBuilder,
     this.elevation,
     this.margin,
-  }) : assert(steps != null),
-       assert(type != null),
-       assert(currentStep != null),
-       assert(0 <= currentStep && currentStep < steps.length),
-       super(key: key);
+    this.stepIconBuilder,
+  }) : assert(0 <= currentStep && currentStep < steps.length);
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
   ///
@@ -304,8 +308,16 @@ class Stepper extends StatefulWidget {
   /// The elevation of this stepper's [Material] when [type] is [StepperType.horizontal].
   final double? elevation;
 
-  /// custom margin on vertical stepper.
+  /// Custom margin on vertical stepper.
   final EdgeInsetsGeometry? margin;
+
+  /// Callback for creating custom icons for the [steps].
+  ///
+  /// When overriding icon for [StepState.error], please return
+  /// a widget whose width and height are 14 pixels or less to avoid overflow.
+  ///
+  /// If null, the default icons will be used for respective [StepState].
+  final StepIconBuilder? stepIconBuilder;
 
   @override
   State<Stepper> createState() => _StepperState();
@@ -323,8 +335,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       (int i) => GlobalKey(),
     );
 
-    for (int i = 0; i < widget.steps.length; i += 1)
+    for (int i = 0; i < widget.steps.length; i += 1) {
       _oldStates[i] = widget.steps[i].state;
+    }
   }
 
   @override
@@ -332,8 +345,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     super.didUpdateWidget(oldWidget);
     assert(widget.steps.length == oldWidget.steps.length);
 
-    for (int i = 0; i < oldWidget.steps.length; i += 1)
+    for (int i = 0; i < oldWidget.steps.length; i += 1) {
       _oldStates[i] = oldWidget.steps[i].state;
+    }
   }
 
   bool _isFirst(int index) {
@@ -352,6 +366,15 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return Theme.of(context).brightness == Brightness.dark;
   }
 
+  bool _isLabel() {
+    for (final Step step in widget.steps) {
+      if (step.label != null) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Widget _buildLine(bool visible) {
     return Container(
       width: visible ? 1.0 : 0.0,
@@ -363,7 +386,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   Widget _buildCircleChild(int index, bool oldState) {
     final StepState state = oldState ? _oldStates[index]! : widget.steps[index].state;
     final bool isDarkActive = _isDark() && widget.steps[index].isActive;
-    assert(state != null);
+    final Widget? icon = widget.stepIconBuilder?.call(index, state);
+    if (icon != null) {
+      return icon;
+    }
     switch (state) {
       case StepState.indexed:
       case StepState.disabled:
@@ -451,15 +477,16 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         duration: kThemeAnimationDuration,
       );
     } else {
-      if (widget.steps[index].state != StepState.error)
+      if (widget.steps[index].state != StepState.error) {
         return _buildCircle(index, false);
-      else
+      } else {
         return _buildTriangle(index, false);
+      }
     }
   }
 
   Widget _buildVerticalControls(int stepIndex) {
-    if (widget.controlsBuilder != null)
+    if (widget.controlsBuilder != null) {
       return widget.controlsBuilder!(
         context,
         ControlsDetails(
@@ -469,15 +496,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           stepIndex: stepIndex,
         ),
       );
+    }
 
     final Color cancelColor;
     switch (Theme.of(context).brightness) {
       case Brightness.light:
         cancelColor = Colors.black54;
-        break;
       case Brightness.dark:
         cancelColor = Colors.white70;
-        break;
     }
 
     final ThemeData themeData = Theme.of(context);
@@ -505,21 +531,29 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 backgroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
                   return _isDark() || states.contains(MaterialState.disabled) ? null : colorScheme.primary;
                 }),
-                padding: MaterialStateProperty.all<EdgeInsetsGeometry>(buttonPadding),
-                shape: MaterialStateProperty.all<OutlinedBorder>(buttonShape),
+                padding: const MaterialStatePropertyAll<EdgeInsetsGeometry>(buttonPadding),
+                shape: const MaterialStatePropertyAll<OutlinedBorder>(buttonShape),
               ),
-              child: Text(localizations.continueButtonLabel),
+              child: Text(
+                themeData.useMaterial3
+                  ? localizations.continueButtonLabel
+                  : localizations.continueButtonLabel.toUpperCase()
+              ),
             ),
             Container(
               margin: const EdgeInsetsDirectional.only(start: 8.0),
               child: TextButton(
                 onPressed: widget.onStepCancel,
                 style: TextButton.styleFrom(
-                  primary: cancelColor,
+                  foregroundColor: cancelColor,
                   padding: buttonPadding,
                   shape: buttonShape,
                 ),
-                child: Text(localizations.cancelButtonLabel),
+                child: Text(
+                  themeData.useMaterial3
+                    ? localizations.cancelButtonLabel
+                    : localizations.cancelButtonLabel.toUpperCase()
+                ),
               ),
             ),
           ],
@@ -532,18 +566,17 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
 
-    assert(widget.steps[index].state != null);
     switch (widget.steps[index].state) {
       case StepState.indexed:
       case StepState.editing:
       case StepState.complete:
-        return textTheme.bodyText1!;
+        return textTheme.bodyLarge!;
       case StepState.disabled:
-        return textTheme.bodyText1!.copyWith(
+        return textTheme.bodyLarge!.copyWith(
           color: _isDark() ? _kDisabledDark : _kDisabledLight,
         );
       case StepState.error:
-        return textTheme.bodyText1!.copyWith(
+        return textTheme.bodyLarge!.copyWith(
           color: _isDark() ? _kErrorDark : _kErrorLight,
         );
     }
@@ -553,18 +586,37 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
 
-    assert(widget.steps[index].state != null);
     switch (widget.steps[index].state) {
       case StepState.indexed:
       case StepState.editing:
       case StepState.complete:
-        return textTheme.caption!;
+        return textTheme.bodySmall!;
       case StepState.disabled:
-        return textTheme.caption!.copyWith(
+        return textTheme.bodySmall!.copyWith(
           color: _isDark() ? _kDisabledDark : _kDisabledLight,
         );
       case StepState.error:
-        return textTheme.caption!.copyWith(
+        return textTheme.bodySmall!.copyWith(
+          color: _isDark() ? _kErrorDark : _kErrorLight,
+        );
+    }
+  }
+
+  TextStyle _labelStyle(int index) {
+    final ThemeData themeData = Theme.of(context);
+    final TextTheme textTheme = themeData.textTheme;
+
+    switch (widget.steps[index].state) {
+      case StepState.indexed:
+      case StepState.editing:
+      case StepState.complete:
+        return textTheme.bodyLarge!;
+      case StepState.disabled:
+        return textTheme.bodyLarge!.copyWith(
+          color: _isDark() ? _kDisabledDark : _kDisabledLight,
+        );
+      case StepState.error:
+        return textTheme.bodyLarge!.copyWith(
           color: _isDark() ? _kErrorDark : _kErrorLight,
         );
     }
@@ -593,6 +645,17 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           ),
       ],
     );
+  }
+
+  Widget _buildLabelText(int index) {
+    if (widget.steps[index].label != null) {
+      return AnimatedDefaultTextStyle(
+        style: _labelStyle(index),
+        duration: kThemeAnimationDuration,
+        child: widget.steps[index].label!,
+      );
+    }
+    return const SizedBox.shrink();
   }
 
   Widget _buildVerticalHeader(int index) {
@@ -706,9 +769,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           child: Row(
             children: <Widget>[
               SizedBox(
-                height: 72.0,
-                child: Center(
-                  child: _buildIcon(i),
+                height: _isLabel() ? 104.0 : 72.0,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    if (widget.steps[i].label != null) const SizedBox(height: 24.0,),
+                    Center(child: _buildIcon(i)),
+                    if (widget.steps[i].label != null) SizedBox(height : 24.0, child: _buildLabelText(i),),
+                  ],
                 ),
               ),
               Container(
@@ -774,16 +842,16 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(() {
-      if (context.findAncestorWidgetOfExactType<Stepper>() != null)
+      if (context.findAncestorWidgetOfExactType<Stepper>() != null) {
         throw FlutterError(
           'Steppers must not be nested.\n'
           'The material specification advises that one should avoid embedding '
           'steppers within steppers. '
           'https://material.io/archive/guidelines/components/steppers.html#steppers-usage',
         );
+      }
       return true;
     }());
-    assert(widget.type != null);
     switch (widget.type) {
       case StepperType.vertical:
         return _buildVertical();

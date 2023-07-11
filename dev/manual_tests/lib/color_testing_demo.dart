@@ -4,15 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-class ColorTestingDemo extends StatelessWidget {
-  const ColorTestingDemo({ super.key });
-
-  static const String routeName = '/color_demo';
-
-  @override
-  Widget build(BuildContext context) => const ColorDemoHome();
-}
-
 class ColorDemoHome extends StatelessWidget {
   const ColorDemoHome({super.key});
 

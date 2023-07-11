@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -53,8 +54,8 @@ class InvertColorTestWidget extends LeafRenderObjectWidget {
   const InvertColorTestWidget({
     required this.color,
     this.filter,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Color color;
   final ColorFilter? filter;
@@ -78,8 +79,9 @@ class RenderInvertColorTest extends RenderProxyBox {
   Color get color => _color;
   Color _color;
   set color(Color value) {
-    if (color == value)
+    if (color == value) {
       return;
+    }
     _color = value;
     markNeedsPaint();
   }
@@ -88,8 +90,9 @@ class RenderInvertColorTest extends RenderProxyBox {
   ColorFilter? get filter => _filter;
   ColorFilter? _filter;
   set filter(ColorFilter? value) {
-    if (filter == value)
+    if (filter == value) {
       return;
+    }
     _filter = value;
     markNeedsPaint();
   }

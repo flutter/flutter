@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -13,6 +12,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'view.dart';
 
 /// A widget that visualizes the semantics for the child.
 ///
@@ -25,16 +25,14 @@ class SemanticsDebugger extends StatefulWidget {
   ///
   /// [labelStyle] dictates the [TextStyle] used for the semantics labels.
   const SemanticsDebugger({
-    Key? key,
+    super.key,
     required this.child,
     this.labelStyle = const TextStyle(
       color: Color(0xFF000000),
       fontSize: 10.0,
       height: 0.8,
     ),
-  }) : assert(child != null),
-       assert(labelStyle != null),
-       super(key: key);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -98,7 +96,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   Offset? _lastPointerDownLocation;
   void _handlePointerDown(PointerDownEvent event) {
     setState(() {
-      _lastPointerDownLocation = event.position * WidgetsBinding.instance.window.devicePixelRatio;
+      _lastPointerDownLocation = event.position * View.of(context).devicePixelRatio;
     });
     // TODO(ianh): Use a gesture recognizer so that we can reset the
     // _lastPointerDownLocation when none of the other gesture recognizers win.
@@ -123,8 +121,9 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   void _handlePanEnd(DragEndDetails details) {
     final double vx = details.velocity.pixelsPerSecond.dx;
     final double vy = details.velocity.pixelsPerSecond.dy;
-    if (vx.abs() == vy.abs())
+    if (vx.abs() == vy.abs()) {
       return;
+    }
     if (vx.abs() > vy.abs()) {
       if (vx.sign < 0) {
         _performAction(_lastPointerDownLocation!, SemanticsAction.decrease);
@@ -134,10 +133,11 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         _performAction(_lastPointerDownLocation!, SemanticsAction.scrollRight);
       }
     } else {
-      if (vy.sign < 0)
+      if (vy.sign < 0) {
         _performAction(_lastPointerDownLocation!, SemanticsAction.scrollUp);
-      else
+      } else {
         _performAction(_lastPointerDownLocation!, SemanticsAction.scrollDown);
+      }
     }
     setState(() {
       _lastPointerDownLocation = null;
@@ -159,7 +159,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         _pipelineOwner,
         _client.generation,
         _lastPointerDownLocation, // in physical pixels
-        WidgetsBinding.instance.window.devicePixelRatio,
+        View.of(context).devicePixelRatio,
         widget.labelStyle,
       ),
       child: GestureDetector(
@@ -223,8 +223,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     final SemanticsNode? rootNode = _rootSemanticsNode;
     canvas.save();
     canvas.scale(1.0 / devicePixelRatio, 1.0 / devicePixelRatio);
-    if (rootNode != null)
+    if (rootNode != null) {
       _paint(canvas, rootNode, _findDepth(rootNode));
+    }
     if (pointerPosition != null) {
       final Paint paint = Paint();
       paint.color = const Color(0x7F0090FF);
@@ -256,15 +257,18 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     }
 
     if (data.hasAction(SemanticsAction.tap)) {
-      if (!wantsTap)
+      if (!wantsTap) {
         annotations.add('button');
+      }
     } else {
-      if (wantsTap)
+      if (wantsTap) {
         annotations.add('disabled');
+      }
     }
 
-    if (data.hasAction(SemanticsAction.longPress))
+    if (data.hasAction(SemanticsAction.longPress)) {
       annotations.add('long-pressable');
+    }
 
     final bool isScrollable = data.hasAction(SemanticsAction.scrollLeft)
         || data.hasAction(SemanticsAction.scrollRight)
@@ -274,35 +278,44 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     final bool isAdjustable = data.hasAction(SemanticsAction.increase)
         || data.hasAction(SemanticsAction.decrease);
 
-    if (isScrollable)
+    if (isScrollable) {
       annotations.add('scrollable');
+    }
 
-    if (isAdjustable)
+    if (isAdjustable) {
       annotations.add('adjustable');
+    }
 
-    assert(data.attributedLabel != null);
     final String message;
-    if (data.attributedLabel.string.isEmpty) {
+    // Android will avoid pronouncing duplicating tooltip and label.
+    // Therefore, having two identical strings is the same as having a single
+    // string.
+    final bool shouldIgnoreDuplicatedLabel = defaultTargetPlatform == TargetPlatform.android && data.attributedLabel.string == data.tooltip;
+    final String tooltipAndLabel = <String>[
+      if (data.tooltip.isNotEmpty)
+        data.tooltip,
+      if (data.attributedLabel.string.isNotEmpty && !shouldIgnoreDuplicatedLabel)
+        data.attributedLabel.string,
+    ].join('\n');
+    if (tooltipAndLabel.isEmpty) {
       message = annotations.join('; ');
     } else {
-      final String label;
+      final String effectivelabel;
       if (data.textDirection == null) {
-        label = '${Unicode.FSI}${data.attributedLabel.string}${Unicode.PDI}';
+        effectivelabel = '${Unicode.FSI}$tooltipAndLabel${Unicode.PDI}';
         annotations.insert(0, 'MISSING TEXT DIRECTION');
       } else {
         switch (data.textDirection!) {
           case TextDirection.rtl:
-            label = '${Unicode.RLI}${data.attributedLabel.string}${Unicode.PDF}';
-            break;
+            effectivelabel = '${Unicode.RLI}$tooltipAndLabel${Unicode.PDF}';
           case TextDirection.ltr:
-            label = data.attributedLabel.string;
-            break;
+            effectivelabel = tooltipAndLabel;
         }
       }
       if (annotations.isEmpty) {
-        message = label;
+        message = effectivelabel;
       } else {
-        message = '$label (${annotations.join('; ')})';
+        message = '$effectivelabel (${annotations.join('; ')})';
       }
     }
 
@@ -311,8 +324,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
   void _paintMessage(Canvas canvas, SemanticsNode node) {
     final String message = getMessage(node);
-    if (message.isEmpty)
+    if (message.isEmpty) {
       return;
+    }
     final Rect rect = node.rect;
     canvas.save();
     canvas.clipRect(rect);
@@ -326,12 +340,14 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       ..layout(maxWidth: rect.width);
 
     textPainter.paint(canvas, Alignment.center.inscribe(textPainter.size, rect).topLeft);
+    textPainter.dispose();
     canvas.restore();
   }
 
   int _findDepth(SemanticsNode node) {
-    if (!node.hasChildren || node.mergeAllDescendantsIntoThisNode)
+    if (!node.hasChildren || node.mergeAllDescendantsIntoThisNode) {
       return 1;
+    }
     int childrenDepth = 0;
     node.visitChildren((SemanticsNode child) {
       childrenDepth = math.max(childrenDepth, _findDepth(child));
@@ -342,8 +358,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
   void _paint(Canvas canvas, SemanticsNode node, int rank) {
     canvas.save();
-    if (node.transform != null)
+    if (node.transform != null) {
       canvas.transform(node.transform!.storage);
+    }
     final Rect rect = node.rect;
     if (!rect.isEmpty) {
       final Color lineColor = Color(0xFF000000 + math.Random(node.id).nextInt(0xFFFFFF));

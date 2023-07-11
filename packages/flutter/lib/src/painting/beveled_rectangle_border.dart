@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
-import 'edge_insets.dart';
 
 /// A rectangular border with flattened or "beveled" corners.
 ///
@@ -24,11 +23,9 @@ class BeveledRectangleBorder extends OutlinedBorder {
   ///
   /// The arguments must not be null.
   const BeveledRectangleBorder({
-    BorderSide side = BorderSide.none,
+    super.side,
     this.borderRadius = BorderRadius.zero,
-  }) : assert(side != null),
-       assert(borderRadius != null),
-       super(side: side);
+  });
 
   /// The radii for each corner.
   ///
@@ -42,11 +39,6 @@ class BeveledRectangleBorder extends OutlinedBorder {
   final BorderRadiusGeometry borderRadius;
 
   @override
-  EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.all(side.width);
-  }
-
-  @override
   ShapeBorder scale(double t) {
     return BeveledRectangleBorder(
       side: side.scale(t),
@@ -56,7 +48,6 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    assert(t != null);
     if (a is BeveledRectangleBorder) {
       return BeveledRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -68,7 +59,6 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    assert(t != null);
     if (b is BeveledRectangleBorder) {
       return BeveledRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -119,7 +109,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
+    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.strokeInset));
   }
 
   @override
@@ -129,23 +119,26 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
-    if (rect.isEmpty)
+    if (rect.isEmpty) {
       return;
+    }
     switch (side.style) {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Path path = getOuterPath(rect, textDirection: textDirection)
+        final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
+        final RRect adjustedRect = borderRect.inflate(side.strokeOutset);
+        final Path path = _getPath(adjustedRect)
           ..addPath(getInnerPath(rect, textDirection: textDirection), Offset.zero);
         canvas.drawPath(path, side.toPaint());
-        break;
     }
   }
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is BeveledRectangleBorder
         && other.side == side
         && other.borderRadius == borderRadius;

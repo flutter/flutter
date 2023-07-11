@@ -2,40 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for DropdownButton
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [DropdownButton].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+const List<String> list = <String>['One', 'Two', 'Three', 'Four'];
 
-  static const String _title = 'Flutter Code Sample';
+void main() => runApp(const DropdownButtonApp());
+
+class DropdownButtonApp extends StatelessWidget {
+  const DropdownButtonApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('DropdownButton Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: DropdownButtonExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class DropdownButtonExample extends StatefulWidget {
+  const DropdownButtonExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<DropdownButtonExample> createState() => _DropdownButtonExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  String dropdownValue = 'One';
+class _DropdownButtonExampleState extends State<DropdownButtonExample> {
+  String dropdownValue = list.first;
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +47,13 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         height: 2,
         color: Colors.deepPurpleAccent,
       ),
-      onChanged: (String? newValue) {
+      onChanged: (String? value) {
+        // This is called when the user selects an item.
         setState(() {
-          dropdownValue = newValue!;
+          dropdownValue = value!;
         });
       },
-      items: <String>['One', 'Two', 'Free', 'Four']
-          .map<DropdownMenuItem<String>>((String value) {
+      items: list.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text(value),

@@ -7,6 +7,9 @@ import 'package:flutter/gestures.dart';
 
 import 'system_channels.dart';
 
+export 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticPropertiesBuilder;
+export 'package:flutter/gestures.dart' show PointerEvent;
+
 /// Maintains the state of mouse cursors and manages how cursors are searched
 /// for.
 ///
@@ -66,8 +69,9 @@ class MouseCursorManager {
     final MouseCursor nextCursor = _DeferringMouseCursor.firstNonDeferred(cursorCandidates)
       ?? fallbackMouseCursor;
     assert(nextCursor is! _DeferringMouseCursor);
-    if (lastSession?.cursor == nextCursor)
+    if (lastSession?.cursor == nextCursor) {
       return;
+    }
 
     final MouseCursorSession nextSession = nextCursor.createSession(device);
     _lastSession[device] = nextSession;
@@ -100,9 +104,7 @@ abstract class MouseCursorSession {
   /// Create a session.
   ///
   /// All arguments must be non-null.
-  MouseCursorSession(this.cursor, this.device)
-    : assert(cursor != null),
-      assert(device != null);
+  MouseCursorSession(this.cursor, this.device);
 
   /// The cursor that created this session.
   final MouseCursor cursor;
@@ -211,8 +213,9 @@ abstract class MouseCursor with Diagnosticable {
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     final String debugDescription = this.debugDescription;
-    if (minLevel.index >= DiagnosticLevel.info.index && debugDescription != null)
+    if (minLevel.index >= DiagnosticLevel.info.index) {
       return debugDescription;
+    }
     return super.toString(minLevel: minLevel);
   }
 
@@ -257,17 +260,16 @@ class _DeferringMouseCursor extends MouseCursor {
   /// Returns the first cursor that is not a [MouseCursor.defer].
   static MouseCursor? firstNonDeferred(Iterable<MouseCursor> cursors) {
     for (final MouseCursor cursor in cursors) {
-      assert(cursor != null);
-      if (cursor != MouseCursor.defer)
+      if (cursor != MouseCursor.defer) {
         return cursor;
+      }
     }
     return null;
   }
 }
 
 class _NoopMouseCursorSession extends MouseCursorSession {
-  _NoopMouseCursorSession(_NoopMouseCursor cursor, int device)
-    : super(cursor, device);
+  _NoopMouseCursorSession(_NoopMouseCursor super.cursor, super.device);
 
   @override
   Future<void> activate() async { /* Nothing */ }
@@ -299,8 +301,7 @@ class _NoopMouseCursor extends MouseCursor {
 }
 
 class _SystemMouseCursorSession extends MouseCursorSession {
-  _SystemMouseCursorSession(SystemMouseCursor cursor, int device)
-    : super(cursor, device);
+  _SystemMouseCursorSession(SystemMouseCursor super.cursor, super.device);
 
   @override
   SystemMouseCursor get cursor => super.cursor as SystemMouseCursor;
@@ -354,7 +355,7 @@ class SystemMouseCursor extends MouseCursor {
   // the supported system cursors are enumerated in [SystemMouseCursors].
   const SystemMouseCursor._({
     required this.kind,
-  }) : assert(kind != null);
+  });
 
   /// A string that identifies the kind of the cursor.
   ///
@@ -370,8 +371,9 @@ class SystemMouseCursor extends MouseCursor {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SystemMouseCursor
         && other.kind == kind;
   }

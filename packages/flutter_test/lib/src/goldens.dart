@@ -86,8 +86,9 @@ abstract class GoldenFileComparator {
   /// Version numbers are used in golden file tests for package:flutter. You can
   /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
   Uri getTestUri(Uri key, int? version) {
-    if (version == null)
+    if (version == null) {
       return key;
+    }
     final String keyString = key.toString();
     final String extension = path.extension(keyString);
     return Uri.parse('${keyString.split(extension).join()}.$version$extension');
@@ -193,8 +194,9 @@ abstract class WebGoldenComparator {
   /// Version numbers are used in golden file tests for package:flutter. You can
   /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
   Uri getTestUri(Uri key, int? version) {
-    if (version == null)
+    if (version == null) {
       return key;
+    }
     final String keyString = key.toString();
     final String extension = path.extension(keyString);
     return Uri.parse('${keyString.split(extension).join()}.$version$extension');

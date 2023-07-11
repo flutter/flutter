@@ -12,7 +12,7 @@ void main() {
   testWidgets('SystemChrome overlay style test', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -34,7 +34,7 @@ void main() {
         'statusBarBrightness': 'Brightness.dark',
         'statusBarIconBrightness': 'Brightness.light',
         'systemNavigationBarIconBrightness': 'Brightness.light',
-        'systemNavigationBarContrastEnforced': null
+        'systemNavigationBarContrastEnforced': null,
       },
     ));
     log.clear();
@@ -47,7 +47,7 @@ void main() {
 
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       systemStatusBarContrastEnforced: false,
-      systemNavigationBarContrastEnforced: true
+      systemNavigationBarContrastEnforced: true,
     ));
     expect(tester.binding.microtaskCount, equals(1));
     await tester.idle();
@@ -62,7 +62,7 @@ void main() {
         'statusBarBrightness': null,
         'statusBarIconBrightness': null,
         'systemNavigationBarIconBrightness': null,
-        'systemNavigationBarContrastEnforced': true
+        'systemNavigationBarContrastEnforced': true,
       },
     ));
   });
@@ -70,7 +70,7 @@ void main() {
   test('setPreferredOrientations control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -89,7 +89,7 @@ void main() {
   test('setApplicationSwitcherDescription control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -108,7 +108,7 @@ void main() {
   test('setApplicationSwitcherDescription missing plugin', () async {
     final List<ByteData?> log = <ByteData>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
       log.add(message);
       return null;
     });
@@ -120,27 +120,11 @@ void main() {
     expect(log, isNotEmpty);
   });
 
-  test('setEnabledSystemUIOverlays control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
-
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      log.add(methodCall);
-      return null;
-    });
-
-    await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.top]);
-
-    expect(log, hasLength(1));
-    expect(log.single, isMethodCall(
-      'SystemChrome.setEnabledSystemUIOverlays',
-      arguments: <String>['SystemUiOverlay.top'],
-    ));
-  });
 
   test('setEnabledSystemUIMode control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -169,7 +153,7 @@ void main() {
   test('setEnabledSystemUIMode passes correct overlays for manual configuration', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -186,7 +170,7 @@ void main() {
   test('setSystemUIChangeCallback control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });

@@ -19,6 +19,43 @@ const String kLastLogcatTimestamp = '11-27 15:39:04.506';
 const String kDummyLine = 'Contents are not important\n';
 
 void main() {
+  testWithoutContext('AdbLogReader ignores spam from SurfaceSyncer', () async {
+    const int appPid = 1;
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>[
+          'adb',
+          '-s',
+          '1234',
+          'shell',
+          '-x',
+          'logcat',
+          '-v',
+          'time',
+        ],
+        completer: Completer<void>.sync(),
+        stdout:
+          '$kDummyLine'
+          '05-11 12:54:46.665 W/flutter($appPid): Hello there!\n'
+          '05-11 12:54:46.665 E/SurfaceSyncer($appPid): Failed to find sync for id=9\n'
+          '05-11 12:54:46.665 E/SurfaceSyncer($appPid): Failed to find sync for id=10\n'
+      ),
+    ]);
+    final AdbLogReader logReader = await AdbLogReader.createLogReader(
+      createFakeDevice(null),
+      processManager,
+    )..appPid = appPid;
+    final Completer<void> onDone = Completer<void>.sync();
+    final List<String> emittedLines = <String>[];
+    logReader.logLines.listen((String line) {
+        emittedLines.add(line);
+    }, onDone: onDone.complete);
+    await null;
+    logReader.dispose();
+    await onDone.future;
+    expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
+  });
+
   testWithoutContext('AdbLogReader calls adb logcat with expected flags apiVersion 21', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
@@ -34,7 +71,7 @@ void main() {
           '-T',
           "'$kLastLogcatTimestamp'",
         ],
-      )
+      ),
     ]);
     await AdbLogReader.createLogReader(
       createFakeDevice(kLollipopVersionCode),
@@ -57,7 +94,7 @@ void main() {
           '-v',
           'time',
         ],
-      )
+      ),
     ]);
     await AdbLogReader.createLogReader(
       createFakeDevice(kLollipopVersionCode - 1),
@@ -80,7 +117,7 @@ void main() {
           '-v',
           'time',
         ],
-      )
+      ),
     ]);
     await AdbLogReader.createLogReader(
       createFakeDevice(null),
@@ -105,7 +142,7 @@ void main() {
           '-s',
           'flutter',
         ],
-      )
+      ),
     ]);
     await AdbLogReader.createLogReader(
       createFakeDevice(null),
@@ -131,7 +168,7 @@ void main() {
         ],
         completer: Completer<void>.sync(),
         stdout: 'Hello There\n',
-      )
+      ),
     ]);
     final AdbLogReader logReader = await AdbLogReader.createLogReader(
       createFakeDevice(null),
@@ -165,7 +202,7 @@ void main() {
           '05-11 12:54:46.665 E/AndroidRuntime(11787): Process: com.example.foobar, PID: 11787\n'
           '05-11 12:54:46.665 java.lang.RuntimeException: Unable to instantiate application '
           'io.flutter.app.FlutterApplication2: java.lang.ClassNotFoundException:\n',
-      )
+      ),
     ]);
     final AdbLogReader logReader = await AdbLogReader.createLogReader(
       createFakeDevice(null),

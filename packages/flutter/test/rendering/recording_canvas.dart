@@ -28,7 +28,6 @@ class RecordedInvocation {
 
   /// Converts [stack] to a string using the [FlutterError.defaultStackFilter] logic.
   String stackToString({ String indent = '' }) {
-    assert(indent != null);
     return indent + FlutterError.defaultStackFilter(
       stack.toString().trimRight().split('\n'),
     ).join('\n$indent');
@@ -124,7 +123,6 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
     Clip clipBehavior = Clip.antiAlias,
     ClipRRectLayer? oldLayer,
   }) {
-    assert(clipBehavior != null);
     clipRRectAndPaint(clipRRect.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
     return null;
   }
@@ -182,6 +180,9 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
+  VoidCallback addCompositionCallback(CompositionCallback callback) => () {};
+
+  @override
   void noSuchMethod(Invocation invocation) { }
 }
 
@@ -208,8 +209,9 @@ class _MethodCall implements Invocation {
 }
 
 String _valueName(Object? value) {
-  if (value is double)
+  if (value is double) {
     return value.toStringAsFixed(1);
+  }
   return value.toString();
 }
 

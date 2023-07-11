@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:io' show SocketException, WebSocket, HttpClient;
+import 'dart:io' show HttpClient, SocketException, WebSocket;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -60,7 +60,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
                 return MapEntry<String, dynamic>(name, result.details);
               }
               return MapEntry<String, Object>(name, result);
-            })
+            }),
           },
         );
       } on MissingPluginException {
@@ -118,11 +118,12 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
-    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
-    return TestViewConfiguration(
+    final FlutterView view = platformDispatcher.implicitView!;
+    final double devicePixelRatio = view.devicePixelRatio;
+    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
+    return TestViewConfiguration.fromView(
       size: size,
-      window: window,
+      view: view,
     );
   }
 
@@ -154,8 +155,9 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
   static IntegrationTestWidgetsFlutterBinding ensureInitialized() {
-    if (_instance == null)
+    if (_instance == null) {
       IntegrationTestWidgetsFlutterBinding();
+    }
     return _instance!;
   }
 
@@ -183,10 +185,10 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   /// On Android, you need to call `convertFlutterSurfaceToImage()`, and
   /// pump a frame before taking a screenshot.
-  Future<List<int>> takeScreenshot(String screenshotName) async {
+  Future<List<int>> takeScreenshot(String screenshotName, [Map<String, Object?>? args]) async {
     reportData ??= <String, dynamic>{};
     reportData!['screenshots'] ??= <dynamic>[];
-    final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName);
+    final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName, args);
     assert(data.containsKey('bytes'));
 
     (reportData!['screenshots']! as List<dynamic>).add(data);
@@ -251,7 +253,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     @visibleForTesting vm.VmService? vmService,
     @visibleForTesting HttpClient? httpClient,
   }) async {
-    assert(streams != null);
     assert(streams.isNotEmpty);
     if (vmService != null) {
       _vmService = vmService;
@@ -405,7 +406,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     // The engine could batch FrameTimings and send them only once per second.
     // Delay for a sufficient time so either old FrameTimings are flushed and not
     // interfering our measurements here, or new FrameTimings are all reported.
-    // TODO(CareF): remove this when flush FrameTiming is readly in engine.
+    // TODO(CareF): remove this when flush FrameTiming is readily in engine.
     //              See https://github.com/flutter/flutter/issues/64808
     //              and https://github.com/flutter/flutter/issues/67593
     final List<FrameTiming> frameTimings = <FrameTiming>[];

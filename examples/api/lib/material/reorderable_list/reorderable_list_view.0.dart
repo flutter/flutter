@@ -2,37 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for ReorderableListView
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ReorderableListView].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const ReorderableApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ReorderableApp extends StatelessWidget {
+  const ReorderableApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('ReorderableListView Sample')),
+        body: const ReorderableExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class ReorderableExample extends StatefulWidget {
+  const ReorderableExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ReorderableExample> createState() => _ReorderableListViewExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ReorderableListViewExampleState extends State<ReorderableExample> {
   final List<int> _items = List<int>.generate(50, (int index) => index);
 
   @override

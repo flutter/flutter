@@ -48,8 +48,6 @@ class Memento extends Object with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('name', name));
-    properties.add(FlagProperty('undo', value: undo != null, ifTrue: 'undo'));
-    properties.add(FlagProperty('redo', value: redo != null, ifTrue: 'redo'));
   }
 }
 
@@ -63,8 +61,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   /// The [maxUndoLevels] argument must not be null.
   UndoableActionDispatcher({
     int maxUndoLevels = _defaultMaxUndoLevels,
-  })  : assert(maxUndoLevels != null),
-        _maxUndoLevels = maxUndoLevels;
+  })  : _maxUndoLevels = maxUndoLevels;
 
   // A stack of actions that have been performed. The most recent action
   // performed is at the end of the list.
@@ -340,12 +337,14 @@ class _DemoButtonState extends State<DemoButton> {
     return TextButton(
       focusNode: _focusNode,
       style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+        foregroundColor: const MaterialStatePropertyAll<Color>(Colors.black),
         overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused))
+          if (states.contains(MaterialState.focused)) {
             return Colors.red;
-          if (states.contains(MaterialState.hovered))
+          }
+          if (states.contains(MaterialState.hovered)) {
             return Colors.blue;
+          }
           return Colors.transparent;
         }),
       ),
@@ -423,7 +422,7 @@ class _FocusDemoState extends State<FocusDemo> {
             debugLabel: 'Scope',
             autofocus: true,
             child: DefaultTextStyle(
-              style: textTheme.headline4!,
+              style: textTheme.headlineMedium!,
               child: Scaffold(
                 appBar: AppBar(
                   title: const Text('Actions Demo'),
@@ -433,25 +432,25 @@ class _FocusDemoState extends State<FocusDemo> {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Row(
+                        const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const <Widget>[
+                          children: <Widget>[
                             DemoButton(name: 'One'),
                             DemoButton(name: 'Two'),
                             DemoButton(name: 'Three'),
                           ],
                         ),
-                        Row(
+                        const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const <Widget>[
+                          children: <Widget>[
                             DemoButton(name: 'Four'),
                             DemoButton(name: 'Five'),
                             DemoButton(name: 'Six'),
                           ],
                         ),
-                        Row(
+                        const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const <Widget>[
+                          children: <Widget>[
                             DemoButton(name: 'Seven'),
                             DemoButton(name: 'Eight'),
                             DemoButton(name: 'Nine'),

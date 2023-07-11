@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -1782,7 +1783,7 @@ Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async 
 class _Stateful extends StatefulWidget {
   // Ignoring the preference for const constructors because we want to test with regular non-const instances.
   // ignore:prefer_const_constructors_in_immutables
-  _Stateful({Key? key}) : super(key: key);
+  _Stateful({super.key});
 
   @override
   State<StatefulWidget> createState() => _StatefulState();

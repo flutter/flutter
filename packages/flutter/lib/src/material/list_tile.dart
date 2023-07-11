@@ -4,25 +4,31 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
+import 'icon_button.dart';
+import 'icon_button_theme.dart';
 import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'list_tile_theme.dart';
 import 'material_state.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// int _act = 1;
+
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
-/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyText1]
-/// text style, which is a little smaller than the theme's [TextTheme.subtitle1]
+/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyLarge]
+/// text style, which is a little smaller than the theme's [TextTheme.titleMedium]
 /// text style, which is used by default.
 enum ListTileStyle {
   /// Use a title font that's appropriate for a [ListTile] in a list.
@@ -57,6 +63,49 @@ enum ListTileControlAffinity {
   platform,
 }
 
+/// Defines how [ListTile.leading] and [ListTile.trailing] are
+/// vertically aligned relative to the [ListTile]'s titles
+/// ([ListTile.title] and [ListTile.subtitle]).
+///
+/// See also:
+///
+///  * [ListTile.titleAlignment], to configure the title alignment for an
+///    individual [ListTile].
+///  * [ListTileThemeData.titleAlignment], to configure the title alignment
+///    for all of the [ListTile]s under a [ListTileTheme].
+///  * [ThemeData.listTileTheme], to configure the [ListTileTheme]
+///    for an entire app.
+enum ListTileTitleAlignment {
+  /// The top of the [ListTile.leading] and [ListTile.trailing] widgets are
+  /// placed [ListTile.minVerticalPadding] below the top of the [ListTile.title]
+  /// if [ListTile.isThreeLine] is true, otherwise they're centered relative
+  /// to the [ListTile.title] and [ListTile.subtitle] widgets.
+  ///
+  /// This is the default when [ThemeData.useMaterial3] is true.
+  threeLine,
+
+  /// The tops of the [ListTile.leading] and [ListTile.trailing] widgets are
+  /// placed 16 units below the top of the [ListTile.title]
+  /// if the titles' overall height is greater than 72, otherwise they're
+  /// centered relative to the [ListTile.title] and [ListTile.subtitle] widgets.
+  ///
+  /// This is the default when [ThemeData.useMaterial3] is false.
+  titleHeight,
+
+  /// The tops of the [ListTile.leading] and [ListTile.trailing] widgets are
+  /// placed [ListTile.minVerticalPadding] below the top of the [ListTile.title].
+  top,
+
+  /// The [ListTile.leading] and [ListTile.trailing] widgets are
+  /// centered relative to the [ListTile]'s titles.
+  center,
+
+  /// The bottoms of the [ListTile.leading] and [ListTile.trailing] widgets are
+  /// placed [ListTile.minVerticalPadding] above the bottom of the [ListTile]'s
+  /// titles.
+  bottom,
+}
+
 /// A single fixed-height row that typically contains some text as well as
 /// a leading or trailing icon.
 ///
@@ -82,103 +131,90 @@ enum ListTileControlAffinity {
 /// see the example below to see how to adhere to both Material spec and
 /// accessibility requirements.
 ///
-/// Note that [leading] and [trailing] widgets can expand as far as they wish
+/// The [leading] and [trailing] widgets can expand as far as they wish
 /// horizontally, so ensure that they are properly constrained.
 ///
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
 /// [Drawer]s and [Card]s.
 ///
-/// One ancestor must be a [Material] widget and typically this is
-/// provided by the app's [Scaffold]. The [tileColor],
-/// [selectedTileColor], [focusColor], and [hoverColor] are not
-/// painted by the list tile itself but by the material widget
-/// ancestor. This generally has no effect. However, if an opaque
-/// widget, like `Container(color: Colors.white)`, is included in
-/// between the [ListTile] and its [Material] ancestor, then the
-/// opaque widget will obscure the material widget and its background
-/// [tileColor], etc. If this a problem, one can wrap a material
-/// widget around the list tile, e.g.:
+/// This widget requires a [Material] widget ancestor in the tree to paint
+/// itself on, which is typically provided by the app's [Scaffold].
+/// The [tileColor], [selectedTileColor], [focusColor], and [hoverColor]
+/// are not painted by the [ListTile] itself but by the [Material] widget
+/// ancestor. In this case, one can wrap a [Material] widget around the
+/// [ListTile], e.g.:
 ///
+/// {@tool snippet}
 /// ```dart
-/// Container(
+/// const ColoredBox(
 ///   color: Colors.green,
 ///   child: Material(
 ///     child: ListTile(
-///       title: const Text('ListTile with red background'),
+///       title: Text('ListTile with red background'),
 ///       tileColor: Colors.red,
 ///     ),
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
-/// {@tool snippet}
+/// ## Performance considerations when wrapping [ListTile] with [Material]
 ///
+/// Wrapping a large number of [ListTile]s individually with [Material]s
+/// is expensive. Consider only wrapping the [ListTile]s that require it
+/// or include a common [Material] ancestor where possible.
+///
+/// [ListTile] must be wrapped in a [Material] widget to animate [tileColor],
+/// [selectedTileColor], [focusColor], and [hoverColor] as these colors
+/// are not drawn by the list tile itself but by the material widget ancestor.
+///
+/// {@tool dartpad}
+/// This example showcases how [ListTile] needs to be wrapped in a [Material]
+/// widget to animate colors.
+///
+/// ** See code in examples/api/lib/material/list_tile/list_tile.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
 /// This example uses a [ListView] to demonstrate different configurations of
 /// [ListTile]s in [Card]s.
 ///
 /// ![Different variations of ListTile](https://flutter.github.io/assets-for-api-docs/assets/material/list_tile.png)
 ///
-/// ```dart
-/// ListView(
-///   children: const <Widget>[
-///     Card(child: ListTile(title: Text('One-line ListTile'))),
-///     Card(
-///       child: ListTile(
-///         leading: FlutterLogo(),
-///         title: Text('One-line with leading widget'),
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         title: Text('One-line with trailing widget'),
-///         trailing: Icon(Icons.more_vert),
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         leading: FlutterLogo(),
-///         title: Text('One-line with both widgets'),
-///         trailing: Icon(Icons.more_vert),
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         title: Text('One-line dense ListTile'),
-///         dense: true,
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         leading: FlutterLogo(size: 56.0),
-///         title: Text('Two-line ListTile'),
-///         subtitle: Text('Here is a second line'),
-///         trailing: Icon(Icons.more_vert),
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         leading: FlutterLogo(size: 72.0),
-///         title: Text('Three-line ListTile'),
-///         subtitle: Text(
-///           'A sufficiently long subtitle warrants three lines.'
-///         ),
-///         trailing: Icon(Icons.more_vert),
-///         isThreeLine: true,
-///       ),
-///     ),
-///   ],
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/list_tile/list_tile.1.dart **
 /// {@end-tool}
-/// {@tool snippet}
 ///
+/// {@tool dartpad}
+/// This sample shows the creation of a [ListTile] using [ThemeData.useMaterial3] flag,
+/// as described in: https://m3.material.io/components/lists/overview.
+///
+/// ** See code in examples/api/lib/material/list_tile/list_tile.2.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows [ListTile]'s [textColor] and [iconColor] can use
+/// [MaterialStateColor] color to change the color of the text and icon
+/// when the [ListTile] is enabled, selected, or disabled.
+///
+/// ** See code in examples/api/lib/material/list_tile/list_tile.3.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows [ListTile.titleAlignment] can be used to configure the
+/// [leading] and [trailing] widgets alignment relative to the [title] and
+/// [subtitle] widgets.
+///
+/// ** See code in examples/api/lib/material/list_tile/list_tile.4.dart **
+/// {@end-tool}
+///
+/// {@tool snippet}
 /// To use a [ListTile] within a [Row], it needs to be wrapped in an
 /// [Expanded] widget. [ListTile] requires fixed width constraints,
 /// whereas a [Row] does not constrain its children.
 ///
 /// ```dart
-/// Row(
-///   children: const <Widget>[
+/// const Row(
+///   children: <Widget>[
 ///     Expanded(
 ///       child: ListTile(
 ///         leading: FlutterLogo(),
@@ -202,8 +238,6 @@ enum ListTileControlAffinity {
 /// tapped, the whole row has an ink splash effect (see [InkWell]).
 ///
 /// ```dart
-/// int _act = 1;
-/// // ...
 /// ListTile(
 ///   leading: const Icon(Icons.flight_land),
 ///   title: const Text("Trix's airplane"),
@@ -264,7 +298,7 @@ enum ListTileControlAffinity {
 ///
 /// ![Custom list item a](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_a.png)
 ///
-/// ** See code in examples/api/lib/material/list_tile/list_tile.4.dart **
+/// ** See code in examples/api/lib/material/list_tile/custom_list_item.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
@@ -274,7 +308,7 @@ enum ListTileControlAffinity {
 ///
 /// ![Custom list item b](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_b.png)
 ///
-/// ** See code in examples/api/lib/material/list_tile/list_tile.5.dart **
+/// ** See code in examples/api/lib/material/list_tile/custom_list_item.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -289,7 +323,8 @@ enum ListTileControlAffinity {
 ///  * [ListTile.divideTiles], a utility for inserting [Divider]s in between [ListTile]s.
 ///  * [CheckboxListTile], [RadioListTile], and [SwitchListTile], widgets
 ///    that combine [ListTile] with other controls.
-///  * <https://material.io/design/components/lists.html>
+///  * Material 3 [ListTile] specifications are referenced from <https://m3.material.io/components/lists/specs>
+///    and Material 2 [ListTile] specifications are referenced from <https://material.io/design/components/lists.html>
 ///  * Cookbook: [Use lists](https://flutter.dev/docs/cookbook/lists/basic-list)
 ///  * Cookbook: [Implement swipe to dismiss](https://flutter.dev/docs/cookbook/gestures/dismissible)
 class ListTile extends StatelessWidget {
@@ -299,7 +334,7 @@ class ListTile extends StatelessWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   const ListTile({
-    Key? key,
+    super.key,
     this.leading,
     this.title,
     this.subtitle,
@@ -312,14 +347,19 @@ class ListTile extends StatelessWidget {
     this.selectedColor,
     this.iconColor,
     this.textColor,
+    this.titleTextStyle,
+    this.subtitleTextStyle,
+    this.leadingAndTrailingTextStyle,
     this.contentPadding,
     this.enabled = true,
     this.onTap,
     this.onLongPress,
+    this.onFocusChange,
     this.mouseCursor,
     this.selected = false,
     this.focusColor,
     this.hoverColor,
+    this.splashColor,
     this.focusNode,
     this.autofocus = false,
     this.tileColor,
@@ -328,12 +368,8 @@ class ListTile extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding,
     this.minLeadingWidth,
-  }) : assert(isThreeLine != null),
-       assert(enabled != null),
-       assert(selected != null),
-       assert(autofocus != null),
-       assert(!isThreeLine || subtitle != null),
-       super(key: key);
+    this.titleAlignment,
+  }) : assert(!isThreeLine || subtitle != null);
 
   /// A widget to display before the title.
   ///
@@ -358,14 +394,14 @@ class ListTile extends StatelessWidget {
   /// two lines. For example, you can use [Text.maxLines] to enforce the number
   /// of lines.
   ///
-  /// The subtitle's default [TextStyle] depends on [TextTheme.bodyText2] except
+  /// The subtitle's default [TextStyle] depends on [TextTheme.bodyMedium] except
   /// [TextStyle.color]. The [TextStyle.color] depends on the value of [enabled]
   /// and [selected].
   ///
   /// When [enabled] is false, the text color is set to [ThemeData.disabledColor].
   ///
   /// When [selected] is false, the text color is set to [ListTileTheme.textColor]
-  /// if it's not null and to [TextTheme.caption]'s color if [ListTileTheme.textColor]
+  /// if it's not null and to [TextTheme.bodySmall]'s color if [ListTileTheme.textColor]
   /// is null.
   final Widget? subtitle;
 
@@ -397,6 +433,8 @@ class ListTile extends StatelessWidget {
   /// If this property is null then its value is based on [ListTileTheme.dense].
   ///
   /// Dense list tiles default to a smaller height.
+  ///
+  /// It is not recommended to set [dense] to true when [ThemeData.useMaterial3] is true.
   final bool? dense;
 
   /// Defines how compact the list tile's layout will be.
@@ -435,7 +473,16 @@ class ListTile extends StatelessWidget {
 
   /// Defines the default color for [leading] and [trailing] icons.
   ///
-  /// If this property is null then [ListTileThemeData.iconColor] is used.
+  /// If this property is null and [selected] is false then [ListTileThemeData.iconColor]
+  /// is used. If that is also null and [ThemeData.useMaterial3] is true, [ColorScheme.onSurfaceVariant]
+  /// is used, otherwise if [ThemeData.brightness] is [Brightness.light], [Colors.black54] is used,
+  /// and if [ThemeData.brightness] is [Brightness.dark], the value is null.
+  ///
+  /// If this property is null and [selected] is true then [ListTileThemeData.selectedColor]
+  /// is used. If that is also null then [ColorScheme.primary] is used.
+  ///
+  /// If this color is a [MaterialStateColor] it will be resolved against
+  /// [MaterialState.selected] and [MaterialState.disabled] states.
   ///
   /// See also:
   ///
@@ -443,16 +490,46 @@ class ListTile extends StatelessWidget {
   ///   [ListTileThemeData].
   final Color? iconColor;
 
-  /// Defines the default color for the [title] and [subtitle].
+  /// Defines the text color for the [title], [subtitle], [leading], and [trailing].
   ///
-  /// If this property is null then [ListTileThemeData.textColor] is used. If that
-  /// is also null then [ColorScheme.primary] is used.
+  /// If this property is null and [selected] is false then [ListTileThemeData.textColor]
+  /// is used. If that is also null then default text color is used for the [title], [subtitle]
+  /// [leading], and [trailing]. Except for [subtitle], if [ThemeData.useMaterial3] is false,
+  /// [TextTheme.bodySmall] is used.
+  ///
+  /// If this property is null and [selected] is true then [ListTileThemeData.selectedColor]
+  /// is used. If that is also null then [ColorScheme.primary] is used.
+  ///
+  /// If this color is a [MaterialStateColor] it will be resolved against
+  /// [MaterialState.selected] and [MaterialState.disabled] states.
   ///
   /// See also:
   ///
   /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
   ///   [ListTileThemeData].
   final Color? textColor;
+
+  /// The text style for ListTile's [title].
+  ///
+  /// If this property is null, then [ListTileThemeData.titleTextStyle] is used.
+  /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.bodyLarge]
+  /// will be used. Otherwise, If ListTile style is [ListTileStyle.list],
+  /// [TextTheme.titleMedium] will be used and if ListTile style is [ListTileStyle.drawer],
+  /// [TextTheme.bodyLarge] will be used.
+  final TextStyle? titleTextStyle;
+
+  /// The text style for ListTile's [subtitle].
+  ///
+  /// If this property is null, then [ListTileThemeData.subtitleTextStyle] is used.
+  /// If that is also null, [TextTheme.bodyMedium] will be used.
+  final TextStyle? subtitleTextStyle;
+
+  /// The text style for ListTile's [leading] and [trailing].
+  ///
+  /// If this property is null, then [ListTileThemeData.leadingAndTrailingTextStyle] is used.
+  /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.labelSmall]
+  /// will be used, otherwise [TextTheme.bodyMedium] will be used.
+  final TextStyle? leadingAndTrailingTextStyle;
 
   /// Defines the font used for the [title].
   ///
@@ -490,6 +567,9 @@ class ListTile extends StatelessWidget {
   /// Inoperative if [enabled] is false.
   final GestureLongPressCallback? onLongPress;
 
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
+
   /// {@template flutter.material.ListTile.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
@@ -517,7 +597,7 @@ class ListTile extends StatelessWidget {
   ///
   /// {@tool dartpad}
   /// Here is an example of using a [StatefulWidget] to keep track of the
-  /// selected index, and using that to set the `selected` property on the
+  /// selected index, and using that to set the [selected] property on the
   /// corresponding [ListTile].
   ///
   /// ** See code in examples/api/lib/material/list_tile/list_tile.selected.0.dart **
@@ -530,6 +610,9 @@ class ListTile extends StatelessWidget {
   /// The color for the tile's [Material] when a pointer is hovering over it.
   final Color? hoverColor;
 
+  /// The color of splash for the tile's [Material].
+  final Color? splashColor;
+
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
@@ -539,14 +622,17 @@ class ListTile extends StatelessWidget {
   /// {@template flutter.material.ListTile.tileColor}
   /// Defines the background color of `ListTile` when [selected] is false.
   ///
-  /// When the value is null, the `tileColor` is set to [ListTileTheme.tileColor]
-  /// if it's not null and to [Colors.transparent] if it's null.
+  /// If this property is null and [selected] is false then [ListTileThemeData.tileColor]
+  /// is used. If that is also null and [selected] is true, [selectedTileColor] is used.
+  /// When that is also null, the [ListTileTheme.selectedTileColor] is used, otherwise
+  /// [Colors.transparent] is used.
+  ///
   /// {@endtemplate}
   final Color? tileColor;
 
   /// Defines the background color of `ListTile` when [selected] is true.
   ///
-  /// When the value if null, the `selectedTileColor` is set to [ListTileTheme.selectedTileColor]
+  /// When the value if null, the [selectedTileColor] is set to [ListTileTheme.selectedTileColor]
   /// if it's not null and to [Colors.transparent] if it's null.
   final Color? selectedTileColor;
 
@@ -582,6 +668,20 @@ class ListTile extends StatelessWidget {
   /// that is also null, then a default value of 40 is used.
   final double? minLeadingWidth;
 
+  /// Defines how [ListTile.leading] and [ListTile.trailing] are
+  /// vertically aligned relative to the [ListTile]'s titles
+  /// ([ListTile.title] and [ListTile.subtitle]).
+  ///
+  /// If this property is null then [ListTileThemeData.titleAlignment]
+  /// is used. If that is also null then [ListTileTitleAlignment.threeLine]
+  /// is used.
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final ListTileTitleAlignment? titleAlignment;
+
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
   ///
@@ -589,7 +689,6 @@ class ListTile extends StatelessWidget {
   ///
   ///  * [Divider], which you can use to obtain this effect manually.
   static Iterable<Widget> divideTiles({ BuildContext? context, required Iterable<Widget> tiles, Color? color }) {
-    assert(tiles != null);
     assert(color != null || context != null);
     tiles = tiles.toList();
 
@@ -615,78 +714,15 @@ class ListTile extends StatelessWidget {
     ];
   }
 
-  Color? _iconColor(ThemeData theme, ListTileThemeData tileTheme) {
-    if (!enabled)
-      return theme.disabledColor;
-
-    if (selected) {
-      return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
-    }
-
-    final Color? color = iconColor ?? tileTheme.iconColor ?? theme.listTileTheme.iconColor;
-    if (color != null)
-      return color;
-
-    switch (theme.brightness) {
-      case Brightness.light:
-        // For the sake of backwards compatibility, the default for unselected
-        // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
-        return Colors.black45;
-      case Brightness.dark:
-        return null; // null - use current icon theme color
-    }
-  }
-
-  Color? _textColor(ThemeData theme, ListTileThemeData tileTheme, Color? defaultColor) {
-    if (!enabled)
-      return theme.disabledColor;
-
-    if (selected) {
-      return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
-    }
-
-    return textColor ?? tileTheme.textColor ?? theme.listTileTheme.textColor ?? defaultColor;
-  }
-
   bool _isDenseLayout(ThemeData theme, ListTileThemeData tileTheme) {
     return dense ?? tileTheme.dense ?? theme.listTileTheme.dense ?? false;
   }
 
-  TextStyle _titleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle textStyle;
-    switch(style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list) {
-      case ListTileStyle.drawer:
-        textStyle = theme.textTheme.bodyText1!;
-        break;
-      case ListTileStyle.list:
-        textStyle = theme.textTheme.subtitle1!;
-        break;
-    }
-    final Color? color = _textColor(theme, tileTheme, textStyle.color);
-    return _isDenseLayout(theme, tileTheme)
-      ? textStyle.copyWith(fontSize: 13.0, color: color)
-      : textStyle.copyWith(color: color);
-  }
-
-  TextStyle _subtitleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle textStyle = theme.textTheme.bodyText2!;
-    final Color? color = _textColor(theme, tileTheme, theme.textTheme.caption!.color);
-    return _isDenseLayout(theme, tileTheme)
-      ? textStyle.copyWith(color: color, fontSize: 12.0)
-      : textStyle.copyWith(color: color);
-  }
-
-  TextStyle _trailingAndLeadingTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle textStyle = theme.textTheme.bodyText2!;
-    final Color? color = _textColor(theme, tileTheme, textStyle.color);
-    return textStyle.copyWith(color: color);
-  }
-
-  Color _tileBackgroundColor(ThemeData theme, ListTileThemeData tileTheme) {
+  Color _tileBackgroundColor(ThemeData theme, ListTileThemeData tileTheme, ListTileThemeData defaults) {
     final Color? color = selected
       ? selectedTileColor ?? tileTheme.selectedTileColor ?? theme.listTileTheme.selectedTileColor
       : tileColor ?? tileTheme.tileColor ?? theme.listTileTheme.tileColor;
-    return color ?? Colors.transparent;
+    return color ?? defaults.tileColor!;
   }
 
   @override
@@ -694,23 +730,66 @@ class ListTile extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
     final ListTileThemeData tileTheme = ListTileTheme.of(context);
-    final IconThemeData iconThemeData = IconThemeData(color: _iconColor(theme, tileTheme));
+    final ListTileStyle listTileStyle = style
+      ?? tileTheme.style
+      ?? theme.listTileTheme.style
+      ?? ListTileStyle.list;
+    final ListTileThemeData defaults = theme.useMaterial3
+        ? _LisTileDefaultsM3(context)
+        : _LisTileDefaultsM2(context, listTileStyle);
+    final Set<MaterialState> states = <MaterialState>{
+      if (!enabled) MaterialState.disabled,
+      if (selected) MaterialState.selected,
+    };
 
-    TextStyle? leadingAndTrailingTextStyle;
+    Color? resolveColor(Color? explicitColor, Color? selectedColor, Color? enabledColor, [Color? disabledColor]) {
+      return _IndividualOverrides(
+        explicitColor: explicitColor,
+        selectedColor: selectedColor,
+        enabledColor: enabledColor,
+        disabledColor: disabledColor,
+      ).resolve(states);
+    }
+
+    final Color? effectiveIconColor = resolveColor(iconColor, selectedColor, iconColor)
+      ?? resolveColor(tileTheme.iconColor, tileTheme.selectedColor, tileTheme.iconColor)
+      ?? resolveColor(theme.listTileTheme.iconColor, theme.listTileTheme.selectedColor, theme.listTileTheme.iconColor)
+      ?? resolveColor(defaults.iconColor, defaults.selectedColor, defaults.iconColor, theme.disabledColor);
+    final Color? effectiveColor = resolveColor(textColor, selectedColor, textColor)
+      ?? resolveColor(tileTheme.textColor, tileTheme.selectedColor, tileTheme.textColor)
+      ?? resolveColor(theme.listTileTheme.textColor, theme.listTileTheme.selectedColor, theme.listTileTheme.textColor)
+      ?? resolveColor(defaults.textColor, defaults.selectedColor, defaults.textColor, theme.disabledColor);
+    final IconThemeData iconThemeData = IconThemeData(color: effectiveIconColor);
+    final IconButtonThemeData iconButtonThemeData = IconButtonThemeData(
+      style: IconButton.styleFrom(foregroundColor: effectiveIconColor),
+    );
+
+    TextStyle? leadingAndTrailingStyle;
     if (leading != null || trailing != null) {
-      leadingAndTrailingTextStyle = _trailingAndLeadingTextStyle(theme, tileTheme);
+      leadingAndTrailingStyle = leadingAndTrailingTextStyle
+        ?? tileTheme.leadingAndTrailingTextStyle
+        ?? defaults.leadingAndTrailingTextStyle!;
+      final Color? leadingAndTrailingTextColor = effectiveColor;
+      leadingAndTrailingStyle = leadingAndTrailingStyle.copyWith(color: leadingAndTrailingTextColor);
     }
 
     Widget? leadingIcon;
     if (leading != null) {
       leadingIcon = AnimatedDefaultTextStyle(
-        style: leadingAndTrailingTextStyle!,
+        style: leadingAndTrailingStyle!,
         duration: kThemeChangeDuration,
         child: leading!,
       );
     }
 
-    final TextStyle titleStyle = _titleTextStyle(theme, tileTheme);
+    TextStyle titleStyle = titleTextStyle
+      ?? tileTheme.titleTextStyle
+      ?? defaults.titleTextStyle!;
+    final Color? titleColor = effectiveColor;
+    titleStyle = titleStyle.copyWith(
+      color: titleColor,
+      fontSize: _isDenseLayout(theme, tileTheme) ? 13.0 : null,
+    );
     final Widget titleText = AnimatedDefaultTextStyle(
       style: titleStyle,
       duration: kThemeChangeDuration,
@@ -720,7 +799,14 @@ class ListTile extends StatelessWidget {
     Widget? subtitleText;
     TextStyle? subtitleStyle;
     if (subtitle != null) {
-      subtitleStyle = _subtitleTextStyle(theme, tileTheme);
+      subtitleStyle = subtitleTextStyle
+        ?? tileTheme.subtitleTextStyle
+        ?? defaults.subtitleTextStyle!;
+      final Color? subtitleColor = effectiveColor ?? theme.textTheme.bodySmall!.color;
+      subtitleStyle = subtitleStyle.copyWith(
+        color: subtitleColor,
+        fontSize: _isDenseLayout(theme, tileTheme) ? 12.0 : null,
+      );
       subtitleText = AnimatedDefaultTextStyle(
         style: subtitleStyle,
         duration: kThemeChangeDuration,
@@ -731,36 +817,40 @@ class ListTile extends StatelessWidget {
     Widget? trailingIcon;
     if (trailing != null) {
       trailingIcon = AnimatedDefaultTextStyle(
-        style: leadingAndTrailingTextStyle!,
+        style: leadingAndTrailingStyle!,
         duration: kThemeChangeDuration,
         child: trailing!,
       );
     }
 
-    const EdgeInsets defaultContentPadding = EdgeInsets.symmetric(horizontal: 16.0);
     final TextDirection textDirection = Directionality.of(context);
     final EdgeInsets resolvedContentPadding = contentPadding?.resolve(textDirection)
       ?? tileTheme.contentPadding?.resolve(textDirection)
-      ?? defaultContentPadding;
+      ?? defaults.contentPadding!.resolve(textDirection);
 
-    final Set<MaterialState> states = <MaterialState>{
+    // Show basic cursor when ListTile isn't enabled or gesture callbacks are null.
+    final Set<MaterialState> mouseStates = <MaterialState>{
       if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
-      if (selected) MaterialState.selected,
     };
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, mouseStates)
+      ?? tileTheme.mouseCursor?.resolve(mouseStates)
+      ?? MaterialStateMouseCursor.clickable.resolve(mouseStates);
 
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, states)
-      ?? tileTheme.mouseCursor?.resolve(states)
-      ?? MaterialStateMouseCursor.clickable.resolve(states);
+    final ListTileTitleAlignment effectiveTitleAlignment = titleAlignment
+      ?? tileTheme.titleAlignment
+      ?? (theme.useMaterial3 ? ListTileTitleAlignment.threeLine : ListTileTitleAlignment.titleHeight);
 
     return InkWell(
       customBorder: shape ?? tileTheme.shape,
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
+      onFocusChange: onFocusChange,
       mouseCursor: effectiveMouseCursor,
       canRequestFocus: enabled,
       focusNode: focusNode,
       focusColor: focusColor,
       hoverColor: hoverColor,
+      splashColor: splashColor,
       autofocus: autofocus,
       enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
       child: Semantics(
@@ -769,7 +859,7 @@ class ListTile extends StatelessWidget {
         child: Ink(
           decoration: ShapeDecoration(
             shape: shape ?? tileTheme.shape ?? const Border(),
-            color: _tileBackgroundColor(theme, tileTheme),
+            color: _tileBackgroundColor(theme, tileTheme, defaults),
           ),
           child: SafeArea(
             top: false,
@@ -777,26 +867,95 @@ class ListTile extends StatelessWidget {
             minimum: resolvedContentPadding,
             child: IconTheme.merge(
               data: iconThemeData,
-              child: _ListTile(
-                leading: leadingIcon,
-                title: titleText,
-                subtitle: subtitleText,
-                trailing: trailingIcon,
-                isDense: _isDenseLayout(theme, tileTheme),
-                visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
-                isThreeLine: isThreeLine,
-                textDirection: textDirection,
-                titleBaselineType: titleStyle.textBaseline!,
-                subtitleBaselineType: subtitleStyle?.textBaseline,
-                horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
-                minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? 4,
-                minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? 40,
+              child: IconButtonTheme(
+                data: iconButtonThemeData,
+                child: _ListTile(
+                  leading: leadingIcon,
+                  title: titleText,
+                  subtitle: subtitleText,
+                  trailing: trailingIcon,
+                  isDense: _isDenseLayout(theme, tileTheme),
+                  visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
+                  isThreeLine: isThreeLine,
+                  textDirection: textDirection,
+                  titleBaselineType: titleStyle.textBaseline ?? defaults.titleTextStyle!.textBaseline!,
+                  subtitleBaselineType: subtitleStyle?.textBaseline ?? defaults.subtitleTextStyle!.textBaseline!,
+                  horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
+                  minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? defaults.minVerticalPadding!,
+                  minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? defaults.minLeadingWidth!,
+                  titleAlignment: effectiveTitleAlignment,
+                ),
               ),
             ),
           ),
-        ),
+       ),
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Widget>('leading', leading, defaultValue: null));
+    properties.add(DiagnosticsProperty<Widget>('title', title, defaultValue: null));
+    properties.add(DiagnosticsProperty<Widget>('subtitle', subtitle, defaultValue: null));
+    properties.add(DiagnosticsProperty<Widget>('trailing', trailing, defaultValue: null));
+    properties.add(FlagProperty('isThreeLine', value: isThreeLine, ifTrue:'THREE_LINE', ifFalse: 'TWO_LINE', showName: true, defaultValue: false));
+    properties.add(FlagProperty('dense', value: dense, ifTrue: 'true', ifFalse: 'false', showName: true));
+    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<ListTileStyle>('style', style, defaultValue: null));
+    properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
+    properties.add(ColorProperty('iconColor', iconColor, defaultValue: null));
+    properties.add(ColorProperty('textColor', textColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('subtitleTextStyle', subtitleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('leadingAndTrailingTextStyle', leadingAndTrailingTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: null));
+    properties.add(FlagProperty('enabled', value: enabled, ifTrue: 'true', ifFalse: 'false', showName: true, defaultValue: true));
+    properties.add(DiagnosticsProperty<Function>('onTap', onTap, defaultValue: null));
+    properties.add(DiagnosticsProperty<Function>('onLongPress', onLongPress, defaultValue: null));
+    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(FlagProperty('selected', value: selected, ifTrue: 'true', ifFalse: 'false', showName: true, defaultValue: false));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'true', ifFalse: 'false', showName: true, defaultValue: false));
+    properties.add(ColorProperty('tileColor', tileColor, defaultValue: null));
+    properties.add(ColorProperty('selectedTileColor', selectedTileColor, defaultValue: null));
+    properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', ifFalse: 'false', showName: true));
+    properties.add(DoubleProperty('horizontalTitleGap', horizontalTitleGap, defaultValue: null));
+    properties.add(DoubleProperty('minVerticalPadding', minVerticalPadding, defaultValue: null));
+    properties.add(DoubleProperty('minLeadingWidth', minLeadingWidth, defaultValue: null));
+    properties.add(DiagnosticsProperty<ListTileTitleAlignment>('titleAlignment', titleAlignment, defaultValue: null));
+  }
+}
+
+class _IndividualOverrides extends MaterialStateProperty<Color?> {
+  _IndividualOverrides({
+    this.explicitColor,
+    this.enabledColor,
+    this.selectedColor,
+    this.disabledColor,
+  });
+
+  final Color? explicitColor;
+  final Color? enabledColor;
+  final Color? selectedColor;
+  final Color? disabledColor;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (explicitColor is MaterialStateColor) {
+      return MaterialStateProperty.resolveAs<Color?>(explicitColor, states);
+    }
+    if (states.contains(MaterialState.disabled)) {
+      return disabledColor;
+    }
+    if (states.contains(MaterialState.selected)) {
+      return selectedColor;
+    }
+    return enabledColor;
   }
 }
 
@@ -810,7 +969,6 @@ enum _ListTileSlot {
 
 class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_ListTileSlot> {
   const _ListTile({
-    Key? key,
     this.leading,
     required this.title,
     this.subtitle,
@@ -824,15 +982,8 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
     required this.minVerticalPadding,
     required this.minLeadingWidth,
     this.subtitleBaselineType,
-  }) : assert(isThreeLine != null),
-       assert(isDense != null),
-       assert(visualDensity != null),
-       assert(textDirection != null),
-       assert(titleBaselineType != null),
-       assert(horizontalTitleGap != null),
-       assert(minVerticalPadding != null),
-       assert(minLeadingWidth != null),
-       super(key: key);
+    required this.titleAlignment,
+  });
 
   final Widget? leading;
   final Widget title;
@@ -847,6 +998,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   final double horizontalTitleGap;
   final double minVerticalPadding;
   final double minLeadingWidth;
+  final ListTileTitleAlignment titleAlignment;
 
   @override
   Iterable<_ListTileSlot> get slots => _ListTileSlot.values;
@@ -877,6 +1029,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
       horizontalTitleGap: horizontalTitleGap,
       minVerticalPadding: minVerticalPadding,
       minLeadingWidth: minLeadingWidth,
+      titleAlignment: titleAlignment,
     );
   }
 
@@ -891,7 +1044,8 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
       ..subtitleBaselineType = subtitleBaselineType
       ..horizontalTitleGap = horizontalTitleGap
       ..minLeadingWidth = minLeadingWidth
-      ..minVerticalPadding = minVerticalPadding;
+      ..minVerticalPadding = minVerticalPadding
+      ..titleAlignment = titleAlignment;
   }
 }
 
@@ -906,15 +1060,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     required double horizontalTitleGap,
     required double minVerticalPadding,
     required double minLeadingWidth,
-  }) : assert(isDense != null),
-       assert(visualDensity != null),
-       assert(isThreeLine != null),
-       assert(textDirection != null),
-       assert(titleBaselineType != null),
-       assert(horizontalTitleGap != null),
-       assert(minVerticalPadding != null),
-       assert(minLeadingWidth != null),
-       _isDense = isDense,
+    required ListTileTitleAlignment titleAlignment,
+  }) : _isDense = isDense,
        _visualDensity = visualDensity,
        _isThreeLine = isThreeLine,
        _textDirection = textDirection,
@@ -922,7 +1069,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
        _subtitleBaselineType = subtitleBaselineType,
        _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
-       _minLeadingWidth = minLeadingWidth;
+       _minLeadingWidth = minLeadingWidth,
+       _titleAlignment = titleAlignment;
 
   RenderBox? get leading => childForSlot(_ListTileSlot.leading);
   RenderBox? get title => childForSlot(_ListTileSlot.title);
@@ -947,9 +1095,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   bool get isDense => _isDense;
   bool _isDense;
   set isDense(bool value) {
-    assert(value != null);
-    if (_isDense == value)
+    if (_isDense == value) {
       return;
+    }
     _isDense = value;
     markNeedsLayout();
   }
@@ -957,9 +1105,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   VisualDensity get visualDensity => _visualDensity;
   VisualDensity _visualDensity;
   set visualDensity(VisualDensity value) {
-    assert(value != null);
-    if (_visualDensity == value)
+    if (_visualDensity == value) {
       return;
+    }
     _visualDensity = value;
     markNeedsLayout();
   }
@@ -967,9 +1115,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   bool get isThreeLine => _isThreeLine;
   bool _isThreeLine;
   set isThreeLine(bool value) {
-    assert(value != null);
-    if (_isThreeLine == value)
+    if (_isThreeLine == value) {
       return;
+    }
     _isThreeLine = value;
     markNeedsLayout();
   }
@@ -977,9 +1125,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsLayout();
   }
@@ -987,9 +1135,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   TextBaseline get titleBaselineType => _titleBaselineType;
   TextBaseline _titleBaselineType;
   set titleBaselineType(TextBaseline value) {
-    assert(value != null);
-    if (_titleBaselineType == value)
+    if (_titleBaselineType == value) {
       return;
+    }
     _titleBaselineType = value;
     markNeedsLayout();
   }
@@ -997,8 +1145,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   TextBaseline? get subtitleBaselineType => _subtitleBaselineType;
   TextBaseline? _subtitleBaselineType;
   set subtitleBaselineType(TextBaseline? value) {
-    if (_subtitleBaselineType == value)
+    if (_subtitleBaselineType == value) {
       return;
+    }
     _subtitleBaselineType = value;
     markNeedsLayout();
   }
@@ -1008,9 +1157,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   double get _effectiveHorizontalTitleGap => _horizontalTitleGap + visualDensity.horizontal * 2.0;
 
   set horizontalTitleGap(double value) {
-    assert(value != null);
-    if (_horizontalTitleGap == value)
+    if (_horizontalTitleGap == value) {
       return;
+    }
     _horizontalTitleGap = value;
     markNeedsLayout();
   }
@@ -1019,9 +1168,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   double _minVerticalPadding;
 
   set minVerticalPadding(double value) {
-    assert(value != null);
-    if (_minVerticalPadding == value)
+    if (_minVerticalPadding == value) {
       return;
+    }
     _minVerticalPadding = value;
     markNeedsLayout();
   }
@@ -1030,10 +1179,20 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   double _minLeadingWidth;
 
   set minLeadingWidth(double value) {
-    assert(value != null);
-    if (_minLeadingWidth == value)
+    if (_minLeadingWidth == value) {
       return;
+    }
     _minLeadingWidth = value;
+    markNeedsLayout();
+  }
+
+  ListTileTitleAlignment get titleAlignment => _titleAlignment;
+  ListTileTitleAlignment _titleAlignment;
+  set titleAlignment(ListTileTitleAlignment value) {
+    if (_titleAlignment == value) {
+      return;
+    }
+    _titleAlignment = value;
     markNeedsLayout();
   }
 
@@ -1074,10 +1233,12 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     final bool isOneLine = !isThreeLine && !hasSubtitle;
 
     final Offset baseDensity = visualDensity.baseSizeAdjustment;
-    if (isOneLine)
+    if (isOneLine) {
       return (isDense ? 48.0 : 56.0) + baseDensity.dy;
-    if (isTwoLine)
+    }
+    if (isTwoLine) {
       return (isDense ? 64.0 : 72.0) + baseDensity.dy;
+    }
     return (isDense ? 76.0 : 88.0) + baseDensity.dy;
   }
 
@@ -1106,8 +1267,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   static Size _layoutBox(RenderBox? box, BoxConstraints constraints) {
-    if (box == null)
+    if (box == null) {
       return Size.zero;
+    }
     box.layout(constraints, parentUsesSize: true);
     return box.size;
   }
@@ -1222,44 +1384,81 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       }
     }
 
-    // This attempts to implement the redlines for the vertical position of the
-    // leading and trailing icons on the spec page:
-    //   https://material.io/design/components/lists.html#specs
-    // The interpretation for these redlines is as follows:
-    //  - For large tiles (> 72dp), both leading and trailing controls should be
-    //    a fixed distance from top. As per guidelines this is set to 16dp.
-    //  - For smaller tiles, trailing should always be centered. Leading can be
-    //    centered or closer to the top. It should never be further than 16dp
-    //    to the top.
     final double leadingY;
     final double trailingY;
-    if (tileHeight > 72.0) {
-      leadingY = 16.0;
-      trailingY = 16.0;
-    } else {
-      leadingY = math.min((tileHeight - leadingSize.height) / 2.0, 16.0);
-      trailingY = (tileHeight - trailingSize.height) / 2.0;
+
+    switch (titleAlignment) {
+      case ListTileTitleAlignment.threeLine: {
+        if (isThreeLine) {
+          leadingY = _minVerticalPadding;
+          trailingY = _minVerticalPadding;
+        } else {
+          leadingY = (tileHeight - leadingSize.height) / 2.0;
+          trailingY = (tileHeight - trailingSize.height) / 2.0;
+        }
+        break;
+      }
+      case ListTileTitleAlignment.titleHeight: {
+        // This attempts to implement the redlines for the vertical position of the
+        // leading and trailing icons on the spec page:
+        //   https://m2.material.io/components/lists#specs
+        // The interpretation for these redlines is as follows:
+        //  - For large tiles (> 72dp), both leading and trailing controls should be
+        //    a fixed distance from top. As per guidelines this is set to 16dp.
+        //  - For smaller tiles, trailing should always be centered. Leading can be
+        //    centered or closer to the top. It should never be further than 16dp
+        //    to the top.
+        if (tileHeight > 72.0) {
+          leadingY = 16.0;
+          trailingY = 16.0;
+        } else {
+          leadingY = math.min((tileHeight - leadingSize.height) / 2.0, 16.0);
+          trailingY = (tileHeight - trailingSize.height) / 2.0;
+        }
+        break;
+      }
+      case ListTileTitleAlignment.top: {
+        leadingY = _minVerticalPadding;
+        trailingY = _minVerticalPadding;
+        break;
+      }
+      case ListTileTitleAlignment.center: {
+        leadingY = (tileHeight - leadingSize.height) / 2.0;
+        trailingY = (tileHeight - trailingSize.height) / 2.0;
+        break;
+      }
+      case ListTileTitleAlignment.bottom: {
+        leadingY = tileHeight - leadingSize.height - _minVerticalPadding;
+        trailingY = tileHeight - trailingSize.height - _minVerticalPadding;
+        break;
+      }
     }
 
     switch (textDirection) {
       case TextDirection.rtl: {
-        if (hasLeading)
+        if (hasLeading) {
           _positionBox(leading!, Offset(tileWidth - leadingSize.width, leadingY));
+        }
         _positionBox(title!, Offset(adjustedTrailingWidth, titleY));
-        if (hasSubtitle)
+        if (hasSubtitle) {
           _positionBox(subtitle!, Offset(adjustedTrailingWidth, subtitleY!));
-        if (hasTrailing)
+        }
+        if (hasTrailing) {
           _positionBox(trailing!, Offset(0.0, trailingY));
+        }
         break;
       }
       case TextDirection.ltr: {
-        if (hasLeading)
+        if (hasLeading) {
           _positionBox(leading!, Offset(0.0, leadingY));
+        }
         _positionBox(title!, Offset(titleStart, titleY));
-        if (hasSubtitle)
+        if (hasSubtitle) {
           _positionBox(subtitle!, Offset(titleStart, subtitleY!));
-        if (hasTrailing)
+        }
+        if (hasTrailing) {
           _positionBox(trailing!, Offset(tileWidth - trailingSize.width, trailingY));
+        }
         break;
       }
     }
@@ -1288,7 +1487,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    assert(position != null);
     for (final RenderBox child in children) {
       final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
@@ -1299,9 +1497,103 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
           return child.hitTest(result, position: transformed);
         },
       );
-      if (isHit)
+      if (isHit) {
         return true;
+      }
     }
     return false;
   }
 }
+
+class _LisTileDefaultsM2 extends ListTileThemeData {
+  _LisTileDefaultsM2(this.context, ListTileStyle style)
+    : super(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+        minLeadingWidth: 40,
+        minVerticalPadding: 4,
+        shape: const Border(),
+        style: style,
+      );
+
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final TextTheme _textTheme = _theme.textTheme;
+
+  @override
+  Color? get tileColor =>  Colors.transparent;
+
+  @override
+  TextStyle? get titleTextStyle {
+    switch (style!) {
+      case ListTileStyle.drawer:
+        return _textTheme.bodyLarge;
+      case ListTileStyle.list:
+        return _textTheme.titleMedium;
+    }
+  }
+
+  @override
+  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium;
+
+  @override
+  TextStyle? get leadingAndTrailingTextStyle => _textTheme.bodyMedium;
+
+  @override
+  Color? get selectedColor => _theme.colorScheme.primary;
+
+  @override
+  Color? get iconColor {
+    switch (_theme.brightness) {
+      case Brightness.light:
+        // For the sake of backwards compatibility, the default for unselected
+        // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
+        return Colors.black45;
+      case Brightness.dark:
+        return null; // null, Use current icon theme color
+    }
+  }
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - LisTile
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_162
+
+class _LisTileDefaultsM3 extends ListTileThemeData {
+  _LisTileDefaultsM3(this.context)
+    : super(
+        contentPadding: const EdgeInsetsDirectional.only(start: 16.0, end: 24.0),
+        minLeadingWidth: 24,
+        minVerticalPadding: 8,
+        shape: const RoundedRectangleBorder(),
+      );
+
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
+  late final TextTheme _textTheme = _theme.textTheme;
+
+  @override
+  Color? get tileColor =>  Colors.transparent;
+
+  @override
+  TextStyle? get titleTextStyle => _textTheme.bodyLarge;
+
+  @override
+  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium;
+
+  @override
+  TextStyle? get leadingAndTrailingTextStyle => _textTheme.labelSmall;
+
+  @override
+  Color? get selectedColor => _colors.primary;
+
+  @override
+  Color? get iconColor => _colors.onSurfaceVariant;
+}
+
+// END GENERATED TOKEN PROPERTIES - LisTile

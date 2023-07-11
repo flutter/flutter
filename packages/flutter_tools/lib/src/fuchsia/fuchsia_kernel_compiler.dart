@@ -63,14 +63,14 @@ class FuchsiaKernelCompiler {
       globals.fs.path.join(outDir, '$appName.dil'),
       '--component-name',
       appName,
-      ...getBuildInfoFlags(buildInfo: buildInfo, manifestPath: manifestPath)
+      ...getBuildInfoFlags(buildInfo: buildInfo, manifestPath: manifestPath),
     ];
 
     flags += <String>[
       '$multiRootScheme:///$target',
     ];
 
-    final String? engineDartBinaryPath = globals.artifacts?.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final String? engineDartBinaryPath = globals.artifacts?.getArtifactPath(Artifact.engineDartBinary);
     if (engineDartBinaryPath == null) {
       throwToolExit('Engine dart binary not found at "$engineDartBinaryPath"');
     }
@@ -104,12 +104,12 @@ class FuchsiaKernelCompiler {
       // AOT/JIT:
       if (buildInfo.usesAot) ...<String>[
         '--aot',
-        '--tfa'
+        '--tfa',
       ] else ...<String>[
         '--no-link-platform',
         '--split-output-by-packages',
         '--manifest',
-        manifestPath
+        manifestPath,
       ],
 
       // debug, profile, jit release, release:

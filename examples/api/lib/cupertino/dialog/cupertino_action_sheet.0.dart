@@ -2,30 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoActionSheet
-
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [CupertinoActionSheet].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const ActionSheetApp());
 
-  static const String _title = 'CupertinoActionSheet Sample';
+class ActionSheetApp extends StatelessWidget {
+  const ActionSheetApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: ActionSheetSample(title: _title),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: ActionSheetExample(),
     );
   }
 }
 
-class ActionSheetSample extends StatelessWidget {
-  const ActionSheetSample({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+class ActionSheetExample extends StatelessWidget {
+  const ActionSheetExample({super.key});
 
   // This shows a CupertinoModalPopup which hosts a CupertinoActionSheet.
   void _showActionSheet(BuildContext context) {
@@ -37,7 +33,7 @@ class ActionSheetSample extends StatelessWidget {
         actions: <CupertinoActionSheetAction>[
           CupertinoActionSheetAction(
             /// This parameter indicates the action would be a default
-            /// defualt behavior, turns the action's text to bold text.
+            /// default behavior, turns the action's text to bold text.
             isDefaultAction: true,
             onPressed: () {
               Navigator.pop(context);
@@ -59,7 +55,7 @@ class ActionSheetSample extends StatelessWidget {
               Navigator.pop(context);
             },
             child: const Text('Destructive Action'),
-          )
+          ),
         ],
       ),
     );
@@ -68,8 +64,8 @@ class ActionSheetSample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text(title),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoActionSheet Sample'),
       ),
       child: Center(
         child: CupertinoButton(

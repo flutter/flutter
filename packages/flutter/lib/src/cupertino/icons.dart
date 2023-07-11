@@ -30,9 +30,9 @@ import 'package:flutter/widgets.dart';
 /// ![The following code snippet would generate a row of icons consisting of a pink heart, a green bell, and a blue umbrella, each progressively bigger than the last.](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_icon.png)
 ///
 /// ```dart
-/// Row(
+/// const Row(
 ///   mainAxisAlignment: MainAxisAlignment.spaceAround,
-///   children: const <Widget>[
+///   children: <Widget>[
 ///     Icon(
 ///       CupertinoIcons.heart_fill,
 ///       color: Colors.pink,
@@ -59,11 +59,8 @@ import 'package:flutter/widgets.dart';
 /// See also:
 ///
 ///  * [Icon], used to show these icons.
-class CupertinoIcons {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  CupertinoIcons._();
-
+@staticIconProvider
+abstract final class CupertinoIcons {
   /// The icon font used for Cupertino icons.
   static const String iconFont = 'CupertinoIcons';
 
@@ -187,14 +184,14 @@ class CupertinoIcons {
   ///  * [check_mark_circled], which is similar, but not filled in.
   static const IconData check_mark_circled_solid = IconData(0xf3ff, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// <i class='cupertino-icons md-36'>circle</i> &#x2014; Cupertino icon for an empty circle (a ring).  An un-selected radio button.
+  /// <i class='cupertino-icons md-36'>circle</i> &#x2014; Cupertino icon for an empty circle (a ring). An un-selected radio button.
   ///
   /// See also:
   ///
   ///  * [circle_filled], which is similar but filled in.
   static const IconData circle = IconData(0xf401, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// <i class='cupertino-icons md-36'>circle_fill</i> &#x2014; Cupertino icon for a filled circle.  The circle is surrounded by a ring.  A selected radio button.
+  /// <i class='cupertino-icons md-36'>circle_fill</i> &#x2014; Cupertino icon for a filled circle. The circle is surrounded by a ring. A selected radio button.
   /// This is the same icon as [circle_fill] in cupertino_icons 1.0.0+.
   ///
   /// See also:
@@ -912,7 +909,7 @@ class CupertinoIcons {
   static const IconData mail_solid = IconData(0xf423, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// <i class='cupertino-icons md-36'>location</i> &#x2014; Cupertino icon for a location pin.
-  static const IconData location = IconData(0xf455, fontFamily: iconFont, fontPackage: iconFontPackage);
+  static const IconData location = IconData(0xf6ee, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// <i class='cupertino-icons md-36'>placemark_fill</i> &#x2014; Cupertino icon for a location pin. This icon is filled in.
   /// This is the same icon as [placemark_fill] in cupertino_icons 1.0.0+.

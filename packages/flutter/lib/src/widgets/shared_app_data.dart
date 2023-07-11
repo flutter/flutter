@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 import 'inherited_model.dart';
@@ -53,7 +52,7 @@ typedef SharedAppDataInitCallback<T> = T Function();
 ///
 /// {@tool dartpad}
 /// The following sample demonstrates using the automatically created
-/// `SharedAppData`. Button presses cause changes to the values for keys
+/// [SharedAppData]. Button presses cause changes to the values for keys
 /// 'foo', and 'bar', and those changes only cause the widgets that
 /// depend on those keys to be rebuilt.
 ///
@@ -75,7 +74,7 @@ class SharedAppData extends StatefulWidget {
   /// rebuilds with [SharedAppData.setValue].
   ///
   /// This widget is automatically created by the [WidgetsApp].
-  const SharedAppData({ Key? key, required this.child }) : super(key: key);
+  const SharedAppData({ super.key, required this.child });
 
   /// The widget below this widget in the tree.
   ///
@@ -122,7 +121,7 @@ class SharedAppData extends StatefulWidget {
   /// The type parameter `K` is the type of the value's keyword and `V`
   /// is the type of the value.
   static void setValue<K extends Object, V>(BuildContext context, K key, V value) {
-    final _SharedAppModel? model = context.getElementForInheritedWidgetOfExactType<_SharedAppModel>()?.widget as _SharedAppModel?;
+    final _SharedAppModel? model = context.getInheritedWidgetOfExactType<_SharedAppModel>();
     assert(_debugHasSharedAppData(model, context, 'setValue'));
     model!.sharedAppDataState.setValue<K, V>(key, value);
   }
@@ -176,10 +175,9 @@ class _SharedAppDataState extends State<SharedAppData> {
 
 class _SharedAppModel extends InheritedModel<Object> {
   _SharedAppModel({
-    Key? key,
     required this.sharedAppDataState,
-    required Widget child
-  }) : data = sharedAppDataState.data, super(key: key, child: child);
+    required super.child
+  }) : data = sharedAppDataState.data;
 
   final _SharedAppDataState sharedAppDataState;
   final Map<Object, Object?> data;

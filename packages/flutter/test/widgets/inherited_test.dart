@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 class TestInherited extends InheritedWidget {
-  const TestInherited({ Key? key, required Widget child, this.shouldNotify = true })
-    : super(key: key, child: child);
+  const TestInherited({ super.key, required super.child, this.shouldNotify = true });
 
   final bool shouldNotify;
 
@@ -20,8 +19,7 @@ class TestInherited extends InheritedWidget {
 }
 
 class ValueInherited extends InheritedWidget {
-  const ValueInherited({ Key? key, required Widget child, required this.value })
-    : super(key: key, child: child);
+  const ValueInherited({ super.key, required super.child, required this.value });
 
   final int value;
 
@@ -30,7 +28,7 @@ class ValueInherited extends InheritedWidget {
 }
 
 class ExpectFail extends StatefulWidget {
-  const ExpectFail(this.onError, { Key? key }) : super(key: key);
+  const ExpectFail(this.onError, { super.key });
   final VoidCallback onError;
 
   @override
@@ -53,8 +51,7 @@ class ExpectFailState extends State<ExpectFail> {
 }
 
 class ChangeNotifierInherited extends InheritedNotifier<ChangeNotifier> {
-  const ChangeNotifierInherited({ Key? key, required Widget child, ChangeNotifier? notifier })
-    : super(key: key, child: child, notifier: notifier);
+  const ChangeNotifierInherited({ super.key, required super.child, super.notifier });
 }
 
 void main() {
@@ -424,6 +421,32 @@ void main() {
       ),
     );
     expect(buildCount, equals(2));
+  });
+
+  testWidgets("BuildContext.getInheritedWidgetOfExactType doesn't create a dependency", (WidgetTester tester) async {
+    int buildCount = 0;
+    final GlobalKey<void> inheritedKey = GlobalKey();
+    final ChangeNotifier notifier = ChangeNotifier();
+
+    final Widget builder = Builder(
+      builder: (BuildContext context) {
+        expect(context.getInheritedWidgetOfExactType<ChangeNotifierInherited>(), equals(inheritedKey.currentWidget));
+        buildCount += 1;
+        return Container();
+      },
+    );
+
+    final Widget inner = ChangeNotifierInherited(
+      key: inheritedKey,
+      notifier: notifier,
+      child: builder,
+    );
+
+    await tester.pumpWidget(inner);
+    expect(buildCount, equals(1));
+    notifier.notifyListeners();
+    await tester.pumpWidget(inner);
+    expect(buildCount, equals(1));
   });
 
   testWidgets('initState() dependency on Inherited asserts', (WidgetTester tester) async {

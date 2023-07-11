@@ -50,6 +50,21 @@ void main() {
     expect(logger.traceText, contains('.metadata file at .metadata was empty or malformed.'));
   });
 
+  testWithoutContext('projectType is populated when version is null', () {
+    metadataFile
+      ..createSync()
+      ..writeAsStringSync('''
+version:
+project_type: plugin
+      ''');
+    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    expect(projectMetadata.projectType, FlutterProjectType.plugin);
+    expect(projectMetadata.versionChannel, isNull);
+    expect(projectMetadata.versionRevision, isNull);
+
+    expect(logger.traceText, contains('The value of key `version` in .metadata was expected to be YamlMap but was Null'));
+  });
+
   testWithoutContext('projectType is populated when version is malformed', () {
     metadataFile
       ..createSync()
@@ -129,7 +144,7 @@ migration:
     expect(projectMetadata.projectType, FlutterProjectType.app);
     expect(projectMetadata.migrateConfig.platformConfigs[SupportedPlatform.root]?.createRevision, 'abcdefg');
     expect(projectMetadata.migrateConfig.platformConfigs[SupportedPlatform.root]?.baseRevision, 'baserevision');
-    // Tool uses default unamanged files list when malformed.
+    // Tool uses default unmanaged files list when malformed.
     expect(projectMetadata.migrateConfig.unmanagedFiles[0], 'lib/main.dart');
 
     expect(logger.traceText, contains('The value of key `unmanaged_files` in .metadata was expected to be YamlList but was YamlMap'));

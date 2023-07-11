@@ -2,37 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for TabBar
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [TabBar].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const TabBarApp());
 
-  static const String _title = 'Flutter Code Sample';
+class TabBarApp extends StatelessWidget {
+  const TabBarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const TabBarExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class TabBarExample extends StatefulWidget {
+  const TabBarExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<TabBarExample> createState() => _TabBarExampleState();
 }
 
-/// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
-    with TickerProviderStateMixin {
-  late TabController _tabController;
+/// [AnimationController]s can be created with `vsync: this` because of
+/// [TickerProviderStateMixin].
+class _TabBarExampleState extends State<TabBarExample> with TickerProviderStateMixin {
+  late final TabController _tabController;
 
   @override
   void initState() {
@@ -41,10 +39,16 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   }
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TabBar Widget'),
+        title: const Text('TabBar Sample'),
         bottom: TabBar(
           controller: _tabController,
           tabs: const <Widget>[

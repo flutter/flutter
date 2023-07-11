@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -240,8 +241,7 @@ void main() {
           child: ClipRect(
             child: Transform(
               transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-              child: Opacity(
-                opacity: 0.9,
+              child: RepaintBoundary(
                 child: Container(
                   color: const Color(0xFF00FF00),
                 ),
@@ -265,7 +265,7 @@ void main() {
     await tester.pumpWidget(
       Transform.rotate(
         angle: math.pi / 2.0,
-        child: Opacity(opacity: 0.5, child: Container()),
+        child: RepaintBoundary(child: Container()),
       ),
     );
 
@@ -305,7 +305,7 @@ void main() {
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(100.0, 50.0),
-        child: Opacity(opacity: 0.5, child: Container()),
+        child: RepaintBoundary(child: Container()),
       ),
     );
 
@@ -320,7 +320,7 @@ void main() {
     await tester.pumpWidget(
       Transform.scale(
         scale: 2.0,
-        child: Opacity(opacity: 0.5, child: Container()),
+        child: RepaintBoundary(child: Container()),
       ),
     );
 
@@ -338,6 +338,153 @@ void main() {
       -400.0, -300.0, 0.0, 1.0, // it's 1600x1200, centered in an 800x600 square
     ]);
   });
+
+  testWidgets('Transform with nan value short-circuits rendering', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform(
+        transform: Matrix4.identity()
+          ..storage[0] = double.nan,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(1));
+  });
+
+  testWidgets('Transform with inf value short-circuits rendering', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform(
+        transform: Matrix4.identity()
+          ..storage[0] = double.infinity,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(1));
+  });
+
+  testWidgets('Transform with -inf value short-circuits rendering', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform(
+        transform: Matrix4.identity()
+          ..storage[0] = double.negativeInfinity,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(1));
+  });
+
+  testWidgets('Transform.rotate does not remove layers due to singular short-circuit', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform.rotate(
+        angle: math.pi / 2,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(3));
+  });
+
+  testWidgets('Transform.rotate creates nice rotation matrices for 0, 90, 180, 270 degrees', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform.rotate(
+        angle: math.pi / 2,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers[1], isA<TransformLayer>()
+      .having((TransformLayer layer) => layer.transform, 'transform', equals(Matrix4.fromList(<double>[
+        0.0, -1.0, 0.0, 700.0,
+        1.0, 0.0, 0.0, -100.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0,
+      ])..transpose()))
+    );
+
+    await tester.pumpWidget(
+      Transform.rotate(
+        angle: math.pi,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers[1], isA<TransformLayer>()
+      .having((TransformLayer layer) => layer.transform, 'transform', equals(Matrix4.fromList(<double>[
+       -1.0, 0.0, 0.0, 800.0,
+        0.0, -1.0, 0.0, 600.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0,
+      ])..transpose()))
+    );
+
+    await tester.pumpWidget(
+      Transform.rotate(
+        angle: 3 * math.pi / 2,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers[1], isA<TransformLayer>()
+      .having((TransformLayer layer) => layer.transform, 'transform', equals(Matrix4.fromList(<double>[
+        0.0, 1.0, 0.0, 100.0,
+       -1.0, 0.0, 0.0, 700.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0,
+      ])..transpose()))
+    );
+
+    await tester.pumpWidget(
+      Transform.rotate(
+        angle: 0,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    // No transform layer created
+    expect(tester.layers[1], isA<OffsetLayer>());
+    expect(tester.layers, hasLength(2));
+  });
+
+  testWidgets('Transform.scale with 0.0 does not paint child layers', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Transform.scale(
+        scale: 0.0,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(1)); // root transform layer
+
+    await tester.pumpWidget(
+      Transform.scale(
+        scaleX: 0.0,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(1));
+
+    await tester.pumpWidget(
+      Transform.scale(
+        scaleY: 0.0,
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(1));
+
+    await tester.pumpWidget(
+      Transform.scale(
+        scale: 0.01, // small but non-zero
+        child: RepaintBoundary(child: Container()),
+      ),
+    );
+
+    expect(tester.layers, hasLength(3));
+  });
+
 
   testWidgets('Translated child into translated box - hit test', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
@@ -364,7 +511,7 @@ void main() {
     expect(pointerDown, isTrue);
   });
 
-  Widget _generateTransform(bool needsCompositing, double angle) {
+  Widget generateTransform(bool needsCompositing, double angle) {
     final Widget customPaint = CustomPaint(painter: TestRectPainter());
     return Transform(
       transform: MatrixUtils.createCylindricalProjectionTransform(
@@ -381,12 +528,12 @@ void main() {
     '3D transform renders the same with or without needsCompositing',
     (WidgetTester tester) async {
       for (double angle = 0; angle <= math.pi/4; angle += 0.01) {
-        await tester.pumpWidget(RepaintBoundary(child: _generateTransform(true, angle)));
+        await tester.pumpWidget(RepaintBoundary(child: generateTransform(true, angle)));
         final RenderBox renderBox = tester.binding.renderView.child!;
         final OffsetLayer layer = renderBox.debugLayer! as OffsetLayer;
         final ui.Image imageWithCompositing = await layer.toImage(renderBox.paintBounds);
 
-        await tester.pumpWidget(RepaintBoundary(child: _generateTransform(false, angle)));
+        await tester.pumpWidget(RepaintBoundary(child: generateTransform(false, angle)));
         await expectLater(find.byType(RepaintBoundary).first, matchesReferenceImage(imageWithCompositing));
       }
     },
@@ -412,8 +559,8 @@ void main() {
       1.0, 0.0, 0.0, 0.0,
       0.0, 1.0, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      25.0, 25.0, 0.0, 1.0]
-    );
+      25.0, 25.0, 0.0, 1.0,
+    ]);
   });
 
   testWidgets('Transform.scale with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -430,8 +577,8 @@ void main() {
       3.14159, 0.0, 0.0, 0.0,
       0.0, 3.14159, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      -856.636, -642.477, 0.0, 1.0]
-    );
+      -856.636, -642.477, 0.0, 1.0,
+    ]);
   });
 
   testWidgets('Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -448,8 +595,8 @@ void main() {
       moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
       moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0]
-    );
+      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0,
+    ]);
   });
 
   testWidgets('Offset Transform.rotate with FilterQuality produces filter layer', (WidgetTester tester) async {
@@ -470,8 +617,8 @@ void main() {
       moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
       moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0]
-    );
+      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0,
+    ]);
   });
 
   testWidgets('Transform layers update to match child and filterQuality', (WidgetTester tester) async {
@@ -640,6 +787,101 @@ void main() {
 
     expect(tester.getBottomRight(find.byType(Container)), target.bottomRight(tester.getTopLeft(find.byType(Container))));
   });
+
+  testWidgets(
+    'Transform.flip does flip child correctly',
+    (WidgetTester tester) async {
+      const Offset topRight = Offset(60, 20);
+      const Offset bottomLeft = Offset(20, 60);
+      const Offset bottomRight = Offset(60, 60);
+
+      bool tappedRed = false;
+
+      const Widget square = SizedBox.square(dimension: 40);
+      final Widget child = Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget> [
+          Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+            GestureDetector(
+              onTap: () => tappedRed = true,
+              child: const ColoredBox(color: Color(0xffff0000), child: square),
+            ),
+            const ColoredBox(color: Color(0xff00ff00), child: square),
+          ]),
+          const Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+            ColoredBox(color: Color(0xff0000ff), child: square),
+            ColoredBox(color: Color(0xffeeff00), child: square),
+          ]),
+        ],
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Transform.flip(
+              flipX: true,
+              child: child,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(topRight);
+
+      expect(tappedRed, isTrue, reason: 'Transform.flip cannot flipX');
+
+      tappedRed = false;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Transform.flip(
+              flipY: true,
+              child: child,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(bottomLeft);
+
+      expect(tappedRed, isTrue, reason: 'Transform.flip cannot flipY');
+
+      tappedRed = false;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Transform.flip(
+              flipX: true,
+              flipY: true,
+              child: child,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(bottomRight);
+
+      expect(
+        tappedRed,
+        isTrue,
+        reason: 'Transform.flip cannot flipX and flipY together',
+      );
+    },
+  );
 }
 
 class TestRectPainter extends CustomPainter {

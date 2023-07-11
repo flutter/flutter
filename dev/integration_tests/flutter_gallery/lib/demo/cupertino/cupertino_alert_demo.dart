@@ -60,6 +60,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
               children: <Widget>[
                 CupertinoScrollbar(
                   child: ListView(
+                    primary: true,
                     // Add more padding to the normal safe area.
                     padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0)
                         + MediaQuery.of(context).padding,

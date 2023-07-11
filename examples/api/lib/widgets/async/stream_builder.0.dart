@@ -2,36 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for StreamBuilder
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [StreamBuilder].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const StreamBuilderExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class StreamBuilderExampleApp extends StatelessWidget {
+  const StreamBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: StreamBuilderExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class StreamBuilderExample extends StatefulWidget {
+  const StreamBuilderExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<StreamBuilderExample> createState() => _StreamBuilderExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _StreamBuilderExampleState extends State<StreamBuilderExample> {
   final Stream<int> _bids = (() {
     late final StreamController<int> controller;
     controller = StreamController<int>(
@@ -48,7 +45,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.headline2!,
+      style: Theme.of(context).textTheme.displayMedium!,
       textAlign: TextAlign.center,
       child: Container(
         alignment: FractionalOffset.center,
@@ -85,9 +82,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     Padding(
                       padding: EdgeInsets.only(top: 16),
                       child: Text('Select a lot'),
-                    )
+                    ),
                   ];
-                  break;
                 case ConnectionState.waiting:
                   children = const <Widget>[
                     SizedBox(
@@ -98,9 +94,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     Padding(
                       padding: EdgeInsets.only(top: 16),
                       child: Text('Awaiting bids...'),
-                    )
+                    ),
                   ];
-                  break;
                 case ConnectionState.active:
                   children = <Widget>[
                     const Icon(
@@ -111,9 +106,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
                       child: Text('\$${snapshot.data}'),
-                    )
+                    ),
                   ];
-                  break;
                 case ConnectionState.done:
                   children = <Widget>[
                     const Icon(
@@ -124,9 +118,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
                       child: Text('\$${snapshot.data} (closed)'),
-                    )
+                    ),
                   ];
-                  break;
               }
             }
 

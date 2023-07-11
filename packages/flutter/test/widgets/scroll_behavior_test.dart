@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,6 +33,55 @@ class TestScrollBehavior extends ScrollBehavior {
 }
 
 void main() {
+  testWidgets('Assert in buildScrollbar that controller != null when using it', (WidgetTester tester) async {
+    const ScrollBehavior defaultBehavior = ScrollBehavior();
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(ScrollConfiguration(
+      // Avoid the default ones here.
+      behavior: const ScrollBehavior().copyWith(scrollbars: false),
+      child: SingleChildScrollView(
+        child: Builder(
+          builder: (BuildContext context) {
+            capturedContext = context;
+            return Container(height: 1000.0);
+          },
+        ),
+      ),
+    ));
+
+    const ScrollableDetails details = ScrollableDetails(direction: AxisDirection.down);
+    final Widget child = Container();
+
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        // Does not throw if we aren't using it.
+        defaultBehavior.buildScrollbar(capturedContext, child, details);
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(
+          () {
+            defaultBehavior.buildScrollbar(capturedContext, child, details);
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description', contains('details.controller != null')),
+          ),
+        );
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  // Regression test for https://github.com/flutter/flutter/issues/89681
+  testWidgets('_WrappedScrollBehavior shouldNotify test', (WidgetTester tester) async {
+    final ScrollBehavior behavior1 = const ScrollBehavior().copyWith();
+    final ScrollBehavior behavior2 = const ScrollBehavior().copyWith();
+
+    expect(behavior1.shouldNotify(behavior2), false);
+  });
+
   testWidgets('Inherited ScrollConfiguration changed', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey(debugLabel: 'scrollable');
     TestScrollBehavior? behavior;
@@ -42,7 +92,7 @@ void main() {
       child: Builder(
         builder: (BuildContext context) {
           behavior = ScrollConfiguration.of(context) as TestScrollBehavior;
-          position = Scrollable.of(context)!.position as ScrollPositionWithSingleContext;
+          position = Scrollable.of(context).position as ScrollPositionWithSingleContext;
           return Container(height: 1000.0);
         },
       ),
@@ -82,7 +132,8 @@ void main() {
   });
 
   testWidgets('ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
           behavior: const ScrollBehavior(),
@@ -92,35 +143,38 @@ void main() {
                 height: 1000.0,
                 width: 1000.0,
                 child: Text('Test'),
-              )
-            ]
-          )
+              ),
+            ],
+          ),
         ),
-    ));
+      ),
+    );
 
     expect(find.byType(StretchingOverscrollIndicator), findsNothing);
     expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('ScrollBehavior stretch android overscroll indicator', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(size: Size(800, 600)),
-        child: ScrollConfiguration(
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800, 600)),
+          child: ScrollConfiguration(
             behavior: const ScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
             child: ListView(
-                children: const <Widget>[
-                  SizedBox(
-                    height: 1000.0,
-                    width: 1000.0,
-                    child: Text('Test'),
-                  )
-                ]
-            )
+              children: const <Widget>[
+                SizedBox(
+                  height: 1000.0,
+                  width: 1000.0,
+                  child: Text('Test'),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
     expect(find.byType(GlowingOverscrollIndicator), findsNothing);
@@ -134,6 +188,7 @@ void main() {
         PointerDeviceKind.touch,
         PointerDeviceKind.stylus,
         PointerDeviceKind.invertedStylus,
+        PointerDeviceKind.trackpad,
         PointerDeviceKind.unknown,
       });
 

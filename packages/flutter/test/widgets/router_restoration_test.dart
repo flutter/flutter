@@ -140,27 +140,22 @@ class _TestRouteInformationProvider extends RouteInformationProvider with Change
   }
 }
 
-class _TestWidget extends StatefulWidget {
-  const _TestWidget({Key? key, this.withInformationProvider = false, this.routerKey}) : super(key: key);
+class _TestWidget extends StatelessWidget {
+  const _TestWidget({this.withInformationProvider = false, this.routerKey});
 
   final bool withInformationProvider;
   final Key? routerKey;
 
   @override
-  State<_TestWidget> createState() => _TestWidgetState();
-}
-
-class _TestWidgetState extends State<_TestWidget> {
-  @override
   Widget build(BuildContext context) {
     return RootRestorationScope(
       restorationId: 'root',
       child: Router<String>(
-        key: widget.routerKey,
+        key: routerKey,
         restorationScopeId: 'router',
         routerDelegate: _TestRouterDelegate(),
         routeInformationParser: _TestRouteInformationParser(),
-        routeInformationProvider: widget.withInformationProvider ? _TestRouteInformationProvider() : null,
+        routeInformationProvider: withInformationProvider ? _TestRouteInformationProvider() : null,
       ),
     );
   }

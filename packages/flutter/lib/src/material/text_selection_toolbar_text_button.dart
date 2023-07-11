@@ -27,11 +27,12 @@ enum _TextSelectionToolbarItemPosition {
 class TextSelectionToolbarTextButton extends StatelessWidget {
   /// Creates an instance of TextSelectionToolbarTextButton.
   const TextSelectionToolbarTextButton({
-    Key? key,
+    super.key,
     required this.child,
     required this.padding,
     this.onPressed,
-  }) : super(key: key);
+    this.alignment,
+  });
 
   // These values were eyeballed to match the native text selection menu on a
   // Pixel 2 running Android 10.
@@ -61,6 +62,15 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   ///    button's position.
   ///  * [ButtonStyle.padding], which is where this padding is applied.
   final EdgeInsets padding;
+
+  /// The alignment of the button's child.
+  ///
+  /// By default, this will be [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [ButtonStyle.alignment], which is where this alignment is applied.
+  final AlignmentGeometry? alignment;
 
   /// Returns the standard padding for a button at index out of a total number
   /// of buttons.
@@ -104,19 +114,36 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
     return _TextSelectionToolbarItemPosition.middle;
   }
 
+  /// Returns a copy of the current [TextSelectionToolbarTextButton] instance
+  /// with specific overrides.
+  TextSelectionToolbarTextButton copyWith({
+    Widget? child,
+    VoidCallback? onPressed,
+    EdgeInsets? padding,
+    AlignmentGeometry? alignment,
+  }) {
+    return TextSelectionToolbarTextButton(
+      onPressed: onPressed ?? this.onPressed,
+      padding: padding ?? this.padding,
+      alignment: alignment ?? this.alignment,
+      child: child ?? this.child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO(hansmuller): Should be colorScheme.onSurface
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.colorScheme.brightness == Brightness.dark;
-    final Color primary = isDark ? Colors.white : Colors.black87;
+    final Color foregroundColor = isDark ? Colors.white : Colors.black87;
 
     return TextButton(
       style: TextButton.styleFrom(
-        primary: primary,
+        foregroundColor: foregroundColor,
         shape: const RoundedRectangleBorder(),
         minimumSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
         padding: padding,
+        alignment: alignment,
       ),
       onPressed: onPressed,
       child: child,

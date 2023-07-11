@@ -7,6 +7,10 @@ import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
 
+export 'dart:ui' show VoidCallback;
+
+export 'animation.dart' show AnimationStatus, AnimationStatusListener;
+
 /// A mixin that helps listen to another object only when this object has registered listeners.
 ///
 /// This mixin provides implementations of [didRegisterListener] and [didUnregisterListener],
@@ -26,8 +30,9 @@ mixin AnimationLazyListenerMixin {
   @protected
   void didRegisterListener() {
     assert(_listenerCounter >= 0);
-    if (_listenerCounter == 0)
+    if (_listenerCounter == 0) {
       didStartListening();
+    }
     _listenerCounter += 1;
   }
 
@@ -41,8 +46,9 @@ mixin AnimationLazyListenerMixin {
   void didUnregisterListener() {
     assert(_listenerCounter >= 1);
     _listenerCounter -= 1;
-    if (_listenerCounter == 0)
+    if (_listenerCounter == 0) {
       didStopListening();
+    }
   }
 
   /// Called when the number of listeners changes from zero to one.
@@ -137,7 +143,7 @@ mixin AnimationLocalListenersMixin {
   @protected
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
-    final List<VoidCallback> localListeners = List<VoidCallback>.of(_listeners);
+    final List<VoidCallback> localListeners = _listeners.toList(growable: false);
     for (final VoidCallback listener in localListeners) {
       InformationCollector? collector;
       assert(() {
@@ -151,8 +157,9 @@ mixin AnimationLocalListenersMixin {
         return true;
       }());
       try {
-        if (_listeners.contains(listener))
+        if (_listeners.contains(listener)) {
           listener();
+        }
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -226,11 +233,12 @@ mixin AnimationLocalStatusListenersMixin {
   @protected
   @pragma('vm:notify-debugger-on-exception')
   void notifyStatusListeners(AnimationStatus status) {
-    final List<AnimationStatusListener> localListeners = List<AnimationStatusListener>.of(_statusListeners);
+    final List<AnimationStatusListener> localListeners = _statusListeners.toList(growable: false);
     for (final AnimationStatusListener listener in localListeners) {
       try {
-        if (_statusListeners.contains(listener))
+        if (_statusListeners.contains(listener)) {
           listener(status);
+        }
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {

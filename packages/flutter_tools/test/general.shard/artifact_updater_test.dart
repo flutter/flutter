@@ -123,7 +123,7 @@ void main() {
           headers: <String, List<String>>{
             'x-goog-hash': <String>[
               'foo-bar-baz',
-              'md5=k7iFrf4NoInN9jSQT9WfcQ=='
+              'md5=k7iFrf4NoInN9jSQT9WfcQ==',
             ],
           }
         )),
@@ -159,7 +159,7 @@ void main() {
            headers: <String, List<String>>{
              'x-goog-hash': <String>[
               'foo-bar-baz',
-              'md5=k7iFrf4SQT9WfcQ=='
+              'md5=k7iFrf4SQT9WfcQ==',
             ],
           }
         )),
@@ -167,7 +167,7 @@ void main() {
            headers: <String, List<String>>{
              'x-goog-hash': <String>[
               'foo-bar-baz',
-              'md5=k7iFrf4SQT9WfcQ=='
+              'md5=k7iFrf4SQT9WfcQ==',
             ],
           }
         )),
@@ -254,11 +254,11 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: FakePlatform(
         environment: <String, String>{
-          'FLUTTER_STORAGE_BASE_URL': 'foo-bar'
+          'FLUTTER_STORAGE_BASE_URL': 'foo-bar',
         },
       ),
       httpClient: FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http://foo-bar/test.zip'), responseError: ArgumentError())
+        FakeRequest(Uri.parse('http://foo-bar/test.zip'), responseError: ArgumentError()),
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),

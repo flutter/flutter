@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -106,5 +106,43 @@ void main() {
     expect(flutterAssetsCallCount, 4);
     await rootBundle.loadString('test_asset2');
     expect(flutterAssetsCallCount, 4);
+  });
+
+  test('initInstances sets a default method call handler for SystemChannels.textInput', () async {
+    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'method': 'TextInput.requestElementsInRect', 'args': null})!;
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/textinput', message, (ByteData? data) {
+      expect(data, isNotNull);
+     });
+  });
+
+  test('Calling exitApplication sends a method call to the engine', () async {
+    bool sentMessage = false;
+    MethodCall? methodCall;
+    binding.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
+      methodCall = const JSONMethodCodec().decodeMethodCall(message);
+      sentMessage = true;
+      return const JSONMethodCodec().encodeSuccessEnvelope(<String, String>{'response': 'cancel'});
+    });
+    final AppExitResponse response = await binding.exitApplication(AppExitType.required);
+    expect(sentMessage, isTrue);
+    expect(methodCall, isNotNull);
+    expect((methodCall!.arguments as Map<String, dynamic>)['type'], equals('required'));
+    expect(response, equals(AppExitResponse.cancel));
+  });
+
+  test('Default handleRequestAppExit returns exit', () async {
+    const MethodCall incomingCall = MethodCall('System.requestAppExit', <dynamic>[<String, dynamic>{'type': 'cancelable'}]);
+    bool receivedReply = false;
+    Map<String, dynamic>? result;
+    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/platform', const JSONMethodCodec().encodeMethodCall(incomingCall),
+      (ByteData? message) async {
+        result = (const JSONMessageCodec().decodeMessage(message) as List<dynamic>)[0] as Map<String, dynamic>;
+        receivedReply = true;
+      },
+    );
+
+    expect(receivedReply, isTrue);
+    expect(result, isNotNull);
+    expect(result!['response'], equals('exit'));
   });
 }

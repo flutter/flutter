@@ -13,10 +13,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 
 // 1x1 colored pixel
-const List<int> _kFailPngBytes = <int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0,
+const List<int> _kFailPngBytes = <int>[
+  137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0,
   13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137,
   0, 0, 0, 13, 73, 68, 65, 84, 120, 1, 99, 249, 207, 240, 255, 63, 0, 7, 18, 3,
-  2, 164, 147, 160, 197, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
+  2, 164, 147, 160, 197, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130,
+];
 
 void main() {
   final MemoryFileSystem fs = MemoryFileSystem();

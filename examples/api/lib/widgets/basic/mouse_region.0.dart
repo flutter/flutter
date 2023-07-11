@@ -2,40 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for MouseRegion
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [MouseRegion].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const MouseRegionApp());
 
-  static const String _title = 'Flutter Code Sample';
+class MouseRegionApp extends StatelessWidget {
+  const MouseRegionApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('MouseRegion Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: MouseRegionExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class MouseRegionExample extends StatefulWidget {
+  const MouseRegionExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<MouseRegionExample> createState() => _MouseRegionExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _MouseRegionExampleState extends State<MouseRegionExample> {
   int _enterCounter = 0;
   int _exitCounter = 0;
   double x = 0.0;
@@ -68,16 +64,15 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         onEnter: _incrementEnter,
         onHover: _updateLocation,
         onExit: _incrementExit,
-        child: Container(
+        child: ColoredBox(
           color: Colors.lightBlueAccent,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Text(
-                  'You have entered or exited this box this many times:'),
+              const Text('You have entered or exited this box this many times:'),
               Text(
                 '$_enterCounter Entries\n$_exitCounter Exits',
-                style: Theme.of(context).textTheme.headline4,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
               Text(
                 'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',

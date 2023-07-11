@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:flutter_devicelab/framework/ab.dart';
-import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -39,6 +38,11 @@ Future<void> main(List<String> rawArgs) async {
   /// Required for A/B test mode.
   final String? localEngine = args['local-engine'] as String?;
 
+  /// The build of the local Web SDK to use.
+  ///
+  /// Required for A/B test mode.
+  final String? localWebSdk = args['local-web-sdk'] as String?;
+
   /// The path to the engine "src/" directory.
   final String? localEngineSrcPath = args['local-engine-src-path'] as String?;
 
@@ -63,15 +67,8 @@ Future<void> main(List<String> rawArgs) async {
   /// Path to write test results to.
   final String? resultsPath = args['results-file'] as String?;
 
-  if (!args.wasParsed('task')) {
-    if (args.wasParsed('stage') || args.wasParsed('all')) {
-      addTasks(
-        tasks: loadTaskManifest().tasks,
-        args: args,
-        taskNames: taskNames,
-      );
-    }
-  }
+  /// Use an emulator for this test if it is an android test.
+  final bool useEmulator = (args['use-emulator'] as bool?) ?? false;
 
   if (args.wasParsed('list')) {
     for (int i = 0; i < taskNames.length; i++) {
@@ -93,8 +90,8 @@ Future<void> main(List<String> rawArgs) async {
       stderr.writeln(argParser.usage);
       exit(1);
     }
-    if (localEngine == null) {
-      stderr.writeln('When running in A/B test mode --local-engine is required.\n');
+    if (localEngine == null && localWebSdk == null) {
+      stderr.writeln('When running in A/B test mode --local-engine or --local-web-sdk is required.\n');
       stderr.writeln(argParser.usage);
       exit(1);
     }
@@ -102,6 +99,7 @@ Future<void> main(List<String> rawArgs) async {
       runsPerTest: runsPerTest,
       silent: silent,
       localEngine: localEngine,
+      localWebSdk: localWebSdk,
       localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
       resultsFile: resultsFile,
@@ -118,6 +116,7 @@ Future<void> main(List<String> rawArgs) async {
       gitBranch: gitBranch,
       luciBuilder: luciBuilder,
       resultsPath: resultsPath,
+      useEmulator: useEmulator,
     );
   }
 }
@@ -125,7 +124,8 @@ Future<void> main(List<String> rawArgs) async {
 Future<void> _runABTest({
   required int runsPerTest,
   required bool silent,
-  required String localEngine,
+  required String? localEngine,
+  required String? localWebSdk,
   required String? localEngineSrcPath,
   required String? deviceId,
   required String resultsFile,
@@ -133,7 +133,9 @@ Future<void> _runABTest({
 }) async {
   print('$taskName A/B test. Will run $runsPerTest times.');
 
-  final ABTest abTest = ABTest(localEngine, taskName);
+  assert(localEngine != null || localWebSdk != null);
+
+  final ABTest abTest = ABTest((localEngine ?? localWebSdk)!, taskName);
   for (int i = 1; i <= runsPerTest; i++) {
     section('Run #$i');
 
@@ -159,6 +161,7 @@ Future<void> _runABTest({
       taskName,
       silent: silent,
       localEngine: localEngine,
+      localWebSdk: localWebSdk,
       localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
     );
@@ -207,29 +210,6 @@ File _uniqueFile(String filenameTemplate) {
     i++;
   }
   return file;
-}
-
-void addTasks({
-  required List<ManifestTask> tasks,
-  required ArgResults args,
-  required List<String> taskNames,
-}) {
-  if (args.wasParsed('continue-from')) {
-    final int index = tasks.indexWhere((ManifestTask task) => task.name == args['continue-from']);
-    if (index == -1) {
-      throw Exception('Invalid task name "${args['continue-from']}"');
-    }
-    tasks.removeRange(0, index);
-  }
-  // Only start skipping if user specified a task to continue from
-  final String stage = args['stage'] as String;
-  for (final ManifestTask task in tasks) {
-    final bool isQualifyingStage = stage == null || task.stage == stage;
-    final bool isQualifyingHost = !(args['match-host-platform'] as bool) || task.isSupportedByHost();
-    if (isQualifyingHost && isQualifyingStage) {
-      taskNames.add(task.name);
-    }
-  }
 }
 
 ArgParser createArgParser(List<String> taskNames) {
@@ -294,16 +274,6 @@ ArgParser createArgParser(List<String> taskNames) {
             'number if the name already exists.',
     )
     ..addFlag(
-      'all',
-      abbr: 'a',
-      help: 'Runs all tasks defined in manifest.yaml in alphabetical order.',
-    )
-    ..addOption(
-      'continue-from',
-      abbr: 'c',
-      help: 'With --all or --stage, continue from the given test.',
-    )
-    ..addFlag(
       'exit',
       defaultsTo: true,
       help: 'Exit on the first test failure. Currently flakes are intentionally (though '
@@ -316,6 +286,14 @@ ArgParser createArgParser(List<String> taskNames) {
     )
     ..addOption(
       'local-engine',
+      help: 'Name of a build output within the engine out directory, if you\n'
+            'are building Flutter locally. Use this to select a specific\n'
+            'version of the engine if you have built multiple engine targets.\n'
+            'This path is relative to --local-engine-src-path/out. This option\n'
+            'is required when running an A/B test (see the --ab option).',
+    )
+    ..addOption(
+      'local-web-sdk',
       help: 'Name of a build output within the engine out directory, if you\n'
             'are building Flutter locally. Use this to select a specific\n'
             'version of the engine if you have built multiple engine targets.\n'
@@ -352,12 +330,6 @@ ArgParser createArgParser(List<String> taskNames) {
       'service-account-token-file',
       help: '[Flutter infrastructure] Authentication for uploading results.',
     )
-    ..addOption(
-      'stage',
-      abbr: 's',
-      help: 'Name of the stage. Runs all tasks for that stage. The tasks and\n'
-            'their stages are read from manifest.yaml.',
-    )
     ..addFlag(
       'silent',
       help: 'Reduce verbosity slightly.',
@@ -368,6 +340,11 @@ ArgParser createArgParser(List<String> taskNames) {
       help: 'Whether to send a SIGKILL signal to any Dart processes that are still '
             'running when a task is completed. If any Dart processes are terminated '
             'in this way, the test is considered to have failed.',
+    )
+    ..addFlag(
+      'use-emulator',
+      help: 'If this is an android test, use an emulator to run the test instead of '
+            'a physical device.'
     )
     ..addMultiOption(
       'test',

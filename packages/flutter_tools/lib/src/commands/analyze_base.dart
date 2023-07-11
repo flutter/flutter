@@ -28,6 +28,7 @@ abstract class AnalyzeBase {
     required this.processManager,
     required this.terminal,
     required this.artifacts,
+    required this.suppressAnalytics,
   });
 
   /// The parsed argument results for execution.
@@ -48,6 +49,8 @@ abstract class AnalyzeBase {
   final Terminal terminal;
   @protected
   final Artifacts artifacts;
+  @protected
+  final bool suppressAnalytics;
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
@@ -84,10 +87,10 @@ abstract class AnalyzeBase {
     if (dartSdk != null) {
       return dartSdk;
     }
-    return artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path;
+    return artifacts.getArtifactPath(Artifact.engineDartSdkPath);
   }
   bool get isBenchmarking => argResults['benchmark'] as bool;
-  String get protocolTrafficLog => argResults['protocol-traffic-log'] as String;
+  String? get protocolTrafficLog => argResults['protocol-traffic-log'] as String?;
 
   /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
   static String generateErrorsMessage({
@@ -285,4 +288,21 @@ class PackageDependencyTracker {
     });
     return result;
   }
+}
+
+/// Find directories or files from argResults.rest.
+Set<String> findDirectories(ArgResults argResults, FileSystem fileSystem) {
+  final Set<String> items = Set<String>.of(argResults.rest
+      .map<String>((String path) => fileSystem.path.canonicalize(path)));
+  if (items.isNotEmpty) {
+    for (final String item in items) {
+      final FileSystemEntityType type = fileSystem.typeSync(item);
+
+      if (type == FileSystemEntityType.notFound) {
+        throwToolExit("You provided the path '$item', however it does not exist on disk");
+      }
+    }
+  }
+
+  return items;
 }

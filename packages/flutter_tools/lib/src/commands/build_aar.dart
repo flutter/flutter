@@ -3,21 +3,27 @@
 // found in the LICENSE file.
 
 import '../android/android_builder.dart';
+import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
-
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
-  BuildAarCommand({ required bool verboseHelp }) : super(verboseHelp: verboseHelp) {
+  BuildAarCommand({
+    required super.logger,
+    required AndroidSdk? androidSdk,
+    required FileSystem fileSystem,
+    required bool verboseHelp,
+  }): _androidSdk = androidSdk,
+      _fileSystem = fileSystem,
+      super(verboseHelp: verboseHelp) {
     argParser
       ..addFlag(
         'debug',
@@ -37,6 +43,7 @@ class BuildAarCommand extends BuildSubCommand {
     addTreeShakeIconsFlag();
     usesFlavorOption();
     usesBuildNumberOption();
+    usesOutputDir();
     usesPubOption();
     addSplitDebugInfoOption();
     addDartObfuscationOption();
@@ -47,18 +54,15 @@ class BuildAarCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     argParser
-      ..addMultiOption(
+      .addMultiOption(
         'target-platform',
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the project is compiled.',
-      )
-      ..addOption(
-        'output-dir',
-        help: 'The absolute path to the directory where the repository is generated. '
-              'By default, this is "<current-directory>android/build".',
       );
   }
+  final AndroidSdk? _androidSdk;
+  final FileSystem _fileSystem;
 
   @override
   final String name = 'aar';
@@ -74,9 +78,6 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<CustomDimensions> get usageValues async {
     final FlutterProject flutterProject = _getProject();
-    if (flutterProject == null) {
-      return const CustomDimensions();
-    }
 
     String projectType;
     if (flutterProject.manifest.isModule) {
@@ -97,14 +98,13 @@ class BuildAarCommand extends BuildSubCommand {
   final String description = 'Build a repository containing an AAR and a POM file.\n\n'
       'By default, AARs are built for `release`, `debug` and `profile`.\n'
       'The POM file is used to include the dependencies that the AAR was compiled against.\n'
-      'To learn more about how to use these artifacts, see '
-      'https://flutter.dev/go/build-aar\n'
-      'Note: this command builds applications assuming that the entrypoint is lib/main.dart. '
+      'To learn more about how to use these artifacts, see: https://flutter.dev/go/build-aar\n'
+      'This command assumes that the entrypoint is "lib/main.dart". '
       'This cannot currently be configured.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (globals.androidSdk == null) {
+    if (_androidSdk == null) {
       exitWithNoSdkMessage();
     }
     final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
@@ -119,7 +119,7 @@ class BuildAarCommand extends BuildSubCommand {
       ? buildNumberArg
       : '1.0';
 
-    final File targetFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'));
+    final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
     for (final String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(
@@ -142,7 +142,7 @@ class BuildAarCommand extends BuildSubCommand {
       project: _getProject(),
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
-      outputDirectoryPath: stringArg('output-dir'),
+      outputDirectoryPath: stringArg('output'),
       buildNumber: buildNumber,
     );
     return FlutterCommandResult.success();
@@ -155,6 +155,21 @@ class BuildAarCommand extends BuildSubCommand {
     if (remainingArguments.isEmpty) {
       return FlutterProject.current();
     }
-    return FlutterProject.fromDirectory(globals.fs.directory(findProjectRoot(globals.fs, remainingArguments.first)));
+    final File mainFile = _fileSystem.file(remainingArguments.first);
+    final String path;
+    if (!mainFile.existsSync()) {
+      final Directory pathProject = _fileSystem.directory(remainingArguments.first);
+      if (!pathProject.existsSync()) {
+        throwToolExit('${remainingArguments.first} does not exist');
+      }
+      path = pathProject.path;
+    } else {
+      path = mainFile.parent.path;
+    }
+    final String? projectRoot = findProjectRoot(_fileSystem, path);
+    if (projectRoot == null) {
+      throwToolExit('${mainFile.parent.path} is not a valid flutter project');
+    }
+    return FlutterProject.fromDirectory(_fileSystem.directory(projectRoot));
   }
 }

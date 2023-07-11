@@ -10,13 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 // valued fields: a, b, c.
 class ABCModel extends InheritedModel<String> {
   const ABCModel({
-    Key? key,
+    super.key,
     this.a,
     this.b,
     this.c,
     this.aspects,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   final int? a;
   final int? b;
@@ -31,7 +31,7 @@ class ABCModel extends InheritedModel<String> {
 
   @override
   bool isSupportedAspect(Object aspect) {
-    return aspect == null || aspects == null || aspects!.contains(aspect);
+    return aspects == null || aspects!.contains(aspect);
   }
 
   @override
@@ -53,7 +53,7 @@ class ABCModel extends InheritedModel<String> {
 }
 
 class ShowABCField extends StatefulWidget {
-  const ShowABCField({ Key? key, required this.fieldName }) : super(key: key);
+  const ShowABCField({ super.key, required this.fieldName });
 
   final String fieldName;
 
@@ -226,7 +226,7 @@ void main() {
         final Widget showABC = Builder(
           builder: (BuildContext context) {
             final ABCModel abc = ABCModel.of(context)!;
-            return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.headline6);
+            return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.titleLarge);
           },
         );
 
@@ -343,7 +343,7 @@ void main() {
         final Widget showABC = Builder(
           builder: (BuildContext context) {
             final ABCModel abc = ABCModel.of(context)!;
-            return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.headline6);
+            return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.titleLarge);
           },
         );
 

@@ -5,9 +5,9 @@
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
 // dependencies have been fixed.
 // https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=382757700"
+// Fails with "flutter test --test-randomize-ordering-seed=20230313"
 @Tags(<String>['no-shuffle'])
-
+library;
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -147,12 +147,11 @@ void main() {
       pixels: 0.0,
       viewportDimension: 100.0,
       axisDirection: AxisDirection.down,
+      devicePixelRatio: tester.view.devicePixelRatio,
     );
-    // ignore: avoid_dynamic_calls
     scrollPainter!.update(metrics, AxisDirection.down);
 
     final TestCanvas canvas = TestCanvas();
-    // ignore: avoid_dynamic_calls
     scrollPainter.paint(canvas, const Size(10.0, 100.0));
 
     // Scrollbar is not supposed to draw anything if there isn't enough content.
@@ -962,7 +961,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pumpAndSettle();
 
@@ -1027,7 +1025,6 @@ void main() {
     // Now trigger hover with a mouse.
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pump();
 
@@ -1067,8 +1064,9 @@ void main() {
             return states.contains(MaterialState.hovered);
           }),
           thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered))
+            if (states.contains(MaterialState.hovered)) {
               return 40.0;
+            }
             // Default thickness
             return 8.0;
           }),
@@ -1092,7 +1090,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pump();
 
@@ -1133,8 +1130,9 @@ void main() {
         theme: ThemeData(scrollbarTheme: ScrollbarThemeData(
           isAlwaysShown: true,
           trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered))
+            if (states.contains(MaterialState.hovered)) {
               return true;
+            }
             return false;
           }),
         )),
@@ -1157,7 +1155,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pump();
 
@@ -1218,7 +1215,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(794.0, 5.0));
     await tester.pump();
 
@@ -1639,33 +1635,39 @@ void main() {
     pointer.hover(const Offset(798.0, 15.0));
     await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 20.0)));
     await tester.pumpAndSettle();
-    // Scrolling while holding the drag on the scrollbar and still hovered over
-    // the scrollbar should not have changed the scroll offset.
-    expect(pointer.location, const Offset(798.0, 15.0));
-    expect(scrollController.offset, previousOffset);
-    expect(
-      find.byType(Scrollbar),
-      paints
-        ..rect(
-          rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
-          color: Colors.transparent,
-        )
-        ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
-          strokeWidth: 1.0,
-          color: Colors.transparent,
-        )
-        ..rect(
-          rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
-          color: const Color(0x99000000),
-        ),
-    );
+
+    if (!kIsWeb) {
+      // Scrolling while holding the drag on the scrollbar and still hovered over
+      // the scrollbar should not have changed the scroll offset.
+      expect(pointer.location, const Offset(798.0, 15.0));
+      expect(scrollController.offset, previousOffset);
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rect(
+            rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0),
+            color: Colors.transparent,
+          )
+          ..line(
+            p1: const Offset(796.0, 0.0),
+            p2: const Offset(796.0, 600.0),
+            strokeWidth: 1.0,
+            color: Colors.transparent,
+          )
+          ..rect(
+            rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
+            color: const Color(0x99000000),
+          ),
+      );
+    } else {
+      expect(pointer.location, const Offset(798.0, 15.0));
+      expect(scrollController.offset, previousOffset + 20.0);
+    }
 
     // Drag is still being held, move pointer to be hovering over another area
     // of the scrollable (not over the scrollbar) and execute another pointer scroll
     pointer.hover(tester.getCenter(find.byType(SingleChildScrollView)));
-    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -70.0)));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -90.0)));
     await tester.pumpAndSettle();
     // Scrolling while holding the drag on the scrollbar changed the offset
     expect(pointer.location, const Offset(400.0, 300.0));
@@ -1713,7 +1715,7 @@ void main() {
   });
 
   testWidgets('Scrollbar.isAlwaysShown triggers assertion when multiple ScrollPositions are attached.', (WidgetTester tester) async {
-    Widget _getTabContent({ ScrollController? scrollController }) {
+    Widget getTabContent({ ScrollController? scrollController }) {
       return Scrollbar(
         isAlwaysShown: true,
         controller: scrollController,
@@ -1725,7 +1727,7 @@ void main() {
       );
     }
 
-    Widget _buildApp({
+    Widget buildApp({
       required String id,
       ScrollController? scrollController,
     }) {
@@ -1736,8 +1738,8 @@ void main() {
           child: Scaffold(
             body: TabBarView(
               children: <Widget>[
-                _getTabContent(scrollController: scrollController),
-                _getTabContent(scrollController: scrollController),
+                getTabContent(scrollController: scrollController),
+                getTabContent(scrollController: scrollController),
               ],
             ),
           ),
@@ -1746,7 +1748,7 @@ void main() {
     }
 
     // Asserts when using the PrimaryScrollController.
-    await tester.pumpWidget(_buildApp(id: 'PrimaryScrollController'));
+    await tester.pumpWidget(buildApp(id: 'PrimaryScrollController'));
 
     // Swipe to the second tab, resulting in two attached ScrollPositions during
     // the transition.
@@ -1762,7 +1764,7 @@ void main() {
     // Asserts when using the ScrollController provided by the user.
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
-      _buildApp(
+      buildApp(
         id: 'Provided ScrollController',
         scrollController: scrollController,
       ),
@@ -1782,7 +1784,7 @@ void main() {
   testWidgets('Scrollbar scrollOrientation works correctly', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
 
-    Widget _buildScrollWithOrientation(ScrollbarOrientation orientation) {
+    Widget buildScrollWithOrientation(ScrollbarOrientation orientation) {
       return _buildBoilerplate(
         child: Theme(
           data: ThemeData(
@@ -1804,7 +1806,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_buildScrollWithOrientation(ScrollbarOrientation.left));
+    await tester.pumpWidget(buildScrollWithOrientation(ScrollbarOrientation.left));
     await tester.pumpAndSettle();
 
     expect(

@@ -7,8 +7,9 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import 'simulation.dart';
-import 'tolerance.dart';
 import 'utils.dart';
+
+export 'tolerance.dart' show Tolerance;
 
 /// Structure that describes a spring's constants.
 ///
@@ -94,10 +95,9 @@ class SpringSimulation extends Simulation {
     double start,
     double end,
     double velocity, {
-    Tolerance tolerance = Tolerance.defaultTolerance,
+    super.tolerance,
   }) : _endPosition = end,
-       _solution = _SpringSolution(spring, start - end, velocity),
-       super(tolerance: tolerance);
+       _solution = _SpringSolution(spring, start - end, velocity);
 
   final double _endPosition;
   final _SpringSolution _solution;
@@ -133,12 +133,12 @@ class ScrollSpringSimulation extends SpringSimulation {
   /// See the [SpringSimulation.new] constructor on the superclass for a
   /// discussion of the arguments' units.
   ScrollSpringSimulation(
-    SpringDescription spring,
-    double start,
-    double end,
-    double velocity, {
-    Tolerance tolerance = Tolerance.defaultTolerance,
-  }) : super(spring, start, end, velocity, tolerance: tolerance);
+    super.spring,
+    super.start,
+    super.end,
+    super.velocity, {
+    super.tolerance,
+  });
 
   @override
   double x(double time) => isDone(time) ? _endPosition : super.x(time);
@@ -153,17 +153,13 @@ abstract class _SpringSolution {
     double initialPosition,
     double initialVelocity,
   ) {
-    assert(spring != null);
-    assert(spring.mass != null);
-    assert(spring.stiffness != null);
-    assert(spring.damping != null);
-    assert(initialPosition != null);
-    assert(initialVelocity != null);
     final double cmk = spring.damping * spring.damping - 4 * spring.mass * spring.stiffness;
-    if (cmk == 0.0)
+    if (cmk == 0.0) {
       return _CriticalSolution(spring, initialPosition, initialVelocity);
-    if (cmk > 0.0)
+    }
+    if (cmk > 0.0) {
       return _OverdampedSolution(spring, initialPosition, initialVelocity);
+    }
     return _UnderdampedSolution(spring, initialPosition, initialVelocity);
   }
 
@@ -180,7 +176,7 @@ class _CriticalSolution implements _SpringSolution {
   ) {
     final double r = -spring.damping / (2.0 * spring.mass);
     final double c1 = distance;
-    final double c2 = velocity / (r * distance);
+    final double c2 = velocity - (r * distance);
     return _CriticalSolution.withArgs(r, c1, c2);
   }
 

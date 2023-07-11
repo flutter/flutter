@@ -62,7 +62,7 @@ class ListItem extends StatelessWidget {
       _buildUserInfo(),
       const SizedBox(
         height: 10,
-      )
+      ),
     ];
     if (index % 3 != 0) {
       contents.add(_buildImageContent());
@@ -140,7 +140,7 @@ class ListItem extends StatelessWidget {
         ),
         const SizedBox(
           width: 15,
-        )
+        ),
       ],
     );
   }

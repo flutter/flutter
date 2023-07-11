@@ -14,7 +14,11 @@ import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
-export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
+export 'package:flutter/physics.dart' show Simulation, SpringDescription;
+export 'package:flutter/scheduler.dart' show TickerFuture, TickerProvider;
+
+export 'animation.dart' show Animation, AnimationStatus;
+export 'curves.dart' show Curve;
 
 // Examples can assume:
 // late AnimationController _controller, fadeAnimationController, sizeAnimationController;
@@ -135,7 +139,7 @@ enum AnimationBehavior {
 ///
 /// ```dart
 /// class Foo extends StatefulWidget {
-///   const Foo({ Key? key, required this.duration }) : super(key: key);
+///   const Foo({ super.key, required this.duration });
 ///
 ///   final Duration duration;
 ///
@@ -238,10 +242,7 @@ class AnimationController extends Animation<double>
     this.upperBound = 1.0,
     this.animationBehavior = AnimationBehavior.normal,
     required TickerProvider vsync,
-  }) : assert(lowerBound != null),
-       assert(upperBound != null),
-       assert(upperBound >= lowerBound),
-       assert(vsync != null),
+  }) : assert(upperBound >= lowerBound),
        _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
@@ -271,9 +272,7 @@ class AnimationController extends Animation<double>
     this.debugLabel,
     required TickerProvider vsync,
     this.animationBehavior = AnimationBehavior.preserve,
-  }) : assert(value != null),
-       assert(vsync != null),
-       lowerBound = double.negativeInfinity,
+  }) : lowerBound = double.negativeInfinity,
        upperBound = double.infinity,
        _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);
@@ -359,7 +358,6 @@ class AnimationController extends Animation<double>
   ///  * [forward], [reverse], [animateTo], [animateWith], [fling], and [repeat],
   ///    which start the animation controller.
   set value(double newValue) {
-    assert(newValue != null);
     stop();
     _internalSetValue(newValue);
     notifyListeners();
@@ -389,13 +387,14 @@ class AnimationController extends Animation<double>
   /// If [isAnimating] is false, then [value] is not changing and the rate of
   /// change is zero.
   double get velocity {
-    if (!isAnimating)
+    if (!isAnimating) {
       return 0.0;
+    }
     return _simulation!.dx(lastElapsedDuration!.inMicroseconds.toDouble() / Duration.microsecondsPerSecond);
   }
 
   void _internalSetValue(double newValue) {
-    _value = newValue.clamp(lowerBound, upperBound);
+    _value = clampDouble(newValue, lowerBound, upperBound);
     if (_value == lowerBound) {
       _status = AnimationStatus.dismissed;
     } else if (_value == upperBound) {
@@ -456,8 +455,9 @@ class AnimationController extends Animation<double>
       'AnimationController methods should not be used after calling dispose.',
     );
     _direction = _AnimationDirection.forward;
-    if (from != null)
+    if (from != null) {
       value = from;
+    }
     return _animateToInternal(upperBound);
   }
 
@@ -489,8 +489,9 @@ class AnimationController extends Animation<double>
       'AnimationController methods should not be used after calling dispose.',
     );
     _direction = _AnimationDirection.reverse;
-    if (from != null)
+    if (from != null) {
       value = from;
+    }
     return _animateToInternal(lowerBound);
   }
 
@@ -575,7 +576,6 @@ class AnimationController extends Animation<double>
           // pattern of an eternally repeating animation might cause an endless loop if it weren't delayed
           // for at least one frame.
           scale = 0.05;
-          break;
         case AnimationBehavior.preserve:
           break;
       }
@@ -598,7 +598,7 @@ class AnimationController extends Animation<double>
     stop();
     if (simulationDuration == Duration.zero) {
       if (value != target) {
-        _value = target.clamp(lowerBound, upperBound);
+        _value = clampDouble(target, lowerBound, upperBound);
         notifyListeners();
       }
       _status = (_direction == _AnimationDirection.forward) ?
@@ -650,7 +650,6 @@ class AnimationController extends Animation<double>
     }());
     assert(max >= min);
     assert(max <= upperBound && min >= lowerBound);
-    assert(reverse != null);
     stop();
     return _startSimulation(_RepeatingSimulation(_value, min, max, reverse, period!, _directionSetter));
   }
@@ -667,15 +666,18 @@ class AnimationController extends Animation<double>
   /// and initial velocity.
   ///
   /// If velocity is positive, the animation will complete, otherwise it will
-  /// dismiss.
+  /// dismiss. The velocity is specified in units per second. If the
+  /// [SemanticsBinding.disableAnimations] flag is set, the velocity is somewhat
+  /// arbitrarily multiplied by 200.
   ///
-  /// The [springDescription] parameter can be used to specify a custom [SpringType.criticallyDamped]
-  /// or [SpringType.overDamped] spring to drive the animation with. Defaults to null, which uses a
-  /// [SpringType.criticallyDamped] spring. See [SpringDescription.withDampingRatio] for how
-  /// to create a suitable [SpringDescription].
+  /// The [springDescription] parameter can be used to specify a custom
+  /// [SpringType.criticallyDamped] or [SpringType.overDamped] spring with which
+  /// to drive the animation. By default, a [SpringType.criticallyDamped] spring
+  /// is used. See [SpringDescription.withDampingRatio] for how to create a
+  /// suitable [SpringDescription].
   ///
-  /// The resulting spring simulation cannot be of type [SpringType.underDamped],
-  /// as this can lead to unexpected look of the produced animation.
+  /// The resulting spring simulation cannot be of type [SpringType.underDamped];
+  /// such a spring would oscillate rather than fling.
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
@@ -692,10 +694,7 @@ class AnimationController extends Animation<double>
     if (SemanticsBinding.instance.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
-          // TODO(zanderso): determine a better process for setting velocity.
-          // the value below was arbitrarily chosen because it worked for the drawer widget.
-          scale = 200.0;
-          break;
+          scale = 200.0; // This is arbitrary (it was chosen because it worked for the drawer widget).
         case AnimationBehavior.preserve:
           break;
       }
@@ -704,8 +703,10 @@ class AnimationController extends Animation<double>
       ..tolerance = _kFlingTolerance;
     assert(
       simulation.type != SpringType.underDamped,
-      'The resulting spring simulation is of type SpringType.underDamped.\n'
-      'This can lead to unexpected look of the animation, please adjust the springDescription parameter',
+      'The specified spring simulation is of type SpringType.underDamped.\n'
+      'An underdamped spring results in oscillation rather than a fling. '
+      'Consider specifying a different springDescription, or use animateWith() '
+      'with an explicit SpringSimulation if an underdamped spring is intentional.',
     );
     stop();
     return _startSimulation(simulation);
@@ -737,11 +738,10 @@ class AnimationController extends Animation<double>
   }
 
   TickerFuture _startSimulation(Simulation simulation) {
-    assert(simulation != null);
     assert(!isAnimating);
     _simulation = simulation;
     _lastElapsedDuration = Duration.zero;
-    _value = simulation.x(0.0).clamp(lowerBound, upperBound);
+    _value = clampDouble(simulation.x(0.0), lowerBound, upperBound);
     final TickerFuture result = _ticker!.start();
     _status = (_direction == _AnimationDirection.forward) ?
       AnimationStatus.forward :
@@ -820,7 +820,7 @@ class AnimationController extends Animation<double>
     _lastElapsedDuration = elapsed;
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
-    _value = _simulation!.x(elapsedInSeconds).clamp(lowerBound, upperBound);
+    _value = clampDouble(_simulation!.x(elapsedInSeconds), lowerBound, upperBound);
     if (_simulation!.isDone(elapsedInSeconds)) {
       _status = (_direction == _AnimationDirection.forward) ?
         AnimationStatus.completed :
@@ -835,7 +835,13 @@ class AnimationController extends Animation<double>
   String toStringDetails() {
     final String paused = isAnimating ? '' : '; paused';
     final String ticker = _ticker == null ? '; DISPOSED' : (_ticker!.muted ? '; silenced' : '');
-    final String label = debugLabel == null ? '' : '; for $debugLabel';
+    String label = '';
+    assert(() {
+      if (debugLabel != null) {
+        label = '; for $debugLabel';
+      }
+      return true;
+    }());
     final String more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
     return '$more$paused$ticker$label';
   }
@@ -843,9 +849,7 @@ class AnimationController extends Animation<double>
 
 class _InterpolationSimulation extends Simulation {
   _InterpolationSimulation(this._begin, this._end, Duration duration, this._curve, double scale)
-    : assert(_begin != null),
-      assert(_end != null),
-      assert(duration != null && duration.inMicroseconds > 0),
+    : assert(duration.inMicroseconds > 0),
       _durationInSeconds = (duration.inMicroseconds * scale) / Duration.microsecondsPerSecond;
 
   final double _durationInSeconds;
@@ -855,13 +859,14 @@ class _InterpolationSimulation extends Simulation {
 
   @override
   double x(double timeInSeconds) {
-    final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
-    if (t == 0.0)
+    final double t = clampDouble(timeInSeconds / _durationInSeconds, 0.0, 1.0);
+    if (t == 0.0) {
       return _begin;
-    else if (t == 1.0)
+    } else if (t == 1.0) {
       return _end;
-    else
+    } else {
       return _begin + (_end - _begin) * _curve.transform(t);
+    }
   }
 
   @override

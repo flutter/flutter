@@ -8,7 +8,6 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -25,16 +24,18 @@ class IntegrationTestTestDevice implements TestDevice {
     required this.device,
     required this.debuggingOptions,
     required this.userIdentifier,
+    required this.compileExpression,
   });
 
   final int id;
   final Device device;
   final DebuggingOptions debuggingOptions;
-  final String userIdentifier;
+  final String? userIdentifier;
+  final CompileExpression? compileExpression;
 
   ApplicationPackage? _applicationPackage;
   final Completer<void> _finished = Completer<void>();
-  final Completer<Uri> _gotProcessObservatoryUri = Completer<Uri>();
+  final Completer<Uri> _gotProcessVmServiceUri = Completer<Uri>();
 
   /// Starts the device.
   ///
@@ -46,12 +47,13 @@ class IntegrationTestTestDevice implements TestDevice {
       targetPlatform,
       buildInfo: debuggingOptions.buildInfo,
     );
-    if (_applicationPackage == null) {
+    final ApplicationPackage? package = _applicationPackage;
+    if (package == null) {
       throw TestDeviceException('No application found for $targetPlatform.', StackTrace.current);
     }
 
     final LaunchResult launchResult = await device.startApp(
-      _applicationPackage!,
+      package,
       mainPath: entrypointPath,
       platformArgs: <String, dynamic>{},
       debuggingOptions: debuggingOptions,
@@ -60,18 +62,22 @@ class IntegrationTestTestDevice implements TestDevice {
     if (!launchResult.started) {
       throw TestDeviceException('Unable to start the app on the device.', StackTrace.current);
     }
-    final Uri? observatoryUri = launchResult.observatoryUri;
-    if (observatoryUri == null) {
-      throw TestDeviceException('Observatory is not available on the test device.', StackTrace.current);
+    final Uri? vmServiceUri = launchResult.vmServiceUri;
+    if (vmServiceUri == null) {
+      throw TestDeviceException('The VM Service is not available on the test device.', StackTrace.current);
     }
 
     // No need to set up the log reader because the logs are captured and
     // streamed to the package:test_core runner.
 
-    _gotProcessObservatoryUri.complete(observatoryUri);
+    _gotProcessVmServiceUri.complete(vmServiceUri);
 
     globals.printTrace('test $id: Connecting to vm service');
-    final FlutterVmService vmService = await connectToVmService(observatoryUri, logger: globals.logger).timeout(
+    final FlutterVmService vmService = await connectToVmService(
+      vmServiceUri,
+      logger: globals.logger,
+      compileExpression: compileExpression,
+    ).timeout(
       const Duration(seconds: 5),
       onTimeout: () => throw TimeoutException('Connecting to the VM Service timed out.'),
     );
@@ -110,7 +116,7 @@ class IntegrationTestTestDevice implements TestDevice {
   }
 
   @override
-  Future<Uri> get observatoryUri => _gotProcessObservatoryUri.future;
+  Future<Uri> get vmServiceUri => _gotProcessVmServiceUri.future;
 
   @override
   Future<void> kill() async {

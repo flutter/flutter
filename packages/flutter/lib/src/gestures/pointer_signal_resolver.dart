@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 
 import 'events.dart';
 
+export 'events.dart' show PointerSignalEvent;
+
 /// The callback to register with a [PointerSignalResolver] to express
 /// interest in a pointer signal event.
 typedef PointerSignalResolvedCallback = void Function(PointerSignalEvent event);
@@ -62,8 +64,6 @@ class PointerSignalResolver {
   /// See the documentation for the [PointerSignalResolver] class on when and
   /// how this method should be used.
   void register(PointerSignalEvent event, PointerSignalResolvedCallback callback) {
-    assert(event != null);
-    assert(callback != null);
     assert(_currentEvent == null || _isSameEvent(_currentEvent!, event));
     if (_firstRegisteredCallback != null) {
       return;

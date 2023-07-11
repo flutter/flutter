@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_api_samples/services/mouse_cursor/mouse_cursor.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
@@ -10,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Uses Text Cursor', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.MouseCursorExampleApp(),
     );
 
     expect(find.byType(MouseRegion), findsNWidgets(2)); // There's one in the MaterialApp

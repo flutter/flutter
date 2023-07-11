@@ -23,6 +23,7 @@ if (flutterVersionName == null) {
 apply plugin: "com.android.dynamic-feature"
 
 android {
+    namespace "io.flutter.integration.deferred_components_test.component1"
     compileSdkVersion 31
 
     sourceSets {

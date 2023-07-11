@@ -2,46 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoDatePicker
-
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [CupertinoDatePicker].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const DatePickerApp());
 
-  static const String _title = 'Flutter Code Sample';
+class DatePickerApp extends StatelessWidget {
+  const DatePickerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: DatePickerExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatefulWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class DatePickerExample extends StatefulWidget {
+  const DatePickerExample({super.key});
 
   @override
-  State<MyStatelessWidget> createState() => _MyStatelessWidgetState();
+  State<DatePickerExample> createState() => _DatePickerExampleState();
 }
 
-class _MyStatelessWidgetState extends State<MyStatelessWidget> {
+class _DatePickerExampleState extends State<DatePickerExample> {
   DateTime date = DateTime(2016, 10, 26);
   DateTime time = DateTime(2016, 5, 10, 22, 35);
   DateTime dateTime = DateTime(2016, 8, 3, 17, 45);
 
-  // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoDatePicker.
+  // This function displays a CupertinoModalPopup with a reasonable fixed height
+  // which hosts CupertinoDatePicker.
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => Container(
         height: 216,
         padding: const EdgeInsets.only(top: 6.0),
-        // The Bottom margin is provided to align the popup above the system navigation bar.
+        // The Bottom margin is provided to align the popup above the system
+        // navigation bar.
         margin: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
@@ -52,13 +52,16 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
           top: false,
           child: child,
         ),
-      )
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoDatePicker Sample'),
+      ),
       child: DefaultTextStyle(
         style: TextStyle(
           color: CupertinoColors.label.resolveFrom(context),
@@ -78,15 +81,19 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                         initialDateTime: date,
                         mode: CupertinoDatePickerMode.date,
                         use24hFormat: true,
+                        // This shows day of week alongside day of month
+                        showDayOfWeek: true,
                         // This is called when the user changes the date.
                         onDateTimeChanged: (DateTime newDate) {
                           setState(() => date = newDate);
                         },
                       ),
                     ),
-                    // In this example, the date value is formatted manually. You can use intl package
-                    // to format the value based on user's locale settings.
-                    child: Text('${date.month}-${date.day}-${date.year}',
+                    // In this example, the date is formatted manually. You can
+                    // use the intl package to format the value based on the
+                    // user's locale settings.
+                    child: Text(
+                      '${date.month}-${date.day}-${date.year}',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),
@@ -110,9 +117,11 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                         },
                       ),
                     ),
-                    // In this example, the time value is formatted manually. You can use intl package to
-                    // format the value based on the user's locale settings.
-                    child: Text('${time.hour}:${time.minute}',
+                    // In this example, the time value is formatted manually.
+                    // You can use the intl package to format the value based on
+                    // the user's locale settings.
+                    child: Text(
+                      '${time.hour}:${time.minute}',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),
@@ -135,9 +144,11 @@ class _MyStatelessWidgetState extends State<MyStatelessWidget> {
                         },
                       ),
                     ),
-                    // In this example, time value is formatted manually. You can use intl package to
-                    // format the value based on the user's locale settings.
-                    child: Text('${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}',
+                    // In this example, the time value is formatted manually. You
+                    // can use the intl package to format the value based on the
+                    // user's locale settings.
+                    child: Text(
+                      '${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),

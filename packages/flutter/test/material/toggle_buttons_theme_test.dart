@@ -22,6 +22,12 @@ void main() {
     expect(const ToggleButtonsThemeData().hashCode, const ToggleButtonsThemeData().copyWith().hashCode);
   });
 
+  test('ToggleButtonsThemeData lerp special cases', () {
+    expect(ToggleButtonsThemeData.lerp(null, null, 0), null);
+    const ToggleButtonsThemeData data = ToggleButtonsThemeData();
+    expect(identical(ToggleButtonsThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('ToggleButtonsThemeData defaults', () {
     const ToggleButtonsThemeData themeData = ToggleButtonsThemeData();
     expect(themeData.textStyle, null);
@@ -259,10 +265,10 @@ void main() {
                 color: enabledColor,
                 isSelected: const <bool>[false],
                 onPressed: (int index) {},
-                children: <Widget>[
+                children: const <Widget>[
                   // This Row is used like this to test for both TextStyle
                   // and IconTheme for Text and Icon widgets respectively.
-                  Row(children: const <Widget>[
+                  Row(children: <Widget>[
                     Text('First child'),
                     Icon(Icons.check),
                   ]),
@@ -288,8 +294,8 @@ void main() {
                 color: enabledColor,
                 isSelected: const <bool>[true],
                 onPressed: (int index) {},
-                children: <Widget>[
-                  Row(children: const <Widget>[
+                children: const <Widget>[
+                  Row(children: <Widget>[
                     Text('First child'),
                     Icon(Icons.check),
                   ]),
@@ -315,8 +321,8 @@ void main() {
               child: ToggleButtons(
                 color: enabledColor,
                 isSelected: const <bool>[false],
-                children: <Widget>[
-                  Row(children: const <Widget>[
+                children: const <Widget>[
+                  Row(children: <Widget>[
                     Text('First child'),
                     Icon(Icons.check),
                   ]),
@@ -344,8 +350,8 @@ void main() {
             child: ToggleButtons(
               isSelected: const <bool>[true],
               onPressed: (int index) {},
-              children: <Widget>[
-                Row(children: const <Widget>[
+              children: const <Widget>[
+                Row(children: <Widget>[
                   Text('First child'),
                 ]),
               ],
@@ -543,6 +549,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model layer paint
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: borderColor,
@@ -576,6 +584,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model layer paint
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: selectedBorderColor,
@@ -608,6 +618,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model layer paint
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: disabledBorderColor,

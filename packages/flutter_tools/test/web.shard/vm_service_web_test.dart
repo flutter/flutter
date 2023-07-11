@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
@@ -17,9 +16,9 @@ import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
 
 void main() {
-  Directory tempDir;
+  late Directory tempDir;
   final BasicProjectWithUnaryMain project = BasicProjectWithUnaryMain();
-  FlutterRunTestDriver flutter;
+  late FlutterRunTestDriver flutter;
 
   group('Clients of flutter run on web with DDS enabled', () {
     setUp(() async {
@@ -60,8 +59,8 @@ void main() {
 
       await Future.wait(<Future<void>>[
         validateFlutterVersion(client1),
-        validateFlutterVersion(client2)]
-      );
+        validateFlutterVersion(client2),
+      ]);
     }, skip: true); // https://github.com/flutter/flutter/issues/99003
   });
 
@@ -92,13 +91,13 @@ void main() {
 }
 
 Future<void> validateFlutterVersion(VmService client) async {
-  String method;
+  String? method;
 
   final Future<dynamic> registration = expectLater(
     client.onEvent('Service'),
       emitsThrough(predicate((Event e) {
         if (e.kind == EventKind.kServiceRegistered &&
-            e.service == 'flutterVersion') {
+            e.service == kFlutterVersionServiceName) {
           method = e.method;
           return true;
         }
@@ -110,10 +109,10 @@ Future<void> validateFlutterVersion(VmService client) async {
   await registration;
   await client.streamCancel('Service');
 
-  final dynamic version1 = await client.callServiceExtension(method);
+  final dynamic version1 = await client.callServiceExtension(method!);
   expect(version1, const TypeMatcher<Success>()
     .having((Success r) => r.type, 'type', 'Success')
-    .having((Success r) => r.json['frameworkVersion'], 'frameworkVersion', isNotNull));
+    .having((Success r) => r.json!['frameworkVersion'], 'frameworkVersion', isNotNull));
 
   await client.dispose();
 }

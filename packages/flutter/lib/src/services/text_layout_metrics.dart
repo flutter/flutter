@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show TextRange;
+
 import 'text_editing.dart';
+
+export 'dart:ui' show TextPosition, TextRange;
+
+export 'text_editing.dart' show TextSelection;
 
 /// A read-only interface for accessing visual information about the
 /// implementing text.
@@ -46,6 +52,25 @@ abstract class TextLayoutMetrics {
         return false;
     }
     return true;
+  }
+
+  /// Check if the given code unit is a line terminator character.
+  ///
+  /// Includes newline characters from ASCII
+  /// (https://www.unicode.org/standard/reports/tr13/tr13-5.html).
+  static bool isLineTerminator(int codeUnit) {
+    switch (codeUnit) {
+      case 0x0A: // line feed
+      case 0x0B: // vertical feed
+      case 0x0C: // form feed
+      case 0x0D: // carriage return
+      case 0x85: // new line
+      case 0x2028: // line separator
+      case 0x2029: // paragraph separator
+        return true;
+      default:
+        return false;
+    }
   }
 
   /// {@template flutter.services.TextLayoutMetrics.getLineAtOffset}

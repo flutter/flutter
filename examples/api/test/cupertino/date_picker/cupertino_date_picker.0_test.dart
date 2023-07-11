@@ -10,7 +10,7 @@ const Offset _kRowOffset = Offset(0.0, -50.0);
 void main() {
   testWidgets('Can change date, time and dateTime using CupertinoDatePicker', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.DatePickerApp(),
     );
     // Open the date picker.
     await tester.tap(find.text('10-26-2016'));
@@ -18,7 +18,7 @@ void main() {
 
     // Drag month, day and year wheels to change the picked date.
     await tester.drag(find.text('October'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
-    await tester.drag(find.text('26'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
+    await tester.drag(find.textContaining('26').last, _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
     await tester.drag(find.text('2016'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
 
     await tester.pump();

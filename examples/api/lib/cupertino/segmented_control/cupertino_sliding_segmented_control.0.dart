@@ -2,42 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoSlidingSegmentedControl
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoSlidingSegmentedControl].
 
 enum Sky { midnight, viridian, cerulean }
 
-Map<Sky, Color> skyColors = <Sky, Color> {
+Map<Sky, Color> skyColors = <Sky, Color>{
   Sky.midnight: const Color(0xff191970),
   Sky.viridian: const Color(0xff40826d),
   Sky.cerulean: const Color(0xff007ba7),
 };
 
-void main() => runApp(const MyApp());
+void main() => runApp(const SegmentedControlApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'CupertinoSlidingSegmentedControl Sample';
+class SegmentedControlApp extends StatelessWidget {
+  const SegmentedControlApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: SegmentedControlSample(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: SegmentedControlExample(),
     );
   }
 }
 
-class SegmentedControlSample extends StatefulWidget {
-  const SegmentedControlSample({Key? key}) : super(key: key);
+class SegmentedControlExample extends StatefulWidget {
+  const SegmentedControlExample({super.key});
 
   @override
-  State<SegmentedControlSample> createState() => _SegmentedControlSampleState();
+  State<SegmentedControlExample> createState() => _SegmentedControlExampleState();
 }
 
-class _SegmentedControlSampleState extends State<SegmentedControlSample> {
+class _SegmentedControlExampleState extends State<SegmentedControlExample> {
   Sky _selectedSegment = Sky.midnight;
 
   @override

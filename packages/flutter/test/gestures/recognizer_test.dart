@@ -72,21 +72,6 @@ void main() {
     expect(difference.global, const Offset(40, 40));
   });
 
-  testWidgets('EagerGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        EagerGestureRecognizer(
-            kind: PointerDeviceKind.touch,
-            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
-  });
-
   group('PrimaryPointerGestureRecognizer', () {
     testGesture('cleans up state after winning arena', (GestureTester tester) {
       final List<String> resolutions = <String>[];
@@ -193,7 +178,7 @@ void main() {
 }
 
 class TestGestureRecognizer extends GestureRecognizer {
-  TestGestureRecognizer({ Object? debugOwner }) : super(debugOwner: debugOwner);
+  TestGestureRecognizer({ super.debugOwner });
 
   @override
   String get debugDescription => 'debugDescription content';
@@ -233,12 +218,9 @@ class TestPrimaryPointerGestureRecognizer<T extends PointerEvent> extends Primar
     this.resolution, {
     this.onAcceptGesture,
     this.onRejectGesture,
-    double? preAcceptSlopTolerance,
-    double? postAcceptSlopTolerance,
-  }) : super(
-    preAcceptSlopTolerance: preAcceptSlopTolerance,
-    postAcceptSlopTolerance: postAcceptSlopTolerance,
-  );
+    super.preAcceptSlopTolerance,
+    super.postAcceptSlopTolerance,
+  });
 
   final GestureDisposition resolution;
   final VoidCallback? onAcceptGesture;

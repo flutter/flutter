@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/slider/cupertino_slider.0.dart' as
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Future<void> _dragSlider(WidgetTester tester, Key sliderKey) {
+  Future<void> dragSlider(WidgetTester tester, Key sliderKey) {
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     const double unit = CupertinoThumbPainter.radius;
     const double delta = 3.0 * unit;
@@ -16,13 +16,13 @@ void main() {
 
   testWidgets('Can change value using CupertinoSlider', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.CupertinoSliderApp(),
     );
 
     // Check for the initial slider value.
     expect(find.text('0.0'), findsOneWidget);
 
-    await _dragSlider(tester, const Key('slider'));
+    await dragSlider(tester, const Key('slider'));
     await tester.pumpAndSettle();
 
     // Check for the updated slider value.

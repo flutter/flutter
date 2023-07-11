@@ -57,38 +57,38 @@ import 'theme_data.dart';
 /// ** See code in examples/api/lib/material/text_button/text_button.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample demonstrates using the [statesController] parameter to create a button
+/// that adds support for [MaterialState.selected].
+///
+/// ** See code in examples/api/lib/material/text_button/text_button.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
-///  * [OutlinedButton], a [TextButton] with a border outline.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
+///  * [FilledButton], a filled button that doesn't elevate when pressed.
+///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [OutlinedButton], a button with an outlined border and no fill color.
 ///  * <https://material.io/design/components/buttons.html>
+///  * <https://m3.material.io/components/buttons>
 class TextButton extends ButtonStyleButton {
   /// Create a TextButton.
   ///
   /// The [autofocus] and [clipBehavior] arguments must not be null.
   const TextButton({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    Clip clipBehavior = Clip.none,
-    required Widget child,
-  }) : super(
-    key: key,
-    onPressed: onPressed,
-    onLongPress: onLongPress,
-    onHover: onHover,
-    onFocusChange: onFocusChange,
-    style: style,
-    focusNode: focusNode,
-    autofocus: autofocus,
-    clipBehavior: clipBehavior,
-    child: child,
-  );
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
+    super.autofocus = false,
+    super.clipBehavior = Clip.none,
+    super.statesController,
+    required Widget super.child,
+  });
 
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -107,6 +107,7 @@ class TextButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) = _TextButtonWithIcon;
@@ -114,13 +115,12 @@ class TextButton extends ButtonStyleButton {
   /// A static convenience method that constructs a text button
   /// [ButtonStyle] given simple values.
   ///
-  /// The [primary], and [onSurface] colors are used to create a
-  /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value in the same
-  /// way that [defaultStyleOf] uses the [ColorScheme] colors with the same
-  /// names. Specify a value for [primary] to specify the color of the button's
-  /// text and icons as well as the overlay colors used to indicate the hover,
-  /// focus, and pressed states. Use [onSurface] to specify the button's
-  /// disabled text and icon color.
+  /// The [foregroundColor] and [disabledForegroundColor] colors are used
+  /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
+  /// a derived [ButtonStyle.overlayColor].
+  ///
+  /// The [backgroundColor] and [disabledBackgroundColor] colors are
+  /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
   /// parameters are used to construct [ButtonStyle.mouseCursor].
@@ -139,14 +139,22 @@ class TextButton extends ButtonStyleButton {
   ///
   /// ```dart
   /// TextButton(
-  ///   style: TextButton.styleFrom(primary: Colors.green),
-  /// )
+  ///   style: TextButton.styleFrom(foregroundColor: Colors.green),
+  ///   child: const Text('Give Kate a mix tape'),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  /// ),
   /// ```
   static ButtonStyle styleFrom({
-    Color? primary,
-    Color? onSurface,
+    Color? foregroundColor,
     Color? backgroundColor,
+    Color? disabledForegroundColor,
+    Color? disabledBackgroundColor,
     Color? shadowColor,
+    Color? surfaceTintColor,
+    Color? iconColor,
+    Color? disabledIconColor,
     Color? surfaceTintColor,
     double? elevation,
     TextStyle? textStyle,
@@ -164,23 +172,47 @@ class TextButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
+    @Deprecated(
+      'Use foregroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? primary,
+    @Deprecated(
+      'Use disabledForegroundColor instead. '
+      'This feature was deprecated after v3.1.0.'
+    )
+    Color? onSurface,
   }) {
-    final MaterialStateProperty<Color?>? foregroundColor = (onSurface == null && primary == null)
+    final Color? foreground = foregroundColor ?? primary;
+    final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
+    final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
       ? null
-      : _TextButtonDefaultForeground(primary, onSurface);
-    final MaterialStateProperty<Color?>? overlayColor = (primary == null)
+      : _TextButtonDefaultColor(foreground, disabledForeground);
+    final MaterialStateProperty<Color?>? backgroundColorProp = (backgroundColor == null && disabledBackgroundColor == null)
       ? null
-      : _TextButtonDefaultOverlay(primary);
+      : disabledBackgroundColor == null
+        ? ButtonStyleButton.allOrNull<Color?>(backgroundColor)
+        : _TextButtonDefaultColor(backgroundColor, disabledBackgroundColor);
+    final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
+      ? null
+      : _TextButtonDefaultOverlay(foreground);
+    final MaterialStateProperty<Color?>? iconColorProp = (iconColor == null && disabledIconColor == null)
+      ? null
+      : disabledIconColor == null
+        ? ButtonStyleButton.allOrNull<Color?>(iconColor)
+        : _TextButtonDefaultIconColor(iconColor, disabledIconColor);
     final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
       ? null
       : _TextButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
 
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
-      backgroundColor: ButtonStyleButton.allOrNull<Color>(backgroundColor),
-      foregroundColor: foregroundColor,
+      foregroundColor: foregroundColorProp,
+      backgroundColor: backgroundColorProp,
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
+      surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
+      iconColor: iconColorProp,
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
@@ -201,13 +233,14 @@ class TextButton extends ButtonStyleButton {
 
   /// Defines the button's default appearance.
   ///
+  /// {@template flutter.material.text_button.default_style_of}
   /// The button [child]'s [Text] and [Icon] widgets are rendered with
   /// the [ButtonStyle]'s foreground color. The button's [InkWell] adds
   /// the style's overlay color when the button is focused, hovered
   /// or pressed. The button's background color becomes its [Material]
   /// color and is transparent by default.
   ///
-  /// All of the ButtonStyle's defaults appear below.
+  /// All of the [ButtonStyle]'s defaults appear below.
   ///
   /// In this list "Theme.foo" is shorthand for
   /// `Theme.of(context).foo`. Color scheme values like
@@ -218,12 +251,15 @@ class TextButton extends ButtonStyleButton {
   /// each state and "others" means all other states.
   ///
   /// The `textScaleFactor` is the value of
-  /// `MediaQuery.of(context).textScaleFactor` and the names of the
+  /// `MediaQuery.textScaleFactorOf(context)` and the names of the
   /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
   /// abbreviated for readability.
   ///
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.
+  /// {@endtemplate}
+  ///
+  /// ## Material 2 defaults
   ///
   /// ## Material 2 defaults
   ///
@@ -238,7 +274,7 @@ class TextButton extends ButtonStyleButton {
   /// * `shadowColor` - Theme.shadowColor
   /// * `elevation` - 0
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - all(8)
+  ///   * `textScaleFactor <= 1` - (horizontal(12), vertical(8))
   ///   * `1 < textScaleFactor <= 2` - lerp(all(8), horizontal(8))
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
@@ -268,6 +304,48 @@ class TextButton extends ButtonStyleButton {
   /// outline, is null. That means that the outline is defined by the button
   /// shape's [OutlinedBorder.side]. Typically the default value of an
   /// [OutlinedBorder]'s side is [BorderSide.none], so an outline is not drawn.
+  ///
+  /// ## Material 3 defaults
+  ///
+  /// If [ThemeData.useMaterial3] is set to true the following defaults will
+  /// be used:
+  ///
+  /// {@template flutter.material.text_button.material3_defaults}
+  /// * `textStyle` - Theme.textTheme.labelLarge
+  /// * `backgroundColor` - transparent
+  /// * `foregroundColor`
+  ///   * disabled - Theme.colorScheme.onSurface(0.38)
+  ///   * others - Theme.colorScheme.primary
+  /// * `overlayColor`
+  ///   * hovered - Theme.colorScheme.primary(0.08)
+  ///   * focused or pressed - Theme.colorScheme.primary(0.12)
+  ///   * others - null
+  /// * `shadowColor` - null
+  /// * `surfaceTintColor` - null
+  /// * `elevation` - 0
+  /// * `padding`
+  ///   * `textScaleFactor <= 1` - lerp(horizontal(12), horizontal(4))
+  ///   * `1 < textScaleFactor <= 2` - lerp(all(8), horizontal(8))
+  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
+  ///   * `3 < textScaleFactor` - horizontal(4)
+  /// * `minimumSize` - Size(64, 40)
+  /// * `fixedSize` - null
+  /// * `maximumSize` - Size.infinite
+  /// * `side` - null
+  /// * `shape` - StadiumBorder()
+  /// * `mouseCursor`
+  ///   * disabled - SystemMouseCursors.basic
+  ///   * others - SystemMouseCursors.click
+  /// * `visualDensity` - theme.visualDensity
+  /// * `tapTargetSize` - theme.materialTapTargetSize
+  /// * `animationDuration` - kThemeChangeDuration
+  /// * `enableFeedback` - true
+  /// * `alignment` - Alignment.center
+  /// * `splashFactory` - Theme.splashFactory
+  ///
+  /// For the [TextButton.icon] factory, the end (generally the right) value of
+  /// [padding] is increased from 12 to 16.
+  /// {@endtemplate}
   ///
   /// ## Material 3 defaults
   ///
@@ -311,14 +389,15 @@ class TextButton extends ButtonStyleButton {
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Theme.of(context).useMaterial3
-      ? _TokenDefaultsM3(context)
+      ? _TextButtonDefaultsM3(context)
       : styleFrom(
-          primary: colorScheme.primary,
-          onSurface: colorScheme.onSurface,
+          foregroundColor: colorScheme.primary,
+          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
           backgroundColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
           shadowColor: theme.shadowColor,
           elevation: 0,
-          textStyle: theme.textTheme.button,
+          textStyle: theme.textTheme.labelLarge,
           padding: _scaledPadding(context),
           minimumSize: const Size(64, 36),
           maximumSize: Size.infinite,
@@ -343,6 +422,16 @@ class TextButton extends ButtonStyleButton {
 }
 
 EdgeInsetsGeometry _scaledPadding(BuildContext context) {
+  final bool useMaterial3 = Theme.of(context).useMaterial3;
+  return ButtonStyleButton.scaledPadding(
+    useMaterial3 ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8) :  const EdgeInsets.all(8),
+    const EdgeInsets.symmetric(horizontal: 8),
+    const EdgeInsets.symmetric(horizontal: 4),
+    MediaQuery.textScaleFactorOf(context),
+  );
+}
+
+EdgeInsetsGeometry _scaledPadding(BuildContext context) {
   return ButtonStyleButton.scaledPadding(
     const EdgeInsets.all(8),
     const EdgeInsets.symmetric(horizontal: 8),
@@ -352,22 +441,23 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
 }
 
 @immutable
-class _TextButtonDefaultForeground extends MaterialStateProperty<Color?> {
-  _TextButtonDefaultForeground(this.primary, this.onSurface);
+class _TextButtonDefaultColor extends MaterialStateProperty<Color?> {
+  _TextButtonDefaultColor(this.color, this.disabled);
 
-  final Color? primary;
-  final Color? onSurface;
+  final Color? color;
+  final Color? disabled;
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
-      return onSurface?.withOpacity(0.38);
-    return primary;
+    if (states.contains(MaterialState.disabled)) {
+      return disabled;
+    }
+    return color;
   }
 
   @override
   String toString() {
-    return '{disabled: ${onSurface?.withOpacity(0.38)}, otherwise: $primary}';
+    return '{disabled: $disabled, otherwise: $color}';
   }
 }
 
@@ -379,16 +469,39 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
 
   @override
   Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.hovered))
+    if (states.contains(MaterialState.hovered)) {
       return primary.withOpacity(0.04);
-    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))
+    }
+    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
       return primary.withOpacity(0.12);
+    }
     return null;
   }
 
   @override
   String toString() {
     return '{hovered: ${primary.withOpacity(0.04)}, focused,pressed: ${primary.withOpacity(0.12)}, otherwise: null}';
+  }
+}
+
+@immutable
+class _TextButtonDefaultIconColor extends MaterialStateProperty<Color?> {
+  _TextButtonDefaultIconColor(this.iconColor, this.disabledIconColor);
+
+  final Color? iconColor;
+  final Color? disabledIconColor;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabledIconColor;
+    }
+    return iconColor;
+  }
+
+  @override
+  String toString() {
+    return '{disabled: $disabledIconColor, color: $iconColor}';
   }
 }
 
@@ -401,35 +514,28 @@ class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
 
   @override
   MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled))
+    if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
+    }
     return enabledCursor;
   }
 }
 
 class _TextButtonWithIcon extends TextButton {
   _TextButtonWithIcon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
-  }) : assert(icon != null),
-       assert(label != null),
-       super(
-         key: key,
-         onPressed: onPressed,
-         onLongPress: onLongPress,
-         onHover: onHover,
-         onFocusChange: onFocusChange,
-         style: style,
-         focusNode: focusNode,
+  }) : super(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _TextButtonWithIconChild(icon: icon, label: label),
@@ -437,31 +543,31 @@ class _TextButtonWithIcon extends TextButton {
 
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      const EdgeInsets.all(8),
+      useMaterial3 ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8) : const EdgeInsets.all(8),
       const EdgeInsets.symmetric(horizontal: 4),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+      MediaQuery.textScaleFactorOf(context),
     );
     return super.defaultStyleOf(context).copyWith(
-      padding: MaterialStateProperty.all<EdgeInsetsGeometry>(scaledPadding),
+      padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
     );
   }
 }
 
 class _TextButtonWithIconChild extends StatelessWidget {
   const _TextButtonWithIconChild({
-    Key? key,
     required this.label,
     required this.icon,
-  }) : super(key: key);
+  });
 
   final Widget label;
   final Widget icon;
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
+    final double scale = MediaQuery.textScaleFactorOf(context);
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -469,6 +575,111 @@ class _TextButtonWithIconChild extends StatelessWidget {
     );
   }
 }
+
+// BEGIN GENERATED TOKEN PROPERTIES - TextButton
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_162
+
+class _TextButtonDefaultsM3 extends ButtonStyle {
+  _TextButtonDefaultsM3(this.context)
+   : super(
+       animationDuration: kThemeChangeDuration,
+       enableFeedback: true,
+       alignment: Alignment.center,
+     );
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  @override
+  MaterialStateProperty<TextStyle?> get textStyle =>
+    MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
+
+  @override
+  MaterialStateProperty<Color?>? get backgroundColor =>
+    const MaterialStatePropertyAll<Color>(Colors.transparent);
+
+  @override
+  MaterialStateProperty<Color?>? get foregroundColor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      return _colors.primary;
+    });
+
+  @override
+  MaterialStateProperty<Color?>? get overlayColor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.primary.withOpacity(0.08);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.primary.withOpacity(0.12);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.primary.withOpacity(0.12);
+      }
+      return null;
+    });
+
+  @override
+  MaterialStateProperty<Color>? get shadowColor =>
+    const MaterialStatePropertyAll<Color>(Colors.transparent);
+
+  @override
+  MaterialStateProperty<Color>? get surfaceTintColor =>
+    const MaterialStatePropertyAll<Color>(Colors.transparent);
+
+  @override
+  MaterialStateProperty<double>? get elevation =>
+    const MaterialStatePropertyAll<double>(0.0);
+
+  @override
+  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+    MaterialStatePropertyAll<EdgeInsetsGeometry>(_scaledPadding(context));
+
+  @override
+  MaterialStateProperty<Size>? get minimumSize =>
+    const MaterialStatePropertyAll<Size>(Size(64.0, 40.0));
+
+  // No default fixedSize
+
+  @override
+  MaterialStateProperty<Size>? get maximumSize =>
+    const MaterialStatePropertyAll<Size>(Size.infinite);
+
+  // No default side
+
+  @override
+  MaterialStateProperty<OutlinedBorder>? get shape =>
+    const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
+
+  @override
+  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return SystemMouseCursors.basic;
+      }
+      return SystemMouseCursors.click;
+    });
+
+  @override
+  VisualDensity? get visualDensity => Theme.of(context).visualDensity;
+
+  @override
+  MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;
+
+  @override
+  InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+}
+
+// END GENERATED TOKEN PROPERTIES - TextButton
 
 // BEGIN GENERATED TOKEN PROPERTIES
 

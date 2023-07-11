@@ -68,19 +68,14 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       switch (action) {
         case LeaveBehindDemoAction.reset:
           initListItems();
-          break;
         case LeaveBehindDemoAction.horizontalSwipe:
           _dismissDirection = DismissDirection.horizontal;
-          break;
         case LeaveBehindDemoAction.leftSwipe:
           _dismissDirection = DismissDirection.endToStart;
-          break;
         case LeaveBehindDemoAction.rightSwipe:
           _dismissDirection = DismissDirection.startToEnd;
-          break;
         case LeaveBehindDemoAction.confirmDismiss:
           _confirmDismiss = !_confirmDismiss;
-          break;
       }
     });
   }
@@ -131,6 +126,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     } else {
       body = Scrollbar(
         child: ListView(
+          primary: true,
           children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
             return _LeaveBehindListItem(
               confirmDismiss: _confirmDismiss,
@@ -221,10 +217,11 @@ class _LeaveBehindListItem extends StatelessWidget {
         key: ObjectKey(item),
         direction: dismissDirection,
         onDismissed: (DismissDirection direction) {
-          if (direction == DismissDirection.endToStart)
+          if (direction == DismissDirection.endToStart) {
             _handleArchive();
-          else
+          } else {
             _handleDelete();
+          }
         },
         confirmDismiss: !confirmDismiss ? null : (DismissDirection dismissDirection) async {
           switch(dismissDirection) {
@@ -241,7 +238,7 @@ class _LeaveBehindListItem extends StatelessWidget {
           }
           return false;
         },
-        background: Container(
+        background: ColoredBox(
           color: theme.primaryColor,
           child: const Center(
             child: ListTile(
@@ -249,7 +246,7 @@ class _LeaveBehindListItem extends StatelessWidget {
             ),
           ),
         ),
-        secondaryBackground: Container(
+        secondaryBackground: ColoredBox(
           color: theme.primaryColor,
           child: const Center(
             child: ListTile(
@@ -275,7 +272,6 @@ class _LeaveBehindListItem extends StatelessWidget {
   Future<bool?> _showConfirmationDialog(BuildContext context, String action) {
     return showDialog<bool>(
       context: context,
-      barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Do you want to $action this item?'),

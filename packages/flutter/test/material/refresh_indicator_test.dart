@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -406,12 +408,17 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
+      await tester.fling(find.text('A'), const Offset(0.0, 1500.0), 10000.0);
+    }
+    else {
+      await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    }
     await tester.pump(const Duration(milliseconds: 100));
     expect(lastScrollOffset = controller.offset, lessThan(0.0));
     expect(refreshCalled, isFalse);
 
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 400));
     expect(controller.offset, greaterThan(lastScrollOffset));
     expect(controller.offset, lessThan(0.0));
     expect(refreshCalled, isTrue);
@@ -786,6 +793,48 @@ void main() {
     expect(refreshCalled, false);
   });
 
+  testWidgets('RefreshIndicator.adaptive', (WidgetTester tester) async {
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: RefreshIndicator.adaptive(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
+                height: 200.0,
+                child: Text(item),
+              );
+            }).toList(),
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle(); // Finish the theme change animation.
+      await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+      await tester.pump();
+
+      expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+      expect(find.byType(RefreshProgressIndicator), findsNothing);
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle(); // Finish the theme change animation.
+      await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+      await tester.pump();
+
+      expect(tester.getSemantics(find.byType(RefreshProgressIndicator)), matchesSemantics(
+        label: 'Refresh',
+      ));
+      expect(find.byType(CupertinoActivityIndicator), findsNothing);
+    }
+  });
+
   testWidgets('RefreshIndicator color defaults to ColorScheme.primary', (WidgetTester tester) async {
     const Color primaryColor = Color(0xff4caf50);
     final ThemeData theme = ThemeData.from(colorScheme: const ColorScheme.light().copyWith(primary: primaryColor));
@@ -901,5 +950,108 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, true);
+  });
+
+  testWidgets('RefreshIndicator disallows indicator - glow', (WidgetTester tester) async {
+    refreshCalled = false;
+    bool glowAccepted = true;
+    ScrollNotification? lastNotification;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: Builder(
+            builder: (BuildContext context) {
+              return NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification notification) {
+                  if (notification is OverscrollNotification
+                      && lastNotification is! OverscrollNotification) {
+                    final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: true);
+                    confirmationNotification.dispatch(context);
+                    glowAccepted = confirmationNotification.accepted;
+                  }
+                  lastNotification = notification;
+                  return false;
+                },
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                    return SizedBox(
+                      height: 200.0,
+                      child: Text(item),
+                    );
+                  }).toList(),
+                ),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsNothing);
+    expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
+
+    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
+    expect(refreshCalled, true);
+    expect(glowAccepted, false);
+  });
+
+  testWidgets('RefreshIndicator disallows indicator - stretch', (WidgetTester tester) async {
+    refreshCalled = false;
+    bool stretchAccepted = true;
+    ScrollNotification? lastNotification;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(useMaterial3: true),
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: Builder(
+              builder: (BuildContext context) {
+                return NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification notification) {
+                    if (notification is OverscrollNotification
+                        && lastNotification is! OverscrollNotification) {
+                      final OverscrollIndicatorNotification confirmationNotification = OverscrollIndicatorNotification(leading: true);
+                      confirmationNotification.dispatch(context);
+                      stretchAccepted = confirmationNotification.accepted;
+                    }
+                    lastNotification = notification;
+                    return false;
+                  },
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                      return SizedBox(
+                        height: 200.0,
+                        child: Text(item),
+                      );
+                    }).toList(),
+                  ),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+
+    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
+    await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
+    expect(refreshCalled, true);
+    expect(stretchAccepted, false);
   });
 }

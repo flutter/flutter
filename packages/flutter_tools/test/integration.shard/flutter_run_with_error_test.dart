@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -17,10 +15,10 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  Directory tempDir;
+  late Directory tempDir;
   final ProjectWithEarlyError project = ProjectWithEarlyError();
   const String exceptionStart = '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞══════════════════';
-  FlutterRunTestDriver flutter;
+  late FlutterRunTestDriver flutter;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
@@ -54,17 +52,15 @@ void main() {
     transformToLines(process.stdout).listen((String line) async {
       stdout.writeln(line);
 
-      if (line.startsWith('An Observatory debugger')) {
+      if (line.startsWith('A Dart VM Service on')) {
         final RegExp exp = RegExp(r'http://127.0.0.1:(\d+)/');
-        final RegExpMatch match = exp.firstMatch(line);
-        final String port = match.group(1);
-        if (port != null) {
-          final VmService vmService =
-              await vmServiceConnectUri('ws://localhost:$port/ws');
-          final VM vm = await vmService.getVM();
-          for (final IsolateRef isolate in vm.isolates) {
-            await vmService.resume(isolate.id);
-          }
+        final RegExpMatch match = exp.firstMatch(line)!;
+        final String port = match.group(1)!;
+        final VmService vmService =
+            await vmServiceConnectUri('ws://localhost:$port/ws');
+        final VM vm = await vmService.getVM();
+        for (final IsolateRef isolate in vm.isolates!) {
+          await vmService.resume(isolate.id!);
         }
       }
 

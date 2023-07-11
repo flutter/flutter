@@ -176,12 +176,10 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               lineStart = currentPosition + 1;
               currentLineIndent += 1;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-              break;
             case '\t':
               lineStart = currentPosition + 1;
               currentLineIndent += 8;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-              break;
             case '\r':
             case '\n':
             case '\f':
@@ -197,7 +195,6 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               currentParagraphIndentation = null;
               lineStart = currentPosition + 1;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-              break;
             case '[':
               // This is a bit of a hack for the LGPL 2.1, which does something like this:
               //
@@ -216,14 +213,14 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               // The following is a wild heuristic for guessing the indentation level.
               // It happens to work for common variants of the BSD and LGPL licenses.
               if (currentParagraphIndentation == null) {
-                if (currentLineIndent > 10)
+                if (currentLineIndent > 10) {
                   currentParagraphIndentation = LicenseParagraph.centeredIndent;
-                else
+                } else {
                   currentParagraphIndentation = currentLineIndent ~/ 3;
+                }
               }
               state = _LicenseEntryWithLineBreaksParserState.inParagraph;
           }
-          break;
         case _LicenseEntryWithLineBreaksParserState.inParagraph:
           switch (text[currentPosition]) {
             case '\n':
@@ -232,7 +229,6 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               currentLineIndent = 0;
               lineStart = currentPosition + 1;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-              break;
             case '\f':
               addLine();
               result.add(getParagraph());
@@ -241,11 +237,9 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               currentParagraphIndentation = null;
               lineStart = currentPosition + 1;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-              break;
             default:
               state = _LicenseEntryWithLineBreaksParserState.inParagraph;
           }
-          break;
       }
       currentPosition += 1;
     }
@@ -254,11 +248,9 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
         if (lines.isNotEmpty) {
           result.add(getParagraph());
         }
-        break;
       case _LicenseEntryWithLineBreaksParserState.inParagraph:
         addLine();
         result.add(getParagraph());
-        break;
     }
     return result;
   }
@@ -290,11 +282,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 ///    uses this API to select licenses to show.
 ///  * [AboutListTile], which is a widget that can be added to a [Drawer]. When
 ///    tapped it calls [showAboutDialog].
-class LicenseRegistry {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  LicenseRegistry._();
-
+abstract final class LicenseRegistry {
   static List<LicenseEntryCollector>? _collectors;
 
   /// Adds licenses to the registry.
@@ -313,14 +301,16 @@ class LicenseRegistry {
   ///
   /// Generating the list of licenses is expensive.
   static Stream<LicenseEntry> get licenses {
-    if (_collectors == null)
+    if (_collectors == null) {
       return const Stream<LicenseEntry>.empty();
+    }
 
     late final StreamController<LicenseEntry> controller;
     controller = StreamController<LicenseEntry>(
       onListen: () async {
-        for (final LicenseEntryCollector collector in _collectors!)
+        for (final LicenseEntryCollector collector in _collectors!) {
           await controller.addStream(collector());
+        }
         await controller.close();
       },
     );

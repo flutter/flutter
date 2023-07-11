@@ -22,6 +22,7 @@ class AnalyzeOnce extends AnalyzeBase {
     required super.processManager,
     required super.terminal,
     required super.artifacts,
+    required super.suppressAnalytics,
     this.workingDirectory,
   }) : super(
         repoRoots: repoRoots,
@@ -35,19 +36,7 @@ class AnalyzeOnce extends AnalyzeBase {
   Future<void> analyze() async {
     final String currentDirectory =
         (workingDirectory ?? fileSystem.currentDirectory).path;
-
-    // find directories or files from argResults.rest
-    final Set<String> items = Set<String>.of(argResults.rest
-        .map<String>((String path) => fileSystem.path.canonicalize(path)));
-    if (items.isNotEmpty) {
-      for (final String item in items) {
-        final FileSystemEntityType type = fileSystem.typeSync(item);
-
-        if (type == FileSystemEntityType.notFound) {
-          throwToolExit("'$item' does not exist");
-        }
-      }
-    }
+    final Set<String> items = findDirectories(argResults, fileSystem);
 
     if (isFlutterRepo) {
       // check for conflicting dependencies
@@ -79,6 +68,7 @@ class AnalyzeOnce extends AnalyzeBase {
       processManager: processManager,
       terminal: terminal,
       protocolTrafficLog: protocolTrafficLog,
+      suppressAnalytics: suppressAnalytics,
     );
 
     Stopwatch? timer;
@@ -179,8 +169,7 @@ class AnalyzeOnce extends AnalyzeBase {
       if (severityLevel == AnalysisSeverity.error) {
         return true;
       }
-      if (severityLevel == AnalysisSeverity.warning &&
-        (argResults['fatal-warnings'] as bool || argResults['fatal-infos'] as bool)) {
+      if (severityLevel == AnalysisSeverity.warning && argResults['fatal-warnings'] as bool) {
         return true;
       }
       if (severityLevel == AnalysisSeverity.info && argResults['fatal-infos'] as bool) {

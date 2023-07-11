@@ -2,33 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for AnimatedWidget
-
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AnimatedWidget].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const AnimatedWidgetExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class AnimatedWidgetExampleApp extends StatelessWidget {
+  const AnimatedWidgetExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: AnimatedWidgetExample(),
     );
   }
 }
 
 class SpinningContainer extends AnimatedWidget {
   const SpinningContainer({
-    Key? key,
+    super.key,
     required AnimationController controller,
-  }) : super(key: key, listenable: controller);
+  }) : super(listenable: controller);
 
   Animation<double> get _progress => listenable as Animation<double>;
 
@@ -41,16 +38,16 @@ class SpinningContainer extends AnimatedWidget {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class AnimatedWidgetExample extends StatefulWidget {
+  const AnimatedWidgetExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<AnimatedWidgetExample> createState() => _AnimatedWidgetExampleState();
 }
 
-/// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
-    with TickerProviderStateMixin {
+/// [AnimationController]s can be created with `vsync: this` because of
+/// [TickerProviderStateMixin].
+class _AnimatedWidgetExampleState extends State<AnimatedWidgetExample> with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 10),
     vsync: this,

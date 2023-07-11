@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  ByteData _makeByteData(String str) {
+  ByteData makeByteData(String str) {
     final List<int> list = utf8.encode(str);
     final ByteBuffer buffer =
         list is Uint8List ? list.buffer : Uint8List.fromList(list).buffer;
@@ -23,7 +23,7 @@ void main() {
     int countInbound = 0;
     int countOutbound = 0;
     const String channel = 'foo';
-    final ByteData bar = _makeByteData('bar');
+    final ByteData bar = makeByteData('bar');
     final Completer<void> done = Completer<void>();
     ServicesBinding.instance.channelBuffers.push(
       channel,
@@ -53,7 +53,7 @@ void main() {
 
   test('can check the mock handler', () {
     Future<ByteData?> handler(ByteData? call) => Future<ByteData?>.value();
-    final TestDefaultBinaryMessenger messenger = TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger;
+    final TestDefaultBinaryMessenger messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
     expect(messenger.checkMockMessageHandler('test_channel', null), true);
     expect(messenger.checkMockMessageHandler('test_channel', handler), false);

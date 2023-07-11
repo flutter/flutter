@@ -22,7 +22,7 @@ final Platform macPlatform = FakePlatform(
 );
 final Platform linuxPlatform = FakePlatform(
   environment: <String, String>{
-    'HOME': '/foo/bar'
+    'HOME': '/foo/bar',
   },
 );
 final Platform windowsPlatform = FakePlatform(
@@ -30,7 +30,7 @@ final Platform windowsPlatform = FakePlatform(
   environment: <String, String>{
     'USERPROFILE': r'C:\Users\foo',
     'APPDATA': r'C:\Users\foo\AppData\Roaming',
-    'LOCALAPPDATA': r'C:\Users\foo\AppData\Local'
+    'LOCALAPPDATA': r'C:\Users\foo\AppData\Local',
   },
 );
 
@@ -49,7 +49,7 @@ void main() {
       ValidationMessage.error('Flutter plugin version 0.1.3 - the recommended minimum version is 16.0.0'),
       ValidationMessage('Dart plugin version 162.2485'),
       ValidationMessage('For information about installing plugins, see\n'
-          'https://flutter.dev/intellij-setup/#installing-the-plugins')
+          'https://flutter.dev/intellij-setup/#installing-the-plugins'),
     ]);
   });
 
@@ -77,7 +77,7 @@ void main() {
       );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('intellij(2020.1) plugins check on linux (installed via JetBrains ToolBox app)', () async {
@@ -104,7 +104,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('intellij(>=2020.2) plugins check on linux (installed via JetBrains ToolBox app)', () async {
@@ -131,7 +131,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('intellij(2020.1~) plugins check on linux (installed via tar.gz)', () async {
@@ -158,7 +158,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('legacy intellij(<2020) plugins check on windows', () async {
@@ -185,7 +185,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('intellij(2020.1 ~ 2020.2) plugins check on windows (installed via JetBrains ToolBox app)', () async {
@@ -212,7 +212,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('intellij(>=2020.3) plugins check on windows (installed via JetBrains ToolBox app and plugins)', () async {
@@ -239,7 +239,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('intellij(2020.1~) plugins check on windows (installed via installer)', () async {
@@ -266,7 +266,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('can locate installations on macOS from Spotlight', () {

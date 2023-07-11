@@ -90,7 +90,7 @@ class AaaPlugin: FlutterPlugin, MethodCallHandler {
             options: <String>[
               'apk',
               '--debug',
-              '--target-platform=android-arm'
+              '--target-platform=android-arm',
             ],
           );
         });

@@ -4,9 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 // Virtual key VK_PROCESSKEY in Win32 API.
 //
@@ -31,10 +35,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
     this.scanCode = 0,
     this.characterCodePoint = 0,
     this.modifiers = 0,
-  }) : assert(keyCode != null),
-       assert(scanCode != null),
-       assert(characterCodePoint != null),
-       assert(modifiers != null);
+  });
 
   /// The hardware key code corresponding to this key event.
   ///
@@ -121,32 +122,24 @@ class RawKeyEventDataWindows extends RawKeyEventData {
     switch (key) {
       case ModifierKey.controlModifier:
         result = _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
-        break;
       case ModifierKey.shiftModifier:
         result = _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift);
-        break;
       case ModifierKey.altModifier:
         result = _isLeftRightModifierPressed(side, modifierAlt, modifierLeftAlt, modifierRightAlt);
-        break;
       case ModifierKey.metaModifier:
         // Windows does not provide an "any" key for win key press.
         result = _isLeftRightModifierPressed(side, modifierLeftMeta | modifierRightMeta , modifierLeftMeta, modifierRightMeta);
-        break;
       case ModifierKey.capsLockModifier:
         result = modifiers & modifierCaps != 0;
-        break;
       case ModifierKey.scrollLockModifier:
         result = modifiers & modifierScrollLock != 0;
-        break;
       case ModifierKey.numLockModifier:
         result = modifiers & modifierNumLock != 0;
-        break;
       // The OS does not expose the Fn key to the drivers, it doesn't generate a key message.
       case ModifierKey.functionModifier:
       case ModifierKey.symbolModifier:
         // These modifier masks are not used in Windows keyboards.
         result = false;
-        break;
     }
     assert(!result || getModifierSide(key) != null, "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
     return result;
@@ -209,10 +202,12 @@ class RawKeyEventDataWindows extends RawKeyEventData {
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RawKeyEventDataWindows
         && other.keyCode == keyCode
         && other.scanCode == scanCode

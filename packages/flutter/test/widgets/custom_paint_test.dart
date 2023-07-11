@@ -21,21 +21,6 @@ class TestCustomPainter extends CustomPainter {
   bool shouldRepaint(TestCustomPainter oldPainter) => true;
 }
 
-class TestCustomPainterWithCustomSemanticsBuilder extends TestCustomPainter {
-  TestCustomPainterWithCustomSemanticsBuilder() : super(log: <String>[]);
-
-  @override
-  SemanticsBuilderCallback get semanticsBuilder => (Size size) {
-    const Key key = Key('0');
-    const Rect rect = Rect.zero;
-    const SemanticsProperties semanticsProperties = SemanticsProperties();
-    return <CustomPainterSemantics>[
-      const CustomPainterSemantics(key: key, rect: rect, properties: semanticsProperties),
-      const CustomPainterSemantics(key: key, rect: rect, properties: semanticsProperties),
-    ];
-  };
-}
-
 class MockCanvas extends Fake implements Canvas {
   int saveCount = 0;
   int saveCountDelta = 1;
@@ -162,7 +147,7 @@ void main() {
     expect(target.currentContext!.size, const Size(800.0, 600.0));
 
     await tester.pumpWidget(Center(
-      child: CustomPaint(key: target, child: const SizedBox(height: 0.0, width: 0.0)),
+      child: CustomPaint(key: target, child: const SizedBox.shrink()),
     ));
     expect(target.currentContext!.size, Size.zero);
 

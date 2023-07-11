@@ -2,42 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for PlatformMenuBar
-
-////////////////////////////////////
 // THIS SAMPLE ONLY WORKS ON MACOS.
-////////////////////////////////////
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const SampleApp());
+/// Flutter code sample for [PlatformMenuBar].
+
+void main() => runApp(const ExampleApp());
 
 enum MenuSelection {
   about,
   showMessage,
 }
 
-class SampleApp extends StatelessWidget {
-  const SampleApp({Key? key}) : super(key: key);
+class ExampleApp extends StatelessWidget {
+  const ExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: MyMenuBarApp()),
+      home: Scaffold(body: PlatformMenuBarExample()),
     );
   }
 }
 
-class MyMenuBarApp extends StatefulWidget {
-  const MyMenuBarApp({Key? key}) : super(key: key);
+class PlatformMenuBarExample extends StatefulWidget {
+  const PlatformMenuBarExample({super.key});
 
   @override
-  State<MyMenuBarApp> createState() => _MyMenuBarAppState();
+  State<PlatformMenuBarExample> createState() => _PlatformMenuBarExampleState();
 }
 
-class _MyMenuBarAppState extends State<MyMenuBarApp> {
+class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
   String _message = 'Hello';
   bool _showMessage = false;
 
@@ -49,12 +46,10 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
           applicationName: 'MenuBar Sample',
           applicationVersion: '1.0.0',
         );
-        break;
       case MenuSelection.showMessage:
         setState(() {
           _showMessage = !_showMessage;
         });
-        break;
     }
   }
 
@@ -74,22 +69,22 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
     //  │  └ There's a million things I haven't done, but just you wait.
     //  └ Quit
     return PlatformMenuBar(
-      menus: <MenuItem>[
+      menus: <PlatformMenuItem>[
         PlatformMenu(
           label: 'Flutter API Sample',
-          menus: <MenuItem>[
+          menus: <PlatformMenuItem>[
             PlatformMenuItemGroup(
-              members: <MenuItem>[
+              members: <PlatformMenuItem>[
                 PlatformMenuItem(
                   label: 'About',
                   onSelected: () {
                     _handleMenuSelection(MenuSelection.about);
                   },
-                )
+                ),
               ],
             ),
             PlatformMenuItemGroup(
-              members: <MenuItem>[
+              members: <PlatformMenuItem>[
                 PlatformMenuItem(
                   onSelected: () {
                     _handleMenuSelection(MenuSelection.showMessage);
@@ -99,7 +94,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                 ),
                 PlatformMenu(
                   label: 'Messages',
-                  menus: <MenuItem>[
+                  menus: <PlatformMenuItem>[
                     PlatformMenuItem(
                       label: 'I am not throwing away my shot.',
                       shortcut: const SingleActivator(LogicalKeyboardKey.digit1, meta: true),
@@ -119,7 +114,7 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
                       },
                     ),
                   ],
-                )
+                ),
               ],
             ),
             if (PlatformProvidedMenuItem.hasMenu(PlatformProvidedMenuItemType.quit))
@@ -127,11 +122,11 @@ class _MyMenuBarAppState extends State<MyMenuBarApp> {
           ],
         ),
       ],
-      body: Center(
+      child: Center(
         child: Text(_showMessage
             ? _message
             : 'This space intentionally left blank.\n'
-              'Show a message here using the menu.'),
+                'Show a message here using the menu.'),
       ),
     );
   }

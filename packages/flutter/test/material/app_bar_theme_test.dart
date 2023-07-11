@@ -9,12 +9,22 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  ScrollController primaryScrollController(WidgetTester tester) {
+    return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
+  }
+
   test('AppBarTheme copyWith, ==, hashCode basics', () {
     expect(const AppBarTheme(), const AppBarTheme().copyWith());
     expect(const AppBarTheme().hashCode, const AppBarTheme().copyWith().hashCode);
   });
 
+  test('AppBarTheme lerp special cases', () {
+    const AppBarTheme data = AppBarTheme();
+    expect(identical(AppBarTheme.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
@@ -45,22 +55,38 @@ void main() {
       expect(iconTheme.data, IconThemeData(color: theme.colorScheme.onSurface, size: 24));
       expect(actionsIconTheme.data, IconThemeData(color: theme.colorScheme.onSurfaceVariant, size: 24));
       expect(actionIconText.text.style!.color, Colors.black);
+      expect(text.style, Typography.material2021().englishLike.bodyMedium!.merge(Typography.material2021().black.bodyMedium).copyWith(color: theme.colorScheme.onSurface));
+      expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
+      expect(tester.getSize(find.byType(AppBar)).width, 800);
+    } else {
+      if (theme.useMaterial3) {
+      expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
+      expect(widget.color, theme.colorScheme.surface);
+      expect(widget.elevation, 0);
+      expect(widget.shadowColor, null);
+      expect(widget.surfaceTintColor, theme.colorScheme.surfaceTint);
+      expect(widget.shape, null);
+      expect(iconTheme.data, IconThemeData(color: theme.colorScheme.onSurface, size: 24));
+      expect(actionsIconTheme.data, IconThemeData(color: theme.colorScheme.onSurfaceVariant, size: 24));
+      expect(actionIconText.text.style!.color, Colors.black);
       expect(text.style, Typography.material2021().englishLike.bodyText2!.merge(Typography.material2021().black.bodyText2).copyWith(color: theme.colorScheme.onSurface));
       expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
       expect(tester.getSize(find.byType(AppBar)).width, 800);
     } else {
       expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
-      expect(widget.color, Colors.blue);
-      expect(widget.elevation, 4.0);
-      expect(widget.shadowColor, Colors.black);
+        expect(widget.color, Colors.blue);
+        expect(widget.elevation, 4.0);
+        expect(widget.shadowColor, Colors.black);
       expect(widget.surfaceTintColor, null);
+        expect(widget.surfaceTintColor, null);
       expect(widget.shape, null);
-      expect(iconTheme.data, const IconThemeData(color: Colors.white));
-      expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
-      expect(actionIconText.text.style!.color, Colors.white);
-      expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().white.bodyText2));
-      expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
-      expect(tester.getSize(find.byType(AppBar)).width, 800);
+        expect(iconTheme.data, const IconThemeData(color: Colors.white));
+        expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
+        expect(actionIconText.text.style!.color, Colors.white);
+        expect(text.style, Typography.material2014().englishLike.bodyMedium!.merge(Typography.material2014().white.bodyMedium));
+        expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
+        expect(tester.getSize(find.byType(AppBar)).width, 800);
+    }
     }
   });
 
@@ -87,7 +113,7 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle!.statusBarBrightness, appBarTheme.brightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
     expect(widget.color, appBarTheme.backgroundColor);
     expect(widget.elevation, appBarTheme.elevation);
     expect(widget.shadowColor, appBarTheme.shadowColor);
@@ -99,51 +125,6 @@ void main() {
     expect(text.style, appBarTheme.toolbarTextStyle);
     expect(tester.getSize(find.byType(AppBar)).height, appBarTheme.toolbarHeight);
     expect(tester.getSize(find.byType(AppBar)).width, 800);
-  });
-
-  testWidgets('SliverAppBar allows AppBar to determine backwardsCompatibility', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/77016
-    const AppBarTheme appBarTheme = AppBarTheme(
-      backwardsCompatibility: false,
-      backgroundColor: Colors.lightBlue,
-      foregroundColor: Colors.black,
-    );
-
-    Widget _buildWithBackwardsCompatibility([bool? enabled]) => MaterialApp(
-      theme: ThemeData(appBarTheme: appBarTheme),
-      home: Scaffold(body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            title: const Text('App Bar Title'),
-            backwardsCompatibility: enabled,
-            actions: <Widget>[
-              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
-            ],
-          ),
-        ],
-      )),
-    );
-
-    // Backwards compatibility enabled, AppBar should be built with true.
-    await tester.pumpWidget(_buildWithBackwardsCompatibility(true));
-    AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
-    expect(appBar.backwardsCompatibility, true);
-
-    // Backwards compatibility disabled, AppBar should be built with false.
-    await tester.pumpWidget(_buildWithBackwardsCompatibility(false));
-    appBar = tester.widget<AppBar>(find.byType(AppBar));
-    expect(appBar.backwardsCompatibility, false);
-
-    // Backwards compatibility unspecified, AppBar should be built with null.
-    await tester.pumpWidget(_buildWithBackwardsCompatibility());
-    appBar = tester.widget<AppBar>(find.byType(AppBar));
-    expect(appBar.backwardsCompatibility, null);
-
-    // AppBar should use the backwardsCompatibility of AppBarTheme.
-    // Since backwardsCompatibility is false, the text color should match the
-    // foreground color of the AppBarTheme.
-    final DefaultTextStyle text = _getAppBarText(tester);
-    expect(text.style.color, appBarTheme.foregroundColor);
   });
 
   testWidgets('AppBar widget properties take priority over theme', (WidgetTester tester) async {
@@ -167,7 +148,6 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             backgroundColor: color,
-            brightness: brightness,
             systemOverlayStyle: systemOverlayStyle,
             elevation: elevation,
             shadowColor: shadowColor,
@@ -246,7 +226,7 @@ void main() {
     final RichText actionIconText = _getAppBarIconRichText(tester);
     final DefaultTextStyle text = _getAppBarText(tester);
 
-    expect(SystemChrome.latestStyle!.statusBarBrightness, appBarTheme.brightness);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
     expect(widget.color, appBarTheme.backgroundColor);
     expect(widget.elevation, appBarTheme.elevation);
     expect(widget.shadowColor, appBarTheme.shadowColor);
@@ -284,7 +264,7 @@ void main() {
       // - surface tint color: ColorScheme.surfaceTint
       // - background color: ColorScheme.surface
       // - foreground color: ColorScheme.onSurface
-      // - actions text: style bodyText2, foreground color
+      // - actions text: style bodyMedium, foreground color
       // - status bar brightness: light (based on color scheme brightness)
       {
         await tester.pumpWidget(buildFrame(lightTheme));
@@ -303,7 +283,7 @@ void main() {
         expect(iconTheme.data.color, lightTheme.colorScheme.onSurface);
         expect(actionsIconTheme.data.color, lightTheme.colorScheme.onSurface);
         expect(actionIconText.text.style!.color, lightTheme.colorScheme.onSurface);
-        expect(text.style, Typography.material2021().englishLike.bodyText2!.merge(Typography.material2021().black.bodyText2).copyWith(color: lightTheme.colorScheme.onSurface));
+        expect(text.style, Typography.material2021().englishLike.bodyMedium!.merge(Typography.material2021().black.bodyMedium).copyWith(color: lightTheme.colorScheme.onSurface));
       }
 
       // M3 AppBar defaults for dark themes:
@@ -312,11 +292,69 @@ void main() {
       // - surface tint color: ColorScheme.surfaceTint
       // - background color: ColorScheme.surface
       // - foreground color: ColorScheme.onSurface
-      // - actions text: style bodyText2, foreground color
+      // - actions text: style bodyMedium, foreground color
       // - status bar brightness: dark (based on background color)
       {
         await tester.pumpWidget(buildFrame(ThemeData.from(colorScheme: const ColorScheme.dark())));
         await tester.pumpAndSettle(); // Theme change animation
+
+        final Material widget = _getAppBarMaterial(tester);
+        final IconTheme iconTheme = _getAppBarIconTheme(tester);
+        final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
+        final RichText actionIconText = _getAppBarIconRichText(tester);
+        final DefaultTextStyle text = _getAppBarText(tester);
+
+        expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.dark);
+        expect(widget.color, darkTheme.colorScheme.surface);
+        expect(widget.elevation, 0);
+        expect(widget.shadowColor, null);
+        expect(widget.surfaceTintColor, darkTheme.colorScheme.surfaceTint);
+        expect(iconTheme.data.color, darkTheme.colorScheme.onSurface);
+        expect(actionsIconTheme.data.color, darkTheme.colorScheme.onSurface);
+        expect(actionIconText.text.style!.color, darkTheme.colorScheme.onSurface);
+        expect(text.style, Typography.material2021().englishLike.bodyMedium!.merge(Typography.material2021().black.bodyMedium).copyWith(color: darkTheme.colorScheme.onSurface));
+      }
+    } else {
+      // AppBar defaults for light themes:
+      // - elevation: 4
+      // - shadow color: black
+      // - surface tint color: null
+      // - background color: ColorScheme.primary
+      // - foreground color: ColorScheme.onPrimary
+      // - actions text: style bodyMedium, foreground color
+      // - status bar brightness: light (based on color scheme brightness)
+      {
+        await tester.pumpWidget(buildFrame(lightTheme));
+
+        final Material widget = _getAppBarMaterial(tester);
+        final IconTheme iconTheme = _getAppBarIconTheme(tester);
+        final IconTheme actionsIconTheme = _getAppBarActionsIconTheme(tester);
+        final RichText actionIconText = _getAppBarIconRichText(tester);
+        final DefaultTextStyle text = _getAppBarText(tester);
+
+        expect(SystemChrome.latestStyle!.statusBarBrightness, SystemUiOverlayStyle.light.statusBarBrightness);
+        expect(widget.color, lightTheme.colorScheme.primary);
+        expect(widget.elevation, 4.0);
+        expect(widget.shadowColor, Colors.black);
+        expect(widget.surfaceTintColor, null);
+        expect(iconTheme.data.color, lightTheme.colorScheme.onPrimary);
+        expect(actionsIconTheme.data.color, lightTheme.colorScheme.onPrimary);
+        expect(actionIconText.text.style!.color, lightTheme.colorScheme.onPrimary);
+        expect(text.style, Typography.material2014().englishLike.bodyMedium!.merge(Typography.material2014().black.bodyMedium).copyWith(color: lightTheme.colorScheme.onPrimary));
+      }
+
+        // M3 AppBar defaults for dark themes:
+        // - elevation: 0
+        // - shadow color: null
+      // - surface tint color: ColorScheme.surfaceTint
+      // - surface tint color: null
+        // - background color: ColorScheme.surface
+        // - foreground color: ColorScheme.onSurface
+        // - actions text: style bodyMedium, foreground color
+        // - status bar brightness: dark (based on background color)
+        {
+          await tester.pumpWidget(buildFrame(darkTheme));
+          await tester.pumpAndSettle(); // Theme change animation
 
         final Material widget = _getAppBarMaterial(tester);
         final IconTheme iconTheme = _getAppBarIconTheme(tester);
@@ -389,7 +427,7 @@ void main() {
         expect(iconTheme.data.color, darkTheme.colorScheme.onSurface);
         expect(actionsIconTheme.data.color, darkTheme.colorScheme.onSurface);
         expect(actionIconText.text.style!.color, darkTheme.colorScheme.onSurface);
-        expect(text.style, Typography.material2014().englishLike.bodyText2!.merge(Typography.material2014().black.bodyText2).copyWith(color: darkTheme.colorScheme.onSurface));
+        expect(text.style, Typography.material2014().englishLike.bodyMedium!.merge(Typography.material2014().black.bodyMedium).copyWith(color: darkTheme.colorScheme.onSurface));
       }
     }
   });
@@ -508,6 +546,165 @@ void main() {
     expect(appBar.surfaceTintColor, Colors.yellow);
   });
 
+  testWidgets('AppBarTheme.iconTheme.color takes priority over IconButtonTheme.foregroundColor - M3', (WidgetTester tester) async {
+    const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow);
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(foregroundColor: Colors.red),
+        ),
+        appBarTheme: const AppBarTheme(iconTheme: overallIconTheme),
+        useMaterial3: true,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {},),
+          actions: <Widget>[ IconButton(icon: const Icon(Icons.add), onPressed: () {},) ],
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    final Color? leadingIconButtonColor = _iconStyle(tester, Icons.menu)?.color;
+    final Color? actionIconButtonColor = _iconStyle(tester, Icons.add)?.color;
+
+    expect(leadingIconButtonColor, overallIconTheme.color);
+    expect(actionIconButtonColor, overallIconTheme.color);
+  });
+
+  testWidgets('AppBarTheme.iconTheme.size takes priority over IconButtonTheme.iconSize - M3', (WidgetTester tester) async {
+    const IconThemeData overallIconTheme = IconThemeData(size: 30.0);
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(iconSize: 32.0),
+        ),
+        appBarTheme: const AppBarTheme(iconTheme: overallIconTheme),
+        useMaterial3: true,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {},),
+          actions: <Widget>[ IconButton(icon: const Icon(Icons.add), onPressed: () {},) ],
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    final double? leadingIconButtonSize = _iconStyle(tester, Icons.menu)?.fontSize;
+    final double? actionIconButtonSize = _iconStyle(tester, Icons.add)?.fontSize;
+
+    expect(leadingIconButtonSize, overallIconTheme.size);
+    expect(actionIconButtonSize, overallIconTheme.size);
+  });
+
+
+  testWidgets('AppBarTheme.actionsIconTheme.color takes priority over IconButtonTheme.foregroundColor - M3', (WidgetTester tester) async {
+    const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow);
+    final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
+      style: IconButton.styleFrom(foregroundColor: Colors.red),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        iconButtonTheme: iconButtonTheme,
+        appBarTheme: const AppBarTheme(actionsIconTheme: actionsIconTheme),
+        useMaterial3: true,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {},),
+          actions: <Widget>[ IconButton(icon: const Icon(Icons.add), onPressed: () {},) ],
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    final Color? leadingIconButtonColor = _iconStyle(tester, Icons.menu)?.color;
+    final Color? actionIconButtonColor = _iconStyle(tester, Icons.add)?.color;
+
+    expect(leadingIconButtonColor, Colors.red); // leading color should come from iconButtonTheme
+    expect(actionIconButtonColor, actionsIconTheme.color);
+  });
+
+  testWidgets('AppBarTheme.actionsIconTheme.size takes priority over IconButtonTheme.iconSize - M3', (WidgetTester tester) async {
+    const IconThemeData actionsIconTheme = IconThemeData(size: 30.0);
+    final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
+      style: IconButton.styleFrom(iconSize: 32.0),
+    );
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        iconButtonTheme: iconButtonTheme,
+        appBarTheme: const AppBarTheme(actionsIconTheme: actionsIconTheme),
+        useMaterial3: true,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {},),
+          actions: <Widget>[ IconButton(icon: const Icon(Icons.add), onPressed: () {},) ],
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    final double? leadingIconButtonSize = _iconStyle(tester, Icons.menu)?.fontSize;
+    final double? actionIconButtonSize = _iconStyle(tester, Icons.add)?.fontSize;
+
+    expect(leadingIconButtonSize, 32.0); // The size of leading icon button should come from iconButtonTheme
+    expect(actionIconButtonSize, actionsIconTheme.size);
+  });
+
+  testWidgets('AppBarTheme.foregroundColor takes priority over IconButtonTheme.foregroundColor - M3', (WidgetTester tester) async {
+    final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
+      style: IconButton.styleFrom(foregroundColor: Colors.red),
+    );
+    const AppBarTheme appBarTheme = AppBarTheme(
+      foregroundColor: Colors.green,
+    );
+    final ThemeData themeData = ThemeData(
+      iconButtonTheme: iconButtonTheme,
+      appBarTheme: appBarTheme,
+      useMaterial3: true,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('title'),
+            leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+            actions: <Widget>[
+              IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Color? leadingIconButtonColor = _iconStyle(tester, Icons.menu)?.color;
+    final Color? actionIconButtonColor = _iconStyle(tester, Icons.add)?.color;
+
+    expect(leadingIconButtonColor, appBarTheme.foregroundColor);
+    expect(actionIconButtonColor, appBarTheme.foregroundColor);
+  });
+
+  testWidgets('AppBar.surfaceTintColor takes priority over AppBarTheme.surfaceTintColor', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(surfaceTintColor: Colors.red)),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Title'),
+          surfaceTintColor: Colors.yellow,
+        ),
+      ),
+    ));
+
+    final AppBar appBar = tester.widget(find.byType(AppBar));
+    // The AppBar.surfaceTintColor should be used instead of AppBarTheme.surfaceTintColor.
+    expect(appBar.surfaceTintColor, Colors.yellow);
+  });
+
   testWidgets('AppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
@@ -574,6 +771,176 @@ void main() {
     expect(navToolbar.middleSpacing, 40);
   });
 
+  testWidgets('SliverAppBar.medium uses AppBarTheme properties', (WidgetTester tester) async {
+    const String title = 'Medium SliverAppBar Title';
+    const Color foregroundColor = Color(0xff00ff00);
+    const double titleSpacing = 10.0;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          foregroundColor: foregroundColor,
+          titleSpacing: titleSpacing,
+          centerTitle: false,
+        ),
+      ),
+      home: CustomScrollView(
+        primary: true,
+        slivers: <Widget>[
+          SliverAppBar.medium(
+            leading: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.menu),
+            ),
+            title: const Text(title),
+          ),
+        ],
+      ),
+    ));
+
+    final RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text.text.style!.color, foregroundColor);
+
+    // Scroll to collapse the SliverAppBar.
+    final ScrollController controller = primaryScrollController(tester);
+    controller.jumpTo(45);
+    await tester.pumpAndSettle();
+
+    final Offset titleOffset = tester.getTopLeft(find.text(title).first);
+    final Offset iconOffset = tester.getTopRight(find.byIcon(Icons.menu));
+    // Title spacing should be 10.0.
+    expect(titleOffset.dx, iconOffset.dx + titleSpacing);
+  });
+
+  testWidgets('SliverAppBar.medium properties take priority over AppBarTheme properties', (WidgetTester tester) async {
+    const String title = 'Medium SliverAppBar Title';
+    const Color foregroundColor = Color(0xff00ff00);
+    const double titleSpacing = 10.0;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          foregroundColor: Color(0xffff0000),
+          titleSpacing: 14.0,
+          centerTitle: true,
+        ),
+      ),
+      home: CustomScrollView(
+        primary: true,
+        slivers: <Widget>[
+          SliverAppBar.medium(
+            centerTitle: false,
+            titleSpacing: titleSpacing,
+            foregroundColor: foregroundColor,
+            leading: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.menu),
+            ),
+            title: const Text(title),
+          ),
+        ],
+      ),
+    ));
+
+    final RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text.text.style!.color, foregroundColor);
+
+    // Scroll to collapse the SliverAppBar.
+    final ScrollController controller = primaryScrollController(tester);
+    controller.jumpTo(45);
+    await tester.pumpAndSettle();
+
+    final Offset titleOffset = tester.getTopLeft(find.text(title).first);
+    final Offset iconOffset = tester.getTopRight(find.byIcon(Icons.menu));
+    // Title spacing should be 10.0.
+    expect(titleOffset.dx, iconOffset.dx + titleSpacing);
+  });
+
+  testWidgets('SliverAppBar.large uses AppBarTheme properties', (WidgetTester tester) async {
+    const String title = 'Large SliverAppBar Title';
+    const Color foregroundColor = Color(0xff00ff00);
+    const double titleSpacing = 10.0;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          foregroundColor: foregroundColor,
+          titleSpacing: titleSpacing,
+          centerTitle: false,
+        ),
+      ),
+      home: CustomScrollView(
+        primary: true,
+        slivers: <Widget>[
+          SliverAppBar.large(
+            leading: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.menu),
+            ),
+            title: const Text(title),
+          ),
+        ],
+      ),
+    ));
+
+    final RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text.text.style!.color, foregroundColor);
+
+    // Scroll to collapse the SliverAppBar.
+    final ScrollController controller = primaryScrollController(tester);
+    controller.jumpTo(45);
+    await tester.pumpAndSettle();
+
+    final Offset titleOffset = tester.getTopLeft(find.text(title).first);
+    final Offset iconOffset = tester.getTopRight(find.byIcon(Icons.menu));
+    // Title spacing should be 10.0.
+    expect(titleOffset.dx, iconOffset.dx + titleSpacing);
+  });
+
+  testWidgets('SliverAppBar.large properties take priority over AppBarTheme properties', (WidgetTester tester) async {
+    const String title = 'Large SliverAppBar Title';
+    const Color foregroundColor = Color(0xff00ff00);
+    const double titleSpacing = 10.0;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          foregroundColor: Color(0xffff0000),
+          titleSpacing: 14.0,
+          centerTitle: true,
+        ),
+      ),
+      home: CustomScrollView(
+        primary: true,
+        slivers: <Widget>[
+          SliverAppBar.large(
+            centerTitle: false,
+            titleSpacing: titleSpacing,
+            foregroundColor: foregroundColor,
+            leading: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.menu),
+            ),
+            title: const Text(title),
+          ),
+        ],
+      ),
+    ));
+
+    final RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text.text.style!.color, foregroundColor);
+
+    // Scroll to collapse the SliverAppBar.
+    final ScrollController controller = primaryScrollController(tester);
+    controller.jumpTo(45);
+    await tester.pumpAndSettle();
+
+    final Offset titleOffset = tester.getTopLeft(find.text(title).first);
+    final Offset iconOffset = tester.getTopRight(find.byIcon(Icons.menu));
+    // Title spacing should be 10.0.
+    expect(titleOffset.dx, iconOffset.dx + titleSpacing);
+  });
+
   testWidgets('Default AppBarTheme debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarTheme().debugFillProperties(builder);
@@ -589,7 +956,6 @@ void main() {
   testWidgets('AppBarTheme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarTheme(
-      brightness: Brightness.dark,
       backgroundColor: Color(0xff000001),
       elevation: 8.0,
       shadowColor: Color(0xff000002),
@@ -604,7 +970,6 @@ void main() {
       .toList();
 
     expect(description, <String>[
-      'brightness: Brightness.dark',
       'backgroundColor: Color(0xff000001)',
       'elevation: 8.0',
       'shadowColor: Color(0xff000002)',
@@ -622,7 +987,7 @@ void main() {
 }
 
 AppBarTheme _appBarTheme() {
-  const Brightness brightness = Brightness.light;
+  const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.dark;
   const Color backgroundColor = Colors.lightBlue;
   const double elevation = 6.0;
   const Color shadowColor = Colors.red;
@@ -631,7 +996,7 @@ AppBarTheme _appBarTheme() {
   const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.pink);
   return const AppBarTheme(
     actionsIconTheme: actionsIconThemeData,
-    brightness: brightness,
+    systemOverlayStyle: systemOverlayStyle,
     backgroundColor: backgroundColor,
     elevation: elevation,
     shadowColor: shadowColor,
@@ -687,4 +1052,11 @@ DefaultTextStyle _getAppBarText(WidgetTester tester) {
       matching: find.byType(DefaultTextStyle),
     ).first,
   );
+}
+
+TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon).first, matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
 }

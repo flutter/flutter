@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of reporting;
+part of 'reporting.dart';
 
 /// The collection of custom dimensions understood by the analytics backend.
 /// When adding to this list, first ensure that the custom dimension is
@@ -67,6 +67,8 @@ class CustomDimensions {
     this.hotEventReassembleTimeInMs,
     this.hotEventReloadVMTimeInMs,
     this.commandRunEnableImpeller,
+    this.commandRunIOSInterfaceType,
+    this.commandRunIsTest,
   });
 
   final String? sessionHostOsDetails;  // cd1
@@ -125,6 +127,8 @@ class CustomDimensions {
   final int? hotEventReassembleTimeInMs;  // cd 54
   final int? hotEventReloadVMTimeInMs;  // cd 55
   final bool? commandRunEnableImpeller;  // cd 56
+  final String? commandRunIOSInterfaceType; // cd 57
+  final bool? commandRunIsTest; // cd 58
 
   /// Convert to a map that will be used to upload to the analytics backend.
   Map<String, String> toMap() => <String, String>{
@@ -184,6 +188,8 @@ class CustomDimensions {
       if (hotEventReassembleTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventReassembleTimeInMs): hotEventReassembleTimeInMs.toString(),
       if (hotEventReloadVMTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventReloadVMTimeInMs): hotEventReloadVMTimeInMs.toString(),
       if (commandRunEnableImpeller != null) cdKey(CustomDimensionsEnum.commandRunEnableImpeller): commandRunEnableImpeller.toString(),
+      if (commandRunIOSInterfaceType != null) cdKey(CustomDimensionsEnum.commandRunIOSInterfaceType): commandRunIOSInterfaceType.toString(),
+      if (commandRunIsTest != null) cdKey(CustomDimensionsEnum.commandRunIsTest): commandRunIsTest.toString(),
     };
 
   /// Merge the values of two [CustomDimensions] into one. If a value is defined
@@ -250,6 +256,8 @@ class CustomDimensions {
       hotEventReassembleTimeInMs: other.hotEventReassembleTimeInMs ?? hotEventReassembleTimeInMs,
       hotEventReloadVMTimeInMs: other.hotEventReloadVMTimeInMs ?? hotEventReloadVMTimeInMs,
       commandRunEnableImpeller: other.commandRunEnableImpeller ?? commandRunEnableImpeller,
+      commandRunIOSInterfaceType: other.commandRunIOSInterfaceType ?? commandRunIOSInterfaceType,
+      commandRunIsTest: other.commandRunIsTest ?? commandRunIsTest,
     );
   }
 
@@ -310,6 +318,8 @@ class CustomDimensions {
       hotEventReassembleTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventReassembleTimeInMs),
       hotEventReloadVMTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventReloadVMTimeInMs),
       commandRunEnableImpeller: _extractBool(map, CustomDimensionsEnum.commandRunEnableImpeller),
+      commandRunIOSInterfaceType: _extractString(map, CustomDimensionsEnum.commandRunIOSInterfaceType),
+      commandRunIsTest: _extractBool(map, CustomDimensionsEnum.commandRunIsTest),
     );
 
   static bool? _extractBool(Map<String, String> map, CustomDimensionsEnum field) =>
@@ -396,6 +406,8 @@ enum CustomDimensionsEnum {
   hotEventReassembleTimeInMs,  // cd54
   hotEventReloadVMTimeInMs,  // cd55
   commandRunEnableImpeller,  // cd56
+  commandRunIOSInterfaceType,  // cd57
+  commandRunIsTest, // cd58
 }
 
 String cdKey(CustomDimensionsEnum cd) => 'cd${cd.index + 1}';

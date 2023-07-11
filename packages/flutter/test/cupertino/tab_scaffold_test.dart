@@ -13,7 +13,7 @@ import '../rendering/rendering_tester.dart' show TestCallbackPainter;
 late List<int> selectedTabs;
 
 class MockCupertinoTabController extends CupertinoTabController {
-  MockCupertinoTabController({ required int initialIndex }): super(initialIndex: initialIndex);
+  MockCupertinoTabController({ required super.initialIndex });
 
   bool isDisposed = false;
   int numOfListeners = 0;
@@ -501,7 +501,7 @@ void main() {
                   items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
                 ),
                 tabBuilder: (BuildContext context, int index) {
-                  contentPadding = MediaQuery.of(context).padding;
+                  contentPadding = MediaQuery.paddingOf(context);
                   return const Placeholder();
                 },
               ),

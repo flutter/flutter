@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -173,11 +172,12 @@ mixin LocalComparisonOutput {
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
 Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
-  if (identical(test, master))
+  if (identical(test, master)) {
     return ComparisonResult(
       passed: true,
       diffPercent: 0.0,
     );
+  }
 
   if (test == null || master == null || test.isEmpty || master.isEmpty) {
     return ComparisonResult(

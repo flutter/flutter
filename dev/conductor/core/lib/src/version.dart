@@ -54,20 +54,16 @@ class Version {
         assert(m == null);
         assert(n == null);
         assert(commits == null);
-        break;
       case VersionType.development:
         assert(m != null);
         assert(n != null);
         assert(commits == null);
-        break;
       case VersionType.latest:
         assert(m != null);
         assert(n != null);
         assert(commits != null);
-        break;
       case VersionType.gitDescribe:
         assert(commits != null);
-        break;
     }
   }
 
@@ -77,7 +73,6 @@ class Version {
   /// `flutter --version` and match one of `stablePattern`, `developmentPattern`
   /// and `latestPattern`.
   factory Version.fromString(String versionString) {
-    assert(versionString != null);
 
     versionString = versionString.trim();
     // stable tag
@@ -183,19 +178,15 @@ class Version {
           nextM = 0;
           nextN = 0;
         }
-        break;
       case 'z':
         // Hotfix to stable release.
         assert(previousVersion.type == VersionType.stable);
         nextZ += 1;
-        break;
       case 'm':
         assert(false, "Do not increment 'm' via Version.increment, use instead Version.fromCandidateBranch()");
-        break;
       case 'n':
         // Hotfix to internal roll.
         nextN = nextN! + 1;
-        break;
       default:
         throw Exception('Unknown increment level $increment.');
     }
@@ -278,14 +269,14 @@ class Version {
     final String branchX = branchMatch.group(1)!;
     if (x != int.tryParse(branchX)) {
       throw ConductorException(
-        'Parsed version ${toString()} has a different x value than candidate '
+        'Parsed version $this has a different x value than candidate '
         'branch $candidateBranch',
       );
     }
     final String branchY = branchMatch.group(2)!;
     if (y != int.tryParse(branchY)) {
       throw ConductorException(
-        'Parsed version ${toString()} has a different y value than candidate '
+        'Parsed version $this has a different y value than candidate '
         'branch $candidateBranch',
       );
     }
@@ -295,7 +286,7 @@ class Version {
       final String branchM = branchMatch.group(3)!;
       if (m != int.tryParse(branchM)) {
         throw ConductorException(
-          'Parsed version ${toString()} has a different m value than candidate '
+          'Parsed version $this has a different m value than candidate '
           'branch $candidateBranch with type $type',
         );
       }

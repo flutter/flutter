@@ -20,6 +20,8 @@ void main() {
     expect(() => RestorableTextEditingController().value, throwsAssertionError);
     expect(() => RestorableDateTime(DateTime(2020, 4, 3)).value, throwsAssertionError);
     expect(() => RestorableDateTimeN(DateTime(2020, 4, 3)).value, throwsAssertionError);
+    expect(() => RestorableEnumN<TestEnum>(TestEnum.one, values: TestEnum.values).value, throwsAssertionError);
+    expect(() => RestorableEnum<TestEnum>(TestEnum.one, values: TestEnum.values).value, throwsAssertionError);
     expect(() => _TestRestorableValue().value, throwsAssertionError);
   });
 
@@ -36,12 +38,14 @@ void main() {
     expect(state.stringValue.value, 'hello world');
     expect(state.boolValue.value, false);
     expect(state.dateTimeValue.value, DateTime(2021, 3, 16));
+    expect(state.enumValue.value, TestEnum.one);
     expect(state.nullableNumValue.value, null);
     expect(state.nullableDoubleValue.value, null);
     expect(state.nullableIntValue.value, null);
     expect(state.nullableStringValue.value, null);
     expect(state.nullableBoolValue.value, null);
     expect(state.nullableDateTimeValue.value, null);
+    expect(state.nullableEnumValue.value, null);
     expect(state.controllerValue.value.text, 'FooBar');
     expect(state.objectValue.value, 55);
 
@@ -53,12 +57,14 @@ void main() {
       state.stringValue.value = 'guten tag';
       state.boolValue.value = true;
       state.dateTimeValue.value = DateTime(2020, 7, 4);
+      state.enumValue.value = TestEnum.two;
       state.nullableNumValue.value = 5.0;
       state.nullableDoubleValue.value = 2.0;
       state.nullableIntValue.value = 1;
       state.nullableStringValue.value = 'hullo';
       state.nullableBoolValue.value = false;
       state.nullableDateTimeValue.value = DateTime(2020, 4, 4);
+      state.nullableEnumValue.value = TestEnum.three;
       state.controllerValue.value.text = 'blabla';
       state.objectValue.value = 53;
     });
@@ -70,12 +76,14 @@ void main() {
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
     expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
+    expect(state.enumValue.value, TestEnum.two);
     expect(state.nullableNumValue.value, 5.0);
     expect(state.nullableDoubleValue.value, 2.0);
     expect(state.nullableIntValue.value, 1);
     expect(state.nullableStringValue.value, 'hullo');
     expect(state.nullableBoolValue.value, false);
     expect(state.nullableDateTimeValue.value, DateTime(2020, 4, 4));
+    expect(state.nullableEnumValue.value, TestEnum.three);
     expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
@@ -97,12 +105,14 @@ void main() {
     expect(state.stringValue.value, 'hello world');
     expect(state.boolValue.value, false);
     expect(state.dateTimeValue.value, DateTime(2021, 3, 16));
+    expect(state.enumValue.value, TestEnum.one);
     expect(state.nullableNumValue.value, null);
     expect(state.nullableDoubleValue.value, null);
     expect(state.nullableIntValue.value, null);
     expect(state.nullableStringValue.value, null);
     expect(state.nullableBoolValue.value, null);
     expect(state.nullableDateTimeValue.value, null);
+    expect(state.nullableEnumValue.value, null);
     expect(state.controllerValue.value.text, 'FooBar');
     expect(state.objectValue.value, 55);
 
@@ -114,12 +124,14 @@ void main() {
       state.stringValue.value = 'guten tag';
       state.boolValue.value = true;
       state.dateTimeValue.value = DateTime(2020, 7, 4);
+      state.enumValue.value = TestEnum.two;
       state.nullableNumValue.value = 5.0;
       state.nullableDoubleValue.value = 2.0;
       state.nullableIntValue.value = 1;
       state.nullableStringValue.value = 'hullo';
       state.nullableBoolValue.value = false;
       state.nullableDateTimeValue.value = DateTime(2020, 4, 4);
+      state.nullableEnumValue.value = TestEnum.three;
       state.controllerValue.value.text = 'blabla';
       state.objectValue.value = 53;
     });
@@ -131,12 +143,14 @@ void main() {
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
     expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
+    expect(state.enumValue.value, TestEnum.two);
     expect(state.nullableNumValue.value, 5.0);
     expect(state.nullableDoubleValue.value, 2.0);
     expect(state.nullableIntValue.value, 1);
     expect(state.nullableStringValue.value, 'hullo');
     expect(state.nullableBoolValue.value, false);
     expect(state.nullableDateTimeValue.value, DateTime(2020, 4, 4));
+    expect(state.nullableEnumValue.value, TestEnum.three);
     expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
@@ -153,12 +167,14 @@ void main() {
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
     expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
+    expect(state.enumValue.value, TestEnum.two);
     expect(state.nullableNumValue.value, 5.0);
     expect(state.nullableDoubleValue.value, 2.0);
     expect(state.nullableIntValue.value, 1);
     expect(state.nullableStringValue.value, 'hullo');
     expect(state.nullableBoolValue.value, false);
     expect(state.nullableDateTimeValue.value, DateTime(2020, 4, 4));
+    expect(state.nullableEnumValue.value, TestEnum.three);
     expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
@@ -181,12 +197,14 @@ void main() {
       state.stringValue.value = 'guten tag';
       state.boolValue.value = true;
       state.dateTimeValue.value = DateTime(2020, 7, 4);
+      state.enumValue.value = TestEnum.two;
       state.nullableNumValue.value = 5.0;
       state.nullableDoubleValue.value = 2.0;
       state.nullableIntValue.value = 1;
       state.nullableStringValue.value = 'hullo';
       state.nullableBoolValue.value = false;
       state.nullableDateTimeValue.value = DateTime(2020, 4, 4);
+      state.nullableEnumValue.value = TestEnum.three;
       state.controllerValue.value.text = 'blabla';
       state.objectValue.value = 53;
     });
@@ -203,12 +221,14 @@ void main() {
       state.stringValue.value = 'ciao';
       state.boolValue.value = false;
       state.dateTimeValue.value = DateTime(2020, 3, 2);
+      state.enumValue.value = TestEnum.four;
       state.nullableNumValue.value = 20.0;
       state.nullableDoubleValue.value = 20.0;
       state.nullableIntValue.value = 20;
       state.nullableStringValue.value = 'ni hao';
       state.nullableBoolValue.value = null;
       state.nullableDateTimeValue.value = DateTime(2020, 5, 5);
+      state.nullableEnumValue.value = TestEnum.two;
       state.controllerValue.value.text = 'blub';
       state.objectValue.value = 20;
     });
@@ -224,12 +244,14 @@ void main() {
     expect(state.stringValue.value, 'guten tag');
     expect(state.boolValue.value, true);
     expect(state.dateTimeValue.value, DateTime(2020, 7, 4));
+    expect(state.enumValue.value, TestEnum.two);
     expect(state.nullableNumValue.value, 5.0);
     expect(state.nullableDoubleValue.value, 2.0);
     expect(state.nullableIntValue.value, 1);
     expect(state.nullableStringValue.value, 'hullo');
     expect(state.nullableBoolValue.value, false);
     expect(state.nullableDateTimeValue.value, DateTime(2020, 4, 4));
+    expect(state.nullableEnumValue.value, TestEnum.three);
     expect(state.controllerValue.value.text, 'blabla');
     expect(state.objectValue.value, 53);
     expect(find.text('guten tag'), findsOneWidget);
@@ -243,12 +265,14 @@ void main() {
     expect(state.stringValue.value, 'hello world');
     expect(state.boolValue.value, false);
     expect(state.dateTimeValue.value, DateTime(2021, 3, 16));
+    expect(state.enumValue.value, TestEnum.one);
     expect(state.nullableNumValue.value, null);
     expect(state.nullableDoubleValue.value, null);
     expect(state.nullableIntValue.value, null);
     expect(state.nullableStringValue.value, null);
     expect(state.nullableBoolValue.value, null);
     expect(state.nullableDateTimeValue.value, null);
+    expect(state.nullableEnumValue.value, null);
     expect(state.controllerValue.value.text, 'FooBar');
     expect(state.objectValue.value, 55);
     expect(find.text('hello world'), findsOneWidget);
@@ -283,6 +307,9 @@ void main() {
     state.dateTimeValue.addListener(() {
       notifyLog.add('date-time');
     });
+    state.enumValue.addListener(() {
+      notifyLog.add('enum');
+    });
     state.nullableNumValue.addListener(() {
       notifyLog.add('nullable-num');
     });
@@ -300,6 +327,9 @@ void main() {
     });
     state.nullableDateTimeValue.addListener(() {
       notifyLog.add('nullable-date-time');
+    });
+    state.nullableEnumValue.addListener(() {
+      notifyLog.add('nullable-enum');
     });
     state.controllerValue.addListener(() {
       notifyLog.add('controller');
@@ -345,6 +375,12 @@ void main() {
     notifyLog.clear();
 
     state.setProperties(() {
+      state.enumValue.value = TestEnum.two;
+    });
+    expect(notifyLog.single, 'enum');
+    notifyLog.clear();
+
+    state.setProperties(() {
       state.nullableNumValue.value = 42.2;
     });
     expect(notifyLog.single, 'nullable-num');
@@ -381,6 +417,12 @@ void main() {
     notifyLog.clear();
 
     state.setProperties(() {
+      state.nullableEnumValue.value = TestEnum.three;
+    });
+    expect(notifyLog.single, 'nullable-enum');
+    notifyLog.clear();
+
+    state.setProperties(() {
       state.controllerValue.value.text = 'foo';
     });
     expect(notifyLog.single, 'controller');
@@ -403,12 +445,14 @@ void main() {
       state.stringValue.value = 'bar';
       state.boolValue.value = true;
       state.dateTimeValue.value = DateTime(2020, 7, 4);
+      state.enumValue.value = TestEnum.two;
       state.nullableNumValue.value = 42.2;
       state.nullableDoubleValue.value = 42.2;
       state.nullableIntValue.value = 45;
       state.nullableStringValue.value = 'bar';
       state.nullableBoolValue.value = true;
       state.nullableDateTimeValue.value = DateTime(2020, 4, 4);
+      state.nullableEnumValue.value = TestEnum.three;
       state.controllerValue.value.text = 'foo';
       state.objectValue.value = 42;
     });
@@ -440,6 +484,40 @@ void main() {
     expect(state.objectValue.didUpdateValueCallCount, 1);
   });
 
+  testWidgets('RestorableEnum and RestorableEnumN assert if default value is not in enum', (WidgetTester tester) async {
+    expect(() => RestorableEnum<TestEnum>(
+      TestEnum.four,
+      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four})), throwsAssertionError);
+    expect(() => RestorableEnumN<TestEnum>(
+      TestEnum.four,
+      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four})), throwsAssertionError);
+  });
+
+  testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are set', (WidgetTester tester) async {
+    final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
+      TestEnum.one,
+      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
+    );
+    expect(() => enumMissingValue.value = TestEnum.four, throwsAssertionError);
+    final RestorableEnumN<TestEnum> nullableEnumMissingValue = RestorableEnumN<TestEnum>(
+      null,
+      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
+    );
+    expect(() => nullableEnumMissingValue.value = TestEnum.four, throwsAssertionError);
+  });
+
+  testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are restored', (WidgetTester tester) async {
+    final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
+      TestEnum.one,
+      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
+    );
+    expect(() => enumMissingValue.fromPrimitives('four'), throwsAssertionError);
+    final RestorableEnumN<TestEnum> nullableEnumMissingValue = RestorableEnumN<TestEnum>(
+      null,
+      values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
+    );
+    expect(() => nullableEnumMissingValue.fromPrimitives('four'), throwsAssertionError);
+  });
 
   testWidgets('RestorableN types are properly defined', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
@@ -504,7 +582,7 @@ class _TestRestorableValue extends RestorableValue<Object?> {
 }
 
 class _RestorableWidget extends StatefulWidget {
-  const _RestorableWidget({Key? key}) : super(key: key);
+  const _RestorableWidget();
 
   @override
   State<_RestorableWidget> createState() => _RestorableWidgetState();
@@ -517,12 +595,14 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   final RestorableString stringValue = RestorableString('hello world');
   final RestorableBool boolValue = RestorableBool(false);
   final RestorableDateTime dateTimeValue = RestorableDateTime(DateTime(2021, 3, 16));
+  final RestorableEnum<TestEnum> enumValue = RestorableEnum<TestEnum>(TestEnum.one, values: TestEnum.values);
   final RestorableNumN<num?> nullableNumValue = RestorableNumN<num?>(null);
   final RestorableDoubleN nullableDoubleValue = RestorableDoubleN(null);
   final RestorableIntN nullableIntValue = RestorableIntN(null);
   final RestorableStringN nullableStringValue = RestorableStringN(null);
   final RestorableBoolN nullableBoolValue = RestorableBoolN(null);
   final RestorableDateTimeN nullableDateTimeValue = RestorableDateTimeN(null);
+  final RestorableEnumN<TestEnum> nullableEnumValue = RestorableEnumN<TestEnum>(null, values: TestEnum.values);
   final RestorableTextEditingController controllerValue = RestorableTextEditingController(text: 'FooBar');
   final _TestRestorableValue objectValue = _TestRestorableValue();
 
@@ -534,12 +614,14 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
     registerForRestoration(stringValue, 'string');
     registerForRestoration(boolValue, 'bool');
     registerForRestoration(dateTimeValue, 'dateTime');
+    registerForRestoration(enumValue, 'enum');
     registerForRestoration(nullableNumValue, 'nullableNum');
     registerForRestoration(nullableDoubleValue, 'nullableDouble');
     registerForRestoration(nullableIntValue, 'nullableInt');
     registerForRestoration(nullableStringValue, 'nullableString');
     registerForRestoration(nullableBoolValue, 'nullableBool');
     registerForRestoration(nullableDateTimeValue, 'nullableDateTime');
+    registerForRestoration(nullableEnumValue, 'nullableEnum');
     registerForRestoration(controllerValue, 'controller');
     registerForRestoration(objectValue, 'object');
   }
@@ -555,4 +637,11 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
 
   @override
   String get restorationId => 'widget';
+}
+
+enum TestEnum {
+  one,
+  two,
+  three,
+  four,
 }

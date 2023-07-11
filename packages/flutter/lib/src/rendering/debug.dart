@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'box.dart';
 import 'object.dart';
 
 export 'package:flutter/foundation.dart' show debugPrint;
@@ -94,7 +95,7 @@ bool debugPrintLayouts = false;
 /// this on in your unit tests for additional validations.
 bool debugCheckIntrinsicSizes = false;
 
-/// Adds [dart:developer.Timeline] events for every [RenderObject] layout.
+/// Adds [Timeline] events for every [RenderObject] layout.
 ///
 /// The timing information this flag exposes is not representative of the actual
 /// cost of layout, because the overhead of adding timeline events is
@@ -116,9 +117,11 @@ bool debugCheckIntrinsicSizes = false;
 ///  * [debugProfileBuildsEnabled], which does something similar for widgets
 ///    being rebuilt.
 ///  * [debugProfilePaintsEnabled], which does something similar for painting.
+///  * [debugEnhanceLayoutTimelineArguments], which enhances the trace with
+///    debugging information related to [RenderObject] layouts.
 bool debugProfileLayoutsEnabled = false;
 
-/// Adds [dart:developer.Timeline] events for every [RenderObject] painted.
+/// Adds [Timeline] events for every [RenderObject] painted.
 ///
 /// The timing information this flag exposes is not representative of actual
 /// paints, because the overhead of adding timeline events is significant
@@ -143,7 +146,51 @@ bool debugProfileLayoutsEnabled = false;
 ///  * The discussion at [RendererBinding.drawFrame].
 ///  * [RepaintBoundary], which can be used to contain repaints when unchanged
 ///    areas are being excessively repainted.
+///  * [debugEnhancePaintTimelineArguments], which enhances the trace with
+///    debugging information related to [RenderObject] paints.
 bool debugProfilePaintsEnabled = false;
+
+/// Adds debugging information to [Timeline] events related to [RenderObject]
+/// layouts.
+///
+/// This flag will only add [Timeline] event arguments for debug builds.
+/// Additional arguments will be added for the "LAYOUT" timeline event and for
+/// all [RenderObject] layout [Timeline] events, which are the events that are
+/// added when [debugProfileLayoutsEnabled] is true. The debugging information
+/// that will be added in trace arguments includes stats around [RenderObject]
+/// dirty states and [RenderObject] diagnostic information (i.e. [RenderObject]
+/// properties).
+///
+/// See also:
+///
+///  * [debugProfileLayoutsEnabled], which adds [Timeline] events for every
+///    [RenderObject] layout.
+///  * [debugEnhancePaintTimelineArguments], which does something similar for
+///    events related to [RenderObject] paints.
+///  * [debugEnhanceBuildTimelineArguments], which does something similar for
+///    events related to [Widget] builds.
+bool debugEnhanceLayoutTimelineArguments = false;
+
+/// Adds debugging information to [Timeline] events related to [RenderObject]
+/// paints.
+///
+/// This flag will only add [Timeline] event arguments for debug builds.
+/// Additional arguments will be added for the "PAINT" timeline event and for
+/// all [RenderObject] paint [Timeline] events, which are the [Timeline] events
+/// that are added when [debugProfilePaintsEnabled] is true. The debugging
+/// information that will be added in trace arguments includes stats around
+/// [RenderObject] dirty states and [RenderObject] diagnostic information
+/// (i.e. [RenderObject] properties).
+///
+/// See also:
+///
+///  * [debugProfilePaintsEnabled], which adds [Timeline] events for every
+///    [RenderObject] paint.
+///  * [debugEnhanceLayoutTimelineArguments], which does something similar for
+///    events related to [RenderObject] layouts.
+///  * [debugEnhanceBuildTimelineArguments], which does something similar for
+///    events related to [Widget] builds.
+bool debugEnhancePaintTimelineArguments = false;
 
 /// Signature for [debugOnProfilePaint] implementations.
 typedef ProfilePaintCallback = void Function(RenderObject renderObject);
@@ -260,6 +307,81 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugDisablePhysicalShapeLayers ||
         debugDisableOpacityLayers) {
       throw FlutterError(reason);
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Returns true if the given [Axis] is bounded within the given
+/// [BoxConstraints] in both the main and cross axis, throwing an exception
+/// otherwise.
+///
+/// This is used by viewports during `performLayout` and `computeDryLayout`
+/// because bounded constraints are required in order to layout their children.
+bool debugCheckHasBoundedAxis(Axis axis, BoxConstraints constraints) {
+  assert(() {
+    if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
+      switch (axis) {
+        case Axis.vertical:
+          if (!constraints.hasBoundedHeight) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Vertical viewport was given unbounded height.'),
+              ErrorDescription(
+                'Viewports expand in the scrolling direction to fill their container. '
+                'In this case, a vertical viewport was given an unlimited amount of '
+                'vertical space in which to expand. This situation typically happens '
+                'when a scrollable widget is nested inside another scrollable widget.',
+              ),
+              ErrorHint(
+                'If this widget is always nested in a scrollable widget there '
+                'is no need to use a viewport because there will always be enough '
+                'vertical space for the children. In this case, consider using a '
+                'Column or Wrap instead. Otherwise, consider using a '
+                'CustomScrollView to concatenate arbitrary slivers into a '
+                'single scrollable.',
+              ),
+            ]);
+          }
+          if (!constraints.hasBoundedWidth) {
+            throw FlutterError(
+              'Vertical viewport was given unbounded width.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a vertical viewport was given an unlimited amount of '
+              'horizontal space in which to expand.',
+            );
+          }
+        case Axis.horizontal:
+          if (!constraints.hasBoundedWidth) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Horizontal viewport was given unbounded width.'),
+              ErrorDescription(
+                'Viewports expand in the scrolling direction to fill their container. '
+                'In this case, a horizontal viewport was given an unlimited amount of '
+                'horizontal space in which to expand. This situation typically happens '
+                'when a scrollable widget is nested inside another scrollable widget.',
+              ),
+              ErrorHint(
+                'If this widget is always nested in a scrollable widget there '
+                'is no need to use a viewport because there will always be enough '
+                'horizontal space for the children. In this case, consider using a '
+                'Row or Wrap instead. Otherwise, consider using a '
+                'CustomScrollView to concatenate arbitrary slivers into a '
+                'single scrollable.',
+              ),
+            ]);
+          }
+          if (!constraints.hasBoundedHeight) {
+            throw FlutterError(
+              'Horizontal viewport was given unbounded height.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a horizontal viewport was given an unlimited amount of '
+              'vertical space in which to expand.',
+            );
+          }
+      }
     }
     return true;
   }());

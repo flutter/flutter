@@ -159,7 +159,7 @@ class MutatingRoute extends MaterialPageRoute<void> {
 }
 
 class _SimpleStatefulWidget extends StatefulWidget {
-  const _SimpleStatefulWidget({ Key? key }) : super(key: key);
+  const _SimpleStatefulWidget({ super.key });
   @override
   _SimpleState createState() => _SimpleState();
 }
@@ -172,7 +172,7 @@ class _SimpleState extends State<_SimpleStatefulWidget> {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({ Key? key, this.value = '123' }) : super(key: key);
+  const MyStatefulWidget({ super.key, this.value = '123' });
   final String value;
   @override
   MyStatefulWidgetState createState() => MyStatefulWidgetState();
@@ -185,7 +185,6 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
 
 Future<void> main() async {
   final ui.Image testImage = await createTestImage();
-  assert(testImage != null);
 
   setUp(() {
     transitionFromUserGestures = false;
@@ -307,8 +306,7 @@ Future<void> main() async {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: HeroController(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             key: key,
             initialRoute: 'navigator1',
@@ -362,8 +360,7 @@ Future<void> main() async {
     await tester.pumpWidget(
       HeroControllerScope(
         controller: HeroController(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: TestDependencies(
           child: Navigator(
             key: key,
             initialRoute: 'navigator1',
@@ -1185,22 +1182,22 @@ Future<void> main() async {
     await tester.pump(const Duration(milliseconds: 100));
     expect(tester.getTopLeft(find.byKey(heroABKey)).dy, 100.0);
 
-    bool _isVisible(Element node) {
-      bool isVisible = true;
+    bool isVisible(Element node) {
+      bool visible = true;
       node.visitAncestorElements((Element ancestor) {
         final RenderObject r = ancestor.renderObject!;
         if (r is RenderAnimatedOpacity && r.opacity.value == 0) {
-          isVisible = false;
+          visible = false;
           return false;
         }
         return true;
       });
-      return isVisible;
+      return visible;
     }
 
     // Of all heroes only one should be visible now.
     final Iterable<Element> elements = find.text('Hero').evaluate();
-    expect(elements.where(_isVisible).length, 1);
+    expect(elements.where(isVisible).length, 1);
 
     // Hero BC's flight finishes normally.
     await tester.pump(const Duration(milliseconds: 300));
@@ -2649,7 +2646,6 @@ Future<void> main() async {
       end: const Size(100, 100),
     ).chain(CurveTween(curve: Curves.fastOutSlowIn));
 
-
     await tester.pumpWidget(
       MaterialApp(
         navigatorKey: navigator,
@@ -3074,4 +3070,86 @@ Future<void> main() async {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('smooth transition between different incoming data', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+    const Key imageKey1 = Key('image1');
+    const Key imageKey2 = Key('image2');
+    final TestImageProvider imageProvider = TestImageProvider(testImage);
+
+    tester.view.padding = const FakeViewPadding(top: 50);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Scaffold(
+          appBar: AppBar(title: const Text('test')),
+          body: Hero(
+            tag: 'imageHero',
+            child: GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              children: <Widget>[
+                Image(image: imageProvider, key: imageKey1),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final MaterialPageRoute<void> route2 = MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return Scaffold(
+          body: Hero(
+            tag: 'imageHero',
+            child: GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              children: <Widget>[
+                Image(image: imageProvider, key: imageKey2),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    // Load images.
+    imageProvider.complete();
+    await tester.pump();
+
+    final double forwardRest = tester.getTopLeft(find.byType(Image)).dy;
+    navigatorKey.currentState!.push(route2);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
+    await tester.pumpAndSettle();
+
+    navigatorKey.currentState!.pop(route2);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
+  });
+}
+
+class TestDependencies extends StatelessWidget {
+  const TestDependencies({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: MediaQueryData.fromView(View.of(context)),
+        child: child,
+      ),
+    );
+  }
 }

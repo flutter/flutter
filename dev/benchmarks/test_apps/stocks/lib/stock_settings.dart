@@ -63,7 +63,6 @@ class StockSettingsState extends State<StockSettings> {
     switch (widget.configuration.stockMode) {
       case StockMode.optimistic:
         _handleOptimismChanged(false);
-        break;
       case StockMode.pessimistic:
         showDialog<bool>(
           context: context,
@@ -88,13 +87,11 @@ class StockSettingsState extends State<StockSettings> {
             );
           },
         ).then<void>(_handleOptimismChanged);
-        break;
     }
   }
 
   void sendUpdates(StockConfiguration value) {
-    if (widget.updater != null)
-      widget.updater(value);
+    widget.updater(value);
   }
 
   AppBar buildAppBar(BuildContext context) {
@@ -143,7 +140,7 @@ class StockSettingsState extends State<StockSettings> {
       ),
     ];
     assert(() {
-      // material grid and size construction lines are only available in checked mode
+      // material grid and size construction lines are only available in debug mode
       rows.addAll(<Widget>[
         ListTile(
           leading: const Icon(Icons.border_clear),

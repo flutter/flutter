@@ -6,7 +6,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
@@ -16,7 +15,6 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 
-final Platform kNoAnsiPlatform = FakePlatform();
 const List<int> _kTtfHeaderBytes = <int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112];
 
 const String inputPath = '/input/fonts/MaterialIcons-Regular.otf';
@@ -35,36 +33,37 @@ void main() {
   late String fontSubsetPath;
   late List<String> fontSubsetArgs;
 
-  List<String> _getConstFinderArgs(String appDillPath) => <String>[
+  List<String> getConstFinderArgs(String appDillPath) => <String>[
     dartPath,
     '--disable-dart-dev',
     constFinderPath,
     '--kernel-file', appDillPath,
     '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
     '--class-name', 'IconData',
+    '--annotation-class-name', '_StaticIconProvider',
+    '--annotation-class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
   ];
 
-  void _addConstFinderInvocation(
+  void addConstFinderInvocation(
     String appDillPath, {
     int exitCode = 0,
     String stdout = '',
     String stderr = '',
   }) {
     processManager.addCommand(FakeCommand(
-      command: _getConstFinderArgs(appDillPath),
+      command: getConstFinderArgs(appDillPath),
       exitCode: exitCode,
       stdout: stdout,
       stderr: stderr,
     ));
   }
 
-  void _resetFontSubsetInvocation({
+  void resetFontSubsetInvocation({
     int exitCode = 0,
     String stdout = '',
     String stderr = '',
     required CompleterIOSink stdinSink,
   }) {
-    assert(stdinSink != null);
     stdinSink.clear();
     processManager.addCommand(FakeCommand(
       command: fontSubsetArgs,
@@ -81,7 +80,7 @@ void main() {
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    dartPath = artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
+    dartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     constFinderPath = artifacts.getArtifactPath(Artifact.constFinder);
     fontSubsetPath = artifacts.getArtifactPath(Artifact.fontSubset);
 
@@ -99,7 +98,7 @@ void main() {
       ..writeAsBytesSync(_kTtfHeaderBytes);
   });
 
-  Environment _createEnvironment(Map<String, String> defines) {
+  Environment createEnvironment(Map<String, String> defines) {
     return Environment.test(
       fileSystem.directory('/icon_test')..createSync(recursive: true),
       defines: defines,
@@ -111,7 +110,7 @@ void main() {
   }
 
   testWithoutContext('Prints error in debug mode environment', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'debug',
     });
@@ -142,7 +141,7 @@ void main() {
   });
 
   testWithoutContext('Does not get enabled without font manifest', () {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -165,7 +164,7 @@ void main() {
   });
 
   testWithoutContext('Gets enabled', () {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -188,7 +187,7 @@ void main() {
   });
 
   test('No app.dill throws exception', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -214,7 +213,7 @@ void main() {
   });
 
   testWithoutContext('Can subset a font', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -229,18 +228,23 @@ void main() {
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
-
     final CompleterIOSink stdinSink = CompleterIOSink();
-    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
-    _resetFontSubsetInvocation(stdinSink: stdinSink);
-
+    addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    resetFontSubsetInvocation(stdinSink: stdinSink);
+    // Font starts out 2500 bytes long
+    final File inputFont = fileSystem.file(inputPath)
+        ..writeAsBytesSync(List<int>.filled(2500, 0));
+    // after subsetting, font is 1200 bytes long
+    fileSystem.file(outputPath)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(List<int>.filled(1200, 0));
     bool subsetted = await iconTreeShaker.subsetFont(
-      input: fileSystem.file(inputPath),
+      input: inputFont,
       outputPath: outputPath,
       relativePath: relativePath,
     );
     expect(stdinSink.getAndClear(), '59470\n');
-    _resetFontSubsetInvocation(stdinSink: stdinSink);
+    resetFontSubsetInvocation(stdinSink: stdinSink);
 
     expect(subsetted, true);
     subsetted = await iconTreeShaker.subsetFont(
@@ -251,10 +255,14 @@ void main() {
     expect(subsetted, true);
     expect(stdinSink.getAndClear(), '59470\n');
     expect(processManager, hasNoRemainingExpectations);
+    expect(
+      logger.statusText,
+      contains('Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 2500 to 1200 bytes (52.0% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.'),
+    );
   });
 
   testWithoutContext('Does not subset a non-supported font', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -271,8 +279,8 @@ void main() {
     );
 
     final CompleterIOSink stdinSink = CompleterIOSink();
-    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
-    _resetFontSubsetInvocation(stdinSink: stdinSink);
+    addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    resetFontSubsetInvocation(stdinSink: stdinSink);
 
     final File notAFont = fileSystem.file('input/foo/bar.txt')
       ..createSync(recursive: true)
@@ -286,7 +294,7 @@ void main() {
   });
 
   testWithoutContext('Does not subset an invalid ttf font', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -303,8 +311,8 @@ void main() {
     );
 
     final CompleterIOSink stdinSink = CompleterIOSink();
-    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
-    _resetFontSubsetInvocation(stdinSink: stdinSink);
+    addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    resetFontSubsetInvocation(stdinSink: stdinSink);
 
     final File notAFont = fileSystem.file(inputPath)
       ..writeAsBytesSync(<int>[0, 1, 2]);
@@ -317,42 +325,43 @@ void main() {
     expect(subsetted, false);
   });
 
-  testWithoutContext('Non-constant instances', () async {
-    final Environment environment = _createEnvironment(<String, String>{
-      kIconTreeShakerFlag: 'true',
-      kBuildMode: 'release',
+  for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.android_arm, TargetPlatform.web_javascript]) {
+    testWithoutContext('Non-constant instances $platform', () async {
+      final Environment environment = createEnvironment(<String, String>{
+        kIconTreeShakerFlag: 'true',
+        kBuildMode: 'release',
+      });
+      final File appDill = environment.buildDir.childFile('app.dill')
+        ..createSync(recursive: true);
+
+      final IconTreeShaker iconTreeShaker = IconTreeShaker(
+        environment,
+        fontManifestContent,
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+      );
+
+      addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
+
+      await expectLater(
+        () => iconTreeShaker.subsetFont(
+          input: fileSystem.file(inputPath),
+          outputPath: outputPath,
+          relativePath: relativePath,
+        ),
+        throwsToolExit(
+          message:
+            'Avoid non-constant invocations of IconData or try to build'
+            ' again with --no-tree-shake-icons.',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
     });
-    final File appDill = environment.buildDir.childFile('app.dill')
-      ..createSync(recursive: true);
-
-    final IconTreeShaker iconTreeShaker = IconTreeShaker(
-      environment,
-      fontManifestContent,
-      logger: logger,
-      processManager: processManager,
-      fileSystem: fileSystem,
-      artifacts: artifacts,
-    );
-
-    _addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
-
-    await expectLater(
-      () => iconTreeShaker.subsetFont(
-        input: fileSystem.file(inputPath),
-        outputPath: outputPath,
-        relativePath: relativePath,
-      ),
-      throwsToolExit(
-        message:
-          'Avoid non-constant invocations of IconData or try to build'
-          ' again with --no-tree-shake-icons.',
-      ),
-    );
-    expect(processManager, hasNoRemainingExpectations);
-  });
-
+  }
   testWithoutContext('Non-zero font-subset exit code', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -370,8 +379,8 @@ void main() {
     );
 
     final CompleterIOSink stdinSink = CompleterIOSink();
-    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
-    _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
+    addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
 
     await expectLater(
       () => iconTreeShaker.subsetFont(
@@ -385,7 +394,7 @@ void main() {
   });
 
   testWithoutContext('font-subset throws on write to sdtin', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -402,8 +411,8 @@ void main() {
     );
 
     final CompleterIOSink stdinSink = CompleterIOSink(throwOnAdd: true);
-    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
-    _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
+    addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
 
     await expectLater(
       () => iconTreeShaker.subsetFont(
@@ -417,7 +426,7 @@ void main() {
   });
 
   testWithoutContext('Invalid font manifest', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -435,7 +444,7 @@ void main() {
       artifacts: artifacts,
     );
 
-    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
 
     await expectLater(
       () => iconTreeShaker.subsetFont(
@@ -449,7 +458,7 @@ void main() {
   });
 
   testWithoutContext('ConstFinder non-zero exit', () async {
-    final Environment environment = _createEnvironment(<String, String>{
+    final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
@@ -467,7 +476,7 @@ void main() {
       artifacts: artifacts,
     );
 
-    _addConstFinderInvocation(appDill.path, exitCode: -1);
+    addConstFinderInvocation(appDill.path, exitCode: -1);
 
     await expectLater(
       () async => iconTreeShaker.subsetFont(

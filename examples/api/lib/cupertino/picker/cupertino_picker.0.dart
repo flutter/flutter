@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoPicker
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoPicker].
 
 const double _kItemExtent = 32.0;
 const List<String> _fruitNames = <String>[
@@ -16,30 +16,28 @@ const List<String> _fruitNames = <String>[
   'Strawberry',
 ];
 
-void main() => runApp(const MyApp());
+void main() => runApp(const CupertinoPickerApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class CupertinoPickerApp extends StatelessWidget {
+  const CupertinoPickerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: CupertinoPickerSample(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: CupertinoPickerExample(),
     );
   }
 }
 
-class CupertinoPickerSample extends StatefulWidget {
-  const CupertinoPickerSample({Key? key}) : super(key: key);
+class CupertinoPickerExample extends StatefulWidget {
+  const CupertinoPickerExample({super.key});
 
   @override
-  State<CupertinoPickerSample> createState() => _CupertinoPickerSampleState();
+  State<CupertinoPickerExample> createState() => _CupertinoPickerExampleState();
 }
 
-class _CupertinoPickerSampleState extends State<CupertinoPickerSample> {
+class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
   int _selectedFruit = 0;
 
   // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoPicker.
@@ -60,13 +58,16 @@ class _CupertinoPickerSampleState extends State<CupertinoPickerSample> {
           top: false,
           child: child,
         ),
-      )
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoPicker Sample'),
+      ),
       child: DefaultTextStyle(
         style: TextStyle(
           color: CupertinoColors.label.resolveFrom(context),
@@ -86,6 +87,10 @@ class _CupertinoPickerSampleState extends State<CupertinoPickerSample> {
                     squeeze: 1.2,
                     useMagnifier: true,
                     itemExtent: _kItemExtent,
+                    // This sets the initial item.
+                    scrollController: FixedExtentScrollController(
+                      initialItem: _selectedFruit,
+                    ),
                     // This is called when selected item is changed.
                     onSelectedItemChanged: (int selectedItem) {
                       setState(() {
@@ -93,16 +98,13 @@ class _CupertinoPickerSampleState extends State<CupertinoPickerSample> {
                       });
                     },
                     children: List<Widget>.generate(_fruitNames.length, (int index) {
-                      return Center(
-                        child: Text(
-                          _fruitNames[index],
-                        ),
-                      );
+                      return Center(child: Text(_fruitNames[index]));
                     }),
                   ),
                 ),
                 // This displays the selected fruit name.
-                child: Text(_fruitNames[_selectedFruit],
+                child: Text(
+                  _fruitNames[_selectedFruit],
                   style: const TextStyle(
                     fontSize: 22.0,
                   ),

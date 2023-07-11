@@ -42,9 +42,9 @@ class _InternalNoTransientCallbacksCondition implements WaitCondition {
   ///
   /// The [condition] argument must not be null.
   factory _InternalNoTransientCallbacksCondition.deserialize(SerializableWaitCondition condition) {
-    assert(condition != null);
-    if (condition.conditionName != 'NoTransientCallbacksCondition')
+    if (condition.conditionName != 'NoTransientCallbacksCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+    }
     return const _InternalNoTransientCallbacksCondition();
   }
 
@@ -70,9 +70,9 @@ class _InternalNoPendingFrameCondition implements WaitCondition {
   ///
   /// The [condition] argument must not be null.
   factory _InternalNoPendingFrameCondition.deserialize(SerializableWaitCondition condition) {
-    assert(condition != null);
-    if (condition.conditionName != 'NoPendingFrameCondition')
+    if (condition.conditionName != 'NoPendingFrameCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+    }
     return const _InternalNoPendingFrameCondition();
   }
 
@@ -98,9 +98,9 @@ class _InternalFirstFrameRasterizedCondition implements WaitCondition {
   ///
   /// The [condition] argument must not be null.
   factory _InternalFirstFrameRasterizedCondition.deserialize(SerializableWaitCondition condition) {
-    assert(condition != null);
-    if (condition.conditionName != 'FirstFrameRasterizedCondition')
+    if (condition.conditionName != 'FirstFrameRasterizedCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+    }
     return const _InternalFirstFrameRasterizedCondition();
   }
 
@@ -124,9 +124,9 @@ class _InternalNoPendingPlatformMessagesCondition implements WaitCondition {
   ///
   /// The [condition] argument must not be null.
   factory _InternalNoPendingPlatformMessagesCondition.deserialize(SerializableWaitCondition condition) {
-    assert(condition != null);
-    if (condition.conditionName != 'NoPendingPlatformMessagesCondition')
+    if (condition.conditionName != 'NoPendingPlatformMessagesCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+    }
     return const _InternalNoPendingPlatformMessagesCondition();
   }
 
@@ -152,17 +152,16 @@ class _InternalCombinedCondition implements WaitCondition {
   /// [conditions].
   ///
   /// The [conditions] argument must not be null.
-  const _InternalCombinedCondition(this.conditions)
-      : assert(conditions != null);
+  const _InternalCombinedCondition(this.conditions);
 
   /// Factory constructor to parse an [_InternalCombinedCondition] instance from
   /// the given [SerializableWaitCondition] instance.
   ///
   /// The [condition] argument must not be null.
   factory _InternalCombinedCondition.deserialize(SerializableWaitCondition condition) {
-    assert(condition != null);
-    if (condition.conditionName != 'CombinedCondition')
+    if (condition.conditionName != 'CombinedCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+    }
     final CombinedCondition combinedCondition = condition as CombinedCondition;
     final List<WaitCondition> conditions = combinedCondition.conditions.map(deserializeCondition).toList();
     return _InternalCombinedCondition(conditions);
@@ -180,7 +179,6 @@ class _InternalCombinedCondition implements WaitCondition {
   Future<void> wait() async {
     while (!condition) {
       for (final WaitCondition condition in conditions) {
-        assert (condition != null);
         await condition.wait();
       }
     }
@@ -192,7 +190,6 @@ class _InternalCombinedCondition implements WaitCondition {
 ///
 /// The [waitCondition] argument must not be null.
 WaitCondition deserializeCondition(SerializableWaitCondition waitCondition) {
-  assert(waitCondition != null);
   final String conditionName = waitCondition.conditionName;
   switch (conditionName) {
     case 'NoTransientCallbacksCondition':

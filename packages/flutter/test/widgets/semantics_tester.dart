@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-export 'dart:ui' show SemanticsFlag, SemanticsAction;
+export 'dart:ui' show SemanticsAction, SemanticsFlag;
 export 'package:flutter/rendering.dart' show SemanticsData;
 
 const String _matcherHelp = 'Try dumping the semantics with debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest) from the package:flutter/rendering.dart library to see what the semantics tree looks like.';
@@ -39,6 +37,7 @@ class TestSemantics {
     this.actions = 0,
     this.label = '',
     this.value = '',
+    this.tooltip = '',
     this.increasedValue = '',
     this.decreasedValue = '',
     this.hint = '',
@@ -54,12 +53,6 @@ class TestSemantics {
     Iterable<SemanticsTag>? tags,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
-       assert(label != null),
-       assert(value != null),
-       assert(increasedValue != null),
-       assert(decreasedValue != null),
-       assert(hint != null),
-       assert(children != null),
        tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
@@ -72,6 +65,7 @@ class TestSemantics {
     this.increasedValue = '',
     this.decreasedValue = '',
     this.hint = '',
+    this.tooltip = '',
     this.textDirection,
     this.transform,
     this.textSelection,
@@ -82,15 +76,9 @@ class TestSemantics {
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
-       assert(label != null),
-       assert(increasedValue != null),
-       assert(decreasedValue != null),
-       assert(value != null),
-       assert(hint != null),
        rect = TestSemantics.rootRect,
        elevation = 0.0,
        thickness = 0.0,
-       assert(children != null),
        tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
@@ -110,6 +98,7 @@ class TestSemantics {
     this.label = '',
     this.hint = '',
     this.value = '',
+    this.tooltip = '',
     this.increasedValue = '',
     this.decreasedValue = '',
     this.textDirection,
@@ -124,13 +113,7 @@ class TestSemantics {
     Iterable<SemanticsTag>? tags,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
-       assert(label != null),
-       assert(value != null),
-       assert(increasedValue != null),
-       assert(decreasedValue != null),
-       assert(hint != null),
        transform = _applyRootChildScale(transform),
-       assert(children != null),
        tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// The unique identifier for this node.
@@ -175,6 +158,9 @@ class TestSemantics {
   /// A brief textual description of the result of the action that can be
   /// performed on this node.
   final String hint;
+
+  /// A textual tooltip of this node.
+  final String tooltip;
 
   /// The reading direction of the [label].
   ///
@@ -239,8 +225,9 @@ class TestSemantics {
 
   static Matrix4 _applyRootChildScale(Matrix4? transform) {
     final Matrix4 result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
-    if (transform != null)
+    if (transform != null) {
       result.multiply(transform);
+    }
     return result;
   }
 
@@ -263,43 +250,59 @@ class TestSemantics {
       return false;
     }
 
-    if (node == null)
+    if (node == null) {
       return fail('could not find node with id $id.');
-    if (!ignoreId && id != node.id)
+    }
+    if (!ignoreId && id != node.id) {
       return fail('expected node id $id but found id ${node.id}.');
+    }
 
     final SemanticsData nodeData = node.getSemanticsData();
 
     final int flagsBitmask = flags is int
       ? flags as int
       : (flags as List<SemanticsFlag>).fold<int>(0, (int bitmask, SemanticsFlag flag) => bitmask | flag.index);
-    if (flagsBitmask != nodeData.flags)
+    if (flagsBitmask != nodeData.flags) {
       return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
+    }
 
     final int actionsBitmask = actions is int
         ? actions as int
         : (actions as List<SemanticsAction>).fold<int>(0, (int bitmask, SemanticsAction action) => bitmask | action.index);
-    if (actionsBitmask != nodeData.actions)
+    if (actionsBitmask != nodeData.actions) {
       return fail('expected node id $id to have actions $actions but found actions ${nodeData.actions}.');
+    }
 
-    if (label != nodeData.label)
+    if (label != nodeData.label) {
       return fail('expected node id $id to have label "$label" but found label "${nodeData.label}".');
-    if (value != nodeData.value)
+    }
+    if (value != nodeData.value) {
       return fail('expected node id $id to have value "$value" but found value "${nodeData.value}".');
-    if (increasedValue != nodeData.increasedValue)
+    }
+    if (increasedValue != nodeData.increasedValue) {
       return fail('expected node id $id to have increasedValue "$increasedValue" but found value "${nodeData.increasedValue}".');
-    if (decreasedValue != nodeData.decreasedValue)
+    }
+    if (decreasedValue != nodeData.decreasedValue) {
       return fail('expected node id $id to have decreasedValue "$decreasedValue" but found value "${nodeData.decreasedValue}".');
-    if (hint != nodeData.hint)
+    }
+    if (hint != nodeData.hint) {
       return fail('expected node id $id to have hint "$hint" but found hint "${nodeData.hint}".');
-    if (textDirection != null && textDirection != nodeData.textDirection)
+    }
+    if (tooltip != nodeData.tooltip) {
+      return fail('expected node id $id to have tooltip "$tooltip" but found hint "${nodeData.tooltip}".');
+    }
+    if (textDirection != null && textDirection != nodeData.textDirection) {
       return fail('expected node id $id to have textDirection "$textDirection" but found "${nodeData.textDirection}".');
-    if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '' || node.increasedValue != '' || node.decreasedValue != '') && nodeData.textDirection == null)
+    }
+    if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '' || node.increasedValue != '' || node.decreasedValue != '') && nodeData.textDirection == null) {
       return fail('expected node id $id, which has a label, value, or hint, to have a textDirection, but it did not.');
-    if (!ignoreRect && rect != nodeData.rect)
+    }
+    if (!ignoreRect && rect != nodeData.rect) {
       return fail('expected node id $id to have rect $rect but found rect ${nodeData.rect}.');
-    if (!ignoreTransform && transform != nodeData.transform)
+    }
+    if (!ignoreTransform && transform != nodeData.transform) {
       return fail('expected node id $id to have transform $transform but found transform:\n${nodeData.transform}.');
+    }
     if (elevation != null && elevation != nodeData.elevation) {
       return fail('expected node id $id to have elevation $elevation but found elevation:\n${nodeData.elevation}.');
     }
@@ -316,11 +319,13 @@ class TestSemantics {
       return fail('expected node id $id to have scrollIndex $scrollChildren but found scrollIndex ${nodeData.scrollChildCount}.');
     }
     final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
-    if (children.length != childrenCount)
+    if (children.length != childrenCount) {
       return fail('expected node id $id to have ${children.length} child${ children.length == 1 ? "" : "ren" } but found $childrenCount.');
+    }
 
-    if (children.isEmpty)
+    if (children.isEmpty) {
       return true;
+    }
     bool result = true;
     final Iterator<TestSemantics> it = children.iterator;
     for (final SemanticsNode child in node.debugListChildrenInOrder(childOrder)) {
@@ -349,36 +354,54 @@ class TestSemantics {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = StringBuffer();
     buf.writeln('$indent${objectRuntimeType(this, 'TestSemantics')}(');
-    if (id != null)
+    if (id != null) {
       buf.writeln('$indent  id: $id,');
-    if (flags is int && flags != 0 || flags is List<SemanticsFlag> && (flags as List<SemanticsFlag>).isNotEmpty)
+    }
+    if (flags is int && flags != 0 || flags is List<SemanticsFlag> && (flags as List<SemanticsFlag>).isNotEmpty) {
       buf.writeln('$indent  flags: ${SemanticsTester._flagsToSemanticsFlagExpression(flags)},');
-    if (actions is int && actions != 0 || actions is List<SemanticsAction> && (actions as List<SemanticsAction>).isNotEmpty)
+    }
+    if (actions is int && actions != 0 || actions is List<SemanticsAction> && (actions as List<SemanticsAction>).isNotEmpty) {
       buf.writeln('$indent  actions: ${SemanticsTester._actionsToSemanticsActionExpression(actions)},');
-    if (label != null && label != '')
+    }
+    if (label != '') {
       buf.writeln("$indent  label: '$label',");
-    if (value != null && value != '')
+    }
+    if (value != '') {
       buf.writeln("$indent  value: '$value',");
-    if (increasedValue != null && increasedValue != '')
+    }
+    if (increasedValue != '') {
       buf.writeln("$indent  increasedValue: '$increasedValue',");
-    if (decreasedValue != null && decreasedValue != '')
+    }
+    if (decreasedValue != '') {
       buf.writeln("$indent  decreasedValue: '$decreasedValue',");
-    if (hint != null && hint != '')
+    }
+    if (hint != '') {
       buf.writeln("$indent  hint: '$hint',");
-    if (textDirection != null)
+    }
+    if (tooltip != '') {
+      buf.writeln("$indent  tooltip: '$tooltip',");
+    }
+    if (textDirection != null) {
       buf.writeln('$indent  textDirection: $textDirection,');
-    if (textSelection?.isValid ?? false)
+    }
+    if (textSelection?.isValid ?? false) {
       buf.writeln('$indent  textSelection:\n[${textSelection!.start}, ${textSelection!.end}],');
-    if (scrollIndex != null)
+    }
+    if (scrollIndex != null) {
       buf.writeln('$indent scrollIndex: $scrollIndex,');
-    if (rect != null)
+    }
+    if (rect != null) {
       buf.writeln('$indent  rect: $rect,');
-    if (transform != null)
+    }
+    if (transform != null) {
       buf.writeln('$indent  transform:\n${transform.toString().trim().split('\n').map<String>((String line) => '$indent    $line').join('\n')},');
-    if (elevation != null)
+    }
+    if (elevation != null) {
       buf.writeln('$indent  elevation: $elevation,');
-    if (thickness != null)
+    }
+    if (thickness != null) {
       buf.writeln('$indent  thickness: $thickness,');
+    }
     buf.writeln('$indent  children: <TestSemantics>[');
     for (final TestSemantics child in children) {
       buf.writeln('${child.toString(indentAmount + 2)},');
@@ -398,7 +421,7 @@ class SemanticsTester {
   /// You should call [dispose] at the end of a test that creates a semantics
   /// tester.
   SemanticsTester(this.tester) {
-    _semanticsHandle = tester.binding.pipelineOwner.ensureSemantics();
+    _semanticsHandle = tester.ensureSemantics();
 
     // This _extra_ clean-up is needed for the case when a test fails and
     // therefore fails to call dispose() explicitly. The test is still required
@@ -428,8 +451,9 @@ class SemanticsTester {
   String toString() => 'SemanticsTester for ${tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode}';
 
   bool _stringAttributesEqual(List<StringAttribute> first, List<StringAttribute> second) {
-    if (first.length != second.length)
+    if (first.length != second.length) {
       return false;
+    }
     for (int i = 0; i < first.length; i++) {
       if (first[i] is SpellOutStringAttribute &&
           (second[i] is! SpellOutStringAttribute ||
@@ -463,6 +487,7 @@ class SemanticsTester {
     TextDirection? textDirection,
     List<SemanticsAction>? actions,
     List<SemanticsFlag>? flags,
+    Set<SemanticsTag>? tags,
     double? scrollPosition,
     double? scrollExtentMax,
     double? scrollExtentMin,
@@ -471,47 +496,62 @@ class SemanticsTester {
     SemanticsNode? ancestor,
   }) {
     bool checkNode(SemanticsNode node) {
-      if (label != null && node.label != label)
+      if (label != null && node.label != label) {
         return false;
+      }
       if (attributedLabel != null &&
           (attributedLabel.string != node.attributedLabel.string ||
           !_stringAttributesEqual(attributedLabel.attributes, node.attributedLabel.attributes))) {
         return false;
       }
-      if (value != null && node.value != value)
+      if (value != null && node.value != value) {
         return false;
+      }
       if (attributedValue != null &&
           (attributedValue.string != node.attributedValue.string ||
           !_stringAttributesEqual(attributedValue.attributes, node.attributedValue.attributes))) {
         return false;
       }
-      if (hint != null && node.hint != hint)
+      if (hint != null && node.hint != hint) {
         return false;
+      }
       if (attributedHint != null &&
           (attributedHint.string != node.attributedHint.string ||
           !_stringAttributesEqual(attributedHint.attributes, node.attributedHint.attributes))) {
         return false;
       }
-      if (textDirection != null && node.textDirection != textDirection)
+      if (textDirection != null && node.textDirection != textDirection) {
         return false;
+      }
       if (actions != null) {
         final int expectedActions = actions.fold<int>(0, (int value, SemanticsAction action) => value | action.index);
         final int actualActions = node.getSemanticsData().actions;
-        if (expectedActions != actualActions)
+        if (expectedActions != actualActions) {
           return false;
+        }
       }
       if (flags != null) {
         final int expectedFlags = flags.fold<int>(0, (int value, SemanticsFlag flag) => value | flag.index);
         final int actualFlags = node.getSemanticsData().flags;
-        if (expectedFlags != actualFlags)
+        if (expectedFlags != actualFlags) {
           return false;
+        }
       }
-      if (scrollPosition != null && !nearEqual(node.scrollPosition, scrollPosition, 0.1))
+      if (tags != null) {
+        final Set<SemanticsTag>? actualTags = node.getSemanticsData().tags;
+        if (!setEquals<SemanticsTag>(actualTags, tags)) {
+          return false;
+        }
+      }
+      if (scrollPosition != null && !nearEqual(node.scrollPosition, scrollPosition, 0.1)) {
         return false;
-      if (scrollExtentMax != null && !nearEqual(node.scrollExtentMax, scrollExtentMax, 0.1))
+      }
+      if (scrollExtentMax != null && !nearEqual(node.scrollExtentMax, scrollExtentMax, 0.1)) {
         return false;
-      if (scrollExtentMin != null && !nearEqual(node.scrollExtentMin, scrollExtentMin, 0.1))
+      }
+      if (scrollExtentMin != null && !nearEqual(node.scrollExtentMin, scrollExtentMin, 0.1)) {
         return false;
+      }
       if (currentValueLength != null && node.currentValueLength != currentValueLength) {
         return false;
       }
@@ -593,7 +633,8 @@ class SemanticsTester {
   static String _flagsToSemanticsFlagExpression(dynamic flags) {
     Iterable<SemanticsFlag> list;
     if (flags is int) {
-      list = SemanticsFlag.values.values
+      // ignore: deprecated_member_use
+      list = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList
           .where((SemanticsFlag flag) => (flag.index & flags) != 0);
     } else {
       list = flags as List<SemanticsFlag>;
@@ -608,7 +649,8 @@ class SemanticsTester {
   static String _actionsToSemanticsActionExpression(dynamic actions) {
     Iterable<SemanticsAction> list;
     if (actions is int) {
-      list = SemanticsAction.values.values
+      // ignore: deprecated_member_use
+      list = SemanticsAction.doNotUseWillBeDeletedWithoutWarningValuesAsList
           .where((SemanticsAction action) => (action.index & actions) != 0);
     } else {
       list = actions as List<SemanticsAction>;
@@ -619,36 +661,46 @@ class SemanticsTester {
   /// Recursively generates [TestSemantics] code for [node] and its children,
   /// indenting the expression by `indentAmount`.
   static String _generateSemanticsTestForNode(SemanticsNode? node, int indentAmount, DebugSemanticsDumpOrder childOrder) {
-    if (node == null)
+    if (node == null) {
       return 'null';
+    }
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = StringBuffer();
     final SemanticsData nodeData = node.getSemanticsData();
     final bool isRoot = node.id == 0;
     buf.writeln('TestSemantics${isRoot ? '.root': ''}(');
-    if (!isRoot)
+    if (!isRoot) {
       buf.writeln('  id: ${node.id},');
-    if (nodeData.tags != null)
+    }
+    if (nodeData.tags != null) {
       buf.writeln('  tags: ${_tagsToSemanticsTagExpression(nodeData.tags!)},');
-    if (nodeData.flags != 0)
+    }
+    if (nodeData.flags != 0) {
       buf.writeln('  flags: ${_flagsToSemanticsFlagExpression(nodeData.flags)},');
-    if (nodeData.actions != 0)
+    }
+    if (nodeData.actions != 0) {
       buf.writeln('  actions: ${_actionsToSemanticsActionExpression(nodeData.actions)},');
-    if (node.label != null && node.label.isNotEmpty) {
+    }
+    if (node.label.isNotEmpty) {
       // Escape newlines and text directionality control characters.
       final String escapedLabel = node.label.replaceAll('\n', r'\n').replaceAll('\u202a', r'\u202a').replaceAll('\u202c', r'\u202c');
       buf.writeln("  label: '$escapedLabel',");
     }
-    if (node.value != null && node.value.isNotEmpty)
+    if (node.value.isNotEmpty) {
       buf.writeln("  value: '${node.value}',");
-    if (node.increasedValue != null && node.increasedValue.isNotEmpty)
+    }
+    if (node.increasedValue.isNotEmpty) {
       buf.writeln("  increasedValue: '${node.increasedValue}',");
-    if (node.decreasedValue != null && node.decreasedValue.isNotEmpty)
+    }
+    if (node.decreasedValue.isNotEmpty) {
       buf.writeln("  decreasedValue: '${node.decreasedValue}',");
-    if (node.hint != null && node.hint.isNotEmpty)
+    }
+    if (node.hint.isNotEmpty) {
       buf.writeln("  hint: '${node.hint}',");
-    if (node.textDirection != null)
+    }
+    if (node.textDirection != null) {
       buf.writeln('  textDirection: ${node.textDirection},');
+    }
     if (node.hasChildren) {
       buf.writeln('  children: <TestSemantics>[');
       for (final SemanticsNode child in node.debugListChildrenInOrder(childOrder)) {
@@ -671,11 +723,7 @@ class _HasSemantics extends Matcher {
     required this.ignoreTransform,
     required this.ignoreId,
     required this.childOrder,
-  }) : assert(_semantics != null),
-       assert(ignoreRect != null),
-       assert(ignoreId != null),
-       assert(ignoreTransform != null),
-       assert(childOrder != null);
+  });
 
   final TestSemantics _semantics;
   final bool ignoreRect;
@@ -757,6 +805,7 @@ class _IncludesNodeWith extends Matcher {
     this.textDirection,
     this.actions,
     this.flags,
+    this.tags,
     this.scrollPosition,
     this.scrollExtentMax,
     this.scrollExtentMin,
@@ -767,6 +816,7 @@ class _IncludesNodeWith extends Matcher {
        value != null ||
        actions != null ||
        flags != null ||
+       tags != null ||
        scrollPosition != null ||
        scrollExtentMax != null ||
        scrollExtentMin != null ||
@@ -782,6 +832,7 @@ class _IncludesNodeWith extends Matcher {
   final TextDirection? textDirection;
   final List<SemanticsAction>? actions;
   final List<SemanticsFlag>? flags;
+  final Set<SemanticsTag>? tags;
   final double? scrollPosition;
   final double? scrollExtentMax;
   final double? scrollExtentMin;
@@ -800,6 +851,7 @@ class _IncludesNodeWith extends Matcher {
       textDirection: textDirection,
       actions: actions,
       flags: flags,
+      tags: tags,
       scrollPosition: scrollPosition,
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
@@ -826,6 +878,7 @@ class _IncludesNodeWith extends Matcher {
       if (textDirection != null) ' (${textDirection!.name})',
       if (actions != null) 'actions "${actions!.join(', ')}"',
       if (flags != null) 'flags "${flags!.join(', ')}"',
+      if (tags != null) 'tags "${tags!.join(', ')}"',
       if (scrollPosition != null) 'scrollPosition "$scrollPosition"',
       if (scrollExtentMax != null) 'scrollExtentMax "$scrollExtentMax"',
       if (scrollExtentMin != null) 'scrollExtentMin "$scrollExtentMin"',
@@ -850,6 +903,7 @@ Matcher includesNodeWith({
   TextDirection? textDirection,
   List<SemanticsAction>? actions,
   List<SemanticsFlag>? flags,
+  Set<SemanticsTag>? tags,
   double? scrollPosition,
   double? scrollExtentMax,
   double? scrollExtentMin,
@@ -866,6 +920,7 @@ Matcher includesNodeWith({
     textDirection: textDirection,
     actions: actions,
     flags: flags,
+    tags: tags,
     scrollPosition: scrollPosition,
     scrollExtentMax: scrollExtentMax,
     scrollExtentMin: scrollExtentMin,

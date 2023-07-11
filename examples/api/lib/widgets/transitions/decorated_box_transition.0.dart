@@ -2,36 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for DecoratedBoxTransition
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [DecoratedBoxTransition].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const DecoratedBoxTransitionExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class DecoratedBoxTransitionExampleApp extends StatelessWidget {
+  const DecoratedBoxTransitionExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: DecoratedBoxTransitionExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class DecoratedBoxTransitionExample extends StatefulWidget {
+  const DecoratedBoxTransitionExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<DecoratedBoxTransitionExample> createState() => _DecoratedBoxTransitionExampleState();
 }
 
-/// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
-    with TickerProviderStateMixin {
+/// [AnimationController]s can be created with `vsync: this` because of
+/// [TickerProviderStateMixin].
+class _DecoratedBoxTransitionExampleState extends State<DecoratedBoxTransitionExample> with TickerProviderStateMixin {
   final DecorationTween decorationTween = DecorationTween(
     begin: BoxDecoration(
       color: const Color(0xFFFFFFFF),
@@ -43,7 +40,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
           blurRadius: 10.0,
           spreadRadius: 3.0,
           offset: Offset(0, 6.0),
-        )
+        ),
       ],
     ),
     end: BoxDecoration(
@@ -69,7 +66,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.white,
       child: Center(
         child: DecoratedBoxTransition(

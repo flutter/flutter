@@ -222,7 +222,7 @@ void main() {
     );
     final RenderOpacity root = RenderOpacity(
       opacity: .5,
-      child: blackBox,
+      child: RenderRepaintBoundary(child: blackBox),
     );
     layout(root, phase: EnginePhase.compositingBits);
 
@@ -231,7 +231,8 @@ void main() {
       rootLayer,
       const Rect.fromLTWH(0, 0, 500, 500),
     );
-    root.paint(context, const Offset(40, 40));
+    context.paintChild(root, const Offset(40, 40));
+
     final OpacityLayer opacityLayer = rootLayer.firstChild! as OpacityLayer;
     expect(opacityLayer.offset, const Offset(40, 40));
     debugDisableOpacityLayers = false;
@@ -259,5 +260,16 @@ void main() {
     debugDisableOpacityLayers = true;
     expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
     debugDisableOpacityLayers = false;
+  });
+
+  test('debugCheckHasBoundedAxis warns for vertical and horizontal axis', () {
+    expect(
+      () => debugCheckHasBoundedAxis(Axis.vertical, const BoxConstraints()),
+      throwsFlutterError,
+    );
+    expect(
+      () => debugCheckHasBoundedAxis(Axis.horizontal, const BoxConstraints()),
+      throwsFlutterError,
+    );
   });
 }

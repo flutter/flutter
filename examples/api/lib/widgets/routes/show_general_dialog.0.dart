@@ -2,29 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for showGeneralDialog
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [showGeneralDialog].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const GeneralDialogApp());
 
-  static const String _title = 'Flutter Code Sample';
+class GeneralDialogApp extends StatelessWidget {
+  const GeneralDialogApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
       restorationScopeId: 'app',
-      title: _title,
-      home: MyStatelessWidget(),
+      home: GeneralDialogExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class GeneralDialogExample extends StatelessWidget {
+  const GeneralDialogExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +29,7 @@ class MyStatelessWidget extends StatelessWidget {
       body: Center(
         child: OutlinedButton(
           onPressed: () {
+            /// This shows an alert dialog.
             Navigator.of(context).restorablePush(_dialogBuilder);
           },
           child: const Text('Open Dialog'),
@@ -40,8 +38,8 @@ class MyStatelessWidget extends StatelessWidget {
     );
   }
 
-  static Route<Object?> _dialogBuilder(
-      BuildContext context, Object? arguments) {
+  @pragma('vm:entry-point')
+  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return RawDialogRoute<void>(
       pageBuilder: (
         BuildContext context,

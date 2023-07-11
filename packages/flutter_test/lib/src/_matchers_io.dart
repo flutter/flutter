@@ -30,6 +30,15 @@ Future<ui.Image> captureImage(Element element) {
   return layer.toImage(renderObject.paintBounds);
 }
 
+/// Whether or not [captureImage] is supported.
+///
+/// This can be used to skip tests on platforms that don't support
+/// capturing images.
+///
+/// Currently this is true except when tests are running in the context of a web
+/// browser (`flutter test --platform chrome`).
+const bool canCaptureImage = true;
+
 /// The matcher created by [matchesGoldenFile]. This class is enabled when the
 /// test is running on a VM using conditional import.
 class MatchesGoldenFile extends AsyncMatcher {
@@ -84,15 +93,16 @@ class MatchesGoldenFile extends AsyncMatcher {
       throw AssertionError('must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
     }
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
     return binding.runAsync<String?>(() async {
       final ui.Image? image = await imageFuture;
       if (image == null) {
         throw AssertionError('Future<Image> completed to null');
       }
       final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null)
+      if (bytes == null) {
         return 'could not encode screenshot.';
+      }
       if (autoUpdateGoldenFiles) {
         await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
         return null;

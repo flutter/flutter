@@ -2,22 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Focus
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Focus].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const FocusExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class FocusExampleApp extends StatelessWidget {
+  const FocusExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      home: FocusExample(),
     );
   }
 }
@@ -25,9 +22,9 @@ class MyApp extends StatelessWidget {
 class FocusableText extends StatelessWidget {
   const FocusableText(
     this.data, {
-    Key? key,
+    super.key,
     required this.autofocus,
-  }) : super(key: key);
+  });
 
   /// The string to display as the text for this widget.
   final String data;
@@ -58,8 +55,8 @@ class FocusableText extends StatelessWidget {
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class FocusExample extends StatelessWidget {
+  const FocusExample({super.key});
 
   @override
   Widget build(BuildContext context) {

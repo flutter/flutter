@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -21,9 +19,9 @@ final Platform windowsPlatform = FakePlatform(
 );
 
 void main() {
-  Testbed testbed;
-  SourceVisitor visitor;
-  Environment environment;
+  late Testbed testbed;
+  late SourceVisitor visitor;
+  late Environment environment;
 
   setUp(() {
     testbed = Testbed(setup: () {
@@ -33,7 +31,7 @@ void main() {
       environment = Environment.test(
         globals.fs.currentDirectory,
         outputDir: outputs,
-        artifacts: globals.artifacts, // using real artifacts
+        artifacts: globals.artifacts!, // using real artifacts
         processManager: FakeProcessManager.any(),
         fileSystem: globals.fs,
         // engineVersion being null simulates a local engine.

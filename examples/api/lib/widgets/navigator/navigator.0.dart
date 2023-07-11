@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Navigator
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Navigator].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const NavigatorExampleApp());
+
+class NavigatorExampleApp extends StatelessWidget {
+  const NavigatorExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Code Sample for Navigator',
       // MaterialApp contains our top-level Navigator
       initialRoute: '/',
       routes: <String, WidgetBuilder>{
@@ -26,12 +25,12 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.headline4!,
+      style: Theme.of(context).textTheme.headlineMedium!,
       child: Container(
         color: Colors.white,
         alignment: Alignment.center,
@@ -42,18 +41,17 @@ class HomePage extends StatelessWidget {
 }
 
 class CollectPersonalInfoPage extends StatelessWidget {
-  const CollectPersonalInfoPage({Key? key}) : super(key: key);
+  const CollectPersonalInfoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.headline4!,
+      style: Theme.of(context).textTheme.headlineMedium!,
       child: GestureDetector(
         onTap: () {
           // This moves from the personal info page to the credentials page,
           // replacing this page with that one.
-          Navigator.of(context)
-              .pushReplacementNamed('signup/choose_credentials');
+          Navigator.of(context).pushReplacementNamed('signup/choose_credentials');
         },
         child: Container(
           color: Colors.lightBlue,
@@ -67,9 +65,9 @@ class CollectPersonalInfoPage extends StatelessWidget {
 
 class ChooseCredentialsPage extends StatelessWidget {
   const ChooseCredentialsPage({
-    Key? key,
+    super.key,
     required this.onSignupComplete,
-  }) : super(key: key);
+  });
 
   final VoidCallback onSignupComplete;
 
@@ -78,7 +76,7 @@ class ChooseCredentialsPage extends StatelessWidget {
     return GestureDetector(
       onTap: onSignupComplete,
       child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.headline4!,
+        style: Theme.of(context).textTheme.headlineMedium!,
         child: Container(
           color: Colors.pinkAccent,
           alignment: Alignment.center,
@@ -90,7 +88,7 @@ class ChooseCredentialsPage extends StatelessWidget {
 }
 
 class SignUpPage extends StatelessWidget {
-  const SignUpPage({Key? key}) : super(key: key);
+  const SignUpPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +103,6 @@ class SignUpPage extends StatelessWidget {
             // Assume CollectPersonalInfoPage collects personal info and then
             // navigates to 'signup/choose_credentials'.
             builder = (BuildContext context) => const CollectPersonalInfoPage();
-            break;
           case 'signup/choose_credentials':
             // Assume ChooseCredentialsPage collects new credentials and then
             // invokes 'onSignupComplete()'.
@@ -119,7 +116,6 @@ class SignUpPage extends StatelessWidget {
                     Navigator.of(context).pop();
                   },
                 );
-            break;
           default:
             throw Exception('Invalid route: ${settings.name}');
         }

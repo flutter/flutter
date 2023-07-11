@@ -2,28 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for PreferredSize
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [PreferredSize].
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+void main() => runApp(const PreferredSizeExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class PreferredSizeExampleApp extends StatelessWidget {
+  const PreferredSizeExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      home: PreferredSizeExample(),
     );
   }
 }
 
 class AppBarContent extends StatelessWidget {
-  const AppBarContent({Key? key}) : super(key: key);
+  const AppBarContent({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -63,8 +60,8 @@ class AppBarContent extends StatelessWidget {
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class PreferredSizeExample extends StatelessWidget {
+  const PreferredSizeExample({super.key});
 
   @override
   Widget build(BuildContext context) {

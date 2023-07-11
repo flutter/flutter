@@ -20,7 +20,7 @@ class MaterialColor extends ColorSwatch<int> {
   /// values in the swatch, as would be passed to the [Color.new] constructor
   /// for that same color, and as is exposed by [value]. (This is distinct from
   /// the specific index of the color in the swatch.)
-  const MaterialColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
+  const MaterialColor(super.primary, super.swatch);
 
   /// The lightest shade.
   Color get shade50 => this[50]!;
@@ -68,7 +68,7 @@ class MaterialColor extends ColorSwatch<int> {
 class MaterialAccentColor extends ColorSwatch<int> {
   /// Creates a color swatch with a variety of shades appropriate for accent
   /// colors.
-  const MaterialAccentColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
+  const MaterialAccentColor(super.primary, super.swatch);
 
   /// The lightest shade.
   Color get shade100 => this[100]!;
@@ -190,11 +190,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// See also:
 ///
 ///  * Cookbook: [Use themes to share colors and font styles](https://flutter.dev/docs/cookbook/design/themes)
-class Colors {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  Colors._();
-
+abstract final class Colors {
   /// Completely invisible.
   static const Color transparent = Color(0x00000000);
 
@@ -1885,7 +1881,7 @@ class Colors {
   );
   static const int _blueGreyPrimaryValue = 0xFF607D8B;
 
-  /// The material design primary color swatches, excluding grey.
+  /// The Material Design primary color swatches, excluding grey.
   static const List<MaterialColor> primaries = <MaterialColor>[
     red,
     pink,
@@ -1910,7 +1906,7 @@ class Colors {
     blueGrey,
   ];
 
-  /// The material design accent color swatches.
+  /// The Material Design accent color swatches.
   static const List<MaterialAccentColor> accents = <MaterialAccentColor>[
     redAccent,
     pinkAccent,

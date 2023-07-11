@@ -4,17 +4,22 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Convert a UTF32 rune to its lower case.
 int runeToLowerCase(int rune) {
   // Assume only Basic Multilingual Plane runes have lower and upper cases.
   // For other characters, return them as is.
   const int utf16BmpUpperBound = 0xD7FF;
-  if (rune > utf16BmpUpperBound)
+  if (rune > utf16BmpUpperBound) {
     return rune;
+  }
   return String.fromCharCode(rune).toLowerCase().codeUnitAt(0);
 }
 
@@ -36,10 +41,8 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     this.charactersIgnoringModifiers = '',
     this.keyCode = 0,
     this.modifiers = 0,
-  }) : assert(characters != null),
-       assert(charactersIgnoringModifiers != null),
-       assert(keyCode != null),
-       assert(modifiers != null);
+    this.specifiedLogicalKey,
+  });
 
   /// The Unicode characters associated with a key-up or key-down event.
   ///
@@ -70,6 +73,15 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   ///  * [Apple's NSEvent documentation](https://developer.apple.com/documentation/appkit/nsevent/1535211-modifierflags?language=objc)
   final int modifiers;
 
+  /// A logical key specified by the embedding that should be used instead of
+  /// deriving from raw data.
+  ///
+  /// The macOS embedding detects the keyboard layout and maps some keys to
+  /// logical keys in a way that can not be derived from per-key information.
+  ///
+  /// This is not part of the native macOS key event.
+  final int? specifiedLogicalKey;
+
   @override
   String get keyLabel => charactersIgnoringModifiers;
 
@@ -78,6 +90,10 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
   @override
   LogicalKeyboardKey get logicalKey {
+    if (specifiedLogicalKey != null) {
+      final int key = specifiedLogicalKey!;
+      return LogicalKeyboardKey.findKeyByKeyId(key) ?? LogicalKeyboardKey(key);
+    }
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. "=") and the number pad version
     // (e.g. the "=" on the number pad) can be determined.
@@ -148,19 +164,14 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     switch (key) {
       case ModifierKey.controlModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierControl, modifierLeftControl, modifierRightControl);
-        break;
       case ModifierKey.shiftModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierShift, modifierLeftShift, modifierRightShift);
-        break;
       case ModifierKey.altModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierOption, modifierLeftOption, modifierRightOption);
-        break;
       case ModifierKey.metaModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierCommand, modifierLeftCommand, modifierRightCommand);
-        break;
       case ModifierKey.capsLockModifier:
         result = independentModifier & modifierCapsLock != 0;
-        break;
     // On macOS, the function modifier bit is set for any function key, like F1,
     // F2, etc., but the meaning of ModifierKey.modifierFunction in Flutter is
     // that of the Fn modifier key, so there's no good way to emulate that on
@@ -171,7 +182,6 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       case ModifierKey.scrollLockModifier:
         // These modifier masks are not used in macOS keyboards.
         result = false;
-        break;
     }
     assert(!result || getModifierSide(key) != null, "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
     return result;
@@ -232,14 +242,17 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     properties.add(DiagnosticsProperty<String>('charactersIgnoringModifiers', charactersIgnoringModifiers));
     properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
     properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+    properties.add(DiagnosticsProperty<int?>('specifiedLogicalKey', specifiedLogicalKey, defaultValue: null));
   }
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RawKeyEventDataMacOs
         && other.characters == characters
         && other.charactersIgnoringModifiers == charactersIgnoringModifiers
