@@ -402,4 +402,71 @@ void main() {
     await tester.pumpWidget(buildWidget(border: allowedBorderDirectionalVariations, boxShape: BoxShape.circle));
     expect(tester.takeException(), isNull);
   });
+
+  test('Compound borders with differing preferPaintInteriors', () {
+    expect(ShapeWithInterior().preferPaintInterior, isTrue);
+    expect(ShapeWithoutInterior().preferPaintInterior, isFalse);
+    expect((ShapeWithInterior() + ShapeWithInterior()).preferPaintInterior, isTrue);
+    expect((ShapeWithInterior() + ShapeWithoutInterior()).preferPaintInterior, isFalse);
+    expect((ShapeWithoutInterior() + ShapeWithInterior()).preferPaintInterior, isFalse);
+    expect((ShapeWithoutInterior() + ShapeWithoutInterior()).preferPaintInterior, isFalse);
+  });
+}
+
+class ShapeWithInterior extends ShapeBorder {
+  @override
+  bool get preferPaintInterior => true;
+
+  @override
+  ShapeBorder scale(double t) {
+    return this;
+  }
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+    return Path();
+  }
+
+  @override
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+    return Path();
+  }
+
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) { }
+
+  @override
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) { }
+}
+
+class ShapeWithoutInterior extends ShapeBorder {
+  @override
+  bool get preferPaintInterior => false;
+
+  @override
+  ShapeBorder scale(double t) {
+    return this;
+  }
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+    return Path();
+  }
+
+  @override
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+    return Path();
+  }
+
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) { }
+
+  @override
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) { }
 }
