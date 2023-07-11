@@ -92,7 +92,7 @@ class Data3x3 : public DisplayListMatrixClipTracker::Data {
   SkMatrix matrix_;
 };
 
-static bool is_3x3(const SkM44& m) {
+bool DisplayListMatrixClipTracker::is_3x3(const SkM44& m) {
   // clang-format off
   return (                                      m.rc(0, 2) == 0 &&
                                                 m.rc(1, 2) == 0 &&

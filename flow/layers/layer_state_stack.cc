@@ -577,9 +577,13 @@ void MutatorContext::transform(const SkMatrix& matrix) {
 }
 
 void MutatorContext::transform(const SkM44& m44) {
-  layer_state_stack_->maybe_save_layer_for_transform(save_needed_);
-  save_needed_ = false;
-  layer_state_stack_->push_transform(m44);
+  if (DisplayListMatrixClipTracker::is_3x3(m44)) {
+    transform(m44.asM33());
+  } else {
+    layer_state_stack_->maybe_save_layer_for_transform(save_needed_);
+    save_needed_ = false;
+    layer_state_stack_->push_transform(m44);
+  }
 }
 
 void MutatorContext::integralTransform() {
