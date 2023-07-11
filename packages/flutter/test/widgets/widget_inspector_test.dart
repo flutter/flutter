@@ -10,6 +10,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -240,7 +241,64 @@ extension TextFromString on String {
   }
 }
 
+/// Forces garbage collection by aggressive memory allocation.
+///
+/// Copied from internal code of
+/// https://github.com/dart-lang/leak_tracker
+Future<void> _forceGC() async {
+  const int gcCycles = 3; // 1 should be enough, but we do 3 to make sure test is not flaky.
+  final int barrier = reachabilityBarrier;
+
+  final List<List<DateTime>> storage = <List<DateTime>>[];
+
+  void allocateMemory() {
+    storage.add(Iterable<DateTime>.generate(10000, (_) => DateTime.now()).toList());
+    if (storage.length > 100) {
+      storage.removeAt(0);
+    }
+  }
+
+  while (reachabilityBarrier < barrier + gcCycles) {
+    await Future<void>.delayed(Duration.zero);
+    allocateMemory();
+  }
+}
+
+final List<Object> _weakValueTests = <Object>[1, 1.0, 'hello', true, false, Object(), <int>[3, 4], DateTime(2023)];
+
 void main() {
+  group('$InspectorReferenceData', (){
+    for (final Object item in _weakValueTests) {
+      test('can be created for any type but $Record, $item', () async {
+        final InspectorReferenceData weakValue = InspectorReferenceData(item, 'id');
+        expect(weakValue.value, item);
+      });
+    }
+
+    test('throws for $Record', () async {
+      expect(()=> InspectorReferenceData((1, 2), 'id'), throwsA(isA<ArgumentError>()));
+    });
+  });
+
+  group('$WeakMap', (){
+    for (final Object item in _weakValueTests) {
+      test('assigns and removes value, $item', () async {
+        final WeakMap<Object, Object> weakMap = WeakMap<Object, Object>();
+        weakMap[item] = 1;
+        expect(weakMap[item], 1);
+        expect(weakMap.remove(item), 1);
+        expect(weakMap[item], null);
+      });
+    }
+
+    for (final Object item in _weakValueTests) {
+      test('returns null for absent value, $item', () async {
+        final WeakMap<Object, Object> weakMap = WeakMap<Object, Object>();
+        expect(weakMap[item], null);
+      });
+    }
+  });
+
   _TestWidgetInspectorService.runTests();
 }
 
@@ -263,6 +321,19 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     test ('objectToDiagnosticsNode returns null for non-diagnosticable', () {
       expect(WidgetInspectorService.objectToDiagnosticsNode(Alignment.bottomCenter), isNull);
+    });
+
+    test('WidgetInspector does not hold objects from GC', () async {
+      List<DateTime>? someObject = <DateTime>[DateTime.now(), DateTime.now()];
+      final String? id = service.toId(someObject, 'group_name');
+
+      expect(id, isNotNull);
+
+      final WeakReference<Object> ref = WeakReference<Object>(someObject);
+      someObject = null;
+      await _forceGC();
+
+      expect(ref.target, null);
     });
 
     testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
@@ -2184,7 +2255,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final List<DiagnosticsNode> expectedProperties = element.toDiagnosticsNode().getProperties();
         final Iterable<Object?> propertyValues = expectedProperties.map((DiagnosticsNode e) => e.value.toString());
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
-          final  String property = service.toObject(propertyJson['valueId']! as String)!.toString();
+          final String id = propertyJson['valueId']! as String;
+          final  String property = service.toObject(id)!.toString();
           expect(propertyValues, contains(property));
         }
       }
@@ -2227,7 +2299,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final List<DiagnosticsNode> expectedProperties = element.toDiagnosticsNode().getProperties();
         final Iterable<Object?> propertyValues = expectedProperties.map((DiagnosticsNode e) => e.value.toString());
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
-          final String property = service.toObject(propertyJson['valueId']! as String)!.toString();
+          final String id = propertyJson['valueId']! as String;
+          final String property = service.toObject(id)!.toString();
           expect(propertyValues, contains(property));
         }
       }
@@ -2283,7 +2356,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree', (WidgetTester tester) async {
       const String group = 'test-group';
-
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -2296,6 +2368,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         ),
       );
+
       final Element elementA = find.text('a').evaluate().first;
 
       service.disposeAllGroups();
@@ -2311,6 +2384,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
         <String, String>{'objectGroup': group},
       ))! as Map<String, Object?>;
+
       // We haven't yet properly specified which directories are summary tree
       // directories so we get an empty tree other than the root that is always
       // included.
@@ -3738,7 +3812,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(55));
+      expect(location.line, equals(56));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(1));
@@ -3748,7 +3822,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(93));
+      expect(location.line, equals(94));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(1));
@@ -3775,7 +3849,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(55));
+      expect(location.line, equals(56));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -3785,7 +3859,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(93));
+      expect(location.line, equals(94));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
