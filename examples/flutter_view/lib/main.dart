@@ -18,7 +18,6 @@ class FlutterView extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         title: 'Flutter View',
-        primarySwatch: Colors.grey,
         useMaterial3: true,
       ),
       home: const MyHomePage(),
