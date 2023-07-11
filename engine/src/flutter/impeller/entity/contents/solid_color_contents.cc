@@ -110,4 +110,10 @@ std::optional<Color> SolidColorContents::AsBackgroundColor(
              : std::optional<Color>();
 }
 
+bool SolidColorContents::ApplyColorFilter(
+    const ColorFilterProc& color_filter_proc) {
+  color_ = color_filter_proc(color_);
+  return true;
+}
+
 }  // namespace impeller

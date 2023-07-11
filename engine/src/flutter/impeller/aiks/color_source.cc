@@ -175,7 +175,8 @@ ColorSource ColorSource::MakeImage(std::shared_ptr<Texture> texture,
     if (paint.color_filter) {
       TiledTextureContents::ColorFilterProc filter_proc =
           [color_filter = paint.color_filter](FilterInput::Ref input) {
-            return color_filter->GetColorFilter(std::move(input), false);
+            return color_filter->WrapWithGPUColorFilter(std::move(input),
+                                                        false);
           };
       contents->SetColorFilter(filter_proc);
     }

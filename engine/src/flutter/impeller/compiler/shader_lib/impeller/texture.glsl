@@ -114,10 +114,11 @@ vec4 IPSampleLinearWithTileMode(sampler2D tex,
                                 float y_coord_scale,
                                 vec2 half_texel,
                                 float x_tile_mode,
-                                float y_tile_mode) {
+                                float y_tile_mode,
+                                vec4 decal_border_color) {
   if (x_tile_mode == kTileModeDecal && (coords.x < 0 || coords.x >= 1) ||
       y_tile_mode == kTileModeDecal && (coords.y < 0 || coords.y >= 1)) {
-    return vec4(0);
+    return decal_border_color;
   }
 
   return IPSampleLinear(tex, IPVec2Tile(coords, x_tile_mode, y_tile_mode),
@@ -152,9 +153,10 @@ vec4 IPSampleLinearWithTileMode(sampler2D tex,
                                 vec2 coords,
                                 float y_coord_scale,
                                 vec2 half_texel,
-                                float tile_mode) {
+                                float tile_mode,
+                                vec4 decal_border_color) {
   return IPSampleLinearWithTileMode(tex, coords, y_coord_scale, half_texel,
-                                    tile_mode, tile_mode);
+                                    tile_mode, tile_mode, decal_border_color);
 }
 
 #endif
