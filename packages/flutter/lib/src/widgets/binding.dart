@@ -497,6 +497,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
+      /// Whai is passed here? It holds widgets.
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;

@@ -203,14 +203,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Another license'), findsOneWidget);
   },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(polina-c): remove after fixing
-    // https://github.com/flutter/flutter/issues/130354
-    notGCedAllowList: <String, int?>{
-      'ValueNotifier<_OverlayEntryWidgetState?>':2,
-      'ValueNotifier<String?>': 1,
-    },
-  ));
+  leakTrackingTestConfig: const LeakTrackingTestConfig(leakDiagnosticConfig: LeakDiagnosticConfig(
+    collectRetainingPathForNonGCed: true,
+  )),
+  // leakTrackingTestConfig: const LeakTrackingTestConfig(
+  //   // TODO(polina-c): remove after fixing
+  //   // https://github.com/flutter/flutter/issues/130354
+  //   notGCedAllowList: <String, int?>{
+  //     'ValueNotifier<_OverlayEntryWidgetState?>':2,
+  //     'ValueNotifier<String?>': 1,
+  //   },
+  // )
+  );
 
   testWidgetsWithLeakTracking('LicensePage control test with all properties', (WidgetTester tester) async {
     /// ???
