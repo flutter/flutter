@@ -8,7 +8,8 @@ import 'framework.dart';
 import 'navigator.dart';
 import 'routes.dart';
 
-/// A callback type for informing that a navigation pop has happened.
+/// A callback type for informing that a navigation pop has been invoked,
+/// whether or not it was handled successfully.
 ///
 /// Accepts a didPop boolean indicating whether or not back navigation
 /// succeeded.
@@ -16,10 +17,20 @@ typedef PopInvokedCallback = void Function(bool didPop);
 
 /// Manages system back gestures.
 ///
-/// The [canPop] parameter can be used to disable system back gestures.
+/// The [canPop] parameter can be used to disable system back gestures. Defaults
+/// to true, meaning that back gestures happen as usual.
 ///
-/// The [onPopInvoked] parameter reports when system back gestures occur, regardless
-/// of whether or not they were successful.
+/// The [onPopInvoked] parameter reports when system back gestures occur,
+/// regardless of whether or not they were successful.
+///
+/// If [canPop] is false, then a system back gesture will not pop the route off
+/// of the enclosing [Navigator]. [onPopInvoked] will still be called, and
+/// `didPop` will be `false`.
+///
+/// If [canPop] is true, then a system back gesture will cause the enclosing
+/// [Navigator] to receive a pop as usual. [onPopInvoked] will be called with
+/// `didPop` as `true`, unless the pop failed for reasons unrelated to
+/// [PopScope], in which case it will be `false`.
 ///
 /// {@tool dartpad}
 /// This sample demonstrates how to use this widget to properly handle system
