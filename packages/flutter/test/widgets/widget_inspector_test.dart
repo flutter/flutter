@@ -10,7 +10,6 @@
 library;
 
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -20,6 +19,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker/leak_tracker.dart';
 
 import 'widget_inspector_test_utils.dart';
 
@@ -241,29 +241,6 @@ extension TextFromString on String {
   }
 }
 
-/// Forces garbage collection by aggressive memory allocation.
-///
-/// Copied from internal code of
-/// https://github.com/dart-lang/leak_tracker
-Future<void> _forceGC() async {
-  const int gcCycles = 3; // 1 should be enough, but we do 3 to make sure test is not flaky.
-  final int barrier = reachabilityBarrier;
-
-  final List<List<DateTime>> storage = <List<DateTime>>[];
-
-  void allocateMemory() {
-    storage.add(Iterable<DateTime>.generate(10000, (_) => DateTime.now()).toList());
-    if (storage.length > 100) {
-      storage.removeAt(0);
-    }
-  }
-
-  while (reachabilityBarrier < barrier + gcCycles) {
-    await Future<void>.delayed(Duration.zero);
-    allocateMemory();
-  }
-}
-
 final List<Object> _weakValueTests = <Object>[1, 1.0, 'hello', true, false, Object(), <int>[3, 4], DateTime(2023)];
 
 void main() {
@@ -331,7 +308,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       final WeakReference<Object> ref = WeakReference<Object>(someObject);
       someObject = null;
-      await _forceGC();
+
+      // One should be enough for [fullGcCycles], but 3 us used to make sure tests are not flaky.
+      await forceGC(fullGcCycles: 3);
 
       expect(ref.target, null);
     });
