@@ -543,7 +543,7 @@ void main() {
     Widget buildFrame({Color? activeColor, Color? checkColor, ThemeData? themeData}) {
       return Material(
         child: Theme(
-          data: theme,
+          data: themeData ?? theme,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return Checkbox(
@@ -586,7 +586,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(activeColor: activeColor));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: activeColor)); // paints's color is 0xFF000000 (params)
+    expect(getCheckboxRenderer(), paints..path(color: activeColor));
   });
 
   testWidgets('Material3 - Checkbox color rendering', (WidgetTester tester) async {
@@ -639,7 +639,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(activeColor: activeColor));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: activeColor)); // paints's color is 0xFF000000 (params)
+    expect(getCheckboxRenderer(), paints..path(color: activeColor));
   });
 
   testWidgets('Material2 - Checkbox is focusable and has correct focus color', (WidgetTester tester) async {
