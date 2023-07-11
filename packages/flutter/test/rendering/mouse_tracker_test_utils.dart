@@ -36,9 +36,14 @@ class TestMouseTrackerFlutterBinding extends BindingBase
     view: platformDispatcher.implicitView!,
   );
 
+  late final PipelineOwner _pipelineOwner = PipelineOwner(
+    onSemanticsUpdate: (ui.SemanticsUpdate _) { assert(false); },
+  );
+
   void setHitTest(BoxHitTest hitTest) {
-    if (rootPipelineOwner.rootNode == null) {
-      rootPipelineOwner.rootNode = _renderView;
+    if (_pipelineOwner.rootNode == null) {
+      _pipelineOwner.rootNode = _renderView;
+      rootPipelineOwner.adoptChild(_pipelineOwner);
       addRenderView(_renderView);
     }
     _renderView.child = _TestHitTester(hitTest);
