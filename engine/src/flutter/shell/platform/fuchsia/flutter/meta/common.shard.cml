@@ -42,7 +42,6 @@
                 "fuchsia.net.name.Lookup",
                 "fuchsia.posix.socket.Provider",
                 "fuchsia.sysmem.Allocator",
-                "fuchsia.tracing.provider.Registry", // Copied from vulkan/client.shard.cml.
                 "fuchsia.ui.composition.Allocator",
                 "fuchsia.ui.composition.Flatland",
                 "fuchsia.ui.input.ImeService",
@@ -51,6 +50,12 @@
                 "fuchsia.ui.scenic.Scenic",
                 "fuchsia.vulkan.loader.Loader", // Copied from vulkan/client.shard.cml.
             ],
+        },
+        {
+            protocol: [
+                "fuchsia.tracing.provider.Registry", // Copied from vulkan/client.shard.cml.
+            ],
+            availability: "optional",
         },
     ],
     expose: [
