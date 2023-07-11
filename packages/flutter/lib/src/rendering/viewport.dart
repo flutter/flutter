@@ -1819,6 +1819,28 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     final double crossAxisExtent;
     // Shrinkwrapping viewport only requires the cross axis to be bounded.
     assert(_debugCheckHasBoundedCrossAxis());
+    assert((){
+      if (debugCheckHasBoundedAxis(axis, constraints)) {
+        // The viewport is bounded, shrinkwrapping the children should not be
+        // necessary and could be causing performance issues.
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('RenderShrinkWrappingViewport has bounded constraints.'),
+          ErrorDescription(
+            'Using shrinkwrap is expensive and should only be used when '
+            'necessary as all of the children of the viewport will be evaluated '
+            'instead of lazily loading for performance. Being constrained, '
+            'shrinkwrap should not be necessary.'
+          ),
+          ErrorHint(
+            'Remove shrinkWrap if it is a property of the type of ScrollView '
+            'in use, or use a Viewport instead of a ShrinkWrappingViewport if '
+            'being instantiated directly.',
+          ),
+        ]);
+      }
+      return true;
+    }());
+
     switch (axis) {
       case Axis.vertical:
         mainAxisExtent = constraints.maxHeight;
