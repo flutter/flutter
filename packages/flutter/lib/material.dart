@@ -10,14 +10,10 @@
 ///
 /// See also:
 ///
-///  * [flutter.dev/widgets/material](https://flutter.dev/widgets/material)
+///  * [docs.flutter.dev/ui/widgets/material](https://docs.flutter.dev/ui/widgets/material)
 ///    for a catalog of commonly-used Material component widgets.
-///  * [material.io/design](https://material.io/design/)
-///    for an introduction to Material Design.
-///  * [material.io/components](https://material.io/components?platform=flutter)
-///    for the Material 2 specification.
-///  * [m3.material.io](https://m3.material.io)
-///    for the Material 3 specification.
+///  * [m3.material.io](https://m3.material.io/) for the Material 3 specification
+///  * [m2.material.io](https://m2.material.io/) for the Material 2 specification
 library material;
 
 export 'src/material/about.dart';
