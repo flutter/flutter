@@ -50,8 +50,10 @@ bool BlitCopyTextureToTextureCommandVK::Encode(
   dst_barrier.new_layout = vk::ImageLayout::eTransferDstOptimal;
   dst_barrier.src_access = {};
   dst_barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
-  dst_barrier.dst_access = vk::AccessFlagBits::eShaderRead;
-  dst_barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
+  dst_barrier.dst_access =
+      vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eTransferWrite;
+  dst_barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
+                          vk::PipelineStageFlagBits::eTransfer;
 
   if (!src.SetLayout(src_barrier) || !dst.SetLayout(dst_barrier)) {
     VALIDATION_LOG << "Could not complete layout transitions.";
