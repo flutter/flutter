@@ -50,8 +50,6 @@ typedef PopInvokedCallback = void Function(bool didPop);
 class PopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
-  ///
-  /// The [child] argument must not be null.
   const PopScope({
     super.key,
     required this.child,
@@ -128,9 +126,7 @@ class _PopScopeState extends State<PopScope> implements PopInterface {
   @override
   void didUpdateWidget(PopScope oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.canPop != oldWidget.canPop) {
-      canPopNotifier.value = widget.canPop;
-    }
+    canPopNotifier.value = widget.canPop;
   }
 
   @override
@@ -144,7 +140,7 @@ class _PopScopeState extends State<PopScope> implements PopInterface {
   Widget build(BuildContext context) => widget.child;
 }
 
-/// An interface to into navigation pop events.
+/// An interface into navigation pop events.
 ///
 /// Can be registered in [ModalRoute] to listen to pops with [onPopInvoked] or to
 /// enable/disable them with [canPopNotifier].
