@@ -121,7 +121,7 @@ String _testTypeToIndexFile(ServiceWorkerTestType type) {
     case ServiceWorkerTestType.withFlutterJsTrustedTypesOn:
       indexFile = 'index_with_flutterjs_el_tt_on.html';
     case ServiceWorkerTestType.withFlutterJsCustomServiceWorkerVersion:
-      indexFile = 'index_with_flutterjs_custom_version.html';
+      indexFile = 'index_with_flutterjs_custom_sw_version.html';
     case ServiceWorkerTestType.generatedEntrypoint:
       indexFile = 'generated_entrypoint.html';
   }
