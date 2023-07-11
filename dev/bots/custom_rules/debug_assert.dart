@@ -201,7 +201,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
       case ExecutableElement(:final InterfaceElement enclosingElement):
         assert(!element.isStatic);
         return _overriddableClassMemberHasDebugAnnotation(element, enclosingElement);
-      // Non class members and fields (which we assume isn't overridable).
+      // Non class members and fields (which we assume are not overridable).
       case FieldElement() || ExecutableElement():
         assert(element is FieldElement || element.enclosingElement is! InterfaceElement);
         return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement);
@@ -297,7 +297,8 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
 
     // If this constructor does not invoke any constructor in the initializer
     // list, then it calls the unnamed constructor from the super class
-    // implicitly.
+    // implicitly (either the default constructor or the unamed constructor via
+    // "super parameter").
     if (!hasExplicitConstructor) {
       final InterfaceType? supertype = element.enclosingElement.supertype;
       if (supertype != null && !supertype.element.library.isInSdk) {
