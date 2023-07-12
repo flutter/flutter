@@ -17,8 +17,7 @@ import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
-const String gobMirror =
-    'https://flutter.googlesource.com/mirrors/flutter';
+const String gobMirror = 'https://flutter.googlesource.com/mirrors/flutter';
 const String githubRepo = 'https://github.com/flutter/flutter.git';
 const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra_release/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
@@ -450,11 +449,9 @@ class ArchiveCreator {
         while (true) {
           retries-=1;
           try {
-            final Uri packageListingUrl =
-              Uri.parse('https://pub.dev/api/packages/$name');
+            final Uri packageListingUrl = Uri.parse('https://pub.dev/api/packages/$name');
             // Fetch the package listing to obtain the package download url.
-            final http.Response packageListingResponse =
-                await client.get(packageListingUrl);
+            final http.Response packageListingResponse = await client.get(packageListingUrl);
             if (packageListingResponse.statusCode != 200) {
               throw Exception('Downloading $packageListingUrl failed. Status code ${packageListingResponse.statusCode}.');
             }
@@ -511,8 +508,7 @@ class ArchiveCreator {
         }
       });
     }
-    final Map<String, dynamic> cacheDescription =
-        json.decode(await _runFlutter(<String>['pub', 'cache', 'list'])) as Map<String, dynamic>;
+    final Map<String, dynamic> cacheDescription = json.decode(await _runFlutter(<String>['pub', 'cache', 'list'])) as Map<String, dynamic>;
     final Map<String, dynamic> packages = cacheDescription['packages'] as Map<String, dynamic>;
     final List<Future<void>> downloads = <Future<void>>[];
     for (final MapEntry<String, dynamic> package in packages.entries) {

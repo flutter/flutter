@@ -103,7 +103,7 @@ void main() {
       );
 
       int errorCount = 0;
-      final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+      final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => !analyzing).first;
       server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
 
       await server.start();
@@ -144,7 +144,7 @@ void main() {
     );
 
     int errorCount = 0;
-    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => !analyzing).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
@@ -172,7 +172,7 @@ void main() {
     );
 
     int errorCount = 0;
-    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => !analyzing).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });

@@ -1893,6 +1893,10 @@ class _TabBarViewState extends State<TabBarView> {
       return false;
     }
 
+    if (!_controllerIsValid) {
+      return false;
+    }
+
     _scrollUnderwayCount += 1;
     if (notification is ScrollUpdateNotification && !_controller!.indexIsChanging) {
       final bool pageChanged = (_pageController.page! - _controller!.index).abs() > 1.0;
@@ -2160,8 +2164,6 @@ class _TabsDefaultsM2 extends TabBarTheme {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   _TabsPrimaryDefaultsM3(this.context, this.isScrollable)

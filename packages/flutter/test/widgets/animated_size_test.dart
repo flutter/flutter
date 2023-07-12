@@ -286,7 +286,7 @@ void main() {
       final RenderAnimatedSize renderObject = tester.renderObject(find.byType(AnimatedSize));
       expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-      for(final Clip clip in Clip.values) {
+      for (final Clip clip in Clip.values) {
         await tester.pumpWidget(
           Center(
             child: AnimatedSize(

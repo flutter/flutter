@@ -21,6 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show OverflowWidgetTextEditingController;
+import '../widgets/live_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 
 // On web, the context menu (aka toolbar) is provided by the browser.
@@ -80,7 +81,7 @@ class PathBoundsMatcher extends Matcher {
     final List<dynamic> values = <dynamic> [bounds, bounds.top, bounds.left, bounds.right, bounds.bottom];
     final Map<Matcher, dynamic> failedMatcher = <Matcher, dynamic> {};
 
-    for(int idx = 0; idx < matchers.length; idx++) {
+    for (int idx = 0; idx < matchers.length; idx++) {
       if (!(matchers[idx]?.matches(values[idx], matchState) ?? true)) {
         failedMatcher[matchers[idx]!] = values[idx];
       }
@@ -199,11 +200,55 @@ void main() {
   Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(kIsWeb ? 1 : 0, -2);
 
   setUp(() async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     EditableText.debugDeterministicCursor = false;
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
+
+
+  testWidgets(
+    'Live Text button shows and hides correctly when LiveTextStatus changes',
+    (WidgetTester tester) async {
+      final LiveTextInputTester liveTextInputTester = LiveTextInputTester();
+      addTearDown(liveTextInputTester.dispose);
+
+      final TextEditingController controller = TextEditingController(text: '');
+      const Key key = ValueKey<String>('TextField');
+      final FocusNode focusNode = FocusNode();
+      final Widget app = MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          body: Center(
+            child: CupertinoTextField(
+              key: key,
+              controller: controller,
+              focusNode: focusNode,
+            ),
+          ),
+        ),
+      );
+
+      liveTextInputTester.mockLiveTextInputEnabled = true;
+      await tester.pumpWidget(app);
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(
+        findLiveTextButton(),
+        kIsWeb ? findsNothing : findsOneWidget,
+      );
+
+      liveTextInputTester.mockLiveTextInputEnabled = false;
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(findLiveTextButton(), findsNothing);
+    },
+  );
 
   testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -1545,7 +1590,7 @@ void main() {
 
     Text text = tester.widget<Text>(find.text('Paste'));
     expect(text.style!.color!.value, CupertinoColors.black.value);
-    expect(text.style!.fontSize, 14);
+    expect(text.style!.fontSize, 15);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
 
@@ -1577,7 +1622,7 @@ void main() {
     text = tester.widget<Text>(find.text('Paste'));
     // The toolbar buttons' text are still the same style.
     expect(text.style!.color!.value, CupertinoColors.white.value);
-    expect(text.style!.fontSize, 14);
+    expect(text.style!.fontSize, 15);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
@@ -6537,7 +6582,7 @@ void main() {
             topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
             leftMatcher: moreOrLessEquals(8),
             rightMatcher: lessThanOrEqualTo(400 - 8),
-            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 45, epsilon: 0.01),
           ),
         ),
       );
@@ -6597,7 +6642,7 @@ void main() {
           pathMatcher: PathBoundsMatcher(
             topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
             rightMatcher: moreOrLessEquals(400.0 - 8),
-            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 45, epsilon: 0.01),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
         ),
@@ -6650,7 +6695,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
@@ -6719,7 +6764,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),
@@ -6792,7 +6837,7 @@ void main() {
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
-            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 45, epsilon: 0.01),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             leftMatcher: greaterThanOrEqualTo(8),
           ),

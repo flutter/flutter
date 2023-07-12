@@ -26,6 +26,11 @@ String camelCase(String str) {
   return str;
 }
 
+/// Convert `fooBar` to `foo-bar`.
+String kebabCase(String str) {
+  return snakeCase(str, '-');
+}
+
 final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
@@ -54,7 +59,8 @@ String sentenceCase(String str, [String? locale]) {
   if (str.isEmpty) {
     return str;
   }
-  return toBeginningOfSentenceCase(str, locale)!;
+  // TODO(christopherfujino): Remove this check after the next release of intl
+  return ArgumentError.checkNotNull(toBeginningOfSentenceCase(str, locale));
 }
 
 /// Converts `foo_bar` to `Foo Bar`.

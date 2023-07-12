@@ -15,6 +15,42 @@ void main() {
         const ActionIconThemeData().copyWith().hashCode);
   });
 
+  testWidgets('ActionIconThemeData copyWith overrides all properties', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/126762.
+    Widget originalButtonBuilder(BuildContext context) {
+      return const SizedBox();
+    }
+    Widget newButtonBuilder(BuildContext context) {
+      return const Icon(Icons.add);
+    }
+
+    // Create a ActionIconThemeData with all properties set.
+    final ActionIconThemeData original = ActionIconThemeData(
+      backButtonIconBuilder: originalButtonBuilder,
+      closeButtonIconBuilder: originalButtonBuilder,
+      drawerButtonIconBuilder: originalButtonBuilder,
+      endDrawerButtonIconBuilder: originalButtonBuilder,
+    );
+    // Check if the all properties are copied.
+    final ActionIconThemeData copy = original.copyWith();
+    expect(copy.backButtonIconBuilder, originalButtonBuilder);
+    expect(copy.closeButtonIconBuilder, originalButtonBuilder);
+    expect(copy.drawerButtonIconBuilder, originalButtonBuilder);
+    expect(copy.endDrawerButtonIconBuilder, originalButtonBuilder);
+
+    // Check if the properties are overriden.
+    final ActionIconThemeData overridden = original.copyWith(
+      backButtonIconBuilder: newButtonBuilder,
+      closeButtonIconBuilder: newButtonBuilder,
+      drawerButtonIconBuilder: newButtonBuilder,
+      endDrawerButtonIconBuilder: newButtonBuilder,
+    );
+    expect(overridden.backButtonIconBuilder, newButtonBuilder);
+    expect(overridden.closeButtonIconBuilder, newButtonBuilder);
+    expect(overridden.drawerButtonIconBuilder, newButtonBuilder);
+    expect(overridden.endDrawerButtonIconBuilder, newButtonBuilder);
+  });
+
   test('ActionIconThemeData defaults', () {
     const ActionIconThemeData themeData = ActionIconThemeData();
     expect(themeData.backButtonIconBuilder, null);

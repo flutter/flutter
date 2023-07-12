@@ -638,7 +638,7 @@ class ProxiedPortForwarder extends DevicePortForwarder {
 }
 
 Future<ServerSocket> _defaultCreateServerSocket(Logger logger, int? hostPort, bool? ipv6) async {
-  if (ipv6 == null || ipv6 == false) {
+  if (ipv6 == null || !ipv6) {
     try {
       return await ServerSocket.bind(InternetAddress.loopbackIPv4, hostPort ?? 0);
     } on SocketException {

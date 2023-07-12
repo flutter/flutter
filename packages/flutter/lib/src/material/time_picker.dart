@@ -2291,7 +2291,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context));
         final double timePickerWidth;
-        switch(timeOfDayFormat) {
+        switch (timeOfDayFormat) {
           case TimeOfDayFormat.HH_colon_mm:
           case TimeOfDayFormat.HH_dot_mm:
           case TimeOfDayFormat.frenchCanadian:
@@ -2331,7 +2331,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context));
         final double timePickerWidth;
-        switch(timeOfDayFormat) {
+        switch (timeOfDayFormat) {
           case TimeOfDayFormat.HH_colon_mm:
           case TimeOfDayFormat.HH_dot_mm:
           case TimeOfDayFormat.frenchCanadian:
@@ -3321,8 +3321,6 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _TimePickerDefaultsM3 extends _TimePickerDefaults {
   _TimePickerDefaultsM3(this.context);

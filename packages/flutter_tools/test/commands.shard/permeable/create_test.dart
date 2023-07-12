@@ -78,7 +78,7 @@ void main() {
     projectDir = tempDir.childDirectory('flutter_project');
     fakeFlutterVersion = FakeFlutterVersion(
       frameworkRevision: frameworkRevision,
-      channel: frameworkChannel,
+      branch: frameworkChannel,
     );
     fakeProcessManager = FakeProcessManager.empty();
     mockStdio = FakeStdio();
@@ -1269,8 +1269,8 @@ void main() {
     expectExists(versionPath);
     final String version = globals.fs.file(globals.fs.path.join(projectDir.path, versionPath)).readAsStringSync();
     expect(version, contains('version:'));
-    expect(version, contains('revision: 12345678'));
-    expect(version, contains('channel: omega'));
+    expect(version, contains('revision: "12345678"'));
+    expect(version, contains('channel: "omega"'));
 
     // IntelliJ metadata
     final String intelliJSdkMetadataPath = globals.fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
@@ -1349,8 +1349,8 @@ void main() {
     expectExists(versionPath);
     final String version = globals.fs.file(globals.fs.path.join(projectDir.path, versionPath)).readAsStringSync();
     expect(version, contains('version:'));
-    expect(version, contains('revision: 12345678'));
-    expect(version, contains('channel: omega'));
+    expect(version, contains('revision: "12345678"'));
+    expect(version, contains('channel: "omega"'));
 
     // IntelliJ metadata
     final String intelliJSdkMetadataPath = globals.fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
@@ -2917,6 +2917,48 @@ void main() {
     expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
     // The namespace should be conditionalized for AGP <4.2.
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
+  });
+
+  testUsingContext('Flutter module Android project contains namespace', () async {
+    const String moduleBuildGradleFilePath = '.android/build.gradle';
+    const String moduleAppBuildGradleFlePath = '.android/app/build.gradle';
+    const String moduleFlutterBuildGradleFilePath = '.android/Flutter/build.gradle';
+    await _createProject(
+      projectDir,
+      <String>['--template=module', '--org', 'com.bar.foo'],
+      <String>[moduleBuildGradleFilePath,
+        moduleAppBuildGradleFlePath,
+        moduleFlutterBuildGradleFilePath,
+      ],
+    );
+
+    final String moduleBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleBuildGradleFilePath)).readAsString();
+    final String moduleAppBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleAppBuildGradleFlePath)).readAsString();
+    final String moduleFlutterBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath)).readAsString();
+
+    // Each build file should contain the expected namespace.
+    const String expectedNameSpace = "namespace 'com.bar.foo.flutter_project'";
+    expect(moduleBuildGradleFileContent.contains(expectedNameSpace), true);
+    expect(moduleFlutterBuildGradleFileContent.contains(expectedNameSpace), true);
+    const String expectedHostNameSpace = 'namespace "com.bar.foo.flutter_project.host"';
+    expect(moduleAppBuildGradleFileContent.contains(expectedHostNameSpace), true);
+
+    // The namespaces should be conditionalized for AGP <4.2.
+    const String expectedConditional = 'if (project.android.hasProperty("namespace")) {';
+    expect(moduleBuildGradleFileContent.contains(expectedConditional), true);
+    expect(moduleAppBuildGradleFileContent.contains(expectedConditional), true);
+    expect(moduleFlutterBuildGradleFileContent.contains(expectedConditional), true);
+
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: mockStdio,
+    ),
   });
 
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {

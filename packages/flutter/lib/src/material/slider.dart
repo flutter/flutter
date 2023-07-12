@@ -684,6 +684,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   void _actionHandler(_AdjustSliderIntent intent) {
     final _RenderSlider renderSlider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
     final TextDirection textDirection = Directionality.of(_renderObjectKey.currentContext!);
+
     switch (intent.type) {
       case _SliderAdjustmentType.right:
         switch (textDirection) {
@@ -1511,8 +1512,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           _state.interactionTimer?.cancel();
           _state.interactionTimer = Timer(_minimumInteractionTime * timeDilation, () {
             _state.interactionTimer = null;
-            if (!_active && !hasFocus &&
-                _state.valueIndicatorController.status == AnimationStatus.completed) {
+            if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
               _state.valueIndicatorController.reverse();
             }
           });
@@ -1530,10 +1530,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       onChangeEnd?.call(_discretize(_currentDragValue));
       _active = false;
       _currentDragValue = 0.0;
-      if (!hasFocus) {
-        _state.overlayController.reverse();
-      }
-
+      _state.overlayController.reverse();
       if (showValueIndicator && _state.interactionTimer == null) {
         _state.valueIndicatorController.reverse();
       }
@@ -1802,14 +1799,32 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void increaseAction() {
     if (isInteractive) {
-      onChanged!(clampDouble(value + _semanticActionUnit, 0.0, 1.0));
+      onChangeStart!(currentValue);
+      final double increase = increaseValue();
+      onChanged!(increase);
+      onChangeEnd!(increase);
     }
   }
 
   void decreaseAction() {
     if (isInteractive) {
-      onChanged!(clampDouble(value - _semanticActionUnit, 0.0, 1.0));
+      onChangeStart!(currentValue);
+      final double decrease = decreaseValue();
+      onChanged!(decrease);
+      onChangeEnd!(decrease);
     }
+  }
+
+  double get currentValue {
+    return clampDouble(value, 0.0, 1.0);
+  }
+
+  double increaseValue() {
+    return clampDouble(value + _semanticActionUnit, 0.0, 1.0);
+  }
+
+  double decreaseValue() {
+    return clampDouble(value - _semanticActionUnit, 0.0, 1.0);
   }
 }
 
@@ -1957,8 +1972,6 @@ class _SliderDefaultsM2 extends SliderThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(this.context)

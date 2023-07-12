@@ -149,6 +149,7 @@ final class PlatformAdaptiveIcons implements Icons {
 ///  * [IconButton]
 ///  * <https://material.io/resources/icons>
 ///  * [AnimatedIcons], for the list of available animated Material Icons.
+/// {@hideConstantImplementations}
 @staticIconProvider
 abstract final class Icons {
   /// A set of platform-adaptive Material Design icons.

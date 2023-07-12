@@ -91,7 +91,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return ${componentColor('md.comp.filled-text-field.disabled.leading-icon')};
     }
-    if(states.contains(MaterialState.error)) {
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('md.comp.filled-text-field.error.hover.leading-icon')};
       }
@@ -114,7 +114,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return ${componentColor('md.comp.filled-text-field.disabled.trailing-icon')};
     }
-    if(states.contains(MaterialState.error)) {${componentColor('md.comp.filled-text-field.error.trailing-icon') == componentColor('md.comp.filled-text-field.error.focus.trailing-icon') ? '' : '''
+    if (states.contains(MaterialState.error)) {${componentColor('md.comp.filled-text-field.error.trailing-icon') == componentColor('md.comp.filled-text-field.error.focus.trailing-icon') ? '' : '''
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('md.comp.filled-text-field.error.hover.trailing-icon')};
       }
@@ -138,7 +138,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.disabled.label-text')});
     }
-    if(states.contains(MaterialState.error)) {
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
         return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.hover.label-text')});
       }
@@ -162,7 +162,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.disabled.label-text')});
     }
-    if(states.contains(MaterialState.error)) {
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
         return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.hover.label-text')});
       }
@@ -215,10 +215,10 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
         ? componentColor(componentToken1)
         : componentColor(componentToken2);
     final double width = (
-        tokens['$componentToken1.width'] ??
-        tokens['$componentToken1.height'] ??
-        tokens['$componentToken2.width'] ??
-        tokens['$componentToken2.height'] ??
+        getToken('$componentToken1.width') ??
+        getToken('$componentToken1.height') ??
+        getToken('$componentToken2.width') ??
+        getToken('$componentToken2.height') ??
         1.0) as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }

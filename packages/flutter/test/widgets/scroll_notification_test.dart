@@ -31,6 +31,7 @@ void main() {
     expect(event.metrics.extentBefore, 0.0);
     expect(event.metrics.extentInside, 600.0);
     expect(event.metrics.extentAfter, 400.0);
+    expect(event.metrics.extentTotal, 1000.0);
 
     events.clear();
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
@@ -53,6 +54,7 @@ void main() {
     expect(event.metrics.extentBefore, 10.0);
     expect(event.metrics.extentInside, 590.0);
     expect(event.metrics.extentAfter, 0.0);
+    expect(event.metrics.extentTotal, 600.0);
 
     events.clear();
     // The content dimensions does not change.

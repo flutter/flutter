@@ -577,7 +577,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   bool get isFocused => _isFocused;
   bool _isFocused;
   set isFocused(bool value) {
-    if(value == _isFocused) {
+    if (value == _isFocused) {
       return;
     }
     _isFocused = value;
@@ -637,7 +637,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
 
-    if(_isFocused) {
+    if (_isFocused) {
       // Paints a border around the switch in the focus color.
       final RRect borderTrackRRect = trackRRect.inflate(1.75);
 

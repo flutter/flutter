@@ -70,12 +70,14 @@ TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool? enableImpeller}
   ).run;
 }
 
-TaskFunction createAndroidTextureScrollPerfTest() {
+TaskFunction createAndroidTextureScrollPerfTest({bool? enableImpeller}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/android_view_scroll_perf.dart',
     'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
+    needsFullTimeline: false,
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -638,6 +640,19 @@ TaskFunction createAnimatedBlurBackropFilterPerfTest({
   ).run;
 }
 
+TaskFunction createDrawPointsPerfTest({
+  bool? enableImpeller,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'draw_points_perf',
+    enableImpeller: enableImpeller,
+    testDriver: 'test_driver/draw_points_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({
   bool? enableImpeller,
 }) {
@@ -756,6 +771,15 @@ class StartupTest {
       const int maxFailures = 3;
       int currentFailures = 0;
       for (int i = 0; i < iterations; i += 1) {
+        // Startup should not take more than a few minutes. After 10 minutes,
+        // take a screenshot to help debug.
+        final Timer timer = Timer(const Duration(minutes: 10), () async {
+          print('Startup not completed within 10 minutes. Taking a screenshot...');
+          await _flutterScreenshot(
+            device.deviceId,
+            'screenshot_startup_${DateTime.now().toLocal().toIso8601String()}.png',
+          );
+        });
         final int result = await flutter('run', options: <String>[
           '--no-android-gradle-daemon',
           '--no-publish-port',
@@ -767,7 +791,8 @@ class StartupTest {
           device.deviceId,
           if (applicationBinaryPath != null)
             '--use-application-binary=$applicationBinaryPath',
-         ], canFail: true);
+        ], canFail: true);
+        timer.cancel();
         if (result == 0) {
           final Map<String, dynamic> data = json.decode(
             file('${_testOutputDirectory(testDirectory)}/start_up_info.json').readAsStringSync(),
@@ -775,20 +800,10 @@ class StartupTest {
           results.add(data);
         } else {
           currentFailures += 1;
-          if (hostAgent.dumpDirectory != null) {
-            await flutter(
-              'screenshot',
-              options: <String>[
-                '-d',
-                device.deviceId,
-                '--out',
-                hostAgent.dumpDirectory!
-                    .childFile('screenshot_startup_failure_$currentFailures.png')
-                    .path,
-              ],
-              canFail: true,
-            );
-          }
+          await _flutterScreenshot(
+            device.deviceId,
+            'screenshot_startup_failure_$currentFailures.png',
+          );
           i -= 1;
           if (currentFailures == maxFailures) {
             return TaskResult.failure('Application failed to start $maxFailures times');
@@ -813,6 +828,23 @@ class StartupTest {
         'timeToFirstFrameRasterizedMicros',
       ]);
     });
+  }
+
+  Future<void> _flutterScreenshot(String deviceId, String screenshotName) async {
+    if (hostAgent.dumpDirectory != null) {
+      await flutter(
+        'screenshot',
+        options: <String>[
+          '-d',
+          deviceId,
+          '--out',
+          hostAgent.dumpDirectory!
+              .childFile(screenshotName)
+              .path,
+        ],
+        canFail: true,
+      );
+    }
   }
 }
 

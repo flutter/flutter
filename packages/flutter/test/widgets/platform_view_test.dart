@@ -3168,4 +3168,28 @@ void main() {
     expect(controller.dispatchedPointerEvents, hasLength(1));
     expect(controller.dispatchedPointerEvents[0], isA<PointerHoverEvent>());
   });
+
+  testWidgets('HtmlElementView can be instantiated', (WidgetTester tester) async {
+    late final Widget htmlElementView;
+    expect(() {
+      htmlElementView = const HtmlElementView(viewType: 'webview');
+    }, returnsNormally);
+
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: htmlElementView,
+        ),
+      )
+    );
+    await tester.pumpAndSettle();
+
+    // This file runs on non-web platforms, so we expect `HtmlElementView` to
+    // fail.
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect(exception.toString(), contains('HtmlElementView is only available on Flutter Web'));
+  });
 }

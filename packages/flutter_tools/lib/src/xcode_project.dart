@@ -508,7 +508,7 @@ class IosProject extends XcodeBasedProject {
     // In newer versions of Xcode, the build settings of the watchOS companion
     // app's scheme should contain the key INFOPLIST_KEY_WKCompanionAppBundleIdentifier.
     final bool watchIdentifierFound = xcodeProjectInfoFile.readAsStringSync().contains('WKCompanionAppBundleIdentifier');
-    if (watchIdentifierFound == false) {
+    if (!watchIdentifierFound) {
       return false;
     }
 

@@ -20,7 +20,7 @@ void main() {
     expect(thumbnailAspectRatio.aspectRatio, 1.0);
 
     // The Expanded widget is used to control the size of the text.
-    Expanded textExpanded = tester.widget(find.ancestor(
+    final Expanded textExpanded = tester.widget(find.ancestor(
       of: find.text('Flutter 1.0 Launch'),
       matching: find.byType(Expanded).at(0),
     ));
@@ -32,12 +32,5 @@ void main() {
       matching: find.byType(AspectRatio),
     ));
     expect(thumbnailAspectRatio.aspectRatio, 1.0);
-
-    // The Expanded widget is used to control the size of the text.
-    textExpanded = tester.widget(find.ancestor(
-      of: find.text('Flutter 1.2 Release - Continual updates to the framework'),
-      matching: find.byType(Expanded).at(3),
-    ));
-    expect(textExpanded.flex, 1);
   });
 }

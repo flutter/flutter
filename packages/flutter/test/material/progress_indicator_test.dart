@@ -723,7 +723,10 @@ void main() {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
 
     await tester.pumpFrames(animationSheet.record(
-      const _RefreshProgressIndicatorGolden(),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const _RefreshProgressIndicatorGolden()
+      ),
     ), const Duration(seconds: 3));
 
     await expectLater(
@@ -1001,11 +1004,14 @@ void main() {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
 
     await tester.pumpFrames(animationSheet.record(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Padding(
-          padding: EdgeInsets.all(4),
-          child: CircularProgressIndicator(),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Padding(
+            padding: EdgeInsets.all(4),
+            child: CircularProgressIndicator(),
+          ),
         ),
       ),
     ), const Duration(seconds: 2));

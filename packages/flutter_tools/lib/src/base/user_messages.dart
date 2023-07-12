@@ -21,7 +21,7 @@ class UserMessages {
 
   // Messages used in FlutterValidator
   String flutterStatusInfo(String? channel, String? version, String os, String locale) =>
-      'Channel ${channel ?? 'unknown'}, ${version ?? 'Unknown'}, on $os, locale $locale';
+      'Channel ${channel ?? 'unknown'}, ${version ?? 'unknown version'}, on $os, locale $locale';
   String flutterVersion(String version, String channel, String flutterRoot) =>
       'Flutter version $version on channel $channel at $flutterRoot';
   String get flutterUnknownChannel =>
@@ -183,10 +183,10 @@ class UserMessages {
       '  sudo xcodebuild -runFirstLaunch';
   String get xcodeMissing =>
       'Xcode not installed; this is necessary for iOS and macOS development.\n'
-      'Download at https://developer.apple.com/xcode/download/.';
+      'Download at https://developer.apple.com/xcode/.';
   String get xcodeIncomplete =>
       'Xcode installation is incomplete; a full installation is necessary for iOS and macOS development.\n'
-      'Download at: https://developer.apple.com/xcode/download/\n'
+      'Download at: https://developer.apple.com/xcode/\n'
       'Or install Xcode via the App Store.\n'
       'Once installed, run:\n'
       '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer\n'

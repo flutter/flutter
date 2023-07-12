@@ -1096,6 +1096,7 @@ void main() {
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
       '--enable-embedder-api',
+      '--ci',
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -1114,6 +1115,7 @@ void main() {
     expect(options.impellerForceGL, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
+    expect(options.usingCISystem, true);
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
@@ -1146,10 +1148,8 @@ void main() {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({required this.logger}) : super(logger: logger);
+  TestDeviceManager({required super.logger});
   List<Device> devices = <Device>[];
-
-  final Logger logger;
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
@@ -1278,10 +1278,10 @@ class FakeDevice extends Fake implements Device {
     bool ipv6 = false,
     String? userIdentifier,
   }) async {
-    if (startAppSuccess == false) {
+    if (!startAppSuccess) {
       return LaunchResult.failed();
     }
-    if (startAppSuccess == true) {
+    if (startAppSuccess) {
       return LaunchResult.succeeded();
     }
     final String dartFlags = debuggingOptions.dartFlags;

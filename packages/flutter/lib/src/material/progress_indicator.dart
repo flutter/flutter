@@ -1041,8 +1041,6 @@ class _LinearProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   _CircularProgressIndicatorDefaultsM3(this.context);
 
