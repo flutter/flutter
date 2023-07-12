@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:package_config/package_config.dart';
 
 import '../../asset.dart';

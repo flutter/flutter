@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:js' as js;
 
 import 'package:flutter/foundation.dart';
 
@@ -17,7 +17,6 @@ import 'message_codecs.dart';
 // See https://github.com/flutter/flutter/issues/128456.
 const String _kAssetManifestFilename = 'AssetManifest.bin';
 
-String? uriEncodedAssetManifestContent;
 Future<AssetManifest>? _precachedAssetManifest;
 
 /// Contains details about available assets and their variants.
@@ -27,25 +26,29 @@ abstract class AssetManifest {
   /// Loads asset manifest data from an [AssetBundle] object and creates an
   /// [AssetManifest] object from that data.
   static Future<AssetManifest> loadFromAssetBundle(AssetBundle bundle) {
-    if (uriEncodedAssetManifestContent != null) {
+    if (kIsWeb) {
       if (_precachedAssetManifest != null) {
         return _precachedAssetManifest!;
       }
 
+      final String uriEncodedAssetManifestContent =
+        js.context['_flutter_UriEncodedAssetManifest'] as String;
+
       final ByteData assetManifestBytes = ByteData.view(
         Uint8List.fromList(
           utf8.encode(
-            Uri.decodeFull(uriEncodedAssetManifestContent!)
+            Uri.decodeFull(uriEncodedAssetManifestContent)
           )
         )
         .buffer
       );
 
+
       return _precachedAssetManifest = SynchronousFuture<AssetManifest>(
         _AssetManifestBin.fromStandardMessageCodecMessage(assetManifestBytes),
       );
     }
-    // ignore: dead_code
+
     return bundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
   }
 
