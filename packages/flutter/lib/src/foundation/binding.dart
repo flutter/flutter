@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
-import 'dart:developer';
 import 'dart:io' show exit;
 import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window; // ignore: deprecated_member_use
 
@@ -930,10 +929,8 @@ abstract class BindingBase {
     required String name,
     required ServiceExtensionCallback callback,
   }) {
-    // ??? this method holds some items from GC.
     final String methodName = 'ext.flutter.$name';
-
-    Future<ServiceExtensionResponse> handler(String method, Map<String, String> parameters) async {
+    developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);
       assert(() {
         if (debugInstrumentationEnabled) {
@@ -960,26 +957,24 @@ abstract class BindingBase {
       try {
         result = await callback(parameters);
       } catch (exception, stack) {
-        // FlutterError.reportError(FlutterErrorDetails(
-        //   exception: exception,
-        //   stack: stack,
-        //   context: ErrorDescription('during a service extension callback for "$method"'),
-        // ));
-        // return developer.ServiceExtensionResponse.error(
-        //   developer.ServiceExtensionResponse.extensionError,
-        //   json.encode(<String, String>{
-        //     'exception': exception.toString(),
-        //     'stack': stack.toString(),
-        //     'method': method,
-        //   }),
-        // );
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          context: ErrorDescription('during a service extension callback for "$method"'),
+        ));
+        return developer.ServiceExtensionResponse.error(
+          developer.ServiceExtensionResponse.extensionError,
+          json.encode(<String, String>{
+            'exception': exception.toString(),
+            'stack': stack.toString(),
+            'method': method,
+          }),
+        );
       }
       result['type'] = '_extensionType';
       result['method'] = method;
       return developer.ServiceExtensionResponse.result(json.encode(result));
-    }
-
-    developer.registerExtension(methodName, handler);
+    });
   }
 
   @override
