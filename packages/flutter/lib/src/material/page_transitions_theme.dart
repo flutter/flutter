@@ -741,7 +741,7 @@ class PageTransitionsTheme with Diagnosticable {
   Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders;
   final Map<TargetPlatform, PageTransitionsBuilder> _builders;
 
-  /// Delegates to the builder for the current [platform].
+  /// Delegates to the builder for the current [ThemeData.platform].
   /// If a builder for the current platform is not found, then the
   /// [ZoomPageTransitionsBuilder] is used.
   ///
@@ -752,8 +752,13 @@ class PageTransitionsTheme with Diagnosticable {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
-    TargetPlatform platform,
   ) {
+    TargetPlatform platform = Theme.of(context).platform;
+
+    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route)) {
+      platform = TargetPlatform.iOS;
+    }
+
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? const ZoomPageTransitionsBuilder();
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
