@@ -784,7 +784,7 @@ mixin WidgetInspectorService {
   bool _trackRebuildDirtyWidgets = false;
   bool _trackRepaintWidgets = false;
 
-  late RegisterServiceExtensionCallback _registerServiceExtensionCallback;
+  RegisterServiceExtensionCallback? _registerServiceExtensionCallback;
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.inspector.name").
   ///
@@ -798,7 +798,7 @@ mixin WidgetInspectorService {
     required String name,
     required ServiceExtensionCallback callback,
   }) {
-    _registerServiceExtensionCallback(
+    _registerServiceExtensionCallback!.call(
       name: 'inspector.$name',
       callback: callback,
     );
@@ -1098,6 +1098,7 @@ mixin WidgetInspectorService {
           }
         },
       );
+
     }
 
     _registerSignalServiceExtension(
@@ -1259,6 +1260,7 @@ mixin WidgetInspectorService {
       name: WidgetInspectorServiceExtensions.setFlexProperties.name,
       callback: _setFlexProperties,
     );
+    _registerServiceExtensionCallback = null;
   }
 
   void _clearStats() {

@@ -497,7 +497,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
-      // WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
+      WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;
     }());
