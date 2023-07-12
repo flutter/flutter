@@ -306,9 +306,9 @@ abstract mixin class WidgetsBindingObserver {
 /// [ViewAnchor] may be used to create a new non-rendering zone.
 ///
 /// To figure out if an element is in a rendering zone it may walk up the tree
-/// calling [debugExpectsRenderObjectForSlot] on its ancestors. If it reaches
-/// an element that returns false, it is in a non-rendering zone. If it reaches
-/// a [RenderObjectElement] it is in a rendering zone.
+/// calling [Element.debugExpectsRenderObjectForSlot] on its ancestors. If it
+/// reaches an element that returns false, it is in a non-rendering zone. If it
+/// reaches a [RenderObjectElement] it is in a rendering zone.
 mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {
