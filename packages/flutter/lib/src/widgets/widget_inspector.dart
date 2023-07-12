@@ -2667,13 +2667,13 @@ class _WidgetInspectorState extends State<WidgetInspector>
         // changed.
       });
     };
-    // WidgetInspectorService.instance.selectionChangedCallback = _selectionChangedCallback;
+    WidgetInspectorService.instance.selectionChangedCallback = _selectionChangedCallback;
   }
 
   @override
   void dispose() {
     if (WidgetInspectorService.instance.selectionChangedCallback == _selectionChangedCallback) {
-      // WidgetInspectorService.instance.selectionChangedCallback = null;
+      WidgetInspectorService.instance.selectionChangedCallback = null;
     }
     super.dispose();
   }
