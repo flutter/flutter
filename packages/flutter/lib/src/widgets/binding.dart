@@ -277,8 +277,38 @@ abstract mixin class WidgetsBindingObserver {
 /// Call [runApp] (which indirectly calls [attachRootWidget]) to bootstrap that
 /// element tree.
 ///
-/// Multiple render trees may be associated with that element tree. Those are
+/// ## Relationship to render trees
+///
+/// Multiple render trees may be associated with the element tree. Those are
 /// managed by the underlying [RendererBinding].
+///
+/// Conceptually, the element tree is organized in zones of two different types:
+/// rendering zones and non-rendering zones.
+///
+/// An element in a rendering zone is backed by a render tree (i.e.
+/// [Element.renderObject] is not null for them). They help define the pixels
+/// that are drawn on screen. Basically all widgets (with the [View] widget,
+/// [ViewCollection] widget, and [RootWidget] as notable exceptions) can be used
+/// in a rendering zone.
+///
+/// An element in a non-rendering zone is not associated with a render tree
+/// ([Element.renderObject] returns null for them) and only widgets that do not
+/// produce a [RenderObject] can be used in this part of the tree because there
+/// is no render tree to attach the render object to. In more technical terms,
+/// no [RenderObjectWidget] may appear in a non-rendering zone. Typically, one
+/// would find [InheritedWidget]s, [View]s, and [ViewCollection]s in this zone
+/// to organize the rendering zones (and their associated render trees) into
+/// a unified element tree.
+///
+/// The root of the element tree at [rootElement] defines the beginning of a
+/// non-rendering zone. The [View] widget is used to start a rendering zone
+/// because it bootstraps a render tree. Within a rendering zone, the
+/// [ViewAnchor] may be used to create a new non-rendering zone.
+///
+/// To figure out if an element is in a rendering zone it may walk up the tree
+/// calling [debugExpectsRenderObjectForSlot] on its ancestors. If it reaches
+/// an element that returns false, it is in a non-rendering zone. If it reaches
+/// a [RenderObjectElement] it is in a rendering zone.
 mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {

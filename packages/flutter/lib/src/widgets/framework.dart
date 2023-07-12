@@ -4442,11 +4442,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// insert a [RenderObject] into its ancestor [RenderObjectElement] by calling
   /// [RenderObjectElement.insertRenderObjectChild] on it.
   ///
+  /// This method is used to define non-rendering zones in the element tree (see
+  /// [WidgetsBinding] for an explanation of rendering and non-rendering zones):
+  ///
   /// Most branches of the [Element] tree are expected to eventually insert a
   /// [RenderObject] into their [RenderObjectElement] ancestor to construct the
   /// render tree. However, there is a notable exception: an [Element] may
-  /// expect that the occupants of certain child slots create a new independent
-  /// render tree and therefore are not allowed to insert a render object into
+  /// expect that the occupant of a certain child slot creates a new independent
+  /// render tree and therefore is not allowed to insert a render object into
   /// the existing render tree. Those elements must return false from this
   /// method for the slot in question to signal to the child in that slot that
   /// it must not call [RenderObjectElement.insertRenderObjectChild] on its

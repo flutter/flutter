@@ -31,17 +31,22 @@ import 'media_query.dart';
 /// it nor any of its descendants will insert a [RenderObject] into an existing
 /// render tree. Therefore, the [View] widget can only be used in those parts of
 /// the widget tree where it is not required to participate in the construction
-/// of the surrounding render tree. In practical terms, this means it can
-/// typically be used at the root of the widget tree outside of any other [View]
-/// widget, as a child of a [ViewCollection] widget, or in the [ViewAnchor.view]
-/// slot of a [ViewAnchor] widget. It is not required be a direct child, though,
-/// since other non-[RenderObjectWidget]s (e.g. [InheritedWidget]s or
-/// [Builder]s) are allowed to be present between those widgets and the [View]
-/// widget.
+/// of the surrounding render tree. In other words, the widget may only be used
+/// in a non-rendering zone of the widget tree (see [WidgetsBinding] for a
+/// definition of rendering and non-rendering zones).
 ///
-/// In technical terms, whether a [View] is allowed to occupy a certain slot of
-/// an element is determined by that element's
-/// [Element.debugExpectsRenderObjectForSlot].
+/// In practical terms, the widget is typically used at the root of the widget
+/// tree outside of any other [View] widget, as a child of a [ViewCollection]
+/// widget, or in the [ViewAnchor.view] slot of a [ViewAnchor] widget. It is not
+/// required to be a direct child, though, since other non-[RenderObjectWidget]s
+/// (e.g. [InheritedWidget]s, [Builder]s, or [StatefulWidget]s/[StatelessWidget]
+/// that only produce non-[RenderObjectWidget]s) are allowed to be present
+/// between those widgets and the [View] widget.
+///
+/// See also:
+///
+///  * [Element.debugExpectsRenderObjectForSlot], which defines whether a [View]
+///    widget is allowed in a given child slot.
 class View extends StatelessWidget {
   /// Create a [View] widget to bootstrap a render tree that is rendered into
   /// the provided [FlutterView].
@@ -442,16 +447,21 @@ class _MultiChildComponentWidget extends Widget {
 
 /// A collection of sibling [View]s.
 ///
-/// This widget can only be used in places were a [View] widget is allowed. In
-/// practical terms, it can be used at the root of the widget tree outside of
-/// any [View] widget, as a child to a another [ViewCollection], or in the
-/// [ViewAnchor.view] slot of a [ViewAnchor] widget. It is not required to be a
-/// direct child of those widgets; other non-[RenderObjectWidget]s may appear
-/// in between the two (such as an [InheritedWidget]).
+/// This widget can only be used in places were a [View] widget is allowed, i.e.
+/// in a non-rendering zone of the widget tree. In practical terms, it can be
+/// used at the root of the widget tree outside of any [View] widget, as a child
+/// to a another [ViewCollection], or in the [ViewAnchor.view] slot of a
+/// [ViewAnchor] widget. It is not required to be a direct child of those
+/// widgets; other non-[RenderObjectWidget]s may appear in between the two (such
+/// as an [InheritedWidget]).
 ///
 /// Similarly, the [views] children of this widget must be [View]s, but they
 /// may be wrapped in additional non-[RenderObjectWidget]s (e.g.
 /// [InheritedWidget]s).
+///
+/// See also:
+///
+///  * [WidgetsBinding] for an explanation of rendering and non-rendering zones.
 class ViewCollection extends _MultiChildComponentWidget {
   /// Creates a [ViewCollection] widget.
   ///
@@ -466,7 +476,7 @@ class ViewCollection extends _MultiChildComponentWidget {
   List<Widget> get views => _views;
 }
 
-/// Decorates a [child] widget in a surrounding [View] with a side-[View].
+/// Decorates a [child] widget with a side [View].
 ///
 /// This widget must have a [View] ancestor, into which the [child] widget
 /// is rendered.
@@ -477,6 +487,10 @@ class ViewCollection extends _MultiChildComponentWidget {
 /// [RenderObjectWidget] is allowed to appear between the [ViewAnchor] and the
 /// next [View] widget in the [view] slot. The widgets in the [view] slot have
 /// access to all [InheritedWidget]s above the [ViewAnchor] in the tree.
+///
+/// In technical terms, the [ViewAnchor] can only be used in a rendering zone of
+/// the widget tree and the [view] slot marks the start of a new non-rendering
+/// zone (see [WidgetsBinding] for a definition of these zones).
 ///
 /// {@template flutter.widgets.ViewAnchor}
 /// An example use case for this widget is a tooltip for a button. The tooltip

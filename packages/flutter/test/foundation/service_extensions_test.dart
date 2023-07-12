@@ -185,7 +185,9 @@ void main() {
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
     binding.rootPipelineOwner.dropChild(owner);
-    owner.dispose();
+    owner
+      ..rootNode = null
+      ..dispose();
   });
 
   // The following list is alphabetical, one test per extension.

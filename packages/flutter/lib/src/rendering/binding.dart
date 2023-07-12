@@ -23,8 +23,8 @@ export 'package:flutter/gestures.dart' show HitTestResult;
 
 /// The glue between the render trees and the Flutter engine.
 ///
-/// The [RendererBinding] manages multiple render trees. Each render tree is
-/// rooted in a [RenderView] that must be added to the binding via
+/// The [RendererBinding] manages multiple independent render trees. Each render
+/// tree is rooted in a [RenderView] that must be added to the binding via
 /// [addRenderView] to be considered during frame production, hit testing, etc.
 /// Furthermore, the render tree must be managed by a [PipelineOwner] that is
 /// part of the pipeline owner tree rooted at [rootPipelineOwner].
