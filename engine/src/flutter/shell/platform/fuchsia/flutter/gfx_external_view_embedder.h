@@ -17,10 +17,10 @@
 #include <vector>
 
 #include "flutter/flow/embedded_views.h"
-#include "flutter/flow/rtree.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
-#include "flutter/shell/common/canvas_spy.h"
+#include "flutter/shell/platform/fuchsia/flutter/canvas_spy.h"
+#include "flutter/shell/platform/fuchsia/flutter/rtree.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkPoint.h"

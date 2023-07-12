@@ -81,8 +81,6 @@ source_set("common") {
   sources = [
     "animator.cc",
     "animator.h",
-    "canvas_spy.cc",
-    "canvas_spy.h",
     "context_options.cc",
     "context_options.h",
     "display_manager.cc",
@@ -295,7 +293,6 @@ if (enable_unittests) {
 
     sources = [
       "animator_unittests.cc",
-      "canvas_spy_unittests.cc",
       "context_options_unittests.cc",
       "dl_op_spy_unittests.cc",
       "engine_unittests.cc",
