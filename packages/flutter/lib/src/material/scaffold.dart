@@ -279,6 +279,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// the SnackBar to be visible.
   ///
   /// {@tool dartpad}
+  /// Here is an example showing how to display a [SnackBar] with [showSnackBar]
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
   /// Here is an example showing that a floating [SnackBar] appears above [Scaffold.floatingActionButton].
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.1.dart **

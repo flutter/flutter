@@ -73,7 +73,13 @@ class MyHomePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-      drawer: const Drawer(),
+      drawer: Drawer(
+        child: Column(
+          children: <Widget>[
+            TextButton(child: const Text('Drawer Item'), onPressed: () {}),
+          ],
+        ),
+      ),
       body: const Center(
         child: NextPageButton(),
       ),

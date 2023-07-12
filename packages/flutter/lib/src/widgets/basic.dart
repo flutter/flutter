@@ -3036,6 +3036,12 @@ class LimitedBox extends SingleChildRenderObjectWidget {
 /// A widget that imposes different constraints on its child than it gets
 /// from its parent, possibly allowing the child to overflow the parent.
 ///
+/// {@tool dartpad}
+/// This example shows how an [OverflowBox] is used, and what its effect is.
+///
+/// ** See code in examples/api/lib/widgets/basic/overflowbox.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [RenderConstrainedOverflowBox] for details about how [OverflowBox] is
