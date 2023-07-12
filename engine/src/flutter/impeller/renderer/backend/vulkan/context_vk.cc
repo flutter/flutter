@@ -29,6 +29,7 @@
 #include "impeller/renderer/backend/vulkan/debug_report_vk.h"
 #include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
+#include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/capabilities.h"
@@ -380,6 +381,15 @@ void ContextVK::Setup(Settings settings) {
   }
 
   //----------------------------------------------------------------------------
+  /// Create the resource manager.
+  ///
+  auto resource_manager = ResourceManagerVK::Create();
+  if (!resource_manager) {
+    VALIDATION_LOG << "Could not create resource manager.";
+    return;
+  }
+
+  //----------------------------------------------------------------------------
   /// Fetch the queues.
   ///
   QueuesVK queues(device_holder->device.get(),  //
@@ -408,6 +418,7 @@ void ContextVK::Setup(Settings settings) {
   queues_ = std::move(queues);
   device_capabilities_ = std::move(caps);
   fence_waiter_ = std::move(fence_waiter);
+  resource_manager_ = std::move(resource_manager);
   device_name_ = std::string(physical_device_properties.deviceName);
   is_valid_ = true;
 
@@ -531,6 +542,10 @@ vk::PhysicalDevice ContextVK::GetPhysicalDevice() const {
 
 std::shared_ptr<FenceWaiterVK> ContextVK::GetFenceWaiter() const {
   return fence_waiter_;
+}
+
+std::shared_ptr<ResourceManagerVK> ContextVK::GetResourceManager() const {
+  return resource_manager_;
 }
 
 std::unique_ptr<CommandEncoderVK> ContextVK::CreateGraphicsCommandEncoder()

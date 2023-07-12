@@ -18,22 +18,18 @@ DeviceBufferVK::DeviceBufferVK(DeviceBufferDescriptor desc,
                                vk::Buffer buffer)
     : DeviceBuffer(desc),
       context_(std::move(context)),
-      allocator_(allocator),
-      allocation_(allocation),
-      info_(info),
-      buffer_(buffer) {}
+      resource_(ContextVK::Cast(*context_.lock().get()).GetResourceManager(),
+                BufferResource{
+                    allocator,   //
+                    allocation,  //
+                    info,        //
+                    buffer       //
+                }) {}
 
-DeviceBufferVK::~DeviceBufferVK() {
-  TRACE_EVENT0("impeller", "DestroyDeviceBuffer");
-  if (buffer_) {
-    ::vmaDestroyBuffer(allocator_,
-                       static_cast<decltype(buffer_)::NativeType>(buffer_),
-                       allocation_);
-  }
-}
+DeviceBufferVK::~DeviceBufferVK() {}
 
 uint8_t* DeviceBufferVK::OnGetContents() const {
-  return static_cast<uint8_t*>(info_.pMappedData);
+  return static_cast<uint8_t*>(resource_->info.pMappedData);
 }
 
 bool DeviceBufferVK::OnCopyHostBuffer(const uint8_t* source,
@@ -55,14 +51,17 @@ bool DeviceBufferVK::OnCopyHostBuffer(const uint8_t* source,
 
 bool DeviceBufferVK::SetLabel(const std::string& label) {
   auto context = context_.lock();
-  if (!context || !buffer_) {
+  if (!context || !resource_->buffer) {
     // The context could have died at this point.
     return false;
   }
 
-  ::vmaSetAllocationName(allocator_, allocation_, label.c_str());
+  ::vmaSetAllocationName(resource_->allocator,   //
+                         resource_->allocation,  //
+                         label.c_str()           //
+  );
 
-  return ContextVK::Cast(*context).SetDebugName(buffer_, label);
+  return ContextVK::Cast(*context).SetDebugName(resource_->buffer, label);
 }
 
 bool DeviceBufferVK::SetLabel(const std::string& label, Range range) {
@@ -71,7 +70,7 @@ bool DeviceBufferVK::SetLabel(const std::string& label, Range range) {
 }
 
 vk::Buffer DeviceBufferVK::GetBuffer() const {
-  return buffer_;
+  return resource_->buffer;
 }
 
 }  // namespace impeller
