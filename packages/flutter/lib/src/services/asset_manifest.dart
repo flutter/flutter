@@ -35,13 +35,10 @@ abstract class AssetManifest {
       final String uriEncodedAssetManifestContent = assetManifestContents!;
       final ByteData assetManifestBytes = ByteData.view(
         Uint8List.fromList(
-          utf8.encode(
-            Uri.decodeFull(uriEncodedAssetManifestContent)
-          )
+          base64.decode(uriEncodedAssetManifestContent)
         )
         .buffer
       );
-
 
       return _precachedAssetManifest = SynchronousFuture<AssetManifest>(
         _AssetManifestBin.fromStandardMessageCodecMessage(assetManifestBytes),
