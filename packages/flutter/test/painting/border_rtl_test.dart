@@ -679,9 +679,9 @@ void main() {
         );
       },
       paints
-          ..drrect(
-            inner: RRect.fromLTRBR(32.0, 0.0, 50.0, 20.0, Radius.zero),
-            outer: RRect.fromLTRBR(30.0, 0.0, 50.0, 20.0, Radius.zero)),
+        ..drrect(
+          inner: RRect.fromLTRBR(32.0, 0.0, 50.0, 20.0, Radius.zero),
+          outer: RRect.fromLTRBR(30.0, 0.0, 50.0, 20.0, Radius.zero)),
     );
     expect(decoration2.padding, const EdgeInsetsDirectional.fromSTEB(2.0, 0.0, 0.0, 0.0));
     expect(decoration2.scale(2.0), decoration4);
