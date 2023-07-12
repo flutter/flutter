@@ -411,14 +411,23 @@ void main() {
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
 
-    expect(tester.getSize(find.text(label).last), const Size(15.0, 20.0));
+    if (!isCanvasKit) {
+      expect(tester.getSize(find.text(label).last), const Size(15.0, 21.0));
+    } else {
+      expect(tester.getSize(find.text(label).last), const Size(15.0, 20.0));
+    }
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     await tester.pumpWidget(buildApp(textScaleFactor: 4.0));
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
-    expect(tester.getSize(find.text(label).last), const Size(57.0, 80.0));
+
+    if (!isCanvasKit) {
+      expect(tester.getSize(find.text(label).last), const Size(57.0, 81.0));
+    } else {
+      expect(tester.getSize(find.text(label).last), const Size(57.0, 80.0));
+    }
   });
 
   testWidgets('Custom tooltips in NavigationBarDestination', (WidgetTester tester) async {
