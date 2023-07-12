@@ -45,7 +45,7 @@ typedef PopInvokedCallback = void Function(bool didPop);
 ///    gestures in the case of nested [Navigator]s.
 ///  * [Form.canPop] and [Form.onPopInvoked], which can be used to handle system
 ///    back gestures in the case of a form with unsaved data.
-///  * [ModalRoute.registerPopInterface] and [ModalRoute.unregisterPopInterface],
+///  * [ModalRoute.registerPopEntry] and [ModalRoute.unregisterPopEntry],
 ///    which this widget uses to integrate with Flutter's navigation system.
 class PopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
@@ -100,7 +100,7 @@ class PopScope extends StatefulWidget {
   State<PopScope> createState() => _PopScopeState();
 }
 
-class _PopScopeState extends State<PopScope> implements PopInterface {
+class _PopScopeState extends State<PopScope> implements PopEntry {
   ModalRoute<dynamic>? _route;
 
   @override
@@ -118,9 +118,9 @@ class _PopScopeState extends State<PopScope> implements PopInterface {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _route?.unregisterPopInterface(this);
+    _route?.unregisterPopEntry(this);
     _route = ModalRoute.of(context);
-    _route?.registerPopInterface(this);
+    _route?.registerPopEntry(this);
   }
 
   @override
@@ -131,7 +131,7 @@ class _PopScopeState extends State<PopScope> implements PopInterface {
 
   @override
   void dispose() {
-    _route?.unregisterPopInterface(this);
+    _route?.unregisterPopEntry(this);
     canPopNotifier.dispose();
     super.dispose();
   }
@@ -148,9 +148,9 @@ class _PopScopeState extends State<PopScope> implements PopInterface {
 /// See also:
 ///
 ///  * [PopScope], which provides similar functionality in a widget.
-///  * [ModalRoute.registerPopInterface], which unregisters instances of this.
-///  * [ModalRoute.unregisterPopInterface], which unregisters instances of this.
-abstract class PopInterface {
+///  * [ModalRoute.registerPopEntry], which unregisters instances of this.
+///  * [ModalRoute.unregisterPopEntry], which unregisters instances of this.
+abstract class PopEntry {
   /// {@macro flutter.widgets.PopScope.onPopInvoked}
   PopInvokedCallback? get onPopInvoked;
 
@@ -159,6 +159,6 @@ abstract class PopInterface {
 
   @override
   String toString() {
-    return 'PopInterface canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvoked';
+    return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvoked';
   }
 }

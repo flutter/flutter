@@ -1494,7 +1494,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
-  final Set<PopInterface> _popInterfaces = <PopInterface>{};
+  final Set<PopEntry> _popEntries = <PopEntry>{};
 
   /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
   /// [addScopedWillPopCallback] returns either false or null. If they all
@@ -1531,7 +1531,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   /// Returns [RoutePopDisposition.doNotPop] if any of the [PopScope] widgets
-  /// registered with [registerPopInterface] have [PopScope.canPop] set to
+  /// registered with [registerPopEntry] have [PopScope.canPop] set to
   /// false.
   ///
   /// Typically this method is not overridden because applications usually
@@ -1543,14 +1543,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// See also:
   ///
   ///  * [Form], which provides an `onPopInvoked` callback that is similar.
-  ///  * [registerPopInterface], which adds a [PopScope] to the list this method
+  ///  * [registerPopEntry], which adds a [PopScope] to the list this method
   ///    checks.
-  ///  * [unregisterPopInterface], which removes a [PopScope] from the list this
+  ///  * [unregisterPopEntry], which removes a [PopScope] from the list this
   ///    method checks.
   @override
   RoutePopDisposition get popDisposition {
-    final bool canPop = _popInterfaces.every((PopInterface popInterface) {
-      return popInterface.canPopNotifier.value;
+    final bool canPop = _popEntries.every((PopEntry popEntry) {
+      return popEntry.canPopNotifier.value;
     });
 
     if (!canPop) {
@@ -1561,8 +1561,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void onPopInvoked(bool didPop) {
-    for (final PopInterface popInterface in _popInterfaces) {
-      popInterface.onPopInvoked?.call(didPop);
+    for (final PopEntry popEntry in _popEntries) {
+      popEntry.onPopInvoked?.call(didPop);
     }
   }
 
@@ -1585,7 +1585,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [removeScopedWillPopCallback], which removes a callback from the list
   ///    that [willPop] checks.
   @Deprecated(
-    'Use registerPopInterface or PopScope instead. '
+    'Use registerPopEntry or PopScope instead. '
     'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   void addScopedWillPopCallback(WillPopCallback callback) {
@@ -1601,7 +1601,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [addScopedWillPopCallback], which adds callback to the list
   ///    checked by [willPop].
   @Deprecated(
-    'Use unregisterPopInterface or PopScope instead. '
+    'Use unregisterPopEntry or PopScope instead. '
     'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   void removeScopedWillPopCallback(WillPopCallback callback) {
@@ -1618,10 +1618,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  ///  * [unregisterPopInterface], which performs the opposite operation.
-  void registerPopInterface(PopInterface popInterface) {
-    _popInterfaces.add(popInterface);
-    popInterface.canPopNotifier.addListener(_updateSystemNavigator);
+  ///  * [unregisterPopEntry], which performs the opposite operation.
+  void registerPopEntry(PopEntry popEntry) {
+    _popEntries.add(popEntry);
+    popEntry.canPopNotifier.addListener(_updateSystemNavigator);
     _updateSystemNavigator();
   }
 
@@ -1629,10 +1629,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  ///  * [registerPopInterface], which performs the opposite operation.
-  void unregisterPopInterface(PopInterface popInterface) {
-    _popInterfaces.remove(popInterface);
-    popInterface.canPopNotifier.removeListener(_updateSystemNavigator);
+  ///  * [registerPopEntry], which performs the opposite operation.
+  void unregisterPopEntry(PopEntry popEntry) {
+    _popEntries.remove(popEntry);
+    popEntry.canPopNotifier.removeListener(_updateSystemNavigator);
     _updateSystemNavigator();
   }
 
@@ -1813,10 +1813,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   bool get willHandlePopInternally {
-    final bool popInterfacesCanPop = _popInterfaces.every((PopInterface popInterface) {
-      return popInterface.canPopNotifier.value;
+    final bool popEntriesCanPop = _popEntries.every((PopEntry popEntry) {
+      return popEntry.canPopNotifier.value;
     });
-    return !popInterfacesCanPop || super.willHandlePopInternally;
+    return !popEntriesCanPop || super.willHandlePopInternally;
   }
 
   @override
