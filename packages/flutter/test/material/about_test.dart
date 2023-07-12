@@ -151,7 +151,6 @@ void main() {
     expect(find.text('About flutter_tester'), findsOneWidget);
   });
 
-
   testWidgetsWithLeakTracking('LicensePage control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
@@ -195,7 +194,7 @@ void main() {
 
     // Go back to list of packages.
     await tester.pageBack();
-    //await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
     // /// Check license is displayed after entering into license page for
     // /// 'Another package'.
