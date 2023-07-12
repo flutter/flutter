@@ -1964,7 +1964,7 @@ void main() {
     expect(find.text(tapTooltip), findsOneWidget);
   });
 
-  testWidgets('Checkbox has default error color when isError is set to true - M3 only', (WidgetTester tester) async {
+  testWidgets('Material3 - Checkbox has default error color when isError is set to true', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     final ThemeData themeData = ThemeData(useMaterial3: true);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -2036,7 +2036,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Checkbox MaterialStateBorderSide applies in error states - M3 only', (WidgetTester tester) async {
+  testWidgets('Material3 - Checkbox MaterialStateBorderSide applies in error states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     final ThemeData themeData = ThemeData(useMaterial3: true);
     const Color borderColor = Color(0xffffeb3b);
@@ -2115,7 +2115,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Checkbox has correct default shape - M3 only', (WidgetTester tester) async {
+  testWidgets('Material3 - Checkbox has correct default shape', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(useMaterial3: true);
 
     Widget buildApp() {
@@ -2211,7 +2211,6 @@ void main() {
     }
 
     // Checkbox is unselected, so the default BorderSide appears and fillColor is checkbox's background color.
-
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expect(
@@ -2265,7 +2264,6 @@ void main() {
     }
 
     // Checkbox is unselected, so the default BorderSide appears and fillColor is checkbox's background color.
-
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expect(
