@@ -546,6 +546,7 @@ struct StencilAttachmentDescriptor {
   /// Indicates what to do when both the stencil and depth tests pass.
   ///
   StencilOperation depth_stencil_pass = StencilOperation::kKeep;
+
   //----------------------------------------------------------------------------
   /// The mask applied to the reference and stencil buffer values before
   /// performing the stencil_compare operation.
@@ -567,7 +568,7 @@ struct StencilAttachmentDescriptor {
 
   constexpr size_t GetHash() const {
     return fml::HashCombine(stencil_compare, stencil_failure, depth_failure,
-                            depth_stencil_pass, read_mask);
+                            depth_stencil_pass, read_mask, write_mask);
   }
 };
 

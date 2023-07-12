@@ -1046,6 +1046,142 @@ TEST_P(RendererTest, VertexBufferBuilder) {
   ASSERT_EQ(vertex_builder.GetVertexCount(), 4u);
 }
 
+TEST_P(RendererTest, StencilMask) {
+  using VS = BoxFadeVertexShader;
+  using FS = BoxFadeFragmentShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  using BoxFadePipelineBuilder = PipelineBuilder<VS, FS>;
+  auto desc = BoxFadePipelineBuilder::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+
+  // Vertex buffer.
+  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
+  vertex_builder.SetLabel("Box");
+  vertex_builder.AddVertices({
+      {{100, 100, 0.0}, {0.0, 0.0}},  // 1
+      {{800, 100, 0.0}, {1.0, 0.0}},  // 2
+      {{800, 800, 0.0}, {1.0, 1.0}},  // 3
+      {{100, 100, 0.0}, {0.0, 0.0}},  // 1
+      {{800, 800, 0.0}, {1.0, 1.0}},  // 3
+      {{100, 800, 0.0}, {0.0, 1.0}},  // 4
+  });
+  auto vertex_buffer =
+      vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
+  ASSERT_TRUE(vertex_buffer);
+
+  desc->SetSampleCount(SampleCount::kCount4);
+
+  auto bridge = CreateTextureForFixture("bay_bridge.jpg");
+  auto boston = CreateTextureForFixture("boston.jpg");
+  ASSERT_TRUE(bridge && boston);
+  auto sampler = context->GetSamplerLibrary()->GetSampler({});
+  ASSERT_TRUE(sampler);
+
+  static bool mirror = false;
+  static int stencil_reference_write = 0xFF;
+  static int stencil_reference_read = 0x1;
+  std::vector<uint8_t> stencil_contents;
+  static int last_stencil_contents_reference_value = 0;
+  Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
+    auto buffer = context->CreateCommandBuffer();
+    if (!buffer) {
+      return false;
+    }
+    buffer->SetLabel("Playground Command Buffer");
+
+    {
+      // Configure the stencil attachment for the test.
+      RenderTarget::AttachmentConfig stencil_config;
+      stencil_config.load_action = LoadAction::kLoad;
+      stencil_config.store_action = StoreAction::kDontCare;
+      stencil_config.storage_mode = StorageMode::kHostVisible;
+      render_target.SetupStencilAttachment(*context,
+                                           render_target.GetRenderTargetSize(),
+                                           true, "stencil", stencil_config);
+      // Fill the stencil buffer with an checkerboard pattern.
+      const auto target_width = render_target.GetRenderTargetSize().width;
+      const auto target_height = render_target.GetRenderTargetSize().height;
+      const size_t target_size = target_width * target_height;
+      if (stencil_contents.size() != target_size ||
+          last_stencil_contents_reference_value != stencil_reference_write) {
+        stencil_contents.resize(target_size);
+        last_stencil_contents_reference_value = stencil_reference_write;
+        for (int y = 0; y < target_height; y++) {
+          for (int x = 0; x < target_width; x++) {
+            const auto index = y * target_width + x;
+            const auto kCheckSize = 64;
+            const auto value =
+                (((y / kCheckSize) + (x / kCheckSize)) % 2 == 0) *
+                stencil_reference_write;
+            stencil_contents[index] = value;
+          }
+        }
+      }
+      if (!render_target.GetStencilAttachment()->texture->SetContents(
+              stencil_contents.data(), stencil_contents.size(), 0, false)) {
+        VALIDATION_LOG << "Could not upload stencil contents to device memory";
+        return false;
+      }
+      auto pass = buffer->CreateRenderPass(render_target);
+      if (!pass) {
+        return false;
+      }
+      pass->SetLabel("Stencil Buffer");
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderInt("Stencil Write Value", &stencil_reference_write, 0,
+                       0xFF);
+      ImGui::SliderInt("Stencil Compare Value", &stencil_reference_read, 0,
+                       0xFF);
+      ImGui::Checkbox("Mirror", &mirror);
+      ImGui::End();
+      StencilAttachmentDescriptor front_and_back;
+      front_and_back.stencil_compare = CompareFunction::kLessEqual;
+      desc->SetStencilAttachmentDescriptors(front_and_back);
+      auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
+
+      assert(pipeline && pipeline->IsValid());
+
+      Command cmd;
+      cmd.label = "Box";
+      cmd.pipeline = pipeline;
+      cmd.stencil_reference = stencil_reference_read;
+
+      cmd.BindVertices(vertex_buffer);
+
+      VS::UniformBuffer uniforms;
+      uniforms.mvp = Matrix::MakeOrthographic(pass->GetRenderTargetSize()) *
+                     Matrix::MakeScale(GetContentScale());
+      if (mirror) {
+        uniforms.mvp = Matrix::MakeScale(Vector2(-1, -1)) * uniforms.mvp;
+      }
+      VS::BindUniformBuffer(
+          cmd, pass->GetTransientsBuffer().EmplaceUniform(uniforms));
+
+      FS::FrameInfo frame_info;
+      frame_info.current_time = GetSecondsElapsed();
+      frame_info.cursor_position = GetCursorPosition();
+      frame_info.window_size.x = GetWindowSize().width;
+      frame_info.window_size.y = GetWindowSize().height;
+
+      FS::BindFrameInfo(cmd,
+                        pass->GetTransientsBuffer().EmplaceUniform(frame_info));
+      FS::BindContents1(cmd, boston, sampler);
+      FS::BindContents2(cmd, bridge, sampler);
+      if (!pass->AddCommand(std::move(cmd))) {
+        return false;
+      }
+      pass->EncodeCommands();
+    }
+
+    if (!buffer->SubmitCommands()) {
+      return false;
+    }
+    return true;
+  };
+  OpenPlaygroundHere(callback);
+}
+
 }  // namespace testing
 }  // namespace impeller
 
