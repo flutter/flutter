@@ -1719,8 +1719,8 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   @override
-  Matrix4 getTransformTo(RenderObject? ancestor) {
-    return getTransformToParagraph()..multiply(paragraph.getTransformTo(ancestor));
+  Matrix4 getTransformTo(RenderObject? target, { bool skipIfInUnpaintedSubtree = false }) {
+    return getTransformToParagraph()..multiply(paragraph.getTransformTo(target, skipIfInUnpaintedSubtree: skipIfInUnpaintedSubtree));
   }
 
   @override

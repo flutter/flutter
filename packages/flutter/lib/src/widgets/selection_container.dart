@@ -196,9 +196,9 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
   }
 
   @override
-  Matrix4 getTransformTo(RenderObject? ancestor) {
+  Matrix4 getTransformTo(RenderObject? target, { bool skipIfInUnpaintedSubtree = false }) {
     assert(!widget._disabled);
-    return context.findRenderObject()!.getTransformTo(ancestor);
+    return context.findRenderObject()!.getTransformTo(target, skipIfInUnpaintedSubtree: skipIfInUnpaintedSubtree);
   }
 
   @override

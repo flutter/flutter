@@ -3240,11 +3240,15 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// Returns a matrix that maps the local paint coordinate system to the
   /// coordinate system of `target`.
   ///
-  /// This method may return a singular matrix when any [RenderObject] between
-  /// this [RenderObjct] and `target` provides a singular paint matrix, or a
-  /// zero matrix when `respectPaintsChild` is true and
-  /// [RenderObject.paintsChild] returns false. The method asserts when the
-  /// `target` is not in the same [RenderPipeline] as this [RenderObject].
+  /// The `skipIfInUnpaintedSubtree` argument determines whether the method
+  /// should return a zero matrix when either this [RenderObject] or `target` is
+  /// in a subtree where the topmost [RenderObject]'s [RenderObject.paintsChild]
+  /// method returns false. In addition to that, this method may also return a
+  /// zero matrix when the paint transform from the common ancestor [RenderObject]
+  /// (of [this] and `target`) to `target` is a singular matrix.
+  ///
+  /// The method asserts when the `target` is not in the same render tree as
+  /// this [RenderObject] as the behavior is undefined.
   ///
   /// If `target` is null, this method returns a matrix that maps from the
   /// local paint coordinate system to the coordinate system of the
@@ -3256,7 +3260,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// the global coordinate system in logical pixels. To get physical pixels,
   /// use [applyPaintTransform] from the [RenderView] to further transform the
   /// coordinate.
-  Matrix4 getTransformTo(RenderObject target, { bool respectPaintsChild = false }) {
+  Matrix4 getTransformTo(RenderObject? target, { bool skipIfInUnpaintedSubtree = false }) {
     assert(attached);
     // The paths to fromRenderObject and toRenderObject's common ancestor.
     List<RenderObject>? fromPath;
@@ -3272,7 +3276,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       if (fromDepth >= toDepth) {
         assert(from.parent != null, '$target and $this are not in the same render tree.');
         final RenderObject fromParent = from.parent!;
-        if (respectPaintsChild && !fromParent.paintsChild(from)) {
+        if (skipIfInUnpaintedSubtree && !fromParent.paintsChild(from)) {
           return Matrix4.zero();
         }
         (fromPath ??= <RenderObject>[this]).add(fromParent);
@@ -3280,11 +3284,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }
       if (fromDepth <= toDepth) {
         assert(to.parent != null, '$target and $this are not in the same render tree.');
+        assert(target != null);
         final RenderObject toParent = to.parent!;
-        if (respectPaintsChild && !toParent.paintsChild(to)) {
+        if (skipIfInUnpaintedSubtree && !toParent.paintsChild(to)) {
           return Matrix4.zero();
         }
-        (toPath ??= <RenderObject>[target]).add(toParent);
+        (toPath ??= target == null ? <RenderObject>[] : <RenderObject>[target]).add(toParent);
         to = toParent;
       }
     }
@@ -3293,7 +3298,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     if (fromPath != null) {
       assert(fromPath.length > 1);
       fromTransform = Matrix4.identity();
-      for (int index = fromPath.length - 1; index > 0; index -= 1) {
+      final int lastIndex = target == null ? fromPath.length - 2 : fromPath.length - 1;
+      for (int index = lastIndex; index > 0; index -= 1) {
         fromPath[index].applyPaintTransform(fromPath[index - 1], fromTransform);
       }
     }

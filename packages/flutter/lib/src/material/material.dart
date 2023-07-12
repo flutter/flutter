@@ -744,8 +744,8 @@ abstract class InkFeature {
     assert(referenceBox.attached);
     assert(!_debugDisposed);
     // determine the transform that gets our coordinate system to be like theirs
-    final Matrix4? transform = referenceBox.computeTransformToRenderObject(_controller);
-    if (transform != null) {
+    final Matrix4 transform = referenceBox.getTransformTo(_controller, skipIfInUnpaintedSubtree: true);
+    if (!transform.isZero()) {
       paintFeature(canvas, transform);
     }
   }

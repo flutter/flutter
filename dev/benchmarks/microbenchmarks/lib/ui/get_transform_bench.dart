@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../common.dart';
 
-const int _kNumOfRenderObjects = 100;
+const int _kNumOfRenderObjects = 256;
 const int _kNumWarmUp = 1000;
 const int _kTestIterations = 100000;
 
@@ -91,20 +91,20 @@ Future<void> main() async {
     final RenderObject toRenderObject = tester.renderObjectList(find.byType(SizedBox)).last;
 
     for (int i = 0; i < _kNumWarmUp; i += 1) {
-      fromRenderObject.computeTransformToRenderObject(toRenderObject);
+      fromRenderObject.getTransformTo(toRenderObject);
     }
     watch.start();
     for (int i = 0; i < _kTestIterations; i += 1) {
-      fromRenderObject.computeTransformToRenderObject(toRenderObject);
+      fromRenderObject.getTransformTo(toRenderObject);
     }
     watch.stop();
   });
 
   printer.addResult(
-    description: 'RenderObject.computeTransformToRenderObject for $_kNumOfRenderObjects levels',
+    description: 'RenderObject.getTransformTo non-ancestor for $_kNumOfRenderObjects levels',
     value: watch.elapsedMicroseconds.toDouble() / _kTestIterations,
     unit: 'μs per iteration',
-    name: 'Simple_RenderObject_computeTransformToRenderObject_iteration',
+    name: 'Simple_RenderObject_getTransformTo_non_ancestor_iteration',
   );
 
   printer.printToStdout();

@@ -148,7 +148,7 @@ void main() {
     expect(() => data3.detach(), throwsAssertionError);
   });
 
-  test('RenderObject.getTransformTo asserts its argument is not descendant', () {
+  test('RenderObject.getTransformTo asserts if target not in the same render tree', () {
     final PipelineOwner owner = PipelineOwner();
     final TestRenderObject renderObject1 = TestRenderObject();
     renderObject1.attach(owner);
@@ -157,7 +157,7 @@ void main() {
     expect(() => renderObject1.getTransformTo(renderObject2), throwsAssertionError);
   });
 
-  test('RenderObject.computeTransformToRenderObject works for siblings and descendants', () {
+  test('RenderObject.getTransformTo works for siblings and descendants', () {
     final PipelineOwner owner = PipelineOwner();
     final TestRenderObject renderObject1 = TestRenderObject()..attach(owner);
     final TestRenderObject renderObject11 = TestRenderObject();
@@ -166,24 +166,93 @@ void main() {
     renderObject1
       ..add(renderObject11)
       ..add(renderObject12);
-    expect(renderObject11.computeTransformToRenderObject(renderObject12), equals(Matrix4.identity()));
-    expect(renderObject1.computeTransformToRenderObject(renderObject11), equals(Matrix4.identity()));
-    expect(renderObject1.computeTransformToRenderObject(renderObject12), equals(Matrix4.identity()));
-    expect(renderObject11.computeTransformToRenderObject(renderObject1), equals(Matrix4.identity()));
-    expect(renderObject12.computeTransformToRenderObject(renderObject1), equals(Matrix4.identity()));
+    expect(renderObject11.getTransformTo(renderObject12), equals(Matrix4.identity()));
+    expect(renderObject1.getTransformTo(renderObject11), equals(Matrix4.identity()));
+    expect(renderObject1.getTransformTo(renderObject12), equals(Matrix4.identity()));
+    expect(renderObject11.getTransformTo(renderObject1), equals(Matrix4.identity()));
+    expect(renderObject12.getTransformTo(renderObject1), equals(Matrix4.identity()));
 
-    expect(renderObject1.computeTransformToRenderObject(renderObject1), equals(Matrix4.identity()));
-    expect(renderObject11.computeTransformToRenderObject(renderObject11), equals(Matrix4.identity()));
-    expect(renderObject12.computeTransformToRenderObject(renderObject12), equals(Matrix4.identity()));
+    expect(renderObject1.getTransformTo(renderObject1), equals(Matrix4.identity()));
+    expect(renderObject11.getTransformTo(renderObject11), equals(Matrix4.identity()));
+    expect(renderObject12.getTransformTo(renderObject12), equals(Matrix4.identity()));
   });
 
-  test('RenderObject.computeTransformToRenderObject returns null if target is not in the same render tree', () {
+  test('RenderObject.getTransformTo skipIfInUnpaintedSubtree', () {
     final PipelineOwner owner = PipelineOwner();
+    final TestRenderObject renderObject0 = TestRenderObject()
+      ..attach(owner);
     final TestRenderObject renderObject1 = TestRenderObject();
-    renderObject1.attach(owner);
     final TestRenderObject renderObject2 = TestRenderObject();
-    renderObject2.attach(owner);
-    expect(renderObject1.computeTransformToRenderObject(renderObject2), isNull);
+    renderObject0
+      ..add(renderObject1)
+      ..add(renderObject2);
+
+    // ignore: avoid_redundant_argument_values
+    expect(renderObject1.getTransformTo(renderObject2, skipIfInUnpaintedSubtree: false), equals(Matrix4.identity()));
+    expect(renderObject1.getTransformTo(renderObject2, skipIfInUnpaintedSubtree: true), equals(Matrix4.identity()));
+
+    renderObject0.shouldPaintChild = false;
+    // ignore: avoid_redundant_argument_values
+    expect(renderObject1.getTransformTo(renderObject2, skipIfInUnpaintedSubtree: false), equals(Matrix4.identity()));
+    expect(renderObject1.getTransformTo(renderObject2, skipIfInUnpaintedSubtree: true), equals(Matrix4.zero()));
+  });
+
+  test('RenderObject.getTransformTo skipIfInUnpaintedSubtree', () {
+    final PipelineOwner owner = PipelineOwner();
+    final TestRenderObject renderObject0 = TestRenderObject()
+      ..attach(owner);
+    final TestRenderObject renderObject1 = TestRenderObject();
+    final TestRenderObject renderObject2 = TestRenderObject();
+    renderObject0
+      ..add(renderObject1)
+      ..add(renderObject2);
+
+    // ignore: avoid_redundant_argument_values
+    expect(renderObject1.getTransformTo(renderObject2, skipIfInUnpaintedSubtree: false), equals(Matrix4.identity()));
+    expect(renderObject1.getTransformTo(renderObject2, skipIfInUnpaintedSubtree: true), equals(Matrix4.identity()));
+
+    renderObject0.shouldPaintChild = false;
+    // ignore: avoid_redundant_argument_values
+    expect(renderObject1.getTransformTo(renderObject2, skipIfInUnpaintedSubtree: false), equals(Matrix4.identity()));
+    expect(renderObject1.getTransformTo(renderObject2, skipIfInUnpaintedSubtree: true), equals(Matrix4.zero()));
+  });
+
+  test('RenderObject.getTransformTo gets the correct paint transform', () {
+    final PipelineOwner owner = PipelineOwner();
+    final TestRenderObject renderObject0 = TestRenderObject()
+      ..attach(owner);
+    final TestRenderObject renderObject1 = TestRenderObject();
+    final TestRenderObject renderObject2 = TestRenderObject();
+    renderObject0
+      ..add(renderObject1)
+      ..add(renderObject2)
+      ..paintTransform = Matrix4.diagonal3Values(9, 4, 1);
+
+    final TestRenderObject renderObject11 = TestRenderObject();
+    final TestRenderObject renderObject21 = TestRenderObject();
+    renderObject1
+      ..add(renderObject11)
+      ..paintTransform = Matrix4.translationValues(8, 16, 32);
+    renderObject2
+      ..add(renderObject21)
+      ..paintTransform = Matrix4.translationValues(32, 64, 128);
+
+    expect(
+      renderObject11.getTransformTo(renderObject21),
+      equals(Matrix4.translationValues((8 - 32) * 9, (16 - 64) * 4, 32 - 128)),
+    );
+    // Turn one of the paint transforms into a singular matrix and getTransformTo
+    // should return Matrix4.zero().
+    renderObject0.paintTransform = Matrix4(
+      1, 1, 1 ,1,
+      2, 2, 2, 2,
+      3, 3, 3, 3,
+      4, 4, 4, 4,
+    ); // Not a full rank matrix, so it has to be singular.
+    expect(
+      renderObject11.getTransformTo(renderObject21),
+      equals(Matrix4.zero()),
+    );
   });
 
   test('PaintingContext.pushClipRect reuses the layer', () {
@@ -415,12 +484,23 @@ class TestRenderObject extends RenderObject with ContainerRenderObjectMixin<Test
     return Rect.zero;
   }
 
+  Matrix4 paintTransform = Matrix4.identity();
+  @override
+  void applyPaintTransform(covariant RenderObject child, Matrix4 transform) {
+    super.applyPaintTransform(child, transform);
+    transform.multiply(paintTransform);
+  }
+
   @override
   void setupParentData(RenderObject child) {
     if (child.parentData is! TestRenderObjectParentData) {
       child.parentData = TestRenderObjectParentData();
     }
   }
+
+  bool shouldPaintChild = true;
+  @override
+  bool paintsChild(covariant RenderObject child) => shouldPaintChild;
 
   @override
   void performLayout() { }

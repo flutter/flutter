@@ -137,7 +137,7 @@ class SelectedContent {
 ///  * [SelectionArea], which provides an overview of selection system.
 mixin Selectable implements SelectionHandler {
   /// {@macro flutter.rendering.RenderObject.getTransformTo}
-  Matrix4 getTransformTo(RenderObject? ancestor);
+  Matrix4 getTransformTo(RenderObject? target, { bool skipIfInUnpaintedSubtree = false });
 
   /// The size of this [Selectable].
   Size get size;
