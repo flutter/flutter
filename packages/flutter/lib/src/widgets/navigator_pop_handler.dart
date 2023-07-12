@@ -29,8 +29,8 @@ class NavigatorPopHandler extends StatefulWidget {
   /// Creates an instance of [NavigatorPopHandler].
   const NavigatorPopHandler({
     super.key,
-    required this.child,
     this.onPop,
+    required this.child,
   });
 
   /// The widget to place below this in the widget tree.
