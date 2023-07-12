@@ -784,7 +784,6 @@ mixin WidgetInspectorService {
   bool _trackRebuildDirtyWidgets = false;
   bool _trackRepaintWidgets = false;
 
-  late RegisterServiceExtensionCallback _registerServiceExtensionCallback;
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.inspector.name").
   ///
@@ -797,8 +796,9 @@ mixin WidgetInspectorService {
   void registerServiceExtension({
     required String name,
     required ServiceExtensionCallback callback,
+    required RegisterServiceExtensionCallback registration,
   }) {
-    _registerServiceExtensionCallback(
+    registration(
       name: 'inspector.$name',
       callback: callback,
     );
@@ -809,8 +809,9 @@ mixin WidgetInspectorService {
   void _registerSignalServiceExtension({
     required String name,
     required FutureOr<Object?> Function() callback,
+    required RegisterServiceExtensionCallback registration,
   }) {
-    registerServiceExtension(
+    registration(
       name: name,
       callback: (Map<String, String> parameters) async {
         return <String, Object?>{'result': await callback()};
@@ -827,8 +828,9 @@ mixin WidgetInspectorService {
   void _registerObjectGroupServiceExtension({
     required String name,
     required FutureOr<Object?> Function(String objectGroup) callback,
+    required RegisterServiceExtensionCallback registration,
   }) {
-    registerServiceExtension(
+    registration(
       name: name,
       callback: (Map<String, String> parameters) async {
         return <String, Object?>{'result': await callback(parameters['objectGroup']!)};
@@ -852,8 +854,9 @@ mixin WidgetInspectorService {
     required String name,
     required AsyncValueGetter<bool> getter,
     required AsyncValueSetter<bool> setter,
+    required RegisterServiceExtensionCallback registration,
   }) {
-    registerServiceExtension(
+    registration(
       name: name,
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey('enabled')) {
@@ -893,8 +896,9 @@ mixin WidgetInspectorService {
   void _registerServiceExtensionWithArg({
     required String name,
     required FutureOr<Object?> Function(String? objectId, String objectGroup) callback,
+    required RegisterServiceExtensionCallback registration,
   }) {
-    registerServiceExtension(
+    registration(
       name: name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('objectGroup'));
@@ -911,8 +915,9 @@ mixin WidgetInspectorService {
   void _registerServiceExtensionVarArgs({
     required String name,
     required FutureOr<Object?> Function(List<String> args) callback,
+    required RegisterServiceExtensionCallback registration,
   }) {
-    registerServiceExtension(
+    registration(
       name: name,
       callback: (Map<String, String> parameters) async {
         final List<String> args = <String>[];
@@ -1011,13 +1016,12 @@ mixin WidgetInspectorService {
   ///  * <https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#rpcs-requests-and-responses>
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
-  void initServiceExtensions(RegisterServiceExtensionCallback registerServiceExtensionCallback) {
+  void initServiceExtensions(RegisterServiceExtensionCallback registration) {
     final FlutterExceptionHandler defaultExceptionHandler = FlutterError.presentError;
 
     if (isStructuredErrorsEnabled()) {
       FlutterError.presentError = _reportStructuredError;
     }
-    _registerServiceExtensionCallback = registerServiceExtensionCallback;
     assert(!_debugServiceExtensionsRegistered);
     assert(() {
       _debugServiceExtensionsRegistered = true;
@@ -1033,6 +1037,7 @@ mixin WidgetInspectorService {
         FlutterError.presentError = value ? _reportStructuredError : defaultExceptionHandler;
         return Future<void>.value();
       },
+      registration: registration,
     );
 
     _registerBoolServiceExtension(
@@ -1045,6 +1050,7 @@ mixin WidgetInspectorService {
         WidgetsApp.debugShowWidgetInspectorOverride = value;
         return forceRebuild();
       },
+      registration: registration,
     );
 
     if (isWidgetCreationTracked()) {
@@ -1071,6 +1077,7 @@ mixin WidgetInspectorService {
             return;
           }
         },
+        registration: registration,
       );
 
       _registerBoolServiceExtension(
@@ -1097,6 +1104,7 @@ mixin WidgetInspectorService {
             debugOnProfilePaint = null;
           }
         },
+        registration: registration,
       );
     }
 
@@ -1106,6 +1114,7 @@ mixin WidgetInspectorService {
         disposeAllGroups();
         return null;
       },
+      registration: registration,
     );
     _registerObjectGroupServiceExtension(
       name: WidgetInspectorServiceExtensions.disposeGroup.name,
@@ -1113,10 +1122,12 @@ mixin WidgetInspectorService {
         disposeGroup(name);
         return null;
       },
+      registration: registration,
     );
     _registerSignalServiceExtension(
       name: WidgetInspectorServiceExtensions.isWidgetTreeReady.name,
       callback: isWidgetTreeReady,
+      registration: registration,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.disposeId.name,
@@ -1124,6 +1135,7 @@ mixin WidgetInspectorService {
         disposeId(objectId, objectGroup);
         return null;
       },
+      registration: registration,
     );
     _registerServiceExtensionVarArgs(
       name: WidgetInspectorServiceExtensions.setPubRootDirectories.name,
@@ -1131,6 +1143,7 @@ mixin WidgetInspectorService {
         setPubRootDirectories(args);
         return null;
       },
+      registration: registration,
     );
     _registerServiceExtensionVarArgs(
       name: WidgetInspectorServiceExtensions.addPubRootDirectories.name,
@@ -1138,6 +1151,7 @@ mixin WidgetInspectorService {
         addPubRootDirectories(args);
         return null;
       },
+      registration: registration,
     );
     _registerServiceExtensionVarArgs(
       name: WidgetInspectorServiceExtensions.removePubRootDirectories.name,
@@ -1145,49 +1159,60 @@ mixin WidgetInspectorService {
         removePubRootDirectories(args);
         return null;
       },
+      registration: registration,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.getPubRootDirectories.name,
       callback: pubRootDirectories,
+      registration: registration,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.setSelectionById.name,
       callback: setSelectionById,
+      registration: registration,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getParentChain.name,
       callback: _getParentChain,
+      registration: registration,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getProperties.name,
       callback: _getProperties,
+      registration: registration,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getChildren.name,
       callback: _getChildren,
+      registration: registration,
     );
 
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
       callback: _getChildrenSummaryTree,
+      registration: registration,
     );
 
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getChildrenDetailsSubtree.name,
       callback: _getChildrenDetailsSubtree,
+      registration: registration,
     );
 
     _registerObjectGroupServiceExtension(
       name: WidgetInspectorServiceExtensions.getRootWidget.name,
       callback: _getRootWidget,
+      registration: registration,
     );
     _registerObjectGroupServiceExtension(
       name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
       callback: _getRootWidgetSummaryTree,
+      registration: registration,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTreeWithPreviews.name,
       callback: _getRootWidgetSummaryTreeWithPreviews,
+      registration: registration,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.getDetailsSubtree.name,
@@ -1202,19 +1227,23 @@ mixin WidgetInspectorService {
           ),
         };
       },
+      registration: registration,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getSelectedWidget.name,
       callback: _getSelectedWidget,
+      registration: registration,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name,
       callback: _getSelectedSummaryWidget,
+      registration: registration,
     );
 
     _registerSignalServiceExtension(
       name: WidgetInspectorServiceExtensions.isWidgetCreationTracked.name,
       callback: isWidgetCreationTracked,
+      registration: registration,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.screenshot.name,
@@ -1242,22 +1271,27 @@ mixin WidgetInspectorService {
           'result': base64.encoder.convert(Uint8List.view(byteData!.buffer)),
         };
       },
+      registration: registration,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
       callback: _getLayoutExplorerNode,
+      registration: registration,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.setFlexFit.name,
       callback: _setFlexFit,
+      registration: registration,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.setFlexFactor.name,
       callback: _setFlexFactor,
+      registration: registration,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.setFlexProperties.name,
       callback: _setFlexProperties,
+      registration: registration,
     );
   }
 
