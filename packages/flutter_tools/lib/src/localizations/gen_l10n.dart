@@ -47,6 +47,9 @@ Future<LocalizationsGenerator> generateLocalizations({
 
   precacheLanguageAndRegionTags();
 
+  // Use \r\n if project's pubspec file contains \r\n.
+  final bool useCRLF = fileSystem.file('pubspec.yaml').readAsStringSync().contains('\r\n');
+
   LocalizationsGenerator generator;
   try {
     generator = LocalizationsGenerator(
@@ -71,7 +74,7 @@ Future<LocalizationsGenerator> generateLocalizations({
       suppressWarnings: options.suppressWarnings,
     )
       ..loadResources()
-      ..writeOutputFiles(isFromYaml: true);
+      ..writeOutputFiles(isFromYaml: true, useCRLF: useCRLF);
   } on L10nException catch (e) {
     throwToolExit(e.message);
   }
@@ -79,7 +82,6 @@ Future<LocalizationsGenerator> generateLocalizations({
   final List<String> outputFileList = generator.outputFileList;
   final File? untranslatedMessagesFile = generator.untranslatedMessagesFile;
 
-  // All other post processing.
   if (options.format) {
     final List<String> formatFileList = outputFileList.toList();
     if (untranslatedMessagesFile != null) {
@@ -1310,7 +1312,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     }
   }
 
-  List<String> writeOutputFiles({ bool isFromYaml = false }) {
+  List<String> writeOutputFiles({ bool isFromYaml = false, bool useCRLF = false }) {
     // First, generate the string contents of all necessary files.
     final String generatedLocalizationsFile = _generateCode();
 
@@ -1328,7 +1330,9 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       syntheticPackageDirectory.createSync(recursive: true);
       final File flutterGenPubspec = syntheticPackageDirectory.childFile('pubspec.yaml');
       if (!flutterGenPubspec.existsSync()) {
-        flutterGenPubspec.writeAsStringSync(emptyPubspecTemplate);
+        flutterGenPubspec.writeAsStringSync(
+          useCRLF ? emptyPubspecTemplate.replaceAll('\n', '\r\n') : emptyPubspecTemplate
+        );
       }
     }
 
@@ -1347,11 +1351,13 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
 
     // Generate the required files for localizations.
     _languageFileMap.forEach((File file, String contents) {
-      file.writeAsStringSync(contents);
+      file.writeAsStringSync(useCRLF ? contents.replaceAll('\n', '\r\n') : contents);
       _outputFileList.add(file.absolute.path);
     });
 
-    baseOutputFile.writeAsStringSync(generatedLocalizationsFile);
+    baseOutputFile.writeAsStringSync(
+      useCRLF ? generatedLocalizationsFile.replaceAll('\n', '\r\n') : generatedLocalizationsFile
+    );
     final File? messagesFile = untranslatedMessagesFile;
     if (messagesFile != null) {
       _generateUntranslatedMessagesFile(logger, messagesFile);
@@ -1387,12 +1393,12 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       if (!inputsAndOutputsListFileLocal.existsSync()) {
         inputsAndOutputsListFileLocal.createSync(recursive: true);
       }
-
+      final String filesListContent = json.encode(<String, Object> {
+        'inputs': _inputFileList,
+        'outputs': _outputFileList,
+      });
       inputsAndOutputsListFileLocal.writeAsStringSync(
-        json.encode(<String, Object> {
-          'inputs': _inputFileList,
-          'outputs': _outputFileList,
-        }),
+        useCRLF ? filesListContent.replaceAll('\n', '\r\n') : filesListContent,
       );
     }
 
