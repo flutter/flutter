@@ -25,13 +25,20 @@ class AllocatorVK final : public Allocator {
  private:
   friend class ContextVK;
 
+  static constexpr size_t kPoolCount = 3;
+
   fml::RefPtr<vulkan::VulkanProcTable> vk_;
   VmaAllocator allocator_ = {};
+  VmaPool staging_buffer_pools_[kPoolCount] = {};
   std::weak_ptr<Context> context_;
   std::weak_ptr<DeviceHolder> device_holder_;
   ISize max_texture_size_;
   bool is_valid_ = false;
   bool supports_memoryless_textures_ = false;
+  // TODO(jonahwilliams): figure out why CI can't create these buffer pools.
+  bool created_buffer_pools_ = true;
+  uint32_t frame_count_ = 0;
+  std::thread::id raster_thread_id_;
 
   AllocatorVK(std::weak_ptr<Context> context,
               uint32_t vulkan_api_version,
@@ -46,6 +53,9 @@ class AllocatorVK final : public Allocator {
   bool IsValid() const;
 
   // |Allocator|
+  void DidAcquireSurfaceFrame() override;
+
+  // |Allocator|
   std::shared_ptr<DeviceBuffer> OnCreateBuffer(
       const DeviceBufferDescriptor& desc) override;
 
@@ -55,6 +65,8 @@ class AllocatorVK final : public Allocator {
 
   // |Allocator|
   ISize GetMaxTextureSizeSupported() const override;
+
+  static bool CreateBufferPool(VmaAllocator allocator, VmaPool* pool);
 
   FML_DISALLOW_COPY_AND_ASSIGN(AllocatorVK);
 };

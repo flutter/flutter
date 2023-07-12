@@ -93,6 +93,10 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
     VALIDATION_LOG << "Could not create memory allocator";
     return;
   }
+  for (auto i = 0u; i < kPoolCount; i++) {
+    created_buffer_pools_ &=
+        CreateBufferPool(allocator, &staging_buffer_pools_[i]);
+  }
   allocator_ = allocator;
   supports_memoryless_textures_ = capabilities.SupportsMemorylessTextures();
   is_valid_ = true;
@@ -101,6 +105,11 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
 AllocatorVK::~AllocatorVK() {
   TRACE_EVENT0("impeller", "DestroyAllocatorVK");
   if (allocator_) {
+    for (auto i = 0u; i < kPoolCount; i++) {
+      if (staging_buffer_pools_[i]) {
+        ::vmaDestroyPool(allocator_, staging_buffer_pools_[i]);
+      }
+    }
     ::vmaDestroyAllocator(allocator_);
   }
 }
@@ -177,35 +186,51 @@ static constexpr VmaMemoryUsage ToVMAMemoryUsage() {
   return VMA_MEMORY_USAGE_AUTO;
 }
 
-static constexpr VkMemoryPropertyFlags ToVKTextureMemoryPropertyFlags(
-    StorageMode mode,
-    bool supports_memoryless_textures) {
+static constexpr vk::Flags<vk::MemoryPropertyFlagBits>
+ToVKTextureMemoryPropertyFlags(StorageMode mode,
+                               bool supports_memoryless_textures) {
   switch (mode) {
     case StorageMode::kHostVisible:
-      return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+      return vk::MemoryPropertyFlagBits::eHostVisible |
+             vk::MemoryPropertyFlagBits::eDeviceLocal |
+             vk::MemoryPropertyFlagBits::eHostCoherent;
     case StorageMode::kDevicePrivate:
-      return VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+      return vk::MemoryPropertyFlagBits::eDeviceLocal;
     case StorageMode::kDeviceTransient:
       if (supports_memoryless_textures) {
-        return VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT |
-               VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+        return vk::MemoryPropertyFlagBits::eLazilyAllocated |
+               vk::MemoryPropertyFlagBits::eDeviceLocal;
       }
-      return VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+      return vk::MemoryPropertyFlagBits::eDeviceLocal;
   }
   FML_UNREACHABLE();
 }
 
-static constexpr VkMemoryPropertyFlags ToVKBufferMemoryPropertyFlags(
-    StorageMode mode) {
+static constexpr vk::Flags<vk::MemoryPropertyFlagBits>
+ToVKBufferMemoryPropertyFlags(StorageMode mode) {
   switch (mode) {
     case StorageMode::kHostVisible:
-      return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
-             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+      return vk::MemoryPropertyFlagBits::eHostVisible;
     case StorageMode::kDevicePrivate:
-      return VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+      return vk::MemoryPropertyFlagBits::eDeviceLocal;
     case StorageMode::kDeviceTransient:
-      return VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT;
+      return vk::MemoryPropertyFlagBits::eLazilyAllocated;
+  }
+  FML_UNREACHABLE();
+}
+
+static VmaAllocationCreateFlags ToVmaAllocationBufferCreateFlags(
+    StorageMode mode) {
+  VmaAllocationCreateFlags flags = 0;
+  switch (mode) {
+    case StorageMode::kHostVisible:
+      flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+      flags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
+      return flags;
+    case StorageMode::kDevicePrivate:
+      return flags;
+    case StorageMode::kDeviceTransient:
+      return flags;
   }
   FML_UNREACHABLE();
 }
@@ -270,8 +295,9 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     VmaAllocationCreateInfo alloc_nfo = {};
 
     alloc_nfo.usage = ToVMAMemoryUsage();
-    alloc_nfo.preferredFlags = ToVKTextureMemoryPropertyFlags(
-        desc.storage_mode, supports_memoryless_textures);
+    alloc_nfo.preferredFlags =
+        static_cast<VkMemoryPropertyFlags>(ToVKTextureMemoryPropertyFlags(
+            desc.storage_mode, supports_memoryless_textures));
     alloc_nfo.flags =
         ToVmaAllocationCreateFlags(desc.storage_mode, /*is_texture=*/true,
                                    desc.GetByteSizeOfBaseMipLevel());
@@ -423,6 +449,11 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
   return std::make_shared<TextureVK>(context_, std::move(source));
 }
 
+void AllocatorVK::DidAcquireSurfaceFrame() {
+  frame_count_++;
+  raster_thread_id_ = std::this_thread::get_id();
+}
+
 // |Allocator|
 std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
     const DeviceBufferDescriptor& desc) {
@@ -441,10 +472,13 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
 
   VmaAllocationCreateInfo allocation_info = {};
   allocation_info.usage = ToVMAMemoryUsage();
-  allocation_info.preferredFlags =
-      ToVKBufferMemoryPropertyFlags(desc.storage_mode);
-  allocation_info.flags = ToVmaAllocationCreateFlags(
-      desc.storage_mode, /*is_texture=*/false, desc.size);
+  allocation_info.preferredFlags = static_cast<VkMemoryPropertyFlags>(
+      ToVKBufferMemoryPropertyFlags(desc.storage_mode));
+  allocation_info.flags = ToVmaAllocationBufferCreateFlags(desc.storage_mode);
+  if (created_buffer_pools_ && desc.storage_mode == StorageMode::kHostVisible &&
+      raster_thread_id_ == std::this_thread::get_id()) {
+    allocation_info.pool = staging_buffer_pools_[frame_count_ % kPoolCount];
+  }
 
   VkBuffer buffer = {};
   VmaAllocation buffer_allocation = {};
@@ -470,6 +504,46 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
                                           buffer_allocation_info,  //
                                           vk::Buffer{buffer}       //
   );
+}
+
+// static
+bool AllocatorVK::CreateBufferPool(VmaAllocator allocator, VmaPool* pool) {
+  vk::BufferCreateInfo buffer_info;
+  buffer_info.usage = vk::BufferUsageFlagBits::eVertexBuffer |
+                      vk::BufferUsageFlagBits::eIndexBuffer |
+                      vk::BufferUsageFlagBits::eUniformBuffer |
+                      vk::BufferUsageFlagBits::eStorageBuffer |
+                      vk::BufferUsageFlagBits::eTransferSrc |
+                      vk::BufferUsageFlagBits::eTransferDst;
+  buffer_info.size = 1u;  // doesn't matter
+  buffer_info.sharingMode = vk::SharingMode::eExclusive;
+  auto buffer_info_native =
+      static_cast<vk::BufferCreateInfo::NativeType>(buffer_info);
+
+  VmaAllocationCreateInfo allocation_info = {};
+  allocation_info.usage = VMA_MEMORY_USAGE_AUTO;
+  allocation_info.preferredFlags = static_cast<VkMemoryPropertyFlags>(
+      ToVKBufferMemoryPropertyFlags(StorageMode::kHostVisible));
+  allocation_info.flags =
+      ToVmaAllocationBufferCreateFlags(StorageMode::kHostVisible);
+
+  uint32_t memTypeIndex;
+  auto result = vk::Result{vmaFindMemoryTypeIndexForBufferInfo(
+      allocator, &buffer_info_native, &allocation_info, &memTypeIndex)};
+  if (result != vk::Result::eSuccess) {
+    return false;
+  }
+
+  VmaPoolCreateInfo pool_create_info = {};
+  pool_create_info.memoryTypeIndex = memTypeIndex;
+  pool_create_info.flags = VMA_POOL_CREATE_IGNORE_BUFFER_IMAGE_GRANULARITY_BIT |
+                           VMA_POOL_CREATE_LINEAR_ALGORITHM_BIT;
+
+  result = vk::Result{vmaCreatePool(allocator, &pool_create_info, pool)};
+  if (result != vk::Result::eSuccess) {
+    return false;
+  }
+  return true;
 }
 
 }  // namespace impeller
