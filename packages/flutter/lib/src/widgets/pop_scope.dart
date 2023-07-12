@@ -140,10 +140,10 @@ class _PopScopeState extends State<PopScope> implements PopEntry {
   Widget build(BuildContext context) => widget.child;
 }
 
-/// An interface into navigation pop events.
+/// Allows listening to and preventing pops.
 ///
-/// Can be registered in [ModalRoute] to listen to pops with [onPopInvoked] or to
-/// enable/disable them with [canPopNotifier].
+/// Can be registered in [ModalRoute] to listen to pops with [onPopInvoked] or
+/// to enable/disable them with [canPopNotifier].
 ///
 /// See also:
 ///
@@ -155,7 +155,7 @@ abstract class PopEntry {
   PopInvokedCallback? get onPopInvoked;
 
   /// {@macro flutter.widgets.PopScope.canPop}
-  ValueNotifier<bool> get canPopNotifier;
+  ValueListenable<bool> get canPopNotifier;
 
   @override
   String toString() {
