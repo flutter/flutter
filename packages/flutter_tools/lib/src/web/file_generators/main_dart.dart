@@ -4,16 +4,21 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:package_config/package_config.dart';
 
 import '../../asset.dart';
 
-final String _assetManifest = (){
-  final ByteBuffer buffer = generatedAssetManifest.buffer;
-  final Uint8List list = buffer.asUint8List(generatedAssetManifest.offsetInBytes, generatedAssetManifest.lengthInBytes);
+final String? _assetManifest = (){
+  if (generatedAssetManifest == null) {
+    return null;
+  }
+  final ByteBuffer buffer = generatedAssetManifest!.buffer;
+  final Uint8List list = buffer.asUint8List(generatedAssetManifest!.offsetInBytes, generatedAssetManifest!.lengthInBytes);
   final String raw =  utf8.decode(list);
   return Uri.encodeFull(raw);
 }();
+
 
 /// Generates the main.dart file.
 String generateMainDartFile(String appEntrypoint, {
@@ -32,7 +37,7 @@ String generateMainDartFile(String appEntrypoint, {
     '',
     "import 'dart:ui_web' as ui_web;",
     "import 'dart:async';",
-    "import 'package:flutter/services.dart';",
+    "import 'dart:js' as js;",
     '',
     "import '$appEntrypoint' as entrypoint;",
     "import '$pluginRegistrantEntrypoint' as pluginRegistrant;",
@@ -43,8 +48,8 @@ String generateMainDartFile(String appEntrypoint, {
     'Future<void> main() async {',
     '  await ui_web.bootstrapEngine(',
     '    runApp: () {',
-    '      print("hello this is andrew");',
-    '      uriEncodedAssetManifestContent = r"$_assetManifest";',
+    if (_assetManifest != null)
+      '      js.context["_flutter_uriEncodedAssetManifest"] = "$_assetManifest";',
     '      if (entrypoint.main is _UnaryFunction) {',
     '        return (entrypoint.main as _UnaryFunction)(<String>[]);',
     '      }',
