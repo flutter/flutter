@@ -243,6 +243,14 @@ class _Channel {
 /// Typically these buffers are drained once a callback is set up on
 /// the [BinaryMessenger] in the Flutter framework. (See [setListener].)
 ///
+/// ## Channel names
+///
+/// By convention, channels are normally named with a reverse-DNS prefix, a
+/// slash, and then a domain-specific name. For example, `com.example/demo`.
+///
+/// Channel names cannot contain the U+0000 NULL character, because they
+/// are passed through APIs that use null-terminated strings.
+///
 /// ## Buffer capacity and overflow
 ///
 /// Each channel has a finite buffer capacity and messages will
@@ -326,7 +334,11 @@ class ChannelBuffers {
   /// If a message overflows the channel, and the channel has not been
   /// configured to expect overflow, then, in debug mode, a message
   /// will be printed to the console warning about the overflow.
+  ///
+  /// Channel names cannot contain the U+0000 NULL character, because they
+  /// are passed through APIs that use null-terminated strings.
   void push(String name, ByteData? data, PlatformMessageResponseCallback callback) {
+    assert(!name.contains('\u0000'), 'Channel names must not contain U+0000 NULL characters.');
     final _Channel channel = _channels.putIfAbsent(name, () => _Channel());
     if (channel.push(_StoredMessage(data, callback))) {
       _printDebug(
@@ -365,6 +377,7 @@ class ChannelBuffers {
   ///
   /// The draining stops if the listener is removed.
   void setListener(String name, ChannelCallback callback) {
+    assert(!name.contains('\u0000'), 'Channel names must not contain U+0000 NULL characters.');
     final _Channel channel = _channels.putIfAbsent(name, () => _Channel());
     channel.setListener(callback);
   }
@@ -416,8 +429,9 @@ class ChannelBuffers {
   /// ## `resize`
   ///
   /// The `resize` method takes as its argument a list with two values, first
-  /// the channel name (a UTF-8 string less than 254 bytes long), and second the
-  /// allowed size of the channel buffer (an integer between 0 and 2147483647).
+  /// the channel name (a UTF-8 string less than 254 bytes long and not
+  /// containing any null bytes), and second the allowed size of the channel
+  /// buffer (an integer between 0 and 2147483647).
   ///
   /// Upon receiving the message, the channel's buffer is resized. If necessary,
   /// messages are silently discarded to ensure the buffer is no bigger than
@@ -433,8 +447,9 @@ class ChannelBuffers {
   /// ## `overflow`
   ///
   /// The `overflow` method takes as its argument a list with two values, first
-  /// the channel name (a UTF-8 string less than 254 bytes long), and second a
-  /// boolean which is true if overflow is expected and false if it is not.
+  /// the channel name (a UTF-8 string less than 254 bytes long and not
+  /// containing any null bytes), and second a boolean which is true if overflow
+  /// is expected and false if it is not.
   ///
   /// This sets a flag on the channel in debug mode. In release mode the message
   /// is silently ignored. The flag indicates whether overflow is expected on this
@@ -473,6 +488,9 @@ class ChannelBuffers {
           }
           index += 1;
           final String channelName = utf8.decode(bytes.sublist(index, index + channelNameLength));
+          if (channelName.contains('\u0000')) {
+            throw Exception("Invalid arguments for 'resize' method sent to $kControlChannelName (channel name must not contain any null bytes)");
+          }
           index += channelNameLength;
           if (bytes[index] != 0x03) { // 3 = value code for uint32
             throw Exception("Invalid arguments for 'resize' method sent to $kControlChannelName (second argument must be an integer in the range 0 to 2147483647)");
@@ -533,6 +551,7 @@ class ChannelBuffers {
   void resize(String name, int newSize) {
     _Channel? channel = _channels[name];
     if (channel == null) {
+      assert(!name.contains('\u0000'), 'Channel names must not contain U+0000 NULL characters.');
       channel = _Channel(newSize);
       _channels[name] = channel;
     } else {
@@ -556,6 +575,7 @@ class ChannelBuffers {
     assert(() {
       _Channel? channel = _channels[name];
       if (channel == null && allowed) {
+        assert(!name.contains('\u0000'), 'Channel names must not contain U+0000 NULL characters.');
         channel = _Channel();
         _channels[name] = channel;
       }
