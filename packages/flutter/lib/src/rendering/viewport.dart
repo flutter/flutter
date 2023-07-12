@@ -1820,7 +1820,8 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     // Shrinkwrapping viewport only requires the cross axis to be bounded.
     assert(_debugCheckHasBoundedCrossAxis());
     assert((){
-      if (debugCheckHasBoundedAxis(axis, constraints)) {
+      try {
+        debugCheckHasBoundedAxis(axis, constraints);
         // The viewport is bounded, shrinkwrapping the children should not be
         // necessary and could be causing performance issues.
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1837,8 +1838,9 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
             'being instantiated directly.',
           ),
         ]);
+      } catch (_) {
+        return true;
       }
-      return true;
     }());
 
     switch (axis) {
