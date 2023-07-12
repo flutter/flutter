@@ -643,7 +643,7 @@ class Border extends BoxBorder {
     // Paint a non uniform border if a single color is visible
     // and (borderRadius is present) or (border is visible and width != 0.0).
     if (visibleColors.length == 1 &&
-        ((borderRadius != null && borderRadius != BorderRadius.zero) ||
+        ((borderRadius != null && borderRadius != BorderRadius.zero) &&
             !hasThinBorder)) {
       BoxBorder.paintNonUniformBorder(canvas, rect,
           shape: shape,
@@ -660,7 +660,7 @@ class Border extends BoxBorder {
      assert(() {
       if (hasThinBorder) {
         assert(borderRadius == null || borderRadius == BorderRadius.zero,
-            'A side like `BorderSide(width: 0.0, style: BorderStyle.solid)` can only be drawn when BorderRadius is zero or null.');
+            'A hairline border like `BorderSide(width: 0.0, style: BorderStyle.solid)` can only be drawn when BorderRadius is zero or null.');
       }
       if (borderRadius != null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[

@@ -388,7 +388,7 @@ void main() {
       ),
     );
     expect(tester.takeException(), isAssertionError,
-        reason: 'Border with width == 0 should fail with borderRadius.');
+        reason: 'Border with a side.width == 0 should fail with borderRadius.');
 
     await tester.pumpWidget(
       buildWidget(
