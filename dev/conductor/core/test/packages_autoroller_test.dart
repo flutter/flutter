@@ -12,7 +12,7 @@ import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
 import '../bin/packages_autoroller.dart' show run;
-import './common.dart';
+import 'common.dart';
 
 void main() {
   const String flutterRoot = '/flutter';
