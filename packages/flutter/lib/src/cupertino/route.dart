@@ -723,10 +723,6 @@ class _CupertinoBackGestureController<T> {
   /// The drag gesture has ended with a horizontal motion of
   /// [fractionalVelocity] as a fraction of screen width per second.
   void dragEnd(double velocity) {
-    // Fling in the appropriate direction.
-    // AnimationController.fling is guaranteed to
-    // take at least one frame.
-    //
     // This curve has been determined through rigorously eyeballing native iOS
     // animations.
     const Curve animationCurve = Curves.fastLinearToSlowEaseIn;
