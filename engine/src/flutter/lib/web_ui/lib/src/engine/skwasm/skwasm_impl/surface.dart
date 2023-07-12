@@ -37,7 +37,7 @@ class SkwasmSurface {
         skwasmInstance.addFunction(
           _callbackHandler.toJS,
           'vii'.toJS
-        ).toDart.toInt()
+        ).toDartDouble.toInt()
       );
     surfaceSetCallbackHandler(handle, _callbackHandle);
   }
@@ -75,9 +75,9 @@ class SkwasmSurface {
   }
 
   void _callbackHandler(JSNumber jsCallbackId, JSNumber jsPointer) {
-    final int callbackId = jsCallbackId.toDart.toInt();
+    final int callbackId = jsCallbackId.toDartDouble.toInt();
     final Completer<int> completer = _pendingCallbacks.remove(callbackId)!;
-    completer.complete(jsPointer.toDart.toInt());
+    completer.complete(jsPointer.toDartDouble.toInt());
   }
 
   void dispose() {

@@ -4,7 +4,6 @@
 
 import 'dart:js_interop';
 
-import 'package:js/js_util.dart' as js_util;
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -12,8 +11,7 @@ import 'package:ui/src/engine.dart';
 import '../common/spy.dart';
 
 @JS('window._flutter_internal_on_benchmark')
-external set _onBenchmark (JSAny? object);
-set onBenchmark (Object? object) => _onBenchmark = object?.toJSAnyShallow;
+external set onBenchmark(JSAny? object);
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -46,9 +44,9 @@ void _profilerTests() {
 
   test('can listen to benchmarks', () {
     final List<BenchmarkDatapoint> data = <BenchmarkDatapoint>[];
-    onBenchmark = js_util.allowInterop((String name, num value) {
+    onBenchmark = (String name, num value) {
       data.add(BenchmarkDatapoint(name, value));
-    });
+    }.toJS;
 
     Profiler.instance.benchmark('foo', 123);
     expect(data, <BenchmarkDatapoint>[BenchmarkDatapoint('foo', 123)]);
@@ -69,9 +67,9 @@ void _profilerTests() {
     final List<BenchmarkDatapoint> data = <BenchmarkDatapoint>[];
 
     // Wrong callback signature.
-    onBenchmark = js_util.allowInterop((num value) {
+    onBenchmark = (num value) {
       data.add(BenchmarkDatapoint('bad', value));
-    });
+    }.toJS;
     expect(
       () => Profiler.instance.benchmark('foo', 123),
 
@@ -82,10 +80,12 @@ void _profilerTests() {
     expect(data, isEmpty);
 
     // Not even a callback.
-    onBenchmark = 'string';
+    onBenchmark = 'string'.toJS;
     expect(
       () => Profiler.instance.benchmark('foo', 123),
-      throwsA(isA<TypeError>()),
+      // dart2js throws a TypeError, while dart2wasm throws an explicit
+      // exception.
+      throwsA(anything),
     );
   });
 }
