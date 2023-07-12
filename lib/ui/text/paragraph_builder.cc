@@ -151,11 +151,12 @@ void ParagraphBuilder::Create(Dart_Handle wrapper,
                               double fontSize,
                               double height,
                               const std::u16string& ellipsis,
-                              const std::string& locale) {
+                              const std::string& locale,
+                              bool applyRoundingHack) {
   UIDartState::ThrowIfUIOperationsProhibited();
   auto res = fml::MakeRefCounted<ParagraphBuilder>(
       encoded_handle, strutData, fontFamily, strutFontFamilies, fontSize,
-      height, ellipsis, locale);
+      height, ellipsis, locale, applyRoundingHack);
   res->AssociateWithDartWrapper(wrapper);
 }
 
@@ -230,7 +231,8 @@ ParagraphBuilder::ParagraphBuilder(
     double fontSize,
     double height,
     const std::u16string& ellipsis,
-    const std::string& locale) {
+    const std::string& locale,
+    bool applyRoundingHack) {
   int32_t mask = 0;
   txt::ParagraphStyle style;
   {
@@ -291,6 +293,7 @@ ParagraphBuilder::ParagraphBuilder(
   if (mask & kPSLocaleMask) {
     style.locale = locale;
   }
+  style.apply_rounding_hack = applyRoundingHack;
 
   FontCollection& font_collection = UIDartState::Current()
                                         ->platform_configuration()

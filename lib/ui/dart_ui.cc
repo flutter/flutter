@@ -78,7 +78,7 @@ typedef CanvasPath Path;
   V(Gradient::Create, 1)                                              \
   V(ImageFilter::Create, 1)                                           \
   V(ImageShader::Create, 1)                                           \
-  V(ParagraphBuilder::Create, 9)                                      \
+  V(ParagraphBuilder::Create, 10)                                     \
   V(PathMeasure::Create, 3)                                           \
   V(Path::Create, 1)                                                  \
   V(PictureRecorder::Create, 1)                                       \
