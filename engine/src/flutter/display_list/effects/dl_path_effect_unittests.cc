@@ -6,7 +6,7 @@
 #include "flutter/display_list/testing/dl_test_equality.h"
 #include "flutter/display_list/utils/dl_comparable.h"
 #include "gtest/gtest.h"
-#include "include/core/SkScalar.h"
+#include "third_party/skia/include/core/SkScalar.h"
 
 namespace flutter {
 namespace testing {

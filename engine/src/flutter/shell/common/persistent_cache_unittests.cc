@@ -17,7 +17,6 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/version/version.h"
 #include "flutter/testing/testing.h"
-#include "include/core/SkPicture.h"
 
 namespace flutter {
 namespace testing {

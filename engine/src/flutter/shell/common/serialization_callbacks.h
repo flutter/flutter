@@ -6,9 +6,8 @@
 #define FLUTTER_SHELL_COMMON_SERIALIZATION_CALLBACKS_H_
 
 #include "flutter/fml/logging.h"
-#include "include/core/SkImage.h"
-#include "include/core/SkPicture.h"
-#include "include/core/SkTypeface.h"
+#include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkTypeface.h"
 
 namespace flutter {
 

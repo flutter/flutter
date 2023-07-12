@@ -14,10 +14,8 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/trace_event.h"
-#include "include/core/SkMatrix.h"
-#include "include/core/SkRect.h"
-#include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkSize.h"
+#include "third_party/skia/include/core/SkMatrix.h"
+#include "third_party/skia/include/core/SkRect.h"
 
 class GrDirectContext;
 class SkColorSpace;
@@ -182,16 +180,14 @@ class RasterCache {
   size_t GetLayerCachedEntriesCount() const;
 
   /**
-   * Return the number of map entries in the picture caches (SkPicture and
-   * DisplayList) regardless of whether the entries have been populated with
-   * an image.
+   * Return the number of map entries in the picture (DisplayList) cache
+   * regardless of whether the entries have been populated with an image.
    */
   size_t GetPictureCachedEntriesCount() const;
 
   /**
    * @brief Estimate how much memory is used by picture raster cache entries in
-   * bytes, including cache entries in the SkPicture cache and the DisplayList
-   * cache.
+   * bytes.
    *
    * Only SkImage's memory usage is counted as other objects are often much
    * smaller compared to SkImage. SkImageInfo::computeMinByteSize is used to

@@ -10,7 +10,7 @@
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/dl_vertices.h"
 #include "gtest/gtest.h"
-#include "include/core/SkSamplingOptions.h"
+#include "third_party/skia/include/core/SkSamplingOptions.h"
 
 namespace flutter {
 namespace testing {
