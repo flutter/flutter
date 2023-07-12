@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/display_list/skia_conversions.h"
+#include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
 namespace impeller {
 namespace skia_conversions {
@@ -157,6 +158,14 @@ std::vector<Matrix> ToRSXForms(const SkRSXform xform[], int count) {
     result.push_back(matrix);
   }
   return result;
+}
+
+Path PathDataFromTextBlob(const sk_sp<SkTextBlob>& blob) {
+  if (!blob) {
+    return {};
+  }
+
+  return ToPath(skia::textlayout::Paragraph::GetPath(blob.get()));
 }
 
 std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {

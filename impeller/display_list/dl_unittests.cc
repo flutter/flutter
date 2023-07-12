@@ -447,6 +447,19 @@ TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, CanDrawStrokedText) {
+  flutter::DisplayListBuilder builder;
+  flutter::DlPaint paint;
+
+  paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
+  paint.setColor(flutter::DlColor::kRed());
+  builder.DrawTextBlob(
+      SkTextBlob::MakeFromString("stoked about stroked text", CreateTestFont()),
+      250, 250, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(DisplayListTest, IgnoreMaskFilterWhenSavingLayer) {
   auto texture = CreateTextureForFixture("embarcadero.jpg");
   flutter::DisplayListBuilder builder;
