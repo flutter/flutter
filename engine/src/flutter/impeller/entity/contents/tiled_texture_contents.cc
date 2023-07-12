@@ -100,7 +100,7 @@ bool TiledTextureContents::UsesEmulatedTileMode(
 
 // |Contents|
 bool TiledTextureContents::IsOpaque() const {
-  if (GetOpacity() < 1 || x_tile_mode_ == Entity::TileMode::kDecal ||
+  if (GetOpacityFactor() < 1 || x_tile_mode_ == Entity::TileMode::kDecal ||
       y_tile_mode_ == Entity::TileMode::kDecal) {
     return false;
   }
@@ -128,8 +128,8 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   auto& host_buffer = pass.GetTransientsBuffer();
 
   auto geometry_result = GetGeometry()->GetPositionUVBuffer(
-      Rect({0, 0}, Size(texture_size)), GetInverseMatrix(), renderer, entity,
-      pass);
+      Rect({0, 0}, Size(texture_size)), GetInverseEffectTransform(), renderer,
+      entity, pass);
   bool uses_emulated_tile_mode =
       UsesEmulatedTileMode(renderer.GetDeviceCapabilities());
 
@@ -158,11 +158,11 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
     FS::FragInfo frag_info;
     frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
     frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
-    frag_info.alpha = GetOpacity();
+    frag_info.alpha = GetOpacityFactor();
     FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
   } else {
     TextureFillFragmentShader::FragInfo frag_info;
-    frag_info.alpha = GetOpacity();
+    frag_info.alpha = GetOpacityFactor();
     TextureFillFragmentShader::BindFragInfo(
         cmd, host_buffer.EmplaceUniform(frag_info));
   }
@@ -202,12 +202,12 @@ std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
     const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled,
     const std::string& label) const {
-  if (GetInverseMatrix().IsIdentity()) {
+  if (GetInverseEffectTransform().IsIdentity()) {
     return Snapshot{
         .texture = texture_,
         .transform = entity.GetTransformation(),
         .sampler_descriptor = sampler_descriptor.value_or(sampler_descriptor_),
-        .opacity = GetOpacity(),
+        .opacity = GetOpacityFactor(),
     };
   }
 

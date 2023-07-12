@@ -50,7 +50,7 @@ ColorSource ColorSource::MakeLinearGradient(Point start_point,
                   stops = std::move(stops), tile_mode,
                   effect_transform](const Paint& paint) {
     auto contents = std::make_shared<LinearGradientContents>();
-    contents->SetOpacity(paint.color.alpha);
+    contents->SetOpacityFactor(paint.color.alpha);
     contents->SetColors(colors);
     contents->SetStops(stops);
     contents->SetEndPoints(start_point, end_point);
@@ -82,7 +82,7 @@ ColorSource ColorSource::MakeConicalGradient(Point center,
                   tile_mode, effect_transform](const Paint& paint) {
     std::shared_ptr<ConicalGradientContents> contents =
         std::make_shared<ConicalGradientContents>();
-    contents->SetOpacity(paint.color.alpha);
+    contents->SetOpacityFactor(paint.color.alpha);
     contents->SetColors(colors);
     contents->SetStops(stops);
     contents->SetCenterAndRadius(center, radius);
@@ -113,7 +113,7 @@ ColorSource ColorSource::MakeRadialGradient(Point center,
                   stops = std::move(stops), tile_mode,
                   effect_transform](const Paint& paint) {
     auto contents = std::make_shared<RadialGradientContents>();
-    contents->SetOpacity(paint.color.alpha);
+    contents->SetOpacityFactor(paint.color.alpha);
     contents->SetColors(colors);
     contents->SetStops(stops);
     contents->SetCenterAndRadius(center, radius);
@@ -144,7 +144,7 @@ ColorSource ColorSource::MakeSweepGradient(Point center,
                   stops = std::move(stops), tile_mode,
                   effect_transform](const Paint& paint) {
     auto contents = std::make_shared<SweepGradientContents>();
-    contents->SetOpacity(paint.color.alpha);
+    contents->SetOpacityFactor(paint.color.alpha);
     contents->SetCenterAndAngles(center, start_angle, end_angle);
     contents->SetColors(colors);
     contents->SetStops(stops);
@@ -167,7 +167,7 @@ ColorSource ColorSource::MakeImage(std::shared_ptr<Texture> texture,
                   sampler_descriptor = std::move(sampler_descriptor),
                   effect_transform](const Paint& paint) {
     auto contents = std::make_shared<TiledTextureContents>();
-    contents->SetOpacity(paint.color.alpha);
+    contents->SetOpacityFactor(paint.color.alpha);
     contents->SetTexture(texture);
     contents->SetTileModes(x_tile_mode, y_tile_mode);
     contents->SetSamplerDescriptor(sampler_descriptor);
@@ -197,7 +197,7 @@ ColorSource ColorSource::MakeRuntimeEffect(
                   texture_inputs =
                       std::move(texture_inputs)](const Paint& paint) {
     auto contents = std::make_shared<RuntimeEffectContents>();
-    contents->SetOpacity(paint.color.alpha);
+    contents->SetOpacityFactor(paint.color.alpha);
     contents->SetRuntimeStage(runtime_stage);
     contents->SetUniformData(uniform_data);
     contents->SetTextureInputs(texture_inputs);
@@ -213,7 +213,7 @@ ColorSource ColorSource::MakeScene(std::shared_ptr<scene::Node> scene_node,
   result.proc_ = [scene_node = std::move(scene_node),
                   camera_transform](const Paint& paint) {
     auto contents = std::make_shared<SceneContents>();
-    contents->SetOpacity(paint.color.alpha);
+    contents->SetOpacityFactor(paint.color.alpha);
     contents->SetNode(scene_node);
     contents->SetCameraTransform(camera_transform);
     return contents;

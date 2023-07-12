@@ -55,7 +55,8 @@ bool ColorSourceTextContents::Render(const ContentContext& renderer,
   // offset the color source so it behaves as if it were drawn in the original
   // position.
   auto effect_transform =
-      color_source_contents_->GetInverseMatrix().Invert().Translate(-position_);
+      color_source_contents_->GetInverseEffectTransform().Invert().Translate(
+          -position_);
   color_source_contents_->SetEffectTransform(effect_transform);
 
   auto new_texture = renderer.MakeSubpass(

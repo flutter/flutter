@@ -46,7 +46,7 @@ const std::vector<Scalar>& RadialGradientContents::GetStops() const {
 }
 
 bool RadialGradientContents::IsOpaque() const {
-  if (GetOpacity() < 1 || tile_mode_ == Entity::TileMode::kDecal) {
+  if (GetOpacityFactor() < 1 || tile_mode_ == Entity::TileMode::kDecal) {
     return false;
   }
   for (auto color : colors_) {
@@ -77,7 +77,7 @@ bool RadialGradientContents::RenderSSBO(const ContentContext& renderer,
   frag_info.radius = radius_;
   frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
   frag_info.decal_border_color = decal_border_color_;
-  frag_info.alpha = GetOpacity();
+  frag_info.alpha = GetOpacityFactor();
 
   auto& host_buffer = pass.GetTransientsBuffer();
   auto colors = CreateGradientColors(colors_, stops_);
@@ -90,7 +90,7 @@ bool RadialGradientContents::RenderSSBO(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransformation();
-  frame_info.matrix = GetInverseMatrix();
+  frame_info.matrix = GetInverseEffectTransform();
 
   Command cmd;
   cmd.label = "RadialGradientSSBOFill";
@@ -142,7 +142,7 @@ bool RadialGradientContents::RenderTexture(const ContentContext& renderer,
   frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
   frag_info.decal_border_color = decal_border_color_;
   frag_info.texture_sampler_y_coord_scale = gradient_texture->GetYCoordScale();
-  frag_info.alpha = GetOpacity();
+  frag_info.alpha = GetOpacityFactor();
   frag_info.half_texel = Vector2(0.5 / gradient_texture->GetSize().width,
                                  0.5 / gradient_texture->GetSize().height);
 
@@ -151,7 +151,7 @@ bool RadialGradientContents::RenderTexture(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   frame_info.mvp = geometry_result.transform;
-  frame_info.matrix = GetInverseMatrix();
+  frame_info.matrix = GetInverseEffectTransform();
 
   Command cmd;
   cmd.label = "RadialGradientFill";
