@@ -23,11 +23,14 @@ void main() {
 
     // Enabled MaterialButton
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MaterialButton(
-          onPressed: () { },
-          child: const Text('button'),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MaterialButton(
+            onPressed: () { },
+            child: const Text('button'),
+          ),
         ),
       ),
     );
@@ -68,11 +71,14 @@ void main() {
 
     // Disabled MaterialButton
     await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: MaterialButton(
-          onPressed: null,
-          child: Text('button'),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: MaterialButton(
+            onPressed: null,
+            child: Text('button'),
+          ),
         ),
       ),
     );
@@ -442,6 +448,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(
+            useMaterial3: false,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: buttonWidget,
@@ -488,6 +495,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(
+            useMaterial3: false,
             highlightColor: themeHighlightColor1,
             splashColor: themeSplashColor1,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -516,6 +524,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(
+            useMaterial3: false,
             highlightColor: themeHighlightColor2,
             splashColor: themeSplashColor2,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -574,15 +583,20 @@ void main() {
       );
 
     // enabled button
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Center(
-        child: MaterialButton(
-          child: const Text('Button'),
-          onPressed: () { /* to make sure the button is enabled */ },
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: MaterialButton(
+              child: const Text('Button'),
+              onPressed: () { /* to make sure the button is enabled */ },
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(semantics, hasSemantics(
       TestSemantics.root(
@@ -607,15 +621,20 @@ void main() {
     ));
 
     // disabled button
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: Center(
-        child: MaterialButton(
-          onPressed: null, // button is disabled
-          child: Text('Button'),
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: MaterialButton(
+              onPressed: null, // button is disabled
+              child: Text('Button'),
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(semantics, hasSemantics(
       TestSemantics.root(
@@ -773,6 +792,7 @@ void main() {
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
       return tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: Center(

@@ -254,7 +254,7 @@ abstract class BoxBorder extends ShapeBorder {
     required BorderSide bottom,
   }) {
     final RRect borderRect;
-    switch(shape) {
+    switch (shape) {
       case BoxShape.rectangle:
         borderRect = (borderRadius ?? BorderRadius.zero)
             .resolve(textDirection)
@@ -605,7 +605,7 @@ class Border extends BoxBorder {
 
     // Allow painting non-uniform borders if the color and style are uniform.
     if (_colorIsUniform && _styleIsUniform) {
-      switch(top.style) {
+      switch (top.style) {
         case BorderStyle.none:
           return;
         case BorderStyle.solid:
@@ -964,7 +964,7 @@ class BorderDirectional extends BoxBorder {
 
     // Allow painting non-uniform borders if the color and style are uniform.
     if (_colorIsUniform && _styleIsUniform) {
-      switch(top.style) {
+      switch (top.style) {
         case BorderStyle.none:
           return;
         case BorderStyle.solid:

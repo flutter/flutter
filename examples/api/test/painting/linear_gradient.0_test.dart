@@ -20,8 +20,9 @@ void main() {
 
   testWidgets('gradient matches golden', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: SizedBox(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const SizedBox(
           width: 800,
           height: 600,
           child: RepaintBoundary(

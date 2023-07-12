@@ -53,6 +53,10 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// A Material Design panel that slides in horizontally from the edge of a
 /// [Scaffold] to show navigation links in an application.
 ///
+/// There is a Material 3 version of this component, [NavigationDrawer],
+/// that's preferred for applications that are configured for Material 3
+/// (see [ThemeData.useMaterial3]).
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=WRj86iHihgY}
 ///
 /// Drawers are typically used with the [Scaffold.drawer] property. The child of
@@ -66,6 +70,18 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// automatically handles the edge-swipe gesture to show the drawer.
 ///
 /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/drawer.mp4}
+///
+/// ## Updating to [NavigationDrawer]
+///
+/// There is a Material 3 version of this component, [NavigationDrawer],
+/// that's preferred for applications that are configured for Material 3
+/// (see [ThemeData.useMaterial3]). The [NavigationDrawer] widget's visual
+/// are a little bit different, see the Material 3 spec at
+/// <https://m3.material.io/components/navigation-drawer/overview> for
+/// more details. While the [Drawer] widget can have only one child, the
+/// [NavigationDrawer] widget can have list of widgets, which typically contains
+/// [NavigationDrawerDestination] widgets and/or customized widgets like headlines
+/// and dividers.
 ///
 /// {@tool snippet}
 /// This example shows how to create a [Scaffold] that contains an [AppBar] and
@@ -112,6 +128,12 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+/// This example shows how to migrate the above [Drawer] to a [NavigationDrawer].
+///
+/// See code in examples/api/lib/material/navigation_drawer/navigation_drawer.1.dart **
 /// {@end-tool}
 ///
 /// An open drawer may be closed with a swipe to close gesture, pressing the
@@ -502,7 +524,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       _scrimColorTween = _buildScrimColorTween();
     }
     if (widget.isDrawerOpen != oldWidget.isDrawerOpen) {
-      switch(_controller.status) {
+      switch (_controller.status) {
         case AnimationStatus.completed:
         case AnimationStatus.dismissed:
           _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
@@ -816,8 +838,6 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
   _DrawerDefaultsM3(this.context)

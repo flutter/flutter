@@ -8,6 +8,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'project.dart';
+import 'template.dart';
 import 'version.dart';
 
 enum FlutterProjectType implements CliEnum {
@@ -172,11 +173,11 @@ class FlutterProjectMetadata {
 # This file tracks properties of this Flutter project.
 # Used by Flutter tool to assess capabilities and perform upgrades etc.
 #
-# This file should be version controlled.
+# This file should be version controlled and should not be manually edited.
 
 version:
-  revision: $_versionRevision
-  channel: $_versionChannel
+  revision: ${escapeYamlString(_versionRevision ?? '')}
+  channel: ${escapeYamlString(_versionChannel ?? kUserBranch)}
 
 project_type: ${projectType == null ? '' : projectType!.cliName}
 ${migrateConfig.getOutputFileString()}''';

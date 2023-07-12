@@ -128,7 +128,7 @@ class NextContext extends Context {
           stdio.printStatus('These must be applied manually in the directory '
               '${state.engine.checkoutPath} before proceeding.\n');
         }
-        if (autoAccept == false) {
+        if (!autoAccept) {
           final bool response = await prompt(
             'Are you ready to push your engine branch to the repository '
             '${state.engine.mirror.url}?',
@@ -146,7 +146,7 @@ class NextContext extends Context {
           'You must validate pre-submit CI for your engine PR, merge it, and codesign',
           'binaries before proceeding.\n',
         ].join('\n'));
-        if (autoAccept == false) {
+        if (!autoAccept) {
           // TODO(fujino): actually test if binaries have been codesigned on macOS
           final bool response = await prompt(
             'Has CI passed for the engine PR and binaries been codesigned?',
@@ -236,7 +236,7 @@ class NextContext extends Context {
           );
         }
 
-        if (autoAccept == false) {
+        if (!autoAccept) {
           final bool response = await prompt(
             'Are you ready to push your framework branch to the repository '
             '${state.framework.mirror.url}?',
@@ -276,7 +276,7 @@ class NextContext extends Context {
             previousCheckoutLocation: state.engine.checkoutPath,
         );
         final String engineHead = await engine.reverseParse('HEAD');
-        if (autoAccept == false) {
+        if (!autoAccept) {
           final bool response = await prompt(
             'Are you ready to tag commit $frameworkHead as ${state.releaseVersion}\n'
             'and push to remote ${state.framework.upstream.url}?',
@@ -302,7 +302,7 @@ class NextContext extends Context {
             previousCheckoutLocation: state.framework.checkoutPath,
         );
         final String headRevision = await framework.reverseParse('HEAD');
-        if (autoAccept == false) {
+        if (!autoAccept) {
           // dryRun: true means print out git command
           await framework.pushRef(
               fromRef: headRevision,
@@ -332,7 +332,7 @@ class NextContext extends Context {
             'The current status of packaging builds can be seen at:\n'
             '\t$kLuciPackagingConsoleLink',
         );
-        if (autoAccept == false) {
+        if (!autoAccept) {
           final bool response = await prompt(
               'Have all packaging builds finished successfully and post release announcements been completed?');
           if (!response) {
@@ -373,7 +373,7 @@ class NextContext extends Context {
           force: force,
       );
     } on GitException catch (exception) {
-      if (exception.type == GitExceptionType.PushRejected && force == false) {
+      if (exception.type == GitExceptionType.PushRejected && !force) {
         throw ConductorException(
           'Push failed because the working branch named '
           '${pbRepository.workingBranch} already exists on your mirror. '

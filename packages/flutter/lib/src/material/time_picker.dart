@@ -2291,7 +2291,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context));
         final double timePickerWidth;
-        switch(timeOfDayFormat) {
+        switch (timeOfDayFormat) {
           case TimeOfDayFormat.HH_colon_mm:
           case TimeOfDayFormat.HH_dot_mm:
           case TimeOfDayFormat.frenchCanadian:
@@ -2331,7 +2331,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context));
         final double timePickerWidth;
-        switch(timeOfDayFormat) {
+        switch (timeOfDayFormat) {
           case TimeOfDayFormat.HH_colon_mm:
           case TimeOfDayFormat.HH_dot_mm:
           case TimeOfDayFormat.frenchCanadian:
@@ -3322,8 +3322,6 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _TimePickerDefaultsM3 extends _TimePickerDefaults {
   _TimePickerDefaultsM3(this.context);
 
@@ -3402,11 +3400,11 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
           textColor = _colors.onTertiaryContainer;
         } else {
           // not pressed
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(MaterialState.hovered)) {
             textColor = _colors.onTertiaryContainer;
           } else {
-            // not focused
-            if (states.contains(MaterialState.hovered)) {
+            // not hovered
+            if (states.contains(MaterialState.focused)) {
               textColor = _colors.onTertiaryContainer;
             }
           }
@@ -3417,11 +3415,11 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
           textColor = _colors.onSurfaceVariant;
         } else {
           // not pressed
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(MaterialState.hovered)) {
             textColor = _colors.onSurfaceVariant;
           } else {
-            // not focused
-            if (states.contains(MaterialState.hovered)) {
+            // not hovered
+            if (states.contains(MaterialState.focused)) {
               textColor = _colors.onSurfaceVariant;
             }
           }
@@ -3511,24 +3509,24 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
         Color overlayColor = _colors.primaryContainer;
         if (states.contains(MaterialState.pressed)) {
           overlayColor = _colors.onPrimaryContainer;
-        } else if (states.contains(MaterialState.focused)) {
-          const double focusOpacity = 0.12;
-          overlayColor = _colors.onPrimaryContainer.withOpacity(focusOpacity);
         } else if (states.contains(MaterialState.hovered)) {
           const double hoverOpacity = 0.08;
           overlayColor = _colors.onPrimaryContainer.withOpacity(hoverOpacity);
+        } else if (states.contains(MaterialState.focused)) {
+          const double focusOpacity = 0.12;
+          overlayColor = _colors.onPrimaryContainer.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, _colors.primaryContainer);
       } else {
         Color overlayColor = _colors.surfaceVariant;
         if (states.contains(MaterialState.pressed)) {
           overlayColor = _colors.onSurface;
-        } else if (states.contains(MaterialState.focused)) {
-          const double focusOpacity = 0.12;
-          overlayColor = _colors.onSurface.withOpacity(focusOpacity);
         } else if (states.contains(MaterialState.hovered)) {
           const double hoverOpacity = 0.08;
           overlayColor = _colors.onSurface.withOpacity(hoverOpacity);
+        } else if (states.contains(MaterialState.focused)) {
+          const double focusOpacity = 0.12;
+          overlayColor = _colors.onSurface.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, _colors.surfaceVariant);
       }
@@ -3577,10 +3575,10 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
         if (states.contains(MaterialState.pressed)) {
           return _colors.onPrimaryContainer;
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimaryContainer;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(MaterialState.focused)) {
           return _colors.onPrimaryContainer;
         }
         return _colors.onPrimaryContainer;
@@ -3589,10 +3587,10 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
         if (states.contains(MaterialState.pressed)) {
           return _colors.onSurface;
         }
-        if (states.contains(MaterialState.focused)) {
+        if (states.contains(MaterialState.hovered)) {
           return _colors.onSurface;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(MaterialState.focused)) {
           return _colors.onSurface;
         }
         return _colors.onSurface;

@@ -258,9 +258,9 @@ class AssembleCommand extends FlutterCommand {
       results[kExtraGenSnapshotOptions] = (argumentResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
     }
 
-    final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
+    final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
-    if(dartDefines.isNotEmpty){
+    if (dartDefines.isNotEmpty){
       results[kDartDefines] = dartDefines.join(',');
     }
 

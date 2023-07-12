@@ -1893,6 +1893,10 @@ class _TabBarViewState extends State<TabBarView> {
       return false;
     }
 
+    if (!_controllerIsValid) {
+      return false;
+    }
+
     _scrollUnderwayCount += 1;
     if (notification is ScrollUpdateNotification && !_controller!.indexIsChanging) {
       final bool pageChanged = (_pageController.page! - _controller!.index).abs() > 1.0;
@@ -2161,8 +2165,6 @@ class _TabsDefaultsM2 extends TabBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   _TabsPrimaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.label);
@@ -2194,25 +2196,25 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   MaterialStateProperty<Color?> get overlayColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.primary.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.primary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.primary.withOpacity(0.12);
-        }
         return null;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.primary.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
         return _colors.onSurface.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.12);
       }
       return null;
     });
@@ -2258,24 +2260,24 @@ class _TabsSecondaryDefaultsM3 extends TabBarTheme {
   MaterialStateProperty<Color?> get overlayColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurface.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurface.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onSurface.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.12);
-        }
         return null;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurface.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.onSurface.withOpacity(0.12);
       }
       return null;

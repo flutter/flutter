@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 import 'leak_tracking.dart';
 
@@ -17,7 +18,7 @@ Leaks _leaksOfAllTypes() => Leaks(<LeakType, List<LeakReport>> {
 });
 
 Future<void> main() async {
-  test('Trivial $LeakCleaner returns only non-disposed leaks.', () {
+  test('Trivial $LeakCleaner returns all leaks.', () {
     final LeakCleaner leakCleaner = LeakCleaner(const LeakTrackingTestConfig());
     final Leaks leaks = _leaksOfAllTypes();
     final int leakTotal = leaks.total;
@@ -25,22 +26,69 @@ Future<void> main() async {
     final Leaks cleanedLeaks = leakCleaner.clean(leaks);
 
     expect(leaks.total, leakTotal);
-    expect(cleanedLeaks.total, 1);
+    expect(cleanedLeaks.total, 3);
   });
 
-  group('Leak tracking works for non-web', () {
+  test('$LeakCleaner catches extra leaks', () {
+    Leaks leaks = _leaksOfAllTypes();
+    final LeakReport leak = leaks.notDisposed.first;
+    leaks.notDisposed.add(leak);
+
+    final LeakTrackingTestConfig config = LeakTrackingTestConfig(
+      notDisposedAllowList: <String, int?>{leak.type: 1},
+    );
+    leaks = LeakCleaner(config).clean(leaks);
+
+    expect(leaks.notDisposed, hasLength(2));
+  });
+
+  group('Leak tracking works for non-web, and', () {
     testWidgetsWithLeakTracking(
-      'Leak tracker respects all allow lists',
+      'respects all allow lists',
       (WidgetTester tester) async {
         await tester.pumpWidget(_StatelessLeakingWidget());
       },
-      leakTrackingConfig: LeakTrackingTestConfig(
-        notDisposedAllowList: <String>{_leakTrackedClassName},
-        notGCedAllowList: <String>{_leakTrackedClassName},
+      leakTrackingTestConfig: LeakTrackingTestConfig(
+        notDisposedAllowList: <String, int?>{_leakTrackedClassName: null},
+        notGCedAllowList: <String, int?>{_leakTrackedClassName: null},
       ),
     );
 
-    group('Leak tracker respects notGCed allow lists', () {
+    testWidgetsWithLeakTracking(
+      'respects count in allow lists',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(_StatelessLeakingWidget());
+      },
+      leakTrackingTestConfig: LeakTrackingTestConfig(
+        notDisposedAllowList: <String, int?>{_leakTrackedClassName: 1},
+        notGCedAllowList: <String, int?>{_leakTrackedClassName: 1},
+      ),
+    );
+
+    group('fails if number or leaks is more than allowed', () {
+      // This test cannot run inside other tests because test nesting is forbidden.
+      // So, `expect` happens outside the tests, in `tearDown`.
+      late Leaks leaks;
+
+      testWidgetsWithLeakTracking(
+        'for $_StatelessLeakingWidget',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(_StatelessLeakingWidget());
+          await tester.pumpWidget(_StatelessLeakingWidget());
+        },
+        leakTrackingTestConfig: LeakTrackingTestConfig(
+          onLeaks: (Leaks theLeaks) {
+            leaks = theLeaks;
+          },
+          failTestOnLeaks: false,
+          notDisposedAllowList: <String, int?>{_leakTrackedClassName: 1},
+        ),
+      );
+
+      tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 2, expectedNotGCed: 2, shouldContainDebugInfo: false));
+    });
+
+    group('respects notGCed allow lists', () {
       // These tests cannot run inside other tests because test nesting is forbidden.
       // So, `expect` happens outside the tests, in `tearDown`.
       late Leaks leaks;
@@ -50,20 +98,20 @@ Future<void> main() async {
         (WidgetTester tester) async {
           await tester.pumpWidget(_StatelessLeakingWidget());
         },
-        leakTrackingConfig: LeakTrackingTestConfig(
+        leakTrackingTestConfig: LeakTrackingTestConfig(
           onLeaks: (Leaks theLeaks) {
             leaks = theLeaks;
           },
           failTestOnLeaks: false,
-          notGCedAllowList: <String>{_leakTrackedClassName},
+          notGCedAllowList: <String, int?>{_leakTrackedClassName: null},
         ),
       );
 
-      tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1));
+      tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1, shouldContainDebugInfo: false));
     });
 
-    group('Leak tracker catches that', () {
-      // These tests cannot run inside other tests because test nesting is forbidden.
+    group('catches that', () {
+      // These test cannot run inside other tests because test nesting is forbidden.
       // So, `expect` happens outside the tests, in `tearDown`.
       late Leaks leaks;
 
@@ -72,7 +120,7 @@ Future<void> main() async {
         (WidgetTester tester) async {
           await tester.pumpWidget(_StatelessLeakingWidget());
         },
-        leakTrackingConfig: LeakTrackingTestConfig(
+        leakTrackingTestConfig: LeakTrackingTestConfig(
           onLeaks: (Leaks theLeaks) {
             leaks = theLeaks;
           },
@@ -80,7 +128,7 @@ Future<void> main() async {
         ),
       );
 
-      tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1));
+      tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1, expectedNotGCed: 1, shouldContainDebugInfo: false));
     });
   },
   skip: isBrowser); // [intended] Leak detection is off for web.
@@ -92,7 +140,12 @@ Future<void> main() async {
 }
 
 /// Verifies [leaks] contains expected number of leaks for [_LeakTrackedClass].
-void _verifyLeaks(Leaks leaks, { int expectedNotDisposed = 0,  int expectedNotGCed = 0 }) {
+void _verifyLeaks(
+  Leaks leaks, {
+  int expectedNotDisposed = 0,
+  int expectedNotGCed = 0,
+  required bool shouldContainDebugInfo,
+}) {
   const String linkToLeakTracker = 'https://github.com/dart-lang/leak_tracker';
 
   expect(
@@ -104,14 +157,20 @@ void _verifyLeaks(Leaks leaks, { int expectedNotDisposed = 0,  int expectedNotGC
     ),
   );
 
-  _verifyLeakList(leaks.notDisposed, expectedNotDisposed);
-  _verifyLeakList(leaks.notGCed, expectedNotGCed);
+  _verifyLeakList(leaks.notDisposed, expectedNotDisposed, shouldContainDebugInfo);
+  _verifyLeakList(leaks.notGCed, expectedNotGCed, shouldContainDebugInfo);
 }
 
-void _verifyLeakList(List<LeakReport> list, int expectedCount){
+void _verifyLeakList(List<LeakReport> list, int expectedCount, bool shouldContainDebugInfo){
   expect(list.length, expectedCount);
 
   for (final LeakReport leak in list) {
+    if (shouldContainDebugInfo) {
+      expect(leak.context, isNotEmpty);
+    } else {
+      expect(leak.context ?? <String, dynamic>{}, isEmpty);
+    }
+
     expect(leak.trackedClass, contains(_LeakTrackedClass.library));
     expect(leak.trackedClass, contains(_leakTrackedClassName));
   }

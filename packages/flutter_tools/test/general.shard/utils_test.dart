@@ -120,6 +120,17 @@ baz=qux
       expect(snakeCase('ABC'), equals('a_b_c'));
     });
 
+    testWithoutContext('kebabCase', () async {
+      expect(kebabCase('abc'), equals('abc'));
+      expect(kebabCase('abC'), equals('ab-c'));
+      expect(kebabCase('aBc'), equals('a-bc'));
+      expect(kebabCase('aBC'), equals('a-b-c'));
+      expect(kebabCase('Abc'), equals('abc'));
+      expect(kebabCase('AbC'), equals('ab-c'));
+      expect(kebabCase('ABc'), equals('a-bc'));
+      expect(kebabCase('ABC'), equals('a-b-c'));
+    });
+
     testWithoutContext('sentenceCase', () async {
       expect(sentenceCase('abc'), equals('Abc'));
       expect(sentenceCase('ab_c'), equals('Ab_c'));

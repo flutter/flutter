@@ -28,6 +28,7 @@ void main() {
     expect(localizations.continueButtonLabel, isNotNull);
     expect(localizations.copyButtonLabel, isNotNull);
     expect(localizations.cutButtonLabel, isNotNull);
+    expect(localizations.scanTextButtonLabel, isNotNull);
     expect(localizations.okButtonLabel, isNotNull);
     expect(localizations.pasteButtonLabel, isNotNull);
     expect(localizations.selectAllButtonLabel, isNotNull);
@@ -186,5 +187,26 @@ void main() {
     )));
 
     expect(MaterialLocalizations.of(localizationsAvailable.currentContext!), isA<MaterialLocalizations>());
+  });
+
+  testWidgets("parseCompactDate doesn't throw an exception on invalid text", (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/126397.
+    final GlobalKey localizations = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          key: localizations,
+          child: const SizedBox.expand(),
+        ),
+      ),
+    );
+
+    final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(localizations.currentContext!);
+    expect(materialLocalizations.parseCompactDate('10/05/2023'), isNotNull);
+    expect(tester.takeException(), null);
+
+    expect(materialLocalizations.parseCompactDate('10/05/2023666777889'), null);
+    expect(tester.takeException(), null);
   });
 }

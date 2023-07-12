@@ -95,7 +95,7 @@ abstract final class _UntilNextFrame {
     if (_UntilNextFrame._completer == null) {
       _UntilNextFrame._completer = Completer<void>();
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        _UntilNextFrame._completer!.complete(null);
+        _UntilNextFrame._completer!.complete();
         _UntilNextFrame._completer = null;
       });
     }
@@ -130,10 +130,10 @@ class _Tester {
     final int frameDurationMs = fullFrameDuration.inMilliseconds;
 
     final int fullFrames = duration.inMilliseconds ~/ frameDurationMs;
-    final Offset fullFrameOffset = offset * ((frameDurationMs as double) / durationMs);
+    final Offset fullFrameOffset = offset * (frameDurationMs.toDouble() / durationMs);
 
     final Duration finalFrameDuration = duration - fullFrameDuration * fullFrames;
-    final Offset finalFrameOffset = offset - fullFrameOffset * (fullFrames as double);
+    final Offset finalFrameOffset = offset - fullFrameOffset * fullFrames.toDouble();
 
     await gesture.down(start, timeStamp: currentTime);
 
