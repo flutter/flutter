@@ -12,7 +12,9 @@ project 'Runner', {
 }
 
 def flutter_root
-  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  flutter_directory = File.expand_path('..', __FILE__)
+  generated_xcode_build_settings_filename = 'Generated.xcconfig'
+  generated_xcode_build_settings_path = File.join(flutter_directory, 'Flutter', generated_xcode_build_settings_filename)
   unless File.exist?(generated_xcode_build_settings_path)
     raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
   end
