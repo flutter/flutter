@@ -10,7 +10,6 @@
 
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/lib/ui/dart_wrapper.h"
-#include "third_party/skia/include/core/SkPicture.h"
 
 namespace flutter {
 

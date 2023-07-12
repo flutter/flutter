@@ -7,7 +7,6 @@
 #include "flutter/fml/logging.h"
 #include "flutter/testing/display_list_testing.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
-#include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSerialProcs.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkTextBlob.h"

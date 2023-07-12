@@ -182,39 +182,6 @@ TEST(RasterCache, SetCheckboardCacheImages) {
   ASSERT_TRUE(did_draw_checkerboard);
 }
 
-TEST(RasterCache, AccessThresholdOfZeroDisablesCachingForSkPicture) {
-  size_t threshold = 0;
-  flutter::RasterCache cache(threshold);
-
-  SkMatrix matrix = SkMatrix::I();
-
-  auto display_list = GetSampleDisplayList();
-
-  MockCanvas dummy_canvas(1000, 1000);
-  DlPaint paint;
-
-  LayerStateStack preroll_state_stack;
-  preroll_state_stack.set_preroll_delegate(kGiantRect, matrix);
-  LayerStateStack paint_state_stack;
-  preroll_state_stack.set_delegate(&dummy_canvas);
-
-  FixedRefreshRateStopwatch raster_time;
-  FixedRefreshRateStopwatch ui_time;
-  PrerollContextHolder preroll_context_holder = GetSamplePrerollContextHolder(
-      preroll_state_stack, &cache, &raster_time, &ui_time);
-  PaintContextHolder paint_context_holder = GetSamplePaintContextHolder(
-      paint_state_stack, &cache, &raster_time, &ui_time);
-  auto& preroll_context = preroll_context_holder.preroll_context;
-  auto& paint_context = paint_context_holder.paint_context;
-
-  cache.BeginFrame();
-  DisplayListRasterCacheItem display_list_item(display_list, SkPoint(), true,
-                                               false);
-  ASSERT_FALSE(RasterCacheItemPrerollAndTryToRasterCache(
-      display_list_item, preroll_context, paint_context, matrix));
-  ASSERT_FALSE(display_list_item.Draw(paint_context, &dummy_canvas, &paint));
-}
-
 TEST(RasterCache, AccessThresholdOfZeroDisablesCachingForDisplayList) {
   size_t threshold = 0;
   flutter::RasterCache cache(threshold);
@@ -244,46 +211,6 @@ TEST(RasterCache, AccessThresholdOfZeroDisablesCachingForDisplayList) {
 
   DisplayListRasterCacheItem display_list_item(display_list, SkPoint(), true,
                                                false);
-  ASSERT_FALSE(RasterCacheItemPrerollAndTryToRasterCache(
-      display_list_item, preroll_context, paint_context, matrix));
-  ASSERT_FALSE(display_list_item.Draw(paint_context, &dummy_canvas, &paint));
-}
-
-TEST(RasterCache, PictureCacheLimitPerFrameIsRespectedWhenZeroForSkPicture) {
-  size_t picture_cache_limit_per_frame = 0;
-  flutter::RasterCache cache(3, picture_cache_limit_per_frame);
-
-  SkMatrix matrix = SkMatrix::I();
-
-  auto display_list = GetSampleDisplayList();
-
-  MockCanvas dummy_canvas(1000, 1000);
-  DlPaint paint;
-
-  LayerStateStack preroll_state_stack;
-  preroll_state_stack.set_preroll_delegate(kGiantRect, matrix);
-  LayerStateStack paint_state_stack;
-  preroll_state_stack.set_delegate(&dummy_canvas);
-
-  FixedRefreshRateStopwatch raster_time;
-  FixedRefreshRateStopwatch ui_time;
-  PrerollContextHolder preroll_context_holder = GetSamplePrerollContextHolder(
-      preroll_state_stack, &cache, &raster_time, &ui_time);
-  PaintContextHolder paint_context_holder = GetSamplePaintContextHolder(
-      paint_state_stack, &cache, &raster_time, &ui_time);
-  auto& preroll_context = preroll_context_holder.preroll_context;
-  auto& paint_context = paint_context_holder.paint_context;
-
-  cache.BeginFrame();
-
-  DisplayListRasterCacheItem display_list_item(display_list, SkPoint(), true,
-                                               false);
-  ASSERT_FALSE(RasterCacheItemPrerollAndTryToRasterCache(
-      display_list_item, preroll_context, paint_context, matrix));
-  ASSERT_FALSE(display_list_item.Draw(paint_context, &dummy_canvas, &paint));
-  ASSERT_FALSE(RasterCacheItemPrerollAndTryToRasterCache(
-      display_list_item, preroll_context, paint_context, matrix));
-  ASSERT_FALSE(display_list_item.Draw(paint_context, &dummy_canvas, &paint));
   ASSERT_FALSE(RasterCacheItemPrerollAndTryToRasterCache(
       display_list_item, preroll_context, paint_context, matrix));
   ASSERT_FALSE(display_list_item.Draw(paint_context, &dummy_canvas, &paint));

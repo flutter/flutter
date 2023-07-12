@@ -20,7 +20,7 @@ namespace testing {
 
 /**
  * @brief A RasterCacheResult implementation that represents a cached Layer or
- * SkPicture without the overhead of storage.
+ * DisplayList without the overhead of storage.
  *
  * This implementation is used by MockRasterCache only for testing proper usage
  * of the RasterCache in layer unit tests.
@@ -50,7 +50,7 @@ static std::vector<RasterCacheItem*> raster_cache_items_;
 
 /**
  * @brief A RasterCache implementation that simulates the act of rendering a
- * Layer or SkPicture without the overhead of rasterization or pixel storage.
+ * Layer or DisplayList without the overhead of rasterization or pixel storage.
  * This implementation is used only for testing proper usage of the RasterCache
  * in layer unit tests.
  */
