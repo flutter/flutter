@@ -21,7 +21,7 @@ void SolidColorContents::SetColor(Color color) {
 }
 
 Color SolidColorContents::GetColor() const {
-  return color_.WithAlpha(color_.alpha * GetOpacity());
+  return color_.WithAlpha(color_.alpha * GetOpacityFactor());
 }
 
 bool SolidColorContents::IsOpaque() const {
