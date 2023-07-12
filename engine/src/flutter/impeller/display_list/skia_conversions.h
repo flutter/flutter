@@ -16,6 +16,7 @@
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkRSXform.h"
+#include "third_party/skia/include/core/SkTextBlob.h"
 
 namespace impeller {
 namespace skia_conversions {
@@ -39,6 +40,8 @@ PathBuilder::RoundingRadii ToRoundingRadii(const SkRRect& rrect);
 Path ToPath(const SkPath& path);
 
 Path ToPath(const SkRRect& rrect);
+
+Path PathDataFromTextBlob(const sk_sp<SkTextBlob>& blob);
 
 std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type);
 

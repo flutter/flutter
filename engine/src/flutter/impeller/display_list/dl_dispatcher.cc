@@ -1104,9 +1104,23 @@ void DlDispatcher::drawDisplayList(
 void DlDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                 SkScalar x,
                                 SkScalar y) {
-  canvas_.DrawTextFrame(TextFrameFromTextBlob(blob),  //
-                        impeller::Point{x, y},        //
-                        paint_                        //
+  const auto text_frame = TextFrameFromTextBlob(blob);
+  if (paint_.style == Paint::Style::kStroke) {
+    auto path = skia_conversions::PathDataFromTextBlob(blob);
+    auto bounds = text_frame.GetBounds();
+    if (!bounds.has_value()) {
+      return;
+    }
+    canvas_.Save();
+    canvas_.Translate({x + bounds->origin.x, y + bounds->origin.y, 0.0});
+    canvas_.DrawPath(path, paint_);
+    canvas_.Restore();
+    return;
+  }
+
+  canvas_.DrawTextFrame(text_frame,             //
+                        impeller::Point{x, y},  //
+                        paint_                  //
   );
 }
 
