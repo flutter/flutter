@@ -6204,7 +6204,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get tabLabelRaw => r'Fane $tabIndex af $tabCount';
 
   @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
 
   @override
   String get timePickerDialHelpText => 'Vælg tidspunkt';
