@@ -492,6 +492,9 @@ std::unique_ptr<Surface> ContextVK::AcquireNextSurface() {
   if (surface && pipeline_library_) {
     pipeline_library_->DidAcquireSurfaceFrame();
   }
+  if (allocator_) {
+    allocator_->DidAcquireSurfaceFrame();
+  }
   return surface;
 }
 

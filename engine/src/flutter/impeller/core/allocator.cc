@@ -61,4 +61,6 @@ uint16_t Allocator::MinimumBytesPerRow(PixelFormat format) const {
   return BytesPerPixelForPixelFormat(format);
 }
 
+void Allocator::DidAcquireSurfaceFrame() {}
+
 }  // namespace impeller
