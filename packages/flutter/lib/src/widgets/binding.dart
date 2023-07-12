@@ -274,7 +274,7 @@ abstract mixin class WidgetsBindingObserver {
 /// The glue between the widgets layer and the Flutter engine.
 ///
 /// The [WidgetsBinding] manages a single [Element] tree rooted at [rootElement].
-/// Call [runApp] (which indirectly calls [attachRootWidget]) to bootstrap that
+/// Calling [runApp] (which indirectly calls [attachRootWidget]) bootstraps that
 /// element tree.
 ///
 /// ## Relationship to render trees
@@ -282,23 +282,26 @@ abstract mixin class WidgetsBindingObserver {
 /// Multiple render trees may be associated with the element tree. Those are
 /// managed by the underlying [RendererBinding].
 ///
-/// Conceptually, the element tree is organized in zones of two different types:
-/// rendering zones and non-rendering zones.
+/// The element tree is segmented into two types of zones: rendering zones and
+/// non-rendering zones.
 ///
-/// An element in a rendering zone is backed by a render tree (i.e.
-/// [Element.renderObject] is not null for them). They help define the pixels
-/// that are drawn on screen. Basically all widgets (with the [View] widget,
-/// [ViewCollection] widget, and [RootWidget] as notable exceptions) can be used
-/// in a rendering zone.
+/// A rendering zone is a part of the element tree that is backed by a render
+/// tree and it describes the pixels that are drawn on screen. For elements in
+/// this zone [Element.renderObject] never returns null because the elements are
+/// all associated with [RenderObject]s. Almost all widgets can be placed in a
+/// rendering zone, with the [View] widget, [ViewCollection] widget, and
+/// [RootWidget] as notable exceptions.
 ///
-/// An element in a non-rendering zone is not associated with a render tree
-/// ([Element.renderObject] returns null for them) and only widgets that do not
-/// produce a [RenderObject] can be used in this part of the tree because there
-/// is no render tree to attach the render object to. In more technical terms,
-/// no [RenderObjectWidget] may appear in a non-rendering zone. Typically, one
+/// A non-rendering zone is a part of the element tree that is not backed by a
+/// render tree. For elements in this zone [Element.renderObject] returns null
+/// because the elements are not associated with any [RenderObject]s. Only
+/// widgets that do not produce a [RenderObject] can be used in this zone
+/// because there is no render tree to attach the render object to. In other
+/// words, [RenderObjectWidget]s cannot be used in this zone. Typically, one
 /// would find [InheritedWidget]s, [View]s, and [ViewCollection]s in this zone
-/// to organize the rendering zones (and their associated render trees) into
-/// a unified element tree.
+/// to inject data across rendering zones into the tree and to organize the
+/// rendering zones (and by extension their associated render trees) into a
+/// unified element tree.
 ///
 /// The root of the element tree at [rootElement] defines the beginning of a
 /// non-rendering zone. The [View] widget is used to start a rendering zone
@@ -308,7 +311,7 @@ abstract mixin class WidgetsBindingObserver {
 /// To figure out if an element is in a rendering zone it may walk up the tree
 /// calling [Element.debugExpectsRenderObjectForSlot] on its ancestors. If it
 /// reaches an element that returns false, it is in a non-rendering zone. If it
-/// reaches a [RenderObjectElement] it is in a rendering zone.
+/// reaches a [RenderObjectElement] ancestor it is in a rendering zone.
 mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, RendererBinding, SemanticsBinding {
   @override
   void initInstances() {

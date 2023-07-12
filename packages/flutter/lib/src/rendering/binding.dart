@@ -261,7 +261,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// [WidgetsBinding.wrapWithDefaultView], which is called indirectly from
   /// [runApp].
   ///
-  /// Apps, that don't use the [WidgetsBinding] or don't call [runApp] (or
+  /// Apps that don't use the [WidgetsBinding] or don't call [runApp] (or
   /// [WidgetsBinding.wrapWithDefaultView]) must manually assign a
   /// [PipelineOwner] to this [RenderView], make sure the pipeline owner is part
   /// of the pipeline owner tree rooted at [rootPipelineOwner], and call
