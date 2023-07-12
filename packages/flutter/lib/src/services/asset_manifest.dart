@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-// ignore: unused_import
-import 'dart:html' as html;
-import 'dart:js' as js;
 
 import 'package:flutter/foundation.dart';
 
 import 'asset_bundle.dart';
+import '_asset_manifest_contents_io.dart'
+  if (dart.library.js_util) '_asset_manifest_contents_web.dart';
 import 'message_codecs.dart';
 
 // We use .bin as the extension since it is well-known to represent
@@ -33,9 +32,7 @@ abstract class AssetManifest {
         return _precachedAssetManifest!;
       }
 
-      final String uriEncodedAssetManifestContent =
-        js.context['_flutter_UriEncodedAssetManifest'] as String;
-
+      final String uriEncodedAssetManifestContent = assetManifestContents!;
       final ByteData assetManifestBytes = ByteData.view(
         Uint8List.fromList(
           utf8.encode(
