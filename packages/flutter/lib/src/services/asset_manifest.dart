@@ -32,17 +32,19 @@ abstract class AssetManifest {
         return _precachedAssetManifest!;
       }
 
-      final String uriEncodedAssetManifestContent = assetManifestContents!;
-      final ByteData assetManifestBytes = ByteData.view(
-        Uint8List.fromList(
-          base64.decode(uriEncodedAssetManifestContent)
-        )
-        .buffer
-      );
+      if (assetManifestContents != null) {
+        final String uriEncodedAssetManifestContent = assetManifestContents!;
+        final ByteData assetManifestBytes = ByteData.view(
+          Uint8List.fromList(
+            base64.decode(uriEncodedAssetManifestContent)
+          )
+          .buffer
+        );
 
-      return _precachedAssetManifest = SynchronousFuture<AssetManifest>(
-        _AssetManifestBin.fromStandardMessageCodecMessage(assetManifestBytes),
-      );
+        return _precachedAssetManifest = SynchronousFuture<AssetManifest>(
+          _AssetManifestBin.fromStandardMessageCodecMessage(assetManifestBytes),
+        );
+      }
     }
 
     return bundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
