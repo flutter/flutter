@@ -32,7 +32,6 @@
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell_io_manager.h"
-#include "third_party/skia/include/core/SkPicture.h"
 
 namespace flutter {
 
@@ -345,7 +344,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///                                snapshot a specified scene. The engine
   ///                                cannot snapshot a scene on the UI thread
   ///                                directly because the scene (described via
-  ///                                an `SkPicture`) may reference resources on
+  ///                                a `DisplayList`) may reference resources on
   ///                                the GPU and there is no GPU context current
   ///                                on the UI thread. The delegate is a
   ///                                component that has access to all the

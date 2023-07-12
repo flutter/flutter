@@ -9,7 +9,7 @@
 
 #include "flutter/display_list/dl_attributes.h"
 #include "flutter/fml/logging.h"
-#include "include/core/SkRect.h"
+#include "third_party/skia/include/core/SkRect.h"
 
 namespace flutter {
 

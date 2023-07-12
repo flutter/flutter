@@ -11,12 +11,8 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/raster_cache_item.h"
-#include "include/core/SkCanvas.h"
-#include "include/core/SkColorSpace.h"
-#include "include/core/SkMatrix.h"
-#include "include/core/SkPicture.h"
-#include "include/core/SkPoint.h"
-#include "include/core/SkRect.h"
+#include "third_party/skia/include/core/SkMatrix.h"
+#include "third_party/skia/include/core/SkPoint.h"
 
 namespace flutter {
 
