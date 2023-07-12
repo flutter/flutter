@@ -387,8 +387,8 @@ void main() {
         borderRadius: BorderRadius.zero,
       ),
     );
-    expect(tester.takeException(), isAssertionError,
-        reason: 'Border with a side.width == 0 should fail with borderRadius.');
+    expect(tester.takeException(), isNull,
+        reason: 'Border with a side.width == 0 should work with borderRadius.');
 
     await tester.pumpWidget(
       buildWidget(
@@ -396,8 +396,8 @@ void main() {
         borderRadius: BorderRadius.circular(40),
       ),
     );
-    expect(tester.takeException(), isNull,
-        reason: 'Border with width == 0 and borderRadius should work.');
+    expect(tester.takeException(), isAssertionError,
+        reason: 'Border with width == 0 and borderRadius should fail (hairline border).');
 
     // Tests for BorderDirectional.
     const BorderDirectional allowedBorderDirectionalVariations = BorderDirectional(

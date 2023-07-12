@@ -513,7 +513,7 @@ class Border extends BoxBorder {
   /// [BoxBorder.paintNonUniformBorder] is about 20% faster than [paintBorder],
   /// but [paintBorder] is able to draw hairline borders when width is zero
   /// and style is [BorderStyle.solid].
-  bool get _hasThinBorder =>
+  bool get _hasHairlineBorder =>
       (top.style == BorderStyle.solid && top.width == 0.0) ||
       (right.style == BorderStyle.solid && right.width == 0.0) ||
       (bottom.style == BorderStyle.solid && bottom.width == 0.0) ||
@@ -639,12 +639,10 @@ class Border extends BoxBorder {
 
     // Allow painting non-uniform borders if the visible colors are uniform.
     final Set<Color> visibleColors = _distinctVisibleColors;
-    final bool hasThinBorder = _hasThinBorder;
+    final bool hasHairlineBorder = _hasHairlineBorder;
     // Paint a non uniform border if a single color is visible
     // and (borderRadius is present) or (border is visible and width != 0.0).
-    if (visibleColors.length == 1 &&
-        ((borderRadius != null && borderRadius != BorderRadius.zero) &&
-            !hasThinBorder)) {
+    if (visibleColors.length == 1 && !hasHairlineBorder) {
       BoxBorder.paintNonUniformBorder(canvas, rect,
           shape: shape,
           borderRadius: borderRadius,
@@ -658,11 +656,11 @@ class Border extends BoxBorder {
     }
 
      assert(() {
-      if (hasThinBorder) {
+      if (hasHairlineBorder) {
         assert(borderRadius == null || borderRadius == BorderRadius.zero,
             'A hairline border like `BorderSide(width: 0.0, style: BorderStyle.solid)` can only be drawn when BorderRadius is zero or null.');
       }
-      if (borderRadius != null) {
+      if (borderRadius != null && borderRadius != BorderRadius.zero) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('A borderRadius can only be given on borders with uniform colors.'),
           ErrorDescription('The following is not uniform:'),
@@ -851,7 +849,7 @@ class BorderDirectional extends BoxBorder {
         if (start.style == BorderStyle.none) null else start.color,
       }.whereNotNull().toSet();
 
-  bool get _hasThinBorder =>
+  bool get _hasHairlineBorder =>
       (top.style == BorderStyle.solid && top.width == 0.0) ||
       (end.style == BorderStyle.solid && end.width == 0.0) ||
       (bottom.style == BorderStyle.solid && bottom.width == 0.0) ||
@@ -1019,10 +1017,8 @@ class BorderDirectional extends BoxBorder {
 
     // Allow painting non-uniform borders if the visible colors are uniform.
     final Set<Color> visibleColors = _distinctVisibleColors;
-    final bool hasThinBorder = _hasThinBorder;
-    if (visibleColors.length == 1 &&
-        ((borderRadius != null && borderRadius != BorderRadius.zero) ||
-            !hasThinBorder)) {
+    final bool hasHairlineBorder = _hasHairlineBorder;
+    if (visibleColors.length == 1 && !hasHairlineBorder) {
       BoxBorder.paintNonUniformBorder(canvas, rect,
           shape: shape,
           borderRadius: borderRadius,
@@ -1035,7 +1031,7 @@ class BorderDirectional extends BoxBorder {
       return;
     }
 
-    if (hasThinBorder) {
+    if (hasHairlineBorder) {
       assert(borderRadius == null || borderRadius == BorderRadius.zero, 'A side like `BorderSide(width: 0.0, style: BorderStyle.solid)` can only be drawn when BorderRadius is zero or null.');
     }
     assert(borderRadius == null, 'A borderRadius can only be given for borders with uniform colors.');
