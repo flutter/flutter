@@ -45,6 +45,10 @@ class Allocator {
 
   virtual ISize GetMaxTextureSizeSupported() const = 0;
 
+  /// @brief Increment an internal frame used to cycle through a ring buffer of
+  /// allocation pools.
+  virtual void DidAcquireSurfaceFrame();
+
  protected:
   Allocator();
 
