@@ -241,11 +241,12 @@ static VmaAllocationCreateFlags ToVmaAllocationCreateFlags(StorageMode mode,
 
 class AllocatedTextureSourceVK final : public TextureSourceVK {
  public:
-  AllocatedTextureSourceVK(const TextureDescriptor& desc,
+  AllocatedTextureSourceVK(std::weak_ptr<ResourceManagerVK> resource_manager,
+                           const TextureDescriptor& desc,
                            VmaAllocator allocator,
                            vk::Device device,
                            bool supports_memoryless_textures)
-      : TextureSourceVK(desc) {
+      : TextureSourceVK(desc), resource_(std::move(resource_manager)) {
     TRACE_EVENT0("impeller", "CreateDeviceTexture");
     vk::ImageCreateInfo image_info;
     image_info.flags = ToVKImageCreateFlags(desc.type);
@@ -305,12 +306,10 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
       }
     }
 
-    image_ = vk::Image{vk_image};
-    allocator_ = allocator;
-    allocation_ = allocation;
+    auto image = vk::Image{vk_image};
 
     vk::ImageViewCreateInfo view_info = {};
-    view_info.image = image_;
+    view_info.image = image;
     view_info.viewType = ToVKImageViewType(desc.type);
     view_info.format = image_info.format;
     view_info.subresourceRange.aspectMask = ToVKImageAspectFlags(desc.format);
@@ -332,34 +331,65 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
                      << vk::to_string(result);
       return;
     }
-    image_view_ = std::move(image_view);
-
+    resource_.Reset(
+        ImageResource(image, allocator, allocation, std::move(image_view)));
     is_valid_ = true;
   }
 
-  ~AllocatedTextureSourceVK() {
-    TRACE_EVENT0("impeller", "DestroyDeviceTexture");
-    image_view_.reset();
-    if (image_) {
-      ::vmaDestroyImage(
-          allocator_,                                                  //
-          static_cast<typename decltype(image_)::NativeType>(image_),  //
-          allocation_                                                  //
-      );
-    }
-  }
+  ~AllocatedTextureSourceVK() = default;
 
   bool IsValid() const { return is_valid_; }
 
-  vk::Image GetImage() const override { return image_; }
+  vk::Image GetImage() const override { return resource_->image; }
 
-  vk::ImageView GetImageView() const override { return image_view_.get(); }
+  vk::ImageView GetImageView() const override {
+    return resource_->image_view.get();
+  }
 
  private:
-  vk::Image image_ = {};
-  VmaAllocator allocator_ = {};
-  VmaAllocation allocation_ = {};
-  vk::UniqueImageView image_view_;
+  struct ImageResource {
+    vk::Image image = {};
+    VmaAllocator allocator = {};
+    VmaAllocation allocation = {};
+    vk::UniqueImageView image_view;
+
+    ImageResource() = default;
+
+    ImageResource(vk::Image p_image,
+                  VmaAllocator p_allocator,
+                  VmaAllocation p_allocation,
+                  vk::UniqueImageView p_image_view)
+        : image(p_image),
+          allocator(p_allocator),
+          allocation(p_allocation),
+          image_view(std::move(p_image_view)) {}
+
+    ImageResource(ImageResource&& o) {
+      std::swap(image, o.image);
+      std::swap(allocator, o.allocator);
+      std::swap(allocation, o.allocation);
+      std::swap(image_view, o.image_view);
+    }
+
+    ~ImageResource() {
+      if (!image) {
+        return;
+      }
+      TRACE_EVENT0("impeller", "DestroyDeviceTexture");
+      image_view.reset();
+      if (image) {
+        ::vmaDestroyImage(
+            allocator,                                                 //
+            static_cast<typename decltype(image)::NativeType>(image),  //
+            allocation                                                 //
+        );
+      }
+    }
+
+    FML_DISALLOW_COPY_AND_ASSIGN(ImageResource);
+  };
+
+  UniqueResourceVKT<ImageResource> resource_;
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AllocatedTextureSourceVK);
@@ -376,11 +406,16 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
   if (!device_holder) {
     return nullptr;
   }
+  auto context = context_.lock();
+  if (!context) {
+    return nullptr;
+  }
   auto source = std::make_shared<AllocatedTextureSourceVK>(
-      desc,                          //
-      allocator_,                    //
-      device_holder->GetDevice(),    //
-      supports_memoryless_textures_  //
+      ContextVK::Cast(*context).GetResourceManager(),  //
+      desc,                                            //
+      allocator_,                                      //
+      device_holder->GetDevice(),                      //
+      supports_memoryless_textures_                    //
   );
   if (!source->IsValid()) {
     return nullptr;

@@ -7,9 +7,11 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/trace_event.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 
 namespace impeller {
 
@@ -31,11 +33,45 @@ class DeviceBufferVK final : public DeviceBuffer,
  private:
   friend class AllocatorVK;
 
+  struct BufferResource {
+    VmaAllocator allocator = {};
+    VmaAllocation allocation = {};
+    VmaAllocationInfo info = {};
+    vk::Buffer buffer = {};
+
+    BufferResource() = default;
+
+    BufferResource(VmaAllocator p_allocator,
+                   VmaAllocation p_allocation,
+                   VmaAllocationInfo p_info,
+                   vk::Buffer p_buffer)
+        : allocator(p_allocator),
+          allocation(p_allocation),
+          info(p_info),
+          buffer(p_buffer) {}
+
+    BufferResource(BufferResource&& o) {
+      std::swap(o.allocator, allocator);
+      std::swap(o.allocation, allocation);
+      std::swap(o.info, info);
+      std::swap(o.buffer, buffer);
+    }
+
+    ~BufferResource() {
+      if (!buffer) {
+        return;
+      }
+      TRACE_EVENT0("impeller", "DestroyDeviceBuffer");
+      ::vmaDestroyBuffer(allocator,
+                         static_cast<decltype(buffer)::NativeType>(buffer),
+                         allocation);
+    }
+
+    FML_DISALLOW_COPY_AND_ASSIGN(BufferResource);
+  };
+
   std::weak_ptr<Context> context_;
-  VmaAllocator allocator_ = {};
-  VmaAllocation allocation_ = {};
-  VmaAllocationInfo info_ = {};
-  vk::Buffer buffer_ = {};
+  UniqueResourceVKT<BufferResource> resource_;
 
   // |DeviceBuffer|
   uint8_t* OnGetContents() const override;
