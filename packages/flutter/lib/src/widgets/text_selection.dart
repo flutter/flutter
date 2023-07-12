@@ -3104,14 +3104,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     }
   }
 
-  void _handleTapTrackStart() {
-    widget.onTapTrackStart?.call();
-  }
-
-  void _handleTapTrackReset() {
-    widget.onTapTrackReset?.call();
-  }
-
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
   void _handleTapDown(TapDragDownDetails details) {
