@@ -388,7 +388,7 @@ void main() {
       ),
     );
     expect(tester.takeException(), isNull,
-        reason: 'Border with a side.width == 0 should work with borderRadius.');
+        reason: 'Border with a side.width == 0 should work without borderRadius (hairline border).');
 
     await tester.pumpWidget(
       buildWidget(
