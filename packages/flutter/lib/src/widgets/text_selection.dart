@@ -3104,6 +3104,14 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     }
   }
 
+  void _handleTapTrackStart() {
+    widget.onTapTrackStart?.call();
+  }
+
+  void _handleTapTrackReset() {
+    widget.onTapTrackReset?.call();
+  }
+
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
   void _handleTapDown(TapDragDownDetails details) {
@@ -3210,6 +3218,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
                 // Text selection should start from the position of the first pointer
                 // down event.
                 ..dragStartBehavior = DragStartBehavior.down
+                ..onTapTrackStart = _handleTapTrackStart
+                ..onTapTrackReset = _handleTapTrackReset
                 ..onTapDown = _handleTapDown
                 ..onDragStart = _handleDragStart
                 ..onDragUpdate = _handleDragUpdate
@@ -3228,6 +3238,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
                 // Text selection should start from the position of the first pointer
                 // down event.
                 ..dragStartBehavior = DragStartBehavior.down
+                ..onTapTrackStart = _handleTapTrackStart
+                ..onTapTrackReset = _handleTapTrackReset
                 ..onTapDown = _handleTapDown
                 ..onDragStart = _handleDragStart
                 ..onDragUpdate = _handleDragUpdate
