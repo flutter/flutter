@@ -23,18 +23,60 @@ void main() {
     ).forEach(runner.addCommand);
     verifyCommandRunner(runner);
     for (final Command<void> command in runner.commands.values) {
-      if(command.name == 'analyze') {
+      if (command.name == 'analyze') {
         final AnalyzeCommand analyze = command as AnalyzeCommand;
         expect(analyze.allProjectValidators().length, 2);
       }
     }
   }));
 
+  testUsingContext('Global arg results are available in FlutterCommands', () async {
+    final DummyFlutterCommand command = DummyFlutterCommand(
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
+    );
+
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+
+    runner.addCommand(command);
+    await runner.run(<String>['dummy', '--${FlutterGlobalOptions.kContinuousIntegrationFlag}']);
+
+    expect(command.globalResults, isNotNull);
+    expect(command.boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true), true);
+  });
+
+  testUsingContext('Global arg results are available in FlutterCommands sub commands', () async {
+    final DummyFlutterCommand command = DummyFlutterCommand(
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
+    );
+
+    final DummyFlutterCommand subcommand = DummyFlutterCommand(
+      name: 'sub',
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
+    );
+
+    command.addSubcommand(subcommand);
+
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+
+    runner.addCommand(command);
+    runner.addCommand(subcommand);
+    await runner.run(<String>['dummy', 'sub', '--${FlutterGlobalOptions.kContinuousIntegrationFlag}']);
+
+    expect(subcommand.globalResults, isNotNull);
+    expect(subcommand.boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true), true);
+  });
+
   testUsingContext('bool? safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addFlag('key');
@@ -47,20 +89,20 @@ void main() {
     await runner.run(<String>['dummy', '--key']);
 
     expect(command.boolArg('key'), true);
-    expect(command.boolArg('empty'), null);
+    expect(() => command.boolArg('non-existent'), throwsArgumentError);
 
-    expect(command.boolArgDeprecated('key'), true);
-    expect(() => command.boolArgDeprecated('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+    expect(command.boolArg('key'), true);
+    expect(() => command.boolArg('non-existent'), throwsA(const TypeMatcher<ArgumentError>()));
 
     expect(command.boolArg('key-false'), false);
-    expect(command.boolArgDeprecated('key-false'), false);
+    expect(command.boolArg('key-false'), false);
   });
 
   testUsingContext('String? safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addOption('key');
@@ -72,17 +114,17 @@ void main() {
     await runner.run(<String>['dummy', '--key=value']);
 
     expect(command.stringArg('key'), 'value');
-    expect(command.stringArg('empty'), null);
+    expect(() => command.stringArg('non-existent'), throwsArgumentError);
 
-    expect(command.stringArgDeprecated('key'), 'value');
-    expect(() => command.stringArgDeprecated('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+    expect(command.stringArg('key'), 'value');
+    expect(() => command.stringArg('non-existent'), throwsA(const TypeMatcher<ArgumentError>()));
   });
 
   testUsingContext('List<String> safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addMultiOption(
@@ -97,7 +139,7 @@ void main() {
     await runner.run(<String>['dummy', '--key', 'a']);
 
     // throws error when trying to parse non-existent key.
-    expect(() => command.stringsArg('empty'),throwsA(const TypeMatcher<ArgumentError>()));
+    expect(() => command.stringsArg('non-existent'), throwsA(const TypeMatcher<ArgumentError>()));
 
     expect(command.stringsArg('key'), <String>['a']);
 
@@ -124,7 +166,7 @@ void verifyCommand(Command<Object?> runner) {
   final String firstDescriptionLine = runner.description.split('\n').first;
   expect(firstDescriptionLine, matches(_allowedTrailingPatterns), reason: "command ${runner.name}'s description does not end with the expected single period that a full sentence should end with");
 
-  if (runner.hidden == false && runner.parent == null) {
+  if (!runner.hidden && runner.parent == null) {
     expect(
       runner.category,
       anyOf(
@@ -176,7 +218,10 @@ void verifyOptions(String? command, Iterable<Option> options) {
       expect(option.name, matches(_allowedArgumentNamePattern), reason: '$_header$target--${option.name}" is not a valid name for a command line argument. (Is it all lowercase? Does it use hyphens rather than underscores?)');
     }
     expect(option.name, isNot(matches(_bannedArgumentNamePattern)), reason: '$_header$target--${option.name}" is not a valid name for a command line argument. (We use "--foo-url", not "--foo-uri", for example.)');
-    expect(option.hide, isFalse, reason: '${_header}Help for $target--${option.name}" is always hidden. $_needHelp');
+    // The flag --sound-null-safety is deprecated
+    if (option.name != FlutterOptions.kNullSafety && option.name != FlutterOptions.kNullAssertions) {
+      expect(option.hide, isFalse, reason: '${_header}Help for $target--${option.name}" is always hidden. $_needHelp');
+    }
     expect(option.help, isNotNull, reason: '${_header}Help for $target--${option.name}" has null help. $_needHelp');
     expect(option.help, isNotEmpty, reason: '${_header}Help for $target--${option.name}" has empty help. $_needHelp');
     expect(option.help, isNot(matches(_bannedLeadingPatterns)), reason: '${_header}A line in the help for $target--${option.name}" starts with a lowercase letter. For stylistic consistency, all help messages must start with a capital letter.');

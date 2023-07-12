@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -70,6 +73,7 @@ void main() {
         processManager: processManager,
         terminal: terminal,
         allProjectValidators: <ProjectValidator>[],
+        suppressAnalytics: true,
       );
       runner = createTestCommandRunner(command);
 
@@ -95,6 +99,7 @@ void main() {
               '--disable-server-feature-search',
               '--sdk',
               'Artifact.engineDartSdkPath',
+              '--suppress-analytics',
             ],
             exitCode: SIGABRT,
             stderr: stderr,
@@ -111,6 +116,40 @@ void main() {
           ),
         ),
       );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('--flutter-repo analyzes everything in the flutterRoot', () async {
+      final StreamController<List<int>> streamController = StreamController<List<int>>();
+      final IOSink sink = IOSink(streamController.sink);
+      processManager.addCommands(
+        <FakeCommand>[
+          FakeCommand(
+            // artifact paths are from Artifacts.test() and stable
+            command: const <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              '--disable-dart-dev',
+              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--sdk',
+              'Artifact.engineDartSdkPath',
+              '--suppress-analytics',
+            ],
+            stdin: sink,
+            stdout: '{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}',
+          ),
+        ],
+      );
+      await runner.run(<String>['analyze', '--flutter-repo']);
+      final Map<String, Object?> setAnalysisRootsCommand = jsonDecode(await streamController.stream.transform(utf8.decoder).elementAt(2)) as Map<String, Object?>;
+      expect(setAnalysisRootsCommand['method'], 'analysis.setAnalysisRoots');
+      final Map<String, Object?> params = setAnalysisRootsCommand['params']! as Map<String, Object?>;
+      expect(params['included'], <String?>[Cache.flutterRoot]);
+      expect(params['excluded'], isEmpty);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

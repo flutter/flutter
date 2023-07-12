@@ -6,11 +6,14 @@ import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -295,8 +298,18 @@ class FakePlistParser implements PlistParser {
   }
 
   @override
-  String? getStringValueFromFile(String plistFilePath, String key) {
-    return _underlyingValues[key] as String?;
+  T? getValueFromFile<T>(String plistFilePath, String key) {
+    return _underlyingValues[key] as T?;
+  }
+
+  @override
+  bool replaceKey(String plistFilePath, {required String key, String? value}) {
+    if (value == null) {
+      _underlyingValues.remove(key);
+      return true;
+    }
+    setProperty(key, value);
+    return true;
   }
 }
 
@@ -312,7 +325,7 @@ class FakeBotDetector implements BotDetector {
 
 class FakeFlutterVersion implements FlutterVersion {
   FakeFlutterVersion({
-    this.channel = 'unknown',
+    this.branch = 'master',
     this.dartSdkVersion = '12',
     this.devToolsVersion = '2.8.0',
     this.engineRevision = 'abcdefghijklmnopqrstuvwxyz',
@@ -326,6 +339,8 @@ class FakeFlutterVersion implements FlutterVersion {
     this.gitTagVersion = const GitTagVersion.unknown(),
   });
 
+  final String branch;
+
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
   bool _didFetchTagsAndUpdate = false;
 
@@ -333,7 +348,12 @@ class FakeFlutterVersion implements FlutterVersion {
   bool _didCheckFlutterVersionFreshness = false;
 
   @override
-  final String channel;
+  String get channel {
+    if (kOfficialChannels.contains(branch) || kObsoleteBranches.containsKey(branch)) {
+      return branch;
+    }
+    return kUserBranch;
+  }
 
   @override
   final String devToolsVersion;
@@ -386,7 +406,10 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   String getBranchName({bool redactUnknownBranches = false}) {
-    return 'master';
+    if (!redactUnknownBranches || kOfficialChannels.contains(branch) || kObsoleteBranches.containsKey(branch)) {
+      return branch;
+    }
+    return kUserBranch;
   }
 
   @override
@@ -413,6 +436,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
+    this.isFlutterWebWasmEnabled = false,
   });
 
   @override
@@ -441,6 +465,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool areCustomDevicesEnabled;
+
+  @override
+  final bool isFlutterWebWasmEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -573,6 +600,7 @@ class FakeFlutterProjectFactory implements FlutterProjectFactory {
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
+
   @override
   late bool platformToolsAvailable;
 
@@ -581,4 +609,44 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   AndroidSdkVersion? latestVersion;
+}
+
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  String get javaPath => 'java';
+}
+
+class FakeJava extends Fake implements Java {
+  FakeJava({
+    this.javaHome = '/android-studio/jbr',
+    String binary = '/android-studio/jbr/bin/java',
+    Version? version,
+    bool canRun = true,
+  }): binaryPath = binary,
+      version = version ?? const Version.withText(19, 0, 2, 'openjdk 19.0.2 2023-01-17'),
+      _environment = <String, String>{
+        if (javaHome != null) Java.javaHomeEnvironmentVariable: javaHome,
+        'PATH': '/android-studio/jbr/bin',
+      },
+      _canRun = canRun;
+
+  @override
+  String? javaHome;
+
+  @override
+  String binaryPath;
+
+  final Map<String, String> _environment;
+  final bool _canRun;
+
+  @override
+  Map<String, String> get environment => _environment;
+
+  @override
+  Version? version;
+
+  @override
+  bool canRun() {
+    return _canRun;
+  }
 }

@@ -22,6 +22,9 @@ const String _unknownFrameworkVersion = '0.0.0-unknown';
 /// See `man gitrevisions` for more information.
 const String kGitTrackingUpstream = '@{upstream}';
 
+/// Replacement name when the branch is user-specific.
+const String kUserBranch = '[user-branch]';
+
 /// This maps old branch names to the names of branches that replaced them.
 ///
 /// For example, in 2021 we deprecated the "dev" channel and transitioned "dev"
@@ -40,10 +43,22 @@ enum Channel {
 
 // Beware: Keep order in accordance with stability
 const Set<String> kOfficialChannels = <String>{
-  globals.kDefaultFrameworkChannel,
+  'master',
   'main',
   'beta',
   'stable',
+};
+
+const Map<String, String> kChannelDescriptions = <String, String>{
+  'master': 'latest development branch, for contributors',
+  'main': 'latest development branch, follows master channel',
+  'beta': 'updated monthly, recommended for experienced users',
+  'stable': 'updated quarterly, for new users and for production app releases',
+};
+
+const Set<String> kDevelopmentChannels = <String>{
+  'master',
+  'main',
 };
 
 /// Retrieve a human-readable name for a given [channel].
@@ -101,16 +116,7 @@ class FlutterVersion {
 
   String? _repositoryUrl;
   String? get repositoryUrl {
-    final String _ = channel;
-    return _repositoryUrl;
-  }
-
-  String? _channel;
-  /// The channel is the upstream branch.
-  /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
-  String get channel {
-    String? channel = _channel;
-    if (channel == null) {
+    if (_repositoryUrl == null) {
       final String gitChannel = _runGit(
         'git rev-parse --abbrev-ref --symbolic $kGitTrackingUpstream',
         globals.processUtils,
@@ -124,14 +130,16 @@ class FlutterVersion {
           globals.processUtils,
           _workingDirectory,
         );
-        channel = gitChannel.substring(slash + 1);
-      } else if (gitChannel.isEmpty) {
-        channel = 'unknown';
-      } else {
-        channel = gitChannel;
       }
-      _channel = channel;
     }
+    return _repositoryUrl;
+  }
+
+  /// The channel is the current branch if we recognize it, or "[user-branch]" (kUserBranch).
+  /// `master`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, `dev`, ...
+  String get channel {
+    final String channel = getBranchName(redactUnknownBranches: true);
+    assert(kOfficialChannels.contains(channel) || kObsoleteBranches.containsKey(channel) || channel == kUserBranch, 'Potential PII leak in channel name: "$channel"');
     return channel;
   }
 
@@ -296,16 +304,16 @@ class FlutterVersion {
   /// Return the branch name.
   ///
   /// If [redactUnknownBranches] is true and the branch is unknown,
-  /// the branch name will be returned as `'[user-branch]'`.
+  /// the branch name will be returned as `'[user-branch]'` ([kUserBranch]).
   String getBranchName({ bool redactUnknownBranches = false }) {
     _branch ??= () {
-      final String branch = _runGit('git rev-parse --abbrev-ref HEAD', globals.processUtils);
-      return branch == 'HEAD' ? channel : branch;
+      final String branch = _runGit('git symbolic-ref --short HEAD', globals.processUtils, _workingDirectory);
+      return branch == 'HEAD' ? '' : branch;
     }();
     if (redactUnknownBranches || _branch!.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
       if (!kOfficialChannels.contains(_branch) && !kObsoleteBranches.containsKey(_branch)) {
-        return '[user-branch]';
+        return kUserBranch;
       }
     }
     return _branch!;
@@ -619,7 +627,7 @@ String _runSync(List<String> command, { bool lenient = true }) {
   return '';
 }
 
-String _runGit(String command, ProcessUtils processUtils, [String? workingDirectory]) {
+String _runGit(String command, ProcessUtils processUtils, String? workingDirectory) {
   return processUtils.runSync(
     command.split(' '),
     workingDirectory: workingDirectory ?? Cache.flutterRoot,
@@ -709,8 +717,8 @@ class GitTagVersion {
     String gitRef = 'HEAD'
   }) {
     if (fetchTags) {
-      final String channel = _runGit('git rev-parse --abbrev-ref HEAD', processUtils, workingDirectory);
-      if (channel == 'dev' || channel == 'beta' || channel == 'stable') {
+      final String channel = _runGit('git symbolic-ref --short HEAD', processUtils, workingDirectory);
+      if (!kDevelopmentChannels.contains(channel) && kOfficialChannels.contains(channel)) {
         globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
       } else {
         final String flutterGit = platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
@@ -918,8 +926,6 @@ class VersionFreshnessValidator {
         return const Duration(days: 365 ~/ 2); // Six months
       case 'beta':
         return const Duration(days: 7 * 8); // Eight weeks
-      case 'dev':
-        return const Duration(days: 7 * 4); // Four weeks
       default:
         return const Duration(days: 7 * 3); // Three weeks
     }
@@ -961,11 +967,9 @@ class VersionFreshnessValidator {
     switch (remoteVersionStatus) {
       case VersionCheckResult.newVersionAvailable:
         updateMessage = _newVersionAvailableMessage;
-        break;
       case VersionCheckResult.versionIsCurrent:
       case VersionCheckResult.unknown:
         updateMessage = versionOutOfDateMessage(frameworkAge);
-        break;
     }
 
     logger.printBox(updateMessage);

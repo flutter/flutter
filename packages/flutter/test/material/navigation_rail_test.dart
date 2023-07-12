@@ -577,15 +577,13 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
-    const double destinationWidth = 126.0;
+    const double destinationWidth = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 125.5 : 126.0;
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between the indicator and label.
@@ -671,9 +669,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=0.75', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -765,9 +761,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -858,15 +852,13 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
-    const double destinationWidth = 126.0;
+    const double destinationWidth = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 125.5 : 126.0;
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between the indicator and label.
@@ -952,9 +944,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=0.75', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -1046,9 +1036,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -3148,8 +3136,55 @@ void main() {
     expect(_getIndicatorDecoration(tester)?.shape, shape);
   });
 
+  testWidgets("Destination's respect their disabled state", (WidgetTester tester) async {
+    late int selectedIndex;
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Bcd'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Cde'),
+            disabled: true,
+          ),
+        ],
+        onDestinationSelected: (int index) {
+          selectedIndex = index;
+        },
+        labelType: NavigationRailLabelType.all,
+      ),
+    );
+
+    await tester.tap(find.text('Abc'));
+    expect(selectedIndex, 0);
+
+    await tester.tap(find.text('Bcd'));
+    expect(selectedIndex, 1);
+
+    await tester.tap(find.text('Cde'));
+    expect(selectedIndex, 1);
+
+    // Wait for any pending shader compilation.
+    tester.pumpAndSettle();
+  });
+
   group('Material 2', () {
-    // Original Material 2 tests. Remove this group after `useMaterial3` has been deprecated.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
+
     testWidgets('Renders at the correct default width - [labelType]=none (default)', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,

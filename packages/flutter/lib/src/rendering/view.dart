@@ -33,6 +33,10 @@ class ViewConfiguration {
   final double devicePixelRatio;
 
   /// Creates a transformation matrix that applies the [devicePixelRatio].
+  ///
+  /// The matrix translates points from the local coordinate system of the
+  /// app (in logical pixels) to the global coordinate system of the
+  /// [FlutterView] (in physical pixels).
   Matrix4 toMatrix() {
     return Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
@@ -68,9 +72,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   RenderView({
     RenderBox? child,
     required ViewConfiguration configuration,
-    required ui.FlutterView window,
+    required ui.FlutterView view,
   }) : _configuration = configuration,
-       _window = window {
+       _view = view {
     this.child = child;
   }
 
@@ -99,7 +103,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  final ui.FlutterView _window;
+  /// The [FlutterView] into which this [RenderView] will render.
+  ui.FlutterView get flutterView => _view;
+  final ui.FlutterView _view;
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///
@@ -212,6 +218,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     if (child != null) {
       context.paintChild(child!, offset);
     }
+    assert(() {
+      final List<DebugPaintCallback> localCallbacks = _debugPaintCallbacks.toList();
+      for (final DebugPaintCallback paintCallback in localCallbacks) {
+        if (_debugPaintCallbacks.contains(paintCallback)) {
+          paintCallback(context, offset, this);
+        }
+      }
+      return true;
+    }());
   }
 
   @override
@@ -234,7 +249,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
       }
-      _window.render(scene);
+      _view.render(scene);
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
@@ -255,7 +270,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// A [SemanticsUpdate] is produced by a [SemanticsOwner] during the
   /// [EnginePhase.flushSemantics] phase.
   void updateSemantics(ui.SemanticsUpdate update) {
-    _window.updateSemantics(update);
+    _view.updateSemantics(update);
   }
 
   void _updateSystemChrome() {
@@ -287,7 +302,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       bounds.center.dx,
       // The vertical center of the system status bar. The system status bar
       // height is kept as top window padding.
-      _window.padding.top / 2.0,
+      _view.padding.top / 2.0,
     );
     // Center of the navigation bar
     final Offset bottom = Offset(
@@ -298,7 +313,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       // from the bottom because available pixels are in (0..bottom) range.
       // I.e. for a device with 1920 height, bound.bottom is 1920, but the most
       // bottom drawn pixel is at 1919 position.
-      bounds.bottom - 1.0 - _window.padding.bottom / 2.0,
+      bounds.bottom - 1.0 - _view.padding.bottom / 2.0,
     );
     final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
@@ -306,7 +321,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         lowerOverlayStyle = layer!.find<SystemUiOverlayStyle>(bottom);
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -375,11 +389,54 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' :  Platform.operatingSystem}'));
       return true;
     }());
-    properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
-    properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
+    properties.add(DiagnosticsProperty<Size>('view size', _view.physicalSize, tooltip: 'in physical pixels'));
+    properties.add(DoubleProperty('device pixel ratio', _view.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
-    if (_window.platformDispatcher.semanticsEnabled) {
+    if (_view.platformDispatcher.semanticsEnabled) {
       properties.add(DiagnosticsNode.message('semantics enabled'));
     }
   }
+
+  static final List<DebugPaintCallback> _debugPaintCallbacks = <DebugPaintCallback>[];
+
+  /// Registers a [DebugPaintCallback] that is called every time a [RenderView]
+  /// repaints in debug mode.
+  ///
+  /// The callback may paint a debug overlay on top of the content of the
+  /// [RenderView] provided to the callback. Callbacks are invoked in the
+  /// order they were registered in.
+  ///
+  /// Neither registering a callback nor the continued presence of a callback
+  /// changes how often [RenderView]s are repainted. It is up to the owner of
+  /// the callback to call [markNeedsPaint] on any [RenderView] for which it
+  /// wants to update the painted overlay.
+  ///
+  /// Does nothing in release mode.
+  static void debugAddPaintCallback(DebugPaintCallback callback) {
+    assert(() {
+      _debugPaintCallbacks.add(callback);
+      return true;
+    }());
+  }
+
+  /// Removes a callback registered with [debugAddPaintCallback].
+  ///
+  /// It does not schedule a frame to repaint the [RenderView]s without the
+  /// overlay painted by the removed callback. It is up to the owner of the
+  /// callback to call [markNeedsPaint] on the relevant [RenderView]s to
+  /// repaint them without the overlay.
+  ///
+  /// Does nothing in release mode.
+  static void debugRemovePaintCallback(DebugPaintCallback callback) {
+    assert(() {
+      _debugPaintCallbacks.remove(callback);
+      return true;
+    }());
+  }
 }
+
+/// A callback for painting a debug overlay on top of the provided [RenderView].
+///
+/// Used by [RenderView.debugAddPaintCallback] and
+/// [RenderView.debugRemovePaintCallback].
+typedef DebugPaintCallback = void Function(PaintingContext context, Offset offset, RenderView renderView);

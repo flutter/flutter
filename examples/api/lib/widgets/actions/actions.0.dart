@@ -2,25 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Actions].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Actions].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ActionsExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ActionsExampleApp extends StatelessWidget {
+  const ActionsExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Actions Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: ActionsExample(),
         ),
       ),
     );
@@ -116,14 +113,14 @@ class _SaveButtonState extends State<SaveButton> {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ActionsExample extends StatefulWidget {
+  const ActionsExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ActionsExample> createState() => _ActionsExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ActionsExampleState extends State<ActionsExample> {
   Model model = Model();
   int count = 0;
 
@@ -154,8 +151,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       builder: (BuildContext context, Widget? child) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text('${model.data.value}',
-                              style: Theme.of(context).textTheme.headlineMedium),
+                          child: Text('${model.data.value}', style: Theme.of(context).textTheme.headlineMedium),
                         );
                       }),
                   IconButton(

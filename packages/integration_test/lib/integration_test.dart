@@ -118,11 +118,12 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
-    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
-    return TestViewConfiguration(
+    final FlutterView view = platformDispatcher.implicitView!;
+    final double devicePixelRatio = view.devicePixelRatio;
+    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
+    return TestViewConfiguration.fromView(
       size: size,
-      window: window,
+      view: view,
     );
   }
 
@@ -262,7 +263,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
       final String address = 'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws';
       try {
         _vmService = await _vmServiceConnectUri(address, httpClient: httpClient);
-      } on SocketException catch(e, s) {
+      } on SocketException catch (e, s) {
         throw StateError(
           'Failed to connect to VM Service at $address.\n'
           'This may happen if DDS is enabled. If this test was launched via '
@@ -405,7 +406,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     // The engine could batch FrameTimings and send them only once per second.
     // Delay for a sufficient time so either old FrameTimings are flushed and not
     // interfering our measurements here, or new FrameTimings are all reported.
-    // TODO(CareF): remove this when flush FrameTiming is readly in engine.
+    // TODO(CareF): remove this when flush FrameTiming is readily in engine.
     //              See https://github.com/flutter/flutter/issues/64808
     //              and https://github.com/flutter/flutter/issues/67593
     final List<FrameTiming> frameTimings = <FrameTiming>[];

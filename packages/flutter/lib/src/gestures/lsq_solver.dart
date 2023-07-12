@@ -70,12 +70,26 @@ class PolynomialFit {
   PolynomialFit(int degree) : coefficients = Float64List(degree + 1);
 
   /// The polynomial coefficients of the fit.
+  ///
+  /// For each `i`, the element `coefficients[i]` is the coefficient of
+  /// the `i`-th power of the variable.
   final List<double> coefficients;
 
   /// An indicator of the quality of the fit.
   ///
-  /// Larger values indicate greater quality.
+  /// Larger values indicate greater quality.  The value ranges from 0.0 to 1.0.
+  ///
+  /// The confidence is defined as the fraction of the dataset's variance
+  /// that is captured by variance in the fit polynomial.  In statistics
+  /// textbooks this is often called "r-squared".
   late double confidence;
+
+  @override
+  String toString() {
+    final String coefficientString =
+        coefficients.map((double c) => c.toStringAsPrecision(3)).toList().toString();
+    return '${objectRuntimeType(this, 'PolynomialFit')}($coefficientString, confidence: ${confidence.toStringAsFixed(3)})';
+  }
 }
 
 /// Uses the least-squares algorithm to fit a polynomial to a set of data.

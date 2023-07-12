@@ -111,7 +111,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
       setState(() {
         _lastTestStatus = _LastTestStatus.success;
       });
-    } catch(e) {
+    } catch (e) {
       setState(() {
         _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
@@ -125,7 +125,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
       setState(() {
         windowClickCount++;
       });
-    } catch(e) {
+    } catch (e) {
       setState(() {
         _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';

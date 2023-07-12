@@ -39,7 +39,7 @@ class FakePub extends Fake implements Pub {
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     project.directory.childFile('.packages').createSync();
-    if (offline == true) {
+    if (offline) {
       calledGetOffline += 1;
     } else {
       calledOnline += 1;

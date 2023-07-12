@@ -28,19 +28,46 @@ void main() {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         expect(region.selectionControls, materialTextSelectionHandleControls);
-        break;
       case TargetPlatform.iOS:
         expect(region.selectionControls, cupertinoTextSelectionHandleControls);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(region.selectionControls, desktopTextSelectionHandleControls);
-        break;
       case TargetPlatform.macOS:
         expect(region.selectionControls, cupertinoDesktopTextSelectionHandleControls);
-        break;
     }
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123378
+    await tester.pumpWidget(
+      const MaterialApp(
+        color: Color(0xFF2196F3),
+        title: 'Demo',
+        home: Scaffold(
+          body: SelectionArea(
+            child: Padding(
+              padding: EdgeInsets.all(100.0),
+              child: Text('Hello World'),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TestGesture dragging = await tester.startGesture(const Offset(10, 10));
+    addTearDown(dragging.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await dragging.moveTo(const Offset(90, 90));
+    await dragging.up();
+
+    final TestGesture longpress = await tester.startGesture(const Offset(20,20));
+    addTearDown(longpress.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await longpress.up();
+
+    expect(tester.takeException(), isNull);
+  });
+
 
   testWidgets('builds the default context menu by default', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -51,6 +78,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
@@ -84,6 +112,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     expect(find.byKey(key), findsNothing);
@@ -133,4 +162,54 @@ void main() {
     expect(content, isNotNull);
     expect(content!.plainText, 'How');
   });
+
+  testWidgets('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/119314
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.only(top: 64),
+            child: Column(
+              children: <Widget>[
+                const Text('How are you?'),
+                SelectionArea(
+                  focusNode: FocusNode(),
+                  child: const Text('Good, and you?'),
+                ),
+                const Text('Fine, thank you.'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    final List<TextBox> boxes = paragraph2.getBoxesForSelection(paragraph2.selections[0]);
+    expect(boxes.length, 1);
+    // There is a selection now.
+    // We check the presence of the copy button to make sure the selection toolbar
+    // is showing.
+    expect(find.text('Copy'), findsOneWidget);
+
+    // This is the position of the selection handle displayed at the end.
+    final Offset handlePos = paragraph2.localToGlobal(boxes[0].toRect().bottomRight);
+    await gesture.down(handlePos);
+    await gesture.moveTo(textOffsetToPosition(paragraph2, 11) + Offset(0, paragraph2.size.height / 2));
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pump();
+
+    // After lifting the finger up, the selection toolbar should be showing again.
+    expect(find.text('Copy'), findsOneWidget);
+  },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended]
+  );
 }

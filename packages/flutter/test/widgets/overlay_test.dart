@@ -41,7 +41,7 @@ void main() {
     expect(
       theater.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        '_RenderTheatre#744c9\n'
+        '_RenderTheater#744c9\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
@@ -114,7 +114,7 @@ void main() {
     expect(
       theater.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        '_RenderTheatre#385b3\n'
+        '_RenderTheater#385b3\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
@@ -1102,10 +1102,9 @@ void main() {
       bool visited = false;
       renderObject.visitChildren((RenderObject child) {
         visited = true;
-        switch(clip) {
+        switch (clip) {
           case Clip.none:
             expect(renderObject.describeApproximatePaintClip(child), null);
-            break;
           case Clip.hardEdge:
           case Clip.antiAlias:
           case Clip.antiAliasWithSaveLayer:
@@ -1113,7 +1112,6 @@ void main() {
               renderObject.describeApproximatePaintClip(child),
               const Rect.fromLTRB(0, 0, 800, 600),
             );
-            break;
         }
       });
       expect(visited, true);

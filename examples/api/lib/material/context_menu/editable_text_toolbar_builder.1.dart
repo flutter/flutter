@@ -9,30 +9,28 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const EditableTextToolbarBuilderExampleApp());
 
 const String emailAddress = 'me@example.com';
 const String text = 'Select the email address and open the menu: $emailAddress';
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
+  const EditableTextToolbarBuilderExampleApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<EditableTextToolbarBuilderExampleApp> createState() => _EditableTextToolbarBuilderExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-
+class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolbarBuilderExampleApp> {
   final TextEditingController _controller = TextEditingController(
     text: text,
   );
 
-  void _showDialog (BuildContext context) {
+  void _showDialog(BuildContext context) {
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder: (BuildContext context) =>
-          const AlertDialog(title: Text('You clicked send email!')),
+        builder: (BuildContext context) => const AlertDialog(title: Text('You clicked send email!')),
       ),
     );
   }
@@ -69,20 +67,22 @@ class _MyAppState extends State<MyApp> {
               TextField(
                 controller: _controller,
                 contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-                  final List<ContextMenuButtonItem> buttonItems =
-                      editableTextState.contextMenuButtonItems;
+                  final List<ContextMenuButtonItem> buttonItems = editableTextState.contextMenuButtonItems;
                   // Here we add an "Email" button to the default TextField
                   // context menu for the current platform, but only if an email
                   // address is currently selected.
                   final TextEditingValue value = _controller.value;
                   if (_isValidEmail(value.selection.textInside(value.text))) {
-                    buttonItems.insert(0, ContextMenuButtonItem(
-                      label: 'Send email',
-                      onPressed: () {
-                        ContextMenuController.removeAny();
-                        _showDialog(context);
-                      },
-                    ));
+                    buttonItems.insert(
+                      0,
+                      ContextMenuButtonItem(
+                        label: 'Send email',
+                        onPressed: () {
+                          ContextMenuController.removeAny();
+                          _showDialog(context);
+                        },
+                      ),
+                    );
                   }
                   return AdaptiveTextSelectionToolbar.buttonItems(
                     anchors: editableTextState.contextMenuAnchors,

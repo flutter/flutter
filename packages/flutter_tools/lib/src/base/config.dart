@@ -189,7 +189,7 @@ class Config {
   //
   // If the searched environment variables are not set, '.' is returned instead.
   //
-  // Note that this is different from FileSystemUtils.homeDirPath.
+  // This is different from [FileSystemUtils.homeDirPath].
   static String _userHomePath(Platform platform) {
     final String envKey = platform.isWindows ? 'APPDATA' : 'HOME';
     return platform.environment[envKey] ?? '.';

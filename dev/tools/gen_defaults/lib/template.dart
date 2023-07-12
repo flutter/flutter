@@ -236,4 +236,15 @@ abstract class TokenTemplate {
   String textStyle(String componentToken) {
     return '$textThemePrefix${tokens["$componentToken.text-style"]}';
   }
+
+  String textStyleWithColor(String componentToken) {
+    if (!tokens.containsKey('$componentToken.text-style')) {
+      return 'null';
+    }
+    String style = textStyle(componentToken);
+    if (tokens.containsKey('$componentToken.color')) {
+      style = '$style?.copyWith(color: ${componentColor(componentToken)})';
+    }
+    return style;
+  }
 }

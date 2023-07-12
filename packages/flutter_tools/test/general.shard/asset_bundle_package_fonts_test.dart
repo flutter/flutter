@@ -111,7 +111,7 @@ $fontsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.bin',
+      expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.smcbin',
         'AssetManifest.json', 'FontManifest.json', 'NOTICES.Z']));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,

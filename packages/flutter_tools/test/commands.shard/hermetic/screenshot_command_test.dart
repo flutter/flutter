@@ -28,26 +28,26 @@ void main() {
       };
 
       await expectLater(() => createTestCommandRunner(ScreenshotCommand(fs: MemoryFileSystem.test()))
-        .run(<String>['screenshot', '--type=skia', '--observatory-url=http://localhost:8181']),
+        .run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']),
         throwsA(isException.having((Exception exception) => exception.toString(), 'message', contains('dummy'))),
       );
 
       await expectLater(() => createTestCommandRunner(ScreenshotCommand(fs: MemoryFileSystem.test()))
-        .run(<String>['screenshot', '--type=rasterizer', '--observatory-url=http://localhost:8181']),
+        .run(<String>['screenshot', '--type=rasterizer', '--vm-service-url=http://localhost:8181']),
         throwsA(isException.having((Exception exception) => exception.toString(), 'message', contains('dummy'))),
       );
     });
 
 
-    testUsingContext('rasterizer and skia screenshots require observatory uri', () async {
+    testUsingContext('rasterizer and skia screenshots require VM Service uri', () async {
       await expectLater(() => createTestCommandRunner(ScreenshotCommand(fs: MemoryFileSystem.test()))
         .run(<String>['screenshot', '--type=skia']),
-        throwsToolExit(message: 'Observatory URI must be specified for screenshot type skia')
+        throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia')
       );
 
       await expectLater(() => createTestCommandRunner(ScreenshotCommand(fs: MemoryFileSystem.test()))
         .run(<String>['screenshot', '--type=rasterizer',]),
-        throwsToolExit(message: 'Observatory URI must be specified for screenshot type rasterizer'),
+        throwsToolExit(message: 'VM Service URI must be specified for screenshot type rasterizer'),
       );
     });
 
@@ -58,10 +58,10 @@ void main() {
       );
     });
 
-    testUsingContext('device screenshots cannot provided Observatory', () async {
+    testUsingContext('device screenshots cannot provided VM Service', () async {
       await expectLater(() => createTestCommandRunner(ScreenshotCommand(fs: MemoryFileSystem.test()))
-        .run(<String>['screenshot',  '--observatory-url=http://localhost:8181']),
-        throwsToolExit(message: 'Observatory URI cannot be provided for screenshot type device'),
+        .run(<String>['screenshot',  '--vm-service-url=http://localhost:8181']),
+        throwsToolExit(message: 'VM Service URI cannot be provided for screenshot type device'),
       );
     });
   });

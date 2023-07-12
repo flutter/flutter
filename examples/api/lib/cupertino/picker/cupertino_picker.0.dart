@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoPicker].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoPicker].
 
 const double _kItemExtent = 32.0;
 const List<String> _fruitNames = <String>[

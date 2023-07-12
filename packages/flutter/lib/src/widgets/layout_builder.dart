@@ -48,7 +48,7 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
   /// Called at layout time to construct the widget tree.
   ///
   /// The builder must not return null.
-  final Widget Function(BuildContext, ConstraintType) builder;
+  final Widget Function(BuildContext context, ConstraintType constraints) builder;
 
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -17,7 +19,7 @@ import '../widgets/editable_text_utils.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
@@ -1104,7 +1106,6 @@ void main() {
         expect(find.text('Cut'), findsOneWidget);
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1115,7 +1116,6 @@ void main() {
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select all'), findsOneWidget);
-        break;
     }
 
     // Right click the first word.
@@ -1131,7 +1131,6 @@ void main() {
         expect(find.text('Cut'), findsOneWidget);
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1142,12 +1141,41 @@ void main() {
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsNothing);
         expect(find.text('Select all'), findsNothing);
-        break;
     }
   },
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
+
+  testWidgets('spellCheckConfiguration passes through to EditableText', (WidgetTester tester) async {
+    final SpellCheckConfiguration mySpellCheckConfiguration = SpellCheckConfiguration(
+        spellCheckService: DefaultSpellCheckService(),
+        misspelledTextStyle: TextField.materialMisspelledTextStyle,
+      );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: TextFormField(
+          spellCheckConfiguration: mySpellCheckConfiguration,
+        ),
+      ),
+    ));
+
+    expect(find.byType(EditableText), findsOneWidget);
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+
+    // Can't do equality comparison on spellCheckConfiguration itself because it
+    // will have been copied.
+    expect(
+      editableText.spellCheckConfiguration?.spellCheckService,
+      equals(mySpellCheckConfiguration.spellCheckService),
+    );
+    expect(
+      editableText.spellCheckConfiguration?.misspelledTextStyle,
+      equals(mySpellCheckConfiguration.misspelledTextStyle),
+    );
+  });
 
   testWidgets('magnifierConfiguration passes through to EditableText', (WidgetTester tester) async {
     final TextMagnifierConfiguration myTextMagnifierConfiguration = TextMagnifierConfiguration(
@@ -1158,7 +1186,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: TextField(
+        body: TextFormField(
           magnifierConfiguration: myTextMagnifierConfiguration,
         ),
       ),
@@ -1168,5 +1196,250 @@ void main() {
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.magnifierConfiguration, equals(myTextMagnifierConfiguration));
+  });
+
+  testWidgets('Passes undoController to undoController TextField', (WidgetTester tester) async {
+    final UndoHistoryController undoController = UndoHistoryController(value: UndoHistoryValue.empty);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              undoController: undoController,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.undoController, undoController);
+  });
+
+  testWidgets('Passes cursorOpacityAnimates to cursorOpacityAnimates TextField', (WidgetTester tester) async {
+    const bool cursorOpacityAnimates = true;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              cursorOpacityAnimates: cursorOpacityAnimates,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.cursorOpacityAnimates, cursorOpacityAnimates);
+  });
+
+  testWidgets('Passes contentInsertionConfiguration to contentInsertionConfiguration TextField', (WidgetTester tester) async {
+    final ContentInsertionConfiguration contentInsertionConfiguration =
+        ContentInsertionConfiguration(onContentInserted: (KeyboardInsertedContent value) {});
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              contentInsertionConfiguration: contentInsertionConfiguration,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.contentInsertionConfiguration, contentInsertionConfiguration);
+  });
+
+  testWidgets('Passes clipBehavior to clipBehavior TextField', (WidgetTester tester) async {
+    const Clip clipBehavior = Clip.antiAlias;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              clipBehavior: clipBehavior,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.clipBehavior, clipBehavior);
+  });
+
+  testWidgets('Passes scribbleEnabled to scribbleEnabled TextField', (WidgetTester tester) async {
+    const bool scribbleEnabled = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              scribbleEnabled: scribbleEnabled,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.scribbleEnabled, scribbleEnabled);
+  });
+
+  testWidgets('Passes canRequestFocus to canRequestFocus TextField', (WidgetTester tester) async {
+    const bool canRequestFocus = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              canRequestFocus: canRequestFocus,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.canRequestFocus, canRequestFocus);
+  });
+
+  testWidgets('Passes onAppPrivateCommand to onAppPrivateCommand TextField', (WidgetTester tester) async {
+    void onAppPrivateCommand(String p0, Map<String, dynamic> p1) {}
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              onAppPrivateCommand: onAppPrivateCommand,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.onAppPrivateCommand, onAppPrivateCommand);
+  });
+
+  testWidgets('Passes selectionHeightStyle to selectionHeightStyle TextField', (WidgetTester tester) async {
+    const BoxHeightStyle selectionHeightStyle = BoxHeightStyle.max;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              selectionHeightStyle: selectionHeightStyle,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.selectionHeightStyle, selectionHeightStyle);
+  });
+
+  testWidgets('Passes selectionWidthStyle to selectionWidthStyle TextField', (WidgetTester tester) async {
+    const BoxWidthStyle selectionWidthStyle = BoxWidthStyle.max;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              selectionWidthStyle: selectionWidthStyle,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.selectionWidthStyle, selectionWidthStyle);
+  });
+
+  testWidgets('Passes dragStartBehavior to dragStartBehavior TextField', (WidgetTester tester) async {
+    const DragStartBehavior dragStartBehavior = DragStartBehavior.down;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              dragStartBehavior: dragStartBehavior,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.dragStartBehavior, dragStartBehavior);
+  });
+
+  testWidgets('Error color for cursor while validating', (WidgetTester tester) async {
+    const Color errorColor = Color(0xff123456);
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        colorScheme: const ColorScheme.light(error: errorColor),
+      ),
+      home: Material(
+        child: Center(
+          child: TextFormField(
+            enabled: true,
+            autovalidateMode: AutovalidateMode.always,
+            validator: (String? value) {
+              return 'Please enter value';
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.enterText(find.byType(TextField), 'a');
+    final EditableText textField = tester.widget(find.byType(EditableText).first);
+    await tester.pump();
+    expect(textField.cursorColor, errorColor);
   });
 }

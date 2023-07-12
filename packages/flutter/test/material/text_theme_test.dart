@@ -14,6 +14,12 @@ void main() {
     expect(const TextTheme(), equals(const TextTheme().copyWith()));
   });
 
+  test('TextTheme lerp special cases', () {
+    expect(TextTheme.lerp(null, null, 0), const TextTheme());
+    const TextTheme theme = TextTheme();
+    expect(identical(TextTheme.lerp(theme, theme, 0.5), theme), true);
+  });
+
   test('TextTheme copyWith apply, merge basics with Typography.black', () {
     final Typography typography = Typography.material2018();
     expect(typography.black, equals(typography.black.copyWith()));

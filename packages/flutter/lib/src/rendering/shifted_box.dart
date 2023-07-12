@@ -819,7 +819,6 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
       switch (clipBehavior) {
         case Clip.none:
           paintOverflowIndicator(context, offset, _overflowContainerRect, _overflowChildRect);
-          break;
         case Clip.hardEdge:
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:

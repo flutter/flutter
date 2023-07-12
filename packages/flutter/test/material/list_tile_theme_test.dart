@@ -46,9 +46,15 @@ class TestTextState extends State<TestText> {
 }
 
 void main() {
-  test('ListTileThemeData copyWith, ==, hashCode basics', () {
+  test('ListTileThemeData copyWith, ==, hashCode, basics', () {
     expect(const ListTileThemeData(), const ListTileThemeData().copyWith());
     expect(const ListTileThemeData().hashCode, const ListTileThemeData().copyWith().hashCode);
+  });
+
+  test('ListTileThemeData lerp special cases', () {
+    expect(ListTileThemeData.lerp(null, null, 0), null);
+    const ListTileThemeData data = ListTileThemeData();
+    expect(identical(ListTileThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('ListTileThemeData defaults', () {
@@ -809,6 +815,88 @@ void main() {
     final Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
     expect(leadingOffset.dy - tileOffset.dy, 8.0);
     expect(trailingOffset.dy - tileOffset.dy, 8.0);
+  });
+
+  testWidgets('ListTileTheme.merge supports all properties', (WidgetTester tester) async {
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: ThemeData(
+          listTileTheme: const ListTileThemeData(
+            dense: true,
+            shape: StadiumBorder(),
+            style: ListTileStyle.drawer,
+            selectedColor: Color(0x00000001),
+            iconColor: Color(0x00000002),
+            textColor: Color(0x00000003),
+            titleTextStyle: TextStyle(color: Color(0x00000004)),
+            subtitleTextStyle: TextStyle(color: Color(0x00000005)),
+            leadingAndTrailingTextStyle: TextStyle(color: Color(0x00000006)),
+            contentPadding: EdgeInsets.all(100),
+            tileColor: Color(0x00000007),
+            selectedTileColor: Color(0x00000008),
+            horizontalTitleGap: 200,
+            minVerticalPadding: 300,
+            minLeadingWidth: 400,
+            enableFeedback: true,
+            titleAlignment: ListTileTitleAlignment.bottom,
+            mouseCursor: MaterialStateMouseCursor.textable,
+            visualDensity: VisualDensity.comfortable,
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ListTileTheme.merge(
+                  dense: false,
+                  shape: const RoundedRectangleBorder(),
+                  style: ListTileStyle.list,
+                  selectedColor: const Color(0x00000009),
+                  iconColor: const Color(0x0000000A),
+                  textColor: const Color(0x0000000B),
+                  titleTextStyle: const TextStyle(color: Color(0x0000000C)),
+                  subtitleTextStyle: const TextStyle(color: Color(0x0000000D)),
+                  leadingAndTrailingTextStyle: const TextStyle(color: Color(0x0000000E)),
+                  contentPadding: const EdgeInsets.all(500),
+                  tileColor: const Color(0x0000000F),
+                  selectedTileColor: const Color(0x00000010),
+                  horizontalTitleGap: 600,
+                  minVerticalPadding: 700,
+                  minLeadingWidth: 800,
+                  enableFeedback: false,
+                  titleAlignment: ListTileTitleAlignment.top,
+                  mouseCursor: MaterialStateMouseCursor.clickable,
+                  visualDensity: VisualDensity.compact,
+                  child: const ListTile(),
+                );
+              }
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    final ListTileThemeData theme = ListTileTheme.of(tester.element(find.byType(ListTile)));
+    expect(theme.dense, false);
+    expect(theme.shape, const RoundedRectangleBorder());
+    expect(theme.style, ListTileStyle.list);
+    expect(theme.selectedColor, const Color(0x00000009));
+    expect(theme.iconColor, const Color(0x0000000A));
+    expect(theme.textColor, const Color(0x0000000B));
+    expect(theme.titleTextStyle, const TextStyle(color: Color(0x0000000C)));
+    expect(theme.subtitleTextStyle, const TextStyle(color: Color(0x0000000D)));
+    expect(theme.leadingAndTrailingTextStyle, const TextStyle(color: Color(0x0000000E)));
+    expect(theme.contentPadding, const EdgeInsets.all(500));
+    expect(theme.tileColor, const Color(0x0000000F));
+    expect(theme.selectedTileColor, const Color(0x00000010));
+    expect(theme.horizontalTitleGap, 600);
+    expect(theme.minVerticalPadding, 700);
+    expect(theme.minLeadingWidth, 800);
+    expect(theme.enableFeedback, false);
+    expect(theme.titleAlignment, ListTileTitleAlignment.top);
+    expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);
+    expect(theme.visualDensity, VisualDensity.compact);
   });
 }
 

@@ -288,7 +288,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
     // defined in a device-independent manner.
     try {
-      _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, window.devicePixelRatio));
+      _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, _devicePixelRatioForView));
       if (!locked) {
         _flushPointerEventQueue();
       }
@@ -300,6 +300,10 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
         context: ErrorDescription('while handling a pointer data packet'),
       ));
     }
+  }
+
+  double? _devicePixelRatioForView(int viewId) {
+    return platformDispatcher.view(id: viewId)?.devicePixelRatio;
   }
 
   /// Dispatch a [PointerCancelEvent] for the given pointer soon.
@@ -368,7 +372,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent || event is PointerPanZoomStartEvent) {
       assert(!_hitTests.containsKey(event.pointer), 'Pointer of ${event.toString(minLevel: DiagnosticLevel.debug)} unexpectedly has a HitTestResult associated with it.');
       hitTestResult = HitTestResult();
-      hitTest(hitTestResult, event.position);
+      hitTestInView(hitTestResult, event.position, event.viewId);
       if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
         _hitTests[event.pointer] = hitTestResult;
       }
@@ -401,10 +405,20 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
   }
 
-  /// Determine which [HitTestTarget] objects are located at a given position.
+  /// Determine which [HitTestTarget] objects are located at a given position in
+  /// the specified view.
   @override // from HitTestable
-  void hitTest(HitTestResult result, Offset position) {
+  void hitTestInView(HitTestResult result, Offset position, int viewId) {
     result.add(HitTestEntry(this));
+  }
+
+  @override // from HitTestable
+  @Deprecated(
+    'Use hitTestInView and specify the view to hit test. '
+    'This feature was deprecated after v3.11.0-20.0.pre.',
+  )
+  void hitTest(HitTestResult result, Offset position) {
+    hitTestInView(result, position, platformDispatcher.implicitView!.viewId);
   }
 
   /// Dispatch an event to [pointerRouter] and the path of a hit test result.

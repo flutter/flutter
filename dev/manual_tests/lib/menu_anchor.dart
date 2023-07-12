@@ -481,13 +481,10 @@ class _TestMenusState extends State<_TestMenus> {
       switch (checkboxState) {
         case false:
           checkboxState = true;
-          break;
         case true:
           checkboxState = null;
-          break;
         case null:
           checkboxState = false;
-          break;
       }
     });
   }
@@ -506,10 +503,8 @@ class _TestMenusState extends State<_TestMenus> {
         case TestMenu.radioMenu2:
         case TestMenu.radioMenu3:
           shortcuts[item.shortcut!] = VoidCallbackIntent(() => _setRadio(item));
-          break;
         case TestMenu.subMenu1:
           shortcuts[item.shortcut!] = VoidCallbackIntent(() => _setCheck(item));
-          break;
         case TestMenu.mainMenu1:
         case TestMenu.mainMenu2:
         case TestMenu.mainMenu3:
@@ -529,7 +524,6 @@ class _TestMenusState extends State<_TestMenus> {
         case TestMenu.standaloneMenu1:
         case TestMenu.standaloneMenu2:
           shortcuts[item.shortcut!] = VoidCallbackIntent(() => _itemSelected(item));
-          break;
       }
     }
     _shortcutsEntry = ShortcutRegistry.of(context).addAll(shortcuts);

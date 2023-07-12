@@ -144,7 +144,8 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   }
 
   VoidCallback _createCallback(Listenable handle) {
-    return () {
+    late final VoidCallback callback;
+    return callback = () {
       assert(() {
         if (!mounted) {
           throw FlutterError(
@@ -157,6 +158,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         return true;
       }());
       _handles!.remove(handle);
+      handle.removeListener(callback);
       if (_handles!.isEmpty) {
         if (SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.persistentCallbacks.index) {
           // Build/layout haven't started yet so let's just schedule this for

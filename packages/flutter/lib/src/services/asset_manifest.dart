@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'asset_bundle.dart';
 import 'message_codecs.dart';
 
-const String _kAssetManifestFilename = 'AssetManifest.bin';
+const String _kAssetManifestFilename = 'AssetManifest.smcbin';
 
 /// Contains details about available assets and their variants.
 /// See [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)
@@ -30,14 +30,12 @@ abstract class AssetManifest {
   /// information.
   List<String> listAssets();
 
-  /// Retrieves metadata about an asset and its variants.
+  /// Retrieves metadata about an asset and its variants. Returns null if the
+  /// key was not found in the asset manifest.
   ///
-  /// Note that this method considers a main asset to be a variant of itself and
-  /// includes it in the returned list.
-  ///
-  /// Throws an [ArgumentError] if [key] cannot be found within the manifest. To
-  /// avoid this, use a key obtained from the [listAssets] method.
-  List<AssetMetadata> getAssetVariants(String key);
+  /// This method considers a main asset to be a variant of itself. The returned
+  /// list will include it if it exists.
+  List<AssetMetadata>? getAssetVariants(String key);
 }
 
 // Lazily parses the binary asset manifest into a data structure that's easier to work
@@ -64,33 +62,32 @@ class _AssetManifestBin implements AssetManifest {
   final Map<String, List<AssetMetadata>> _typeCastedData = <String, List<AssetMetadata>>{};
 
   @override
-  List<AssetMetadata> getAssetVariants(String key) {
+  List<AssetMetadata>? getAssetVariants(String key) {
     // We lazily delay typecasting to prevent a performance hiccup when parsing
     // large asset manifests. This is important to keep an app's first asset
     // load fast.
     if (!_typeCastedData.containsKey(key)) {
       final Object? variantData = _data[key];
       if (variantData == null) {
-        throw ArgumentError('Asset key $key was not found within the asset manifest.');
+        return null;
       }
       _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as Iterable<Object?>)
         .cast<Map<Object?, Object?>>()
-        .map((Map<Object?, Object?> data) => AssetMetadata(
+        .map((Map<Object?, Object?> data) {
+          final String asset = data['asset']! as String;
+          final Object? dpr = data['dpr'];
+          return AssetMetadata(
             key: data['asset']! as String,
-            targetDevicePixelRatio: data['dpr']! as double,
-            main: false,
-        ))
+            targetDevicePixelRatio: dpr as double?,
+            main: key == asset,
+          );
+        })
         .toList();
 
       _data.remove(key);
     }
 
-    final AssetMetadata mainAsset = AssetMetadata(key: key,
-      targetDevicePixelRatio: null,
-      main: true
-    );
-
-    return <AssetMetadata>[mainAsset, ..._typeCastedData[key]!];
+    return _typeCastedData[key]!;
   }
 
   @override

@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'text_input_utils.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
   group('TextSelection', () {
     test('The invalid selection is a singleton', () {
@@ -229,7 +229,7 @@ void main() {
         }],
       });
 
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -259,7 +259,7 @@ void main() {
         ],
       });
 
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -396,7 +396,7 @@ void main() {
         'args': <dynamic>[1],
         'method': 'TextInputClient.onConnectionClosed',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -421,7 +421,7 @@ void main() {
         ],
         'method': 'TextInputClient.performAction',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
             (ByteData? _) {},
@@ -449,7 +449,7 @@ void main() {
         ],
         'method': 'TextInputClient.performSelectors',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -475,7 +475,7 @@ void main() {
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -500,7 +500,7 @@ void main() {
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -525,7 +525,7 @@ void main() {
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -551,7 +551,7 @@ void main() {
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -577,7 +577,7 @@ void main() {
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -602,7 +602,7 @@ void main() {
         ],
         'method': 'TextInputClient.performPrivateCommand',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -626,7 +626,7 @@ void main() {
         'args': <dynamic>[1, 0, 1],
         'method': 'TextInputClient.showAutocorrectionPromptRect',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -649,7 +649,7 @@ void main() {
         'args': <dynamic>[1, 0, 1],
         'method': 'TextInputClient.showToolbar',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -678,7 +678,7 @@ void main() {
         'args': <dynamic>[1, 0, 1],
         'method': 'TextInputClient.scribbleInteractionBegan',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -692,7 +692,7 @@ void main() {
         'args': <dynamic>[1, 0, 1],
         'method': 'TextInputClient.scribbleInteractionFinished',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -721,7 +721,7 @@ void main() {
         'args': <dynamic>[targetElement.elementIdentifier, 0.0, 0.0],
         'method': 'TextInputClient.focusElement',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -761,7 +761,7 @@ void main() {
         'method': 'TextInputClient.requestElementsInRect',
       });
       ByteData? responseBytes;
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? response) {

@@ -152,6 +152,7 @@ List<FlutterCommand> generateCommands({
         platform: globals.platform,
       ),
     ],
+    suppressAnalytics: globals.flutterUsage.suppressAnalytics,
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(
@@ -199,7 +200,7 @@ List<FlutterCommand> generateCommands({
     signals: globals.signals,
   ),
   EmulatorsCommand(),
-  FormatCommand(verboseHelp: verboseHelp),
+  FormatCommand(),
   GenerateCommand(),
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,

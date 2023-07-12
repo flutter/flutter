@@ -301,7 +301,7 @@ void main() {
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
-                data: MediaQueryData.fromView(tester.binding.window),
+                data: MediaQueryData.fromView(tester.view),
                 child: Material(
                   child: Center(
                     child: Slider(
@@ -325,17 +325,15 @@ void main() {
     // interpreted as a gesture by the semantics debugger and sent to the widget
     // as a semantic action that always moves by 10% of the complete track.
     await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 2000.0, warnIfMissed: false); // hitting the debugger
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(value, equals(0.65));
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         expect(value, equals(0.70));
-        break;
     }
   }, variant: TargetPlatformVariant.all());
 

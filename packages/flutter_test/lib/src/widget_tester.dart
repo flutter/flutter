@@ -9,11 +9,9 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
-
-// The test_api package is not for general use... it's literally for our use.
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/scaffolding.dart' as test_package;
 
 import 'all_elements.dart';
 import 'binding.dart';
@@ -28,7 +26,14 @@ import 'test_text_input.dart';
 
 // Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
-
+// We re-export the matcher package minus some features that we reimplement.
+//
+//  - expect is reimplemented below, to catch incorrect async usage.
+//
+//  - isInstanceOf is reimplemented in matchers.dart because we don't want to
+//    mark it as deprecated (ours is just a method, not a class).
+//
+export 'package:matcher/expect.dart' hide expect, isInstanceOf;
 // We re-export the test package minus some features that we reimplement.
 //
 // Specifically:
@@ -38,23 +43,24 @@ export 'package:flutter/rendering.dart' show SemanticsHandle;
 //    setting up a declarer when one is not defined, which can happen when a
 //    test is executed via `flutter run`.
 //
-//  - expect is reimplemented below, to catch incorrect async usage.
-//
-//  - isInstanceOf is reimplemented in matchers.dart because we don't want to
-//    mark it as deprecated (ours is just a method, not a class).
-//
 // The test_api package has a deprecation warning to discourage direct use but
 // that doesn't apply here.
-// ignore: deprecated_member_use
-export 'package:test_api/test_api.dart' hide
-  expect,
-  group,
-  isInstanceOf,
-  setUp,
-  setUpAll,
-  tearDown,
-  tearDownAll,
-  test;
+export 'package:test_api/hooks.dart' show TestFailure;
+export 'package:test_api/scaffolding.dart'
+    show
+        OnPlatform,
+        Retry,
+        Skip,
+        Tags,
+        TestOn,
+        Timeout,
+        addTearDown,
+        markTestSkipped,
+        printOnFailure,
+        pumpEventQueue,
+        registerException,
+        spawnHybridCode,
+        spawnHybridUri;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
@@ -137,6 +143,7 @@ void testWidgets(
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
+  int? retry,
 }) {
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -155,10 +162,10 @@ void testWidgets(
       () {
         tester._testDescription = combinedDescription;
         SemanticsHandle? semanticsHandle;
-        if (semanticsEnabled == true) {
+        tester._recordNumberOfSemanticsHandles();
+        if (semanticsEnabled) {
           semanticsHandle = tester.ensureSemantics();
         }
-        tester._recordNumberOfSemanticsHandles();
         test_package.addTearDown(binding.postTest);
         return binding.runTest(
           () async {
@@ -181,6 +188,7 @@ void testWidgets(
       skip: skip,
       timeout: timeout ?? binding.defaultTestTimeout,
       tags: tags,
+      retry: retry,
     );
   }
 }
@@ -427,7 +435,7 @@ Future<void> benchmarkWidgets(
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
   SemanticsHandle? semanticsHandle;
-  if (semanticsEnabled == true) {
+  if (semanticsEnabled) {
     semanticsHandle = tester.ensureSemantics();
   }
   tester._recordNumberOfSemanticsHandles();
@@ -442,7 +450,7 @@ Future<void> benchmarkWidgets(
 
 /// Assert that `actual` matches `matcher`.
 ///
-/// See [test_package.expect] for details. This is a variant of that function
+/// See [matcher_expect.expect] for details. This is a variant of that function
 /// that additionally verifies that there are no asynchronous APIs
 /// that have not yet resolved.
 ///
@@ -456,12 +464,12 @@ void expect(
   dynamic skip, // true or a String
 }) {
   TestAsyncUtils.guardSync();
-  test_package.expect(actual, matcher, reason: reason, skip: skip);
+  matcher_expect.expect(actual, matcher, reason: reason, skip: skip);
 }
 
 /// Assert that `actual` matches `matcher`.
 ///
-/// See [test_package.expect] for details. This variant will _not_ check that
+/// See [matcher_expect.expect] for details. This variant will _not_ check that
 /// there are no outstanding asynchronous API requests. As such, it can be
 /// called from, e.g., callbacks that are run during build or layout, or in the
 /// completion handlers of futures that execute in response to user input.
@@ -473,13 +481,13 @@ void expectSync(
   dynamic matcher, {
   String? reason,
 }) {
-  test_package.expect(actual, matcher, reason: reason);
+  matcher_expect.expect(actual, matcher, reason: reason);
 }
 
 /// Just like [expect], but returns a [Future] that completes when the matcher
 /// has finished matching.
 ///
-/// See [test_package.expectLater] for details.
+/// See [matcher_expect.expectLater] for details.
 ///
 /// If the matcher fails asynchronously, that failure is piped to the returned
 /// future where it can be handled by user code. If it is not handled by user
@@ -493,18 +501,40 @@ Future<void> expectLater(
   // We can't wrap the delegate in a guard, or we'll hit async barriers in
   // [TestWidgetsFlutterBinding] while we're waiting for the matcher to complete
   TestAsyncUtils.guardSync();
-  return test_package.expectLater(actual, matcher, reason: reason, skip: skip)
+  return matcher_expect.expectLater(actual, matcher, reason: reason, skip: skip)
            .then<void>((dynamic value) => null);
 }
 
 /// Class that programmatically interacts with widgets and the test environment.
+///
+/// Typically, a test uses [pumpWidget] to load a widget tree (in a manner very
+/// similar to how [runApp] works in a Flutter application). Then, methods such
+/// as [tap], [drag], [enterText], [fling], [longPress], etc, can be used to
+/// interact with the application. The application runs in a [FakeAsync] zone,
+/// which allows time to be stepped forward deliberately; this is done using the
+/// [pump] method.
+///
+/// The [expect] function can then be used to examine the state of the
+/// application, typically using [Finder]s such as those in the [find]
+/// namespace, and [Matcher]s such as [findsOneWidget].
+///
+/// ```dart
+/// testWidgets('MyWidget', (WidgetTester tester) async {
+///   await tester.pumpWidget(MyWidget());
+///   await tester.tap(find.text('Save'));
+///   await tester.pump(); // allow the application to handle
+///   await tester.pump(const Duration(seconds: 1)); // skip past the animation
+///   expect(find.text('Success'), findsOneWidget);
+/// });
+/// ```
 ///
 /// For convenience, instances of this class (such as the one provided by
 /// `testWidgets`) can be used as the `vsync` for `AnimationController` objects.
 ///
 /// When the binding is [LiveTestWidgetsFlutterBinding], events from
 /// [LiveTestWidgetsFlutterBinding.deviceEventDispatcher] will be handled in
-/// [dispatchEvent].
+/// [dispatchEvent]. Thus, using `flutter run` to run a test lets one tap on
+/// the screen to generate [Finder]s relevant to the test.
 class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
   WidgetTester._(super.binding) {
     if (binding is LiveTestWidgetsFlutterBinding) {
@@ -668,7 +698,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final WidgetsBinding binding = this.binding;
       if (binding is LiveTestWidgetsFlutterBinding &&
           binding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
-        test_package.fail(
+        matcher_expect.fail(
           'When using LiveTestWidgetsFlutterBindingFramePolicy.benchmark, '
           'hasScheduledFrame is never set to true. This means that pumpAndSettle() '
           'cannot be used, because it has no way to know if the application has '
@@ -728,7 +758,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       'your widget tree in a RootRestorationScope?',
     );
     return TestAsyncUtils.guard<void>(() async {
-      final Widget widget = ((binding.renderViewElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
+      final Widget widget = ((binding.rootElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
       final TestRestorationData restorationData = binding.restorationManager.restorationData;
       runApp(Container(key: UniqueKey()));
       await pump();
@@ -817,7 +847,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   HitTestResult hitTestOnBinding(Offset location) {
-    location = binding.localToGlobal(location);
+    location = binding.localToGlobal(location, binding.renderView);
     return super.hitTestOnBinding(location);
   }
 
@@ -841,7 +871,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         .whereType<RenderObject>()
         .first;
       final Element? innerTargetElement = _lastWhereOrNull(
-        collectAllElementsFrom(binding.renderViewElement!, skipOffstage: true),
+        collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
         (Element element) => element.renderObject == innerTarget,
       );
       if (innerTargetElement == null) {
@@ -1022,17 +1052,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   void _verifySemanticsHandlesWereDisposed() {
     assert(_lastRecordedSemanticsHandles != null);
-    if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles!) {
+    // TODO(goderbauer): Fix known leak in web engine when running integration tests and remove this "correction", https://github.com/flutter/flutter/issues/121640.
+    final int knownWebEngineLeakForLiveTestsCorrection = kIsWeb && binding is LiveTestWidgetsFlutterBinding ? 1 : 0;
+
+    if (_currentSemanticsHandles - knownWebEngineLeakForLiveTestsCorrection > _lastRecordedSemanticsHandles!) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('A SemanticsHandle was active at the end of the test.'),
         ErrorDescription(
           'All SemanticsHandle instances must be disposed by calling dispose() on '
           'the SemanticsHandle.'
-        ),
-        ErrorHint(
-          'If your test uses SemanticsTester, it is '
-          'sufficient to call dispose() on SemanticsTester. Otherwise, the '
-          'existing handle will leak into another test and alter its behavior.'
         ),
       ]);
     }
@@ -1041,8 +1069,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   int? _lastRecordedSemanticsHandles;
 
+  int get _currentSemanticsHandles => binding.debugOutstandingSemanticsHandles + binding.pipelineOwner.debugOutstandingSemanticsHandles;
+
   void _recordNumberOfSemanticsHandles() {
-    _lastRecordedSemanticsHandles = binding.pipelineOwner.debugOutstandingSemanticsHandles;
+    _lastRecordedSemanticsHandles = _currentSemanticsHandles;
   }
 
   /// Returns the TestTextInput singleton.

@@ -68,7 +68,6 @@ enum RenderingServiceExtensions {
   ///   registered.
   debugDumpLayerTree,
 
-
   /// Name of service extension that, when called, will toggle whether all
   /// clipping effects from the layer tree will be ignored.
   ///

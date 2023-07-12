@@ -15,11 +15,17 @@ void main() {
     expect(const SwitchThemeData().hashCode, const SwitchThemeData().copyWith().hashCode);
   });
 
+  test('SwitchThemeData lerp special cases', () {
+    const SwitchThemeData data = SwitchThemeData();
+    expect(identical(SwitchThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('SwitchThemeData defaults', () {
     const SwitchThemeData themeData = SwitchThemeData();
     expect(themeData.thumbColor, null);
     expect(themeData.trackColor, null);
     expect(themeData.trackOutlineColor, null);
+    expect(themeData.trackOutlineWidth, null);
     expect(themeData.mouseCursor, null);
     expect(themeData.materialTapTargetSize, null);
     expect(themeData.overlayColor, null);
@@ -30,6 +36,7 @@ void main() {
     expect(theme.data.thumbColor, null);
     expect(theme.data.trackColor, null);
     expect(theme.data.trackOutlineColor, null);
+    expect(theme.data.trackOutlineWidth, null);
     expect(theme.data.mouseCursor, null);
     expect(theme.data.materialTapTargetSize, null);
     expect(theme.data.overlayColor, null);
@@ -55,6 +62,7 @@ void main() {
       thumbColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
       trackColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
       trackOutlineColor: MaterialStatePropertyAll<Color>(Color(0xfffffff3)),
+      trackOutlineWidth: MaterialStatePropertyAll<double>(6.0),
       mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
@@ -70,11 +78,12 @@ void main() {
     expect(description[0], 'thumbColor: MaterialStatePropertyAll(Color(0xfffffff0))');
     expect(description[1], 'trackColor: MaterialStatePropertyAll(Color(0xfffffff1))');
     expect(description[2], 'trackOutlineColor: MaterialStatePropertyAll(Color(0xfffffff3))');
-    expect(description[3], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
-    expect(description[4], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
-    expect(description[5], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
-    expect(description[6], 'splashRadius: 1.0');
-    expect(description[7], 'thumbIcon: MaterialStatePropertyAll(Icon(IconData(U+0007B)))');
+    expect(description[3], 'trackOutlineWidth: MaterialStatePropertyAll(6.0)');
+    expect(description[4], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
+    expect(description[5], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
+    expect(description[6], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff2))');
+    expect(description[7], 'splashRadius: 1.0');
+    expect(description[8], 'thumbIcon: MaterialStatePropertyAll(Icon(IconData(U+0007B)))');
   });
 
   testWidgets('Switch is themeable', (WidgetTester tester) async {
@@ -86,6 +95,8 @@ void main() {
     const Color selectedTrackColor = Color(0xfffffff3);
     const Color defaultTrackOutlineColor = Color(0xfffffff4);
     const Color selectedTrackOutlineColor = Color(0xfffffff5);
+    const double defaultTrackOutlineWidth = 3.0;
+    const double selectedTrackOutlineWidth = 6.0;
     const MouseCursor mouseCursor = SystemMouseCursors.text;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const Color focusOverlayColor = Color(0xfffffff4);
@@ -113,6 +124,12 @@ void main() {
             return selectedTrackOutlineColor;
           }
           return defaultTrackOutlineColor;
+        }),
+        trackOutlineWidth: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return selectedTrackOutlineWidth;
+          }
+          return defaultTrackOutlineWidth;
         }),
         mouseCursor: const MaterialStatePropertyAll<MouseCursor>(mouseCursor),
         materialTapTargetSize: materialTapTargetSize,
@@ -157,13 +174,13 @@ void main() {
       material3
       ? (paints
         ..rrect(color: defaultTrackColor)
-        ..rrect(color: defaultTrackOutlineColor)
+        ..rrect(color: defaultTrackOutlineColor, strokeWidth: defaultTrackOutlineWidth)
         ..rrect(color: defaultThumbColor)
         ..paragraph()
       )
       : (paints
         ..rrect(color: defaultTrackColor)
-        ..rrect(color: defaultTrackOutlineColor)
+        ..rrect(color: defaultTrackOutlineColor, strokeWidth: defaultTrackOutlineWidth)
         ..rrect()
         ..rrect()
         ..rrect()
@@ -181,11 +198,11 @@ void main() {
       material3
       ? (paints
         ..rrect(color: selectedTrackColor)
-        ..rrect(color: selectedTrackOutlineColor)
+        ..rrect(color: selectedTrackOutlineColor, strokeWidth: selectedTrackOutlineWidth)
         ..rrect(color: selectedThumbColor)..paragraph())
       : (paints
         ..rrect(color: selectedTrackColor)
-        ..rrect(color: selectedTrackOutlineColor)
+        ..rrect(color: selectedTrackOutlineColor, strokeWidth: selectedTrackOutlineWidth)
         ..rrect()
         ..rrect()
         ..rrect()
@@ -214,6 +231,8 @@ void main() {
     const Color themeSelectedTrackColor = Color(0xfffffff3);
     const Color themeDefaultOutlineColor = Color(0xfffffff6);
     const Color themeSelectedOutlineColor = Color(0xfffffff7);
+    const double themeDefaultOutlineWidth = 5.0;
+    const double themeSelectedOutlineWidth = 7.0;
     const MouseCursor themeMouseCursor = SystemMouseCursors.click;
     const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
     const Color themeFocusOverlayColor = Color(0xfffffff4);
@@ -226,6 +245,8 @@ void main() {
     const Color selectedTrackColor = Color(0xffffff3f);
     const Color defaultOutlineColor = Color(0xffffff6f);
     const Color selectedOutlineColor = Color(0xffffff7f);
+    const double defaultOutlineWidth = 6.0;
+    const double selectedOutlineWidth = 8.0;
     const MouseCursor mouseCursor = SystemMouseCursors.text;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const Color focusColor = Color(0xffffff4f);
@@ -251,6 +272,12 @@ void main() {
             return themeSelectedOutlineColor;
           }
           return themeDefaultOutlineColor;
+        }),
+        trackOutlineWidth: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.selected)) {
+            return themeSelectedOutlineWidth;
+          }
+          return themeDefaultOutlineWidth;
         }),
         mouseCursor: const MaterialStatePropertyAll<MouseCursor>(themeMouseCursor),
         materialTapTargetSize: themeMaterialTapTargetSize,
@@ -300,6 +327,12 @@ void main() {
               }
               return defaultOutlineColor;
             }),
+            trackOutlineWidth: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return selectedOutlineWidth;
+              }
+              return defaultOutlineWidth;
+            }),
             mouseCursor: mouseCursor,
             materialTapTargetSize: materialTapTargetSize,
             focusColor: focusColor,
@@ -324,11 +357,11 @@ void main() {
       material3
       ? (paints
         ..rrect(color: defaultTrackColor)
-        ..rrect(color: defaultOutlineColor)
+        ..rrect(color: defaultOutlineColor, strokeWidth: defaultOutlineWidth)
         ..rrect(color: defaultThumbColor)..paragraph(offset: const Offset(12, 16)))
       : (paints
         ..rrect(color: defaultTrackColor)
-        ..rrect(color: defaultOutlineColor)
+        ..rrect(color: defaultOutlineColor, strokeWidth: defaultOutlineWidth)
         ..rrect()
         ..rrect()
         ..rrect()
@@ -344,11 +377,11 @@ void main() {
       _getSwitchMaterial(tester),
       material3
       ? (paints
-        ..rrect(color: selectedTrackColor)..rrect(color: selectedOutlineColor)
+        ..rrect(color: selectedTrackColor)..rrect(color: selectedOutlineColor, strokeWidth: selectedOutlineWidth)
         ..rrect(color: selectedThumbColor))
       : (paints
         ..rrect(color: selectedTrackColor)
-        ..rrect(color: selectedOutlineColor)
+        ..rrect(color: selectedOutlineColor, strokeWidth: selectedOutlineWidth)
         ..rrect()
         ..rrect()
         ..rrect()
@@ -529,15 +562,18 @@ void main() {
     const Color globalThemeThumbColor = Color(0xfffffff1);
     const Color globalThemeTrackColor = Color(0xfffffff2);
     const Color globalThemeOutlineColor = Color(0xfffffff3);
+    const double globalThemeOutlineWidth = 6.0;
     const Color localThemeThumbColor = Color(0xffff0000);
     const Color localThemeTrackColor = Color(0xffff0000);
     const Color localThemeOutlineColor = Color(0xffff0000);
+    const double localThemeOutlineWidth = 4.0;
 
     final ThemeData themeData = ThemeData(
       switchTheme: const SwitchThemeData(
         thumbColor: MaterialStatePropertyAll<Color>(globalThemeThumbColor),
         trackColor: MaterialStatePropertyAll<Color>(globalThemeTrackColor),
         trackOutlineColor: MaterialStatePropertyAll<Color>(globalThemeOutlineColor),
+        trackOutlineWidth: MaterialStatePropertyAll<double>(globalThemeOutlineWidth),
       ),
     );
     final bool material3 = themeData.useMaterial3;
@@ -550,6 +586,7 @@ void main() {
               thumbColor: MaterialStatePropertyAll<Color>(localThemeThumbColor),
               trackColor: MaterialStatePropertyAll<Color>(localThemeTrackColor),
               trackOutlineColor: MaterialStatePropertyAll<Color>(localThemeOutlineColor),
+              trackOutlineWidth: MaterialStatePropertyAll<double>(localThemeOutlineWidth)
             ),
             child: Switch(
               value: selected,
@@ -568,11 +605,11 @@ void main() {
       material3
       ? (paints
         ..rrect(color: localThemeTrackColor)
-        ..rrect(color: localThemeOutlineColor)
+        ..rrect(color: localThemeOutlineColor, strokeWidth: localThemeOutlineWidth)
         ..rrect(color: localThemeThumbColor))
       : (paints
         ..rrect(color: localThemeTrackColor)
-        ..rrect(color: localThemeOutlineColor)
+        ..rrect(color: localThemeOutlineColor, strokeWidth: localThemeOutlineWidth)
         ..rrect()
         ..rrect()
         ..rrect()

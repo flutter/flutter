@@ -131,7 +131,6 @@ class BeveledRectangleBorder extends OutlinedBorder {
         final Path path = _getPath(adjustedRect)
           ..addPath(getInnerPath(rect, textDirection: textDirection), Offset.zero);
         canvas.drawPath(path, side.toPaint());
-        break;
     }
   }
 

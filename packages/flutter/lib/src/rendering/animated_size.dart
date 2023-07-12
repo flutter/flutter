@@ -181,7 +181,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         // Call markNeedsLayout in case the RenderObject isn't marked dirty
         // already, to resume interrupted resizing animation.
         markNeedsLayout();
-        break;
     }
   }
 
@@ -213,16 +212,12 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     switch (_state) {
       case RenderAnimatedSizeState.start:
         _layoutStart();
-        break;
       case RenderAnimatedSizeState.stable:
         _layoutStable();
-        break;
       case RenderAnimatedSizeState.changed:
         _layoutChanged();
-        break;
       case RenderAnimatedSizeState.unstable:
         _layoutUnstable();
-        break;
     }
 
     size = constraints.constrain(_animatedSize!);
@@ -253,13 +248,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         } else if (_controller.value == _controller.upperBound) {
           return constraints.constrain(childSize);
         }
-        break;
       case RenderAnimatedSizeState.unstable:
       case RenderAnimatedSizeState.changed:
         if (_sizeTween.end != childSize) {
           return constraints.constrain(childSize);
         }
-        break;
     }
 
     return constraints.constrain(_animatedSize!);

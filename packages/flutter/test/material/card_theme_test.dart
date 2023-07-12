@@ -16,6 +16,12 @@ void main() {
     expect(const CardTheme().hashCode, const CardTheme().copyWith().hashCode);
   });
 
+  test('CardTheme lerp special cases', () {
+    expect(CardTheme.lerp(null, null, 0), const CardTheme());
+    const CardTheme theme = CardTheme();
+    expect(identical(CardTheme.lerp(theme, theme, 0.5), theme), true);
+  });
+
   testWidgets('Passing no CardTheme returns defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(MaterialApp(
@@ -155,8 +161,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Passing no CardTheme returns defaults - M2', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(

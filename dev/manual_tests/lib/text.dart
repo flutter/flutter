@@ -170,8 +170,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
         case 0:
           return const TextStyle();
         case 1:
-          style = const TextStyle();
-          break; // and mutate it below
+          style = const TextStyle(); // is mutated below
         default:
           return null;
       }
@@ -211,7 +210,6 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
           case 3:
             return value.withBlue(value.blue + _random.nextInt(10) - 5);
         }
-        break;
       case 1:
         return null;
     }
@@ -322,10 +320,8 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 3:
       case 4:
         children.insert(_random.nextInt(children.length + 1), _createRandomTextSpan());
-        break;
       case 10:
         children = children.reversed.toList();
-        break;
       case 20:
         if (children.isEmpty) {
           break;
@@ -337,7 +333,6 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
         if (depthOf(children[index]) < 3) {
           children.removeAt(index);
         }
-        break;
     }
     if (children.isEmpty && _random.nextBool()) {
       return null;

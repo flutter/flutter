@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// On web, the context menu (aka toolbar) is provided by the browser.
@@ -47,6 +48,69 @@ Offset textOffsetToPosition(WidgetTester tester, int offset, {int index = 0}) {
   );
   expect(endpoints.length, 1);
   return endpoints[0].point + const Offset(kIsWeb? 1.0 : 0.0, -2.0);
+}
+
+/// Mimic key press events by sending key down and key up events via the [tester].
+Future<void> sendKeys(
+    WidgetTester tester,
+    List<LogicalKeyboardKey> keys, {
+      bool shift = false,
+      bool wordModifier = false,
+      bool lineModifier = false,
+      bool shortcutModifier = false,
+      required TargetPlatform targetPlatform,
+    }) async {
+  final String targetPlatformString = targetPlatform.toString();
+  final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
+  if (shift) {
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+  }
+  if (shortcutModifier) {
+    await tester.sendKeyDownEvent(
+      platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+      platform: platform,
+    );
+  }
+  if (wordModifier) {
+    await tester.sendKeyDownEvent(
+      platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
+      platform: platform,
+    );
+  }
+  if (lineModifier) {
+    await tester.sendKeyDownEvent(
+      platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
+      platform: platform,
+    );
+  }
+  for (final LogicalKeyboardKey key in keys) {
+    await tester.sendKeyEvent(key, platform: platform);
+    await tester.pump();
+  }
+  if (lineModifier) {
+    await tester.sendKeyUpEvent(
+      platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
+      platform: platform,
+    );
+  }
+  if (wordModifier) {
+    await tester.sendKeyUpEvent(
+      platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft,
+      platform: platform,
+    );
+  }
+  if (shortcutModifier) {
+    await tester.sendKeyUpEvent(
+      platform == 'macos' || platform == 'ios' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft,
+      platform: platform,
+    );
+  }
+  if (shift) {
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+  }
+  if (shift || wordModifier || lineModifier) {
+    await tester.pump();
+  }
 }
 
 // Simple controller that builds a WidgetSpan with 100 height.

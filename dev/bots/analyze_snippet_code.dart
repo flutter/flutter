@@ -385,7 +385,7 @@ class _SnippetChecker {
 
   /// A RegExp that matches the start of a code block within a regular comment.
   /// Such blocks are not analyzed. They can be used to give sample code for
-  /// internal (private) APIs where visibilty would make analyzing the sample
+  /// internal (private) APIs where visibility would make analyzing the sample
   /// code problematic.
   static final RegExp _uncheckedCodeBlockStartRegex = RegExp(r'^ *// *```dart$');
 
@@ -419,7 +419,7 @@ class _SnippetChecker {
   /// A RegExp that matches a line that ends with a semicolon (and maybe a comment)
   static final RegExp _trailingSemicolonRegExp = RegExp(r'^(.*);(| *//.*)$');
 
-  /// A RegExp that matches a line that ends with a closing blace (and maybe a comment)
+  /// A RegExp that matches a line that ends with a closing brace (and maybe a comment)
   static final RegExp _trailingCloseBraceRegExp = RegExp(r'^(.*)}(| *//.*)$');
 
   /// A RegExp that matches a line that only contains a commented-out ellipsis
@@ -1148,7 +1148,6 @@ Future<void> _runInteractive({
         if (!busy) {
           rerun();
         }
-        break;
     }
   });
   Watcher(file.absolute.path).events.listen((_) => rerun());

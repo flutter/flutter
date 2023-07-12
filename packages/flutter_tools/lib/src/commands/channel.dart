@@ -6,6 +6,7 @@ import '../base/common.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 import '../version.dart';
 
 class ChannelCommand extends FlutterCommand {
@@ -39,8 +40,8 @@ class ChannelCommand extends FlutterCommand {
     switch (rest.length) {
       case 0:
         await _listChannels(
-          showAll: boolArgDeprecated('all'),
-          verbose: globalResults?['verbose'] == true,
+          showAll: boolArg('all'),
+          verbose: globalResults?[FlutterGlobalOptions.kVerboseFlag] == true,
         );
         return FlutterCommandResult.success();
       case 1:
@@ -53,12 +54,11 @@ class ChannelCommand extends FlutterCommand {
 
   Future<void> _listChannels({ required bool showAll, required bool verbose }) async {
     // Beware: currentBranch could contain PII. See getBranchName().
-    final String currentChannel = globals.flutterVersion.channel;
+    final String currentChannel = globals.flutterVersion.channel; // limited to known branch names
+    assert(kOfficialChannels.contains(currentChannel) || kObsoleteBranches.containsKey(currentChannel) || currentChannel == kUserBranch, 'potential PII leak in channel name: "$currentChannel"');
     final String currentBranch = globals.flutterVersion.getBranchName();
     final Set<String> seenUnofficialChannels = <String>{};
     final List<String> rawOutput = <String>[];
-
-    showAll = showAll || currentChannel != currentBranch;
 
     globals.printStatus('Flutter channels:');
     final int result = await globals.processUtils.stream(
@@ -74,8 +74,7 @@ class ChannelCommand extends FlutterCommand {
       throwToolExit('List channels failed: $result$details', exitCode: result);
     }
 
-    final List<String> officialChannels = kOfficialChannels.toList();
-    final List<bool> availableChannels = List<bool>.filled(officialChannels.length, false);
+    final Set<String> availableChannels = <String>{};
 
     for (final String line in rawOutput) {
       final List<String> split = line.split('/');
@@ -84,27 +83,25 @@ class ChannelCommand extends FlutterCommand {
         continue;
       }
       final String branch = split[1];
-      if (split.length > 1) {
-        final int index = officialChannels.indexOf(branch);
-
-        if (index != -1) { // Mark all available channels official channels from output
-          availableChannels[index] = true;
-        } else if (showAll && !seenUnofficialChannels.contains(branch)) {
-        // add other branches to seenUnofficialChannels if --all flag is given (to print later)
-          seenUnofficialChannels.add(branch);
-        }
+      if (kOfficialChannels.contains(branch)) {
+        availableChannels.add(branch);
+      } else if (showAll) {
+        seenUnofficialChannels.add(branch);
       }
     }
 
+    bool currentChannelIsOfficial = false;
+
     // print all available official channels in sorted manner
-    for (int i = 0; i < officialChannels.length; i++) {
+    for (final String channel in kOfficialChannels) {
       // only print non-missing channels
-      if (availableChannels[i]) {
+      if (availableChannels.contains(channel)) {
         String currentIndicator = ' ';
-        if (officialChannels[i] == currentChannel) {
+        if (channel == currentChannel) {
           currentIndicator = '*';
+          currentChannelIsOfficial = true;
         }
-        globals.printStatus('$currentIndicator ${officialChannels[i]}');
+        globals.printStatus('$currentIndicator $channel (${kChannelDescriptions[channel]})');
       }
     }
 
@@ -117,9 +114,12 @@ class ChannelCommand extends FlutterCommand {
           globals.printStatus('  $branch');
         }
       }
+    } else if (!currentChannelIsOfficial) {
+      globals.printStatus('* $currentBranch');
     }
 
-    if (currentChannel == 'unknown') {
+    if (!currentChannelIsOfficial) {
+      assert(currentChannel == kUserBranch, 'Current channel is "$currentChannel", which is not an official branch. (Current branch is "$currentBranch".)');
       globals.printStatus('');
       globals.printStatus('Currently not on an official channel.');
     }

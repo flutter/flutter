@@ -2150,6 +2150,34 @@ void main() {
       expect(channelArguments['platformViewId'], currentViewId + 1);
     });
 
+    testWidgets('FocusNode is disposed on UIView dispose', (WidgetTester tester) async {
+      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+      // casting to dynamic is required since the state class is private.
+      // ignore: avoid_dynamic_calls, invalid_assignment
+      final FocusNode node = (tester.state(find.byType(UiKitView)) as dynamic).focusNode;
+      expect(() => ChangeNotifier.debugAssertNotDisposed(node), isNot(throwsAssertionError));
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+          ),
+        ),
+      );
+      expect(() => ChangeNotifier.debugAssertNotDisposed(node), throwsAssertionError);
+    });
+
     testWidgets('UiKitView has correct semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -2599,6 +2627,8 @@ void main() {
     );
 
     testWidgets('PlatformViewLink includes offset in create call when using texture layer', (WidgetTester tester) async {
+      addTearDown(tester.view.reset);
+
       late FakeAndroidViewController controller;
 
       final PlatformViewLink platformViewLink = PlatformViewLink(
@@ -2622,8 +2652,8 @@ void main() {
         },
       );
 
-      TestWidgetsFlutterBinding.instance.window.physicalSizeTestValue = const Size(400, 200);
-      TestWidgetsFlutterBinding.instance.window.devicePixelRatioTestValue = 1.0;
+      tester.view.physicalSize= const Size(400, 200);
+      tester.view.devicePixelRatio = 1.0;
 
       await tester.pumpWidget(
         Container(
@@ -2638,9 +2668,6 @@ void main() {
       );
 
       expect(controller.createPosition, const Offset(150, 75));
-
-      TestWidgetsFlutterBinding.instance.window.clearPhysicalSizeTestValue();
-      TestWidgetsFlutterBinding.instance.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets(

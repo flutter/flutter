@@ -2,31 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [InteractiveViewer.constrained].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [InteractiveViewer.constrained].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ConstrainedExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ConstrainedExampleApp extends StatelessWidget {
+  const ConstrainedExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        appBar: AppBar(title: const Text('Constrained Sample')),
+        body: const ConstrainedExample(),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ConstrainedExample extends StatelessWidget {
+  const ConstrainedExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +36,7 @@ class MyStatelessWidget extends StatelessWidget {
       scaleEnabled: false,
       child: Table(
         columnWidths: <int, TableColumnWidth>{
-          for (int column = 0; column < columnCount; column += 1)
-            column: const FixedColumnWidth(200.0),
+          for (int column = 0; column < columnCount; column += 1) column: const FixedColumnWidth(200.0),
         },
         children: <TableRow>[
           for (int row = 0; row < rowCount; row += 1)
@@ -49,9 +45,7 @@ class MyStatelessWidget extends StatelessWidget {
                 for (int column = 0; column < columnCount; column += 1)
                   Container(
                     height: 26,
-                    color: row % 2 + column % 2 == 1
-                        ? Colors.white
-                        : Colors.grey.withOpacity(0.1),
+                    color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text('$row x $column'),

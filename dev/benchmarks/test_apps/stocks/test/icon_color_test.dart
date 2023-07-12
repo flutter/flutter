@@ -58,8 +58,8 @@ void main() {
     expect(find.text('Account Balance'), findsNothing);
 
     // drag the drawer out
-    final Offset left = Offset(0.0, (WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio).height / 2.0);
-    final Offset right = Offset((WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio).width, left.dy);
+    final Offset left = Offset(0.0, (tester.view.physicalSize / tester.view.devicePixelRatio).height / 2.0);
+    final Offset right = Offset((tester.view.physicalSize / tester.view.devicePixelRatio).width, left.dy);
     final TestGesture gesture = await tester.startGesture(left);
     await tester.pump();
     await gesture.moveTo(right);

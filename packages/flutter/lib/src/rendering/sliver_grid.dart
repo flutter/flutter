@@ -225,6 +225,11 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
 
   @override
   double computeMaxScrollOffset(int childCount) {
+    if (childCount == 0) {
+      // There are no children in the grid. The max scroll offset should be
+      // zero.
+      return 0.0;
+    }
     final int mainAxisCount = ((childCount - 1) ~/ crossAxisCount) + 1;
     final double mainAxisSpacing = mainAxisStride - childMainAxisExtent;
     return mainAxisStride * mainAxisCount - mainAxisSpacing;

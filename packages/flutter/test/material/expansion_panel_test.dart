@@ -1619,4 +1619,90 @@ void main() {
     expect((mergeableMaterial.children.first as MaterialSlice).color, firstPanelColor);
     expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
   });
+
+  testWidgets('ExpansionPanelList.materialGapSize defaults to 16.0', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList(
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              canTapOnHeader: true,
+              body: const SizedBox.shrink(),
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const SizedBox.shrink();
+              },
+            )
+          ],
+        ),
+      ),
+    ));
+
+    final ExpansionPanelList expansionPanelList = tester.widget(find.byType(ExpansionPanelList));
+    expect(expansionPanelList.materialGapSize, 16);
+  });
+
+  testWidgets('ExpansionPanelList respects materialGapSize', (WidgetTester tester) async {
+    Widget buildWidgetForTest({double materialGapSize = 16}) {
+      return MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            materialGapSize: materialGapSize,
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                isExpanded: true,
+                canTapOnHeader: true,
+                body: const SizedBox.shrink(),
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const SizedBox.shrink();
+                },
+              ),
+              ExpansionPanel(
+                canTapOnHeader: true,
+                body: const SizedBox.shrink(),
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidgetForTest(materialGapSize: 0));
+    await tester.pumpAndSettle();
+    final MergeableMaterial mergeableMaterial = tester.widget(find.byType(MergeableMaterial));
+    expect(mergeableMaterial.children.length, 3);
+    expect(mergeableMaterial.children.whereType<MaterialGap>().length, 1);
+    expect(mergeableMaterial.children.whereType<MaterialSlice>().length, 2);
+    for (final MergeableMaterialItem e in mergeableMaterial.children) {
+      if (e is MaterialGap) {
+        expect(e.size, 0);
+      }
+    }
+
+    await tester.pumpWidget(buildWidgetForTest(materialGapSize: 20));
+    await tester.pumpAndSettle();
+    final MergeableMaterial mergeableMaterial2 = tester.widget(find.byType(MergeableMaterial));
+    expect(mergeableMaterial2.children.length, 3);
+    expect(mergeableMaterial2.children.whereType<MaterialGap>().length, 1);
+    expect(mergeableMaterial2.children.whereType<MaterialSlice>().length, 2);
+    for (final MergeableMaterialItem e in mergeableMaterial2.children) {
+      if (e is MaterialGap) {
+        expect(e.size, 20);
+      }
+    }
+
+    await tester.pumpWidget(buildWidgetForTest());
+    await tester.pumpAndSettle();
+    final MergeableMaterial mergeableMaterial3 = tester.widget(find.byType(MergeableMaterial));
+    expect(mergeableMaterial3.children.length, 3);
+    expect(mergeableMaterial3.children.whereType<MaterialGap>().length, 1);
+    expect(mergeableMaterial3.children.whereType<MaterialSlice>().length, 2);
+    for (final MergeableMaterialItem e in mergeableMaterial3.children) {
+      if (e is MaterialGap) {
+        expect(e.size, 16);
+      }
+    }
+  });
 }

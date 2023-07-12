@@ -43,8 +43,8 @@ void main() {
         sync_io.LogType.browser: 'INFO',
         sync_io.LogType.performance: 'ALL',
       },
-      'chromeOptions': <String, dynamic>{
-        'w3c': false,
+      'goog:chromeOptions': <String, dynamic>{
+        'w3c': true,
         'args': <String>[
           ...kChromeArgs,
           '--headless',
@@ -70,9 +70,9 @@ void main() {
         sync_io.LogType.browser: 'INFO',
         sync_io.LogType.performance: 'ALL',
       },
-      'chromeOptions': <String, dynamic>{
+      'goog:chromeOptions': <String, dynamic>{
         'binary': chromeBinary,
-        'w3c': false,
+        'w3c': true,
         'args': kChromeArgs,
         'perfLoggingPrefs': <String, String>{
           'traceCategories':
@@ -100,8 +100,8 @@ void main() {
         sync_io.LogType.browser: 'INFO',
         sync_io.LogType.performance: 'ALL',
       },
-      'chromeOptions': <String, dynamic>{
-        'w3c': false,
+      'goog:chromeOptions': <String, dynamic>{
+        'w3c': true,
         'args': <String>[
           ...kChromeArgs,
           '--autoplay-policy=no-user-gesture-required',

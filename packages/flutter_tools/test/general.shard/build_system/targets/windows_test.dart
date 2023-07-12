@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/windows.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -30,10 +29,6 @@ void main() {
       defines: <String, String>{
         kBuildMode: 'debug',
       },
-    );
-    final DepfileService depfileService = DepfileService(
-      logger: BufferLogger.test(),
-      fileSystem: fileSystem,
     );
     environment.buildDir.createSync(recursive: true);
 
@@ -83,9 +78,9 @@ void main() {
     // Depfile is created correctly.
     expect(outputDepfile, exists);
 
-    final List<String> inputPaths = depfileService.parse(outputDepfile)
+    final List<String> inputPaths = environment.depFileService.parse(outputDepfile)
       .inputs.map((File file) => file.path).toList();
-    final List<String> outputPaths = depfileService.parse(outputDepfile)
+    final List<String> outputPaths = environment.depFileService.parse(outputDepfile)
       .outputs.map((File file) => file.path).toList();
 
     // Depfile has expected sources.

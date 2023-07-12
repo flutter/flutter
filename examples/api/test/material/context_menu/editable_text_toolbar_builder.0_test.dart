@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('showing and hiding the context menu in TextField with custom buttons', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.EditableTextToolbarBuilderExampleApp(),
     );
 
     expect(BrowserContextMenu.enabled, !kIsWeb);

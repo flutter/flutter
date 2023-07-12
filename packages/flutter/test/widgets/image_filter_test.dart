@@ -179,7 +179,7 @@ void main() {
   });
 
   testWidgets('Image filter - enabled and disabled', (WidgetTester tester) async {
-    Future<void> pumpWithEnabledStaet(bool enabled) async {
+    Future<void> pumpWithEnabledState(bool enabled) async {
       await tester.pumpWidget(
         RepaintBoundary(
           child: ImageFiltered(
@@ -191,11 +191,11 @@ void main() {
       );
     }
 
-    await pumpWithEnabledStaet(false);
+    await pumpWithEnabledState(false);
     expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
 
 
-    await pumpWithEnabledStaet(true);
+    await pumpWithEnabledState(true);
     expect(tester.layers, contains(isA<ImageFilterLayer>()));
   });
 }

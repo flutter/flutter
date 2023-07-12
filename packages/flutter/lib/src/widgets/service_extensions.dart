@@ -20,6 +20,15 @@ enum WidgetsServiceExtensions {
   ///   registered.
   debugDumpApp,
 
+  /// Name of service extension that, when called, will output a string
+  /// representation of the focus tree to the console.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
+  ///   registered.
+  debugDumpFocusTree,
+
   /// Name of service extension that, when called, will overlay a performance
   /// graph on top of this app.
   ///
@@ -343,17 +352,6 @@ enum WidgetInspectorServiceExtensions {
   getRootWidget,
 
   /// Name of service extension that, when called, will return the
-  /// [DiagnosticsNode] data for the root [RenderObject].
-  ///
-  /// See also:
-  ///
-  /// * [WidgetInspectorService.getRootRenderObject], which returns a json
-  ///   encoded String representation of this data.
-  /// * [WidgetInspectorService.initServiceExtensions], where the service
-  ///   extension is registered.
-  getRootRenderObject,
-
-  /// Name of service extension that, when called, will return the
   /// [DiagnosticsNode] data for the root [Element] of the summary tree, which
   /// only includes [Element]s that were created by user code.
   ///
@@ -393,17 +391,6 @@ enum WidgetInspectorServiceExtensions {
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   getDetailsSubtree,
-
-  /// Name of service extension that, when called, will return the
-  /// [DiagnosticsNode] data for the currently selected [RenderObject].
-  ///
-  /// See also:
-  ///
-  /// * [WidgetInspectorService.getSelectedRenderObject], which returns a json
-  ///   encoded String representation of this data.
-  /// * [WidgetInspectorService.initServiceExtensions], where the service
-  ///   extension is registered.
-  getSelectedRenderObject,
 
   /// Name of service extension that, when called, will return the
   /// [DiagnosticsNode] data for the currently selected [Element].

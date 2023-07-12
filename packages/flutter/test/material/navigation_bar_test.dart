@@ -7,6 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -913,8 +915,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
@@ -1217,6 +1220,52 @@ void main() {
 
       await expectLater(find.byType(NavigationBar), matchesGoldenFile('indicator_onlyShowSelected_unselected_m2.png'));
     });
+
+    testWidgets('Destination icon does not rebuild when tapped', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/122811.
+
+      Widget buildNavigationBar() {
+        return MaterialApp(
+          home: Scaffold(
+            bottomNavigationBar: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                int selectedIndex = 0;
+                return NavigationBar(
+                  selectedIndex: selectedIndex,
+                  destinations: const <Widget>[
+                    NavigationDestination(
+                      icon: IconWithRandomColor(icon: Icons.ac_unit),
+                      label: 'AC',
+                    ),
+                    NavigationDestination(
+                      icon: IconWithRandomColor(icon: Icons.access_alarm),
+                      label: 'Alarm',
+                    ),
+                  ],
+                  onDestinationSelected: (int i) {
+                    setState(() {
+                      selectedIndex = i;
+                    });
+                  },
+                );
+              }
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildNavigationBar());
+      Icon icon = tester.widget<Icon>(find.byType(Icon).last);
+      final Color initialColor = icon.color!;
+
+      // Trigger a rebuild.
+      await tester.tap(find.text('Alarm'));
+      await tester.pumpAndSettle();
+
+      // Icon color should be the same as before the rebuild.
+      icon = tester.widget<Icon>(find.byType(Icon).last);
+      expect(icon.color, initialColor);
+    });
   });
 }
 
@@ -1244,4 +1293,16 @@ ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
       matching: find.byType(Container),
     ),
   ).decoration as ShapeDecoration?;
+}
+
+class IconWithRandomColor extends StatelessWidget {
+  const IconWithRandomColor({super.key, required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+    return Icon(icon, color: randomColor);
+  }
 }

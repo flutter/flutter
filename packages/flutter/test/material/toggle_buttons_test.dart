@@ -808,12 +808,28 @@ void main() {
 
     final Offset center = tester.getCenter(find.text('First child'));
 
+    // hoverColor
+    final TestGesture hoverGesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await hoverGesture.addPointer();
+    await hoverGesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await hoverGesture.moveTo(Offset.zero);
+
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(
+      inkFeatures,
+      paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.04)),
+    );
+
     // splashColor
     final TestGesture touchGesture = await tester.createGesture();
-    await touchGesture.down(center);
+    await touchGesture.down(center); // The button is on hovered and pressed
     await tester.pumpAndSettle();
 
-    RenderObject inkFeatures;
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
@@ -825,23 +841,8 @@ void main() {
 
     await touchGesture.up();
     await tester.pumpAndSettle();
-
-    // hoverColor
-    final TestGesture hoverGesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await hoverGesture.addPointer();
-    await hoverGesture.moveTo(center);
+    await hoverGesture.moveTo(const Offset(0, 50));
     await tester.pumpAndSettle();
-    await hoverGesture.moveTo(Offset.zero);
-
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
-      return object.runtimeType.toString() == '_RenderInkFeatures';
-    });
-    expect(
-      inkFeatures,
-      paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.04)),
-    );
 
     // focusColor
     focusNode.requestFocus();
@@ -874,12 +875,28 @@ void main() {
 
     final Offset center = tester.getCenter(find.text('First child'));
 
-    // splashColor
-    final TestGesture touchGesture = await tester.createGesture();
-    await touchGesture.down(center);
+    // hoverColor
+    final TestGesture hoverGesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await hoverGesture.addPointer();
+    await hoverGesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    RenderObject inkFeatures;
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(
+      inkFeatures,
+      paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
+    );
+    await hoverGesture.moveTo(Offset.zero);
+
+    // splashColor
+    final TestGesture touchGesture = await tester.createGesture();
+    await touchGesture.down(center); // The button is on hovered and pressed
+    await tester.pumpAndSettle();
+
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
@@ -891,23 +908,8 @@ void main() {
 
     await touchGesture.up();
     await tester.pumpAndSettle();
-
-    // hoverColor
-    final TestGesture hoverGesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await hoverGesture.addPointer();
-    await hoverGesture.moveTo(center);
+    await hoverGesture.moveTo(const Offset(0, 50));
     await tester.pumpAndSettle();
-
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
-      return object.runtimeType.toString() == '_RenderInkFeatures';
-    });
-    expect(
-      inkFeatures,
-      paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
-    );
-    await hoverGesture.moveTo(Offset.zero);
 
     // focusColor
     focusNode.requestFocus();
@@ -1326,6 +1328,8 @@ void main() {
   });
 
   testWidgets('ToggleButtons text baseline alignment', (WidgetTester tester) async {
+    // The point size of the fonts must be a multiple of 4 until
+    // https://github.com/flutter/flutter/issues/122066 is resolved.
     await tester.pumpWidget(
       Material(
         child: boilerplate(
@@ -1337,27 +1341,27 @@ void main() {
                 borderWidth: 5.0,
                 isSelected: const <bool>[false, true],
                 children: const <Widget>[
-                  Text('First child', style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0)),
-                  Text('Second child', style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0)),
+                  Text('First child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
+                  Text('Second child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
                 ],
               ),
               const MaterialButton(
                 onPressed: null,
-                child: Text('Material Button', style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0)),
+                child: Text('Material Button', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
               ),
-              const Text('Text', style: TextStyle(fontFamily: 'Ahem', fontSize: 30.0)),
+              const Text('Text', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 28.0)),
             ],
           ),
         ),
       ),
     );
 
-    // The Ahem font extends 0.2 * fontSize below the baseline.
+    // The test font extends 0.25 * fontSize below the baseline.
     // So the three row elements line up like this:
     //
     //  ToggleButton  MaterialButton  Text
     //  ------------------------------------   baseline
-    //  2             4               6        space below the baseline = 0.2 * fontSize
+    //  2.0           5.0             7.0      space below the baseline = 0.25 * fontSize
     //  ------------------------------------   widget text dy values
 
     final double firstToggleButtonDy = tester.getBottomLeft(find.text('First child')).dy;
@@ -1366,8 +1370,8 @@ void main() {
     final double textDy = tester.getBottomLeft(find.text('Text')).dy;
 
     expect(firstToggleButtonDy, secondToggleButtonDy);
-    expect(firstToggleButtonDy, moreOrLessEquals(materialButtonDy - 2.0, epsilon: 0.001));
-    expect(firstToggleButtonDy, moreOrLessEquals(textDy - 4.0, epsilon: 0.001));
+    expect(firstToggleButtonDy, materialButtonDy - 3.0);
+    expect(firstToggleButtonDy, textDy - 5.0);
   });
 
   testWidgets('Directionality test', (WidgetTester tester) async {

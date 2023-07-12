@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Regenerates the material icons file.
+// Regenerates a Dart file with a class containing IconData constants.
 // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts-&-Icons
+// Should be idempotent with:
+// dart dev/tools/update_icons.dart --new-codepoints bin/cache/artifacts/material_fonts/codepoints
 
 import 'dart:collection';
 import 'dart:convert' show LineSplitter;
@@ -18,6 +20,7 @@ const String _iconsTemplatePathOption = 'icons-template';
 const String _newCodepointsPathOption = 'new-codepoints';
 const String _oldCodepointsPathOption = 'old-codepoints';
 const String _fontFamilyOption = 'font-family';
+const String _possibleStyleSuffixesOption = 'style-suffixes';
 const String _classNameOption = 'class-name';
 const String _enforceSafetyChecks = 'enforce-safety-checks';
 const String _dryRunOption = 'dry-run';
@@ -26,6 +29,11 @@ const String _defaultIconsPath = 'packages/flutter/lib/src/material/icons.dart';
 const String _defaultNewCodepointsPath = 'codepoints';
 const String _defaultOldCodepointsPath = 'bin/cache/artifacts/material_fonts/codepoints';
 const String _defaultFontFamily = 'MaterialIcons';
+const List<String> _defaultPossibleStyleSuffixes = <String>[
+  '_outlined',
+  '_rounded',
+  '_sharp',
+];
 const String _defaultClassName = 'Icons';
 const String _defaultDemoFilePath = '/tmp/new_icons_demo.dart';
 
@@ -91,7 +99,7 @@ const Map<String, String> _identifierExactRewrites = <String, String>{
 
 const Set<String> _iconsMirroredWhenRTL = <String>{
   // This list is obtained from:
-  // http://google.github.io/material-design-icons/#icons-in-rtl
+  // https://developers.google.com/fonts/docs/material_icons#which_icons_should_be_mirrored_for_rtl
   'arrow_back',
   'arrow_back_ios',
   'arrow_forward',
@@ -248,6 +256,10 @@ ArgResults _handleArguments(List<String> args) {
     ..addOption(_fontFamilyOption,
         defaultsTo: _defaultFontFamily,
         help: 'The font family to use for the IconData constants')
+    ..addMultiOption(_possibleStyleSuffixesOption,
+        defaultsTo: _defaultPossibleStyleSuffixes,
+        help: 'A comma-separated list of suffixes (typically an optional '
+              'family + a style) e.g. _outlined, _monoline_filled')
     ..addOption(_classNameOption,
         defaultsTo: _defaultClassName,
         help: 'The containing class for all icons')
@@ -444,67 +456,60 @@ class Icon {
   // Parse tokenPair (e.g. {"6_ft_apart_outlined": "e004"}).
   Icon(MapEntry<String, String> tokenPair, {
     this.fontFamily = _defaultFontFamily,
+    this.possibleStyleSuffixes = _defaultPossibleStyleSuffixes,
     this.className = _defaultClassName,
   }) {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
 
-    // Determine family and htmlSuffix.
+    // Determine family and HTML class suffix for Dartdoc.
     if (id.endsWith('_gm_outlined')) {
-      family = 'GM';
-      htmlSuffix = '-outlined';
+      dartdocFamily = 'GM';
+      dartdocHtmlSuffix = '-outlined';
     } else if (id.endsWith('_gm_filled')) {
-      family = 'GM';
-      htmlSuffix = '-filled';
+      dartdocFamily = 'GM';
+      dartdocHtmlSuffix = '-filled';
     } else if (id.endsWith('_monoline_outlined')) {
-      family = 'Monoline';
-      htmlSuffix = '-outlined';
+      dartdocFamily = 'Monoline';
+      dartdocHtmlSuffix = '-outlined';
     } else if (id.endsWith('_monoline_filled')) {
-      family = 'Monoline';
-      htmlSuffix = '-filled';
+      dartdocFamily = 'Monoline';
+      dartdocHtmlSuffix = '-filled';
     } else {
-      family = 'material';
+      dartdocFamily = 'material';
       if (id.endsWith('_baseline')) {
         id = _removeLast(id, '_baseline');
-        htmlSuffix = '';
+        dartdocHtmlSuffix = '';
       } else if (id.endsWith('_outlined')) {
-        htmlSuffix = '-outlined';
+        dartdocHtmlSuffix = '-outlined';
       } else if (id.endsWith('_rounded')) {
-        htmlSuffix = '-round';
+        dartdocHtmlSuffix = '-round';
       } else if (id.endsWith('_sharp')) {
-        htmlSuffix = '-sharp';
+        dartdocHtmlSuffix = '-sharp';
       }
     }
 
-    shortId = _generateShortId(id);
-    flutterId = generateFlutterId(id);
+    _generateShortId();
+    _generateFlutterId();
   }
 
-  static const List<String> _idSuffixes = <String>[
-    '_gm_outlined',
-    '_gm_filled',
-    '_monoline_outlined',
-    '_monoline_filled',
-    '_outlined',
-    '_rounded',
-    '_sharp',
-  ];
 
   late String id; // e.g. 5g, 5g_outlined, 5g_rounded, 5g_sharp
   late String shortId; // e.g. 5g
   late String flutterId; // e.g. five_g, five_g_outlined, five_g_rounded, five_g_sharp
-  late String family; // e.g. material
   late String hexCodepoint; // e.g. e547
-  late String htmlSuffix = ''; // The suffix for the 'material-icons' HTML class.
+  late String dartdocFamily; // e.g. material
+  late String dartdocHtmlSuffix = ''; // The suffix for the 'material-icons' HTML class.
   String fontFamily; // The IconData font family.
+  List<String> possibleStyleSuffixes; // A list of possible suffixes e.g. _outlined, _monoline_filled.
   String className; // The containing class.
 
   String get name => shortId.replaceAll('_', ' ').trim();
 
-  String get style => htmlSuffix == '' ? '' : ' (${htmlSuffix.replaceFirst('-', '')})';
+  String get style => dartdocHtmlSuffix == '' ? '' : ' (${dartdocHtmlSuffix.replaceFirst('-', '')})';
 
   String get dartDoc =>
-      '<i class="material-icons$htmlSuffix md-36">$shortId</i> &#x2014; $family icon named "$name"$style';
+      '<i class="material-icons$dartdocHtmlSuffix md-36">$shortId</i> &#x2014; $dartdocFamily icon named "$name"$style';
 
   String get usage => 'Icon($className.$flutterId),';
 
@@ -543,23 +548,22 @@ class Icon {
     return string.replaceAll(RegExp('$toReplace\$'), '');
   }
 
-  static String _generateShortId(String id) {
-    String shortId = id;
-    for (final String styleSuffix in _idSuffixes) {
+  /// See [shortId].
+  void _generateShortId() {
+    shortId = id;
+    for (final String styleSuffix in possibleStyleSuffixes) {
       shortId = _removeLast(shortId, styleSuffix);
       if (shortId != id) {
         break;
       }
     }
-    return shortId;
   }
 
-  /// Given some icon's raw id, returns a valid Dart icon identifier
-  static String generateFlutterId(String id) {
-    String flutterId = id;
+  /// See [flutterId].
+  void _generateFlutterId() {
+    flutterId = id;
     // Exact identifier rewrites.
     for (final MapEntry<String, String> rewritePair in _identifierExactRewrites.entries) {
-      final String shortId = Icon._generateShortId(id);
       if (shortId == rewritePair.key) {
         flutterId = id.replaceFirst(
           rewritePair.key,
@@ -579,7 +583,5 @@ class Icon {
 
     // Prevent double underscores.
     flutterId = flutterId.replaceAll('__', '_');
-
-    return flutterId;
   }
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: undefined_class, undefined_getter, undefined_setter
-
 @TestOn('browser') // This file contains web-only library.
 library;
 
@@ -16,8 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   html.Element? element;
-  final RegisterViewFactory originalFactory = PlatformSelectableRegionContextMenu.registerViewFactory;
-  PlatformSelectableRegionContextMenu.registerViewFactory = (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
+  PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
     element = fn(0) as html.Element;
     // The element needs to be attached to the document body to receive mouse
     // events.
@@ -25,7 +22,7 @@ void main() {
   };
   // This force register the dom element.
   PlatformSelectableRegionContextMenu(child: const Placeholder());
-  PlatformSelectableRegionContextMenu.registerViewFactory = originalFactory;
+  PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = null;
 
   test('DOM element is set up correctly', () async {
     expect(element, isNotNull);
@@ -144,15 +141,15 @@ class RenderSelectionSpy extends RenderProxyBox
 
   @override
   SelectionGeometry get value => _value;
-  SelectionGeometry _value = SelectionGeometry(
+  SelectionGeometry _value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
-    startSelectionPoint: const SelectionPoint(
+    startSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
     ),
-    endSelectionPoint: const SelectionPoint(
+    endSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,

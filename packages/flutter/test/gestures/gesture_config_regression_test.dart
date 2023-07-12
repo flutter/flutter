@@ -7,6 +7,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 class TestResult {
   bool dragStarted = false;
   bool dragUpdate = false;
@@ -50,8 +52,8 @@ class NestedScrollableCase extends StatelessWidget {
   }
 }
 
-class NestedDragableCase extends StatelessWidget {
-  const NestedDragableCase({super.key, required this.testResult});
+class NestedDraggableCase extends StatelessWidget {
+  const NestedDraggableCase({super.key, required this.testResult});
 
   final TestResult testResult;
 
@@ -89,10 +91,10 @@ class NestedDragableCase extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
-    tester.binding.window.viewConfigurationTestValue = const ui.ViewConfiguration(
-      gestureSettings: ui.GestureSettings(physicalTouchSlop: 4),
-    );
+  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
+    tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
+    addTearDown(tester.view.reset);
+
     final TestResult result = TestResult();
 
     await tester.pumpWidget(MaterialApp(
@@ -112,15 +114,15 @@ void main() {
    expect(result.dragUpdate, true);
   });
 
-  testWidgets('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
-    tester.binding.window.viewConfigurationTestValue = const ui.ViewConfiguration(
-      gestureSettings: ui.GestureSettings(physicalTouchSlop: 4),
-    );
+  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
+    tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
+    addTearDown(tester.view.reset);
+
     final TestResult result = TestResult();
 
     await tester.pumpWidget(MaterialApp(
       title: 'Scroll Bug',
-      home: NestedDragableCase(testResult: result),
+      home: NestedDraggableCase(testResult: result),
     ));
 
     // By dragging the scroll view more than the configured touch slop above but less than

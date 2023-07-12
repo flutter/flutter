@@ -296,11 +296,9 @@ class ScaleTransition extends AnimatedWidget {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
         useFilterQuality = false;
-        break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         useFilterQuality = true;
-        break;
     }
     return Transform.scale(
       scale: scale.value,
@@ -379,11 +377,9 @@ class RotationTransition extends AnimatedWidget {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
         useFilterQuality = false;
-        break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         useFilterQuality = true;
-        break;
     }
     return Transform.rotate(
       angle: turns.value * math.pi * 2.0,
@@ -516,6 +512,7 @@ class SizeTransition extends AnimatedWidget {
 ///  * [Opacity], which does not animate changes in opacity.
 ///  * [AnimatedOpacity], which animates changes in opacity without taking an
 ///    explicit [Animation] argument.
+///  * [SliverFadeTransition], the sliver version of this widget.
 class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
@@ -586,6 +583,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [SliverOpacity], which does not animate changes in opacity.
+///  * [FadeTransition], the box version of this widget.
 class SliverFadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
@@ -995,16 +993,33 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// they have identical implementations, if an [Animation] is being listened to,
 /// consider using an [AnimatedBuilder] instead for better readability.
 ///
+/// {@tool dartpad}
+/// The following example uses a subclass of [ChangeNotifier] to hold the
+/// application model's state, in this case, a counter. A [ListenableBuilder] is
+/// then used to update the rendering (a [Text] widget) whenever the model changes.
+///
+/// ** See code in examples/api/lib/widgets/transitions/listenable_builder.2.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This version is identical, but using a [ValueNotifier] instead of a
+/// dedicated subclass of [ChangeNotifier]. This works well when there is only a
+/// single immutable value to be tracked.
+///
+/// ** See code in examples/api/lib/widgets/transitions/listenable_builder.1.dart **
+/// {@end-tool}
+///
 /// ## Performance optimizations
 ///
 /// {@template flutter.widgets.transitions.ListenableBuilder.optimizations}
 /// If the [builder] function contains a subtree that does not depend on the
-/// [listenable], it's often more efficient to build that subtree once instead
-/// of rebuilding it on every change of the listenable.
+/// [listenable], it is more efficient to build that subtree once instead
+/// of rebuilding it on every change of the [listenable].
 ///
-/// If a pre-built subtree is passed as the [child] parameter, the
-/// [ListenableBuilder] will pass it back to the [builder] function so that it
-/// can be incorporated into the build.
+/// Performance is therefore improved by specifying any widgets that don't need
+/// to change using the prebuilt [child] attribute. The [ListenableBuilder]
+/// passes this [child] back to the [builder] callback so that it can be
+/// incorporated into the build.
 ///
 /// Using this pre-built [child] is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
@@ -1013,32 +1028,19 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// {@tool dartpad}
 /// This example shows how a [ListenableBuilder] can be used to listen to a
 /// [FocusNode] (which is also a [ChangeNotifier]) to see when a subtree has
-/// focus, and modify a decoration when its focus state changes.
+/// focus, and modify a decoration when its focus state changes. Only the
+/// [Container] is rebuilt when the [FocusNode] changes; the rest of the tree
+/// (notably the [Focus] widget) remain unchanged from frame to frame.
 ///
 /// ** See code in examples/api/lib/widgets/transitions/listenable_builder.0.dart **
 /// {@end-tool}
-///
-/// {@template flutter.flutter.ListenableBuilder.ChangeNotifier.rebuild}
-/// ## Improve rebuild performance
-///
-/// Performance can be improved by specifying any widgets that don't need to
-/// change as a result of changes in the listener as the prebuilt
-/// [ListenableBuilder.child] attribute.
-///
-/// {@tool dartpad}
-/// The following example implements a simple counter that utilizes a
-/// [ListenableBuilder] to limit rebuilds to only the [Text] widget containing
-/// the count. The current count is stored in a [ValueNotifier], which rebuilds
-/// the [ListenableBuilder]'s contents when its value is changed.
-///
-/// ** See code in examples/api/lib/widgets/transitions/listenable_builder.1.dart **
-/// {@end-tool}
-/// {@endtemplate}
 ///
 /// See also:
 ///
 /// * [AnimatedBuilder], which has the same functionality, but is named more
 ///   appropriately for a builder triggered by [Animation]s.
+/// * [ValueListenableBuilder], which is specialized for [ValueNotifier]s and
+///   reports the new value in its builder callback.
 class ListenableBuilder extends AnimatedWidget {
   /// Creates a builder that responds to changes in [listenable].
   ///
@@ -1050,17 +1052,23 @@ class ListenableBuilder extends AnimatedWidget {
     this.child,
   });
 
-  // Overridden getter to replace with documentation tailored to
-  // ListenableBuilder.
-
   /// The [Listenable] supplied to the constructor.
   ///
-  /// Also accessible through the [listenable] getter.
+  /// {@tool dartpad}
+  /// In this example, the [listenable] is a [ChangeNotifier] subclass that
+  /// encapsulates a list. The [ListenableBuilder] is rebuilt each time an item
+  /// is added to the list.
+  ///
+  /// ** See code in examples/api/lib/widgets/transitions/listenable_builder.3.dart **
+  /// {@end-tool}
   ///
   /// See also:
   ///
-  /// * [AnimatedBuilder], a widget with an identical functionality commonly
+  /// * [AnimatedBuilder], a widget with identical functionality commonly
   ///   used with [Animation] [Listenable]s for better readability.
+  //
+  // Overridden getter to replace with documentation tailored to
+  // ListenableBuilder.
   @override
   Listenable get listenable => super.listenable;
 
@@ -1090,6 +1098,12 @@ class ListenableBuilder extends AnimatedWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=N-RiyZlv8v8}
 ///
+/// Despite the name, [AnimatedBuilder] is not limited to [Animation]s, any
+/// subtype of [Listenable] (such as [ChangeNotifier] or [ValueNotifier]) can be
+/// used to trigger rebuilds. Although they have identical implementations, if
+/// an [Animation] is not being listened to, consider using a
+/// [ListenableBuilder] for better readability.
+///
 /// ## Performance optimizations
 ///
 /// {@template flutter.widgets.transitions.AnimatedBuilder.optimizations}
@@ -1113,31 +1127,9 @@ class ListenableBuilder extends AnimatedWidget {
 /// ** See code in examples/api/lib/widgets/transitions/animated_builder.0.dart **
 /// {@end-tool}
 ///
-/// ## Improve rebuild performance
-///
-/// Despite the name, [AnimatedBuilder] is not limited to [Animation]s, any
-/// subtype of [Listenable] (such as [ChangeNotifier] or [ValueNotifier]) can be
-/// used to trigger rebuilds. Although they have identical implementations, if
-/// an [Animation] is not being listened to, consider using a
-/// [ListenableBuilder] for better readability.
-///
-/// You can use an [AnimatedBuilder] or [ListenableBuilder] to rebuild only
-/// certain parts of a widget when the [Listenable] notifies its listeners. You
-/// can improve performance by specifying any widgets that don't need to change
-/// as a result of changes in the listener as the prebuilt [child] attribute.
-///
-/// {@tool dartpad}
-/// The following example implements a simple counter that utilizes an
-/// [AnimatedBuilder] to limit rebuilds to only the [Text] widget. The current
-/// count is stored in a [ValueNotifier], which rebuilds the [AnimatedBuilder]'s
-/// contents when its value is changed.
-///
-/// ** See code in examples/api/lib/widgets/transitions/listenable_builder.1.dart **
-/// {@end-tool}
-///
 /// See also:
 ///
-/// * [ListenableBuilder], a widget with similar functionality, but is named
+/// * [ListenableBuilder], a widget with similar functionality, but named
 ///   more appropriately for a builder triggered on changes in [Listenable]s
 ///   that aren't [Animation]s.
 /// * [TweenAnimationBuilder], which animates a property to a target value
@@ -1164,13 +1156,27 @@ class AnimatedBuilder extends ListenableBuilder {
   ///   when the [animation] isn't an [Animation].
   Listenable get animation => super.listenable;
 
+  /// The [Listenable] supplied to the constructor (typically an [Animation]).
+  ///
+  /// Also accessible through the [animation] getter.
+  ///
+  /// See also:
+  ///
+  /// * [ListenableBuilder], a widget with identical functionality commonly
+  ///   used with non-animation [Listenable]s for readability.
+  //
   // Overridden getter to replace with documentation tailored to
-  // AnimatedBuilder.
+  // ListenableBuilder.
+  @override
+  Listenable get listenable => super.listenable;
 
   /// Called every time the [animation] notifies about a change.
   ///
   /// The child given to the builder should typically be part of the returned
   /// widget tree.
+  //
+  // Overridden getter to replace with documentation tailored to
+  // AnimatedBuilder.
   @override
   TransitionBuilder get builder => super.builder;
 }

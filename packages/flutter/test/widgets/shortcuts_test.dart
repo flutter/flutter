@@ -1909,8 +1909,6 @@ class TestAction extends CallbackAction<Intent> {
   TestAction({
     required super.onInvoke,
   });
-
-  static const LocalKey key = ValueKey<Type>(TestAction);
 }
 
 /// An activator that accepts down events that has [key] as the logical key.

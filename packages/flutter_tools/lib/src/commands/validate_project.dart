@@ -42,10 +42,17 @@ class ValidateProject {
         continue;
       }
       if (!results.containsKey(validator) && validator.supportsProject(project)) {
-        results[validator] = validator.start(project).catchError((Object exception, StackTrace trace) {
-          hasCrash = true;
-          return <ProjectValidatorResult>[ProjectValidatorResult.crash(exception, trace)];
-        });
+        results[validator] = validator
+            .start(project)
+            .then(
+              (List<ProjectValidatorResult> results) => results,
+              onError: (Object exception, StackTrace trace) {
+                hasCrash = true;
+                return <ProjectValidatorResult>[
+                  ProjectValidatorResult.crash(exception, trace),
+                ];
+              },
+            );
       }
     }
 
@@ -92,20 +99,16 @@ class ValidateProject {
 
   String getStringResult(ProjectValidatorResult result) {
     final String icon;
-    switch(result.status) {
+    switch (result.status) {
       case StatusProjectValidator.error:
         icon = '[✗]';
-        break;
       case StatusProjectValidator.info:
       case StatusProjectValidator.success:
         icon = '[✓]';
-        break;
       case StatusProjectValidator.warning:
         icon = '[!]';
-        break;
       case StatusProjectValidator.crash:
         icon = '[☠]';
-        break;
     }
 
     return '$icon $result';

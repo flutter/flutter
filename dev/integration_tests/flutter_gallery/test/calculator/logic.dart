@@ -4,8 +4,7 @@
 
 import 'package:flutter_gallery/demo/calculator/logic.dart';
 
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   test('Test order of operations: 12 + 3 * 4 = 24', () {

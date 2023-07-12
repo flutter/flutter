@@ -286,19 +286,15 @@ class CardCollectionState extends State<CardCollection> {
     switch (_dismissDirection) {
       case DismissDirection.horizontal:
         backgroundMessage = 'Swipe in either direction';
-        break;
       case DismissDirection.endToStart:
         backgroundMessage = 'Swipe left to dismiss';
-        break;
       case DismissDirection.startToEnd:
         backgroundMessage = 'Swipe right to dismiss';
-        break;
       case DismissDirection.vertical:
       case DismissDirection.up:
       case DismissDirection.down:
       case DismissDirection.none:
         backgroundMessage = 'Unsupported dismissDirection';
-        break;
     }
 
     // This icon is wrong in RTL.

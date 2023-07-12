@@ -35,6 +35,28 @@ const String htmlSample2 = '''
   <div></div>
   <script src="main.dart.js"></script>
   <script>
+    const serviceWorkerVersion = null;
+  </script>
+  <script>
+    navigator.serviceWorker.register('flutter_service_worker.js');
+  </script>
+</body>
+</html>
+''';
+
+const String htmlSampleLegacyVar = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="$kBaseHrefPlaceholder">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script src="main.dart.js"></script>
+  <script>
     var serviceWorkerVersion = null;
   </script>
   <script>
@@ -61,7 +83,7 @@ String htmlSample2Replaced({
   <div></div>
   <script src="main.dart.js"></script>
   <script>
-    var serviceWorkerVersion = "$serviceWorkerVersion";
+    const serviceWorkerVersion = "$serviceWorkerVersion";
   </script>
   <script>
     navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion');
@@ -114,6 +136,21 @@ void main() {
 
   test('applies substitutions', () {
     final IndexHtml indexHtml = IndexHtml(htmlSample2);
+    indexHtml.applySubstitutions(
+      baseHref: '/foo/333/',
+      serviceWorkerVersion: 'v123xyz',
+    );
+    expect(
+      indexHtml.content,
+      htmlSample2Replaced(
+        baseHref: '/foo/333/',
+        serviceWorkerVersion: 'v123xyz',
+      ),
+    );
+  });
+
+  test('applies substitutions with legacy var version syntax', () {
+    final IndexHtml indexHtml = IndexHtml(htmlSampleLegacyVar);
     indexHtml.applySubstitutions(
       baseHref: '/foo/333/',
       serviceWorkerVersion: 'v123xyz',

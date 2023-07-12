@@ -63,6 +63,10 @@ enum BottomNavigationBarLandscapeLayout {
 /// A material widget that's displayed at the bottom of an app for selecting
 /// among a small number of views, typically between three and five.
 ///
+/// There is an updated version of this component, [NavigationBar], that's
+/// preferred for new applications and applications that are configured
+/// for Material 3 (see [ThemeData.useMaterial3]).
+///
 /// The bottom navigation bar consists of multiple items in the form of
 /// text labels, icons, or both, laid out on top of a piece of material. It
 /// provides quick navigation between the top-level views of an app. For larger
@@ -94,6 +98,39 @@ enum BottomNavigationBarLandscapeLayout {
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
 ///
+/// ## Updating to [NavigationBar]
+///
+/// The [NavigationBar] widget's visuals
+/// are a little bit different, see the Material 3 spec at
+/// <https://m3.material.io/components/navigation-bar/overview> for
+/// more details.
+///
+/// The [NavigationBar] widget's API is also slightly different.
+/// To update from [BottomNavigationBar] to [NavigationBar], you will
+/// need to make the following changes.
+///
+/// 1. Instead of using [BottomNavigationBar.items], which
+/// takes a list of [BottomNavigationBarItem]s, use
+/// [NavigationBar.destinations], which takes a list of widgets.
+/// Usually, you use a list of [NavigationDestination] widgets.
+/// Just like [BottomNavigationBarItem]s, [NavigationDestination]s
+/// have a label and icon field.
+///
+/// 2. Instead of using [BottomNavigationBar.onTap],
+/// use [NavigationBar.onDestinationSelected], which is also
+/// a callback that is called when the user taps on a
+/// navigation bar item.
+///
+/// 3. Instead of using [BottomNavigationBar.currentIndex],
+/// use [NavigationBar.selectedIndex], which is also an integer
+/// that represents the index of the selected destination.
+///
+/// 4. You may also need to make changes to the styling of the
+/// [NavigationBar], see the properties in the [NavigationBar]
+/// constructor for more details.
+///
+/// ## Using [BottomNavigationBar]
+///
 /// {@tool dartpad}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
@@ -103,6 +140,13 @@ enum BottomNavigationBarLandscapeLayout {
 /// and displays a corresponding message in the center of the [Scaffold].
 ///
 /// ** See code in examples/api/lib/material/bottom_navigation_bar/bottom_navigation_bar.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how you would migrate the above [BottomNavigationBar]
+/// to the new [NavigationBar].
+///
+/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
@@ -516,10 +560,8 @@ class _BottomNavigationTile extends StatelessWidget {
     switch (type) {
       case BottomNavigationBarType.fixed:
         size = 1;
-        break;
       case BottomNavigationBarType.shifting:
         size = (flex! * 1000.0).round();
-        break;
     }
 
     Widget result = InkResponse(
@@ -862,7 +904,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                   _backgroundColor = circle.color;
                   circle.dispose();
                 });
-                break;
               case AnimationStatus.dismissed:
               case AnimationStatus.forward:
               case AnimationStatus.reverse:
@@ -890,7 +931,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           break;
         case BottomNavigationBarType.shifting:
           _pushCircle(widget.currentIndex);
-          break;
       }
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
@@ -928,10 +968,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     switch (themeData.brightness) {
       case Brightness.light:
         themeColor = themeData.colorScheme.primary;
-        break;
       case Brightness.dark:
         themeColor = themeData.colorScheme.secondary;
-        break;
     }
 
     final TextStyle effectiveSelectedLabelStyle =
@@ -979,7 +1017,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? widget.fixedColor
             ?? themeColor,
         );
-        break;
       case BottomNavigationBarType.shifting:
         colorTween = ColorTween(
           begin: widget.unselectedItemColor
@@ -989,7 +1026,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? bottomTheme.selectedItemColor
             ?? themeData.colorScheme.surface,
         );
-        break;
     }
 
     final ColorTween labelColorTween;
@@ -1006,7 +1042,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? widget.fixedColor
             ?? themeColor,
         );
-        break;
       case BottomNavigationBarType.shifting:
         labelColorTween = ColorTween(
           begin: effectiveUnselectedLabelStyle.color
@@ -1018,7 +1053,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? bottomTheme.selectedItemColor
             ?? themeColor,
         );
-        break;
     }
 
     final ColorTween iconColorTween;
@@ -1035,7 +1069,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? widget.fixedColor
             ?? themeColor,
         );
-        break;
       case BottomNavigationBarType.shifting:
         iconColorTween = ColorTween(
           begin: effectiveUnselectedIconTheme.color
@@ -1047,7 +1080,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? bottomTheme.selectedItemColor
             ?? themeColor,
         );
-        break;
     }
 
     final List<Widget> tiles = <Widget>[];
@@ -1104,10 +1136,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
         backgroundColor = widget.backgroundColor ?? bottomTheme.backgroundColor;
-        break;
       case BottomNavigationBarType.shifting:
         backgroundColor = _backgroundColor;
-        break;
     }
 
     return Semantics(
@@ -1277,10 +1307,8 @@ class _RadialPainter extends CustomPainter {
       switch (textDirection) {
         case TextDirection.rtl:
           leftFraction = 1.0 - circle.horizontalLeadingOffset;
-          break;
         case TextDirection.ltr:
           leftFraction = circle.horizontalLeadingOffset;
-          break;
       }
       final Offset center = Offset(leftFraction * size.width, size.height / 2.0);
       final Tween<double> radiusTween = Tween<double>(

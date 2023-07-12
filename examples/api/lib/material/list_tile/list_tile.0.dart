@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ListTile].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ListTile].
 
 void main() => runApp(const ListTileApp());
 
@@ -17,7 +17,8 @@ class ListTileApp extends StatelessWidget {
       theme: ThemeData(
         listTileTheme: const ListTileThemeData(
           textColor: Colors.white,
-        )
+        ),
+        useMaterial3: true,
       ),
       home: const LisTileExample(),
     );
@@ -85,8 +86,9 @@ class _LisTileExampleState extends State<LisTileExample> with TickerProviderStat
                 subtitle: const Text('Tap here for Hero transition'),
                 tileColor: Colors.cyan,
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute<Widget>(
-                    builder: (BuildContext context) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<Widget>(builder: (BuildContext context) {
                       return Scaffold(
                         appBar: AppBar(title: const Text('ListTile Hero')),
                         body: Center(

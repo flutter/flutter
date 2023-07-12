@@ -27,6 +27,7 @@ abstract class AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    bool configOnly = false,
   });
 
   /// Builds an App Bundle artifact.
@@ -36,5 +37,21 @@ abstract class AndroidBuilder {
     required String target,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
+    bool configOnly = false,
+  });
+
+  /// Returns a list of available build variant from the Android project.
+  Future<List<String>> getBuildVariants({required FlutterProject project});
+
+  /// Returns the application id for the given build variant.
+  Future<String> getApplicationIdForVariant(
+    String buildVariant, {
+    required FlutterProject project,
+  });
+
+  /// Returns a list of app link domains for the given build variant.
+  Future<List<String>> getAppLinkDomainsForVariant(
+    String buildVariant, {
+    required FlutterProject project,
   });
 }

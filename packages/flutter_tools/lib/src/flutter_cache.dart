@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
-import 'android/android_studio.dart';
+import 'android/java.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
@@ -38,6 +38,7 @@ class FlutterCache extends Cache {
     registerArtifact(AndroidInternalBuildArtifacts(this));
     registerArtifact(IOSEngineArtifacts(this, platform: platform));
     registerArtifact(FlutterWebSdk(this));
+    registerArtifact(LegacyCanvasKitRemover(this));
     registerArtifact(FlutterSdk(this, platform: platform));
     registerArtifact(WindowsEngineArtifacts(this, platform: platform));
     registerArtifact(MacOSEngineArtifacts(this, platform: platform));
@@ -127,7 +128,8 @@ class PubDependencies extends ArtifactSet {
       project: _projectFactory.fromDirectory(
         fileSystem.directory(fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'))
       ),
-      offline: offline
+      offline: offline,
+      outputMode: PubOutputMode.none,
     );
   }
 }
@@ -180,21 +182,39 @@ class FlutterWebSdk extends CachedArtifact {
     final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/flutter-web-sdk.zip');
     ErrorHandlingFileSystem.deleteIfExists(location, recursive: true);
     await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
-    // This is a temporary work-around for not being able to safely download into a shared directory.
-    final FileSystem fileSystem = location.fileSystem;
-    for (final FileSystemEntity entity in location.listSync(recursive: true)) {
-      if (entity is File) {
-        final List<String> segments = fileSystem.path.split(entity.path);
-        segments.remove('flutter_web_sdk');
-        final String newPath = fileSystem.path.joinAll(segments);
-        final File newFile = fileSystem.file(newPath);
-        if (!newFile.existsSync()) {
-          newFile.createSync(recursive: true);
-        }
-        entity.copySync(newPath);
-      }
-    }
   }
+}
+
+// In previous builds, CanvasKit artifacts were stored in a different location
+// than they are now. Leaving those old artifacts in the cache confuses the
+// in-memory filesystem that the web runner uses, so this artifact will evict
+// them from our cache if they are there.
+class LegacyCanvasKitRemover extends ArtifactSet {
+  LegacyCanvasKitRemover(this.cache) : super(DevelopmentArtifact.web);
+
+  final Cache cache;
+
+  @override
+  String get name => 'legacy_canvaskit_remover';
+
+  Directory _getLegacyCanvasKitDirectory(FileSystem fileSystem) =>
+    fileSystem.directory(fileSystem.path.join(
+      cache.getRoot().path,
+      'canvaskit',
+    ));
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async =>
+    !(await _getLegacyCanvasKitDirectory(fileSystem).exists());
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+    {bool offline = false}
+  ) => _getLegacyCanvasKitDirectory(fileSystem).delete(recursive: true);
 }
 
 /// A cached artifact containing the dart:ui source code.
@@ -314,7 +334,7 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
     if (_platform.isLinux || ignorePlatformFiltering) {
       final String arch = cache.getHostPlatformArchName();
       return <List<String>>[
-        <String>['linux-$arch', 'linux-$arch/linux-$arch-flutter-gtk.zip'],
+        <String>['linux-$arch', 'linux-$arch-debug/linux-$arch-flutter-gtk.zip'],
         <String>['linux-$arch-profile', 'linux-$arch-profile/linux-$arch-flutter-gtk.zip'],
         <String>['linux-$arch-release', 'linux-$arch-release/linux-$arch-flutter-gtk.zip'],
       ];
@@ -366,12 +386,17 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
 /// A cached artifact containing the Maven dependencies used to build Android projects.
 ///
 /// This is a no-op if the android SDK is not available.
+///
+/// Set [Java] to `null` to indicate that no Java/JDK installation could be found.
 class AndroidMavenArtifacts extends ArtifactSet {
   AndroidMavenArtifacts(this.cache, {
+    required Java? java,
     required Platform platform,
-  }) : _platform = platform,
+  }) : _java = java,
+       _platform = platform,
        super(DevelopmentArtifact.androidMaven);
 
+  final Java? _java;
   final Platform _platform;
   final Cache cache;
 
@@ -383,6 +408,8 @@ class AndroidMavenArtifacts extends ArtifactSet {
     OperatingSystemUtils operatingSystemUtils,
     {bool offline = false}
   ) async {
+    // TODO(andrewkolos): Should this really be no-op if the Android SDK
+    // is unavailable? https://github.com/flutter/flutter/issues/127848
     if (globals.androidSdk == null) {
       return;
     }
@@ -403,10 +430,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
           '--project-cache-dir', tempDir.path,
           'resolveDependencies',
         ],
-        environment: <String, String>{
-          if (javaPath != null)
-            'JAVA_HOME': javaPath!,
-        },
+        environment: _java?.environment,
       );
       if (processResult.exitCode != 0) {
         logger.printError('Failed to download the Android dependencies');

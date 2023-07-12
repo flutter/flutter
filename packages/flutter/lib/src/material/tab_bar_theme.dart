@@ -40,6 +40,7 @@ class TabBarTheme with Diagnosticable {
     this.overlayColor,
     this.splashFactory,
     this.mouseCursor,
+    this.tabAlignment,
   });
 
   /// Overrides the default value for [TabBar.indicator].
@@ -55,6 +56,12 @@ class TabBarTheme with Diagnosticable {
   final Color? dividerColor;
 
   /// Overrides the default value for [TabBar.labelColor].
+  ///
+  /// If [labelColor] is a [MaterialStateColor], then the effective color will
+  /// depend on the [MaterialState.selected] state, i.e. if the [Tab] is
+  /// selected or not. In case of unselected state, this [MaterialStateColor]'s
+  /// resolved color will be used even if [TabBar.unselectedLabelColor] or
+  /// [unselectedLabelColor] is non-null.
   final Color? labelColor;
 
   /// Overrides the default value for [TabBar.labelPadding].
@@ -84,6 +91,9 @@ class TabBarTheme with Diagnosticable {
   /// If specified, overrides the default value of [TabBar.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
+  /// Overrides the default value for [TabBar.tabAlignment].
+  final TabAlignment? tabAlignment;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TabBarTheme copyWith({
@@ -99,6 +109,7 @@ class TabBarTheme with Diagnosticable {
     MaterialStateProperty<Color?>? overlayColor,
     InteractiveInkFeatureFactory? splashFactory,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
+    TabAlignment? tabAlignment,
   }) {
     return TabBarTheme(
       indicator: indicator ?? this.indicator,
@@ -113,6 +124,7 @@ class TabBarTheme with Diagnosticable {
       overlayColor: overlayColor ?? this.overlayColor,
       splashFactory: splashFactory ?? this.splashFactory,
       mouseCursor: mouseCursor ?? this.mouseCursor,
+      tabAlignment: tabAlignment ?? this.tabAlignment,
     );
   }
 
@@ -127,6 +139,9 @@ class TabBarTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TabBarTheme lerp(TabBarTheme a, TabBarTheme b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return TabBarTheme(
       indicator: Decoration.lerp(a.indicator, b.indicator, t),
       indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t),
@@ -140,6 +155,7 @@ class TabBarTheme with Diagnosticable {
       overlayColor: MaterialStateProperty.lerp<Color?>(a.overlayColor, b.overlayColor, t, Color.lerp),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
+      tabAlignment: t < 0.5 ? a.tabAlignment : b.tabAlignment,
     );
   }
 
@@ -157,6 +173,7 @@ class TabBarTheme with Diagnosticable {
     overlayColor,
     splashFactory,
     mouseCursor,
+    tabAlignment,
   );
 
   @override
@@ -179,6 +196,7 @@ class TabBarTheme with Diagnosticable {
         && other.unselectedLabelStyle == unselectedLabelStyle
         && other.overlayColor == overlayColor
         && other.splashFactory == splashFactory
-        && other.mouseCursor == mouseCursor;
+        && other.mouseCursor == mouseCursor
+        && other.tabAlignment == tabAlignment;
   }
 }

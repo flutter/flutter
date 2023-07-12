@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../device.dart';
@@ -18,6 +19,7 @@ class LogsCommand extends FlutterCommand {
       help: 'Clear log history before reading from logs.',
     );
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
   }
 
   @override
@@ -30,13 +32,16 @@ class LogsCommand extends FlutterCommand {
   final String category = FlutterCommandCategory.tools;
 
   @override
+  bool get refreshWirelessDevices => true;
+
+  @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   Device? device;
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
-    device = await findTargetDevice(includeUnsupportedDevices: true);
+    device = await findTargetDevice(includeDevicesUnsupportedByProject: true);
     if (device == null) {
       throwToolExit(null);
     }
@@ -46,11 +51,15 @@ class LogsCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Device cachedDevice = device!;
-    if (boolArgDeprecated('clear')) {
+    if (boolArg('clear')) {
       cachedDevice.clearLogs();
     }
 
-    final DeviceLogReader logReader = await cachedDevice.getLogReader();
+    final ApplicationPackage? app = await applicationPackages?.getPackageForPlatform(
+      await cachedDevice.targetPlatform,
+    );
+
+    final DeviceLogReader logReader = await cachedDevice.getLogReader(app: app);
 
     globals.printStatus('Showing $logReader logs:');
 

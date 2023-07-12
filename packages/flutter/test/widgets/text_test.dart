@@ -92,7 +92,7 @@ void main() {
     expect(text, isNotNull);
     expect(text.textScaleFactor, 1.3);
     final Size largeSize = tester.getSize(find.byType(RichText));
-    expect(largeSize.width, anyOf(131.0, 130.0));
+    expect(largeSize.width, 130.0);
     expect(largeSize.height, equals(26.0));
   });
 
@@ -135,7 +135,7 @@ void main() {
 
   testWidgets('inline widgets works with ellipsis', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35869
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -168,7 +168,7 @@ void main() {
 
   testWidgets('inline widgets hitTest works with ellipsis', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/68559
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -310,6 +310,160 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('semantics label is in order when uses widget span', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            children: <InlineSpan>[
+              const TextSpan(text: 'before '),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: Semantics(label: 'foo'),
+              ),
+              const TextSpan(text: ' after'),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byType(Text)),
+      matchesSemantics(label: 'before \nfoo\n after'),
+    );
+
+    // If the Paragraph is not dirty it should use the cache correctly.
+    final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
+    parent.markNeedsSemanticsUpdate();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSemantics(find.byType(Text)),
+      matchesSemantics(label: 'before \nfoo\n after'),
+    );
+  });
+
+  testWidgets('semantics can handle some widget spans without semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            children: <InlineSpan>[
+              const TextSpan(text: 'before '),
+              const WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: SizedBox(width: 10.0),
+              ),
+              const TextSpan(text: ' mid'),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: Semantics(label: 'foo'),
+              ),
+              const TextSpan(text: ' after'),
+              const WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: SizedBox(width: 10.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(Text)),
+        matchesSemantics(label: 'before \n mid\nfoo\n after'));
+
+    // If the Paragraph is not dirty it should use the cache correctly.
+    final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
+    parent.markNeedsSemanticsUpdate();
+    await tester.pumpAndSettle();
+
+    expect(tester.getSemantics(find.byType(Text)),
+        matchesSemantics(label: 'before \n mid\nfoo\n after'));
+  });
+
+  testWidgets('semantics can handle all widget spans without semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'before '),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: SizedBox(width: 10.0),
+              ),
+              TextSpan(text: ' mid'),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: SizedBox(width: 10.0),
+              ),
+              TextSpan(text: ' after'),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: SizedBox(width: 10.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(Text)),
+        matchesSemantics(label: 'before \n mid\n after'));
+
+    // If the Paragraph is not dirty it should use the cache correctly.
+    final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
+    parent.markNeedsSemanticsUpdate();
+    await tester.pumpAndSettle();
+
+    expect(tester.getSemantics(find.byType(Text)),
+        matchesSemantics(label: 'before \n mid\n after'));
+  });
+
+  testWidgets('semantics can handle widget spans with explicit semantics node', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            children: <InlineSpan>[
+              const TextSpan(text: 'before '),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: Semantics(label: 'inner', container: true),
+              ),
+              const TextSpan(text: ' after'),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byType(Text)),
+      matchesSemantics(label: 'before \n after', children: <Matcher>[matchesSemantics(label: 'inner')]),
+    );
+
+    // If the Paragraph is not dirty it should use the cache correctly.
+    final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
+    parent.markNeedsSemanticsUpdate();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSemantics(find.byType(Text)),
+      matchesSemantics(label: 'before \n after', children: <Matcher>[matchesSemantics(label: 'inner')]),
+    );
+  });
+
   testWidgets('semanticsLabel can be shorter than text', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(Directionality(
@@ -360,7 +514,7 @@ void main() {
 
   testWidgets('recognizers split semantic node', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -415,7 +569,7 @@ void main() {
   testWidgets('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/100395.
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem', fontSize: 200);
+    const TextStyle textStyle = TextStyle(fontSize: 200);
     const String onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
     const String offScreenText = 'off screen';
     final ScrollController controller = ScrollController();
@@ -483,7 +637,7 @@ void main() {
 
   testWidgets('recognizers split semantic node when TextSpan overflows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       SizedBox(
         height: 10,
@@ -534,7 +688,7 @@ void main() {
 
   testWidgets('recognizers split semantic nodes with text span labels', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -592,7 +746,7 @@ void main() {
 
   testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       RichText(
         text: TextSpan(
@@ -673,7 +827,7 @@ void main() {
 
   testWidgets('TapGesture recognizers contribute link semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -713,7 +867,7 @@ void main() {
 
   testWidgets('inline widgets generate semantic nodes', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -787,7 +941,7 @@ void main() {
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -843,7 +997,7 @@ void main() {
             TestSemantics(
               label: 'INTERRUPTION',
               textDirection: TextDirection.rtl,
-              rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 80.0),
+              rect: const Rect.fromLTRB(0.0, 0.0, 20.0, 40.0),
             ),
             TestSemantics(
               label: 'sky',
@@ -1071,9 +1225,11 @@ void main() {
               width: 400,
               child: Center(
                 child: RichText(
+                  // 400 is not wide enough for this string. The part after the
+                  // whitespace is going to be broken into a 2nd line.
                   text: const TextSpan(text: 'fwefwefwewfefewfwe fwfwfwefweabcdefghijklmnopqrstuvwxyz'),
                   textWidthBasis: TextWidthBasis.longestLine,
-                  textDirection: TextDirection.ltr,
+                  textDirection: TextDirection.rtl,
                 ),
               ),
             ),
@@ -1085,11 +1241,12 @@ void main() {
           return false;
         }
         final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
-        if (paragraph.longestLine > paragraph.width) {
-          throw 'paragraph width (${paragraph.width}) greater than its longest line (${paragraph.longestLine}).';
-        }
-        if (paragraph.width >= 400) {
-          throw 'paragraph.width (${paragraph.width}) >= 400';
+        final Offset offset = arguments[1] as Offset;
+        final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+        for (final ui.LineMetrics line in lines) {
+          if (line.left + offset.dx + line.width >= 400) {
+            throw 'line $line is greater than the max width constraints';
+          }
         }
         return true;
       }));
@@ -1151,6 +1308,7 @@ void main() {
         ),
       ],
     )));
+    semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
@@ -1174,29 +1332,34 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(label: 'included'),
             TestSemantics(
-              label: 'HELLO',
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isLink,
+              children: <TestSemantics>[
+                TestSemantics(label: 'included'),
+                TestSemantics(
+                  label: 'HELLO',
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isLink,
+                  ],
+                ),
+                TestSemantics(label: 'included2'),
               ],
             ),
-            TestSemantics(label: 'included2'),
           ],
         ),
-      ],
-    ),
-    ignoreId: true,
-    ignoreRect: true,
-    ignoreTransform: true,
-    ));
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
@@ -1232,29 +1395,34 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(label: 'foo'),
-            TestSemantics(label: 'bar'),
             TestSemantics(
-              label: 'HELLO',
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isLink,
+              children: <TestSemantics>[
+                TestSemantics(label: 'foo'),
+                TestSemantics(label: 'bar'),
+                TestSemantics(
+                  label: 'HELLO',
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isLink,
+                  ],
+                ),
               ],
             ),
           ],
         ),
-      ],
-    ),
-    ignoreId: true,
-    ignoreRect: true,
-    ignoreTransform: true,
-    ));
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
@@ -1303,24 +1471,29 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(label: 'not clipped'),
             TestSemantics(
-              label: 'next WS is clipped',
-              flags: <SemanticsFlag>[SemanticsFlag.isLink],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              children: <TestSemantics>[
+                TestSemantics(label: 'not clipped'),
+                TestSemantics(
+                  label: 'next WS is clipped',
+                  flags: <SemanticsFlag>[SemanticsFlag.isLink],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                ),
+              ],
             ),
           ],
         ),
-      ],
-    ),
-    ignoreId: true,
-    ignoreRect: true,
-    ignoreTransform: true,
-    ));
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   testWidgets('RenderParagraph intrinsic width', (WidgetTester tester) async {
@@ -1362,6 +1535,59 @@ void main() {
     expect(paragraph.getMaxIntrinsicWidth(0.0), 200 + 4 * 16.0);
     // The inline spans are rendered in one vertical run, the widest one determines the min intrinsic width.
     expect(paragraph.getMinIntrinsicWidth(0.0), 200);
+  });
+
+  testWidgets('can compute intrinsic width and height for widget span with text scaling', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/59316
+    const Key textKey = Key('RichText');
+    Widget textWithNestedInlineSpans({ required double textScaleFactor, required double screenWidth }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: OverflowBox(
+            alignment: Alignment.topLeft,
+            maxWidth: screenWidth,
+            child: RichText(
+              key: textKey,
+              textScaleFactor: textScaleFactor,
+              text: const TextSpan(children: <InlineSpan>[
+                WidgetSpan(child: Text('one two')),
+              ]),
+            ),
+          ),
+        ),
+      );
+    }
+    // The render object is going to be reused across widget tree rebuilds.
+    late final RenderParagraph outerParagraph = tester.renderObject(find.byKey(textKey));
+
+    await tester.pumpWidget(textWithNestedInlineSpans(textScaleFactor: 1.0, screenWidth: 100.0));
+    expect(
+      outerParagraph.getMaxIntrinsicHeight(100.0),
+      14.0,
+      reason: 'singleLineHeight = 14.0',
+    );
+
+    await tester.pumpWidget(textWithNestedInlineSpans(textScaleFactor: 2.0, screenWidth: 100.0));
+    expect(
+      outerParagraph.getMinIntrinsicHeight(100.0),
+      14.0 * 2.0 * 2,
+      reason: 'intrinsicHeight = singleLineHeight * textScaleFactor * two lines.',
+    );
+
+    await tester.pumpWidget(textWithNestedInlineSpans(textScaleFactor: 1.0, screenWidth: 1000.0));
+    expect(
+      outerParagraph.getMaxIntrinsicWidth(1000.0),
+      14.0 * 7,
+      reason: 'intrinsic width = 14.0 * 7',
+    );
+
+    await tester.pumpWidget(textWithNestedInlineSpans(textScaleFactor: 2.0, screenWidth: 1000.0));
+    expect(
+      outerParagraph.getMaxIntrinsicWidth(1000.0),
+      14.0 * 2.0 * 7,
+      reason: 'intrinsic width = glyph advance * textScaleFactor * num of glyphs',
+    );
   });
 
   testWidgets('Text uses TextStyle.overflow', (WidgetTester tester) async {
@@ -1413,6 +1639,39 @@ void main() {
 
       await tester.tap(find.text('Hello World'));
       expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Mouse hovering over selectable Text uses SystemMouseCursor.text', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: SelectionArea(
+        child: Text('Flutter'),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
+
+  testWidgets('Mouse hovering over selectable Text uses default selection style mouse cursor', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        child: DefaultSelectionStyle.merge(
+          mouseCursor: SystemMouseCursors.click,
+          child: const Text('Flutter'),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 }
 

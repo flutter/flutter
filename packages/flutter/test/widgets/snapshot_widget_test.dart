@@ -241,7 +241,7 @@ void main() {
     expect(tester.takeException(), isNull);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('RenderSnapshotWidget does not take a snapshot if a platform view is encounted with SnapshotMode.permissive', (WidgetTester tester) async {
+  testWidgets('RenderSnapshotWidget does not take a snapshot if a platform view is encountered with SnapshotMode.permissive', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(
       Center(
@@ -264,12 +264,11 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('SnapshotWidget should have same result when enabled', (WidgetTester tester) async {
-    tester.binding.window
-      ..physicalSizeTestValue = const Size(10, 10)
-      ..devicePixelRatioTestValue = 1;
-    addTearDown(() => tester.binding.window
-      ..clearPhysicalSizeTestValue()
-      ..clearDevicePixelRatioTestValue());
+    addTearDown(tester.view.reset);
+
+    tester.view
+      ..physicalSize = const Size(10, 10)
+      ..devicePixelRatio = 1;
 
     const ValueKey<String> repaintBoundaryKey = ValueKey<String>('boundary');
     final SnapshotController controller = SnapshotController();

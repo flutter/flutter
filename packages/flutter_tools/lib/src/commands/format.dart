@@ -4,18 +4,14 @@
 
 import 'package:args/args.dart';
 
-import '../artifacts.dart';
 import '../base/common.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class FormatCommand extends FlutterCommand {
-  FormatCommand({required this.verboseHelp});
+  FormatCommand();
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
-
-  final bool verboseHelp;
 
   @override
   final String name = 'format';
@@ -24,53 +20,20 @@ class FormatCommand extends FlutterCommand {
   List<String> get aliases => const <String>['dartfmt'];
 
   @override
-  final String description = 'Format one or more Dart files.';
+  String get description => deprecationWarning;
 
   @override
-  String get category => FlutterCommandCategory.project;
-
-  @override
-  String get invocation => '${runner?.executableName} $name <one or more paths>';
-
-  @override
-  final bool deprecated = true;
+  final bool hidden = true;
 
   @override
   String get deprecationWarning {
-    return '${globals.logger.terminal.warningMark} The "format" command is '
-           'deprecated and will be removed in a future version of Flutter. '
-           'Please use the "dart format" sub-command instead, which takes all '
-           'of the same command-line arguments as "flutter format".\n';
+    return 'The "format" command is deprecated. Please use the "dart format" '
+           'sub-command instead, which has the same command-line usage as '
+           '"flutter format".\n';
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String dartBinary = globals.artifacts!.getArtifactPath(Artifact.engineDartBinary);
-    final List<String> command = <String>[
-      dartBinary,
-      'format',
-    ];
-    final List<String> rest = argResults?.rest ?? <String>[];
-    if (rest.isEmpty) {
-      globals.printError(
-        'No files specified to be formatted.'
-      );
-      command.add('-h');
-    } else {
-      command.addAll(<String>[
-        for (String arg in rest)
-          if (arg == '--dry-run' || arg == '-n')
-            '--output=none'
-          else
-            arg,
-      ]);
-    }
-
-    final int result = await globals.processUtils.stream(command);
-    if (result != 0) {
-      throwToolExit('Formatting failed: $result', exitCode: result);
-    }
-
-    return FlutterCommandResult.success();
+    throwToolExit(deprecationWarning);
   }
 }

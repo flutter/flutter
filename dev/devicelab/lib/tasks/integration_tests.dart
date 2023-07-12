@@ -4,13 +4,14 @@
 
 import '../framework/devices.dart';
 import '../framework/framework.dart';
+import '../framework/talkback.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 TaskFunction createChannelsIntegrationTest() {
-  return DriverTest(
+  return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/channels',
-    'lib/main.dart',
+    'integration_test/main_test.dart',
   ).call;
 }
 
@@ -74,9 +75,10 @@ TaskFunction createHybridAndroidViewsIntegrationTest() {
 }
 
 TaskFunction createAndroidSemanticsIntegrationTest() {
-  return DriverTest(
+  return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/android_semantics_testing',
-    'lib/main.dart',
+    'integration_test/main_test.dart',
+    withTalkBack: true,
   ).call;
 }
 
@@ -157,6 +159,14 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
   ).call;
 }
 
+TaskFunction createWideGamutTest() {
+  return IntegrationTest(
+    '${flutterDirectory.path}/dev/integration_tests/wide_gamut_test',
+    'integration_test/app_test.dart',
+    createPlatforms: <String>['ios'],
+  ).call;
+}
+
 class DriverTest {
   DriverTest(
     this.testDirectory,
@@ -204,12 +214,16 @@ class IntegrationTest {
     this.testDirectory,
     this.testTarget, {
       this.extraOptions = const <String>[],
+      this.createPlatforms = const <String>[],
+      this.withTalkBack = false,
     }
   );
 
   final String testDirectory;
   final String testTarget;
   final List<String> extraOptions;
+  final List<String> createPlatforms;
+  final bool withTalkBack;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -217,6 +231,22 @@ class IntegrationTest {
       await device.unlock();
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
+
+      if (createPlatforms.isNotEmpty) {
+        await flutter('create', options: <String>[
+          '--platforms',
+          createPlatforms.join(','),
+          '--no-overwrite',
+          '.'
+        ]);
+      }
+
+      if (withTalkBack) {
+        if (device is! AndroidDevice) {
+          return TaskResult.failure('A test that enables TalkBack can only be run on Android devices');
+        }
+        await enableTalkBack();
+      }
 
       final List<String> options = <String>[
         '-v',
@@ -226,6 +256,10 @@ class IntegrationTest {
         ...extraOptions,
       ];
       await flutter('test', options: options);
+
+      if (withTalkBack) {
+        await disableTalkBack();
+      }
 
       return TaskResult.success(null);
     });

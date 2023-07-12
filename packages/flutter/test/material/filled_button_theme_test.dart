@@ -6,6 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('FilledButtonThemeData lerp special cases', () {
+    expect(FilledButtonThemeData.lerp(null, null, 0), null);
+    const FilledButtonThemeData data = FilledButtonThemeData();
+    expect(identical(FilledButtonThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Passing no FilledButtonTheme returns defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(

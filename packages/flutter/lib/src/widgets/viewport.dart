@@ -13,7 +13,8 @@ export 'package:flutter/rendering.dart' show
   AxisDirection,
   GrowthDirection;
 
-/// A widget that is bigger on the inside.
+/// A widget through which a portion of larger content can be viewed, typically
+/// in combination with a [Scrollable].
 ///
 /// [Viewport] is the visual workhorse of the scrolling machinery. It displays a
 /// subset of its children according to its own dimensions and the given
@@ -96,6 +97,8 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// vertically centered within the viewport. If the [anchor] is 1.0, and the
   /// [axisDirection] is [AxisDirection.right], then the zero scroll offset is
   /// on the left edge of the viewport.
+  ///
+  /// {@macro flutter.rendering.GrowthDirection.sample}
   final double anchor;
 
   /// Which part of the content inside the viewport should be visible.
@@ -115,6 +118,8 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// the [axisDirection] relative to the [center].
   ///
   /// The [center] must be the key of a child of the viewport.
+  ///
+  /// {@macro flutter.rendering.GrowthDirection.sample}
   final Key? center;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}

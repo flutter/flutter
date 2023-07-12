@@ -382,13 +382,10 @@ class _CardsDemoState extends State<CardsDemo> {
             switch (destination.type) {
               case CardDemoType.standard:
                 child = TravelDestinationItem(destination: destination, shape: _shape);
-                break;
               case CardDemoType.tappable:
                 child = TappableTravelDestinationItem(destination: destination, shape: _shape);
-                break;
               case CardDemoType.selectable:
                 child = SelectableTravelDestinationItem(destination: destination, shape: _shape);
-                break;
             }
 
             return Container(

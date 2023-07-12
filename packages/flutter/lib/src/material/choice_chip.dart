@@ -7,10 +7,14 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
+
+enum _ChipVariant { flat, elevated }
 
 /// A Material Design choice chip.
 ///
@@ -50,6 +54,7 @@ class ChoiceChip extends StatelessWidget
     implements
         ChipAttributes,
         SelectableChipAttributes,
+        CheckmarkableChipAttributes,
         DisabledChipAttributes {
   /// Create a chip that acts like a radio button.
   ///
@@ -82,9 +87,50 @@ class ChoiceChip extends StatelessWidget
     this.surfaceTintColor,
     this.iconTheme,
     this.selectedShadowColor,
+    this.showCheckmark,
+    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(pressElevation == null || pressElevation >= 0.0),
-       assert(elevation == null || elevation >= 0.0);
+       assert(elevation == null || elevation >= 0.0),
+       _chipVariant = _ChipVariant.flat;
+
+  /// Create an elevated chip that acts like a radio button.
+  ///
+  /// The [label], [selected], [autofocus], and [clipBehavior] arguments must
+  /// not be null. The [pressElevation] and [elevation] must be null or
+  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  const ChoiceChip.elevated({
+    super.key,
+    this.avatar,
+    required this.label,
+    this.labelStyle,
+    this.labelPadding,
+    this.onSelected,
+    this.pressElevation,
+    required this.selected,
+    this.selectedColor,
+    this.disabledColor,
+    this.tooltip,
+    this.side,
+    this.shape,
+    this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
+    this.backgroundColor,
+    this.padding,
+    this.visualDensity,
+    this.materialTapTargetSize,
+    this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
+    this.iconTheme,
+    this.selectedShadowColor,
+    this.showCheckmark,
+    this.checkmarkColor,
+    this.avatarBorder = const CircleBorder(),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       _chipVariant = _ChipVariant.elevated;
 
   @override
   final Widget? avatar;
@@ -133,6 +179,10 @@ class ChoiceChip extends StatelessWidget
   @override
   final Color? selectedShadowColor;
   @override
+  final bool? showCheckmark;
+  @override
+  final Color? checkmarkColor;
+  @override
   final ShapeBorder avatarBorder;
   @override
   final IconThemeData? iconTheme;
@@ -140,12 +190,14 @@ class ChoiceChip extends StatelessWidget
   @override
   bool get isEnabled => onSelected != null;
 
+  final _ChipVariant _chipVariant;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _ChoiceChipDefaultsM3(context, isEnabled, selected)
+      ? _ChoiceChipDefaultsM3(context, isEnabled, selected, _chipVariant)
       : null;
     return RawChip(
       defaultProperties: defaults,
@@ -156,7 +208,8 @@ class ChoiceChip extends StatelessWidget
       onSelected: onSelected,
       pressElevation: pressElevation,
       selected: selected,
-      showCheckmark: Theme.of(context).useMaterial3,
+      showCheckmark: showCheckmark ?? chipTheme.showCheckmark ?? Theme.of(context).useMaterial3,
+      checkmarkColor: checkmarkColor,
       tooltip: tooltip,
       side: side,
       shape: shape,
@@ -187,12 +240,15 @@ class ChoiceChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _ChoiceChipDefaultsM3 extends ChipThemeData {
-  const _ChoiceChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
-    : super(
-        elevation: 0.0,
+  _ChoiceChipDefaultsM3(
+    this.context,
+    this.isEnabled,
+    this.isSelected,
+    this._chipVariant,
+  ) : super(
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         showCheckmark: true,
       );
@@ -200,47 +256,66 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   final BuildContext context;
   final bool isEnabled;
   final bool isSelected;
+  final _ChipVariant _chipVariant;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => Theme.of(context).textTheme.labelLarge;
+  double? get elevation => _chipVariant == _ChipVariant.flat
+    ? 0.0
+    : isEnabled ? 1.0 : 0.0;
+
+  @override
+  double? get pressElevation => 1.0;
+
+  @override
+  TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
   Color? get backgroundColor => null;
 
   @override
-  Color? get shadowColor => Colors.transparent;
+  Color? get shadowColor => _chipVariant == _ChipVariant.flat
+    ? Colors.transparent
+    : _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
-  Color? get selectedColor => isEnabled
-    ? Theme.of(context).colorScheme.secondaryContainer
-    : Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
-
-  @override
-  Color? get checkmarkColor => Theme.of(context).colorScheme.onSecondaryContainer;
-
-  @override
-  Color? get disabledColor => isSelected
-   ? Theme.of(context).colorScheme.onSurface.withOpacity(0.12)
-   : null;
-
-  @override
-  Color? get deleteIconColor => Theme.of(context).colorScheme.onSecondaryContainer;
-
-  @override
-  BorderSide? get side => !isSelected
+  Color? get selectedColor => _chipVariant == _ChipVariant.flat
     ? isEnabled
-      ? BorderSide(color: Theme.of(context).colorScheme.outline)
-      : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12))
+      ? _colors.secondaryContainer
+      : _colors.onSurface.withOpacity(0.12)
+    : isEnabled
+      ? _colors.secondaryContainer
+      : _colors.onSurface.withOpacity(0.12);
+
+  @override
+  Color? get checkmarkColor => _colors.onSecondaryContainer;
+
+  @override
+  Color? get disabledColor => _chipVariant == _ChipVariant.flat
+    ? isSelected
+      ? _colors.onSurface.withOpacity(0.12)
+      : null
+    : _colors.onSurface.withOpacity(0.12);
+
+  @override
+  Color? get deleteIconColor => _colors.onSecondaryContainer;
+
+  @override
+  BorderSide? get side => _chipVariant == _ChipVariant.flat && !isSelected
+    ? isEnabled
+      ? BorderSide(color: _colors.outline)
+      : BorderSide(color: _colors.onSurface.withOpacity(0.12))
     : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
       ? null
-      : Theme.of(context).colorScheme.onSurface,
+      : _colors.onSurface,
     size: 18.0,
   );
 

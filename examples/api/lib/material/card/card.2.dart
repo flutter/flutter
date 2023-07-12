@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Card].
-
 import 'package:flutter/material.dart';
 
-void main() { runApp(const CardExamplesApp()); }
+/// Flutter code sample for [Card].
+
+void main() {
+  runApp(const CardExamplesApp());
+}
 
 class CardExamplesApp extends StatelessWidget {
   const CardExamplesApp({super.key});
@@ -38,7 +40,7 @@ class CardExamplesApp extends StatelessWidget {
 ///
 /// https://m3.material.io/components/cards/specs#a012d40d-7a5c-4b07-8740-491dec79d58b
 class ElevatedCardExample extends StatelessWidget {
-  const ElevatedCardExample({ super.key });
+  const ElevatedCardExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +63,7 @@ class ElevatedCardExample extends StatelessWidget {
 ///
 /// https://m3.material.io/components/cards/specs#0f55bf62-edf2-4619-b00d-b9ed462f2c5a
 class FilledCardExample extends StatelessWidget {
-  const FilledCardExample({ super.key });
+  const FilledCardExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +88,7 @@ class FilledCardExample extends StatelessWidget {
 ///
 /// https://m3.material.io/components/cards/specs#0f55bf62-edf2-4619-b00d-b9ed462f2c5a
 class OutlinedCardExample extends StatelessWidget {
-  const OutlinedCardExample({ super.key });
+  const OutlinedCardExample({super.key});
 
   @override
   Widget build(BuildContext context) {

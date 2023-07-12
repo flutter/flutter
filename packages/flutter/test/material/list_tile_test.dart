@@ -1882,10 +1882,10 @@ void main() {
     expect(iconColor(trailingKey), colorScheme.primary);
 
     await tester.pumpWidget(buildFrame(selected: false));
-    expect(iconColor(leadingKey), colorScheme.onSurface);
-    expect(iconColor(titleKey), colorScheme.onSurface);
-    expect(iconColor(subtitleKey), colorScheme.onSurface);
-    expect(iconColor(trailingKey), colorScheme.onSurface);
+    expect(iconColor(leadingKey), colorScheme.onSurfaceVariant);
+    expect(iconColor(titleKey), colorScheme.onSurfaceVariant);
+    expect(iconColor(subtitleKey), colorScheme.onSurfaceVariant);
+    expect(iconColor(trailingKey), colorScheme.onSurfaceVariant);
   });
 
   testWidgets('ListTile font size', (WidgetTester tester) async {
@@ -2479,8 +2479,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
       // See https://material.io/go/design-lists

@@ -9,7 +9,7 @@ import groovy.json.JsonSlurper
 
 def flutterProjectRoot = rootProject.projectDir.parentFile
 
-// Note: if this logic is changed, also change the logic in module_plugin_loader.gradle.
+// If this logic is changed, also change the logic in module_plugin_loader.gradle.
 def pluginsFile = new File(flutterProjectRoot, '.flutter-plugins-dependencies')
 if (!pluginsFile.exists()) {
   return

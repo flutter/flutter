@@ -3,6 +3,4 @@
 // found in the LICENSE file.
 
 /// Placeholder to be used in a future version of Flutter.
-abstract class Window {
-  const Window._();
-}
+abstract final class Window { }

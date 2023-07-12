@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [GestureDetector].
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [GestureDetector].
 
 void main() {
   debugPrintGestureArenaDiagnostics = true;
@@ -35,8 +35,7 @@ class NestedGestureDetectorsExample extends StatefulWidget {
   State<NestedGestureDetectorsExample> createState() => _NestedGestureDetectorsExampleState();
 }
 
-class _NestedGestureDetectorsExampleState
-    extends State<NestedGestureDetectorsExample> {
+class _NestedGestureDetectorsExampleState extends State<NestedGestureDetectorsExample> {
   bool _isYellowTranslucent = false;
   _OnTapWinner _winner = _OnTapWinner.none;
   final Border highlightBorder = Border.all(color: Colors.red, width: 5);
@@ -66,9 +65,7 @@ class _NestedGestureDetectorsExampleState
                 // parent-child hit testing. A tap on 'Yellow' is also in
                 // 'Green' bounds. Both enter the gesture arena, 'Yellow' wins
                 // because it is in front.
-                behavior: _isYellowTranslucent
-                    ? HitTestBehavior.translucent
-                    : HitTestBehavior.opaque,
+                behavior: _isYellowTranslucent ? HitTestBehavior.translucent : HitTestBehavior.opaque,
                 onTap: () {
                   debugPrint('Yellow onTap');
                   setState(() {

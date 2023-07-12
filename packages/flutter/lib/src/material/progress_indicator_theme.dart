@@ -84,8 +84,8 @@ class ProgressIndicatorThemeData with Diagnosticable {
   ///
   /// If both arguments are null, then null is returned.
   static ProgressIndicatorThemeData? lerp(ProgressIndicatorThemeData? a, ProgressIndicatorThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ProgressIndicatorThemeData(
       color: Color.lerp(a?.color, b?.color, t),

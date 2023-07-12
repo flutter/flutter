@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'text_input_utils.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
   group('DeltaTextInputClient', () {
     late FakeTextChannel fakeTextChannel;
@@ -57,7 +57,7 @@ void main() {
           ],
           'method': 'TextInputClient.updateEditingStateWithDeltas',
         });
-        await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        await binding.defaultBinaryMessenger.handlePlatformMessage(
           'flutter/textinput',
           messageBytes,
               (ByteData? _) {},
@@ -94,7 +94,7 @@ void main() {
         'args': <dynamic>[-1, jsonDecode('{"deltas": [$jsonDelta]}')],
       });
 
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -133,7 +133,7 @@ void main() {
         'args': <dynamic>[-1, jsonDecode('{"deltas": [$jsonDelta]}')],
       });
 
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -172,7 +172,7 @@ void main() {
         'args': <dynamic>[-1, jsonDecode('{"deltas": [$jsonDelta]}')],
       });
 
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
@@ -211,7 +211,7 @@ void main() {
         'args': <dynamic>[-1, jsonDecode('{"deltas": [$jsonDelta]}')],
       });
 
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},

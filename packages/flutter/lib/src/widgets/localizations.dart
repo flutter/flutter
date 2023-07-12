@@ -145,7 +145,7 @@ abstract class LocalizationsDelegate<T> {
 /// Interface for localized resource values for the lowest levels of the Flutter
 /// framework.
 ///
-/// In particular, this maps locales to a specific [Directionality] using the
+/// This class also maps locales to a specific [Directionality] using the
 /// [textDirection] property.
 ///
 /// See also:
@@ -155,6 +155,30 @@ abstract class LocalizationsDelegate<T> {
 abstract class WidgetsLocalizations {
   /// The reading direction for text in this locale.
   TextDirection get textDirection;
+
+  /// The semantics label used for [SliverReorderableList] to reorder an item in the
+  /// list to the start of the list.
+  String get reorderItemToStart;
+
+  /// The semantics label used for [SliverReorderableList] to reorder an item in the
+  /// list to the end of the list.
+  String get reorderItemToEnd;
+
+  /// The semantics label used for [SliverReorderableList] to reorder an item in the
+  /// list one space up the list.
+  String get reorderItemUp;
+
+  /// The semantics label used for [SliverReorderableList] to reorder an item in the
+  /// list one space down the list.
+  String get reorderItemDown;
+
+  /// The semantics label used for [SliverReorderableList] to reorder an item in the
+  /// list one space left in the list.
+  String get reorderItemLeft;
+
+  /// The semantics label used for [SliverReorderableList] to reorder an item in the
+  /// list one space right in the list.
+  String get reorderItemRight;
 
   /// The `WidgetsLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -206,6 +230,24 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   const DefaultWidgetsLocalizations();
+
+  @override
+  String get reorderItemUp => 'Move up';
+
+  @override
+  String get reorderItemDown => 'Move down';
+
+  @override
+  String get reorderItemLeft => 'Move left';
+
+  @override
+  String get reorderItemRight => 'Move right';
+
+  @override
+  String get reorderItemToEnd => 'Move to the end';
+
+  @override
+  String get reorderItemToStart => 'Move to the start';
 
   @override
   TextDirection get textDirection => TextDirection.ltr;

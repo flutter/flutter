@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('showing and hiding the custom context menu in the whole app', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.ContextMenuControllerExampleApp(),
     );
 
     expect(BrowserContextMenu.enabled, !kIsWeb);

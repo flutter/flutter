@@ -29,9 +29,9 @@
 // is referenced more than once, link back to the instance the example file is
 // named for.
 
-// Flutter code sample for [Placeholder].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [Placeholder].
 
 void main() {
   runApp(const SampleApp());

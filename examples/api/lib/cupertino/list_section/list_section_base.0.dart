@@ -2,28 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for base [CupertinoListSection] and [CupertinoListTile].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for base [CupertinoListSection] and [CupertinoListTile].
 
 void main() => runApp(const CupertinoListSectionBaseApp());
 
 class CupertinoListSectionBaseApp extends StatelessWidget {
   const CupertinoListSectionBaseApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
-
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      home: ListSectionBaseExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ListSectionBaseExample extends StatelessWidget {
+  const ListSectionBaseExample({super.key});
 
   @override
   Widget build(BuildContext context) {

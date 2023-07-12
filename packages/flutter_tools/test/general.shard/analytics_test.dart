@@ -114,7 +114,7 @@ void main() {
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
-      final String featuresKey = cdKey(CustomDimensionsEnum.enabledFlutterFeatures);
+      final String featuresKey = CustomDimensionsEnum.enabledFlutterFeatures.cdKey;
 
       expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
@@ -134,7 +134,7 @@ void main() {
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
-      final String featuresKey = cdKey(CustomDimensionsEnum.enabledFlutterFeatures);
+      final String featuresKey = CustomDimensionsEnum.enabledFlutterFeatures.cdKey;
 
       expect(
         globals.fs.file('test').readAsStringSync(),
@@ -388,8 +388,6 @@ class FakeDoctor extends Fake implements Doctor {
     return diagnoseSucceeds;
   }
 }
-
-class FakeAndroidStudio extends Fake implements AndroidStudio {}
 
 class FakeClock extends Fake implements SystemClock {
   List<int> times = <int>[];

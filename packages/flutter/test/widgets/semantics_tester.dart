@@ -421,7 +421,7 @@ class SemanticsTester {
   /// You should call [dispose] at the end of a test that creates a semantics
   /// tester.
   SemanticsTester(this.tester) {
-    _semanticsHandle = tester.binding.pipelineOwner.ensureSemantics();
+    _semanticsHandle = tester.ensureSemantics();
 
     // This _extra_ clean-up is needed for the case when a test fails and
     // therefore fails to call dispose() explicitly. The test is still required
@@ -487,6 +487,7 @@ class SemanticsTester {
     TextDirection? textDirection,
     List<SemanticsAction>? actions,
     List<SemanticsFlag>? flags,
+    Set<SemanticsTag>? tags,
     double? scrollPosition,
     double? scrollExtentMax,
     double? scrollExtentMin,
@@ -533,6 +534,12 @@ class SemanticsTester {
         final int expectedFlags = flags.fold<int>(0, (int value, SemanticsFlag flag) => value | flag.index);
         final int actualFlags = node.getSemanticsData().flags;
         if (expectedFlags != actualFlags) {
+          return false;
+        }
+      }
+      if (tags != null) {
+        final Set<SemanticsTag>? actualTags = node.getSemanticsData().tags;
+        if (!setEquals<SemanticsTag>(actualTags, tags)) {
           return false;
         }
       }
@@ -626,7 +633,7 @@ class SemanticsTester {
   static String _flagsToSemanticsFlagExpression(dynamic flags) {
     Iterable<SemanticsFlag> list;
     if (flags is int) {
-      list = SemanticsFlag.values.values
+      list = SemanticsFlag.values
           .where((SemanticsFlag flag) => (flag.index & flags) != 0);
     } else {
       list = flags as List<SemanticsFlag>;
@@ -641,7 +648,7 @@ class SemanticsTester {
   static String _actionsToSemanticsActionExpression(dynamic actions) {
     Iterable<SemanticsAction> list;
     if (actions is int) {
-      list = SemanticsAction.values.values
+      list = SemanticsAction.values
           .where((SemanticsAction action) => (action.index & actions) != 0);
     } else {
       list = actions as List<SemanticsAction>;
@@ -796,6 +803,7 @@ class _IncludesNodeWith extends Matcher {
     this.textDirection,
     this.actions,
     this.flags,
+    this.tags,
     this.scrollPosition,
     this.scrollExtentMax,
     this.scrollExtentMin,
@@ -806,6 +814,7 @@ class _IncludesNodeWith extends Matcher {
        value != null ||
        actions != null ||
        flags != null ||
+       tags != null ||
        scrollPosition != null ||
        scrollExtentMax != null ||
        scrollExtentMin != null ||
@@ -821,6 +830,7 @@ class _IncludesNodeWith extends Matcher {
   final TextDirection? textDirection;
   final List<SemanticsAction>? actions;
   final List<SemanticsFlag>? flags;
+  final Set<SemanticsTag>? tags;
   final double? scrollPosition;
   final double? scrollExtentMax;
   final double? scrollExtentMin;
@@ -839,6 +849,7 @@ class _IncludesNodeWith extends Matcher {
       textDirection: textDirection,
       actions: actions,
       flags: flags,
+      tags: tags,
       scrollPosition: scrollPosition,
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
@@ -865,6 +876,7 @@ class _IncludesNodeWith extends Matcher {
       if (textDirection != null) ' (${textDirection!.name})',
       if (actions != null) 'actions "${actions!.join(', ')}"',
       if (flags != null) 'flags "${flags!.join(', ')}"',
+      if (tags != null) 'tags "${tags!.join(', ')}"',
       if (scrollPosition != null) 'scrollPosition "$scrollPosition"',
       if (scrollExtentMax != null) 'scrollExtentMax "$scrollExtentMax"',
       if (scrollExtentMin != null) 'scrollExtentMin "$scrollExtentMin"',
@@ -889,6 +901,7 @@ Matcher includesNodeWith({
   TextDirection? textDirection,
   List<SemanticsAction>? actions,
   List<SemanticsFlag>? flags,
+  Set<SemanticsTag>? tags,
   double? scrollPosition,
   double? scrollExtentMax,
   double? scrollExtentMin,
@@ -905,6 +918,7 @@ Matcher includesNodeWith({
     textDirection: textDirection,
     actions: actions,
     flags: flags,
+    tags: tags,
     scrollPosition: scrollPosition,
     scrollExtentMax: scrollExtentMax,
     scrollExtentMin: scrollExtentMin,

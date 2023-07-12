@@ -38,7 +38,7 @@ class MultidexProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.12.0-0 <4.0.0"
+    sdk: '>=3.0.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -110,7 +110,7 @@ class MultidexProject extends Project {
       project.evaluationDependsOn(':app')
   }
 
-  task clean(type: Delete) {
+  tasks.register("clean", Delete) {
       delete rootProject.buildDir
   }
   ''';
@@ -162,7 +162,7 @@ class MultidexProject extends Project {
       defaultConfig {
           // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
           applicationId "com.example.multidextest2"
-          minSdkVersion 16
+          minSdkVersion 19
           targetSdkVersion 30
           versionCode flutterVersionCode.toInteger()
           versionName flutterVersionName

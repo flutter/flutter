@@ -41,15 +41,15 @@ void main() {
     group('disableContextMenu', () {
       // Make sure the context menu is enabled (default) after the test.
       tearDown(() async {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall methodCall) {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall methodCall) {
           return null;
         });
         await BrowserContextMenu.enableContextMenu();
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
       });
 
       test('disableContextMenu calls its platform channel method', () async {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall methodCall) async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall methodCall) async {
           log.add(methodCall);
           return null;
         });
@@ -58,13 +58,13 @@ void main() {
           isMethodCall('disableContextMenu', arguments: null),
         ]);
 
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
       });
     });
 
     group('enableContextMenu', () {
       test('enableContextMenu calls its platform channel method', () async {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall methodCall) async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall methodCall) async {
           log.add(methodCall);
           return null;
         });
@@ -73,7 +73,7 @@ void main() {
           isMethodCall('enableContextMenu', arguments: null),
         ]);
 
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
       });
     });
   },

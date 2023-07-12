@@ -39,6 +39,11 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
   final List<FinderExtension>? finders;
   final List<CommandExtension>? commands;
 
+  // Because you can't really control which zone a driver test uses,
+  // we override the test for zones here.
+  @override
+  bool debugCheckZone(String entryPoint) { return true; }
+
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
@@ -97,7 +102,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// driver.sendCommand(SomeCommand(ByValueKey('Button'), 7));
 /// ```
 ///
-/// Note: SomeFinder and SomeFinderExtension must be placed in different files
+/// `SomeFinder` and `SomeFinderExtension` must be placed in different files
 /// to avoid `dart:ui` import issue. Imports relative to `dart:ui` can't be
 /// accessed from host runner, where flutter runtime is not accessible.
 ///
@@ -140,7 +145,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// }
 /// ```
 ///
-/// Note: SomeCommand, SomeResult and SomeCommandExtension must be placed in
+/// `SomeCommand`, `SomeResult` and `SomeCommandExtension` must be placed in
 /// different files to avoid `dart:ui` import issue. Imports relative to `dart:ui`
 /// can't be accessed from host runner, where flutter runtime is not accessible.
 ///

@@ -2,25 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ActionListener].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ActionListener].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ActionListenerExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ActionListenerExampleApp extends StatelessWidget {
+  const ActionListenerExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('ActionListener Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: ActionListenerExample(),
         ),
       ),
     );
@@ -75,8 +72,7 @@ class _ActionListenerExampleState extends State<ActionListenerExample> {
               },
               action: _myAction,
               child: ElevatedButton(
-                onPressed: () => const ActionDispatcher()
-                    .invokeAction(_myAction, const MyIntent()),
+                onPressed: () => const ActionDispatcher().invokeAction(_myAction, const MyIntent()),
                 child: const Text('Call Action Listener'),
               ),
             ),
@@ -108,18 +104,4 @@ class MyAction extends Action<MyIntent> {
 
 class MyIntent extends Intent {
   const MyIntent();
-}
-
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
-
-  @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-}
-
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return const ActionListenerExample();
-  }
 }

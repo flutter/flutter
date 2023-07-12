@@ -91,7 +91,6 @@ class WebCallbackManager implements CallbackManager {
             : _requestDataWithMessage(params['message']!, testRunner);
       case 'get_health':
         response = <String, String>{'status': 'ok'};
-        break;
       default:
         throw UnimplementedError('$command is not implemented');
     }
@@ -119,14 +118,12 @@ class WebCallbackManager implements CallbackManager {
           response = <String, String>{
             'message': Response.webDriverCommand(data: data).toJson(),
           };
-          break;
         case WebDriverCommandType.noop:
           final Map<String, dynamic> data = <String, dynamic>{};
           data.addAll(WebDriverCommand.typeToMap(WebDriverCommandType.noop));
           response = <String, String>{
             'message': Response.webDriverCommand(data: data).toJson(),
           };
-          break;
         case WebDriverCommandType.ack:
           throw UnimplementedError('${command.type} is not implemented');
       }

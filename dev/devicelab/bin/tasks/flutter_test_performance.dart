@@ -38,14 +38,13 @@ enum TestStep {
 
 Future<int> runTest({bool coverage = false, bool noPub = false}) async {
   final Stopwatch clock = Stopwatch()..start();
-  final List<String> arguments = flutterCommandArgs('test', <String>[
-    if (coverage) '--coverage',
-    if (noPub) '--no-pub',
-    path.join('flutter_test', 'trivial_widget_test.dart'),
-  ]);
-  final Process analysis = await startProcess(
-    path.join(flutterDirectory.path, 'bin', 'flutter'),
-    arguments,
+  final Process analysis = await startFlutter(
+    'test',
+    options: <String>[
+      if (coverage) '--coverage',
+      if (noPub) '--no-pub',
+      path.join('flutter_test', 'trivial_widget_test.dart'),
+    ],
     workingDirectory: path.join(flutterDirectory.path, 'dev', 'automated_tests'),
   );
   int badLines = 0;

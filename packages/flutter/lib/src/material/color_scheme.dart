@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
@@ -109,16 +112,6 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? surfaceTint,
-    @Deprecated(
-      'Use primary or primaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.'
-    )
-    Color? primaryVariant,
-    @Deprecated(
-      'Use secondary or secondaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.'
-    )
-    Color? secondaryVariant,
   }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
@@ -138,8 +131,6 @@ class ColorScheme with Diagnosticable {
        _inverseSurface = inverseSurface,
        _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
-       _primaryVariant = primaryVariant,
-       _secondaryVariant = secondaryVariant,
        _surfaceTint = surfaceTint;
 
   /// Generate a [ColorScheme] derived from the given `seedColor`.
@@ -202,10 +193,8 @@ class ColorScheme with Diagnosticable {
     switch (brightness) {
       case Brightness.light:
         scheme = Scheme.light(seedColor.value);
-        break;
       case Brightness.dark:
         scheme = Scheme.dark(seedColor.value);
-        break;
     }
     return ColorScheme(
       primary: primary ?? Color(scheme.primary),
@@ -276,16 +265,6 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? surfaceTint,
-    @Deprecated(
-      'Use primary or primaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.'
-    )
-    Color? primaryVariant = const Color(0xff3700b3),
-    @Deprecated(
-      'Use secondary or secondaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.'
-    )
-    Color? secondaryVariant = const Color(0xff018786),
   }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
@@ -305,8 +284,6 @@ class ColorScheme with Diagnosticable {
        _inverseSurface = inverseSurface,
        _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
-       _primaryVariant = primaryVariant,
-       _secondaryVariant = secondaryVariant,
        _surfaceTint = surfaceTint;
 
   /// Create the recommended dark color scheme that matches the
@@ -343,16 +320,6 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? surfaceTint,
-    @Deprecated(
-      'Use primary or primaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.'
-    )
-    Color? primaryVariant = const Color(0xff3700B3),
-    @Deprecated(
-      'Use secondary or secondaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.'
-    )
-    Color? secondaryVariant = const Color(0xff03dac6),
   }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
@@ -372,8 +339,6 @@ class ColorScheme with Diagnosticable {
        _inverseSurface = inverseSurface,
        _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
-       _primaryVariant = primaryVariant,
-       _secondaryVariant = secondaryVariant,
        _surfaceTint = surfaceTint;
 
   /// Create a high contrast ColorScheme based on a purple primary color that
@@ -410,16 +375,6 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? surfaceTint,
-    @Deprecated(
-      'Use primary or primaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.'
-    )
-    Color? primaryVariant = const Color(0xff000088),
-    @Deprecated(
-      'Use secondary or secondaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.'
-    )
-    Color? secondaryVariant = const Color(0xff018786),
   }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
@@ -439,8 +394,6 @@ class ColorScheme with Diagnosticable {
        _inverseSurface = inverseSurface,
        _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
-       _primaryVariant = primaryVariant,
-       _secondaryVariant = secondaryVariant,
        _surfaceTint = surfaceTint;
 
   /// Create a high contrast ColorScheme based on the dark
@@ -477,16 +430,6 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? surfaceTint,
-    @Deprecated(
-      'Use primary or primaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.'
-    )
-    Color? primaryVariant = const Color(0xffbe9eff),
-    @Deprecated(
-      'Use secondary or secondaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.'
-    )
-    Color? secondaryVariant = const Color(0xff66fff9),
   }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
@@ -506,8 +449,6 @@ class ColorScheme with Diagnosticable {
        _inverseSurface = inverseSurface,
        _onInverseSurface = onInverseSurface,
        _inversePrimary = inversePrimary,
-       _primaryVariant = primaryVariant,
-       _secondaryVariant = secondaryVariant,
        _surfaceTint = surfaceTint;
 
   /// Create a color scheme from a [MaterialColor] swatch.
@@ -516,7 +457,6 @@ class ColorScheme with Diagnosticable {
   /// color scheme.
   factory ColorScheme.fromSwatch({
     MaterialColor primarySwatch = Colors.blue,
-    Color? primaryColorDark,
     Color? accentColor,
     Color? cardColor,
     Color? backgroundColor,
@@ -531,9 +471,7 @@ class ColorScheme with Diagnosticable {
 
     return ColorScheme(
       primary: primarySwatch,
-      primaryVariant: primaryColorDark ?? (isDark ? Colors.black : primarySwatch[700]!),
       secondary: secondary,
-      secondaryVariant: isDark ? Colors.tealAccent[700]! : primarySwatch[700]!,
       surface: cardColor ?? (isDark ? Colors.grey[800]! : Colors.white),
       background: backgroundColor ?? (isDark ? Colors.grey[700]! : primarySwatch[200]!),
       error: errorColor ?? Colors.red[700]!,
@@ -725,22 +663,6 @@ class ColorScheme with Diagnosticable {
   /// elevation.
   Color get surfaceTint => _surfaceTint ?? primary;
 
-  final Color? _primaryVariant;
-  /// A darker version of the primary color.
-  @Deprecated(
-    'Use primary or primaryContainer instead. '
-    'This feature was deprecated after v2.6.0-0.0.pre.'
-  )
-  Color get primaryVariant => _primaryVariant ?? primary;
-
-  final Color? _secondaryVariant;
-  /// A darker version of the secondary color.
-  @Deprecated(
-    'Use secondary or secondaryContainer instead. '
-    'This feature was deprecated after v2.6.0-0.0.pre.'
-  )
-  Color get secondaryVariant => _secondaryVariant ?? secondary;
-
   /// Creates a copy of this color scheme with the given fields
   /// replaced by the non-null parameter values.
   ColorScheme copyWith({
@@ -775,16 +697,6 @@ class ColorScheme with Diagnosticable {
     Color? onInverseSurface,
     Color? inversePrimary,
     Color? surfaceTint,
-    @Deprecated(
-      'Use primary or primaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.'
-    )
-    Color? primaryVariant,
-    @Deprecated(
-      'Use secondary or secondaryContainer instead. '
-      'This feature was deprecated after v2.6.0-0.0.pre.'
-    )
-    Color? secondaryVariant,
   }) {
     return ColorScheme(
       brightness: brightness ?? this.brightness,
@@ -817,8 +729,6 @@ class ColorScheme with Diagnosticable {
       inverseSurface : inverseSurface ?? this.inverseSurface,
       onInverseSurface : onInverseSurface ?? this.onInverseSurface,
       inversePrimary : inversePrimary ?? this.inversePrimary,
-      primaryVariant: primaryVariant ?? this.primaryVariant,
-      secondaryVariant: secondaryVariant ?? this.secondaryVariant,
       surfaceTint: surfaceTint ?? this.surfaceTint,
     );
   }
@@ -827,6 +737,9 @@ class ColorScheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ColorScheme lerp(ColorScheme a, ColorScheme b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return ColorScheme(
       brightness: t < 0.5 ? a.brightness : b.brightness,
       primary: Color.lerp(a.primary, b.primary, t)!,
@@ -858,8 +771,6 @@ class ColorScheme with Diagnosticable {
       inverseSurface: Color.lerp(a.inverseSurface, b.inverseSurface, t),
       onInverseSurface: Color.lerp(a.onInverseSurface, b.onInverseSurface, t),
       inversePrimary: Color.lerp(a.inversePrimary, b.inversePrimary, t),
-      primaryVariant: Color.lerp(a.primaryVariant, b.primaryVariant, t),
-      secondaryVariant: Color.lerp(a.secondaryVariant, b.secondaryVariant, t),
       surfaceTint: Color.lerp(a.surfaceTint, b.surfaceTint, t),
     );
   }
@@ -903,8 +814,6 @@ class ColorScheme with Diagnosticable {
       && other.inverseSurface == inverseSurface
       && other.onInverseSurface == onInverseSurface
       && other.inversePrimary == inversePrimary
-      && other.primaryVariant == primaryVariant
-      && other.secondaryVariant == secondaryVariant
       && other.surfaceTint == surfaceTint;
   }
 
@@ -941,8 +850,6 @@ class ColorScheme with Diagnosticable {
       inverseSurface,
       onInverseSurface,
       inversePrimary,
-      primaryVariant,
-      secondaryVariant,
       surfaceTint,
     ),
   );
@@ -981,8 +888,198 @@ class ColorScheme with Diagnosticable {
     properties.add(ColorProperty('inverseSurface', inverseSurface, defaultValue: defaultScheme.inverseSurface));
     properties.add(ColorProperty('onInverseSurface', onInverseSurface, defaultValue: defaultScheme.onInverseSurface));
     properties.add(ColorProperty('inversePrimary', inversePrimary, defaultValue: defaultScheme.inversePrimary));
-    properties.add(ColorProperty('primaryVariant', primaryVariant, defaultValue: defaultScheme.primaryVariant));
-    properties.add(ColorProperty('secondaryVariant', secondaryVariant, defaultValue: defaultScheme.secondaryVariant));
     properties.add(ColorProperty('surfaceTint', surfaceTint, defaultValue: defaultScheme.surfaceTint));
+  }
+
+  /// Generate a [ColorScheme] derived from the given `imageProvider`.
+  ///
+  /// Material Color Utilities extracts the dominant color from the
+  /// supplied [ImageProvider]. Using this color, a set of tonal palettes are
+  /// constructed. These tonal palettes are based on the Material 3 Color
+  /// system and provide all the needed colors for a [ColorScheme]. These
+  /// colors are designed to work well together and meet contrast
+  /// requirements for accessibility.
+  ///
+  /// If any of the optional color parameters are non-null, they will be
+  /// used in place of the generated colors for that field in the resulting
+  /// color scheme. This allows apps to override specific colors for their
+  /// needs.
+  ///
+  /// Given the nature of the algorithm, the most dominant color of the
+  /// `imageProvider` may not wind up as one of the ColorScheme colors.
+  ///
+  /// The provided image will be scaled down to a maximum size of 112x112 pixels
+  /// during color extraction.
+  ///
+  /// See also:
+  ///
+  ///  * <https://m3.material.io/styles/color/the-color-system/color-roles>, the
+  ///    Material 3 Color system specification.
+  ///  * <https://pub.dev/packages/material_color_utilities>, the package
+  ///    used to generate the base color and tonal palettes needed for the scheme.
+  static Future<ColorScheme> fromImageProvider({
+    required ImageProvider provider,
+    Brightness brightness = Brightness.light,
+    Color? primary,
+    Color? onPrimary,
+    Color? primaryContainer,
+    Color? onPrimaryContainer,
+    Color? secondary,
+    Color? onSecondary,
+    Color? secondaryContainer,
+    Color? onSecondaryContainer,
+    Color? tertiary,
+    Color? onTertiary,
+    Color? tertiaryContainer,
+    Color? onTertiaryContainer,
+    Color? error,
+    Color? onError,
+    Color? errorContainer,
+    Color? onErrorContainer,
+    Color? outline,
+    Color? outlineVariant,
+    Color? background,
+    Color? onBackground,
+    Color? surface,
+    Color? onSurface,
+    Color? surfaceVariant,
+    Color? onSurfaceVariant,
+    Color? inverseSurface,
+    Color? onInverseSurface,
+    Color? inversePrimary,
+    Color? shadow,
+    Color? scrim,
+    Color? surfaceTint,
+  }) async {
+    // Extract dominant colors from image.
+    final QuantizerResult quantizerResult =
+        await _extractColorsFromImageProvider(provider);
+    final Map<int, int> colorToCount = quantizerResult.colorToCount.map(
+      (int key, int value) => MapEntry<int, int>(_getArgbFromAbgr(key), value),
+    );
+
+    // Score colors for color scheme suitability.
+    final List<int> scoredResults = Score.score(colorToCount, desired: 1);
+    final ui.Color baseColor = Color(scoredResults.first);
+
+    final Scheme scheme;
+    switch (brightness) {
+      case Brightness.light:
+        scheme = Scheme.light(baseColor.value);
+      case Brightness.dark:
+        scheme = Scheme.dark(baseColor.value);
+    }
+
+    return ColorScheme(primary: primary ?? Color(scheme.primary),
+      onPrimary: onPrimary ?? Color(scheme.onPrimary),
+      primaryContainer: primaryContainer ?? Color(scheme.primaryContainer),
+      onPrimaryContainer: onPrimaryContainer ?? Color(scheme.onPrimaryContainer),
+      secondary: secondary ?? Color(scheme.secondary),
+      onSecondary: onSecondary ?? Color(scheme.onSecondary),
+      secondaryContainer: secondaryContainer ?? Color(scheme.secondaryContainer),
+      onSecondaryContainer: onSecondaryContainer ?? Color(scheme.onSecondaryContainer),
+      tertiary: tertiary ?? Color(scheme.tertiary),
+      onTertiary: onTertiary ?? Color(scheme.onTertiary),
+      tertiaryContainer: tertiaryContainer ?? Color(scheme.tertiaryContainer),
+      onTertiaryContainer: onTertiaryContainer ?? Color(scheme.onTertiaryContainer),
+      error: error ?? Color(scheme.error),
+      onError: onError ?? Color(scheme.onError),
+      errorContainer: errorContainer ?? Color(scheme.errorContainer),
+      onErrorContainer: onErrorContainer ?? Color(scheme.onErrorContainer),
+      outline: outline ?? Color(scheme.outline),
+      outlineVariant: outlineVariant ?? Color(scheme.outlineVariant),
+      background: background ?? Color(scheme.background),
+      onBackground: onBackground ?? Color(scheme.onBackground),
+      surface: surface ?? Color(scheme.surface),
+      onSurface: onSurface ?? Color(scheme.onSurface),
+      surfaceVariant: surfaceVariant ?? Color(scheme.surfaceVariant),
+      onSurfaceVariant: onSurfaceVariant ?? Color(scheme.onSurfaceVariant),
+      inverseSurface: inverseSurface ?? Color(scheme.inverseSurface),
+      onInverseSurface: onInverseSurface ?? Color(scheme.inverseOnSurface),
+      inversePrimary: inversePrimary ?? Color(scheme.inversePrimary),
+      shadow: shadow ?? Color(scheme.shadow),
+      scrim: scrim ?? Color(scheme.scrim),
+      surfaceTint: surfaceTint ?? Color(scheme.primary),
+      brightness: brightness,
+    );
+  }
+
+  // ColorScheme.fromImageProvider() utilities.
+
+  // Extracts bytes from an [ImageProvider] and returns a [QuantizerResult]
+  // containing the most dominant colors.
+  static Future<QuantizerResult> _extractColorsFromImageProvider(ImageProvider imageProvider) async {
+    final ui.Image scaledImage = await _imageProviderToScaled(imageProvider);
+    final ByteData? imageBytes = await scaledImage.toByteData();
+
+    final QuantizerResult quantizerResult = await QuantizerCelebi().quantize(
+      imageBytes!.buffer.asUint32List(),
+      128,
+      returnInputPixelToClusterPixel: true,
+    );
+    return quantizerResult;
+  }
+
+  // Scale image size down to reduce computation time of color extraction.
+  static Future<ui.Image> _imageProviderToScaled(ImageProvider imageProvider) async {
+    const double maxDimension = 112.0;
+    final ImageStream stream = imageProvider.resolve(
+        const ImageConfiguration(size: Size(maxDimension, maxDimension)));
+    final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
+    late ImageStreamListener listener;
+    late ui.Image scaledImage;
+    Timer? loadFailureTimeout;
+
+    listener = ImageStreamListener((ImageInfo info, bool sync) async {
+      loadFailureTimeout?.cancel();
+      stream.removeListener(listener);
+      final ui.Image image = info.image;
+      final int width = image.width;
+      final int height = image.height;
+      double paintWidth = width.toDouble();
+      double paintHeight = height.toDouble();
+      assert(width > 0 && height > 0);
+
+      final bool rescale = width > maxDimension || height > maxDimension;
+      if (rescale) {
+        paintWidth = (width > height) ? maxDimension : (maxDimension / height) * width;
+        paintHeight = (height > width) ? maxDimension : (maxDimension / width) * height;
+      }
+      final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(pictureRecorder);
+      paintImage(
+        canvas: canvas,
+        rect: Rect.fromLTRB(0, 0, paintWidth, paintHeight),
+        image: image,
+        filterQuality: FilterQuality.none);
+
+      final ui.Picture picture = pictureRecorder.endRecording();
+      scaledImage = await picture.toImage(paintWidth.toInt(), paintHeight.toInt());
+      imageCompleter.complete(info.image);
+    }, onError: (Object exception, StackTrace? stackTrace) {
+      stream.removeListener(listener);
+      throw Exception('Failed to render image: $exception');
+    });
+
+    loadFailureTimeout = Timer(const Duration(seconds: 5), () {
+      stream.removeListener(listener);
+      imageCompleter.completeError(
+        TimeoutException('Timeout occurred trying to load image'));
+    });
+
+    stream.addListener(listener);
+    await imageCompleter.future;
+    return scaledImage;
+  }
+
+  // Converts AABBGGRR color int to AARRGGBB format.
+  static int _getArgbFromAbgr(int abgr) {
+    const int exceptRMask = 0xFF00FFFF;
+    const int onlyRMask = ~exceptRMask;
+    const int exceptBMask = 0xFFFFFF00;
+    const int onlyBMask = ~exceptBMask;
+    final int r = (abgr & onlyRMask) >> 16;
+    final int b = abgr & onlyBMask;
+    return (abgr & exceptRMask & exceptBMask) | (b << 16) | r;
   }
 }

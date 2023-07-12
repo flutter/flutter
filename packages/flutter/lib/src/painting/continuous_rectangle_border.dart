@@ -149,7 +149,6 @@ class ContinuousRectangleBorder extends OutlinedBorder {
           getOuterPath(rect, textDirection: textDirection),
           side.toPaint(),
         );
-        break;
     }
   }
 

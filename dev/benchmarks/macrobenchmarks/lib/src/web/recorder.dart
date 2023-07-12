@@ -279,7 +279,7 @@ abstract class SceneBuilderRecorder extends Recorder {
           _profile!.record('sceneBuildDuration', () {
             final Scene scene = sceneBuilder.build();
             _profile!.record('windowRenderDuration', () {
-              window.render(scene);
+              view.render(scene);
             }, reported: false);
           }, reported: false);
         }, reported: true);
@@ -297,6 +297,11 @@ abstract class SceneBuilderRecorder extends Recorder {
     };
     PlatformDispatcher.instance.scheduleFrame();
     return profileCompleter.future;
+  }
+
+  FlutterView get view {
+    assert(PlatformDispatcher.instance.implicitView != null, 'This benchmark requires the embedder to provide an implicit view.');
+    return PlatformDispatcher.instance.implicitView!;
   }
 }
 
@@ -650,7 +655,8 @@ class Timeseries {
     final double dirtyStandardDeviation = _computeStandardDeviationForPopulation(name, candidateValues);
 
     // Any value that's higher than this is considered an outlier.
-    final double outlierCutOff = dirtyAverage + dirtyStandardDeviation;
+    // Two standard deviations captures 95% of a normal distribution.
+    final double outlierCutOff = dirtyAverage + dirtyStandardDeviation * 2;
 
     // Candidates with outliers removed.
     final Iterable<double> cleanValues = candidateValues.where((double value) => value <= outlierCutOff);

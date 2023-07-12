@@ -67,6 +67,7 @@ int x = 'String';
         result.stderr,
         contains("A value of type 'String' can't be assigned to a variable of type 'int'."),
       );
+      expect(result.stderr, isNot(contains("Warning: The 'dart2js' entrypoint script is deprecated")));
       expect(result.exitCode, 1);
     });
   }

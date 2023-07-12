@@ -14,6 +14,7 @@ class CustomerTest {
     final List<String> fetch = <String>[];
     final List<Directory> update = <Directory>[];
     final List<String> test = <String>[];
+    int? iterations;
     bool hasTests = false;
     for (final String line in testFile.readAsLinesSync().map((String line) => line.trim())) {
       if (line.isEmpty) {
@@ -26,6 +27,14 @@ class CustomerTest {
         fetch.add(line.substring(6));
       } else if (line.startsWith('update=')) {
         update.add(Directory(line.substring(7)));
+      } else if (line.startsWith('iterations=')) {
+        if (iterations != null) {
+          throw const FormatException('Cannot specify "iterations" directive multiple times.');
+        }
+        iterations = int.parse(line.substring(11));
+        if (iterations < 1) {
+          throw const FormatException('The "iterations" directive must have a positive integer value.');
+        }
       } else if (line.startsWith('test=')) {
         hasTests = true;
         test.add(line.substring(5));
@@ -84,10 +93,11 @@ class CustomerTest {
       List<String>.unmodifiable(fetch),
       List<Directory>.unmodifiable(update),
       List<String>.unmodifiable(test),
+      iterations,
     );
   }
 
-  const CustomerTest._(this.contacts, this.fetch, this.update, this.tests);
+  const CustomerTest._(this.contacts, this.fetch, this.update, this.tests, this.iterations);
 
   // (e-mail regexp from HTML standard)
   static final RegExp _email = RegExp(r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$");
@@ -98,4 +108,5 @@ class CustomerTest {
   final List<String> fetch;
   final List<Directory> update;
   final List<String> tests;
+  final int? iterations;
 }

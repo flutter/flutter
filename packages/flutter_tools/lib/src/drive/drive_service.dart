@@ -196,7 +196,7 @@ class FlutterDriverService extends DriverService {
       throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
     }
     return reuseApplication(
-      result.observatoryUri!,
+      result.vmServiceUri!,
       device,
       debuggingOptions,
       ipv6,

@@ -63,16 +63,32 @@ const List<VmServiceExpectation> kAttachIsolateExpectations =
     'streamId': 'Isolate',
   }),
   FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': 'reloadSources',
-    'alias': 'Flutter Tools',
+    'service': kReloadSourcesServiceName,
+    'alias': kFlutterToolAlias,
   }),
   FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': 'flutterVersion',
-    'alias': 'Flutter Tools',
+    'service': kFlutterVersionServiceName,
+    'alias': kFlutterToolAlias,
   }),
   FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': 'flutterMemoryInfo',
-    'alias': 'Flutter Tools',
+    'service': kFlutterMemoryInfoServiceName,
+    'alias': kFlutterToolAlias,
+  }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': kFlutterGetIOSBuildOptionsServiceName,
+    'alias': kFlutterToolAlias,
+  }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': kFlutterGetAndroidBuildVariantsServiceName,
+    'alias': kFlutterToolAlias,
+  }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': kFlutterGetIOSUniversalLinkSettingsServiceName,
+    'alias': kFlutterToolAlias,
+  }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': kFlutterGetAndroidAppLinkSettingsName,
+    'alias': kFlutterToolAlias,
   }),
   FakeVmServiceRequest(
     method: 'streamListen',
@@ -607,7 +623,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-          method: 'hotRestart',
+          method: kHotRestartServiceName,
           jsonResponse: <String, Object>{
             'type': 'Success',
           }),
@@ -680,7 +696,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-          method: 'hotRestart',
+          method: kHotRestartServiceName,
           jsonResponse: <String, Object>{
             'type': 'Success',
           }),
@@ -879,7 +895,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        method: 'hotRestart',
+        method: kHotRestartServiceName,
         jsonResponse: <String, Object>{
           'type': 'Failed',
         },
@@ -906,7 +922,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        method: 'hotRestart',
+        method: kHotRestartServiceName,
         // Failed response,
         errorCode: RPCErrorCodes.kInternalError,
       ),
@@ -1307,6 +1323,23 @@ flutter:
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
+
+  testUsingContext('throws when port is an integer outside the valid TCP range', () async {
+    final BufferLogger logger = BufferLogger.test();
+
+    DebuggingOptions debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, port: '65536');
+    ResidentRunner residentWebRunner =
+        setUpResidentRunner(flutterDevice, logger: logger, debuggingOptions: debuggingOptions);
+    await expectToolExitLater(residentWebRunner.run(), matches('Invalid port: 65536.*'));
+
+    debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, port: '-1');
+    residentWebRunner =
+      setUpResidentRunner(flutterDevice, logger: logger, debuggingOptions: debuggingOptions);
+    await expectToolExitLater(residentWebRunner.run(), matches('Invalid port: -1.*'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
 }
 
 ResidentRunner setUpResidentRunner(
@@ -1597,7 +1630,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   ResidentCompiler? generator;
 
   @override
-  Stream<Uri?> get observatoryUris => Stream<Uri?>.value(testUri);
+  Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
 
   @override
   DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
@@ -1637,6 +1670,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     Restart? restart,
     CompileExpression? compileExpression,
     GetSkSLMethod? getSkSLMethod,
+    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     int? hostVmServicePort,
     int? ddsPort,
@@ -1677,7 +1711,10 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+  void configureCompiler(
+    TargetPlatform? platform, {
+    required ImpellerStatus impellerStatus,
+  }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

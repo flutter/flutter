@@ -16,14 +16,11 @@ abstract class ClipContext {
         break;
       case Clip.hardEdge:
         canvasClipCall(false);
-        break;
       case Clip.antiAlias:
         canvasClipCall(true);
-        break;
       case Clip.antiAliasWithSaveLayer:
         canvasClipCall(true);
         canvas.saveLayer(bounds, Paint());
-        break;
     }
     painter();
     if (clipBehavior == Clip.antiAliasWithSaveLayer) {

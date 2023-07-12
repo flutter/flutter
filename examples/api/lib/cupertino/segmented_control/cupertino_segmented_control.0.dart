@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoSegmentedControl].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoSegmentedControl].
 
 enum Sky { midnight, viridian, cerulean }
 
-Map<Sky, Color> skyColors = <Sky, Color> {
+Map<Sky, Color> skyColors = <Sky, Color>{
   Sky.midnight: const Color(0xff191970),
   Sky.viridian: const Color(0xff40826d),
   Sky.cerulean: const Color(0xff007ba7),

@@ -57,7 +57,7 @@ enum _InputStreamParseState {
 /// message data.
 ///
 /// If the JSON object contains the key [_binaryLengthKey] with an integer
-/// value (will be refered to as N), the following N bytes after the newline
+/// value (will be referred to as N), the following N bytes after the newline
 /// character will contain the binary part of the message.
 @visibleForTesting
 class DaemonInputStreamConverter {

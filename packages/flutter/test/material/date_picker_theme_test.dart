@@ -40,6 +40,7 @@ void main() {
     rangePickerHeaderHelpStyle: TextStyle(fontSize: 15),
     rangeSelectionBackgroundColor: Color(0xffffff2f),
     rangeSelectionOverlayColor: MaterialStatePropertyAll<Color>(Color(0xffffff3f)),
+    dividerColor: Color(0xffffff3f),
   );
 
   Material findDialogMaterial(WidgetTester tester) {
@@ -70,9 +71,17 @@ void main() {
     return container.decoration as BoxDecoration?;
   }
 
+  const Size wideWindowSize = Size(1920.0, 1080.0);
+  const Size narrowWindowSize = Size(1070.0, 1770.0);
+
   test('DatePickerThemeData copyWith, ==, hashCode basics', () {
     expect(const DatePickerThemeData(), const DatePickerThemeData().copyWith());
     expect(const DatePickerThemeData().hashCode, const DatePickerThemeData().copyWith().hashCode);
+  });
+
+  test('DatePickerThemeData lerp special cases', () {
+    const DatePickerThemeData data = DatePickerThemeData();
+    expect(identical(DatePickerThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('DatePickerThemeData defaults', () {
@@ -109,6 +118,7 @@ void main() {
     expect(theme.rangePickerHeaderHelpStyle, null);
     expect(theme.rangeSelectionBackgroundColor, null);
     expect(theme.rangeSelectionOverlayColor, null);
+    expect(theme.dividerColor, null);
   });
 
   testWidgets('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
@@ -154,6 +164,10 @@ void main() {
     expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
     expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
     expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.08));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.pressed}), colorScheme.onPrimary.withOpacity(0.12));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered, MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.08));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered, MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
     expect(m3.todayForegroundColor?.resolve(<MaterialState>{}), colorScheme.primary);
     expect(m3.todayForegroundColor?.resolve(<MaterialState>{MaterialState.disabled}), colorScheme.primary.withOpacity(0.38));
     expect(m3.todayBorder, BorderSide(color: colorScheme.primary));
@@ -178,8 +192,8 @@ void main() {
     expect(m3.rangePickerHeaderForegroundColor, colorScheme.onSurfaceVariant);
     expect(m3.rangePickerHeaderHeadlineStyle, textTheme.titleLarge);
     expect(m3.rangePickerHeaderHelpStyle, textTheme.titleSmall);
+    expect(m3.dividerColor, null);
   });
-
 
   testWidgets('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
     late final DatePickerThemeData m2; // M2 defaults
@@ -219,6 +233,8 @@ void main() {
     expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered}), colorScheme.onPrimary.withOpacity(0.08));
     expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.12));
     expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.pressed}), colorScheme.onPrimary.withOpacity(0.38));
+    expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.08));
+    expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.pressed}), colorScheme.onPrimary.withOpacity(0.38));
     expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
     expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
     expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
@@ -299,6 +315,7 @@ void main() {
       'rangePickerHeaderHelpStyle: TextStyle(inherit: true, size: 15.0)',
       'rangeSelectionBackgroundColor: Color(0xffffff2f)',
       'rangeSelectionOverlayColor: MaterialStatePropertyAll(Color(0xffffff3f))',
+      'dividerColor: Color(0xffffff3f)',
     ]);
   });
 
@@ -381,7 +398,6 @@ void main() {
     expect(year2023Decoration.border?.bottom.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
   });
 
-
   testWidgets('DateRangePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -415,6 +431,9 @@ void main() {
     expect(material.surfaceTintColor, datePickerTheme.rangePickerSurfaceTintColor);
     expect(material.shape, datePickerTheme.rangePickerShape);
 
+    final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(appBar.backgroundColor, datePickerTheme.rangePickerHeaderBackgroundColor);
+
     final Text selectRange = tester.widget<Text>(find.text('Select range'));
     expect(selectRange.style?.color, datePickerTheme.rangePickerHeaderForegroundColor);
     expect(selectRange.style?.fontSize, datePickerTheme.rangePickerHeaderHelpStyle?.fontSize);
@@ -422,5 +441,45 @@ void main() {
     final Text selectedDate = tester.widget<Text>(find.text('Jan 17'));
     expect(selectedDate.style?.color, datePickerTheme.rangePickerHeaderForegroundColor);
     expect(selectedDate.style?.fontSize, datePickerTheme.rangePickerHeaderHeadlineStyle?.fontSize);
+  });
+
+  testWidgets('Dividers use DatePickerThemeData.dividerColor', (WidgetTester tester) async {
+    Future<void> showPicker(WidgetTester tester, Size size) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(useMaterial3: true).copyWith(
+            datePickerTheme: datePickerTheme,
+          ),
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: Center(
+                child: DatePickerDialog(
+                  initialDate: DateTime(2023, DateTime.january, 25),
+                  firstDate: DateTime(2022),
+                  lastDate: DateTime(2024, DateTime.december, 31),
+                  currentDate: DateTime(2023, DateTime.january, 24),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    await showPicker(tester, wideWindowSize);
+
+    // Test vertical divider.
+    final VerticalDivider verticalDivider = tester.widget(find.byType(VerticalDivider));
+    expect(verticalDivider.color, datePickerTheme.dividerColor);
+
+    // Test portrait layout.
+    await showPicker(tester, narrowWindowSize);
+
+    // Test horizontal divider.
+    final Divider horizontalDivider = tester.widget(find.byType(Divider));
+    expect(horizontalDivider.color, datePickerTheme.dividerColor);
   });
 }

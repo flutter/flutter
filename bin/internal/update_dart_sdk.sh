@@ -169,7 +169,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     >&2 echo
     >&2 echo "It appears that the downloaded file is corrupt; please try again."
     >&2 echo "If this problem persists, please report the problem at:"
-    >&2 echo "  https://github.com/flutter/flutter/issues/new?template=1_activation.md"
+    >&2 echo "  https://github.com/flutter/flutter/issues/new?template=1_activation.yml"
     >&2 echo
     rm -f -- "$DART_SDK_ZIP"
     exit 1

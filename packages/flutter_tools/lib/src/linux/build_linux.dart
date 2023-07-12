@@ -67,7 +67,7 @@ Future<void> buildLinux(
     'Building Linux application...',
   );
   try {
-    final String buildModeName = getNameForBuildMode(buildInfo.mode);
+    final String buildModeName = buildInfo.mode.cliName;
     final Directory buildDirectory =
         globals.fs.directory(getLinuxBuildDirectory(targetPlatform)).childDirectory(buildModeName);
     await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory,
@@ -105,8 +105,7 @@ Future<void> buildLinux(
     final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
     globals.printStatus(
       '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-      'flutter pub global activate devtools; flutter pub global run devtools '
-      '--appSizeBase=$relativeAppSizePath'
+      'dart devtools --appSizeBase=$relativeAppSizePath'
     );
   }
 }

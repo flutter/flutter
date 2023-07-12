@@ -2,31 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ScaffoldState.showBottomSheet].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ScaffoldState.showBottomSheet].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ShowBottomSheetExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ShowBottomSheetExampleApp extends StatelessWidget {
+  const ShowBottomSheetExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        appBar: AppBar(title: const Text('ScaffoldState Sample')),
+        body: const ShowBottomSheetExample(),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ShowBottomSheetExample extends StatelessWidget {
+  const ShowBottomSheetExample({super.key});
 
   @override
   Widget build(BuildContext context) {

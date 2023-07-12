@@ -2,21 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestAssetBundle extends AssetBundle {
   @override
   Future<ByteData> load(String key) async {
-    if (key == 'AssetManifest.bin') {
+    if (key == 'AssetManifest.smcbin') {
       final Map<String, List<Object>> binManifestData = <String, List<Object>>{
         'assets/foo.png': <Object>[
           <String, Object>{
+            'asset': 'assets/foo.png',
+          },
+          <String, Object>{
             'asset': 'assets/2x/foo.png',
             'dpr': 2.0
-          }
+          },
         ],
-        'assets/bar.png': <Object>[],
+        'assets/bar.png': <Object>[
+          <String, Object>{
+            'asset': 'assets/bar.png',
+          },
+        ],
       };
 
       final ByteData data = const StandardMessageCodec().encodeMessage(binManifestData)!;
@@ -32,7 +41,6 @@ class TestAssetBundle extends AssetBundle {
   }
 }
 
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -41,7 +49,7 @@ void main() {
 
     expect(manifest.listAssets(), unorderedEquals(<String>['assets/foo.png', 'assets/bar.png']));
 
-    final List<AssetMetadata> fooVariants = manifest.getAssetVariants('assets/foo.png');
+    final List<AssetMetadata> fooVariants = manifest.getAssetVariants('assets/foo.png')!;
     expect(fooVariants.length, 2);
     final AssetMetadata firstFooVariant = fooVariants[0];
     expect(firstFooVariant.key, 'assets/foo.png');
@@ -52,7 +60,7 @@ void main() {
     expect(secondFooVariant.targetDevicePixelRatio, 2.0);
     expect(secondFooVariant.main, false);
 
-    final List<AssetMetadata> barVariants = manifest.getAssetVariants('assets/bar.png');
+    final List<AssetMetadata> barVariants = manifest.getAssetVariants('assets/bar.png')!;
     expect(barVariants.length, 1);
     final AssetMetadata firstBarVariant = barVariants[0];
     expect(firstBarVariant.key, 'assets/bar.png');
@@ -60,9 +68,34 @@ void main() {
     expect(firstBarVariant.main, true);
   });
 
-  test('getAssetVariants throws if given a key not contained in the asset manifest', () async {
+  test('getAssetVariants returns null if the key not contained in the asset manifest', () async {
     final AssetManifest manifest = await AssetManifest.loadFromAssetBundle(TestAssetBundle());
-
-    expect(() => manifest.getAssetVariants('invalid asset key'), throwsArgumentError);
+    expect(manifest.getAssetVariants('invalid asset key'), isNull);
   });
+}
+
+String createAssetManifestJson(Map<String, List<AssetMetadata>> manifest) {
+  final Map<Object, Object> jsonObject = manifest.map(
+    (String key, List<AssetMetadata> value) {
+      final List<String> variants = value.map((AssetMetadata e) => e.key).toList();
+      return MapEntry<String, List<String>>(key, variants);
+    }
+  );
+
+  return json.encode(jsonObject);
+}
+
+ByteData createAssetManifestSmcBin(Map<String, List<AssetMetadata>> manifest) {
+  final Map<Object, Object> smcObject  = manifest.map(
+    (String key, List<AssetMetadata> value) {
+      final List<Object> variants = value.map((AssetMetadata variant) => <String, Object?>{
+        'asset': variant.key,
+        'dpr': variant.targetDevicePixelRatio,
+      }).toList();
+
+      return MapEntry<String, List<Object>>(key, variants);
+    }
+  );
+
+  return const StandardMessageCodec().encodeMessage(smcObject)!;
 }

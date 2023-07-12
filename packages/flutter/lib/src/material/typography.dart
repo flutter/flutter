@@ -215,24 +215,19 @@ class Typography with Diagnosticable {
       case TargetPlatform.iOS:
         black ??= blackCupertino;
         white ??= whiteCupertino;
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         black ??= blackMountainView;
         white ??= whiteMountainView;
-        break;
       case TargetPlatform.windows:
         black ??= blackRedmond;
         white ??= whiteRedmond;
-        break;
       case TargetPlatform.macOS:
         black ??= blackRedwoodCity;
         white ??= whiteRedwoodCity;
-        break;
       case TargetPlatform.linux:
         black ??= blackHelsinki;
         white ??= whiteHelsinki;
-        break;
       case null:
         break;
     }
@@ -329,6 +324,9 @@ class Typography with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Typography lerp(Typography a, Typography b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return Typography._(
       TextTheme.lerp(a.black, b.black, t),
       TextTheme.lerp(a.white, b.white, t),
@@ -750,7 +748,7 @@ class Typography with Diagnosticable {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _M3Typography {
   _M3Typography._();
