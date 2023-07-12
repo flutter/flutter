@@ -9,8 +9,8 @@ import 'package:package_config/package_config.dart';
 import '../../asset.dart';
 
 final String _assetManifest = (){
-  final ByteBuffer buffer = globalAssetManifest.buffer;
-  final Uint8List list = buffer.asUint8List(globalAssetManifest.offsetInBytes, globalAssetManifest.lengthInBytes);
+  final ByteBuffer buffer = generatedAssetManifest.buffer;
+  final Uint8List list = buffer.asUint8List(generatedAssetManifest.offsetInBytes, generatedAssetManifest.lengthInBytes);
   final String raw =  utf8.decode(list);
   return Uri.encodeFull(raw);
 }();

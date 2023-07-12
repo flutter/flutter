@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+// ignore: unused_import
+import 'dart:html' as html;
 import 'dart:js' as js;
 
 import 'package:flutter/foundation.dart';
