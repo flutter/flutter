@@ -411,7 +411,7 @@ void main() {
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
 
-    if (!isCanvasKit) {
+    if (kIsWeb && !isCanvasKit) {
       expect(tester.getSize(find.text(label).last), const Size(15.0, 21.0));
     } else {
       expect(tester.getSize(find.text(label).last), const Size(15.0, 20.0));
@@ -423,7 +423,7 @@ void main() {
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
 
-    if (!isCanvasKit) {
+    if (kIsWeb && !isCanvasKit) {
       expect(tester.getSize(find.text(label).last), const Size(57.0, 81.0));
     } else {
       expect(tester.getSize(find.text(label).last), const Size(57.0, 80.0));
