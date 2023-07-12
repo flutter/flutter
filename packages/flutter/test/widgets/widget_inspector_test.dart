@@ -309,7 +309,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final WeakReference<Object> ref = WeakReference<Object>(someObject);
       someObject = null;
 
-      // One should be enough for [fullGcCycles], but 3 us used to make sure tests are not flaky.
+      // 1 should be enough for [fullGcCycles], but it is 3 to make sure tests are not flaky.
       await forceGC(fullGcCycles: 3);
 
       expect(ref.target, null);
