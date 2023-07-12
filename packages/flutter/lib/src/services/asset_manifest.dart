@@ -12,10 +12,7 @@ import 'asset_bundle.dart';
 import 'message_codecs.dart';
 
 // We use .bin as the extension since it is well-known to represent
-// data in some arbitrary binary format. Using a well-known extension here
-// is important for web, because some web servers will not serve files with
-// unrecognized file extensions by default.
-// See https://github.com/flutter/flutter/issues/128456.
+// data in some arbitrary binary format.
 const String _kAssetManifestFilename = 'AssetManifest.bin';
 
 Future<AssetManifest>? _precachedAssetManifest;
