@@ -11,8 +11,8 @@ import 'package:conductor_core/packages_autoroller.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
-import './common.dart';
 import '../bin/packages_autoroller.dart' show run;
+import './common.dart';
 
 void main() {
   const String flutterRoot = '/flutter';
