@@ -228,7 +228,7 @@ void main() {
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile('dialog_theme.m3.dialog_with_custom_border.png'),
+      matchesGoldenFile('m3_dialog_theme.dialog_with_custom_border.png'),
     );
   });
 
@@ -247,7 +247,7 @@ void main() {
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile('dialog_theme.m2.dialog_with_custom_border.png'),
+      matchesGoldenFile('m2_dialog_theme.dialog_with_custom_border.png'),
     );
   });
 
