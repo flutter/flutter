@@ -46,6 +46,21 @@ void TransformLayer::Preroll(PrerollContext* context) {
   SkRect child_paint_bounds = SkRect::MakeEmpty();
   PrerollChildren(context, &child_paint_bounds);
 
+  // We convert to a 3x3 matrix here primarily because the SkM44 object
+  // does not support a mapRect operation.
+  // https://bugs.chromium.org/p/skia/issues/detail?id=11720&q=mapRect&can=2
+  //
+  // All geometry is X,Y only which means the 3rd row of the 4x4 matrix
+  // is ignored and the output of the 3rd column is also ignored.
+  // So we can transform the rectangle using just the 3x3 SkMatrix
+  // equivalent without any loss of information.
+  //
+  // Performance consideration:
+  // Skia has an internal mapRect for their SkM44 object that is faster
+  // than what SkMatrix does when it has perspective elements. But SkMatrix
+  // is otherwise optimal for non-perspective matrices. If SkM44 ever exposes
+  // a mapRect operation, or if SkMatrix ever optimizes its handling of
+  // the perspective elements, this issue will become moot.
   transform_.asM33().mapRect(&child_paint_bounds);
   set_paint_bounds(child_paint_bounds);
 }
