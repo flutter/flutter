@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FLOW_RTREE_H_
-#define FLUTTER_FLOW_RTREE_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_RTREE_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_RTREE_H_
 
 #include <list>
 #include <map>
@@ -62,4 +62,4 @@ class RTreeFactory : public SkBBHFactory {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_FLOW_RTREE_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_RTREE_H_

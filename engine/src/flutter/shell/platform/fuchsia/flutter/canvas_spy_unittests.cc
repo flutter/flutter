@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "canvas_spy.h"
+#include "flutter/shell/platform/fuchsia/flutter/canvas_spy.h"
 
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"

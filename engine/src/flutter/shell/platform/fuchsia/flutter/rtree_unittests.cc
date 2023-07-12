@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "rtree.h"
+#include "flutter/shell/platform/fuchsia/flutter/rtree.h"
 
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkCanvas.h"
