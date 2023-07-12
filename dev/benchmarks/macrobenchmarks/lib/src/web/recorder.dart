@@ -1336,9 +1336,7 @@ void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListe
   if (_engineBenchmarkListeners.isEmpty) {
     // The first listener is being registered. Register the global listener.
     web.window['_flutter_internal_on_benchmark'.toJS] =
-        // Upcast to [Object] to export.
-        // ignore: unnecessary_cast
-        (_dispatchEngineBenchmarkValue as Object).toJS;
+        _dispatchEngineBenchmarkValue.toJS;
   }
   _engineBenchmarkListeners[name] = listener;
 }
