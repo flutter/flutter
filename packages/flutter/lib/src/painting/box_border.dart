@@ -510,7 +510,7 @@ class Border extends BoxBorder {
         if (left.style == BorderStyle.none) null else left.color,
       }.whereNotNull().toSet();
 
-  /// [BoxBorder.paintNonUniformBorder] is about 20% than [paintBorder],
+  /// [BoxBorder.paintNonUniformBorder] is about 20% faster than [paintBorder],
   /// but [paintBorder] is able to draw hairline borders when width is zero
   /// and style is [BorderStyle.solid].
   bool get _hasThinBorder =>
