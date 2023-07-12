@@ -796,9 +796,9 @@ mixin WidgetInspectorService {
   void registerServiceExtension({
     required String name,
     required ServiceExtensionCallback callback,
-    required RegisterServiceExtensionCallback registration,
+    required RegisterServiceExtensionCallback registerExtension,
   }) {
-    registration(
+    registerExtension(
       name: 'inspector.$name',
       callback: callback,
     );
@@ -809,13 +809,14 @@ mixin WidgetInspectorService {
   void _registerSignalServiceExtension({
     required String name,
     required FutureOr<Object?> Function() callback,
-    required RegisterServiceExtensionCallback registration,
+    required RegisterServiceExtensionCallback registerExtension,
   }) {
-    registration(
+    registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         return <String, Object?>{'result': await callback()};
       },
+      registerExtension: registerExtension,
     );
   }
 
@@ -828,9 +829,9 @@ mixin WidgetInspectorService {
   void _registerObjectGroupServiceExtension({
     required String name,
     required FutureOr<Object?> Function(String objectGroup) callback,
-    required RegisterServiceExtensionCallback registration,
+    required RegisterServiceExtensionCallback registerExtension,
   }) {
-    registration(
+    registerExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         return <String, Object?>{'result': await callback(parameters['objectGroup']!)};
@@ -854,9 +855,9 @@ mixin WidgetInspectorService {
     required String name,
     required AsyncValueGetter<bool> getter,
     required AsyncValueSetter<bool> setter,
-    required RegisterServiceExtensionCallback registration,
+    required RegisterServiceExtensionCallback registerExtension,
   }) {
-    registration(
+    registerExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey('enabled')) {
@@ -896,9 +897,9 @@ mixin WidgetInspectorService {
   void _registerServiceExtensionWithArg({
     required String name,
     required FutureOr<Object?> Function(String? objectId, String objectGroup) callback,
-    required RegisterServiceExtensionCallback registration,
+    required RegisterServiceExtensionCallback registerExtension,
   }) {
-    registration(
+    registerExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('objectGroup'));
@@ -915,9 +916,9 @@ mixin WidgetInspectorService {
   void _registerServiceExtensionVarArgs({
     required String name,
     required FutureOr<Object?> Function(List<String> args) callback,
-    required RegisterServiceExtensionCallback registration,
+    required RegisterServiceExtensionCallback registerExtension,
   }) {
-    registration(
+    registerExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         final List<String> args = <String>[];
@@ -1016,7 +1017,7 @@ mixin WidgetInspectorService {
   ///  * <https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#rpcs-requests-and-responses>
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
-  void initServiceExtensions(RegisterServiceExtensionCallback registration) {
+  void initServiceExtensions(RegisterServiceExtensionCallback registerExtension) {
     final FlutterExceptionHandler defaultExceptionHandler = FlutterError.presentError;
 
     if (isStructuredErrorsEnabled()) {
@@ -1037,7 +1038,7 @@ mixin WidgetInspectorService {
         FlutterError.presentError = value ? _reportStructuredError : defaultExceptionHandler;
         return Future<void>.value();
       },
-      registration: registration,
+      registerExtension: registerExtension,
     );
 
     _registerBoolServiceExtension(
@@ -1050,7 +1051,7 @@ mixin WidgetInspectorService {
         WidgetsApp.debugShowWidgetInspectorOverride = value;
         return forceRebuild();
       },
-      registration: registration,
+      registerExtension: registerExtension,
     );
 
     if (isWidgetCreationTracked()) {
@@ -1077,7 +1078,7 @@ mixin WidgetInspectorService {
             return;
           }
         },
-        registration: registration,
+        registerExtension: registerExtension,
       );
 
       _registerBoolServiceExtension(
@@ -1104,7 +1105,7 @@ mixin WidgetInspectorService {
             debugOnProfilePaint = null;
           }
         },
-        registration: registration,
+        registerExtension: registerExtension,
       );
     }
 
@@ -1114,7 +1115,7 @@ mixin WidgetInspectorService {
         disposeAllGroups();
         return null;
       },
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerObjectGroupServiceExtension(
       name: WidgetInspectorServiceExtensions.disposeGroup.name,
@@ -1122,12 +1123,12 @@ mixin WidgetInspectorService {
         disposeGroup(name);
         return null;
       },
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerSignalServiceExtension(
       name: WidgetInspectorServiceExtensions.isWidgetTreeReady.name,
       callback: isWidgetTreeReady,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.disposeId.name,
@@ -1135,7 +1136,7 @@ mixin WidgetInspectorService {
         disposeId(objectId, objectGroup);
         return null;
       },
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerServiceExtensionVarArgs(
       name: WidgetInspectorServiceExtensions.setPubRootDirectories.name,
@@ -1143,7 +1144,7 @@ mixin WidgetInspectorService {
         setPubRootDirectories(args);
         return null;
       },
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerServiceExtensionVarArgs(
       name: WidgetInspectorServiceExtensions.addPubRootDirectories.name,
@@ -1151,7 +1152,7 @@ mixin WidgetInspectorService {
         addPubRootDirectories(args);
         return null;
       },
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerServiceExtensionVarArgs(
       name: WidgetInspectorServiceExtensions.removePubRootDirectories.name,
@@ -1159,60 +1160,60 @@ mixin WidgetInspectorService {
         removePubRootDirectories(args);
         return null;
       },
-      registration: registration,
+      registerExtension: registerExtension,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.getPubRootDirectories.name,
       callback: pubRootDirectories,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.setSelectionById.name,
       callback: setSelectionById,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getParentChain.name,
       callback: _getParentChain,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getProperties.name,
       callback: _getProperties,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getChildren.name,
       callback: _getChildren,
-      registration: registration,
+      registerExtension: registerExtension,
     );
 
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
       callback: _getChildrenSummaryTree,
-      registration: registration,
+      registerExtension: registerExtension,
     );
 
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getChildrenDetailsSubtree.name,
       callback: _getChildrenDetailsSubtree,
-      registration: registration,
+      registerExtension: registerExtension,
     );
 
     _registerObjectGroupServiceExtension(
       name: WidgetInspectorServiceExtensions.getRootWidget.name,
       callback: _getRootWidget,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerObjectGroupServiceExtension(
       name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
       callback: _getRootWidgetSummaryTree,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTreeWithPreviews.name,
       callback: _getRootWidgetSummaryTreeWithPreviews,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.getDetailsSubtree.name,
@@ -1227,23 +1228,23 @@ mixin WidgetInspectorService {
           ),
         };
       },
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getSelectedWidget.name,
       callback: _getSelectedWidget,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name,
       callback: _getSelectedSummaryWidget,
-      registration: registration,
+      registerExtension: registerExtension,
     );
 
     _registerSignalServiceExtension(
       name: WidgetInspectorServiceExtensions.isWidgetCreationTracked.name,
       callback: isWidgetCreationTracked,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.screenshot.name,
@@ -1271,27 +1272,27 @@ mixin WidgetInspectorService {
           'result': base64.encoder.convert(Uint8List.view(byteData!.buffer)),
         };
       },
-      registration: registration,
+      registerExtension: registerExtension,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
       callback: _getLayoutExplorerNode,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.setFlexFit.name,
       callback: _setFlexFit,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.setFlexFactor.name,
       callback: _setFlexFactor,
-      registration: registration,
+      registerExtension: registerExtension,
     );
     registerServiceExtension(
       name: WidgetInspectorServiceExtensions.setFlexProperties.name,
       callback: _setFlexProperties,
-      registration: registration,
+      registerExtension: registerExtension,
     );
   }
 
