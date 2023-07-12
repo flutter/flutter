@@ -1322,9 +1322,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           }
         };
         handleDidLoseAccessibilityFocus = () {
-          if (_effectiveFocusNode.hasFocus) {
-            _effectiveFocusNode.unfocus();
-          }
+          _effectiveFocusNode.unfocus();
         };
 
       case TargetPlatform.android:
@@ -1350,9 +1348,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           }
         };
         handleDidLoseAccessibilityFocus = () {
-          if (_effectiveFocusNode.hasFocus) {
-            _effectiveFocusNode.unfocus();
-          }
+          _effectiveFocusNode.unfocus();
         };
 
       case TargetPlatform.windows:
@@ -1369,9 +1365,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           }
         };
         handleDidLoseAccessibilityFocus = () {
-          if (_effectiveFocusNode.hasFocus) {
-            _effectiveFocusNode.unfocus();
-          }
+          _effectiveFocusNode.unfocus();
         };
     }
 
