@@ -1517,7 +1517,7 @@ void _testTextField() {
 
   // TODO(yjbanov): this test will need to be adjusted for Safari when we add
   //                Safari testing.
-  test('sends a tap action when text field is activated', () async {
+  test('sends a focus action when text field is activated', () async {
     final SemanticsActionLogger logger = SemanticsActionLogger();
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -1526,7 +1526,7 @@ void _testTextField() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      actions: 0 | ui.SemanticsAction.tap.index,
+      actions: 0 | ui.SemanticsAction.didGainAccessibilityFocus.index,
       flags: 0 | ui.SemanticsFlag.isTextField.index,
       value: 'hello',
       transform: Matrix4.identity().toFloat64(),
@@ -1544,7 +1544,7 @@ void _testTextField() {
 
     expect(appHostNode.ownerDocument?.activeElement, textField);
     expect(await logger.idLog.first, 0);
-    expect(await logger.actionLog.first, ui.SemanticsAction.tap);
+    expect(await logger.actionLog.first, ui.SemanticsAction.didGainAccessibilityFocus);
 
     semantics().semanticsEnabled = false;
   }, // TODO(yjbanov): https://github.com/flutter/flutter/issues/46638

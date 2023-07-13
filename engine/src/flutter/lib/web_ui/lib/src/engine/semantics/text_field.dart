@@ -301,7 +301,16 @@ class TextField extends PrimaryRoleManager {
           }
 
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-              semanticsObject.id, ui.SemanticsAction.tap, null);
+              semanticsObject.id, ui.SemanticsAction.didGainAccessibilityFocus, null);
+        }));
+    activeEditableElement.addEventListener('blur',
+        createDomEventListener((DomEvent event) {
+          if (semanticsObject.owner.gestureMode != GestureMode.browserGestures) {
+            return;
+          }
+
+          EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+              semanticsObject.id, ui.SemanticsAction.didLoseAccessibilityFocus, null);
         }));
   }
 
