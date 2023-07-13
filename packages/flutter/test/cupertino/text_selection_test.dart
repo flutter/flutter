@@ -247,7 +247,7 @@ void main() {
 
     testWidgets("When a menu item doesn't fit, a second page is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Paste can't fit.
-      tester.view.physicalSize = const Size(800, 800);
+      tester.view.physicalSize = const Size(900, 800);
       addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
@@ -270,6 +270,7 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsNothing);
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsNothing);
 
@@ -285,7 +286,19 @@ void main() {
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsNothing);
       expect(findOverflowBackButton(), findsNothing);
+      expect(findOverflowNextButton(), findsOneWidget);
+
+      // Tapping the next button shows both the overflow back and next button
+      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+      await tester.pumpAndSettle();
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsNothing);
+      expect(findOverflowBackButton(), findsOneWidget);
       expect(findOverflowNextButton(), findsOneWidget);
 
       // Tapping the next button shows the overflowing button and the next
@@ -294,18 +307,22 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
-      expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsOneWidget);
       expect(findOverflowBackButton(), findsOneWidget);
       expect(findOverflowNextButton(), findsNothing);
 
       // Tapping the back button shows the first page again with the next button.
       await tester.tapAt(tester.getCenter(findOverflowBackButton()));
       await tester.pumpAndSettle();
+      await tester.tapAt(tester.getCenter(findOverflowBackButton()));
+      await tester.pumpAndSettle();
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsNothing);
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsOneWidget);
     },
@@ -340,6 +357,7 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsNothing);
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsNothing);
 
@@ -356,6 +374,7 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsNothing);
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsOneWidget);
 
@@ -367,22 +386,36 @@ void main() {
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsNothing);
       expect(findOverflowBackButton(), findsOneWidget);
       expect(findOverflowNextButton(), findsOneWidget);
 
-      // Tapping the next button again shows Paste and hides the next button as
-      // the last page is shown.
+      // Tapping the next button again shows Paste
       await tester.tapAt(tester.getCenter(findOverflowNextButton()));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(2));
+      expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(3));
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsOneWidget);
       expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsNothing);
+      expect(findOverflowBackButton(), findsOneWidget);
+      expect(findOverflowNextButton(), findsOneWidget);
+
+      // Tapping the next button again shows the last page
+      await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+      await tester.pumpAndSettle();
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Copy'), findsNothing);
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsOneWidget);
       expect(findOverflowBackButton(), findsOneWidget);
       expect(findOverflowNextButton(), findsNothing);
 
-      // Tapping the back button shows the second page again with the next button.
+      // Tapping the back button twice shows the second page again with the next button.
+      await tester.tapAt(tester.getCenter(findOverflowBackButton()));
+      await tester.pumpAndSettle();
       await tester.tapAt(tester.getCenter(findOverflowBackButton()));
       await tester.pumpAndSettle();
       expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(3));
@@ -390,6 +423,7 @@ void main() {
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsNothing);
       expect(findOverflowBackButton(), findsOneWidget);
       expect(findOverflowNextButton(), findsOneWidget);
 
@@ -401,6 +435,7 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select All'), findsNothing);
+      expect(find.text('Look Up'), findsNothing);
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsOneWidget);
     },
@@ -485,7 +520,7 @@ void main() {
       expect(findOverflowBackButton(), findsOneWidget);
       expect(findOverflowNextButton(), findsOneWidget);
 
-      // Tap next to go to the third and final page.
+      // Tap twice to go to the third page.
       await tester.tapAt(tester.getCenter(findOverflowNextButton()));
       await tester.pumpAndSettle();
       expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
@@ -493,7 +528,7 @@ void main() {
       expect(find.text(_longLocalizations.pasteButtonLabel), findsOneWidget);
       expect(find.text(_longLocalizations.selectAllButtonLabel), findsNothing);
       expect(findOverflowBackButton(), findsOneWidget);
-      expect(findOverflowNextButton(), findsNothing);
+      expect(findOverflowNextButton(), findsOneWidget);
 
       // Tap back to go to the second page again.
       await tester.tapAt(tester.getCenter(findOverflowBackButton()));

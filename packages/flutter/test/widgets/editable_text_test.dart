@@ -154,6 +154,7 @@ void main() {
                     onCut: null,
                     onPaste: null,
                     onSelectAll: null,
+                    onLookUp: null,
                     onLiveTextInput: () {
                       invokedLiveTextInputSuccessfully = true;
                     },

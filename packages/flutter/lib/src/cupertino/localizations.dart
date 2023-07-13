@@ -245,6 +245,10 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get selectAllButtonLabel;
 
+  /// The term used for looking up a selection.
+  // The global version uses the translated string from the arb file.
+  String get lookUpButtonLabel;
+
   /// The default placeholder used in [CupertinoSearchTextField].
   // The global version uses the translated string from the arb file.
   String get searchTextFieldPlaceholderLabel;
@@ -450,6 +454,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Select All';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get searchTextFieldPlaceholderLabel => 'Search';

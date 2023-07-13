@@ -1835,6 +1835,7 @@ class EditableText extends StatefulWidget {
     required final VoidCallback? onCut,
     required final VoidCallback? onPaste,
     required final VoidCallback? onSelectAll,
+    required final VoidCallback? onLookUp,
     required final VoidCallback? onLiveTextInput,
   }) {
     final List<ContextMenuButtonItem> resultButtonItem = <ContextMenuButtonItem>[];
@@ -1864,6 +1865,11 @@ class EditableText extends StatefulWidget {
           ContextMenuButtonItem(
             onPressed: onSelectAll,
             type: ContextMenuButtonType.selectAll,
+          ),
+        if (onLookUp != null)
+          ContextMenuButtonItem(
+            onPressed: onLookUp,
+            type: ContextMenuButtonType.lookUp,
           ),
       ]);
     }
@@ -2216,6 +2222,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
+  bool get lookUpEnabled {
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      return false;
+    }
+    return !widget.obscureText
+        && !textEditingValue.selection.isCollapsed;
+  }
+
+  @override
   bool get liveTextInputEnabled {
     return _liveTextInputStatus?.value == LiveTextInputStatus.enabled &&
         !widget.obscureText &&
@@ -2378,6 +2393,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           break;
       }
     }
+  }
+
+  /// Look Up current selection.
+  Future<void> lookUpSelection(SelectionChangedCause cause) async {
+    if (widget.obscureText) {
+      return;
+    }
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    await SystemChannels.platform.invokeMethod(
+      'LookUp.invoke',
+      text,
+    );
   }
 
   void _startLiveTextInput(SelectionChangedCause cause) {
@@ -2605,6 +2632,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           : null,
       onSelectAll: selectAllEnabled
           ? () => selectAll(SelectionChangedCause.toolbar)
+          : null,
+      onLookUp: lookUpEnabled
+          ? () => lookUpSelection(SelectionChangedCause.toolbar)
           : null,
       onLiveTextInput: liveTextInputEnabled
           ? () => _startLiveTextInput(SelectionChangedCause.toolbar)
