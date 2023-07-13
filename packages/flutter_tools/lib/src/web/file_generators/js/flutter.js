@@ -189,15 +189,13 @@ _flutter.loader = null;
      * @param {ServiceWorker} serviceWorker
      * @returns {Promise<void>}
      */
-    _waitForServiceWorkerActivation(serviceWorker) {
+    async _waitForServiceWorkerActivation(serviceWorker) {
       if (!serviceWorker || serviceWorker.state == "activated") {
         if (!serviceWorker) {
-          return Promise.reject(
-            new Error("Cannot activate a null service worker!")
-          );
+          throw new Error("Cannot activate a null service worker!");
         } else {
           console.debug("Service worker already active.");
-          return Promise.resolve();
+          return;
         }
       }
       return new Promise((resolve, _) => {
