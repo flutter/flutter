@@ -62,6 +62,11 @@ void FlutterWindowsEngineBuilder::AddDartEntrypointArgument(std::string arg) {
   dart_entrypoint_arguments_.emplace_back(std::move(arg));
 }
 
+void FlutterWindowsEngineBuilder::SetSwitches(
+    std::vector<std::string> switches) {
+  switches_ = std::move(switches);
+}
+
 void FlutterWindowsEngineBuilder::SetCreateKeyboardHandlerCallbacks(
     KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state,
     KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan) {
@@ -86,6 +91,7 @@ std::unique_ptr<FlutterWindowsEngine> FlutterWindowsEngineBuilder::Build() {
   }
 
   FlutterProjectBundle project(properties_);
+  project.SetSwitches(switches_);
 
   return std::make_unique<TestFlutterWindowsEngine>(project, get_key_state_,
                                                     map_vk_to_scan_);

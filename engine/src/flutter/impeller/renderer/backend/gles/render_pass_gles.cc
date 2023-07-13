@@ -454,6 +454,7 @@ struct RenderPassData {
 
   if (gl.DiscardFramebufferEXT.IsAvailable()) {
     std::vector<GLenum> attachments;
+
     if (pass_data.discard_color_attachment) {
       attachments.push_back(is_default_fbo ? GL_COLOR_EXT
                                            : GL_COLOR_ATTACHMENT0);
@@ -462,7 +463,15 @@ struct RenderPassData {
       attachments.push_back(is_default_fbo ? GL_DEPTH_EXT
                                            : GL_DEPTH_ATTACHMENT);
     }
+
+// TODO(jonahwilliams): discarding the stencil on the default fbo when running
+// on Windows causes Angle to discard the entire render target. Until we know
+// the reason, default to storing.
+#ifdef FML_OS_WIN
+    if (pass_data.discard_stencil_attachment && !is_default_fbo) {
+#else
     if (pass_data.discard_stencil_attachment) {
+#endif
       attachments.push_back(is_default_fbo ? GL_STENCIL_EXT
                                            : GL_STENCIL_ATTACHMENT);
     }

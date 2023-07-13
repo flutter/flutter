@@ -88,7 +88,17 @@ void FlutterProjectBundle::SetSwitches(
 }
 
 const std::vector<std::string> FlutterProjectBundle::GetSwitches() {
-  return GetSwitchesFromEnvironment();
+  if (engine_switches_.size() == 0) {
+    return GetSwitchesFromEnvironment();
+  }
+  std::vector<std::string> switches;
+  switches.insert(switches.end(), engine_switches_.begin(),
+                  engine_switches_.end());
+
+  auto env_switches = GetSwitchesFromEnvironment();
+  switches.insert(switches.end(), env_switches.begin(), env_switches.end());
+
+  return switches;
 }
 
 }  // namespace flutter

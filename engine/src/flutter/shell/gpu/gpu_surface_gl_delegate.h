@@ -58,7 +58,7 @@ class GPUSurfaceGLDelegate {
   virtual std::unique_ptr<GLContextResult> GLContextMakeCurrent() = 0;
 
   // Called to clear the current GL context on the thread. This may be called on
-  // either the GPU or IO threads.
+  // either the Raster or IO threads.
   virtual bool GLContextClearCurrent() = 0;
 
   // Inform the GL Context that there's going to be no writing beyond

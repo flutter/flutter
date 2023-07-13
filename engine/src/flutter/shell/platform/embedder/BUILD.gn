@@ -95,16 +95,6 @@ template("embedder_source_set") {
     ]
 
     public_deps = [ ":embedder_headers" ]
-
-    if (embedder_enable_gl) {
-      sources += [
-        "embedder_external_texture_gl.cc",
-        "embedder_external_texture_gl.h",
-        "embedder_surface_gl.cc",
-        "embedder_surface_gl.h",
-      ]
-    }
-
     deps = [
       ":embedder_gpu_configuration",
       "//flutter/assets",
@@ -121,13 +111,33 @@ template("embedder_source_set") {
       "//third_party/skia",
     ]
 
+    if (embedder_enable_gl) {
+      sources += [
+        "embedder_external_texture_gl.cc",
+        "embedder_external_texture_gl.h",
+        "embedder_surface_gl.cc",
+        "embedder_surface_gl.h",
+      ]
+
+      if (impeller_supports_rendering) {
+        sources += [
+          "embedder_surface_gl_impeller.cc",
+          "embedder_surface_gl_impeller.h",
+        ]
+        deps += [ "//flutter/impeller/renderer/backend/gles" ]
+      }
+    }
+
     if (impeller_supports_rendering) {
       sources += [
         "embedder_render_target_impeller.cc",
         "embedder_render_target_impeller.h",
       ]
 
-      deps += [ "//flutter/impeller" ]
+      deps += [
+        "//flutter/impeller",
+        "//flutter/impeller/renderer",
+      ]
     }
 
     if (embedder_enable_metal) {
@@ -143,6 +153,7 @@ template("embedder_source_set") {
           "embedder_surface_metal_impeller.h",
           "embedder_surface_metal_impeller.mm",
         ]
+        deps += [ "//flutter/impeller/renderer/backend/metal" ]
       }
 
       cflags_objc = flutter_cflags_objc
