@@ -28,9 +28,10 @@ found in the LICENSE file. -->
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: '123',
+        },
+        onEntrypointLoaded: function(engineInitializer) {
+          return engineInitializer.autoStart();
         }
-      }).then(function(engineInitializer) {
-        return engineInitializer.autoStart();
       });
     });
   </script>
