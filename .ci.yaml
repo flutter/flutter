@@ -412,6 +412,7 @@ targets:
       - .ci.yaml
 
   - name: Linux firebase_oriol33_abstract_method_smoke_test
+    bringup: true
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
