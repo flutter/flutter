@@ -94,6 +94,8 @@ impeller_component("vulkan") {
     "vertex_descriptor_vk.cc",
     "vertex_descriptor_vk.h",
     "vk.h",
+    "vma.cc",
+    "vma.h",
   ]
 
   public_deps = [

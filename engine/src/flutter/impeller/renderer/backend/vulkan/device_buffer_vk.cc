@@ -6,27 +6,22 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
 
 DeviceBufferVK::DeviceBufferVK(DeviceBufferDescriptor desc,
                                std::weak_ptr<Context> context,
-                               VmaAllocator allocator,
-                               VmaAllocation allocation,
-                               VmaAllocationInfo info,
-                               vk::Buffer buffer)
+                               UniqueBufferVMA buffer,
+                               VmaAllocationInfo info)
     : DeviceBuffer(desc),
       context_(std::move(context)),
       resource_(ContextVK::Cast(*context_.lock().get()).GetResourceManager(),
                 BufferResource{
-                    allocator,   //
-                    allocation,  //
-                    info,        //
-                    buffer       //
+                    std::move(buffer),  //
+                    info                //
                 }) {}
 
-DeviceBufferVK::~DeviceBufferVK() {}
+DeviceBufferVK::~DeviceBufferVK() = default;
 
 uint8_t* DeviceBufferVK::OnGetContents() const {
   return static_cast<uint8_t*>(resource_->info.pMappedData);
@@ -51,17 +46,18 @@ bool DeviceBufferVK::OnCopyHostBuffer(const uint8_t* source,
 
 bool DeviceBufferVK::SetLabel(const std::string& label) {
   auto context = context_.lock();
-  if (!context || !resource_->buffer) {
+  if (!context || !resource_->buffer.is_valid()) {
     // The context could have died at this point.
     return false;
   }
 
-  ::vmaSetAllocationName(resource_->allocator,   //
-                         resource_->allocation,  //
-                         label.c_str()           //
+  ::vmaSetAllocationName(resource_->buffer.get().allocator,   //
+                         resource_->buffer.get().allocation,  //
+                         label.c_str()                        //
   );
 
-  return ContextVK::Cast(*context).SetDebugName(resource_->buffer, label);
+  return ContextVK::Cast(*context).SetDebugName(resource_->buffer.get().buffer,
+                                                label);
 }
 
 bool DeviceBufferVK::SetLabel(const std::string& label, Range range) {
@@ -70,7 +66,7 @@ bool DeviceBufferVK::SetLabel(const std::string& label, Range range) {
 }
 
 vk::Buffer DeviceBufferVK::GetBuffer() const {
-  return resource_->buffer;
+  return resource_->buffer.get().buffer;
 }
 
 }  // namespace impeller
