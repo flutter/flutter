@@ -123,7 +123,51 @@ void testMain() {
         }
       });
     });
+
+    test('applyRoundingHack works', () {
+      bool assertsEnabled = false;
+      assert(() {
+        assertsEnabled = true;
+        return true;
+      }());
+      if (!assertsEnabled){
+        return;
+      }
+
+      const double fontSize = 1.25;
+      const String text = '12345';
+      assert((fontSize * text.length).truncate() != fontSize * text.length);
+      final bool roundingHackWasDisabled = ui.ParagraphBuilder.shouldDisableRoundingHack;
+      ui.ParagraphBuilder.setDisableRoundingHack(true);
+      final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
+        ui.ParagraphStyle(fontSize: fontSize, fontFamily: 'FlutterTest'),
+      );
+      builder.addText(text);
+      final ui.Paragraph paragraph = builder.build()
+        ..layout(const ui.ParagraphConstraints(width: text.length * fontSize));
+
+      expect(paragraph.maxIntrinsicWidth, text.length * fontSize);
+      switch (paragraph.computeLineMetrics()) {
+        case [ui.LineMetrics(width: final double width)]:
+          expect(width, text.length * fontSize);
+        case final List<ui.LineMetrics> metrics:
+          expect(metrics, hasLength(1));
+      }
+      ui.ParagraphBuilder.setDisableRoundingHack(roundingHackWasDisabled);
+    });
+
+    test('rounding hack applied by default', () {
+      const double fontSize = 1.25;
+      const String text = '12345';
+      assert((fontSize * text.length).truncate() != fontSize * text.length);
+      expect(ui.ParagraphBuilder.shouldDisableRoundingHack, isFalse);
+      final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontSize: fontSize, fontFamily: 'FlutterTest'));
+      builder.addText(text);
+      final ui.Paragraph paragraph = builder.build()
+        ..layout(const ui.ParagraphConstraints(width: text.length * fontSize));
+      expect(paragraph.computeLineMetrics().length, greaterThan(1));
+    });
+
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
-
 }
