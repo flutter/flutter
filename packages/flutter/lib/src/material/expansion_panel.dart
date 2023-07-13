@@ -14,7 +14,7 @@ import 'theme.dart';
 
 const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
-    vertical: 64.0 - _kPanelHeaderCollapsedHeight,
+  vertical: 64.0 - _kPanelHeaderCollapsedHeight,
 );
 const EdgeInsets _kExpandIconPadding = EdgeInsets.all(12.0);
 
@@ -29,9 +29,9 @@ class _SaltedKey<S, V> extends LocalKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _SaltedKey<S, V>
-        && other.salt == salt
-        && other.value == value;
+    return other is _SaltedKey<S, V> &&
+        other.salt == salt &&
+        other.value == value;
   }
 
   @override
@@ -54,7 +54,17 @@ typedef ExpansionPanelCallback = void Function(int panelIndex, bool isExpanded);
 
 /// Signature for the callback that's called when the header of the
 /// [ExpansionPanel] needs to rebuild.
-typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool isExpanded);
+typedef ExpansionPanelHeaderBuilder = Widget Function(
+    BuildContext context, bool isExpanded);
+
+/// Signature for the callback that's called when the expansion indicator of the
+/// [ExpansionPanel] needs to rebuild.
+typedef ExpansionPanelIconBuilder = Widget Function(
+  BuildContext context,
+  bool isExpanded,
+  VoidCallback handlePressed,
+  Duration animationDuration,
+);
 
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
@@ -82,6 +92,7 @@ class ExpansionPanel {
     this.isExpanded = false,
     this.canTapOnHeader = false,
     this.backgroundColor,
+    this.expandIconBuilder,
   });
 
   /// The widget builder that builds the expansion panels' header.
@@ -106,6 +117,243 @@ class ExpansionPanel {
   ///
   /// Defaults to [ThemeData.cardColor].
   final Color? backgroundColor;
+
+  /// A callback which builds the expansion panel indicator to show
+  /// whether the panel is expanded or not.
+  ///
+  /// If [expandIconBuilder] is specified, then the widget it returns must
+  /// rebuild the panel with a new [isExpanded] value.
+  /// [ExpansionPanelList.expansionCallback] should still be used to update
+  /// the state correctly. A [VoidCallback] is passed as a parameter to `expandIconBuilder`
+  /// to properly trigger [ExpansionPanelList.expansionCallback].
+  ///
+  /// The `expandIconBuilder` callback also provides [ExpansionPanelList.animationDuration],
+  /// which can be used to build custom animation for expansion icon.
+  ///
+  /// If [expandIconBuilder] is not specified, then [ExpandIcon] is used as
+  /// expansion indicator icon.
+  ///
+  /// When [canTapOnHeader] is set to true, the expansion indicator icon will we
+  /// invisible to hit testing. Since the entire header should semantically behave
+  /// as a single button, the expansion indicator icon's gesture detection and
+  /// semantics are ignored.
+  ///
+  /// ## Handling Gesture Detection
+  ///
+  /// Since there are many ways to customize the expanded icons, the gesture
+  /// detection has to be properly handled. This makes it necessary to
+  /// define a [VoidCallback] that calls [ExpansionPanelList.expansionCallback]
+  /// with correct index and isExpanded values.
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold}
+  ///
+  /// Here is a custom expansion indicator icon that uses a [Checkbox], which
+  /// has its own gesture detector. This example assumes that
+  /// [ExpansionPanelList.expansionCallback] toggles `_isExpanded`.
+  ///
+  /// ```dart
+  /// bool _isExpanded = false;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return SingleChildScrollView(
+  ///     child: ExpansionPanelList(
+  ///       expansionCallback: (int index, bool isExpanded) {
+  ///         setState(() {
+  ///           _isExpanded = !_isExpanded;
+  ///         });
+  ///       },
+  ///       children: <ExpansionPanel>[
+  ///         ExpansionPanel(
+  ///           isExpanded: _isExpanded,
+  ///           headerBuilder: (BuildContext context, bool isExpanded) {
+  ///             return const ListTile(
+  ///               title: Text('Header Text'),
+  ///             );
+  ///           },
+  ///           expandIconBuilder: (
+  ///             BuildContext context,
+  ///             bool isExpanded,
+  ///             VoidCallback handlePressed,
+  ///             Duration animationDuration,
+  ///         ) {
+  ///           return Checkbox(
+  ///             value: isExpanded,
+  ///             onChanged: (bool? value) {
+  ///               handlePressed();
+  ///             });
+  ///           },
+  ///           body: const ListTile(
+  ///             title: Text('Title Text'),
+  ///             subtitle: Text('Subtitle Text'),
+  ///           ),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold}
+  ///
+  /// Here is a custom expansion icon that uses two static icons, which requires
+  /// gesture detection to be manually handled. In this case, an [InkWell] is
+  /// used. This example assumes that [ExpansionPanelList.expansionCallback]
+  /// toggles _isExpanded.
+  ///
+  /// ```dart
+  /// bool _isExpanded = false;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return SingleChildScrollView(
+  ///     child: ExpansionPanelList(
+  ///       expansionCallback: (int index, bool isExpanded) {
+  ///         setState(() {
+  ///           _isExpanded = !_isExpanded;
+  ///         });
+  ///       },
+  ///       children: <ExpansionPanel>[
+  ///         ExpansionPanel(
+  ///           isExpanded: _isExpanded,
+  ///           headerBuilder: (BuildContext context, bool isExpanded) {
+  ///             return const ListTile(title: Text('Header Text'));
+  ///           },
+  ///           expandIconBuilder: (
+  ///             BuildContext context,
+  ///             bool isExpanded,
+  ///             VoidCallback handlePressed,
+  ///             Duration animationDuration,
+  ///           ) {
+  ///             return InkWell(
+  ///               customBorder: const CircleBorder(),
+  ///               onTap: () {
+  ///                 handlePressed();
+  ///               },
+  ///               child: Padding(
+  ///                 padding: const EdgeInsets.all(12.0),
+  ///                 child: isExpanded
+  ///                   ? const Icon(Icons.check_box)
+  ///                   : const Icon(Icons.check_box_outline_blank),
+  ///               ),
+  ///             );
+  ///           },
+  ///           body: const ListTile(
+  ///             title: Text('Title Text'),
+  ///             subtitle: Text('Subtitle Text'),
+  ///           ),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad --template=stateful_widget_scaffold}
+  ///
+  /// Here is a custom expansion icon that uses an [AnimatedIcon], which
+  /// requires gesture detection to be manually handled. In this case, an
+  /// [InkWell] is used. It also can make use of the
+  /// [ExpansionPanelList.animationDuration] for its animation. This example
+  /// assumes that [ExpansionPanelList.expansionCallback] toggles _isExpanded.
+  ///
+  /// ```dart preamble
+  /// class CustomAnimatedIcon extends StatefulWidget{
+  ///   const CustomAnimatedIcon(
+  ///     this.isExpanded,
+  ///     this.duration,
+  ///   );
+  ///
+  ///   final bool isExpanded;
+  ///   final Duration duration;
+  ///
+  ///   @override
+  ///   _CustomAnimatedIconState createState() => _CustomAnimatedIconState();
+  /// }
+  ///
+  /// class _CustomAnimatedIconState extends State<CustomAnimatedIcon> with SingleTickerProviderStateMixin {
+  ///   late AnimationController animationController;
+  ///
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     animationController = AnimationController(
+  ///       vsync: this,
+  ///       duration: widget.duration,
+  ///     );
+  ///   }
+  ///
+  ///   @override
+  ///   void didUpdateWidget(CustomAnimatedIcon oldWidget) {
+  ///     if (widget.isExpanded != oldWidget.isExpanded) {
+  ///       if (widget.isExpanded) {
+  ///         animationController.forward();
+  ///       } else {
+  ///         animationController.reverse();
+  ///       }
+  ///     }
+  ///     super.didUpdateWidget(oldWidget);
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return AnimatedIcon(
+  ///       icon: AnimatedIcons.menu_close,
+  ///       progress: animationController,
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ```dart
+  /// bool _isExpanded = false;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return SingleChildScrollView(
+  ///     child: ExpansionPanelList(
+  ///       expansionCallback: (int index, bool isExpanded) {
+  ///         setState(() {
+  ///           _isExpanded = !isExpanded;
+  ///         });
+  ///       },
+  ///       children: <ExpansionPanel>[
+  ///         ExpansionPanel(
+  ///           isExpanded: _isExpanded,
+  ///           headerBuilder: (BuildContext context, bool isExpanded) {
+  ///             return const ListTile(title: Text('Header Text'));
+  ///           },
+  ///           expandIconBuilder: (
+  ///             BuildContext context,
+  ///             bool isExpanded,
+  ///             VoidCallback handlePressed,
+  ///             Duration animationDuration,
+  ///           ) {
+  ///             return InkWell(
+  ///               customBorder: const CircleBorder(),
+  ///               onTap: () {
+  ///                 handlePressed();
+  ///               },
+  ///               child: Padding(
+  ///                 padding: const EdgeInsets.all(12.0),
+  ///                 child: CustomAnimatedIcon(isExpanded, animationDuration),
+  ///               ),
+  ///             );
+  ///           },
+  ///           body: const ListTile(
+  ///             title: Text('Title Text'),
+  ///             subtitle: Text('Subtitle Text'),
+  ///           ),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final ExpansionPanelIconBuilder? expandIconBuilder;
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -128,6 +376,8 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required super.body,
     super.canTapOnHeader,
     super.backgroundColor,
+    super.expandIconBuilder,
+    super.isExpanded,
   });
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -172,8 +422,8 @@ class ExpansionPanelList extends StatefulWidget {
     this.elevation = 2,
     this.expandIconColor,
     this.materialGapSize = 16.0,
-  }) : _allowOnlyOnePanelOpen = false,
-       initialOpenPanelValue = null;
+  })  : _allowOnlyOnePanelOpen = false,
+        initialOpenPanelValue = null;
 
   /// Creates a radio expansion panel list widget.
   ///
@@ -272,10 +522,12 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   void initState() {
     super.initState();
     if (widget._allowOnlyOnePanelOpen) {
-      assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values must be unique.');
+      assert(_allIdentifiersUnique(),
+          'All ExpansionPanelRadio identifier values must be unique.');
       if (widget.initialOpenPanelValue != null) {
-        _currentOpenPanel =
-          searchPanelByValue(widget.children.cast<ExpansionPanelRadio>(), widget.initialOpenPanelValue);
+        _currentOpenPanel = searchPanelByValue(
+            widget.children.cast<ExpansionPanelRadio>(),
+            widget.initialOpenPanelValue);
       }
     }
   }
@@ -285,12 +537,14 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     super.didUpdateWidget(oldWidget);
 
     if (widget._allowOnlyOnePanelOpen) {
-      assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values must be unique.');
+      assert(_allIdentifiersUnique(),
+          'All ExpansionPanelRadio identifier values must be unique.');
       // If the previous widget was non-radio ExpansionPanelList, initialize the
       // open panel to widget.initialOpenPanelValue
       if (!oldWidget._allowOnlyOnePanelOpen) {
-        _currentOpenPanel =
-          searchPanelByValue(widget.children.cast<ExpansionPanelRadio>(), widget.initialOpenPanelValue);
+        _currentOpenPanel = searchPanelByValue(
+            widget.children.cast<ExpansionPanelRadio>(),
+            widget.initialOpenPanelValue);
       }
     } else {
       _currentOpenPanel = null;
@@ -299,7 +553,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   bool _allIdentifiersUnique() {
     final Map<Object, bool> identifierMap = <Object, bool>{};
-    for (final ExpansionPanelRadio child in widget.children.cast<ExpansionPanelRadio>()) {
+    for (final ExpansionPanelRadio child
+        in widget.children.cast<ExpansionPanelRadio>()) {
       identifierMap[child.value] = true;
     }
     return identifierMap.length == widget.children.length;
@@ -307,20 +562,25 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   bool _isChildExpanded(int index) {
     if (widget._allowOnlyOnePanelOpen) {
-      final ExpansionPanelRadio radioWidget = widget.children[index] as ExpansionPanelRadio;
+      final ExpansionPanelRadio radioWidget =
+          widget.children[index] as ExpansionPanelRadio;
       return _currentOpenPanel?.value == radioWidget.value;
     }
     return widget.children[index].isExpanded;
   }
 
- void _handlePressed(bool isExpanded, int index) {
+  void _handlePressed(bool isExpanded, int index) {
     if (widget._allowOnlyOnePanelOpen) {
-      final ExpansionPanelRadio pressedChild = widget.children[index] as ExpansionPanelRadio;
+      final ExpansionPanelRadio pressedChild =
+          widget.children[index] as ExpansionPanelRadio;
 
       // If another ExpansionPanelRadio was already open, apply its
       // expansionCallback (if any) to false, because it's closing.
-      for (int childIndex = 0; childIndex < widget.children.length; childIndex += 1) {
-        final ExpansionPanelRadio child = widget.children[childIndex] as ExpansionPanelRadio;
+      for (int childIndex = 0;
+          childIndex < widget.children.length;
+          childIndex += 1) {
+        final ExpansionPanelRadio child =
+            widget.children[childIndex] as ExpansionPanelRadio;
         if (widget.expansionCallback != null &&
             childIndex != index &&
             child.value == _currentOpenPanel?.value) {
@@ -336,7 +596,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     widget.expansionCallback?.call(index, !isExpanded);
   }
 
-  ExpansionPanelRadio? searchPanelByValue(List<ExpansionPanelRadio> panels, Object? value)  {
+  ExpansionPanelRadio? searchPanelByValue(
+      List<ExpansionPanelRadio> panels, Object? value) {
     for (final ExpansionPanelRadio panel in panels) {
       if (panel.value == value) {
         return panel;
@@ -347,7 +608,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   @override
   Widget build(BuildContext context) {
-    assert(kElevationToShadow.containsKey(widget.elevation),
+    assert(
+      kElevationToShadow.containsKey(widget.elevation),
       'Invalid value for elevation. See the kElevationToShadow constant for'
       ' possible elevation values.',
     );
@@ -355,8 +617,12 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];
 
     for (int index = 0; index < widget.children.length; index += 1) {
-      if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1)) {
-        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 - 1), size: widget.materialGapSize));
+      if (_isChildExpanded(index) &&
+          index != 0 &&
+          !_isChildExpanded(index - 1)) {
+        items.add(MaterialGap(
+            key: _SaltedKey<BuildContext, int>(context, index * 2 - 1),
+            size: widget.materialGapSize));
       }
 
       final ExpansionPanel child = widget.children[index];
@@ -365,21 +631,44 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         _isChildExpanded(index),
       );
 
-      Widget expandIconContainer = Container(
-        margin: const EdgeInsetsDirectional.only(end: 8.0),
-        child: ExpandIcon(
+      Widget expansionIndicator;
+      if (child.expandIconBuilder != null) {
+        expansionIndicator = IgnorePointer(
+          ignoring: child.canTapOnHeader,
+          ignoringSemantics: child.canTapOnHeader,
+          child: child.expandIconBuilder!(
+            context,
+            _isChildExpanded(index),
+            () {
+              _handlePressed(_isChildExpanded(index), index);
+            },
+            widget.animationDuration,
+          ),
+        );
+      } else {
+        expansionIndicator = ExpandIcon(
           color: widget.expandIconColor,
           isExpanded: _isChildExpanded(index),
           padding: _kExpandIconPadding,
           onPressed: !child.canTapOnHeader
               ? (bool isExpanded) => _handlePressed(isExpanded, index)
               : null,
-        ),
+        );
+      }
+
+      Widget expandIconContainer = Container(
+        margin: const EdgeInsetsDirectional.only(end: 8.0),
+        child: expansionIndicator,
       );
       if (!child.canTapOnHeader) {
-        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+        final MaterialLocalizations localizations =
+            MaterialLocalizations.of(context);
+        final String onTapHint = _isChildExpanded(index)
+            ? localizations.expandedIconTapHint
+            : localizations.collapsedIconTapHint;
         expandIconContainer = Semantics(
-          label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
+          label: onTapHint,
+          onTapHint: child.expandIconBuilder == null ? null : onTapHint,
           container: true,
           child: expandIconContainer,
         );
@@ -390,9 +679,12 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
             child: AnimatedContainer(
               duration: widget.animationDuration,
               curve: Curves.fastOutSlowIn,
-              margin: _isChildExpanded(index) ? widget.expandedHeaderPadding : EdgeInsets.zero,
+              margin: _isChildExpanded(index)
+                  ? widget.expandedHeaderPadding
+                  : EdgeInsets.zero,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: _kPanelHeaderCollapsedHeight),
+                constraints: const BoxConstraints(
+                    minHeight: _kPanelHeaderCollapsedHeight),
                 child: headerWidget,
               ),
             ),
@@ -404,7 +696,13 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         header = MergeSemantics(
           child: InkWell(
             onTap: () => _handlePressed(_isChildExpanded(index), index),
-            child: header,
+            child: child.expandIconBuilder != null
+                ? Semantics(
+                    button: true,
+                    enabled: true,
+                    child: header,
+                  )
+                : header,
           ),
         );
       }
@@ -418,10 +716,14 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               AnimatedCrossFade(
                 firstChild: Container(height: 0.0),
                 secondChild: child.body,
-                firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
-                secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
+                firstCurve:
+                    const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
+                secondCurve:
+                    const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
                 sizeCurve: Curves.fastOutSlowIn,
-                crossFadeState: _isChildExpanded(index) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                crossFadeState: _isChildExpanded(index)
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
                 duration: widget.animationDuration,
               ),
             ],
@@ -430,7 +732,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       );
 
       if (_isChildExpanded(index) && index != widget.children.length - 1) {
-        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 + 1), size: widget.materialGapSize));
+        items.add(MaterialGap(
+            key: _SaltedKey<BuildContext, int>(context, index * 2 + 1),
+            size: widget.materialGapSize));
       }
     }
 
