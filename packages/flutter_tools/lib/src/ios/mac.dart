@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -41,21 +40,6 @@ import 'xcresult.dart';
 
 const String kConcurrentRunFailureMessage1 = 'database is locked';
 const String kConcurrentRunFailureMessage2 = 'there are two concurrent builds running';
-
-/// User message when missing platform required to use Xcode.
-///
-/// Starting with Xcode 15, the simulator is no longer downloaded with Xcode
-/// and must be downloaded and installed separately.
-@visibleForTesting
-String missingPlatformInstructions(String simulatorVersion) => '''
-════════════════════════════════════════════════════════════════════════════════
-$simulatorVersion is not installed. To download and install the platform, open
-Xcode, select Xcode > Settings > Platforms, and click the GET button for the
-required platform.
-
-For more information, please visit:
-  https://developer.apple.com/documentation/xcode/installing-additional-simulator-runtimes
-════════════════════════════════════════════════════════════════════════════════''';
 
 class IMobileDevice {
   IMobileDevice({
@@ -716,11 +700,6 @@ _XCResultIssueHandlingResult _handleXCResultIssue({required XCResultIssue issue,
     return _XCResultIssueHandlingResult(requiresProvisioningProfile: true, hasProvisioningProfileIssue: true);
   } else if (message.toLowerCase().contains('provisioning profile')) {
     return _XCResultIssueHandlingResult(requiresProvisioningProfile: false, hasProvisioningProfileIssue: true);
-  } else if (message.toLowerCase().contains('ineligible destinations')) {
-    final String? missingPlatform = _parseMissingPlatform(message);
-    if (missingPlatform != null) {
-      return _XCResultIssueHandlingResult(requiresProvisioningProfile: false, hasProvisioningProfileIssue: false, missingPlatform: missingPlatform);
-    }
   }
   return _XCResultIssueHandlingResult(requiresProvisioningProfile: false, hasProvisioningProfileIssue: false);
 }
@@ -730,7 +709,6 @@ bool _handleIssues(XCResult? xcResult, Logger logger, XcodeBuildExecution? xcode
   bool requiresProvisioningProfile = false;
   bool hasProvisioningProfileIssue = false;
   bool issueDetected = false;
-  String? missingPlatform;
 
   if (xcResult != null && xcResult.parseSuccess) {
     for (final XCResultIssue issue in xcResult.issues) {
@@ -741,7 +719,6 @@ bool _handleIssues(XCResult? xcResult, Logger logger, XcodeBuildExecution? xcode
       if (handlingResult.requiresProvisioningProfile) {
         requiresProvisioningProfile = true;
       }
-      missingPlatform = handlingResult.missingPlatform;
       issueDetected = true;
     }
   } else if (xcResult != null) {
@@ -761,8 +738,6 @@ bool _handleIssues(XCResult? xcResult, Logger logger, XcodeBuildExecution? xcode
     logger.printError('  open ios/Runner.xcworkspace');
     logger.printError('');
     logger.printError("Also try selecting 'Product > Build' to fix the problem.");
-  } else if (missingPlatform != null) {
-    logger.printError(missingPlatformInstructions(missingPlatform), emphasis: true);
   }
 
   return issueDetected;
@@ -798,41 +773,18 @@ void _parseIssueInStdout(XcodeBuildExecution xcodeBuildExecution, Logger logger,
       && (result.stdout?.contains('requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor') ?? false)) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
   }
-
-  if (stderr != null && stderr.contains('Ineligible destinations')) {
-    final String? version = _parseMissingPlatform(stderr);
-      if (version != null) {
-        logger.printError(missingPlatformInstructions(version), emphasis: true);
-      }
-  }
-}
-
-String? _parseMissingPlatform(String message) {
-  final RegExp pattern = RegExp(r'error:(.*?) is not installed\. To use with Xcode, first download and install the platform');
-  final RegExpMatch? match = pattern.firstMatch(message);
-  if (match != null) {
-    final String? version = match.group(1);
-    return version;
-  }
-  return null;
 }
 
 // The result of [_handleXCResultIssue].
 class _XCResultIssueHandlingResult {
 
-  _XCResultIssueHandlingResult({
-    required this.requiresProvisioningProfile,
-    required this.hasProvisioningProfileIssue,
-    this.missingPlatform,
-  });
+  _XCResultIssueHandlingResult({required this.requiresProvisioningProfile, required this.hasProvisioningProfileIssue});
 
   // An issue indicates that user didn't provide the provisioning profile.
   final bool requiresProvisioningProfile;
 
   // An issue indicates that there is a provisioning profile issue.
   final bool hasProvisioningProfileIssue;
-
-  final String? missingPlatform;
 }
 
 const String _kResultBundlePath = 'temporary_xcresult_bundle';

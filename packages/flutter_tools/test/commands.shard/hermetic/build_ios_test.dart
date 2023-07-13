@@ -638,37 +638,6 @@ void main() {
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
 
-    testUsingContext('Extra error message for missing simulator platform in xcresult bundle.', () async {
-      final BuildCommand command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
-        osUtils: FakeOperatingSystemUtils(),
-      );
-
-      createMinimalMockProjectFiles();
-
-      await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
-        throwsToolExit(),
-      );
-
-      expect(testLogger.errorText, contains(missingPlatformInstructions('iOS 17.0')));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
-        }),
-        setUpXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
-        setUpRsyncCommand(),
-      ]),
-      Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
-    });
-
     testUsingContext('Delete xcresult bundle before each xcodebuild command.', () async {
       final BuildCommand command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
