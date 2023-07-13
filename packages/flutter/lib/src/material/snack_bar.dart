@@ -250,6 +250,13 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// ** See code in examples/api/lib/material/snack_bar/snack_bar.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example demonstrates the various [SnackBar] widget components,
+/// including an optional icon, in either floating or fixed format.
+///
+/// ** See code in examples/api/lib/material/snack_bar/snack_bar.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ScaffoldMessenger.of], to obtain the current [ScaffoldMessengerState],
