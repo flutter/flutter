@@ -91,7 +91,7 @@ class HotRunner extends ResidentRunner {
     this.multidexEnabled = false,
     super.devtoolsHandler,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-    ReloadSourcesHelper reloadSourcesHelper = _defaultReloadSourcesHelper,
+    ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
   }) : _stopwatchFactory = stopwatchFactory,
        _reloadSourcesHelper = reloadSourcesHelper,
@@ -1174,7 +1174,8 @@ typedef ReloadSourcesHelper = Future<OperationResult> Function(
   String? reason,
 );
 
-Future<OperationResult> _defaultReloadSourcesHelper(
+@visibleForTesting
+Future<OperationResult> defaultReloadSourcesHelper(
   HotRunner hotRunner,
   List<FlutterDevice?> flutterDevices,
   bool? pause,
@@ -1186,7 +1187,7 @@ Future<OperationResult> _defaultReloadSourcesHelper(
 ) async {
   final Stopwatch vmReloadTimer = Stopwatch()..start();
   const String entryPath = 'main.dart.incremental.dill';
-  final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
+  final List<Future<DeviceReloadReport?>> allReportsFutures = <Future<DeviceReloadReport?>>[];
 
   for (final FlutterDevice? device in flutterDevices) {
     final List<Future<vm_service.ReloadReport>> reportFutures = await _reloadDeviceSources(
@@ -1194,10 +1195,13 @@ Future<OperationResult> _defaultReloadSourcesHelper(
       entryPath,
       pause: pause,
     );
-    allReportsFutures.add(Future.wait(reportFutures).then(
+    allReportsFutures.add(Future.wait(reportFutures).then<DeviceReloadReport?>(
       (List<vm_service.ReloadReport> reports) async {
         // TODO(aam): Investigate why we are validating only first reload report,
         // which seems to be current behavior
+        //if (reports.isEmpty) {
+        //  return null;
+        //}
         final vm_service.ReloadReport firstReport = reports.first;
         // Don't print errors because they will be printed further down when
         // `validateReloadReport` is called again.
@@ -1208,7 +1212,7 @@ Future<OperationResult> _defaultReloadSourcesHelper(
       },
     ));
   }
-  final List<DeviceReloadReport> reports = await Future.wait(allReportsFutures);
+  final Iterable<DeviceReloadReport> reports = (await Future.wait(allReportsFutures)).whereType<DeviceReloadReport>();
   final vm_service.ReloadReport reloadReport = reports.first.reports[0];
   if (!HotRunner.validateReloadReport(reloadReport)) {
     // Reload failed.
