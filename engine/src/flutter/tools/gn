@@ -214,6 +214,13 @@ def buildtools_dir():
 def setup_goma(args):
   goma_gn_args = {}
 
+  # args.goma has three states, True (--goma), False (--no-goma), and
+  # None (default). In True mode, we force GOMA to be used (and fail
+  # if we cannot enable it) unless the selected target definitely does
+  # not support it (in which case we print a warning). In False mode,
+  # we disable GOMA regardless. In None mode, we enable it if we can
+  # autodetect a configuration, and otherwise disable it.
+
   # When running in CI, the recipes use their own goma install, and take
   # care of starting and stopping the compiler proxy.
   running_on_luci = os.environ.get('LUCI_CONTEXT') is not None
@@ -235,14 +242,16 @@ def setup_goma(args):
   if args.target_os == 'wasm' or args.web:
     goma_gn_args['use_goma'] = False
     goma_gn_args['goma_dir'] = None
-    print('Disabling GOMA for wasm builds, it is not supported yet.')
-  elif args.goma and not running_on_luci and os.path.exists(cipd_goma_dir):
+    if args.goma:
+      print('Disabling GOMA for wasm builds, it is not supported yet.')
+  elif args.goma is not False and not running_on_luci and os.path.exists(
+      cipd_goma_dir):
     goma_gn_args['use_goma'] = True
     goma_gn_args['goma_dir'] = cipd_goma_dir
-  elif args.goma and goma_dir and os.path.exists(goma_dir):
+  elif args.goma is not False and goma_dir and os.path.exists(goma_dir):
     goma_gn_args['use_goma'] = True
     goma_gn_args['goma_dir'] = goma_dir
-  elif args.goma and os.path.exists(goma_home_dir):
+  elif args.goma is not False and os.path.exists(goma_home_dir):
     goma_gn_args['use_goma'] = True
     goma_gn_args['goma_dir'] = goma_home_dir
   elif args.goma:
@@ -870,7 +879,7 @@ def parse_args(args):
       help='Do not build the host-side development artifacts.'
   )
 
-  parser.add_argument('--goma', default=True, action='store_true')
+  parser.add_argument('--goma', default=None, action='store_true')
   parser.add_argument('--no-goma', dest='goma', action='store_false')
   parser.add_argument(
       '--xcode-symlinks',
