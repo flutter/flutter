@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 
+import 'package:ui/src/engine/vector_math.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../color_filter.dart';
@@ -79,6 +80,9 @@ abstract class CkColorFilter implements CkManagedSkImageFilterConvertible {
     borrow(skImageFilter);
     skImageFilter.delete();
   }
+
+  @override
+  Matrix4 get transform => Matrix4.identity();
 }
 
 /// A reusable identity transform matrix.
