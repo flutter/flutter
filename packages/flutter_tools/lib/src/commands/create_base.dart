@@ -389,7 +389,7 @@ abstract class CreateBase extends FlutterCommand {
       'macosIdentifier': appleIdentifier,
       'linuxIdentifier': linuxIdentifier,
       'windowsIdentifier': windowsIdentifier,
-      'description': projectDescription,
+      'description': projectDescription != null ? escapeYamlString(projectDescription) : null,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android_common.minApiLevel,
       'androidSdkVersion': kAndroidSdkMinVersion,
