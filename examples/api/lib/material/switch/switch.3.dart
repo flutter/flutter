@@ -16,7 +16,7 @@ class SwitchApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light(useMaterial3: true).copyWith(
-        // Use the ambient [CupetinoThemeData] to style all widgets which would
+        // Use the ambient CupertinoThemeData to style all widgets which would
         // otherwise use iOS defaults.
         cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
       ),
@@ -54,7 +54,7 @@ class _SwitchExampleState extends State<SwitchExample> {
           },
         ),
         Switch.adaptive(
-          // Don't use the ambient [CupetinoThemeData] to style this switch.
+          // Don't use the ambient CupertinoThemeData to style this switch.
           applyCupertinoTheme: false,
           value: light,
           onChanged: (bool value) {
