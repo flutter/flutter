@@ -26,8 +26,7 @@ void main() {
   });
 }
 
-class _FakeHotRunner extends Fake implements HotRunner {
-}
+class _FakeHotRunner extends Fake implements HotRunner {}
 
 class _FakeDevFS extends Fake implements DevFS {
   @override
