@@ -199,7 +199,13 @@ FlutterWindowsEngine::FlutterWindowsEngine(const FlutterProjectBundle& project)
   FlutterWindowsTextureRegistrar::ResolveGlFunctions(gl_procs_);
   texture_registrar_ =
       std::make_unique<FlutterWindowsTextureRegistrar>(this, gl_procs_);
-  surface_manager_ = AngleSurfaceManager::Create();
+
+  // Check for impeller support.
+  auto& switches = project_->GetSwitches();
+  enable_impeller_ = std::find(switches.begin(), switches.end(),
+                               "--enable-impeller=true") != switches.end();
+
+  surface_manager_ = AngleSurfaceManager::Create(enable_impeller_);
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
@@ -369,9 +375,21 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     args.aot_data = aot_data_.get();
   }
 
-  FlutterRendererConfig renderer_config = surface_manager_
-                                              ? GetOpenGLRendererConfig()
-                                              : GetSoftwareRendererConfig();
+  FlutterRendererConfig renderer_config;
+
+  if (enable_impeller_) {
+    // Impeller does not support a Software backend. Avoid falling back and
+    // confusing the engine on which renderer is selected.
+    if (!surface_manager_) {
+      FML_LOG(ERROR) << "Could not create surface manager. Impeller backend "
+                        "does not support software rendering.";
+      return false;
+    }
+    renderer_config = GetOpenGLRendererConfig();
+  } else {
+    renderer_config = surface_manager_ ? GetOpenGLRendererConfig()
+                                       : GetSoftwareRendererConfig();
+  }
 
   auto result = embedder_api_.Run(FLUTTER_ENGINE_VERSION, &renderer_config,
                                   &args, this, &engine_);

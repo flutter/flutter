@@ -552,7 +552,6 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
 
   auto root_surface_canvas =
       embedder_root_canvas ? embedder_root_canvas : frame->Canvas();
-
   auto compositor_frame = compositor_context_->AcquireFrame(
       surface_->GetContext(),         // skia GrContext
       root_surface_canvas,            // root surface canvas
