@@ -283,16 +283,15 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// tree ([rootPipelineOwner]).
   ///
   /// {@template flutter.rendering.createRootPipelineOwner}
-  /// By default, the root pipeline owner is not setup to manage its own
-  /// [RenderView] and in this configuration nothing must be assigned to
-  /// [PipelineOwner.rootNode] of [rootPipelineOwner]. If necessary,
+  /// By default, the root pipeline owner is not setup to manage a render tree
+  /// and its [PipelineOwner.rootNode] must not be assigned. If necessary,
   /// [createRootPipelineOwner] may be overridden to create a root pipeline
-  /// owner configured to manage its own [RenderView].
+  /// owner configured to manage its own render tree.
   ///
-  /// In typical use, children are added to the root pipeline owner (via
-  /// [PipelineOwner.adoptChild]). Those children typically do each manage their
-  /// own [RenderView] and produce distinct render trees which render their
-  /// content into the [FlutterView] associated with that [RenderView].
+  /// In typical use, child pipeline owners are added to the root pipeline owner
+  /// (via [PipelineOwner.adoptChild]). Those children typically do each manage
+  /// their own [RenderView] and produce distinct render trees which render
+  /// their content into the [FlutterView] associated with that [RenderView].
   /// {@endtemplate}
   PipelineOwner createRootPipelineOwner() {
     return _DefaultRootPipelineOwner();

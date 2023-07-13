@@ -287,13 +287,13 @@ abstract mixin class WidgetsBindingObserver {
 ///
 /// A rendering zone is a part of the element tree that is backed by a render
 /// tree and it describes the pixels that are drawn on screen. For elements in
-/// this zone [Element.renderObject] never returns null because the elements are
-/// all associated with [RenderObject]s. Almost all widgets can be placed in a
-/// rendering zone, with the [View] widget, [ViewCollection] widget, and
-/// [RootWidget] as notable exceptions.
+/// this zone, [Element.renderObject] never returns null because the elements
+/// are all associated with [RenderObject]s. Almost all widgets can be placed in
+/// a rendering zone; notable exceptions are the [View] widget, [ViewCollection]
+/// widget, and [RootWidget].
 ///
 /// A non-rendering zone is a part of the element tree that is not backed by a
-/// render tree. For elements in this zone [Element.renderObject] returns null
+/// render tree. For elements in this zone, [Element.renderObject] returns null
 /// because the elements are not associated with any [RenderObject]s. Only
 /// widgets that do not produce a [RenderObject] can be used in this zone
 /// because there is no render tree to attach the render object to. In other
@@ -303,10 +303,12 @@ abstract mixin class WidgetsBindingObserver {
 /// rendering zones (and by extension their associated render trees) into a
 /// unified element tree.
 ///
-/// The root of the element tree at [rootElement] defines the beginning of a
-/// non-rendering zone. The [View] widget is used to start a rendering zone
-/// because it bootstraps a render tree. Within a rendering zone, the
-/// [ViewAnchor] may be used to create a new non-rendering zone.
+/// The root of the element tree at [rootElement] starts a non-rendering zone.
+/// Within a non-rendering zone, the [View] widget is used to start a rendering
+/// zone by bootstrapping a render tree. Within a rendering zone, the
+/// [ViewAnchor] can be used to start a new non-rendering zone.
+///
+// TODO(goderbauer): Include an example graph showcasing the different zones.
 ///
 /// To figure out if an element is in a rendering zone it may walk up the tree
 /// calling [Element.debugExpectsRenderObjectForSlot] on its ancestors. If it
