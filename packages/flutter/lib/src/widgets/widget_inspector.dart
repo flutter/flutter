@@ -798,10 +798,9 @@ mixin WidgetInspectorService {
     required ServiceExtensionCallback callback,
     required RegisterServiceExtensionCallback registerExtension,
   }) {
-    registerServiceExtension(
+    registerExtension(
       name: 'inspector.$name',
       callback: callback,
-      registerExtension: registerExtension,
     );
   }
 
