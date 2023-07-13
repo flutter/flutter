@@ -22,5 +22,6 @@
   "tabSemanticsLabel": "برگه $tabIndex از $tabCount",
   "modalBarrierDismissLabel": "نپذیرفتن",
   "searchTextFieldPlaceholderLabel": "جستجو",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "lookUpButtonLabel": "Look Up"
 }

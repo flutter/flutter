@@ -22,5 +22,6 @@
   "tabSemanticsLabel": "தாவல் $tabIndex / $tabCount",
   "modalBarrierDismissLabel": "நிராகரிக்கும்",
   "searchTextFieldPlaceholderLabel": "தேடுக",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "lookUpButtonLabel": "Look Up"
 }

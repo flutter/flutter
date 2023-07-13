@@ -32,5 +32,6 @@
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zamknij",
   "searchTextFieldPlaceholderLabel": "Szukaj",
-  "noSpellCheckReplacementsLabel": "Nie znaleziono zastąpień"
+  "noSpellCheckReplacementsLabel": "Nie znaleziono zastąpień",
+  "lookUpButtonLabel": "Look Up"
 }
