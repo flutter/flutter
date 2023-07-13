@@ -82,7 +82,7 @@ class Response {
     } else {
       return Response.someTestsFailed(
         _failureDetailsFromJson(responseJson['failureDetails'] as List<dynamic>),
-        data: responseJson['data'] as Map<String, dynamic>?,
+        data: responseJson['failureDetails'] as Map<String, dynamic>?,
       );
     }
   }
