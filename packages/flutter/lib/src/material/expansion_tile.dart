@@ -683,7 +683,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           bottom: BorderSide(color: Colors.transparent),
         )
       ..end = widget.shape
-        ?? expansionTileTheme.collapsedShape
+        ?? expansionTileTheme.shape
         ?? Border(
           top: BorderSide(color: theme.dividerColor),
           bottom: BorderSide(color: theme.dividerColor),
