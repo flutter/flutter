@@ -173,7 +173,7 @@ _flutter.loader = null;
       } else if (!serviceWorkerRegistration.active.scriptURL.endsWith(serviceWorkerVersion)) {
         // When the app updates the serviceWorkerVersion changes, so we
         // need to ask the service worker to update.
-        const newRegistration = await serviceWorkerRegistration.update()
+        const newRegistration = await serviceWorkerRegistration.update();
         console.debug("Updating service worker.");
         return newRegistration.installing || newRegistration.waiting || newRegistration.active;
       } else {
