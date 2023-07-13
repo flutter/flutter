@@ -22,8 +22,6 @@ class TextFrame {
 
   ~TextFrame();
 
-  void CollectUniqueFontGlyphPairs(FontGlyphPair::Set& set, Scalar scale) const;
-
   //----------------------------------------------------------------------------
   /// @brief      The conservative bounding box for this text frame.
   ///

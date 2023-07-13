@@ -79,15 +79,4 @@ bool TextFrame::MaybeHasOverlapping() const {
   return false;
 }
 
-void TextFrame::CollectUniqueFontGlyphPairs(FontGlyphPair::Set& set,
-                                            Scalar scale) const {
-  for (const TextRun& run : GetRuns()) {
-    const Font& font = run.GetFont();
-    for (const TextRun::GlyphPosition& glyph_position :
-         run.GetGlyphPositions()) {
-      set.insert({font, glyph_position.glyph, scale});
-    }
-  }
-}
-
 }  // namespace impeller

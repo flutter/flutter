@@ -162,6 +162,7 @@ class Canvas {
   std::unique_ptr<EntityPass> base_pass_;
   EntityPass* current_pass_ = nullptr;
   std::deque<CanvasStackEntry> xformation_stack_;
+  std::shared_ptr<LazyGlyphAtlas> lazy_glyph_atlas_;
   std::optional<Rect> initial_cull_rect_;
 
   void Initialize(std::optional<Rect> cull_rect);
