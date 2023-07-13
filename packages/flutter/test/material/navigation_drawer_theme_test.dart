@@ -84,7 +84,6 @@ void main() {
 
     const Color indicatorColor = Color(0x00000005);
     final ThemeData theme = ThemeData(
-      useMaterial3: true,
       navigationDrawerTheme: const NavigationDrawerThemeData(
         backgroundColor: backgroundColor,
         elevation: elevation,
@@ -151,7 +150,6 @@ void main() {
 
     const Color indicatorColor = Color(0x00000005);
     final ThemeData theme = ThemeData(
-      useMaterial3: true,
       navigationDrawerTheme: const NavigationDrawerThemeData(
         backgroundColor: Color(0x00000000),
         elevation: 3,
@@ -216,7 +214,6 @@ void main() {
     const Color indicatorColor = Color(0x00000005);
 
     final ThemeData theme = ThemeData(
-      useMaterial3: true,
       navigationDrawerTheme: const NavigationDrawerThemeData(
         backgroundColor: Color(0x00000000),
         elevation: 3,
