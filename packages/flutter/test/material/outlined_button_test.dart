@@ -42,7 +42,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, material3 ? null : const Color(0xff000000));
+    expect(material.shadowColor, material3 ? Colors.transparent : const Color(0xff000000));
 
     expect(material.shape, material3
       ? StadiumBorder(side: BorderSide(color: colorScheme.outline))
@@ -82,7 +82,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, material3 ? null : const Color(0xff000000));
+    expect(material.shadowColor, material3 ? Colors.transparent : const Color(0xff000000));
 
     expect(material.shape, material3
       ? StadiumBorder(side: BorderSide(color: colorScheme.outline))
@@ -125,7 +125,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, material3 ? null : const Color(0xff000000));
+    expect(material.shadowColor, material3 ? Colors.transparent : const Color(0xff000000));
 
     expect(material.shape, material3
         ? StadiumBorder(side: BorderSide(color: colorScheme.outline))
@@ -160,7 +160,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, material3 ? null : const Color(0xff000000));
+    expect(material.shadowColor, material3 ? Colors.transparent : const Color(0xff000000));
 
     expect(material.shape, material3
         ? StadiumBorder(side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)))
@@ -966,18 +966,21 @@ void main() {
   testWidgets('OutlinedButton contributes semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: OutlinedButton(
-            style: const ButtonStyle(
-              // Specifying minimumSize to mimic the original minimumSize for
-              // RaisedButton so that the corresponding button size matches
-              // the original version of this test.
-              minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: OutlinedButton(
+              style: const ButtonStyle(
+                // Specifying minimumSize to mimic the original minimumSize for
+                // RaisedButton so that the corresponding button size matches
+                // the original version of this test.
+                minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
+              ),
+              onPressed: () {},
+              child: const Text('ABC'),
             ),
-            onPressed: () {},
-            child: const Text('ABC'),
           ),
         ),
       ),
@@ -1011,8 +1014,7 @@ void main() {
   testWidgets('OutlinedButton scales textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
-        // Force Material 2 typography.
-        data: ThemeData(textTheme: Typography.englishLike2014),
+        data: ThemeData(useMaterial3: false),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
@@ -1041,7 +1043,7 @@ void main() {
     await tester.pumpWidget(
       Theme(
         // Force Material 2 typography.
-        data: ThemeData(textTheme: Typography.englishLike2014),
+        data: ThemeData(useMaterial3: false),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
@@ -1072,8 +1074,7 @@ void main() {
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
       Theme(
-        // Force Material 2 typography.
-        data: ThemeData(textTheme: Typography.englishLike2014),
+        data: ThemeData(useMaterial3: false),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
@@ -1131,7 +1132,7 @@ void main() {
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
       return tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(textTheme: Typography.englishLike2014),
+          theme: ThemeData(useMaterial3: false),
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: Center(
@@ -1261,10 +1262,7 @@ void main() {
             await tester.pumpWidget(
               MaterialApp(
                 theme: ThemeData(
-                  colorScheme: const ColorScheme.light(),
-                  // Force Material 2 defaults for the typography and size
-                  // default values as the test was designed against these settings.
-                  textTheme: Typography.englishLike2014,
+                  useMaterial3: false,
                   outlinedButtonTheme: OutlinedButtonThemeData(
                     style: OutlinedButton.styleFrom(minimumSize: const Size(64, 36)),
                   ),
@@ -1407,7 +1405,7 @@ void main() {
   testWidgets('Override OutlinedButton default padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData(useMaterial3: false),
         home: Builder(
           builder: (BuildContext context) {
             return MediaQuery(
@@ -1677,7 +1675,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(textTheme: Typography.englishLike2014),
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: Column(

@@ -250,6 +250,13 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// ** See code in examples/api/lib/material/snack_bar/snack_bar.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example demonstrates the various [SnackBar] widget components,
+/// including an optional icon, in either floating or fixed format.
+///
+/// ** See code in examples/api/lib/material/snack_bar/snack_bar.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ScaffoldMessenger.of], to obtain the current [ScaffoldMessengerState],
@@ -842,11 +849,12 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 
   @override
   TextStyle? get contentTextStyle => ThemeData(
-          brightness: _theme.brightness == Brightness.light
-              ? Brightness.dark
-              : Brightness.light)
-      .textTheme
-      .titleMedium;
+    useMaterial3: _theme.useMaterial3,
+    brightness: _theme.brightness == Brightness.light
+      ? Brightness.dark
+      : Brightness.light)
+    .textTheme
+    .titleMedium;
 
   @override
   SnackBarBehavior get behavior => SnackBarBehavior.fixed;
@@ -884,8 +892,6 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _SnackbarDefaultsM3 extends SnackBarThemeData {
     _SnackbarDefaultsM3(this.context);

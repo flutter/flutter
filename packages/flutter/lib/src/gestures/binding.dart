@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show PointerDataPacket;
@@ -338,8 +337,18 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   /// State for all pointers which are currently down.
   ///
-  /// The state of hovering pointers is not tracked because that would require
-  /// hit-testing on every frame.
+  /// This map caches the hit test result done when the pointer goes down
+  /// ([PointerDownEvent] and [PointerPanZoomStartEvent]). This hit test result
+  /// will be used throughout the entire pointer interaction; that is, the
+  /// pointer is seen as pointing to the same place even if it has moved away
+  /// until pointer goes up ([PointerUpEvent] and [PointerPanZoomEndEvent]).
+  /// This matches the expected gesture interaction with a button, and allows
+  /// devices that don't support hovering to perform as few hit tests as
+  /// possible.
+  ///
+  /// On the other hand, hovering requires hit testing on almost every frame.
+  /// This is handled in [RendererBinding] and [MouseTracker], and will ignore
+  /// the results cached here.
   final Map<int, HitTestResult> _hitTests = <int, HitTestResult>{};
 
   /// Dispatch an event to the targets found by a hit test on its position.

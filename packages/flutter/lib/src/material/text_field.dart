@@ -178,6 +178,13 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///
 /// {@macro flutter.widgets.editableText.accessibility}
 ///
+/// {@tool dartpad}
+/// This sample shows how to style a text field to match a filled or outlined
+/// Material Design 3 text field.
+///
+/// ** See code in examples/api/lib/material/text_field/text_field.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TextFormField], which integrates with the [Form] widget.
@@ -1502,8 +1509,6 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
   if (states.contains(MaterialState.disabled)) {

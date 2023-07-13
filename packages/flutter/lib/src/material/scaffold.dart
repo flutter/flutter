@@ -279,6 +279,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// the SnackBar to be visible.
   ///
   /// {@tool dartpad}
+  /// Here is an example showing how to display a [SnackBar] with [showSnackBar]
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
   /// Here is an example showing that a floating [SnackBar] appears above [Scaffold.floatingActionButton].
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.1.dart **
@@ -1358,11 +1364,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   void _handlePreviousAnimationStatusChanged(AnimationStatus status) {
     setState(() {
-      if (status == AnimationStatus.dismissed) {
+      if (widget.child != null && status == AnimationStatus.dismissed) {
         assert(widget.currentController.status == AnimationStatus.dismissed);
-        if (widget.child != null) {
-          widget.currentController.forward();
-        }
+        widget.currentController.forward();
       }
     });
   }
@@ -2312,6 +2316,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
       bottomSheetKey.currentState!.close();
       setState(() {
+        _showBodyScrim = false;
+        _bodyScrimColor = Colors.black.withOpacity(0.0);
         _currentBottomSheet = null;
       });
 

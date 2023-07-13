@@ -45,12 +45,19 @@ import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/testbed.dart';
 
+final vm_service.Event fakeUnpausedEvent = vm_service.Event(
+  kind: vm_service.EventKind.kResume,
+  timestamp: 0
+);
+
+final vm_service.Event fakePausedEvent = vm_service.Event(
+  kind: vm_service.EventKind.kPauseException,
+  timestamp: 0
+);
+
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kResume,
-    timestamp: 0
-  ),
+  pauseEvent: fakeUnpausedEvent,
   breakpoints: <vm_service.Breakpoint>[],
   extensionRPCs: <String>[],
   libraries: <vm_service.LibraryRef>[
@@ -72,10 +79,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
 
 final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kPauseException,
-    timestamp: 0
-  ),
+  pauseEvent: fakePausedEvent,
   breakpoints: <vm_service.Breakpoint>[
     vm_service.Breakpoint(
       breakpointNumber: 123,
@@ -537,11 +541,11 @@ void main() {
       listViews,
       listViews,
       FakeVmServiceRequest(
-        method: 'getIsolate',
+        method: 'getIsolatePauseEvent',
         args: <String, Object>{
           'isolateId': '1',
         },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
+        jsonResponse: fakeUnpausedEvent.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.reassemble',
@@ -604,11 +608,11 @@ void main() {
         },
       ),
       FakeVmServiceRequest(
-        method: 'getIsolate',
+        method: 'getIsolatePauseEvent',
         args: <String, Object>{
           'isolateId': '1',
         },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
+        jsonResponse: fakeUnpausedEvent.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.reassemble',
@@ -728,11 +732,11 @@ void main() {
         },
       ),
       FakeVmServiceRequest(
-        method: 'getIsolate',
+        method: 'getIsolatePauseEvent',
         args: <String, Object>{
           'isolateId': '1',
         },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
+        jsonResponse: fakeUnpausedEvent.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.reassemble',
@@ -791,11 +795,11 @@ void main() {
         },
       ),
       FakeVmServiceRequest(
-        method: 'getIsolate',
+        method: 'getIsolatePauseEvent',
         args: <String, Object>{
           'isolateId': '1',
         },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
+        jsonResponse: fakeUnpausedEvent.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.fastReassemble',
@@ -882,11 +886,11 @@ void main() {
         },
       ),
       FakeVmServiceRequest(
-        method: 'getIsolate',
+        method: 'getIsolatePauseEvent',
         args: <String, Object>{
           'isolateId': '1',
         },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
+        jsonResponse: fakeUnpausedEvent.toJson(),
       ),
       FakeVmServiceRequest(
         method: 'ext.flutter.fastReassemble',

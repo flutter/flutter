@@ -553,7 +553,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
   }) {
     RenderObject repaintBoundary = renderObject;
     while (!repaintBoundary.isRepaintBoundary) {
-      repaintBoundary = repaintBoundary.parent! as RenderObject;
+      repaintBoundary = repaintBoundary.parent!;
     }
     final _ScreenshotData data = _ScreenshotData(target: renderObject);
     final _ScreenshotPaintingContext context = _ScreenshotPaintingContext(
@@ -1330,6 +1330,7 @@ mixin WidgetInspectorService {
     InspectorReferenceData referenceData;
     if (id == null) {
       // TODO(polina-c): comment here why we increase memory footprint by the prefix 'inspector-'.
+      // https://github.com/flutter/devtools/issues/5995
       id = 'inspector-$_nextId';
       _nextId += 1;
       _objectToId[object] = id;
@@ -1663,7 +1664,7 @@ mixin WidgetInspectorService {
     final List<RenderObject> chain = <RenderObject>[];
     while (renderObject != null) {
       chain.add(renderObject);
-      renderObject = renderObject.parent as RenderObject?;
+      renderObject = renderObject.parent;
     }
     return _followDiagnosticableChain(chain.reversed.toList());
   }
@@ -1753,9 +1754,12 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getProperties(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getProperties(String? diagnosticsNodeId, String groupName) {
-    final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode?;
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), InspectorSerializationDelegate(groupName: groupName, service: this), parent: node);
+  List<Object>  _getProperties(String? diagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticableId);
+    if (node == null) {
+      return const <Object>[];
+    }
+    return _nodesToJson(node.getProperties(), InspectorSerializationDelegate(groupName: groupName, service: this), parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -1788,24 +1792,42 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getChildrenSummaryTree(diagnosticsNodeId, groupName));
   }
 
-  List<Object> _getChildrenSummaryTree(String? diagnosticsNodeId, String groupName) {
-    final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode?;
+  DiagnosticsNode? _idToDiagnosticsNode(String? diagnosticableId) {
+    final Object? object = toObject(diagnosticableId);
+    return objectToDiagnosticsNode(object);
+  }
+
+  /// If possible, returns [DiagnosticsNode] for the object.
+  @visibleForTesting
+  static DiagnosticsNode? objectToDiagnosticsNode(Object? object) {
+    if (object is Diagnosticable) {
+      return object.toDiagnosticsNode();
+    }
+    return null;
+  }
+
+  List<Object> _getChildrenSummaryTree(String? diagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticableId);
+    if (node == null) {
+      return <Object>[];
+    }
+
     final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, summaryTree: true, service: this);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate, parent: node);
+    return _nodesToJson(_getChildrenFiltered(node, delegate), delegate, parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
-  /// object that `diagnosticsNodeId` references providing information needed
+  /// object that [diagnosticableId] references providing information needed
   /// for the details subtree view.
   ///
   /// The details subtree shows properties inline and includes all children
   /// rather than a filtered set of important children.
-  String getChildrenDetailsSubtree(String diagnosticsNodeId, String groupName) {
-    return _safeJsonEncode(_getChildrenDetailsSubtree(diagnosticsNodeId, groupName));
+  String getChildrenDetailsSubtree(String diagnosticableId, String groupName) {
+    return _safeJsonEncode(_getChildrenDetailsSubtree(diagnosticableId, groupName));
   }
 
-  List<Object> _getChildrenDetailsSubtree(String? diagnosticsNodeId, String groupName) {
-    final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode?;
+  List<Object> _getChildrenDetailsSubtree(String? diagnosticableId, String groupName) {
+    final DiagnosticsNode? node = _idToDiagnosticsNode(diagnosticableId);
     // With this value of minDepth we only expand one extra level of important nodes.
     final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, includeProperties: true, service: this);
     return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate, parent: node);
@@ -1917,19 +1939,19 @@ mixin WidgetInspectorService {
   ///  * [getChildrenDetailsSubtree], a method to get children of a node
   ///    in the details subtree.
   String getDetailsSubtree(
-    String id,
+    String diagnosticableId,
     String groupName, {
     int subtreeDepth = 2,
   }) {
-    return _safeJsonEncode(_getDetailsSubtree( id, groupName, subtreeDepth));
+    return _safeJsonEncode(_getDetailsSubtree(diagnosticableId, groupName, subtreeDepth));
   }
 
   Map<String, Object?>? _getDetailsSubtree(
-    String? id,
+    String? diagnosticableId,
     String? groupName,
     int subtreeDepth,
   ) {
-    final DiagnosticsNode? root = toObject(id) as DiagnosticsNode?;
+    final DiagnosticsNode? root = _idToDiagnosticsNode(diagnosticableId);
     if (root == null) {
       return null;
     }
@@ -1945,13 +1967,12 @@ mixin WidgetInspectorService {
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element].
-  ///
-  /// If the currently selected [Element] is identical to the [Element]
-  /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
-  /// reused.
   @protected
   String getSelectedWidget(String? previousSelectionId, String groupName) {
-    return _safeJsonEncode(_getSelectedWidget(previousSelectionId, groupName));
+    if (previousSelectionId != null) {
+      debugPrint('previousSelectionId is deprecated in API');
+    }
+    return _safeJsonEncode(_getSelectedWidget(null, groupName));
   }
 
   /// Captures an image of the current state of an [object] that is a
@@ -2027,18 +2048,18 @@ mixin WidgetInspectorService {
   Future<Map<String, Object?>> _getLayoutExplorerNode(
     Map<String, String> parameters,
   ) {
-    final String? id = parameters['id'];
+    final String? diagnosticableId = parameters['id'];
     final int subtreeDepth = int.parse(parameters['subtreeDepth']!);
     final String? groupName = parameters['groupName'];
     Map<String, dynamic>? result = <String, dynamic>{};
-    final Object? root = toObject(id);
+    final DiagnosticsNode? root = _idToDiagnosticsNode(diagnosticableId);
     if (root == null) {
       return Future<Map<String, dynamic>>.value(<String, dynamic>{
         'result': result,
       });
     }
     result = _nodeToJson(
-      root as DiagnosticsNode,
+      root,
       InspectorSerializationDelegate(
         groupName: groupName,
         summaryTree: true,
@@ -2060,7 +2081,7 @@ mixin WidgetInspectorService {
             'renderObject': renderObject.toDiagnosticsNode().toJsonMap(renderObjectSerializationDelegate),
           };
 
-          final AbstractNode? renderParent = renderObject.parent;
+          final RenderObject? renderParent = renderObject.parent;
           if (renderParent is RenderObject && subtreeDepth > 0) {
             final Object? parentCreator = renderParent.debugCreator;
             if (parentCreator is DebugCreator) {
@@ -2235,12 +2256,11 @@ mixin WidgetInspectorService {
   /// if the selected [Element] should be shown in the summary tree otherwise
   /// returns the first ancestor of the selected [Element] shown in the summary
   /// tree.
-  ///
-  /// If the currently selected [Element] is identical to the [Element]
-  /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
-  /// reused.
-  String getSelectedSummaryWidget(String previousSelectionId, String groupName) {
-    return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
+  String getSelectedSummaryWidget(String? previousSelectionId, String groupName) {
+    if (previousSelectionId != null) {
+      debugPrint('previousSelectionId is deprecated in API');
+    }
+    return _safeJsonEncode(_getSelectedSummaryWidget(null, groupName));
   }
 
   _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId) {
@@ -2955,7 +2975,7 @@ class _RenderInspectorOverlay extends RenderBox {
     context.addLayer(_InspectorOverlayLayer(
       overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       selection: selection,
-      rootRenderObject: parent is RenderObject ? parent! as RenderObject : null,
+      rootRenderObject: parent is RenderObject ? parent! : null,
     ));
   }
 }
@@ -3244,14 +3264,14 @@ class _InspectorOverlayLayer extends Layer {
   /// overlays in the same app (i.e. an storyboard), a selected or candidate
   /// render object may not belong to this tree.
   bool _isInInspectorRenderObjectTree(RenderObject child) {
-    RenderObject? current = child.parent as RenderObject?;
+    RenderObject? current = child.parent;
     while (current != null) {
       // We found the widget inspector render object.
       if (current is RenderStack
           && current.lastChild is _RenderInspectorOverlay) {
         return rootRenderObject == current;
       }
-      current = current.parent as RenderObject?;
+      current = current.parent;
     }
     return false;
   }
@@ -3609,7 +3629,6 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     final Map<String, Object?> result = <String, Object?>{};
     final Object? value = node.value;
     if (_interactive) {
-      result['objectId'] = service.toId(node, groupName!);
       result['valueId'] = service.toId(value, groupName!);
     }
     if (summaryTree) {

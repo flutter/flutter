@@ -865,6 +865,13 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       }
       context.canvas.clipRect(bounds);
     }
+
+    if (_lastSelectableFragments != null) {
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paint(context, offset);
+      }
+    }
+
     _textPainter.paint(context.canvas, offset);
 
     paintInlineChildren(context, offset);
@@ -878,11 +885,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
         context.canvas.drawRect(Offset.zero & size, paint);
       }
       context.canvas.restore();
-    }
-    if (_lastSelectableFragments != null) {
-      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
-        fragment.paint(context, offset);
-      }
     }
   }
 
@@ -1333,6 +1335,14 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
     final bool flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
     final Matrix4 paragraphToFragmentTransform = getTransformToParagraph()..invert();
+    final TextSelection selection = TextSelection(
+      baseOffset: selectionStart,
+      extentOffset: selectionEnd,
+    );
+    final List<Rect> selectionRects = <Rect>[];
+    for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
+      selectionRects.add(textBox.toRect());
+    }
     return SelectionGeometry(
       startSelectionPoint: SelectionPoint(
         localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, startOffsetInParagraphCoordinates),
@@ -1344,6 +1354,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         lineHeight: paragraph._textPainter.preferredLineHeight,
         handleType: flipHandles ? TextSelectionHandleType.left : TextSelectionHandleType.right,
       ),
+      selectionRects: selectionRects,
       status: _textSelectionStart!.offset == _textSelectionEnd!.offset
         ? SelectionStatus.collapsed
         : SelectionStatus.uncollapsed,
@@ -1486,7 +1497,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     assert(word.start >= range.start && word.end <= range.end);
     late TextPosition start;
     late TextPosition end;
-    if (position.offset >= word.end) {
+    if (position.offset > word.end) {
       start = end = TextPosition(offset: position.offset);
     } else {
       start = TextPosition(offset: word.start);

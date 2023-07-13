@@ -1835,36 +1835,48 @@ class EditableText extends StatefulWidget {
     required final VoidCallback? onCut,
     required final VoidCallback? onPaste,
     required final VoidCallback? onSelectAll,
+    required final VoidCallback? onLiveTextInput,
   }) {
-    // If the paste button is enabled, don't render anything until the state
-    // of the clipboard is known, since it's used to determine if paste is
-    // shown.
-    if (onPaste != null && clipboardStatus == ClipboardStatus.unknown) {
-      return <ContextMenuButtonItem>[];
+    final List<ContextMenuButtonItem> resultButtonItem = <ContextMenuButtonItem>[];
+
+    // Configure button items with clipboard.
+    if (onPaste == null || clipboardStatus != ClipboardStatus.unknown) {
+      // If the paste button is enabled, don't render anything until the state
+      // of the clipboard is known, since it's used to determine if paste is
+      // shown.
+      resultButtonItem.addAll(<ContextMenuButtonItem>[
+        if (onCut != null)
+          ContextMenuButtonItem(
+            onPressed: onCut,
+            type: ContextMenuButtonType.cut,
+          ),
+        if (onCopy != null)
+          ContextMenuButtonItem(
+            onPressed: onCopy,
+            type: ContextMenuButtonType.copy,
+          ),
+        if (onPaste != null)
+          ContextMenuButtonItem(
+            onPressed: onPaste,
+            type: ContextMenuButtonType.paste,
+          ),
+        if (onSelectAll != null)
+          ContextMenuButtonItem(
+            onPressed: onSelectAll,
+            type: ContextMenuButtonType.selectAll,
+          ),
+      ]);
     }
 
-    return <ContextMenuButtonItem>[
-      if (onCut != null)
-        ContextMenuButtonItem(
-          onPressed: onCut,
-          type: ContextMenuButtonType.cut,
-        ),
-      if (onCopy != null)
-        ContextMenuButtonItem(
-          onPressed: onCopy,
-          type: ContextMenuButtonType.copy,
-        ),
-      if (onPaste != null)
-        ContextMenuButtonItem(
-          onPressed: onPaste,
-          type: ContextMenuButtonType.paste,
-        ),
-      if (onSelectAll != null)
-        ContextMenuButtonItem(
-          onPressed: onSelectAll,
-          type: ContextMenuButtonType.selectAll,
-        ),
-    ];
+    // Config button items with Live Text.
+    if (onLiveTextInput != null) {
+      resultButtonItem.add(ContextMenuButtonItem(
+        onPressed: onLiveTextInput,
+        type: ContextMenuButtonType.liveTextInput,
+      ));
+    }
+
+    return resultButtonItem;
   }
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
@@ -2063,6 +2075,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Detects whether the clipboard can paste.
   final ClipboardStatusNotifier clipboardStatus = ClipboardStatusNotifier();
 
+  /// Detects whether the Live Text input is enabled.
+  ///
+  /// See also:
+  ///  * [LiveText], where the availability of Live Text input can be obtained.
+  final LiveTextInputStatusNotifier? _liveTextInputStatus =
+      kIsWeb ? null : LiveTextInputStatusNotifier();
+
   TextInputConnection? _textInputConnection;
   bool get _hasInputConnection => _textInputConnection?.attached ?? false;
 
@@ -2196,9 +2215,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  @override
+  bool get liveTextInputEnabled {
+    return _liveTextInputStatus?.value == LiveTextInputStatus.enabled &&
+        !widget.obscureText &&
+        !widget.readOnly &&
+        textEditingValue.selection.isCollapsed;
+  }
+
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
+    });
+  }
+
+  void _onChangedLiveTextInputStatus() {
+    setState(() {
+      // Inform the widget that the value of liveTextInputStatus has changed.
     });
   }
 
@@ -2344,6 +2377,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         case TargetPlatform.iOS:
           break;
       }
+    }
+  }
+
+  void _startLiveTextInput(SelectionChangedCause cause) {
+    if (!liveTextInputEnabled) {
+      return;
+    }
+    if (_hasInputConnection) {
+      LiveText.startLiveTextInput();
+    }
+    if (cause == SelectionChangedCause.toolbar) {
+      hideToolbar();
     }
   }
 
@@ -2561,6 +2606,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       onSelectAll: selectAllEnabled
           ? () => selectAll(SelectionChangedCause.toolbar)
           : null,
+      onLiveTextInput: liveTextInputEnabled
+          ? () => _startLiveTextInput(SelectionChangedCause.toolbar)
+          : null,
     );
   }
 
@@ -2569,6 +2617,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void initState() {
     super.initState();
+    _liveTextInputStatus?.addListener(_onChangedLiveTextInputStatus);
     clipboardStatus.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
@@ -2610,12 +2659,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool newTickerEnabled = TickerMode.of(context);
     if (_tickersEnabled != newTickerEnabled) {
       _tickersEnabled = newTickerEnabled;
-      if (_tickersEnabled && _cursorActive) {
+      if (_showBlinkingCursor) {
         _startCursorBlink();
       } else if (!_tickersEnabled && _cursorTimer != null) {
-        // Cannot use _stopCursorBlink because it would reset _cursorActive.
-        _cursorTimer!.cancel();
-        _cursorTimer = null;
+        _stopCursorBlink();
       }
     }
 
@@ -2707,6 +2754,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         );
       }
     }
+
+    if (widget.showCursor != oldWidget.showCursor) {
+      _startOrStopCursorTimerIfNeeded();
+    }
     final bool canPaste = widget.selectionControls is TextSelectionHandleControls
         ? pasteEnabled
         : widget.selectionControls?.canPaste(this) ?? false;
@@ -2732,6 +2783,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance.removeObserver(this);
+    _liveTextInputStatus?.removeListener(_onChangedLiveTextInputStatus);
+    _liveTextInputStatus?.dispose();
     clipboardStatus.removeListener(_onChangedClipboardStatus);
     clipboardStatus.dispose();
     _cursorVisibilityNotifier.dispose();
@@ -2792,6 +2845,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_textInputConnection?.scribbleInProgress ?? false) {
         cause = SelectionChangedCause.scribble;
       } else if (_pointOffsetOrigin != null) {
+        // For floating cursor selection when force pressing the space bar.
         cause = SelectionChangedCause.forcePress;
       } else {
         cause = SelectionChangedCause.keyboard;
@@ -2816,17 +2870,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _formatAndSetValue(value, SelectionChangedCause.keyboard);
     }
 
+    if (_showBlinkingCursor && _cursorTimer != null) {
+      // To keep the cursor from blinking while typing, restart the timer here.
+      _stopCursorBlink(resetCharTicks: false);
+      _startCursorBlink();
+    }
+
     // Wherever the value is changed by the user, schedule a showCaretOnScreen
     // to make sure the user can see the changes they just made. Programmatic
     // changes to `textEditingValue` do not trigger the behavior even if the
     // text field is focused.
     _scheduleShowCaretOnScreen(withAnimation: true);
-    if (_hasInputConnection) {
-      // To keep the cursor from blinking while typing, we want to restart the
-      // cursor timer every time a new character is typed.
-      _stopCursorBlink(resetCharTicks: false);
-      _startCursorBlink();
-    }
   }
 
   bool _checkNeedsAdjustAffinity(TextEditingValue value) {
@@ -2941,8 +2995,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition!).centerLeft - _floatingCursorOffset;
     if (_floatingCursorResetController!.isCompleted) {
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
-      // Only change if the current selection range is collapsed, to prevent
-      // overwriting the result of the iOS keyboard selection gesture.
+      // During a floating cursor's move gesture (1 finger), a cursor is
+      // animated only visually, without actually updating the selection.
+      // Only after move gesture is complete, this function will be called
+      // to actually update the selection to the new cursor location with
+      // zero selection length.
+
+      // However, During a floating cursor's selection gesture (2 fingers), the
+      // selection is constantly updated by the engine throughout the gesture.
+      // Thus when the gesture is complete, we should not update the selection
+      // to the cursor location with zero selection length, because that would
+      // overwrite the selection made by floating cursor selection.
+
+      // Here we use `isCollapsed` to distinguish between floating cursor's
+      // move gesture (1 finger) vs selection gesture (2 fingers), as
+      // the engine does not provide information other than notifying a
+      // new selection during with selection gesture (2 fingers).
       if (renderEditable.selection!.isCollapsed) {
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
         _handleSelectionChanged(TextSelection.fromPosition(_lastTextPosition!), SelectionChangedCause.forcePress);
@@ -3398,16 +3466,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     // To keep the cursor from blinking while it moves, restart the timer here.
-    if (_cursorTimer != null) {
+    if (_showBlinkingCursor && _cursorTimer != null) {
       _stopCursorBlink(resetCharTicks: false);
       _startCursorBlink();
     }
-  }
-
-  Rect? _currentCaretRect;
-  // ignore: use_setters_to_change_properties, (this is used as a callback, can't be a setter)
-  void _handleCaretChanged(Rect caretRect) {
-    _currentCaretRect = caretRect;
   }
 
   // Animation configuration for scrolling the caret back on screen.
@@ -3423,7 +3485,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
-      if (_currentCaretRect == null || !_scrollController.hasClients) {
+      // Since we are in a post frame callback, check currentContext in case
+      // RenderEditable has been disposed (in which case it will be null).
+      final RenderEditable? renderEditable =
+          _editableKey.currentContext?.findRenderObject() as RenderEditable?;
+      if (renderEditable == null
+          || !(renderEditable.selection?.isValid ?? false)
+          || !_scrollController.hasClients) {
         return;
       }
 
@@ -3454,7 +3522,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final EdgeInsets caretPadding = widget.scrollPadding
         .copyWith(bottom: bottomSpacing);
 
-      final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
+      final Rect caretRect = renderEditable.getLocalRectForCaret(renderEditable.selection!.extent);
+      final RevealedOffset targetOffset = _getOffsetToRevealCaret(caretRect);
 
       final Rect rectToReveal;
       final TextSelection selection = textEditingValue.selection;
@@ -3640,6 +3709,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController.value > 0;
   }
 
+  bool get _showBlinkingCursor => _hasFocus && _value.selection.isCollapsed && widget.showCursor && _tickersEnabled;
+
   /// Whether the blinking cursor is actually visible at this precise moment
   /// (it's hidden half the time, since it blinks).
   @visibleForTesting
@@ -3658,13 +3729,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   int _obscureShowCharTicksPending = 0;
   int? _obscureLatestCharIndex;
 
-  // Indicates whether the cursor should be blinking right now (but it may
-  // actually not blink because it's disabled via TickerMode.of(context)).
-  bool _cursorActive = false;
-
   void _startCursorBlink() {
     assert(!(_cursorTimer?.isActive ?? false) || !(_backingCursorBlinkOpacityController?.isAnimating ?? false));
-    _cursorActive = true;
+    if (!widget.showCursor) {
+      return;
+    }
     if (!_tickersEnabled) {
       return;
     }
@@ -3704,7 +3773,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _stopCursorBlink({ bool resetCharTicks = true }) {
-    _cursorActive = false;
     _cursorBlinkOpacityController.value = 0.0;
     _cursorTimer?.cancel();
     _cursorTimer = null;
@@ -3714,11 +3782,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _startOrStopCursorTimerIfNeeded() {
-    if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed) {
-      _startCursorBlink();
-    }
-    else if (_cursorActive && (!_hasFocus || !_value.selection.isCollapsed)) {
+    if (!_showBlinkingCursor) {
       _stopCursorBlink();
+    } else if (_cursorTimer == null) {
+      _startCursorBlink();
     }
   }
 
@@ -3970,6 +4037,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_selectionOverlay == null) {
       return false;
     }
+    _liveTextInputStatus?.update();
     clipboardStatus.update();
     _selectionOverlay!.showToolbar();
     return true;
@@ -4629,7 +4697,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             obscuringCharacter: widget.obscuringCharacter,
                             obscureText: widget.obscureText,
                             offset: offset,
-                            onCaretChanged: _handleCaretChanged,
                             rendererIgnoresPointer: widget.rendererIgnoresPointer,
                             cursorWidth: widget.cursorWidth,
                             cursorHeight: widget.cursorHeight,
@@ -4754,7 +4821,6 @@ class _Editable extends MultiChildRenderObjectWidget {
     required this.obscuringCharacter,
     required this.obscureText,
     required this.offset,
-    this.onCaretChanged,
     this.rendererIgnoresPointer = false,
     required this.cursorWidth,
     this.cursorHeight,
@@ -4795,7 +4861,6 @@ class _Editable extends MultiChildRenderObjectWidget {
   final TextHeightBehavior? textHeightBehavior;
   final TextWidthBasis textWidthBasis;
   final ViewportOffset offset;
-  final CaretChangedHandler? onCaretChanged;
   final bool rendererIgnoresPointer;
   final double cursorWidth;
   final double? cursorHeight;
@@ -4834,7 +4899,6 @@ class _Editable extends MultiChildRenderObjectWidget {
       locale: locale ?? Localizations.maybeLocaleOf(context),
       selection: value.selection,
       offset: offset,
-      onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
       obscureText: obscureText,
@@ -4879,7 +4943,6 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..selection = value.selection
       ..offset = offset
-      ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
       ..textHeightBehavior = textHeightBehavior
       ..textWidthBasis = textWidthBasis

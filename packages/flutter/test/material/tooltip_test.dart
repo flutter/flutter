@@ -142,32 +142,35 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) {
-                return Stack(
-                  children: <Widget>[
-                    Positioned(
-                      left: 0.0,
-                      top: 0.0,
-                      child: Tooltip(
-                        key: tooltipKey,
-                        message: tooltipText,
-                        height: 20.0,
-                        padding: const EdgeInsets.all(5.0),
-                        verticalOffset: 20.0,
-                        preferBelow: false,
-                        child: const SizedBox.shrink(),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Stack(
+                    children: <Widget>[
+                      Positioned(
+                        left: 0.0,
+                        top: 0.0,
+                        child: Tooltip(
+                          key: tooltipKey,
+                          message: tooltipText,
+                          height: 20.0,
+                          padding: const EdgeInsets.all(5.0),
+                          verticalOffset: 20.0,
+                          preferBelow: false,
+                          child: const SizedBox.shrink(),
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -362,32 +365,35 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up in the right place - way off to the right', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) {
-                return Stack(
-                  children: <Widget>[
-                    Positioned(
-                      left: 1600.0,
-                      top: 300.0,
-                      child: Tooltip(
-                        key: tooltipKey,
-                        message: tooltipText,
-                        height: 10.0,
-                        padding: EdgeInsets.zero,
-                        verticalOffset: 10.0,
-                        preferBelow: true,
-                        child: const SizedBox.shrink(),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Stack(
+                    children: <Widget>[
+                      Positioned(
+                        left: 1600.0,
+                        top: 300.0,
+                        child: Tooltip(
+                          key: tooltipKey,
+                          message: tooltipText,
+                          height: 10.0,
+                          padding: EdgeInsets.zero,
+                          verticalOffset: 10.0,
+                          preferBelow: true,
+                          child: const SizedBox.shrink(),
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -416,32 +422,35 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) {
-                return Stack(
-                  children: <Widget>[
-                    Positioned(
-                      left: 780.0,
-                      top: 300.0,
-                      child: Tooltip(
-                        key: tooltipKey,
-                        message: tooltipText,
-                        height: 10.0,
-                        padding: EdgeInsets.zero,
-                        verticalOffset: 10.0,
-                        preferBelow: true,
-                        child: const SizedBox.shrink(),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Stack(
+                    children: <Widget>[
+                      Positioned(
+                        left: 780.0,
+                        top: 300.0,
+                        child: Tooltip(
+                          key: tooltipKey,
+                          message: tooltipText,
+                          height: 10.0,
+                          padding: EdgeInsets.zero,
+                          verticalOffset: 10.0,
+                          preferBelow: true,
+                          child: const SizedBox.shrink(),
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -580,6 +589,7 @@ void main() {
   testWidgetsWithLeakTracking('Default tooltip message textStyle - light', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Tooltip(
         key: tooltipKey,
         message: tooltipText,
@@ -604,6 +614,7 @@ void main() {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
+        useMaterial3: false,
         brightness: Brightness.dark,
       ),
       home: Tooltip(
@@ -760,20 +771,23 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up with the right default size, shape, and color', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) {
-                return Tooltip(
-                  key: tooltipKey,
-                  message: tooltipText,
-                  child: const SizedBox.shrink(),
-                );
-              },
-            ),
-          ],
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Tooltip(
+                    key: tooltipKey,
+                    message: tooltipText,
+                    child: const SizedBox.shrink(),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -797,6 +811,7 @@ void main() {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Tooltip(
           key: tooltipKey,
           message: tooltipText,
@@ -828,21 +843,24 @@ void main() {
       color: Color(0x80800000),
     );
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) {
-                return Tooltip(
-                  key: tooltipKey,
-                  decoration: customDecoration,
-                  message: tooltipText,
-                  child: const SizedBox.shrink(),
-                );
-              },
-            ),
-          ],
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Tooltip(
+                    key: tooltipKey,
+                    decoration: customDecoration,
+                    message: tooltipText,
+                    child: const SizedBox.shrink(),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1041,15 +1059,9 @@ void main() {
       ),
     );
 
-    // The tooltip overlay still on the tree and it will removed in the next frame.
-
-    // Dispatch the mouse in and out events before the overlay detached.
-    await gesture.moveTo(tester.getCenter(find.text(tooltipText)));
-    await gesture.moveTo(Offset.zero);
-    await tester.pumpAndSettle();
-
-    // Go without crashes.
-    await gesture.removePointer();
+    // The tooltip should be removed, including the overlay child.
+    expect(find.text(tooltipText), findsNothing);
+    expect(find.byTooltip(tooltipText), findsNothing);
   });
 
   testWidgetsWithLeakTracking('Calling ensureTooltipVisible on an unmounted TooltipState returns false', (WidgetTester tester) async {
@@ -1435,58 +1447,32 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Tooltip overlay does not update', (WidgetTester tester) async {
-    Widget buildApp(String text) {
-      return MaterialApp(
-        home: Center(
-          child: Tooltip(
-            message: text,
-            child: Container(
-              width: 100.0,
-              height: 100.0,
-              color: Colors.green[500],
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildApp(tooltipText));
-    await tester.longPress(find.byType(Tooltip));
-    expect(find.text(tooltipText), findsOneWidget);
-    await tester.pumpWidget(buildApp('NEW'));
-    expect(find.text(tooltipText), findsOneWidget);
-    await tester.tapAt(const Offset(5.0, 5.0));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.text(tooltipText), findsNothing);
-    await tester.longPress(find.byType(Tooltip));
-    expect(find.text(tooltipText), findsNothing);
-  });
-
   testWidgetsWithLeakTracking('Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
     Widget buildApp(String text, { required double textScaleFactor }) {
-      return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Navigator(
-            onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return Center(
-                    child: Tooltip(
-                      message: text,
-                      child: Container(
-                        width: 100.0,
-                        height: 100.0,
-                        color: Colors.green[500],
+      return Theme(
+        data: ThemeData(useMaterial3: false),
+        child: MediaQuery(
+          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return Center(
+                      child: Tooltip(
+                        message: text,
+                        child: Container(
+                          width: 100.0,
+                          height: 100.0,
+                          color: Colors.green[500],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              );
-            },
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       );
@@ -2259,6 +2245,130 @@ void main() {
       reason: 'Tooltip should NOT be visible when hovered and tapped, when trigger mode is tap',
     );
   });
+
+  testWidgetsWithLeakTracking('Tooltip does not rebuild for fade in / fade out animation', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.square(
+            dimension: 10.0,
+            child: Tooltip(
+              message: tooltipText,
+              waitDuration: Duration(seconds: 1),
+              triggerMode: TooltipTriggerMode.longPress,
+              child: SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TooltipState tooltipState = tester.state(find.byType(Tooltip));
+    final Element element = tooltipState.context as Element;
+    // The Tooltip widget itself is almost stateless thus doesn't need
+    // rebuilding.
+    expect(element.dirty, isFalse);
+
+    expect(tooltipState.ensureTooltipVisible(), isTrue);
+    expect(element.dirty, isFalse);
+    await tester.pump(const Duration(seconds: 1));
+    expect(element.dirty, isFalse);
+
+    expect(Tooltip.dismissAllToolTips(), isTrue);
+    expect(element.dirty, isFalse);
+    await tester.pump(const Duration(seconds: 1));
+    expect(element.dirty, isFalse);
+  });
+
+  testWidgets('Tooltip does not initialize animation controller in dispose process', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: Duration(seconds: 1),
+            triggerMode: TooltipTriggerMode.longPress,
+            child: SizedBox.square(dimension: 50),
+          ),
+        ),
+      ),
+    );
+
+    await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
+    await tester.pumpWidget(const SizedBox());
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Tooltip does not crash when showing the tooltip but the OverlayPortal is unmounted, during dispose', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SelectionArea(
+          child: Center(
+            child: Tooltip(
+              message: tooltipText,
+              waitDuration: Duration(seconds: 1),
+              triggerMode: TooltipTriggerMode.longPress,
+              child: SizedBox.square(dimension: 50),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TooltipState tooltipState = tester.state(find.byType(Tooltip));
+    await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
+    tooltipState.ensureTooltipVisible();
+    await tester.pumpWidget(const SizedBox());
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Tooltip is not selectable', (WidgetTester tester) async {
+    const String tooltipText = 'AAAAAAAAAAAAAAAAAAAAAAA';
+    String? selectedText;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectionArea(
+          onSelectionChanged: (SelectedContent? content) { selectedText = content?.plainText; },
+          child: const Center(
+            child: Column(
+              children: <Widget>[
+                Text('Select Me'),
+                Tooltip(
+                  message: tooltipText,
+                  waitDuration: Duration(seconds: 1),
+                  triggerMode: TooltipTriggerMode.longPress,
+                  child: SizedBox.square(dimension: 50),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TooltipState tooltipState = tester.state(find.byType(Tooltip));
+
+    final Rect textRect = tester.getRect(find.text('Select Me'));
+    final TestGesture gesture = await tester.startGesture(Alignment.centerLeft.alongSize(textRect.size) + textRect.topLeft);
+    // Drag from centerLeft to centerRight to select the text.
+    await tester.pump(const Duration(seconds: 1));
+    await gesture.moveTo(Alignment.centerRight.alongSize(textRect.size) + textRect.topLeft);
+    await tester.pump();
+
+    tooltipState.ensureTooltipVisible();
+    await tester.pump();
+    // Make sure the tooltip becomes visible.
+    expect(find.text(tooltipText), findsOneWidget);
+    assert(selectedText != null);
+
+    final Rect tooltipTextRect = tester.getRect(find.text(tooltipText));
+    // Now drag from centerLeft to centerRight to select the tooltip text.
+    await gesture.moveTo(Alignment.centerLeft.alongSize(tooltipTextRect.size) + tooltipTextRect.topLeft);
+    await tester.pump();
+    await gesture.moveTo(Alignment.centerRight.alongSize(tooltipTextRect.size) + tooltipTextRect.topLeft);
+    await tester.pump();
+
+    expect(selectedText, isNot(contains('A')));
+  });
 }
 
 Future<void> setWidgetForTooltipMode(
@@ -2297,5 +2407,5 @@ SemanticsNode _findDebugSemantics(RenderObject object) {
   if (object.debugSemantics != null) {
     return object.debugSemantics!;
   }
-  return _findDebugSemantics(object.parent! as RenderObject);
+  return _findDebugSemantics(object.parent!);
 }

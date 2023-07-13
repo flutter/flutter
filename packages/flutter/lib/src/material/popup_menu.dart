@@ -339,9 +339,10 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   /// the menu route.
   @protected
   void handleTap() {
-    widget.onTap?.call();
-
+    // Need to pop the navigator first in case onTap may push new route onto navigator.
     Navigator.pop<T>(context, widget.value);
+
+    widget.onTap?.call();
   }
 
   @override
@@ -1413,8 +1414,6 @@ class _PopupMenuDefaultsM2 extends PopupMenuThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
   _PopupMenuDefaultsM3(this.context)

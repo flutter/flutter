@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'feedback.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';
 import 'tooltip_visibility.dart';
@@ -388,23 +389,17 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const bool _defaultEnableFeedback = true;
   static const TextAlign _defaultTextAlign = TextAlign.start;
 
-  late double _height;
-  late EdgeInsetsGeometry _padding;
-  late EdgeInsetsGeometry _margin;
-  late Decoration _decoration;
-  late TextStyle _textStyle;
-  late TextAlign _textAlign;
-  late double _verticalOffset;
-  late bool _preferBelow;
-  late bool _excludeFromSemantics;
-  OverlayEntry? _entry;
+  final OverlayPortalController _overlayController = OverlayPortalController();
 
-  late Duration _showDuration;
-  late Duration _hoverShowDuration;
-  late Duration _waitDuration;
-  late TooltipTriggerMode _triggerMode;
-  late bool _enableFeedback;
+  // From InheritedWidgets
   late bool _visible;
+  late TooltipThemeData _tooltipTheme;
+
+  Duration get _showDuration => widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultShowDuration;
+  Duration get _hoverShowDuration => widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultHoverShowDuration;
+  Duration get _waitDuration => widget.waitDuration ?? _tooltipTheme.waitDuration ?? _defaultWaitDuration;
+  TooltipTriggerMode get _triggerMode => widget.triggerMode ?? _tooltipTheme.triggerMode ?? _defaultTriggerMode;
+  bool get _enableFeedback => widget.enableFeedback ?? _tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
 
   /// The plain text message for this tooltip.
   ///
@@ -430,28 +425,27 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   // _handleMouseExit. The set is cleared in _handleTapToDismiss, typically when
   // a PointerDown event interacts with some other UI component.
   final Set<int> _activeHoveringPointerDevices = <int>{};
+
+  static bool _isTooltipVisible(AnimationStatus status) {
+    return switch (status) {
+      AnimationStatus.completed || AnimationStatus.forward || AnimationStatus.reverse => true,
+      AnimationStatus.dismissed                                                       => false,
+    };
+  }
+
   AnimationStatus _animationStatus = AnimationStatus.dismissed;
   void _handleStatusChanged(AnimationStatus status) {
     assert(mounted);
-    final bool entryNeedsUpdating;
-    switch (status) {
-      case AnimationStatus.dismissed:
-        entryNeedsUpdating = _animationStatus != AnimationStatus.dismissed;
-        if (entryNeedsUpdating) {
-          _removeEntry();
-        }
-      case AnimationStatus.completed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        entryNeedsUpdating = _animationStatus == AnimationStatus.dismissed;
-        if (entryNeedsUpdating) {
-          _createNewEntry();
-          SemanticsService.tooltip(_tooltipMessage);
-        }
-    }
-
-    if (entryNeedsUpdating) {
-      setState(() { /* Rebuild to update the OverlayEntry */ });
+    switch ((_isTooltipVisible(_animationStatus), _isTooltipVisible(status))) {
+      case (true, false):
+        Tooltip._openedTooltips.remove(this);
+        _overlayController.hide();
+      case (false, true):
+        _overlayController.show();
+        Tooltip._openedTooltips.add(this);
+        SemanticsService.tooltip(_tooltipMessage);
+      case (true, true) || (false, false):
+        break;
     }
     _animationStatus = status;
   }
@@ -488,13 +482,16 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _scheduleDismissTooltip({ required Duration withDelay }) {
     assert(mounted);
     assert(
-      !(_timer?.isActive ?? false) || _controller.status != AnimationStatus.reverse,
+      !(_timer?.isActive ?? false) || _backingController?.status != AnimationStatus.reverse,
       'timer must not be active when the tooltip is fading out',
     );
 
     _timer?.cancel();
     _timer = null;
-    switch (_controller.status) {
+    // Use _backingController instead of _controller to prevent the lazy getter
+    // from instaniating an AnimationController unnecessarily.
+    switch (_backingController?.status) {
+      case null:
       case AnimationStatus.reverse:
       case AnimationStatus.dismissed:
         break;
@@ -620,11 +617,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   //    (even these tooltips are still hovered),
   //    iii. The last hovering device leaves the tooltip.
   void _handleMouseEnter(PointerEnterEvent event) {
-    // The callback is also used in an OverlayEntry, so there's a chance that
-    // this widget is already unmounted.
-    if (!mounted) {
-      return;
-    }
     // _handleMouseEnter is only called when the mouse starts to hover over this
     // tooltip (including the actual tooltip it shows on the overlay), and this
     // tooltip is the first to be hit in the widget tree's hit testing order.
@@ -646,7 +638,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _handleMouseExit(PointerExitEvent event) {
-    if (!mounted || _activeHoveringPointerDevices.isEmpty) {
+    if (_activeHoveringPointerDevices.isEmpty) {
       return;
     }
     _activeHoveringPointerDevices.remove(event.device);
@@ -694,6 +686,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _visible = TooltipVisibility.of(context);
+    _tooltipTheme = TooltipTheme.of(context);
   }
 
   // https://material.io/components/tooltips#specs
@@ -719,8 +712,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
   }
 
-  double _getDefaultFontSize() {
-    return switch (Theme.of(context).platform) {
+  static double _getDefaultFontSize(TargetPlatform platform) {
+    return switch (platform) {
       TargetPlatform.macOS ||
       TargetPlatform.linux ||
       TargetPlatform.windows => 12.0,
@@ -730,59 +723,58 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
   }
 
-  void _createNewEntry() {
-    final OverlayState overlayState = Overlay.of(
-      context,
-      debugRequiredFor: widget,
-    );
-
-    final RenderBox box = context.findRenderObject()! as RenderBox;
+  Widget _buildTooltipOverlay(BuildContext context) {
+    final OverlayState overlayState = Overlay.of(context, debugRequiredFor: widget);
+    final RenderBox box = this.context.findRenderObject()! as RenderBox;
     final Offset target = box.localToGlobal(
       box.size.center(Offset.zero),
       ancestor: overlayState.context.findRenderObject(),
     );
 
-    // We create this widget outside of the overlay entry's builder to prevent
-    // updated values from happening to leak into the overlay when the overlay
-    // rebuilds.
-    final Widget overlay = Directionality(
-      textDirection: Directionality.of(context),
-      child: _TooltipOverlay(
-        richMessage: widget.richMessage ?? TextSpan(text: widget.message),
-        height: _height,
-        padding: _padding,
-        margin: _margin,
-        onEnter: _handleMouseEnter,
-        onExit: _handleMouseExit,
-        decoration: _decoration,
-        textStyle: _textStyle,
-        textAlign: _textAlign,
-        animation: CurvedAnimation(
-          parent: _controller,
-          curve: Curves.fastOutSlowIn,
-        ),
-        target: target,
-        verticalOffset: _verticalOffset,
-        preferBelow: _preferBelow,
+    final (TextStyle defaultTextStyle, BoxDecoration defaultDecoration) = switch (Theme.of(context)) {
+      ThemeData(brightness: Brightness.dark, :final TextTheme textTheme, :final TargetPlatform platform) => (
+        textTheme.bodyMedium!.copyWith(color: Colors.black, fontSize: _getDefaultFontSize(platform)),
+        BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: const BorderRadius.all(Radius.circular(4))),
       ),
-    );
-    final OverlayEntry entry = _entry = OverlayEntry(builder: (BuildContext context) => overlay);
-    overlayState.insert(entry);
-    Tooltip._openedTooltips.add(this);
-  }
+      ThemeData(brightness: Brightness.light, :final TextTheme textTheme, :final TargetPlatform platform) => (
+        textTheme.bodyMedium!.copyWith(color: Colors.white, fontSize: _getDefaultFontSize(platform)),
+        BoxDecoration(color: Colors.grey[700]!.withOpacity(0.9), borderRadius: const BorderRadius.all(Radius.circular(4))),
+      ),
+    };
 
-  void _removeEntry() {
-    Tooltip._openedTooltips.remove(this);
-    _entry?.remove();
-    _entry?.dispose();
-    _entry = null;
+    final TooltipThemeData tooltipTheme = _tooltipTheme;
+    final _TooltipOverlay overlayChild = _TooltipOverlay(
+      richMessage: widget.richMessage ?? TextSpan(text: widget.message),
+      height: widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight(),
+      padding: widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding(),
+      margin: widget.margin ?? tooltipTheme.margin ?? _defaultMargin,
+      onEnter: _handleMouseEnter,
+      onExit: _handleMouseExit,
+      decoration: widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration,
+      textStyle: widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle,
+      textAlign: widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign,
+      animation: CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn),
+      target: target,
+      verticalOffset: widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
+      preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
+    );
+
+    return SelectionContainer.maybeOf(context) == null
+      ? overlayChild
+      : SelectionContainer.disabled(child: overlayChild);
   }
 
   @override
   void dispose() {
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
-    _removeEntry();
+    Tooltip._openedTooltips.remove(this);
+    // _longPressRecognizer.dispose() and _tapRecognizer.dispose() may call
+    // their registered onCancel callbacks if there's a gesture in progress.
+    // Remove the onCancel callbacks to prevent the registered callbacks from
+    // triggering unnecessary side effects (such as animations).
+    _longPressRecognizer?.onLongPressCancel = null;
     _longPressRecognizer?.dispose();
+    _tapRecognizer?.onTapCancel = null;
     _tapRecognizer?.dispose();
     _timer?.cancel();
     _backingController?.dispose();
@@ -798,47 +790,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       return widget.child ?? const SizedBox.shrink();
     }
     assert(debugCheckHasOverlay(context));
-    final ThemeData theme = Theme.of(context);
-    final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
-    final TextStyle defaultTextStyle;
-    final BoxDecoration defaultDecoration;
-    if (theme.brightness == Brightness.dark) {
-      defaultTextStyle = theme.textTheme.bodyMedium!.copyWith(
-        color: Colors.black,
-        fontSize: _getDefaultFontSize(),
-      );
-      defaultDecoration = BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-      );
-    } else {
-      defaultTextStyle = theme.textTheme.bodyMedium!.copyWith(
-        color: Colors.white,
-        fontSize: _getDefaultFontSize(),
-      );
-      defaultDecoration = BoxDecoration(
-        color: Colors.grey[700]!.withOpacity(0.9),
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-      );
-    }
-
-    _height = widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight();
-    _padding = widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding();
-    _margin = widget.margin ?? tooltipTheme.margin ?? _defaultMargin;
-    _verticalOffset = widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset;
-    _preferBelow = widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow;
-    _excludeFromSemantics = widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
-    _decoration = widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration;
-    _textStyle = widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle;
-    _textAlign = widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign;
-    _waitDuration = widget.waitDuration ?? tooltipTheme.waitDuration ?? _defaultWaitDuration;
-    _showDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultShowDuration;
-    _hoverShowDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultHoverShowDuration;
-    _triggerMode = widget.triggerMode ?? tooltipTheme.triggerMode ?? _defaultTriggerMode;
-    _enableFeedback = widget.enableFeedback ?? tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
-
+    final bool excludeFromSemantics = widget.excludeFromSemantics ?? _tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
     Widget result = Semantics(
-      tooltip: _excludeFromSemantics ? null : _tooltipMessage,
+      tooltip: excludeFromSemantics ? null : _tooltipMessage,
       child: widget.child,
     );
 
@@ -854,8 +808,11 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         ),
       );
     }
-
-    return result;
+    return OverlayPortal(
+      controller: _overlayController,
+      overlayChildBuilder: _buildTooltipOverlay,
+      child: result,
+    );
   }
 }
 

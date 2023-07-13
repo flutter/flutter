@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestAssetBundle extends AssetBundle {
   @override
   Future<ByteData> load(String key) async {
-    if (key == 'AssetManifest.smcbin') {
+    if (key == 'AssetManifest.bin') {
       final Map<String, List<Object>> binManifestData = <String, List<Object>>{
         'assets/foo.png': <Object>[
           <String, Object>{
@@ -72,30 +70,4 @@ void main() {
     final AssetManifest manifest = await AssetManifest.loadFromAssetBundle(TestAssetBundle());
     expect(manifest.getAssetVariants('invalid asset key'), isNull);
   });
-}
-
-String createAssetManifestJson(Map<String, List<AssetMetadata>> manifest) {
-  final Map<Object, Object> jsonObject = manifest.map(
-    (String key, List<AssetMetadata> value) {
-      final List<String> variants = value.map((AssetMetadata e) => e.key).toList();
-      return MapEntry<String, List<String>>(key, variants);
-    }
-  );
-
-  return json.encode(jsonObject);
-}
-
-ByteData createAssetManifestSmcBin(Map<String, List<AssetMetadata>> manifest) {
-  final Map<Object, Object> smcObject  = manifest.map(
-    (String key, List<AssetMetadata> value) {
-      final List<Object> variants = value.map((AssetMetadata variant) => <String, Object?>{
-        'asset': variant.key,
-        'dpr': variant.targetDevicePixelRatio,
-      }).toList();
-
-      return MapEntry<String, List<Object>>(key, variants);
-    }
-  );
-
-  return const StandardMessageCodec().encodeMessage(smcObject)!;
 }
