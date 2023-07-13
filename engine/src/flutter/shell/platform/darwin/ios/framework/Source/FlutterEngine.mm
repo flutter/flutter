@@ -871,6 +871,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
                    << entrypoint.UTF8String;
   } else {
+    // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
+    FML_LOG(INFO) << "Enabled VM Service Publication: " << settings.enable_vm_service_publication;
     [self setupShell:std::move(shell)
         withVMServicePublication:settings.enable_vm_service_publication];
     if ([FlutterEngine isProfilerEnabled]) {
