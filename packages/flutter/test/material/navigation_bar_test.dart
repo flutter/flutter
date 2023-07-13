@@ -305,7 +305,7 @@ void main() {
     expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
   });
 
-  testWidgets('Material2 - NavigationBar shows tooltips with text scaling ', (WidgetTester tester) async {
+  testWidgets('Material2 - NavigationBar shows tooltips with text scaling', (WidgetTester tester) async {
     const String label = 'A';
 
     Widget buildApp({ required double textScaleFactor }) {
@@ -364,7 +364,7 @@ void main() {
     expect(tester.getSize(find.text(label).last), Size(defaultTooltipSize.width * 4, defaultTooltipSize.height * 4));
   });
 
-  testWidgets('Material3 - NavigationBar shows tooltips with text scaling ', (WidgetTester tester) async {
+  testWidgets('Material3 - NavigationBar shows tooltips with text scaling', (WidgetTester tester) async {
     const String label = 'A';
 
     Widget buildApp({ required double textScaleFactor }) {
