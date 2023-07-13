@@ -1977,7 +1977,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       final Rect localRect = Rect.fromLTWH(0, 0, selectables[index].size.width, selectables[index].size.height);
       final Matrix4 transform = selectables[index].getTransformTo(null);
       final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
+      debugPrint('$globalRect');
+    }
+    for (int index = 0; index < selectables.length; index += 1) {
+      final Rect localRect = Rect.fromLTWH(0, 0, selectables[index].size.width, selectables[index].size.height);
+      final Matrix4 transform = selectables[index].getTransformTo(null);
+      final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
       if (globalRect.contains(event.globalPosition)) {
+        debugPrint('$globalRect contains ${event.globalPosition}');
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
         if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
@@ -1999,6 +2006,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         }
         return SelectionResult.end;
       } else {
+        debugPrint('$globalRect does not contain ${event.globalPosition}');
         if (lastSelectionResult == SelectionResult.next) {
           currentSelectionStartIndex = currentSelectionEndIndex = index - 1;
           return SelectionResult.end;

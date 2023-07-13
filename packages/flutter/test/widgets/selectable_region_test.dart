@@ -1246,9 +1246,10 @@ void main() {
       'can select word when a selectables rect is completely inside of another selectables rect', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/127076.
       final UniqueKey outerText = UniqueKey();
+      const TextStyle textStyle = TextStyle(fontSize: 10);
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false),
+          theme: ThemeData(useMaterial3: true),
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
@@ -1260,10 +1261,12 @@ void main() {
                         TextSpan(
                           text:
                               'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                          style: textStyle,
                         ),
-                        WidgetSpan(child: Text('Some text in a WidgetSpan. ')),
-                        TextSpan(text: 'Hello, world.'),
+                        WidgetSpan(child: Text('Some text in a WidgetSpan. ', style: textStyle)),
+                        TextSpan(text: 'Hello, world.', style: textStyle),
                       ],
+                      style: textStyle,
                   ),
                   key: outerText,
                 ),

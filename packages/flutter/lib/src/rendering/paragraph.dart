@@ -397,6 +397,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
         if (end == -1) {
           end = plainText.length;
         }
+        debugPrint('_SelectableFragment(paragraph: $this, range: ${TextRange(start: start, end: end)}, fullText: $plainText)');
         result.add(_SelectableFragment(paragraph: this, range: TextRange(start: start, end: end), fullText: plainText));
         start = end;
       }
