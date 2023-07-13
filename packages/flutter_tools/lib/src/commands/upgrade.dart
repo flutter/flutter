@@ -80,7 +80,7 @@ class UpgradeCommand extends FlutterCommand {
       gitTagVersion: GitTagVersion.determine(globals.processUtils, globals.platform),
       flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
-        : FlutterVersion(workingDirectory: _commandRunner.workingDirectory),
+        : FlutterVersion(flutterRoot: _commandRunner.workingDirectory!, fs: globals.fs),
       verifyOnly: boolArg('verify-only'),
     );
   }
@@ -297,7 +297,11 @@ class UpgradeCommandRunner {
         'for instructions.'
       );
     }
-    return FlutterVersion(workingDirectory: workingDirectory, frameworkRevision: revision);
+    return FlutterVersion.fromRevision(
+      flutterRoot: workingDirectory!,
+      frameworkRevision: revision,
+      fs: globals.fs,
+    );
   }
 
   /// Attempts a hard reset to the given revision.

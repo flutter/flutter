@@ -157,6 +157,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
         hasContent: true,
         startSelectionPoint: isReversed ? secondSelectionPoint : firstSelectionPoint,
         endSelectionPoint: isReversed ? firstSelectionPoint : secondSelectionPoint,
+        selectionRects: <Rect>[selectionRect],
       );
     }
   }

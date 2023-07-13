@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -12,6 +14,7 @@ import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
@@ -504,7 +507,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('test --dart-define-from-file option', () async {
+  testUsingContext('--dart-define-from-file successfully forwards values to build env', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
@@ -514,7 +517,9 @@ void main() {
           "kInt": 1,
           "kDouble": 1.1,
           "name": "denghaizhu",
-          "title": "this is title from config json file"
+          "title": "this is title from config json file",
+          "nullValue": null,
+          "containEqual": "sfadsfv=432f"
         }
       '''
     );
@@ -537,8 +542,168 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      expect(environment.defines[kDartDefines], 'a0ludD0x,a0RvdWJsZT0xLjE=,bmFtZT1kZW5naGFpemh1,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=,Ym9keT10aGlzIGlzIGJvZHkgZnJvbSBjb25maWcganNvbiBmaWxl');
+      expect(
+        _decodeDartDefines(environment),
+        containsAllInOrder(const <String>[
+          'kInt=1',
+          'kDouble=1.1',
+          'name=denghaizhu',
+          'title=this is title from config json file',
+          'nullValue=null',
+          'containEqual=sfadsfv=432f',
+          'body=this is body from config json file',
+        ]),
+      );
     }),
+    FileSystem: fsFactory,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('--dart-define-from-file correctly parses a valid env file', () async {
+    globals.fs
+        .file(globals.fs.path.join('lib', 'main.dart'))
+        .createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    await globals.fs.file('.env').writeAsString('''
+        # comment
+        kInt=1
+        kDouble=1.1 # should be double
+
+        name=piotrfleury
+        title=this is title from config env file
+        empty=
+
+        doubleQuotes="double quotes 'value'#=" # double quotes
+        singleQuotes='single quotes "value"#=' # single quotes
+        backQuotes=`back quotes "value" '#=` # back quotes
+
+        hashString="some-#-hash-string-value"
+
+        # Play around with spaces around the equals sign.
+        spaceBeforeEqual =value
+        spaceAroundEqual = value
+        spaceAfterEqual= value
+
+      ''');
+    await globals.fs.file('.env2').writeAsString('''
+        # second comment
+
+        body=this is body from config env file
+      ''');
+    final CommandRunner<void> runner =
+        createTestCommandRunner(BuildBundleCommand(
+      logger: BufferLogger.test(),
+    ));
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--dart-define-from-file=.env',
+      '--dart-define-from-file=.env2',
+    ]);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true),
+            (Target target, Environment environment) {
+          expect(
+            _decodeDartDefines(environment),
+            containsAllInOrder(const <String>[
+              'kInt=1',
+              'kDouble=1.1',
+              'name=piotrfleury',
+              'title=this is title from config env file',
+              'empty=',
+              "doubleQuotes=double quotes 'value'#=",
+              'singleQuotes=single quotes "value"#=',
+              'backQuotes=back quotes "value" \'#=',
+              'hashString=some-#-hash-string-value',
+              'spaceBeforeEqual=value',
+              'spaceAroundEqual=value',
+              'spaceAfterEqual=value',
+              'body=this is body from config env file'
+            ]),
+          );
+        }),
+    FileSystem: fsFactory,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('--dart-define-from-file option env file throws a ToolExit when .env file contains a multiline value', () async {
+    globals.fs
+        .file(globals.fs.path.join('lib', 'main.dart'))
+        .createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    await globals.fs.file('.env').writeAsString('''
+        # single line value
+        name=piotrfleury
+
+        # multi-line value
+        multiline = """ Welcome to .env demo
+        a simple counter app with .env file support
+        for more info, check out the README.md file
+        Thanks! """ # This is the welcome message that will be displayed on the counter app
+
+      ''');
+    final CommandRunner<void> runner =
+        createTestCommandRunner(BuildBundleCommand(
+      logger: BufferLogger.test(),
+    ));
+
+    expect(() => runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--dart-define-from-file=.env',
+    ]), throwsToolExit(message: 'Multi-line value is not supported: multiline = """ Welcome to .env demo'));
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+    FileSystem: fsFactory,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('--dart-define-from-file option works with mixed file formats',
+      () async {
+    globals.fs
+        .file(globals.fs.path.join('lib', 'main.dart'))
+        .createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    await globals.fs.file('.env').writeAsString('''
+        kInt=1
+        kDouble=1.1
+        name=piotrfleury
+        title=this is title from config env file
+      ''');
+    await globals.fs.file('config.json').writeAsString('''
+        {
+          "body": "this is body from config json file"
+        }
+      ''');
+    final CommandRunner<void> runner =
+        createTestCommandRunner(BuildBundleCommand(
+      logger: BufferLogger.test(),
+    ));
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--dart-define-from-file=.env',
+      '--dart-define-from-file=config.json',
+    ]);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true),
+            (Target target, Environment environment) {
+          expect(
+            _decodeDartDefines(environment),
+            containsAllInOrder(const <String>[
+              'kInt=1',
+              'kDouble=1.1',
+              'name=piotrfleury',
+              'title=this is title from config env file',
+              'body=this is body from config json file',
+            ]),
+          );
+        }),
     FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -576,7 +741,10 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
-      expect(environment.defines[kDartDefines], 'a0ludD0y,a0RvdWJsZT0xLjE=,bmFtZT1kZW5naGFpemh1,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=');
+      expect(
+        _decodeDartDefines(environment),
+        containsAllInOrder(<String>['kInt=2', 'kDouble=1.1', 'name=denghaizhu', 'title=this is title from config json file']),
+      );
     }),
     FileSystem: fsFactory,
     ProcessManager: () => FakeProcessManager.any(),
@@ -630,6 +798,15 @@ void main() {
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
     ProcessManager: () => FakeProcessManager.any(),
   });
+}
+
+Iterable<String> _decodeDartDefines(Environment environment) {
+  final String encodedDefines = environment.defines[kDartDefines]!;
+  const Utf8Decoder byteDecoder = Utf8Decoder();
+  return encodedDefines
+      .split(',')
+      .map<Uint8List>(base64.decode)
+      .map<String>(byteDecoder.convert);
 }
 
 class FakeBundleBuilder extends Fake implements BundleBuilder {

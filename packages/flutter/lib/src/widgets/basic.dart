@@ -2263,7 +2263,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
     final MultiChildLayoutParentData parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
-      final AbstractNode? targetParent = renderObject.parent;
+      final RenderObject? targetParent = renderObject.parent;
       if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
       }
@@ -3035,6 +3035,12 @@ class LimitedBox extends SingleChildRenderObjectWidget {
 
 /// A widget that imposes different constraints on its child than it gets
 /// from its parent, possibly allowing the child to overflow the parent.
+///
+/// {@tool dartpad}
+/// This example shows how an [OverflowBox] is used, and what its effect is.
+///
+/// ** See code in examples/api/lib/widgets/basic/overflowbox.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -4348,7 +4354,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
     }
 
     if (needsLayout) {
-      final AbstractNode? targetParent = renderObject.parent;
+      final RenderObject? targetParent = renderObject.parent;
       if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
       }
@@ -5207,7 +5213,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     }
 
     if (needsLayout) {
-      final AbstractNode? targetParent = renderObject.parent;
+      final RenderObject? targetParent = renderObject.parent;
       if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
       }

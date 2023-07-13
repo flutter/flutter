@@ -5,6 +5,10 @@
 import 'package:flutter/services.dart';
 
 void main() {
+  // Changes made in https://github.com/flutter/flutter/pull/122446
+  final clipboardData1 = ClipboardData();
+  final clipboardData2 = ClipboardData(text: null);
+
   // Changes made in https://github.com/flutter/flutter/pull/60320
   final SurfaceAndroidViewController surfaceController = SurfaceAndroidViewController(
       viewId: 10,

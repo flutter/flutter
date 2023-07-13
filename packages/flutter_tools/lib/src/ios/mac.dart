@@ -357,10 +357,10 @@ Future<XcodeBuildResult> buildXcodeProject({
       buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
     }
 
-    final File resultBundleFile = tempDir.childFile(_kResultBundlePath);
+    final Directory resultBundleDirectory = tempDir.childDirectory(_kResultBundlePath);
     buildCommands.addAll(<String>[
       '-resultBundlePath',
-      resultBundleFile.absolute.path,
+      resultBundleDirectory.absolute.path,
       '-resultBundleVersion',
       _kResultBundleVersion,
     ]);
@@ -382,7 +382,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     final Stopwatch sw = Stopwatch()..start();
     initialBuildStatus = globals.logger.startProgress('Running Xcode build...');
 
-    buildResult = await _runBuildWithRetries(buildCommands, app, resultBundleFile);
+    buildResult = await _runBuildWithRetries(buildCommands, app, resultBundleDirectory);
 
     // Notifies listener that no more output is coming.
     scriptOutputPipeFile?.writeAsStringSync('all done');
@@ -512,14 +512,14 @@ Future<void> removeFinderExtendedAttributes(FileSystemEntity projectDirectory, P
   }
 }
 
-Future<RunResult?> _runBuildWithRetries(List<String> buildCommands, BuildableIOSApp app, File resultBundleFile) async {
+Future<RunResult?> _runBuildWithRetries(List<String> buildCommands, BuildableIOSApp app, Directory resultBundleDirectory) async {
   int buildRetryDelaySeconds = 1;
   int remainingTries = 8;
 
   RunResult? buildResult;
   while (remainingTries > 0) {
-    if (resultBundleFile.existsSync()) {
-      resultBundleFile.deleteSync(recursive: true);
+    if (resultBundleDirectory.existsSync()) {
+      resultBundleDirectory.deleteSync(recursive: true);
     }
     remainingTries--;
     buildRetryDelaySeconds *= 2;

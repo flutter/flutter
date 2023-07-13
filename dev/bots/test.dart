@@ -277,7 +277,8 @@ Future<void> main(List<String> args) async {
 }
 
 final String _luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
-final bool _runningInDartHHHBot = _luciBotId.startsWith('luci-dart-');
+final bool _runningInDartHHHBot =
+    _luciBotId.startsWith('luci-dart-') || _luciBotId.startsWith('dart-tests-');
 
 /// Verify the Flutter Engine is the revision in
 /// bin/cache/internal/engine.version.
@@ -970,6 +971,7 @@ Future<void> _runFrameworkTests() async {
     await runTracingTests();
     await runFixTests('flutter');
     await runFixTests('flutter_test');
+    await runFixTests('integration_test');
     await runPrivateTests();
   }
 
@@ -1373,6 +1375,14 @@ Future<void> _runWebTreeshakeTest() async {
     }
     pos = javaScript.indexOf(word, pos);
   }
+
+  // The following are classes from `timeline.dart` that should be treeshaken
+  // off unless the app (typically a benchmark) uses methods that need them.
+  expect(javaScript.contains('AggregatedTimedBlock'), false);
+  expect(javaScript.contains('AggregatedTimings'), false);
+  expect(javaScript.contains('_BlockBuffer'), false);
+  expect(javaScript.contains('_StringListChain'), false);
+  expect(javaScript.contains('_Float64ListChain'), false);
 
   const int kMaxExpectedDebugFillProperties = 11;
   if (count > kMaxExpectedDebugFillProperties) {
