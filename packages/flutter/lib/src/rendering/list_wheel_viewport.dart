@@ -1129,7 +1129,7 @@ class RenderListWheelViewport
     Rect? rect,
     AxisDirection? axisDirection,
   }) {
-    // ListWheelViewport only support vertical axes.
+    // ListWheelViewport only supports vertical axes.
     assert(axisDirection == null || axisDirectionToAxis(axisDirection) == Axis.vertical);
     // `target` is only fully revealed when in the selected/center position. Therefore,
     // this method always returns the offset that shows `target` in the center position,

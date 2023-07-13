@@ -110,7 +110,7 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   ///
   /// The optional [axisDirection] is used by [RenderTwoDimensionalViewport] to
   /// determine which [Axis] of the two should reveal. One dimensional
-  /// subclasses like [RenderViewportBase and [RenderListWheelViewport] will
+  /// subclasses like [RenderViewportBase] and [RenderListWheelViewport] will
   /// assert that if an [axisDirection] is provided, that it matches the
   /// [axisDirection] the viewport has been configured for.
   ///
