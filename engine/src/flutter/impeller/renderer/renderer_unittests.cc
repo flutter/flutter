@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/fml/logging.h"
 #include "flutter/testing/testing.h"
 #include "impeller/base/strings.h"
 #include "impeller/core/device_buffer_descriptor.h"
@@ -1046,6 +1047,54 @@ TEST_P(RendererTest, VertexBufferBuilder) {
   ASSERT_EQ(vertex_builder.GetVertexCount(), 4u);
 }
 
+class CompareFunctionUIData {
+ public:
+  CompareFunctionUIData() {
+    labels_.push_back("Never");
+    functions_.push_back(CompareFunction::kNever);
+    labels_.push_back("Always");
+    functions_.push_back(CompareFunction::kAlways);
+    labels_.push_back("Less");
+    functions_.push_back(CompareFunction::kLess);
+    labels_.push_back("Equal");
+    functions_.push_back(CompareFunction::kEqual);
+    labels_.push_back("LessEqual");
+    functions_.push_back(CompareFunction::kLessEqual);
+    labels_.push_back("Greater");
+    functions_.push_back(CompareFunction::kGreater);
+    labels_.push_back("NotEqual");
+    functions_.push_back(CompareFunction::kNotEqual);
+    labels_.push_back("GreaterEqual");
+    functions_.push_back(CompareFunction::kGreaterEqual);
+    assert(labels_.size() == functions_.size());
+  }
+
+  const char* const* labels() const { return &labels_[0]; }
+
+  int size() const { return labels_.size(); }
+
+  int IndexOf(CompareFunction func) const {
+    for (size_t i = 0; i < functions_.size(); i++) {
+      if (functions_[i] == func) {
+        return i;
+      }
+    }
+    FML_UNREACHABLE();
+    return -1;
+  }
+
+  CompareFunction FunctionOf(int index) const { return functions_[index]; }
+
+ private:
+  std::vector<const char*> labels_;
+  std::vector<CompareFunction> functions_;
+};
+
+static const CompareFunctionUIData& CompareFunctionUI() {
+  static CompareFunctionUIData data;
+  return data;
+}
+
 TEST_P(RendererTest, StencilMask) {
   using VS = BoxFadeVertexShader;
   using FS = BoxFadeFragmentShader;
@@ -1083,6 +1132,10 @@ TEST_P(RendererTest, StencilMask) {
   static int stencil_reference_read = 0x1;
   std::vector<uint8_t> stencil_contents;
   static int last_stencil_contents_reference_value = 0;
+  static int current_front_compare =
+      CompareFunctionUI().IndexOf(CompareFunction::kLessEqual);
+  static int current_back_compare =
+      CompareFunctionUI().IndexOf(CompareFunction::kLessEqual);
   Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
@@ -1133,11 +1186,20 @@ TEST_P(RendererTest, StencilMask) {
                        0xFF);
       ImGui::SliderInt("Stencil Compare Value", &stencil_reference_read, 0,
                        0xFF);
-      ImGui::Checkbox("Mirror", &mirror);
+      ImGui::Checkbox("Back face mode", &mirror);
+      ImGui::ListBox("Front face compare function", &current_front_compare,
+                     CompareFunctionUI().labels(), CompareFunctionUI().size());
+      ImGui::ListBox("Back face compare function", &current_back_compare,
+                     CompareFunctionUI().labels(), CompareFunctionUI().size());
       ImGui::End();
-      StencilAttachmentDescriptor front_and_back;
-      front_and_back.stencil_compare = CompareFunction::kLessEqual;
-      desc->SetStencilAttachmentDescriptors(front_and_back);
+
+      StencilAttachmentDescriptor front;
+      front.stencil_compare =
+          CompareFunctionUI().FunctionOf(current_front_compare);
+      StencilAttachmentDescriptor back;
+      back.stencil_compare =
+          CompareFunctionUI().FunctionOf(current_back_compare);
+      desc->SetStencilAttachmentDescriptors(front, back);
       auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
 
       assert(pipeline && pipeline->IsValid());
@@ -1153,7 +1215,7 @@ TEST_P(RendererTest, StencilMask) {
       uniforms.mvp = Matrix::MakeOrthographic(pass->GetRenderTargetSize()) *
                      Matrix::MakeScale(GetContentScale());
       if (mirror) {
-        uniforms.mvp = Matrix::MakeScale(Vector2(-1, -1)) * uniforms.mvp;
+        uniforms.mvp = Matrix::MakeScale(Vector2(-1, 1)) * uniforms.mvp;
       }
       VS::BindUniformBuffer(
           cmd, pass->GetTransientsBuffer().EmplaceUniform(uniforms));
