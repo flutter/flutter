@@ -1199,9 +1199,9 @@ Future<OperationResult> defaultReloadSourcesHelper(
       (List<vm_service.ReloadReport> reports) async {
         // TODO(aam): Investigate why we are validating only first reload report,
         // which seems to be current behavior
-        //if (reports.isEmpty) {
-        //  return null;
-        //}
+        if (reports.isEmpty) {
+          return null;
+        }
         final vm_service.ReloadReport firstReport = reports.first;
         // Don't print errors because they will be printed further down when
         // `validateReloadReport` is called again.
@@ -1213,8 +1213,8 @@ Future<OperationResult> defaultReloadSourcesHelper(
     ));
   }
   final Iterable<DeviceReloadReport> reports = (await Future.wait(allReportsFutures)).whereType<DeviceReloadReport>();
-  final vm_service.ReloadReport reloadReport = reports.first.reports[0];
-  if (!HotRunner.validateReloadReport(reloadReport)) {
+  final vm_service.ReloadReport? reloadReport = reports.isEmpty ? null : reports.first.reports[0];
+  if (reloadReport == null || !HotRunner.validateReloadReport(reloadReport)) {
     // Reload failed.
     HotEvent('reload-reject',
       targetPlatform: targetPlatform!,
@@ -1227,6 +1227,9 @@ Future<OperationResult> defaultReloadSourcesHelper(
     // Reset devFS lastCompileTime to ensure the file will still be marked
     // as dirty on subsequent reloads.
     _resetDevFSCompileTime(flutterDevices);
+    if (reloadReport == null) {
+      return OperationResult(1, 'No Dart isolates found');
+    }
     final ReloadReportContents contents = ReloadReportContents.fromReloadReport(reloadReport);
     return OperationResult(1, 'Reload rejected: ${contents.notices.join("\n")}');
   }
