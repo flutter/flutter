@@ -536,7 +536,7 @@ static char markerKey;
     kSelectionIsDirectionalKey : @NO,
     kComposingBaseKey : @(composingBase),
     kComposingExtentKey : @(composingExtent),
-    kTextKey : [NSString stringWithUTF8String:_activeModel->GetText().c_str()]
+    kTextKey : [NSString stringWithUTF8String:_activeModel->GetText().c_str()] ?: [NSNull null],
   };
 }
 
