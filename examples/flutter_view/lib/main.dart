@@ -31,45 +31,6 @@ class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
-class Item {
-  Item({
-    required this.expandedValue,
-    required this.headerValue,
-    this.isExpanded = false,
-  });
-
-  final String expandedValue;
-  final String headerValue;
-  bool isExpanded;
-}
-
-List<Item> expandedList = <Item>[
-  Item(expandedValue: 'expandedValue', headerValue: 'headerValue'),
-  Item(expandedValue: 'expandedValue2', headerValue: 'headerValue2'),
-  Item(expandedValue: 'expandedValue3', headerValue: 'headerValue3'),
-];
-
-ExpansionPanel cellExpanded(
-    bool isExpanded, String headerValue, String expandedValue) {
-  return ExpansionPanel(
-    headerBuilder: (BuildContext context, _) {
-      return ListTile(
-        title: Text(
-          headerValue,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-        ),
-      );
-    },
-    body: ListTile(
-      title: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        child: Text(expandedValue, style: const TextStyle(fontSize: 16)),
-      ),
-    ),
-    canTapOnHeader: true,
-    isExpanded: isExpanded,
-  );
-}
 
 class _MyHomePageState extends State<MyHomePage> {
   static const String _channel = 'increment';
@@ -118,23 +79,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
                 const Text('Flutter', style: TextStyle(fontSize: 30.0)),
               ],
-            ),
-          ),
-          SizedBox(
-            width: 300,
-            child: ExpansionPanelList(
-              expandIconColor: Colors.red,
-              expansionCallback: (int index, _) {
-                setState(
-                  () {
-                    expandedList[index].isExpanded = !expandedList[index].isExpanded;
-                  },
-                );
-              },
-              children: expandedList.map<ExpansionPanel>((Item item) {
-                return cellExpanded(
-                    item.isExpanded, item.headerValue, item.expandedValue);
-              }).toList(),
             ),
           ),
         ],

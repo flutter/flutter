@@ -2107,16 +2107,16 @@ void main() {
     expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isFalse);
 
     // Tap on the last Checkbox to expand the last ExpansionPanel and collapse others.
-    await tester.tap(find.byType(Checkbox).last);
+    await tester.tap(find.byType(Checkbox).at(1));
     await tester.pumpAndSettle();
-
-    expect(find.text('A'), findsOneWidget);
-    expect(find.text('B'), findsNothing);
-    expect(find.text('C'), findsOneWidget);
-    expect(find.text('D'), findsNothing);
 
     expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isFalse);
     expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isTrue);
+
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
   });
 
   testWidgets(
@@ -2205,7 +2205,9 @@ void main() {
     // Tapping on the first Checkbox will collapse the first ExpansionPanel,
     // but expansion icon onChanged will not be called since canTapOnHeader
     // is set to true.
-    await tester.tap(find.byType(Checkbox).first);
+    // as the tap should go to the header instead of the checkbox
+    // that will not hit on the specified widget, so warnIfMissed is set to false
+    await tester.tap(find.byType(Checkbox).first,warnIfMissed: false);
     await tester.pumpAndSettle();
 
     expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isFalse);
@@ -2311,11 +2313,13 @@ void main() {
     // Tapping on the second Checkbox will expand the second ExpansionPanel
     // and collapse the remaining panels but expansion icon onChanged will
     // not be called since canTapOnHeader is set to true.
-    await tester.tap(find.byType(Checkbox).last);
+    // as the tap should go to the header instead of the checkbox
+    // that will not hit on the specified widget, so warnIfMissed is set to false
+    await tester.tap(find.byType(Checkbox).last,warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    expect(find.text('A'), findsOneWidget);
-    expect(find.text('B'), findsNothing);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
     expect(find.text('D'), findsNothing);
 
@@ -2329,8 +2333,8 @@ void main() {
 
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsNothing);
-    expect(find.text('C'), findsOneWidget);
-    expect(find.text('D'), findsNothing);
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
 
     expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isTrue);
     expect(tester.widget<Checkbox>(find.byType(Checkbox).last).value, isFalse);
