@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import '../services/dom.dart';
 
@@ -23,9 +23,7 @@ platform.TargetPlatform get defaultTargetPlatform {
 final platform.TargetPlatform? _testPlatform = () {
   platform.TargetPlatform? result;
   assert(() {
-    // This member is only available in the web's dart:ui implementation.
-    // ignore: undefined_prefixed_name
-    if (ui.debugEmulateFlutterTesterEnvironment as bool) {
+    if (ui_web.debugEmulateFlutterTesterEnvironment) {
       result = platform.TargetPlatform.android;
     }
     return true;
