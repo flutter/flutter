@@ -17,7 +17,7 @@
 
 namespace impeller {
 
-static Font ToFont(const SkTextBlobRunIterator& run) {
+static Font ToFont(const SkTextBlobRunIterator& run, Scalar scale) {
   auto& font = run.font();
   auto typeface = std::make_shared<TypefaceSkia>(font.refTypefaceOrDefault());
 
@@ -25,6 +25,7 @@ static Font ToFont(const SkTextBlobRunIterator& run) {
   font.getMetrics(&sk_metrics);
 
   Font::Metrics metrics;
+  metrics.scale = scale;
   metrics.point_size = font.getSize();
   metrics.embolden = font.isEmbolden();
   metrics.skewX = font.getSkewX();
@@ -37,7 +38,7 @@ static Rect ToRect(const SkRect& rect) {
   return Rect::MakeLTRB(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom);
 }
 
-TextFrame TextFrameFromTextBlob(const sk_sp<SkTextBlob>& blob) {
+TextFrame TextFrameFromTextBlob(const sk_sp<SkTextBlob>& blob, Scalar scale) {
   if (!blob) {
     return {};
   }
@@ -45,7 +46,7 @@ TextFrame TextFrameFromTextBlob(const sk_sp<SkTextBlob>& blob) {
   TextFrame frame;
 
   for (SkTextBlobRunIterator run(blob.get()); !run.done(); run.next()) {
-    TextRun text_run(ToFont(run));
+    TextRun text_run(ToFont(run, scale));
 
     // TODO(jonahwilliams): ask Skia for a public API to look this up.
     // https://github.com/flutter/flutter/issues/112005
