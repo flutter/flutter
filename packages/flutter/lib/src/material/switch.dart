@@ -69,6 +69,13 @@ enum _SwitchType { material, adaptive }
 /// ** See code in examples/api/lib/material/switch/switch.2.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to use the ambient [CupertinoThemeData] to style all
+/// widgets which would otherwise use iOS defaults.
+///
+/// ** See code in examples/api/lib/material/switch/switch.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SwitchListTile], which combines this widget with a [ListTile] so that
