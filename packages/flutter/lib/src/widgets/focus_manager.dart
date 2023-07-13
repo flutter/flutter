@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
@@ -1601,10 +1602,32 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     _haveScheduledUpdate = true;
-    scheduleMicrotask(_applyFocusChange);
+    scheduleMicrotask(applyFocusChangesIfNeeded);
   }
 
-  void _applyFocusChange() {
+  /// Applies any pending focus changes and notifies listeners that the focus
+  /// has changed.
+  ///
+  /// Must not be called during the build phase. This method is meant to be
+  /// called in a post-frame callback or microtask when the pending focus
+  /// changes need to be resolved before something else occurs.
+  ///
+  /// It can't be called during the build phase because not all listeners are
+  /// safe to be called with an update during a build.
+  ///
+  /// Typically, this is called automatically by the [FocusManager], but
+  /// sometimes it is necessary to ensure that no focus changes are pending
+  /// before executing an action. For example, the [MenuAnchor] class uses this
+  /// to make sure that the previous focus has been restored before executing a
+  /// menu callback when a menu item is selected.
+  ///
+  /// It is safe to call this if no focus changes are pending.
+  void applyFocusChangesIfNeeded() {
+    assert(
+      SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks,
+      'applyFocusChanges() should not be called during the build phase.'
+    );
+
     _haveScheduledUpdate = false;
     final FocusNode? previousFocus = _primaryFocus;
 
