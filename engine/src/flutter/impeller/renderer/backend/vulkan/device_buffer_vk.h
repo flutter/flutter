@@ -12,6 +12,7 @@
 #include "impeller/core/device_buffer.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
+#include "impeller/renderer/backend/vulkan/vma.h"
 
 namespace impeller {
 
@@ -20,10 +21,8 @@ class DeviceBufferVK final : public DeviceBuffer,
  public:
   DeviceBufferVK(DeviceBufferDescriptor desc,
                  std::weak_ptr<Context> context,
-                 VmaAllocator allocator,
-                 VmaAllocation allocation,
-                 VmaAllocationInfo info,
-                 vk::Buffer buffer);
+                 UniqueBufferVMA buffer,
+                 VmaAllocationInfo info);
 
   // |DeviceBuffer|
   ~DeviceBufferVK() override;
@@ -34,37 +33,17 @@ class DeviceBufferVK final : public DeviceBuffer,
   friend class AllocatorVK;
 
   struct BufferResource {
-    VmaAllocator allocator = {};
-    VmaAllocation allocation = {};
+    UniqueBufferVMA buffer;
     VmaAllocationInfo info = {};
-    vk::Buffer buffer = {};
 
     BufferResource() = default;
 
-    BufferResource(VmaAllocator p_allocator,
-                   VmaAllocation p_allocation,
-                   VmaAllocationInfo p_info,
-                   vk::Buffer p_buffer)
-        : allocator(p_allocator),
-          allocation(p_allocation),
-          info(p_info),
-          buffer(p_buffer) {}
+    BufferResource(UniqueBufferVMA p_buffer, VmaAllocationInfo p_info)
+        : buffer(std::move(p_buffer)), info(p_info) {}
 
     BufferResource(BufferResource&& o) {
-      std::swap(o.allocator, allocator);
-      std::swap(o.allocation, allocation);
-      std::swap(o.info, info);
       std::swap(o.buffer, buffer);
-    }
-
-    ~BufferResource() {
-      if (!buffer) {
-        return;
-      }
-      TRACE_EVENT0("impeller", "DestroyDeviceBuffer");
-      ::vmaDestroyBuffer(allocator,
-                         static_cast<decltype(buffer)::NativeType>(buffer),
-                         allocation);
+      std::swap(o.info, info);
     }
 
     FML_DISALLOW_COPY_AND_ASSIGN(BufferResource);

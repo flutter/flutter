@@ -67,5 +67,3 @@
 #include "vulkan/vulkan.hpp"
 
 static_assert(VK_HEADER_VERSION >= 215, "Vulkan headers must not be too old.");
-
-#include "flutter/flutter_vma/flutter_vma.h"

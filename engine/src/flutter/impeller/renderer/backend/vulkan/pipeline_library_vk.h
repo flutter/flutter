@@ -17,7 +17,6 @@
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/pipeline_library.h"
-#include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
 
