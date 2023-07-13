@@ -47,6 +47,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   void registerServiceExtension({
     required String name,
     required ServiceExtensionCallback callback,
+    required RegisterServiceExtensionCallback registerExtension,
   }) {
     assert(!extensions.containsKey(name));
     extensions[name] = callback;
