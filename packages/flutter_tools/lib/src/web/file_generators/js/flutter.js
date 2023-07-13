@@ -156,43 +156,41 @@ _flutter.loader = null;
     }
 
     /**
-     * Returns the latest service worker for the given `ServiceWorkerRegistration`.
+     * Returns the latest service worker for the given `serviceWorkerRegistration`.
      *
      * This might return the current service worker, if there's no new service worker
      * awaiting to be installed/updated.
      *
-     * @param {ServiceWorkerRegistration} reg
+     * @param {ServiceWorkerRegistration} serviceWorkerRegistration
      * @returns {ServiceWorker}
      */
-    _getNewServiceWorker(reg) {
-      if (!reg.active && (reg.installing || reg.waiting)) {
+    _getNewServiceWorker(serviceWorkerRegistration) {
+      if (!serviceWorkerRegistration.active && (serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting)) {
         // No active web worker and we have installed or are installing
         // one for the first time. Simply wait for it to activate.
         console.debug("Installing/Activating first service worker.");
-        return reg.installing || reg.waiting;
-      } else if (!reg.active.scriptURL.endsWith(serviceWorkerVersion)) {
+        return serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting;
+      } else if (!serviceWorkerRegistration.active.scriptURL.endsWith(serviceWorkerVersion)) {
         // When the app updates the serviceWorkerVersion changes, so we
         // need to ask the service worker to update.
-        return reg.update().then((newReg) => {
+        return serviceWorkerRegistration.update().then((newReg) => {
           console.debug("Updating service worker.");
           return newReg.installing || newReg.waiting || newReg.active;
         });
       } else {
         console.debug("Loading from existing service worker.");
-        return reg.active;
+        return serviceWorkerRegistration.active;
       }
     }
 
     /**
-     * Returns a Promise that resolves when the `latestServiceWorker` changes its
+     * Returns a Promise that resolves when the `serviceWorker` changes its
      * state to "activated".
      *
-     * @param {ServiceWorker} latestServiceWorker
+     * @param {ServiceWorker} serviceWorker
      * @returns {Promise<void>}
      */
-    _waitForServiceWorkerActivation(latestServiceWorker) {
-      const serviceWorker = latestServiceWorker;
-
+    _waitForServiceWorkerActivation(serviceWorker) {
       if (!serviceWorker || serviceWorker.state == "activated") {
         if (!serviceWorker) {
           return Promise.reject(
