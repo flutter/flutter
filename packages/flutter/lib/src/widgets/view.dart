@@ -490,7 +490,8 @@ class ViewCollection extends _MultiChildComponentWidget {
 ///
 /// In technical terms, the [ViewAnchor] can only be used in a rendering zone of
 /// the widget tree and the [view] slot marks the start of a new non-rendering
-/// zone (see [WidgetsBinding] for a definition of these zones).
+/// zone (see [WidgetsBinding] for a definition of these zones). Typically,
+/// it is occupied by a [View] widget, which will start a new rendering zone.
 ///
 /// {@template flutter.widgets.ViewAnchor}
 /// An example use case for this widget is a tooltip for a button. The tooltip
