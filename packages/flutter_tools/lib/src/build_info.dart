@@ -903,6 +903,11 @@ const String kTrackWidgetCreation = 'TrackWidgetCreation';
 /// This is expected to be a comma separated list of strings.
 const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
 
+/// The native assets mapping to  be embedded in the kernel file.
+///
+/// This is a single path.
+const String kNativeAssets = 'NativeAssets';
+
 /// Additional configuration passed to gen_snapshot.
 ///
 /// This is expected to be a comma separated list of strings.

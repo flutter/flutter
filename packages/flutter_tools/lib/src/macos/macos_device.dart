@@ -12,6 +12,7 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../macos/application_package.dart';
 import '../project.dart';
 import 'build_macos.dart';
@@ -61,6 +62,14 @@ class MacOSDevice extends DesktopDevice {
     return 'darwin-x64';
   }
 
+  DarwinArch get darwinArch {
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
+      return DarwinArch.arm64;
+    } else {
+      return DarwinArch.x86_64;
+    }
+  }
+
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.macos.existsSync();
@@ -76,6 +85,7 @@ class MacOSDevice extends DesktopDevice {
       buildInfo: buildInfo,
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,
+      fileSystem: globals.fs,
     );
   }
 

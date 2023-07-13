@@ -79,6 +79,7 @@ void main() {
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'skeleton'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'module', 'common'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package_ffi'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_ffi'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_shared'),
@@ -133,6 +134,9 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', 'testy5']);
       expect((await command.usageValues).commandCreateProjectType, 'plugin_ffi');
+
+      await runner.run(<String>['create', '--no-pub', '--template=package_ffi', 'testy5']);
+      expect((await command.usageValues).commandCreateProjectType, 'package_ffi');
     }));
 
     testUsingContext('set iOS host language type as usage value', () => testbed.run(() async {

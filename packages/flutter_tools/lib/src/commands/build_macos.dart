@@ -4,6 +4,7 @@
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
@@ -18,6 +19,7 @@ class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({
     required super.logger,
     required bool verboseHelp,
+    required this.fileSystem,
   }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesFlavorOption();
@@ -28,6 +30,8 @@ class BuildMacosCommand extends BuildSubCommand {
           'performing duplicate work.'
     );
   }
+
+  final FileSystem fileSystem;
 
   @override
   final String name = 'macos';
@@ -65,8 +69,9 @@ class BuildMacosCommand extends BuildSubCommand {
       targetOverride: targetFile,
       verboseLogging: globals.logger.isVerbose,
       configOnly: configOnly,
+      fileSystem: fileSystem,
       sizeAnalyzer: SizeAnalyzer(
-        fileSystem: globals.fs,
+        fileSystem: fileSystem,
         logger: globals.logger,
         appFilenamePattern: 'App',
         flutterUsage: globals.flutterUsage,

@@ -50,6 +50,9 @@ abstract class FeatureFlags {
   /// Whether WebAssembly compilation for Flutter Web is enabled.
   bool get isFlutterWebWasmEnabled => false;
 
+  /// Whether native assets compilation and bundling is enabled.
+  bool get isNativeAssetsEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -68,6 +71,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterFuchsiaFeature,
   flutterCustomDevicesFeature,
   flutterWebWasm,
+  nativeAssets,
 ];
 
 /// All current Flutter feature flags that can be configured.
@@ -161,6 +165,16 @@ const Feature flutterWebWasm = Feature(
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
+  ),
+);
+
+/// Enable native assets compilation and bundling.
+const Feature nativeAssets = Feature(
+  name: 'native assets compilation and bundling',
+  configSetting: 'enable-native-assets',
+  environmentOverride: 'FLUTTER_NATIVE_ASSETS',
+  master: FeatureChannelSetting(
+    available: true,
   ),
 );
 

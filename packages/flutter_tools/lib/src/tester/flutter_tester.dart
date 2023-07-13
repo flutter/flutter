@@ -12,6 +12,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../bundle_builder.dart';
@@ -19,6 +20,8 @@ import '../desktop_device.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../globals.dart' as globals;
+import '../macos/native_assets.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';
@@ -152,6 +155,21 @@ class FlutterTesterDevice extends Device {
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
 
+    Uri? nativeAssetsYaml;
+    final Uri projectUri = FlutterProject.current().directory.uri;
+    if (globals.platform.isMacOS) {
+      nativeAssetsYaml = await buildNativeAssetsMacOS(
+        buildMode: BuildMode.debug,
+        projectUri: projectUri,
+        flutterTester: true,
+        fileSystem: _fileSystem,
+      );
+    } else {
+      await ensureNoNativeAssetsUnimplementedOs(
+          projectUri, const LocalPlatform().operatingSystem);
+      nativeAssetsYaml = null;
+    }
+
     // Build assets and perform initial compilation.
     await BundleBuilder().build(
       buildInfo: buildInfo,
@@ -159,6 +177,7 @@ class FlutterTesterDevice extends Device {
       applicationKernelFilePath: applicationKernelFilePath,
       platform: getTargetPlatformForName(getNameForHostPlatform(_operatingSystemUtils.hostPlatform)),
       assetDirPath: assetDirectory.path,
+      nativeAssets: nativeAssetsYaml,
     );
 
     final List<String> command = <String>[

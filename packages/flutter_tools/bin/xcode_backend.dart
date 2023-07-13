@@ -212,6 +212,25 @@ class Context {
       ],
     );
 
+    // // # Copy the native assets.
+    final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
+    final String projectPath = '$sourceRoot/..';
+    final String nativeAssetsPath =
+        '$projectPath/build/native_assets/ios/';
+    runSync(
+      'rsync',
+      <String>[
+        '-8', // Avoid mangling filenames with encodings that do not match the current locale.
+        '-av',
+        '--filter',
+        '- .DS_Store',
+        '--filter',
+        '- native_assets.yaml',
+        nativeAssetsPath,
+        xcodeFrameworksDir,
+      ],
+    );
+
     addVmServiceBonjourService();
   }
 
@@ -359,6 +378,7 @@ class Context {
       '-dTrackWidgetCreation=${environment['TRACK_WIDGET_CREATION'] ?? ''}',
       '-dDartObfuscation=${environment['DART_OBFUSCATION'] ?? ''}',
       '-dAction=${environment['ACTION'] ?? ''}',
+      '-dNativeAssets=${environment['NATIVE_ASSETS']}',
       '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS'] ?? ''}',
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',

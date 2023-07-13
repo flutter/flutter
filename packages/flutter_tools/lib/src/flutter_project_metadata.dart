@@ -28,6 +28,9 @@ enum FlutterProjectType implements CliEnum {
   /// components, only Dart.
   package,
 
+  /// This is a Dart package project with external builds for native components.
+  packageFfi,
+
   /// This is a native plugin project.
   plugin,
 
@@ -50,6 +53,10 @@ enum FlutterProjectType implements CliEnum {
           'Linux, macOS, Windows, web, or any combination of these.',
         FlutterProjectType.pluginFfi =>
           'Generate a shareable Flutter project containing an API '
+          'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
+          'Linux, macOS, Windows, or any combination of these.',
+        FlutterProjectType.packageFfi =>
+          'Generate a shareable Dart/Flutter project containing an API '
           'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
           'Linux, macOS, Windows, or any combination of these.',
         FlutterProjectType.module =>

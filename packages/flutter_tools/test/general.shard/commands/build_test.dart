@@ -53,7 +53,7 @@ void main() {
     final List<FlutterCommand> commands = <FlutterCommand>[
       BuildWindowsCommand(logger: BufferLogger.test()),
       BuildLinuxCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()),
-      BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false),
+      BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false, fileSystem: MemoryFileSystem.test()),
       BuildWebCommand(fileSystem: fileSystem, logger: BufferLogger.test(), verboseHelp: false),
       BuildApkCommand(logger: BufferLogger.test()),
       BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false),

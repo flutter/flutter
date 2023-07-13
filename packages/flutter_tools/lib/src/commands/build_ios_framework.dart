@@ -270,6 +270,23 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
       final Status status = globals.logger.startProgress(
         ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
+
+      // Copy the native assets.
+      final ProcessResult rsyncResult =
+          await globals.processManager.run(<Object>[
+        'rsync',
+        '-av',
+        '--filter',
+        '- .DS_Store',
+        '--filter',
+        '- native_assets.yaml',
+        outputDirectory.childDirectory('../../native_assets/ios/').path,
+        modeDirectory.path,
+      ]);
+      assert(rsyncResult.exitCode == 0);
+      globals.logger.printTrace(rsyncResult.stderr as String);
+      globals.logger.printTrace(rsyncResult.stdout as String);
+
       try {
         // Delete the intermediaries since they would have been copied into our
         // output frameworks.

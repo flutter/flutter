@@ -51,6 +51,9 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isFlutterWebWasmEnabled => isEnabled(flutterWebWasm);
 
   @override
+  bool get isNativeAssetsEnabled => isEnabled(nativeAssets);
+
+  @override
   bool isEnabled(Feature feature) {
     final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);

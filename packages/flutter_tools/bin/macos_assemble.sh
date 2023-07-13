@@ -106,6 +106,7 @@ BuildApp() {
     "-dSplitDebugInfo=${SPLIT_DEBUG_INFO}"
     "-dTrackWidgetCreation=${TRACK_WIDGET_CREATION}"
     "-dAction=${ACTION}"
+    "-dNativeAssets=${NATIVE_ASSETS}"
     "--DartDefines=${DART_DEFINES}"
     "--ExtraGenSnapshotOptions=${EXTRA_GEN_SNAPSHOT_OPTIONS}"
     "--ExtraFrontEndOptions=${EXTRA_FRONT_END_OPTIONS}"
@@ -147,6 +148,13 @@ EmbedFrameworks() {
     RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/App.framework/App"
     RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/FlutterMacOS.framework/FlutterMacOS"
   fi
+
+  # Copy the native assets.
+  local project_path="${SOURCE_ROOT}/.."
+  local native_assets_path="${project_path}/build/native_assets/macos/"
+  local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
+  RunCommand mkdir -p -- "${xcode_frameworks_dir}"
+  RunCommand rsync -av --filter "- .DS_Store" --filter "- native_assets.yaml" "${native_assets_path}" "${xcode_frameworks_dir}"
 }
 
 # Main entry point.

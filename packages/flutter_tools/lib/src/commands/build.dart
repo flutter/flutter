@@ -60,7 +60,7 @@ class BuildCommand extends FlutterCommand {
       logger: logger,
       verboseHelp: verboseHelp,
     ));
-    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp, fileSystem: fileSystem));
     _addSubcommand(BuildLinuxCommand(
       logger: logger,
       operatingSystemUtils: osUtils,

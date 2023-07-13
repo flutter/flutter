@@ -503,7 +503,7 @@ STDERR STUFF
       osUtils: FakeOperatingSystemUtils(),
     ));
 
-    final bool supported = BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
+    final bool supported = BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false, fileSystem: MemoryFileSystem.test()).supported;
     expect(() => runner.run(<String>['build', 'macos', '--no-pub']),
       supported ? throwsToolExit() : throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
@@ -511,14 +511,14 @@ STDERR STUFF
   });
 
   testUsingContext('hidden when not enabled on macOS host', () {
-    expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, true);
+    expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false, fileSystem: MemoryFileSystem.test()).hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
     Platform: () => macosPlatform,
   });
 
   testUsingContext('Not hidden when enabled and on macOS host', () {
-    expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, false);
+    expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false, fileSystem: MemoryFileSystem.test()).hidden, false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Platform: () => macosPlatform,
