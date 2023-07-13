@@ -238,7 +238,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     _vibrate();
 
     final int daysInMonth = DateUtils.getDaysInMonth(value.year, value.month);
-    final int preferredDay = _selectedDate.day.clamp(1, daysInMonth);
+    final int preferredDay = math.min(_selectedDate.day, daysInMonth);
     value = DateTime(value.year, value.month, preferredDay);
 
     if (value.isBefore(widget.firstDate)) {
