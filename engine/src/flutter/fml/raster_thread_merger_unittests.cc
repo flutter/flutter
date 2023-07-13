@@ -594,6 +594,42 @@ TEST(RasterThreadMerger, TheLastCallerOfMultipleMergersCanUnmergeNow) {
   ASSERT_FALSE(raster_thread_merger2->IsMerged());
 }
 
+TEST(RasterThreadMerger, TheLastMergedCallerOfMultipleMergersCanUnmergeNow) {
+  TaskQueueWrapper queue1;
+  TaskQueueWrapper queue2;
+  fml::TaskQueueId qid1 = queue1.GetTaskQueueId();
+  fml::TaskQueueId qid2 = queue2.GetTaskQueueId();
+  // Two mergers will share one same inner merger
+  const auto raster_thread_merger1 =
+      fml::RasterThreadMerger::CreateOrShareThreadMerger(nullptr, qid1, qid2);
+
+  const size_t kNumFramesMerged = 1;
+  ASSERT_FALSE(raster_thread_merger1->IsMerged());
+
+  // Merge using the mergers
+  raster_thread_merger1->MergeWithLease(kNumFramesMerged);
+  ASSERT_TRUE(raster_thread_merger1->IsMerged());
+
+  for (size_t i = 0; i < kNumFramesMerged; i++) {
+    // Un-merge thread merger 1.
+    raster_thread_merger1->DecrementLease();
+  }
+  ASSERT_FALSE(raster_thread_merger1->IsMerged());
+
+  const auto raster_thread_merger2 =
+      fml::RasterThreadMerger::CreateOrShareThreadMerger(raster_thread_merger1,
+                                                         qid1, qid2);
+  ASSERT_FALSE(raster_thread_merger2->IsMerged());
+  raster_thread_merger2->MergeWithLease(kNumFramesMerged);
+  ASSERT_TRUE(raster_thread_merger2->IsMerged());
+
+  // One caller state becomes no callers left.
+  raster_thread_merger2->UnMergeNowIfLastOne();
+  // Check if unmerged
+  ASSERT_FALSE(raster_thread_merger1->IsMerged());
+  ASSERT_FALSE(raster_thread_merger2->IsMerged());
+}
+
 /// This case tests multiple standalone engines using independent merger to
 /// merge two different raster threads into the same platform thread.
 TEST(RasterThreadMerger,

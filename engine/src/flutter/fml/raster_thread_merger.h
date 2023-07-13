@@ -53,10 +53,10 @@ class RasterThreadMerger
       TaskQueueId platform_id,
       TaskQueueId raster_id);
 
-  // Un-merges the threads now if current caller is the last merge caller,
-  // and it resets the lease term to 0, otherwise it will remove the caller
-  // record and return. The multiple caller records were recorded after
-  // |MergeWithLease| or |ExtendLeaseTo| method.
+  // Un-merges the threads now if current caller is the last merged caller,
+  // and it resets the lease term to 0, otherwise it will remove
+  // the caller record and return. The multiple caller records were recorded
+  // after |MergeWithLease| or |ExtendLeaseTo| method.
   //
   // Must be executed on the raster task runner.
   //
