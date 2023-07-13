@@ -55,28 +55,6 @@ Future<void> main() async {
     );
 
     testWidgetsWithLeakTracking(
-      'respects allowAllNotDisposed',
-      (WidgetTester tester) async {
-        // ignore: avoid_redundant_argument_values, for readability.
-        await tester.pumpWidget(_StatelessLeakingWidget(notDisposed: true, notGCed: false));
-      },
-      leakTrackingTestConfig: const LeakTrackingTestConfig(
-        allowAllNotDisposed: true,
-      ),
-    );
-
-    testWidgetsWithLeakTracking(
-      'respects allowAllNotGCed',
-      (WidgetTester tester) async {
-        // ignore: avoid_redundant_argument_values, for readability.
-        await tester.pumpWidget(_StatelessLeakingWidget(notDisposed: false, notGCed: true));
-      },
-      leakTrackingTestConfig: const LeakTrackingTestConfig(
-        allowAllNotGCed: true,
-      ),
-    );
-
-    testWidgetsWithLeakTracking(
       'respects count in allow lists',
       (WidgetTester tester) async {
         await tester.pumpWidget(_StatelessLeakingWidget());
@@ -202,14 +180,10 @@ void _verifyLeakList(List<LeakReport> list, int expectedCount, bool shouldContai
 final List<_LeakTrackedClass> _notGcedStorage = <_LeakTrackedClass>[];
 
 class _StatelessLeakingWidget extends StatelessWidget {
-  _StatelessLeakingWidget({bool notDisposed = true, bool notGCed = true}) {
-    if (notDisposed) {
-      // ignore: unused_local_variable, the variable is used to create non disposed leak
-      final _LeakTrackedClass notDisposed = _LeakTrackedClass();
-    }
-    if (notGCed) {
-      _notGcedStorage.add(_LeakTrackedClass()..dispose());
-    }
+  _StatelessLeakingWidget() {
+    // ignore: unused_local_variable, the variable is used to create non disposed leak
+    final _LeakTrackedClass notDisposed = _LeakTrackedClass();
+    _notGcedStorage.add(_LeakTrackedClass()..dispose());
   }
 
   @override
