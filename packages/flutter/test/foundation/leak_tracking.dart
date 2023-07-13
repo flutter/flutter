@@ -54,13 +54,13 @@ void testWidgetsWithLeakTracking(
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
-  LeakTrackingTestConfig leakTrackingConfig = const LeakTrackingTestConfig(),
+  LeakTrackingTestConfig leakTrackingTestConfig = const LeakTrackingTestConfig(),
 }) {
   Future<void> wrappedCallback(WidgetTester tester) async {
     await _withFlutterLeakTracking(
       () async => callback(tester),
       tester,
-      leakTrackingConfig,
+      leakTrackingTestConfig,
     );
   }
 
@@ -169,12 +169,6 @@ class LeakCleaner {
 
   /// Returns true if [leak] should be reported as failure.
   bool _shouldReportLeak(LeakType leakType, LeakReport leak, Map<(String, LeakType), int> countByClassAndType) {
-    // Tracking for non-GCed is temporarily disabled.
-    // TODO(polina-c): turn on tracking for non-GCed after investigating existing leaks.
-    if (leakType != LeakType.notDisposed) {
-      return false;
-    }
-
     final String leakingClass = leak.type;
     final (String, LeakType) classAndType = (leakingClass, leakType);
 
