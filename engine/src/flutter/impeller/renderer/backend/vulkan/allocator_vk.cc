@@ -251,8 +251,7 @@ ToVKTextureMemoryPropertyFlags(StorageMode mode,
   switch (mode) {
     case StorageMode::kHostVisible:
       return vk::MemoryPropertyFlagBits::eHostVisible |
-             vk::MemoryPropertyFlagBits::eDeviceLocal |
-             vk::MemoryPropertyFlagBits::eHostCoherent;
+             vk::MemoryPropertyFlagBits::eDeviceLocal;
     case StorageMode::kDevicePrivate:
       return vk::MemoryPropertyFlagBits::eDeviceLocal;
     case StorageMode::kDeviceTransient:
@@ -266,25 +265,16 @@ ToVKTextureMemoryPropertyFlags(StorageMode mode,
 }
 
 static VmaAllocationCreateFlags ToVmaAllocationCreateFlags(StorageMode mode,
-                                                           bool is_texture,
                                                            size_t size) {
   VmaAllocationCreateFlags flags = 0;
   switch (mode) {
     case StorageMode::kHostVisible:
-      if (is_texture) {
-        if (size >= kImageSizeThresholdForDedicatedMemoryAllocation) {
-          flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
-        } else {
-          flags |= {};
-        }
-      } else {
-        flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-        flags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
+      if (size >= kImageSizeThresholdForDedicatedMemoryAllocation) {
+        flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
       }
       return flags;
     case StorageMode::kDevicePrivate:
-      if (is_texture &&
-          size >= kImageSizeThresholdForDedicatedMemoryAllocation) {
+      if (size >= kImageSizeThresholdForDedicatedMemoryAllocation) {
         flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
       }
       return flags;
@@ -328,9 +318,8 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     alloc_nfo.preferredFlags =
         static_cast<VkMemoryPropertyFlags>(ToVKTextureMemoryPropertyFlags(
             desc.storage_mode, supports_memoryless_textures));
-    alloc_nfo.flags =
-        ToVmaAllocationCreateFlags(desc.storage_mode, /*is_texture=*/true,
-                                   desc.GetByteSizeOfBaseMipLevel());
+    alloc_nfo.flags = ToVmaAllocationCreateFlags(
+        desc.storage_mode, desc.GetByteSizeOfBaseMipLevel());
 
     auto create_info_native =
         static_cast<vk::ImageCreateInfo::NativeType>(image_info);
