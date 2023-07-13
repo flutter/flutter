@@ -59,17 +59,12 @@ void main() {
     expect(description[3], 'shadowColor: Color(0x00000097)');
     expect(description[4], 'surfaceTintColor: Color(0x00000096)');
     expect(description[5], 'indicatorColor: Color(0x00000098)');
-    expect(description[6],
-        'indicatorShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))');
+    expect(description[6], 'indicatorShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))');
     expect(description[7], 'indicatorSize: Size(10.0, 10.0)');
-    expect(description[8],
-        'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
+    expect(description[8], 'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
 
     // Ignore instance address for IconThemeData.
-    expect(
-        description[9]
-            .contains('iconTheme: MaterialStatePropertyAll(IconThemeData'),
-        isTrue);
+    expect(description[9].contains('iconTheme: MaterialStatePropertyAll(IconThemeData'),isTrue);
     expect(description[9].contains('(color: Color(0x00000097))'), isTrue);
   });
 
@@ -134,10 +129,10 @@ void main() {
     // Test indicator decoration.
     expect(_getIndicatorDecoration(tester)?.color, indicatorColor);
     expect(_getIndicatorDecoration(tester)?.shape, indicatorShape);
-    // Test selected and unselected icon.
+    // Test icon.
     expect(_iconStyle(tester, Icons.ac_unit)?.color, iconColor);
     expect(_iconStyle(tester, Icons.access_alarm)?.color, iconColor);
-    // Test selected and unselected label.
+    // Test label.
     expect(_labelStyle(tester, 'AC'), labelStyle);
     expect(_labelStyle(tester, 'Alarm'), labelStyle);
   });
@@ -281,10 +276,10 @@ void main() {
     // Test indicator decoration.
     expect(_getIndicatorDecoration(tester)?.color, indicatorColor);
     expect(_getIndicatorDecoration(tester)?.shape, indicatorShape);
-    // Test selected and unselected icon.
+    // Test icon.
     expect(_iconStyle(tester, Icons.ac_unit)?.color, iconColor);
     expect(_iconStyle(tester, Icons.access_alarm)?.color, iconColor);
-    // Test selected and unselected label.
+    // Test label.
     expect(_labelStyle(tester, 'AC'), labelStyle);
     expect(_labelStyle(tester, 'Alarm'), labelStyle);
   });
