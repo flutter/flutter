@@ -138,7 +138,6 @@ skt::ParagraphStyle ParagraphBuilderSkia::TxtToSkia(const ParagraphStyle& txt) {
 
   skia.turnHintingOff();
   skia.setReplaceTabCharacters(true);
-  skia.setApplyRoundingHack(txt.apply_rounding_hack);
 
   return skia;
 }

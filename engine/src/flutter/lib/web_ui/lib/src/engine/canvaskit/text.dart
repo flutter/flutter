@@ -33,7 +33,6 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-    bool applyRoundingHack = true,
   })  : skParagraphStyle = toSkParagraphStyle(
           textAlign,
           textDirection,
@@ -47,7 +46,6 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           strutStyle,
           ellipsis,
           locale,
-          applyRoundingHack,
         ),
         _fontFamily = _effectiveFontFamily(fontFamily),
         _fontSize = fontSize,
@@ -147,7 +145,6 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-    bool applyRoundingHack,
   ) {
     final SkParagraphStyleProperties properties = SkParagraphStyleProperties();
 
@@ -184,7 +181,6 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     properties.replaceTabCharacters = true;
     properties.textStyle = toSkTextStyleProperties(
         fontFamily, fontSize, height, fontWeight, fontStyle);
-    properties.applyRoundingHack = applyRoundingHack;
 
     return canvasKit.ParagraphStyle(properties);
   }
