@@ -162,9 +162,9 @@ _flutter.loader = null;
      * awaiting to be installed/updated.
      *
      * @param {ServiceWorkerRegistration} serviceWorkerRegistration
-     * @returns {ServiceWorker}
+     * @returns {Promise<ServiceWorker>}
      */
-    _getNewServiceWorker(serviceWorkerRegistration) {
+    async _getNewServiceWorker(serviceWorkerRegistration) {
       if (!serviceWorkerRegistration.active && (serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting)) {
         // No active web worker and we have installed or are installing
         // one for the first time. Simply wait for it to activate.
@@ -173,10 +173,9 @@ _flutter.loader = null;
       } else if (!serviceWorkerRegistration.active.scriptURL.endsWith(serviceWorkerVersion)) {
         // When the app updates the serviceWorkerVersion changes, so we
         // need to ask the service worker to update.
-        return serviceWorkerRegistration.update().then((newReg) => {
-          console.debug("Updating service worker.");
-          return newReg.installing || newReg.waiting || newReg.active;
-        });
+        const newRegistration = await serviceWorkerRegistration.update()
+        console.debug("Updating service worker.");
+        return newRegistration.installing || newRegistration.waiting || newRegistration.active;
       } else {
         console.debug("Loading from existing service worker.");
         return serviceWorkerRegistration.active;
