@@ -5,6 +5,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -177,7 +178,11 @@ void main() {
 
     final Finder textField = find.byType(TextField);
     final Size anchorSize = tester.getSize(textField);
-    expect(anchorSize, const Size(195.0, 60.0));
+    if (kIsWeb && !isCanvasKit) {
+      expect(anchorSize, const Size(195.0, 61.0));
+    } else {
+      expect(anchorSize, const Size(195.0, 60.0));
+    }
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
@@ -195,7 +200,11 @@ void main() {
 
     final Finder anchor = find.byType(TextField);
     final Size size = tester.getSize(anchor);
-    expect(size, const Size(200.0, 60.0));
+    if (kIsWeb && !isCanvasKit) {
+      expect(size, const Size(200.0, 61.0));
+    } else {
+      expect(size, const Size(200.0, 60.0));
+    }
 
     await tester.tap(anchor);
     await tester.pumpAndSettle();
