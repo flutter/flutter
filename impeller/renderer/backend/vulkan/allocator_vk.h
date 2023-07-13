@@ -13,6 +13,7 @@
 #include "impeller/renderer/backend/vulkan/device_holder.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
+#include <array>
 #include <memory>
 
 namespace impeller {
@@ -28,8 +29,8 @@ class AllocatorVK final : public Allocator {
   static constexpr size_t kPoolCount = 3;
 
   fml::RefPtr<vulkan::VulkanProcTable> vk_;
-  VmaAllocator allocator_ = {};
-  VmaPool staging_buffer_pools_[kPoolCount] = {};
+  UniqueAllocatorVMA allocator_;
+  std::array<UniquePoolVMA, kPoolCount> staging_buffer_pools_;
   std::weak_ptr<Context> context_;
   std::weak_ptr<DeviceHolder> device_holder_;
   ISize max_texture_size_;
@@ -65,8 +66,6 @@ class AllocatorVK final : public Allocator {
 
   // |Allocator|
   ISize GetMaxTextureSizeSupported() const override;
-
-  static bool CreateBufferPool(VmaAllocator allocator, VmaPool* pool);
 
   FML_DISALLOW_COPY_AND_ASSIGN(AllocatorVK);
 };
