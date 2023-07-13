@@ -9,19 +9,19 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../src/common.dart';
+import '../src/context.dart';
 
 void main() {
-  test('defaultReloadSourcesHelper() handles empty DeviceReloadReports)', () {
+  testUsingContext('defaultReloadSourcesHelper() handles empty DeviceReloadReports)', () {
     defaultReloadSourcesHelper(
       _FakeHotRunner(),
       <FlutterDevice?>[_FakeFlutterDevice()],
       false,
       const <String, dynamic>{},
-      null,
-      null,
-      null,
-      null,
+      'android',
+      'flutter-sdk',
+      false,
+      'test-reason',
     );
   });
 }
@@ -32,6 +32,9 @@ class _FakeHotRunner extends Fake implements HotRunner {
 class _FakeDevFS extends Fake implements DevFS {
   @override
   final Uri? baseUri = Uri();
+
+  @override
+  void resetLastCompiled() {}
 }
 
 class _FakeFlutterDevice extends Fake implements FlutterDevice {
