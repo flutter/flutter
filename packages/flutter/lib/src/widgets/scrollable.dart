@@ -457,36 +457,16 @@ class Scrollable extends StatefulWidget {
     RenderObject? targetRenderObject;
     ScrollableState? scrollable = Scrollable.maybeOf(context);
     while (scrollable != null) {
-      if (scrollable is _HorizontalInnerDimensionState) {
-        // Handle ensure visible for 2D viewport.
-        // The default loop below assumes nested viewports with one scrollable for
-        // each one, while a 2D viewport contains 2 scrollables and only one
-        // viewport.
-        futures.add(scrollable.position.ensureVisible(
-          context.findRenderObject()!,
-          alignment: alignment,
-          duration: duration,
-          curve: curve,
-          alignmentPolicy: alignmentPolicy,
-        ));
-        scrollable.verticalScrollable.position.ensureVisible(
-          context.findRenderObject()!,
-          alignment: alignment,
-          duration: duration,
-          curve: curve,
-          alignmentPolicy: alignmentPolicy,
-        );
-        scrollable = scrollable.verticalScrollable;
-      } else {
-        futures.add(scrollable.position.ensureVisible(
-          context.findRenderObject()!,
-          alignment: alignment,
-          duration: duration,
-          curve: curve,
-          alignmentPolicy: alignmentPolicy,
-          targetRenderObject: targetRenderObject,
-        ));
-      }
+      late final List<Future<void>> newFutures;
+      (newFutures, scrollable) = scrollable._performEnsureVisible(
+        context.findRenderObject()!,
+        alignment: alignment,
+        duration: duration,
+        curve: curve,
+        alignmentPolicy: alignmentPolicy,
+        targetRenderObject: targetRenderObject,
+      );
+      futures.addAll(newFutures);
 
       targetRenderObject = targetRenderObject ?? context.findRenderObject();
       context = scrollable.context;
@@ -1023,6 +1003,25 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
 
     return result;
+  }
+
+  (List<Future<void>>, ScrollableState) _performEnsureVisible(
+    RenderObject object, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    RenderObject? targetRenderObject,
+  }) {
+    final Future<void> ensureVisibleFuture = position.ensureVisible(
+      object,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+      targetRenderObject: targetRenderObject,
+    );
+    return (<Future<void>>[ ensureVisibleFuture ], this);
   }
 
   @override
@@ -2049,6 +2048,22 @@ class _VerticalOuterDimensionState extends ScrollableState {
   DiagonalDragBehavior get diagonalDragBehavior => (widget as _VerticalOuterDimension).diagonalDragBehavior;
 
   @override
+  (List<Future<void>>, ScrollableState) _performEnsureVisible(
+    RenderObject object, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    RenderObject? targetRenderObject,
+  }) {
+    throw FlutterError(
+      'The _performEnsureVisible method was called for the vertical scrollable '
+      'of a TwoDimensionalScrollable. This should not happen as the horizontal '
+      'scrollable handles both axes.'
+    );
+  }
+
+  @override
   void setCanDrag(bool value) {
     switch (diagonalDragBehavior) {
       case DiagonalDragBehavior.none:
@@ -2125,6 +2140,34 @@ class _HorizontalInnerDimensionState extends ScrollableState {
     verticalScrollable = Scrollable.of(context);
     assert(axisDirectionToAxis(verticalScrollable.axisDirection) == Axis.vertical);
     super.didChangeDependencies();
+  }
+
+  @override
+  (List<Future<void>>, ScrollableState) _performEnsureVisible(
+    RenderObject object, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    RenderObject? targetRenderObject,
+  }) {
+    final List<Future<void>> newFutures = <Future<void>>[];
+    newFutures.add(position.ensureVisible(
+      object,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+    ));
+    newFutures.add(verticalScrollable.position.ensureVisible(
+      object,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+    ));
+
+    return (newFutures, verticalScrollable);
   }
 
   void _evaluateLockedAxis(Offset offset) {

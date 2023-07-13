@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -908,7 +909,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     RenderBox? pivot;
     // Find the direct child of the viewport that contains our target
     while (child.parent != this) {
-      final RenderObject parent = child.parent! as RenderObject;
+      final RenderObject parent = child.parent!;
       if (child is RenderBox) {
         pivot = child;
       }
@@ -998,8 +999,142 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         targetRect = targetRect.translate(-offsetDifference, 0.0);
     }
 
-    final RevealedOffset revealedOffset = RevealedOffset(offset: targetOffset, rect: targetRect);
+    final RevealedOffset revealedOffset = RevealedOffset(
+      offset: targetOffset,
+      rect: targetRect,
+    );
     return revealedOffset;
+  }
+
+  @override
+  void showOnScreen({
+    RenderObject? descendant,
+    Rect? rect,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    if (!horizontalOffset.allowImplicitScrolling && !verticalOffset.allowImplicitScrolling) {
+      // Neither axis allows for implicit scrolling.
+      return super.showOnScreen(
+        descendant: descendant,
+        rect: rect,
+        duration: duration,
+        curve: curve,
+      );
+    }
+    assert(horizontalOffset.allowImplicitScrolling || verticalOffset.allowImplicitScrolling);
+    Rect? newRect = rect;
+    // It is possible for one and not both axes to allow for implicit scrolling,
+    // so they are handled individually, updating the final rect for each.
+    if (verticalOffset.allowImplicitScrolling) {
+      newRect = RenderTwoDimensionalViewport.showInViewportForAxisDirection(
+        descendant: descendant,
+        viewport: this,
+        offset: verticalOffset,
+        axisDirection: verticalAxisDirection,
+        rect: newRect,
+        duration: duration,
+        curve: curve,
+      );
+    }
+
+    if (horizontalOffset.allowImplicitScrolling) {
+      newRect = RenderTwoDimensionalViewport.showInViewportForAxisDirection(
+        descendant: descendant,
+        viewport: this,
+        offset: horizontalOffset,
+        axisDirection: horizontalAxisDirection,
+        rect: newRect,
+        duration: duration,
+        curve: curve,
+      );
+    }
+
+    super.showOnScreen(
+      rect: newRect,
+      duration: duration,
+      curve: curve,
+    );
+  }
+
+  /// Make (a portion of) the given `descendant` of the given `viewport` fully
+  /// visible in one dimension of the `viewport` by manipulating the provided
+  /// [ViewportOffset]s `offset`.
+  ///
+  /// The optional `rect` parameter describes which area of the `descendant`
+  /// should be shown in the viewport. If `rect` is null, the entire
+  /// `descendant` will be revealed. The `rect` parameter is interpreted
+  /// relative to the coordinate system of `descendant`.
+  ///
+  /// The returned [Rect] describes the new location of `descendant` or `rect`
+  /// in the viewport after it has been revealed. See [RevealedOffset.rect]
+  /// for a full definition of this [Rect].
+  ///
+  /// The parameters `viewport`, `offset`, and `axisDirection` are
+  /// required and cannot be null. If `descendant` is null, this is a no-op and
+  /// `rect` is returned.
+  ///
+  /// If both `descendant` and `rect` are null, null is returned because there
+  /// is nothing to be shown in the viewport.
+  ///
+  /// The `duration` parameter can be set to a non-zero value to animate the
+  /// target object into the viewport with an animation defined by `curve`.
+  ///
+  /// See also:
+  ///
+  /// * [RenderObject.showOnScreen], overridden by
+  ///   [RenderTwoDimensionalViewport] to delegate to this method.
+  static Rect? showInViewportForAxisDirection({
+    RenderObject? descendant,
+    Rect? rect,
+    required RenderTwoDimensionalViewport viewport,
+    required ViewportOffset offset,
+    required AxisDirection axisDirection,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    if (descendant == null) {
+      return rect;
+    }
+    final RevealedOffset leadingEdgeOffset = viewport.getOffsetToReveal(
+      descendant,
+      0.0,
+      rect: rect,
+      axisDirection: axisDirection,
+    );
+    final RevealedOffset trailingEdgeOffset = viewport.getOffsetToReveal(
+      descendant,
+      1.0,
+      rect: rect,
+      axisDirection: axisDirection,
+    );
+    final double currentOffset = offset.pixels;
+
+    final RevealedOffset targetOffset;
+    if (leadingEdgeOffset.offset < trailingEdgeOffset.offset) {
+      // `descendant` is too big to be visible on screen in its entirety. Let's
+      // align it with the edge that requires the least amount of scrolling.
+      final double leadingEdgeDiff = (offset.pixels - leadingEdgeOffset.offset).abs();
+      final double trailingEdgeDiff = (offset.pixels - trailingEdgeOffset.offset).abs();
+      targetOffset = leadingEdgeDiff < trailingEdgeDiff ? leadingEdgeOffset : trailingEdgeOffset;
+    } else if (currentOffset > leadingEdgeOffset.offset) {
+      // `descendant` currently starts above the leading edge and can be shown
+      // fully on screen by scrolling down (which means: moving viewport up).
+      targetOffset = leadingEdgeOffset;
+    } else if (currentOffset < trailingEdgeOffset.offset) {
+      // `descendant currently ends below the trailing edge and can be shown
+      // fully on screen by scrolling up (which means: moving viewport down)
+      targetOffset = trailingEdgeOffset;
+    } else {
+      // `descendant` is between leading and trailing edge and hence already
+      //  fully shown on screen. No action necessary.
+      assert(viewport.parent != null);
+      final Matrix4 transform = descendant.getTransformTo(viewport.parent);
+      return MatrixUtils.transformRect(transform, rect ?? descendant.paintBounds);
+    }
+
+    offset.moveTo(targetOffset.offset, duration: duration, curve: curve);
+    return targetOffset.rect;
   }
 
   /// Should be used by subclasses to invalidate any cached metrics for the
