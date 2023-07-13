@@ -29,7 +29,7 @@ String generateMainDartFile(String appEntrypoint, {
     'typedef _NullaryFunction = dynamic Function();',
     '',
     'Future<void> main() async {',
-    '  await ui_web.warmupEngine(',
+    '  await ui_web.bootstrapEngine(',
     '    runApp: () {',
     '      if (entrypoint.main is _UnaryFunction) {',
     '        return (entrypoint.main as _UnaryFunction)(<String>[]);',
