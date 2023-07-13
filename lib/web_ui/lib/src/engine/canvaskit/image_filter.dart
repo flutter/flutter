@@ -23,6 +23,8 @@ typedef SkImageFilterBorrow = void Function(SkImageFilter);
 /// Currently implemented by [CkImageFilter] and [CkColorFilter].
 abstract class CkManagedSkImageFilterConvertible implements ui.ImageFilter {
   void imageFilter(SkImageFilterBorrow borrow);
+
+  Matrix4 get transform;
 }
 
 /// The CanvasKit implementation of [ui.ImageFilter].
@@ -40,6 +42,9 @@ abstract class CkImageFilter implements CkManagedSkImageFilterConvertible {
       required ui.FilterQuality filterQuality}) = _CkMatrixImageFilter;
 
   CkImageFilter._();
+
+  @override
+  Matrix4 get transform => Matrix4.identity();
 }
 
 class CkColorFilterImageFilter extends CkImageFilter {
@@ -149,6 +154,7 @@ class _CkMatrixImageFilter extends CkImageFilter {
   _CkMatrixImageFilter(
       {required Float64List matrix, required this.filterQuality})
       : matrix = Float64List.fromList(matrix),
+        _transform = Matrix4.fromFloat32List(toMatrix32(matrix)),
         super._() {
     final SkImageFilter skImageFilter = canvasKit.ImageFilter.MakeMatrixTransform(
       toSkMatrixFromFloat64(matrix),
@@ -160,6 +166,7 @@ class _CkMatrixImageFilter extends CkImageFilter {
 
   final Float64List matrix;
   final ui.FilterQuality filterQuality;
+  final Matrix4 _transform;
 
   late final UniqueRef<SkImageFilter> _ref;
 
@@ -183,4 +190,7 @@ class _CkMatrixImageFilter extends CkImageFilter {
 
   @override
   String toString() => 'ImageFilter.matrix($matrix, $filterQuality)';
+
+  @override
+  Matrix4 get transform => _transform;
 }

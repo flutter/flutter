@@ -72,5 +72,31 @@ void testMain() {
         region: kDefaultRegion,
       );
     });
+
+    test('ImageFilter layer applies matrix in preroll', () async {
+      final CkPicture picture =
+          paintPicture(const ui.Rect.fromLTRB(0, 0, 100, 100), (CkCanvas canvas) {
+        canvas.drawRect(const ui.Rect.fromLTRB(0, 0, 100, 100),
+            CkPaint()..style = ui.PaintingStyle.fill);
+      });
+
+      final LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushImageFilter(
+        ui.ImageFilter.matrix(
+          (
+            Matrix4.identity()
+              ..scale(0.5, 0.5)
+              ..translate(20)
+          ).toFloat64(),
+        ),
+      );
+      sb.addPicture(ui.Offset.zero, picture);
+
+      final LayerTree layerTree = sb.build().layerTree;
+      CanvasKitRenderer.instance.rasterizer.draw(layerTree);
+
+      final ImageFilterEngineLayer imageFilterLayer = layerTree.rootLayer.debugLayers.single as ImageFilterEngineLayer;
+      expect(imageFilterLayer.paintBounds, const ui.Rect.fromLTRB(10, 0, 60, 50));
+    });
   });
 }

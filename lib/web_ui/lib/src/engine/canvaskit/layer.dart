@@ -7,6 +7,7 @@ import 'package:ui/ui.dart' as ui;
 import '../vector_math.dart';
 import 'canvas.dart';
 import 'embedded_views.dart';
+import 'image_filter.dart';
 import 'n_way_canvas.dart';
 import 'painting.dart';
 import 'path.dart';
@@ -395,6 +396,17 @@ class ImageFilterEngineLayer extends ContainerLayer
 
   final ui.Offset _offset;
   final ui.ImageFilter _filter;
+
+  @override
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    final Matrix4 transform = (_filter as CkManagedSkImageFilterConvertible).transform;
+    final Matrix4 childMatrix = matrix.multiplied(transform);
+    prerollContext.mutatorsStack.pushTransform(transform);
+    final ui.Rect childPaintBounds =
+        prerollChildren(prerollContext, childMatrix);
+    paintBounds = transform.transformRect(childPaintBounds);
+    prerollContext.mutatorsStack.pop();
+  }
 
   @override
   void paint(PaintContext paintContext) {
