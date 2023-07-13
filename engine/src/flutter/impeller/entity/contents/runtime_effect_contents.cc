@@ -44,6 +44,13 @@ bool RuntimeEffectContents::CanInheritOpacity(const Entity& entity) const {
 bool RuntimeEffectContents::Render(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const {
+// TODO(jonahwilliams): FragmentProgram API is not fully wired up on Android.
+// Disable until this is complete so that integration tests and benchmarks can
+// run m3 applications.
+#ifdef FML_OS_ANDROID
+  return true;
+#endif
+
   auto context = renderer.GetContext();
   auto library = context->GetShaderLibrary();
 
