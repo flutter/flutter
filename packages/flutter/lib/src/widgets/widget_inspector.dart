@@ -798,9 +798,10 @@ mixin WidgetInspectorService {
     required ServiceExtensionCallback callback,
     required RegisterServiceExtensionCallback registerExtension,
   }) {
-    registerExtension(
+    registerServiceExtension(
       name: 'inspector.$name',
       callback: callback,
+      registerExtension: registerExtension,
     );
   }
 
@@ -831,11 +832,12 @@ mixin WidgetInspectorService {
     required FutureOr<Object?> Function(String objectGroup) callback,
     required RegisterServiceExtensionCallback registerExtension,
   }) {
-    registerExtension(
+    registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         return <String, Object?>{'result': await callback(parameters['objectGroup']!)};
       },
+      registerExtension: registerExtension,
     );
   }
 
@@ -857,7 +859,7 @@ mixin WidgetInspectorService {
     required AsyncValueSetter<bool> setter,
     required RegisterServiceExtensionCallback registerExtension,
   }) {
-    registerExtension(
+    registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey('enabled')) {
@@ -867,6 +869,7 @@ mixin WidgetInspectorService {
         }
         return <String, dynamic>{'enabled': await getter() ? 'true' : 'false'};
       },
+      registerExtension: registerExtension,
     );
   }
 
@@ -899,7 +902,7 @@ mixin WidgetInspectorService {
     required FutureOr<Object?> Function(String? objectId, String objectGroup) callback,
     required RegisterServiceExtensionCallback registerExtension,
   }) {
-    registerExtension(
+    registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('objectGroup'));
@@ -907,6 +910,7 @@ mixin WidgetInspectorService {
           'result': await callback(parameters['arg'], parameters['objectGroup']!),
         };
       },
+      registerExtension: registerExtension,
     );
   }
 
@@ -918,7 +922,7 @@ mixin WidgetInspectorService {
     required FutureOr<Object?> Function(List<String> args) callback,
     required RegisterServiceExtensionCallback registerExtension,
   }) {
-    registerExtension(
+    registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         final List<String> args = <String>[];
@@ -937,6 +941,7 @@ mixin WidgetInspectorService {
         assert(index == parameters.length || (index == parameters.length - 1 && parameters.containsKey('isolateId')));
         return <String, Object?>{'result': await callback(args)};
       },
+      registerExtension: registerExtension,
     );
   }
 
