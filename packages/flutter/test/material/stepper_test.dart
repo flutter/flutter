@@ -214,15 +214,13 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
-  testWidgets('Stepper button test', (WidgetTester tester) async {
+  testWidgets('Material2 - Stepper button test', (WidgetTester tester) async {
     bool continuePressed = false;
     bool cancelPressed = false;
-    final ThemeData theme = ThemeData();
-    final bool material3 = theme.useMaterial3;
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: theme,
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Stepper(
             type: StepperType.horizontal,
@@ -253,8 +251,52 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text(material3 ? 'Continue' : 'CONTINUE'));
-    await tester.tap(find.text(material3 ? 'Cancel' : 'CANCEL'));
+    await tester.tap(find.text('CONTINUE'));
+    await tester.tap(find.text('CANCEL'));
+
+    expect(continuePressed, isTrue);
+    expect(cancelPressed, isTrue);
+  });
+
+  testWidgets('Material3 - Stepper button test', (WidgetTester tester) async {
+    bool continuePressed = false;
+    bool cancelPressed = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Stepper(
+            type: StepperType.horizontal,
+            onStepContinue: () {
+              continuePressed = true;
+            },
+            onStepCancel: () {
+              cancelPressed = true;
+            },
+            steps: const <Step>[
+              Step(
+                title: Text('Step 1'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
+                ),
+              ),
+              Step(
+                title: Text('Step 2'),
+                content: SizedBox(
+                  width: 200.0,
+                  height: 200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Continue'));
+    await tester.tap(find.text('Cancel'));
 
     expect(continuePressed, isTrue);
     expect(cancelPressed, isTrue);
@@ -833,7 +875,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Stepper enabled button styles', (WidgetTester tester) async {
+  testWidgets('Material2 - Stepper enabled button styles', (WidgetTester tester) async {
     Widget buildFrame(ThemeData theme) {
       return MaterialApp(
         theme: theme,
@@ -861,15 +903,14 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 
     const OutlinedBorder buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2)));
 
-    final ThemeData themeLight = ThemeData.light();
-    final bool material3Light = themeLight.useMaterial3;
+    final ThemeData themeLight = ThemeData(useMaterial3: false);
     await tester.pumpWidget(buildFrame(themeLight));
 
-    final String continueStr = material3Light ? 'Continue' : 'CONTINUE';
-    final String cancelStr = material3Light ? 'Cancel' : 'CANCEL';
-    final Rect continueButtonRect = material3Light ? const Rect.fromLTRB(24.0, 212.0, 169.0, 260.0) : const Rect.fromLTRB(24.0, 212.0, 168.0, 260.0);
-    final Rect cancelButtonRect = material3Light ? const Rect.fromLTRB(177.0, 212.0, 294.0, 260.0) : const Rect.fromLTRB(176.0, 212.0, 292.0, 260.0);
-    expect(buttonMaterial(continueStr).color!.value, material3Light ? themeLight.colorScheme.primary.value : 0xff2196f3);
+    const String continueStr = 'CONTINUE';
+    const String cancelStr = 'CANCEL';
+    const Rect continueButtonRect = Rect.fromLTRB(24.0, 212.0, 168.0, 260.0);
+    const Rect cancelButtonRect = Rect.fromLTRB(176.0, 212.0, 292.0, 260.0);
+    expect(buttonMaterial(continueStr).color!.value, 0xff2196f3);
     expect(buttonMaterial(continueStr).textStyle!.color!.value, 0xffffffff);
     expect(buttonMaterial(continueStr).shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, continueStr)), continueButtonRect);
@@ -879,13 +920,12 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(buttonMaterial(cancelStr).shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, cancelStr)), cancelButtonRect);
 
-    final ThemeData themeDark = ThemeData.dark();
-    final bool material3Dark = themeDark.useMaterial3;
+    final ThemeData themeDark = ThemeData.dark(useMaterial3: false);
     await tester.pumpWidget(buildFrame(themeDark));
     await tester.pumpAndSettle(); // Complete the theme animation.
 
     expect(buttonMaterial(continueStr).color!.value, 0);
-    expect(buttonMaterial(continueStr).textStyle!.color!.value, material3Dark ? themeDark.colorScheme.onSurface.value : 0xffffffff);
+    expect(buttonMaterial(continueStr).textStyle!.color!.value, 0xffffffff);
     expect(buttonMaterial(continueStr).shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, continueStr)), continueButtonRect);
 
@@ -895,7 +935,67 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(tester.getRect(find.widgetWithText(TextButton, cancelStr)), cancelButtonRect);
   });
 
-  testWidgets('Stepper disabled button styles', (WidgetTester tester) async {
+  testWidgets('Material3 - Stepper enabled button styles', (WidgetTester tester) async {
+    Widget buildFrame(ThemeData theme) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Stepper(
+            type: StepperType.horizontal,
+            onStepCancel: () { },
+            onStepContinue: () { },
+            steps: const <Step>[
+              Step(
+                title: Text('step1'),
+                content: SizedBox(width: 100, height: 100),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Material buttonMaterial(String label) {
+      return tester.widget<Material>(
+        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material)),
+      );
+    }
+
+    const OutlinedBorder buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2)));
+
+    final ThemeData themeLight = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(buildFrame(themeLight));
+
+    const String continueStr = 'Continue';
+    const String cancelStr = 'Cancel';
+    const Rect continueButtonRect = Rect.fromLTRB(24.0, 212.0, 169.0, 260.0);
+    const Rect cancelButtonRect = Rect.fromLTRB(177.0, 212.0, 294.0, 260.0);
+    expect(buttonMaterial(continueStr).color!.value, themeLight.colorScheme.primary.value);
+    expect(buttonMaterial(continueStr).textStyle!.color!.value, 0xffffffff);
+    expect(buttonMaterial(continueStr).shape, buttonShape);
+    expect(tester.getRect(find.widgetWithText(TextButton, continueStr)), continueButtonRect);
+
+    expect(buttonMaterial(cancelStr).color!.value, 0);
+    expect(buttonMaterial(cancelStr).textStyle!.color!.value, 0x8a000000);
+    expect(buttonMaterial(cancelStr).shape, buttonShape);
+    expect(tester.getRect(find.widgetWithText(TextButton, cancelStr)), cancelButtonRect);
+
+    final ThemeData themeDark = ThemeData.dark(useMaterial3: true);
+    await tester.pumpWidget(buildFrame(themeDark));
+    await tester.pumpAndSettle(); // Complete the theme animation.
+
+    expect(buttonMaterial(continueStr).color!.value, 0);
+    expect(buttonMaterial(continueStr).textStyle!.color!.value, themeDark.colorScheme.onSurface.value);
+    expect(buttonMaterial(continueStr).shape, buttonShape);
+    expect(tester.getRect(find.widgetWithText(TextButton, continueStr)), continueButtonRect);
+
+    expect(buttonMaterial(cancelStr).color!.value, 0);
+    expect(buttonMaterial(cancelStr).textStyle!.color!.value, 0xb3ffffff);
+    expect(buttonMaterial(cancelStr).shape, buttonShape);
+    expect(tester.getRect(find.widgetWithText(TextButton, cancelStr)), cancelButtonRect);
+  });
+
+  testWidgets('Material2 - Stepper disabled button styles', (WidgetTester tester) async {
     Widget buildFrame(ThemeData theme) {
       return MaterialApp(
         theme: theme,
@@ -919,28 +1019,72 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       );
     }
 
-    final ThemeData themeLight = ThemeData.light();
-    final bool material3Light = themeLight.useMaterial3;
+    final ThemeData themeLight = ThemeData(useMaterial3: false);
     await tester.pumpWidget(buildFrame(themeLight));
 
-    final String continueStr = material3Light ? 'Continue' : 'CONTINUE';
-    final String cancelStr = material3Light ? 'Cancel' : 'CANCEL';
+    const String continueStr = 'CONTINUE';
+    const String cancelStr = 'CANCEL';
     expect(buttonMaterial(continueStr).color!.value, 0);
-    expect(buttonMaterial(continueStr).textStyle!.color!.value, material3Light ? themeLight.colorScheme.onSurface.withOpacity(0.38).value : 0x61000000);
+    expect(buttonMaterial(continueStr).textStyle!.color!.value, 0x61000000);
 
     expect(buttonMaterial(cancelStr).color!.value, 0);
-    expect(buttonMaterial(cancelStr).textStyle!.color!.value, material3Light ? themeLight.colorScheme.onSurface.withOpacity(0.38).value : 0x61000000);
+    expect(buttonMaterial(cancelStr).textStyle!.color!.value, 0x61000000);
 
-    final ThemeData themeDark = ThemeData.dark();
-    final bool material3Dark = themeDark.useMaterial3;
+    final ThemeData themeDark = ThemeData.dark(useMaterial3: false);
     await tester.pumpWidget(buildFrame(themeDark));
     await tester.pumpAndSettle(); // Complete the theme animation.
 
     expect(buttonMaterial(continueStr).color!.value, 0);
-    expect(buttonMaterial(continueStr).textStyle!.color!.value, material3Dark ? themeDark.colorScheme.onSurface.withOpacity(0.38).value : 0x61ffffff);
+    expect(buttonMaterial(continueStr).textStyle!.color!.value, 0x61ffffff);
 
     expect(buttonMaterial(cancelStr).color!.value, 0);
-    expect(buttonMaterial(cancelStr).textStyle!.color!.value, material3Dark ? themeDark.colorScheme.onSurface.withOpacity(0.38).value : 0x61ffffff);
+    expect(buttonMaterial(cancelStr).textStyle!.color!.value, 0x61ffffff);
+  });
+
+  testWidgets('Material3 - Stepper disabled button styles', (WidgetTester tester) async {
+    Widget buildFrame(ThemeData theme) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Stepper(
+            type: StepperType.horizontal,
+            steps: const <Step>[
+              Step(
+                title: Text('step1'),
+                content: SizedBox(width: 100, height: 100),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Material buttonMaterial(String label) {
+      return tester.widget<Material>(
+        find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material)),
+      );
+    }
+
+    final ThemeData themeLight = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(buildFrame(themeLight));
+
+    const String continueStr = 'Continue';
+    const String cancelStr = 'Cancel';
+    expect(buttonMaterial(continueStr).color!.value, 0);
+    expect(buttonMaterial(continueStr).textStyle!.color!.value, themeLight.colorScheme.onSurface.withOpacity(0.38).value);
+
+    expect(buttonMaterial(cancelStr).color!.value, 0);
+    expect(buttonMaterial(cancelStr).textStyle!.color!.value, themeLight.colorScheme.onSurface.withOpacity(0.38).value);
+
+    final ThemeData themeDark = ThemeData.dark(useMaterial3: true);
+    await tester.pumpWidget(buildFrame(themeDark));
+    await tester.pumpAndSettle(); // Complete the theme animation.
+
+    expect(buttonMaterial(continueStr).color!.value, 0);
+    expect(buttonMaterial(continueStr).textStyle!.color!.value, themeDark.colorScheme.onSurface.withOpacity(0.38).value);
+
+    expect(buttonMaterial(cancelStr).color!.value, 0);
+    expect(buttonMaterial(cancelStr).textStyle!.color!.value, themeDark.colorScheme.onSurface.withOpacity(0.38).value);
   });
 
   testWidgets('Vertical and Horizontal Stepper physics test', (WidgetTester tester) async {
