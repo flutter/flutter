@@ -104,8 +104,6 @@ void main() {
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
-
-
   testWidgetsWithLeakTracking('can use the desktop cut/copy/paste buttons on Windows and Linux', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
