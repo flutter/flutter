@@ -61,7 +61,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
                         delegate = delegate_]() -> bool {
     if (weak) {
       GLPresentInfo present_info = {
-          .fbo_id = 0,
+          .fbo_id = 0u,
           .frame_damage = std::nullopt,
           // TODO (https://github.com/flutter/flutter/issues/105597): wire-up
           // presentation time to impeller backend.
@@ -80,10 +80,14 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
     return nullptr;
   }
 
+  GLFrameInfo frame_info = {static_cast<uint32_t>(size.width()),
+                            static_cast<uint32_t>(size.height())};
+  const GLFBOInfo fbo_info = delegate_->GLContextFBO(frame_info);
+
   auto surface = impeller::SurfaceGLES::WrapFBO(
       impeller_context_,                            // context
       swap_callback,                                // swap_callback
-      0u,                                           // fbo
+      fbo_info.fbo_id,                              // fbo
       impeller::PixelFormat::kR8G8B8A8UNormInt,     // color_format
       impeller::ISize{size.width(), size.height()}  // fbo_size
   );
@@ -122,12 +126,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
       });
 
   return std::make_unique<SurfaceFrame>(
-      nullptr,                          // surface
-      SurfaceFrame::FramebufferInfo{},  // framebuffer info
-      submit_callback,                  // submit callback
-      size,                             // frame size
-      std::move(context_switch),        // context result
-      true                              // display list fallback
+      nullptr,                                // surface
+      delegate_->GLContextFramebufferInfo(),  // framebuffer info
+      submit_callback,                        // submit callback
+      size,                                   // frame size
+      std::move(context_switch),              // context result
+      true                                    // display list fallback
   );
 }
 

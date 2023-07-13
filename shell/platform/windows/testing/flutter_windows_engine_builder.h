@@ -29,6 +29,8 @@ class FlutterWindowsEngineBuilder {
       KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state,
       KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan);
 
+  void SetSwitches(std::vector<std::string> switches);
+
   std::unique_ptr<FlutterWindowsEngine> Build();
 
  private:
@@ -36,6 +38,7 @@ class FlutterWindowsEngineBuilder {
   FlutterDesktopEngineProperties properties_ = {};
   std::string dart_entrypoint_;
   std::vector<std::string> dart_entrypoint_arguments_;
+  std::vector<std::string> switches_;
   KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state_;
   KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan_;
 

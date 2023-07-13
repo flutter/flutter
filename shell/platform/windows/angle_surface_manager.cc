@@ -20,20 +20,21 @@ namespace flutter {
 
 int AngleSurfaceManager::instance_count_ = 0;
 
-std::unique_ptr<AngleSurfaceManager> AngleSurfaceManager::Create() {
+std::unique_ptr<AngleSurfaceManager> AngleSurfaceManager::Create(
+    bool enable_impeller) {
   std::unique_ptr<AngleSurfaceManager> manager;
-  manager.reset(new AngleSurfaceManager());
+  manager.reset(new AngleSurfaceManager(enable_impeller));
   if (!manager->initialize_succeeded_) {
     return nullptr;
   }
   return std::move(manager);
 }
 
-AngleSurfaceManager::AngleSurfaceManager()
+AngleSurfaceManager::AngleSurfaceManager(bool enable_impeller)
     : egl_config_(nullptr),
       egl_display_(EGL_NO_DISPLAY),
       egl_context_(EGL_NO_CONTEXT) {
-  initialize_succeeded_ = Initialize();
+  initialize_succeeded_ = Initialize(enable_impeller);
   ++instance_count_;
 }
 
@@ -66,14 +67,20 @@ bool AngleSurfaceManager::InitializeEGL(
   return true;
 }
 
-bool AngleSurfaceManager::Initialize() {
-  // TODO(dnfield): Enable MSAA here, see similar code in android_context_gl.cc
-  // Will need to plumb in argument from project bundle for sampling rate.
-  // https://github.com/flutter/flutter/issues/100392
+bool AngleSurfaceManager::Initialize(bool enable_impeller) {
   const EGLint config_attributes[] = {EGL_RED_SIZE,   8, EGL_GREEN_SIZE,   8,
                                       EGL_BLUE_SIZE,  8, EGL_ALPHA_SIZE,   8,
                                       EGL_DEPTH_SIZE, 8, EGL_STENCIL_SIZE, 8,
                                       EGL_NONE};
+
+  const EGLint impeller_config_attributes[] = {
+      EGL_RED_SIZE,       8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE,    8,
+      EGL_ALPHA_SIZE,     8, EGL_DEPTH_SIZE, 0, EGL_STENCIL_SIZE, 8,
+      EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES,    4, EGL_NONE};
+  const EGLint impeller_config_attributes_no_msaa[] = {
+      EGL_RED_SIZE,   8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE,    8,
+      EGL_ALPHA_SIZE, 8, EGL_DEPTH_SIZE, 0, EGL_STENCIL_SIZE, 8,
+      EGL_NONE};
 
   const EGLint display_context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
                                                EGL_NONE};
@@ -147,11 +154,26 @@ bool AngleSurfaceManager::Initialize() {
   }
 
   EGLint numConfigs = 0;
-  if ((eglChooseConfig(egl_display_, config_attributes, &egl_config_, 1,
-                       &numConfigs) == EGL_FALSE) ||
-      (numConfigs == 0)) {
-    LogEglError("Failed to choose first context");
-    return false;
+  if (enable_impeller) {
+    // First try the MSAA configuration.
+    if ((eglChooseConfig(egl_display_, impeller_config_attributes, &egl_config_,
+                         1, &numConfigs) == EGL_FALSE) ||
+        (numConfigs == 0)) {
+      // Next fall back to disabled MSAA.
+      if ((eglChooseConfig(egl_display_, impeller_config_attributes_no_msaa,
+                           &egl_config_, 1, &numConfigs) == EGL_FALSE) ||
+          (numConfigs == 0)) {
+        LogEglError("Failed to choose first context");
+        return false;
+      }
+    }
+  } else {
+    if ((eglChooseConfig(egl_display_, config_attributes, &egl_config_, 1,
+                         &numConfigs) == EGL_FALSE) ||
+        (numConfigs == 0)) {
+      LogEglError("Failed to choose first context");
+      return false;
+    }
   }
 
   egl_context_ = eglCreateContext(egl_display_, egl_config_, EGL_NO_CONTEXT,

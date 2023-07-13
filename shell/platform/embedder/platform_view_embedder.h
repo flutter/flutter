@@ -17,6 +17,7 @@
 
 #ifdef SHELL_ENABLE_GL
 #include "flutter/shell/platform/embedder/embedder_surface_gl.h"
+#include "flutter/shell/platform/embedder/embedder_surface_gl_impeller.h"
 #endif
 
 #ifdef SHELL_ENABLE_METAL
@@ -65,8 +66,7 @@ class PlatformViewEmbedder final : public PlatformView {
   PlatformViewEmbedder(
       PlatformView::Delegate& delegate,
       const flutter::TaskRunners& task_runners,
-      const EmbedderSurfaceGL::GLDispatchTable& gl_dispatch_table,
-      bool fbo_reset_after_present,
+      std::unique_ptr<EmbedderSurface> embedder_surface,
       PlatformDispatchTable platform_dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 #endif

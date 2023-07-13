@@ -64,9 +64,20 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "rapidjson/rapidjson.h"
 #include "rapidjson/writer.h"
 
+// Note: the IMPELLER_SUPPORTS_RENDERING may be defined even when the
+// embedder/BUILD.gn variable impeller_supports_rendering is disabled.
 #ifdef SHELL_ENABLE_GL
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
-#endif
+#ifdef IMPELLER_SUPPORTS_RENDERING
+#include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"  // nogncheck
+#include "flutter/shell/platform/embedder/embedder_surface_gl_impeller.h"  // nogncheck
+#include "impeller/core/texture.h"                        // nogncheck
+#include "impeller/renderer/backend/gles/context_gles.h"  // nogncheck
+#include "impeller/renderer/backend/gles/texture_gles.h"  // nogncheck
+#include "impeller/renderer/context.h"                    // nogncheck
+#include "impeller/renderer/render_target.h"              // nogncheck
+#endif  // IMPELLER_SUPPORTS_RENDERING
+#endif  // SHELL_ENABLE_GL
 
 #ifdef SHELL_ENABLE_METAL
 #include "flutter/shell/platform/embedder/embedder_surface_metal.h"
@@ -265,7 +276,8 @@ InferOpenGLPlatformViewCreationCallback(
     const flutter::PlatformViewEmbedder::PlatformDispatchTable&
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
-        external_view_embedder) {
+        external_view_embedder,
+    bool enable_impeller) {
 #ifdef SHELL_ENABLE_GL
   if (config->type != kOpenGL) {
     return nullptr;
@@ -441,15 +453,30 @@ InferOpenGLPlatformViewCreationCallback(
 
   return fml::MakeCopyable(
       [gl_dispatch_table, fbo_reset_after_present, platform_dispatch_table,
+       enable_impeller,
        external_view_embedder =
            std::move(external_view_embedder)](flutter::Shell& shell) mutable {
+        std::shared_ptr<flutter::EmbedderExternalViewEmbedder> view_embedder =
+            std::move(external_view_embedder);
+        if (enable_impeller) {
+          return std::make_unique<flutter::PlatformViewEmbedder>(
+              shell,                   // delegate
+              shell.GetTaskRunners(),  // task runners
+              std::make_unique<flutter::EmbedderSurfaceGLImpeller>(
+                  gl_dispatch_table, fbo_reset_after_present,
+                  view_embedder),       // embedder_surface
+              platform_dispatch_table,  // embedder platform dispatch table
+              view_embedder             // external view embedder
+          );
+        }
         return std::make_unique<flutter::PlatformViewEmbedder>(
-            shell,                    // delegate
-            shell.GetTaskRunners(),   // task runners
-            gl_dispatch_table,        // embedder GL dispatch table
-            fbo_reset_after_present,  // fbo reset after present
+            shell,                   // delegate
+            shell.GetTaskRunners(),  // task runners
+            std::make_unique<flutter::EmbedderSurfaceGL>(
+                gl_dispatch_table, fbo_reset_after_present,
+                view_embedder),       // embedder_surface
             platform_dispatch_table,  // embedder platform dispatch table
-            std::move(external_view_embedder)  // external view embedder
+            view_embedder             // external view embedder
         );
       });
 #else
@@ -686,7 +713,7 @@ InferPlatformViewCreationCallback(
     case kOpenGL:
       return InferOpenGLPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder));
+          std::move(external_view_embedder), enable_impeller);
     case kSoftware:
       return InferSoftwarePlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
@@ -930,6 +957,66 @@ MakeRenderTargetFromBackingStoreImpeller(
     const fml::closure& on_release,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     const FlutterBackingStoreConfig& config,
+    const FlutterOpenGLFramebuffer* framebuffer) {
+#if defined(SHELL_ENABLE_GL) && defined(IMPELLER_SUPPORTS_RENDERING)
+
+  const auto& gl_context =
+      impeller::ContextGLES::Cast(*aiks_context->GetContext());
+  const auto size = impeller::ISize(config.size.width, config.size.height);
+
+  impeller::TextureDescriptor color0_tex;
+  color0_tex.type = impeller::TextureType::kTexture2D;
+  color0_tex.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  color0_tex.size = size;
+  color0_tex.usage = static_cast<impeller::TextureUsageMask>(
+      impeller::TextureUsage::kRenderTarget);
+  color0_tex.sample_count = impeller::SampleCount::kCount1;
+  color0_tex.storage_mode = impeller::StorageMode::kDevicePrivate;
+
+  impeller::ColorAttachment color0;
+  color0.texture = std::make_shared<impeller::TextureGLES>(
+      gl_context.GetReactor(), color0_tex,
+      impeller::TextureGLES::IsWrapped::kWrapped);
+  color0.clear_color = impeller::Color::DarkSlateGray();
+  color0.load_action = impeller::LoadAction::kClear;
+  color0.store_action = impeller::StoreAction::kStore;
+
+  impeller::TextureDescriptor stencil0_tex;
+  stencil0_tex.type = impeller::TextureType::kTexture2D;
+  stencil0_tex.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  stencil0_tex.size = size;
+  stencil0_tex.usage = static_cast<impeller::TextureUsageMask>(
+      impeller::TextureUsage::kRenderTarget);
+  stencil0_tex.sample_count = impeller::SampleCount::kCount1;
+
+  impeller::StencilAttachment stencil0;
+  stencil0.clear_stencil = 0;
+  stencil0.texture = std::make_shared<impeller::TextureGLES>(
+      gl_context.GetReactor(), stencil0_tex,
+      impeller::TextureGLES::IsWrapped::kWrapped);
+  stencil0.load_action = impeller::LoadAction::kClear;
+  stencil0.store_action = impeller::StoreAction::kDontCare;
+
+  impeller::RenderTarget render_target_desc;
+
+  render_target_desc.SetColorAttachment(color0, framebuffer->target);
+  render_target_desc.SetStencilAttachment(stencil0);
+
+  return std::make_unique<flutter::EmbedderRenderTargetImpeller>(
+      backing_store, aiks_context,
+      std::make_unique<impeller::RenderTarget>(std::move(render_target_desc)),
+      on_release);
+#else
+  return nullptr;
+#endif
+}
+
+static std::unique_ptr<flutter::EmbedderRenderTarget>
+MakeRenderTargetFromBackingStoreImpeller(
+    FlutterBackingStore backing_store,
+    const fml::closure& on_release,
+    const std::shared_ptr<impeller::AiksContext>& aiks_context,
+    const FlutterBackingStoreConfig& config,
     const FlutterMetalBackingStore* metal) {
 #if defined(SHELL_ENABLE_METAL) && defined(IMPELLER_SUPPORTS_RENDERING)
   if (!metal->texture.texture) {
@@ -1113,12 +1200,19 @@ CreateEmbedderRenderTarget(
           break;
         }
         case kFlutterOpenGLTargetTypeFramebuffer: {
-          auto skia_surface = MakeSkSurfaceFromBackingStore(
-              context, config, &backing_store.open_gl.framebuffer);
-          render_target = MakeRenderTargetFromSkSurface(
-              backing_store, std::move(skia_surface),
-              collect_callback.Release());
-          break;
+          if (enable_impeller) {
+            render_target = MakeRenderTargetFromBackingStoreImpeller(
+                backing_store, collect_callback.Release(), aiks_context, config,
+                &backing_store.open_gl.framebuffer);
+            break;
+          } else {
+            auto skia_surface = MakeSkSurfaceFromBackingStore(
+                context, config, &backing_store.open_gl.framebuffer);
+            render_target = MakeRenderTargetFromSkSurface(
+                backing_store, std::move(skia_surface),
+                collect_callback.Release());
+            break;
+          }
         }
       }
       break;
