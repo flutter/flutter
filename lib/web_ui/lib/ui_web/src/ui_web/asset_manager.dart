@@ -92,7 +92,7 @@ class AssetManager {
 
     if (response.status == 404 && asset == 'AssetManifest.json') {
       printWarning('Asset manifest does not exist at `$url` - ignoring.');
-      return Uint8List.fromList(utf8.encode('{}')).buffer.asByteData();
+      return ByteData.sublistView(utf8.encode('{}'));
     }
 
     return (await response.payload.asByteBuffer()).asByteData();

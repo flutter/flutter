@@ -69,7 +69,7 @@ Future<void> testMain() async {
     assetScope = fakeAssetManager.pushAssetScope();
     assetScope.setAsset(
       'glitch_shader',
-      Uint8List.fromList(utf8.encode(kGlitchShaderSksl)).buffer.asByteData()
+      ByteData.sublistView(utf8.encode(kGlitchShaderSksl))
     );
   });
 

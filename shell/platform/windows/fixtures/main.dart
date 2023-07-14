@@ -92,7 +92,7 @@ void exitTestExit() async {
   final Completer<ByteData?> closed = Completer<ByteData?>();
   ui.channelBuffers.setListener('flutter/platform', (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
     final String jsonString = json.encode(<Map<String, String>>[{'response': 'exit'}]);
-    final ByteData responseData = ByteData.sublistView(Uint8List.fromList(utf8.encode(jsonString)));
+    final ByteData responseData = ByteData.sublistView(utf8.encode(jsonString));
     callback(responseData);
     closed.complete(data);
   });
@@ -104,7 +104,7 @@ void exitTestCancel() async {
   final Completer<ByteData?> closed = Completer<ByteData?>();
   ui.channelBuffers.setListener('flutter/platform', (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
     final String jsonString = json.encode(<Map<String, String>>[{'response': 'cancel'}]);
-    final ByteData responseData = ByteData.sublistView(Uint8List.fromList(utf8.encode(jsonString)));
+    final ByteData responseData = ByteData.sublistView(utf8.encode(jsonString));
     callback(responseData);
     closed.complete(data);
   });
@@ -120,9 +120,7 @@ void exitTestCancel() async {
     });
   ui.PlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform',
-    ByteData.sublistView(
-      Uint8List.fromList(utf8.encode(jsonString))
-    ),
+    ByteData.sublistView(utf8.encode(jsonString)),
     (ByteData? reply) {
       exited.complete(reply);
     });

@@ -39,7 +39,7 @@ class StringCodec implements MessageCodec<String> {
 
   @override
   ByteData encodeMessage(String message) {
-    final Uint8List encoded = utf8.encoder.convert(message);
+    final Uint8List encoded = utf8.encode(message);
     return encoded.buffer.asByteData();
   }
 }
@@ -320,7 +320,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       }
     } else if (value is String) {
       buffer.putUint8(_valueString);
-      final List<int> bytes = utf8.encoder.convert(value);
+      final List<int> bytes = utf8.encode(value);
       writeSize(buffer, bytes.length);
       buffer.putUint8List(bytes as Uint8List);
     } else if (value is Uint8List) {

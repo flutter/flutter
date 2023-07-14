@@ -68,7 +68,7 @@ void main() {
 
   test('Tester can still load through dart:ui', () async {
     /// Manually load font asset through dart.
-    final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull('Roboto-Medium.ttf')).path);
+    final Uint8List encoded = utf8.encode(Uri(path: Uri.encodeFull('Roboto-Medium.ttf')).path);
     final Completer<Uint8List> result = Completer<Uint8List>();
     PlatformDispatcher.instance.sendPlatformMessage('flutter/assets', encoded.buffer.asByteData(), (ByteData? data) {
       result.complete(data!.buffer.asUint8List());
