@@ -267,6 +267,4 @@ void DidDrawCanvas::onDrawEdgeAAImageSet2(const ImageSetEntry set[],
   did_draw_ = true;
 }
 
-void DidDrawCanvas::onFlush() {}
-
 }  // namespace flutter

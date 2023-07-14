@@ -23,7 +23,10 @@ sk_sp<SkImage> DrawSnapshot(
   }
 
   draw_callback(surface->getCanvas());
-  surface->getCanvas()->flush();
+  auto dContext = GrAsDirectContext(surface->recordingContext());
+  if (dContext) {
+    dContext->flushAndSubmit();
+  }
 
   sk_sp<SkImage> device_snapshot;
   {
