@@ -683,7 +683,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
         NSString* format = [NSString stringWithUTF8String:screenshot.format.c_str()];
         NSNumber* width = @(screenshot.frame_size.fWidth);
         NSNumber* height = @(screenshot.frame_size.fHeight);
-        return result(@[ width, height, format, data ]);
+        return result(@[ width, height, format ?: [NSNull null], data ]);
       }];
 }
 

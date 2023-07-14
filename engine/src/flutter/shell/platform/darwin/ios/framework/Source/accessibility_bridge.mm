@@ -161,7 +161,8 @@ void AccessibilityBridge::UpdateSemantics(
 
   if (root) {
     if (!view_controller_.view.accessibilityElements) {
-      view_controller_.view.accessibilityElements = @[ [root accessibilityContainer] ];
+      view_controller_.view.accessibilityElements =
+          @[ [root accessibilityContainer] ?: [NSNull null] ];
     }
     NSMutableArray<SemanticsObject*>* newRoutes = [[[NSMutableArray alloc] init] autorelease];
     [root collectRoutes:newRoutes];
