@@ -169,13 +169,11 @@ class ChildView {
       ],
     };
 
-    final ByteData createViewMessage = utf8.encoder
-        .convert(json.encode(<String, Object>{
-          'method': 'View.create',
-          'args': args,
-        }))
-        .buffer
-        .asByteData();
+    final ByteData createViewMessage =
+        ByteData.sublistView(utf8.encode(json.encode(<String, Object>{
+      'method': 'View.create',
+      'args': args,
+    })));
 
     final platformViewsChannel = 'flutter/platform_views';
 

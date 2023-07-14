@@ -186,7 +186,7 @@ void testMain() {
   });
 
   test('FragmentProgram can be created from JSON IPLR bundle', () {
-    final Uint8List data = const Utf8Encoder().convert(kJsonIPLR);
+    final Uint8List data = utf8.encode(kJsonIPLR);
     final CkFragmentProgram program = CkFragmentProgram.fromBytes('test', data);
 
     expect(program.effect, isNotNull);

@@ -56,7 +56,7 @@ void _handleDriverMessage(ByteData? data, PlatformMessageResponseCallback? callb
 
 Future<void> _handleWriteTimelineMessage(ByteData? data, PlatformMessageResponseCallback? callback) async {
   final String timelineData = await _getTimelineData();
-  callback!(Uint8List.fromList(utf8.encode(timelineData)).buffer.asByteData());
+  callback!(ByteData.sublistView(utf8.encode(timelineData)));
 }
 
 Future<String> _getTimelineData() async {

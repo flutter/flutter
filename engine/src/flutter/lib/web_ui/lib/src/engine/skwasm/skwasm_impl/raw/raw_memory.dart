@@ -26,8 +26,7 @@ external void stackRestore(StackPointer pointer);
 
 class StackScope {
   Pointer<Int8> convertStringToNative(String string) {
-    final Utf8Encoder utf8Encoder = utf8.encoder;
-    final Uint8List encoded = utf8Encoder.convert(string);
+    final Uint8List encoded = utf8.encode(string);
     final Pointer<Int8> pointer = allocInt8Array(encoded.length + 1);
     for (int i = 0; i < encoded.length; i++) {
       pointer[i] = encoded[i];

@@ -167,7 +167,7 @@ void testSkiaResourceCacheSendsResponse() {
                           }''';
   PlatformDispatcher.instance.sendPlatformMessage(
     'flutter/skia',
-    Uint8List.fromList(utf8.encode(jsonRequest)).buffer.asByteData(),
+    ByteData.sublistView(utf8.encode(jsonRequest)),
     callback,
   );
 }
@@ -294,7 +294,7 @@ void canAccessResourceFromAssetDir() async {
   notifySetAssetBundlePath();
   window.sendPlatformMessage(
     'flutter/assets',
-    Uint8List.fromList(utf8.encode('kernel_blob.bin')).buffer.asByteData(),
+    ByteData.sublistView(utf8.encode('kernel_blob.bin')),
     (ByteData? byteData) {
       notifyCanAccessResource(byteData != null);
     },

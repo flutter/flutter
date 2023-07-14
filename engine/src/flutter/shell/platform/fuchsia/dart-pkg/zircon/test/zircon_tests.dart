@@ -13,7 +13,7 @@ import 'package:litetest/litetest.dart';
 /// Helper method to turn a [String] into a [ByteData] containing the
 /// text of the string encoded as UTF-8.
 ByteData utf8Bytes(final String text) {
-  return ByteData.view(Uint8List.fromList(utf8.encode(text)).buffer);
+  return ByteData.sublistView(utf8.encode(text));
 }
 
 // Take from zircon constants in zircon/errors.h, zircon/rights.h, zircon/types.h

@@ -1001,7 +1001,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   void _setAppLifecycleState(ui.AppLifecycleState state) {
     sendPlatformMessage(
       'flutter/lifecycle',
-      Uint8List.fromList(utf8.encode(state.toString())).buffer.asByteData(),
+      ByteData.sublistView(utf8.encode(state.toString())),
       null,
     );
   }
