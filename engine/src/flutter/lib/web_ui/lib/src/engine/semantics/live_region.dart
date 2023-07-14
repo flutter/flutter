@@ -22,6 +22,10 @@ class LiveRegion extends RoleManager {
 
   @override
   void update() {
+    if (!semanticsObject.isLiveRegion) {
+      return;
+    }
+
     // Avoid announcing the same message over and over.
     if (_lastAnnouncement != semanticsObject.label) {
       _lastAnnouncement = semanticsObject.label;
