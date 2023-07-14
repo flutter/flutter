@@ -1530,10 +1530,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       onChangeEnd?.call(_discretize(_currentDragValue));
       _active = false;
       _currentDragValue = 0.0;
-      if (!hasFocus) {
-        _state.overlayController.reverse();
-      }
-
+      _state.overlayController.reverse();
       if (showValueIndicator && _state.interactionTimer == null) {
         _state.valueIndicatorController.reverse();
       }

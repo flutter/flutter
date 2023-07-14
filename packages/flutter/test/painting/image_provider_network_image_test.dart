@@ -16,6 +16,7 @@ import '../rendering/rendering_tester.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
+  HttpOverrides.global = _FakeHttpOverrides();
 
   Future<Codec>  basicDecoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
     return PaintingBinding.instance.instantiateImageCodecFromBuffer(buffer, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
@@ -24,12 +25,14 @@ void main() {
   late _FakeHttpClient httpClient;
 
   setUp(() {
+    _FakeHttpOverrides.createHttpClientCalls = 0;
     httpClient = _FakeHttpClient();
     debugNetworkImageHttpClientProvider = () => httpClient;
   });
 
   tearDown(() {
     debugNetworkImageHttpClientProvider = null;
+    expect(_FakeHttpOverrides.createHttpClientCalls, 0);
     PaintingBinding.instance.imageCache.clear();
     PaintingBinding.instance.imageCache.clearLiveImages();
   });
@@ -212,6 +215,22 @@ void main() {
   });
 }
 
+/// Override `HttpClient()` to throw an error.
+///
+/// This ensures that these tests never cause a call to the [HttpClient]
+/// constructor.
+///
+/// Regression test for <https://github.com/flutter/flutter/issues/129532>.
+class _FakeHttpOverrides extends HttpOverrides {
+  static int createHttpClientCalls = 0;
+
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    createHttpClientCalls++;
+    throw Exception('This test tried to create an HttpClient.');
+  }
+}
+
 class _FakeHttpClient extends Fake implements HttpClient {
   final _FakeHttpClientRequest request = _FakeHttpClientRequest();
   Object? thrownError;
@@ -224,6 +243,7 @@ class _FakeHttpClient extends Fake implements HttpClient {
     return request;
   }
 }
+
 class _FakeHttpClientRequest extends Fake implements HttpClientRequest {
   final _FakeHttpClientResponse response = _FakeHttpClientResponse();
 
