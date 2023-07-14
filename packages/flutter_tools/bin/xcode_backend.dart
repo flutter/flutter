@@ -212,7 +212,7 @@ class Context {
       ],
     );
 
-    // // # Copy the native assets.
+    // Copy the native assets.
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     final String projectPath = '$sourceRoot/..';
     final String nativeAssetsPath =
