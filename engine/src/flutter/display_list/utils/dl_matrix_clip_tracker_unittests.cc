@@ -323,6 +323,107 @@ TEST(DisplayListMatrixClipTracker, TransformFullPerspectiveUsing4x4Matrix) {
   ASSERT_EQ(tracker2.matrix_4x4(), transformed_m44);
 }
 
+TEST(DisplayListMatrixClipTracker, ClipDifference) {
+  SkRect cull_rect = SkRect::MakeLTRB(20, 20, 40, 40);
+
+  auto non_reducing = [&cull_rect](const SkRect& diff_rect,
+                                   const std::string& label) {
+    {
+      DisplayListMatrixClipTracker tracker(cull_rect, SkMatrix::I());
+      tracker.clipRect(diff_rect, DlCanvas::ClipOp::kDifference, false);
+      ASSERT_EQ(tracker.device_cull_rect(), cull_rect) << label;
+    }
+    {
+      DisplayListMatrixClipTracker tracker(cull_rect, SkMatrix::I());
+      const SkRRect diff_rrect = SkRRect::MakeRect(diff_rect);
+      tracker.clipRRect(diff_rrect, DlCanvas::ClipOp::kDifference, false);
+      ASSERT_EQ(tracker.device_cull_rect(), cull_rect) << label << " (RRect)";
+    }
+    {
+      DisplayListMatrixClipTracker tracker(cull_rect, SkMatrix::I());
+      const SkPath diff_path = SkPath().addRect(diff_rect);
+      tracker.clipPath(diff_path, DlCanvas::ClipOp::kDifference, false);
+      ASSERT_EQ(tracker.device_cull_rect(), cull_rect) << label << " (RRect)";
+    }
+  };
+
+  auto reducing = [&cull_rect](const SkRect& diff_rect,
+                               const SkRect& result_rect,
+                               const std::string& label) {
+    ASSERT_TRUE(result_rect.isEmpty() || cull_rect.contains(result_rect));
+    {
+      DisplayListMatrixClipTracker tracker(cull_rect, SkMatrix::I());
+      tracker.clipRect(diff_rect, DlCanvas::ClipOp::kDifference, false);
+      ASSERT_EQ(tracker.device_cull_rect(), result_rect) << label;
+    }
+    {
+      DisplayListMatrixClipTracker tracker(cull_rect, SkMatrix::I());
+      const SkRRect diff_rrect = SkRRect::MakeRect(diff_rect);
+      tracker.clipRRect(diff_rrect, DlCanvas::ClipOp::kDifference, false);
+      ASSERT_EQ(tracker.device_cull_rect(), result_rect) << label << " (RRect)";
+    }
+    {
+      DisplayListMatrixClipTracker tracker(cull_rect, SkMatrix::I());
+      const SkPath diff_path = SkPath().addRect(diff_rect);
+      tracker.clipPath(diff_path, DlCanvas::ClipOp::kDifference, false);
+      ASSERT_EQ(tracker.device_cull_rect(), result_rect) << label << " (RRect)";
+    }
+  };
+
+  // Skim the corners and edge
+  non_reducing(SkRect::MakeLTRB(10, 10, 20, 20), "outside UL corner");
+  non_reducing(SkRect::MakeLTRB(20, 10, 40, 20), "Above");
+  non_reducing(SkRect::MakeLTRB(40, 10, 50, 20), "outside UR corner");
+  non_reducing(SkRect::MakeLTRB(40, 20, 50, 40), "Right");
+  non_reducing(SkRect::MakeLTRB(40, 40, 50, 50), "outside LR corner");
+  non_reducing(SkRect::MakeLTRB(20, 40, 40, 50), "Below");
+  non_reducing(SkRect::MakeLTRB(10, 40, 20, 50), "outside LR corner");
+  non_reducing(SkRect::MakeLTRB(10, 20, 20, 40), "Left");
+
+  // Overlap corners
+  non_reducing(SkRect::MakeLTRB(15, 15, 25, 25), "covering UL corner");
+  non_reducing(SkRect::MakeLTRB(35, 15, 45, 25), "covering UR corner");
+  non_reducing(SkRect::MakeLTRB(35, 35, 45, 45), "covering LR corner");
+  non_reducing(SkRect::MakeLTRB(15, 35, 25, 45), "covering LL corner");
+
+  // Overlap edges, but not across an entire side
+  non_reducing(SkRect::MakeLTRB(20, 15, 39, 25), "Top edge left-biased");
+  non_reducing(SkRect::MakeLTRB(21, 15, 40, 25), "Top edge, right biased");
+  non_reducing(SkRect::MakeLTRB(35, 20, 45, 39), "Right edge, top-biased");
+  non_reducing(SkRect::MakeLTRB(35, 21, 45, 40), "Right edge, bottom-biased");
+  non_reducing(SkRect::MakeLTRB(20, 35, 39, 45), "Bottom edge, left-biased");
+  non_reducing(SkRect::MakeLTRB(21, 35, 40, 45), "Bottom edge, right-biased");
+  non_reducing(SkRect::MakeLTRB(15, 20, 25, 39), "Left edge, top-biased");
+  non_reducing(SkRect::MakeLTRB(15, 21, 25, 40), "Left edge, bottom-biased");
+
+  // Slice all the way through the middle
+  non_reducing(SkRect::MakeLTRB(25, 15, 35, 45), "Vertical interior slice");
+  non_reducing(SkRect::MakeLTRB(15, 25, 45, 35), "Horizontal interior slice");
+
+  // Slice off each edge
+  reducing(SkRect::MakeLTRB(20, 15, 40, 25),  //
+           SkRect::MakeLTRB(20, 25, 40, 40),  //
+           "Slice off top");
+  reducing(SkRect::MakeLTRB(35, 20, 45, 40),  //
+           SkRect::MakeLTRB(20, 20, 35, 40),  //
+           "Slice off right");
+  reducing(SkRect::MakeLTRB(20, 35, 40, 45),  //
+           SkRect::MakeLTRB(20, 20, 40, 35),  //
+           "Slice off bottom");
+  reducing(SkRect::MakeLTRB(15, 20, 25, 40),  //
+           SkRect::MakeLTRB(25, 20, 40, 40),  //
+           "Slice off left");
+
+  // cull rect contains diff rect
+  non_reducing(SkRect::MakeLTRB(21, 21, 39, 39), "Contained, non-covering");
+
+  // cull rect equals diff rect
+  reducing(cull_rect, SkRect::MakeEmpty(), "Perfectly covering");
+
+  // diff rect contains cull rect
+  reducing(SkRect::MakeLTRB(15, 15, 45, 45), SkRect::MakeEmpty(), "Smothering");
+}
+
 TEST(DisplayListMatrixClipTracker, ClipPathWithInvertFillType) {
   SkRect cull_rect = SkRect::MakeLTRB(0, 0, 100.0, 100.0);
   DisplayListMatrixClipTracker builder(cull_rect, SkMatrix::I());

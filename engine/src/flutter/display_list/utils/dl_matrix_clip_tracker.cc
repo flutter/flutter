@@ -310,12 +310,12 @@ void DisplayListMatrixClipTracker::Data::clipBounds(const SkRect& clip,
       break;
     }
     case ClipOp::kDifference: {
-      if (clip.isEmpty() || !clip.intersects(cull_rect_)) {
+      if (clip.isEmpty()) {
         break;
       }
       SkRect rect;
       if (mapRect(clip, &rect)) {
-        // This technique only works if it is rect -> rect
+        // This technique only works if the transform is rect -> rect
         if (is_aa) {
           SkIRect rounded;
           rect.round(&rounded);
@@ -324,13 +324,22 @@ void DisplayListMatrixClipTracker::Data::clipBounds(const SkRect& clip,
           }
           rect.set(rounded);
         }
+        if (!rect.intersects(cull_rect_)) {
+          break;
+        }
         if (rect.fLeft <= cull_rect_.fLeft &&
             rect.fRight >= cull_rect_.fRight) {
           // bounds spans entire width of cull_rect_
           // therefore we can slice off a top or bottom
           // edge of the cull_rect_.
-          SkScalar top = std::max(rect.fBottom, cull_rect_.fTop);
-          SkScalar btm = std::min(rect.fTop, cull_rect_.fBottom);
+          SkScalar top = cull_rect_.fTop;
+          SkScalar btm = cull_rect_.fBottom;
+          if (rect.fTop <= top) {
+            top = rect.fBottom;
+          }
+          if (rect.fBottom >= btm) {
+            btm = rect.fTop;
+          }
           if (top < btm) {
             cull_rect_.fTop = top;
             cull_rect_.fBottom = btm;
@@ -342,8 +351,14 @@ void DisplayListMatrixClipTracker::Data::clipBounds(const SkRect& clip,
           // bounds spans entire height of cull_rect_
           // therefore we can slice off a left or right
           // edge of the cull_rect_.
-          SkScalar lft = std::max(rect.fRight, cull_rect_.fLeft);
-          SkScalar rgt = std::min(rect.fLeft, cull_rect_.fRight);
+          SkScalar lft = cull_rect_.fLeft;
+          SkScalar rgt = cull_rect_.fRight;
+          if (rect.fLeft <= lft) {
+            lft = rect.fRight;
+          }
+          if (rect.fRight >= rgt) {
+            rgt = rect.fLeft;
+          }
           if (lft < rgt) {
             cull_rect_.fLeft = lft;
             cull_rect_.fRight = rgt;
