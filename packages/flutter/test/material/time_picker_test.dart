@@ -16,24 +16,216 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 void main() {
-  for (final MaterialType materialType in MaterialType.values) {
-    final String selectTimeString;
-    final String enterTimeString;
-    final String cancelString;
-    const String okString = 'OK';
-    const String amString = 'AM';
-    const String pmString = 'PM';
-    switch (materialType) {
-      case MaterialType.material2:
-        selectTimeString = 'SELECT TIME';
-        enterTimeString = 'ENTER TIME';
-        cancelString = 'CANCEL';
-      case MaterialType.material3:
-        selectTimeString = 'Select time';
-        enterTimeString = 'Enter time';
-        cancelString = 'Cancel';
-    }
+  const String okString = 'OK';
+  const String amString = 'AM';
+  const String pmString = 'PM';
+  Material getMaterialFromDialog(WidgetTester tester) {
+    return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
+  }
 
+  testWidgets('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+
+    const Size timePickerPortraitSize =  Size(310, 468);
+    const Size timePickerLandscapeSize = Size(524, 342);
+    const Size timePickerLandscapeSizeM2 = Size(508, 300);
+    const EdgeInsets padding = EdgeInsets.fromLTRB(8, 18, 8, 8);
+    double width;
+    double height;
+
+    // portrait
+    tester.view.physicalSize = const Size(800, 800.5);
+    tester.view.devicePixelRatio = 1;
+    await mediaQueryBoilerplate(tester, materialType: MaterialType.material2);
+
+    width = timePickerPortraitSize.width + padding.horizontal;
+    height = timePickerPortraitSize.height + padding.vertical;
+    expect(
+      tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
+      Size(width, height),
+    );
+
+    await tester.tap(find.text(okString)); // dismiss the dialog
+    await tester.pumpAndSettle();
+
+    // landscape
+    tester.view.physicalSize = const Size(800.5, 800);
+    tester.view.devicePixelRatio = 1;
+    await mediaQueryBoilerplate(
+      tester,
+      alwaysUse24HourFormat: true,
+      materialType: MaterialType.material2,
+    );
+
+    width =  timePickerLandscapeSize.width + padding.horizontal;
+    height = timePickerLandscapeSizeM2.height + padding.vertical;
+    expect(
+      tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
+      Size(width, height),
+    );
+  });
+
+  testWidgets('Material2 - Dialog size - input mode', (WidgetTester tester) async {
+    const TimePickerEntryMode entryMode = TimePickerEntryMode.input;
+    const Size timePickerInputSize = Size(312, 216);
+    const Size dayPeriodPortraitSize = Size(52, 80);
+    const EdgeInsets padding = EdgeInsets.fromLTRB(8, 18, 8, 8);
+    final double height = timePickerInputSize.height + padding.vertical;
+    double width;
+
+    await mediaQueryBoilerplate(
+      tester,
+      entryMode: entryMode,
+      materialType: MaterialType.material2,
+    );
+
+    width = timePickerInputSize.width + padding.horizontal;
+    expect(
+      tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
+      Size(width, height),
+    );
+
+    await tester.tap(find.text(okString)); // dismiss the dialog
+    await tester.pumpAndSettle();
+
+    await mediaQueryBoilerplate(
+      tester,
+      alwaysUse24HourFormat: true,
+      entryMode: entryMode,
+      materialType: MaterialType.material2,
+    );
+    width = timePickerInputSize.width - dayPeriodPortraitSize.width - 12 + padding.horizontal + 16;
+    expect(
+      tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
+      Size(width, height),
+    );
+  });
+
+  testWidgets('Material2 - respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, materialType: MaterialType.material2);
+
+    final List<String> labels00To22 = List<String>.generate(12, (int index) {
+      return (index * 2).toString().padLeft(2, '0');
+    });
+    final CustomPaint dialPaint = tester.widget(findDialPaint);
+    final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
+    expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
+
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
+    expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
+  });
+
+  testWidgets('Material3 - Dialog size - dial mode', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+
+    const Size timePickerPortraitSize =  Size(310, 468);
+    const Size timePickerLandscapeSize = Size(524, 342);
+    const EdgeInsets padding = EdgeInsets.all(24.0);
+    double width;
+    double height;
+
+    // portrait
+    tester.view.physicalSize = const Size(800, 800.5);
+    tester.view.devicePixelRatio = 1;
+    await mediaQueryBoilerplate(tester, materialType: MaterialType.material3);
+
+    width = timePickerPortraitSize.width + padding.horizontal;
+    height = timePickerPortraitSize.height + padding.vertical;
+    expect(
+      tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
+      Size(width, height),
+    );
+
+    await tester.tap(find.text(okString)); // dismiss the dialog
+    await tester.pumpAndSettle();
+
+    // landscape
+    tester.view.physicalSize = const Size(800.5, 800);
+    tester.view.devicePixelRatio = 1;
+    await mediaQueryBoilerplate(
+      tester,
+      alwaysUse24HourFormat: true,
+      materialType: MaterialType.material3,
+    );
+
+    width =  timePickerLandscapeSize.width + padding.horizontal;
+    height = timePickerLandscapeSize.height + padding.vertical;
+    expect(
+      tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
+      Size(width, height),
+    );
+  });
+
+  testWidgets('Material3 - Dialog size - input mode', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const TimePickerEntryMode entryMode = TimePickerEntryMode.input;
+    const double textScaleFactor = 1.0;
+    const Size timePickerMinInputSize = Size(312, 216);
+    const Size dayPeriodPortraitSize = Size(52, 80);
+    const EdgeInsets padding = EdgeInsets.all(24.0);
+    final double height = timePickerMinInputSize.height * textScaleFactor + padding.vertical;
+    double width;
+
+    await mediaQueryBoilerplate(
+      tester,
+      entryMode: entryMode,
+      materialType: MaterialType.material3,
+    );
+
+    width = timePickerMinInputSize.width - (theme.useMaterial3 ? 32 : 0) + padding.horizontal;
+    expect(
+      tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
+      Size(width, height),
+    );
+
+    await tester.tap(find.text(okString)); // dismiss the dialog
+    await tester.pumpAndSettle();
+
+    await mediaQueryBoilerplate(
+      tester,
+      alwaysUse24HourFormat: true,
+      entryMode: entryMode,
+      materialType: MaterialType.material3,
+    );
+
+    width = timePickerMinInputSize.width - dayPeriodPortraitSize.width - 12 + padding.horizontal;
+    expect(
+      tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
+      Size(width, height),
+    );
+  });
+
+  testWidgets('Material3 - respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, materialType: MaterialType.material3);
+
+    final List<String> labels00To23 = List<String>.generate(24, (int index) {
+      return index == 0 ? '00' : index.toString();
+    });
+    final List<bool> inner0To23 = List<bool>.generate(24, (int index) => index >= 12);
+
+    final CustomPaint dialPaint = tester.widget(findDialPaint);
+    final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
+    expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
+    // ignore: avoid_dynamic_calls
+    expect(primaryLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
+
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
+    expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
+    // ignore: avoid_dynamic_calls
+    expect(selectedLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
+  });
+
+  for (final MaterialType materialType in MaterialType.values) {
     group('Dial (${materialType.name})', () {
       testWidgets('tap-select an hour', (WidgetTester tester) async {
         TimeOfDay? result;
@@ -280,21 +472,30 @@ void main() {
     });
 
     group('Dialog (${materialType.name})', () {
-      Material getMaterialFromDialog(WidgetTester tester) {
-        return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
-      }
-
-      testWidgets('Widgets have correct label capitalization', (WidgetTester tester) async {
-        await startPicker(tester, (TimeOfDay? time) {}, materialType: materialType);
-        expect(find.text(selectTimeString), findsOneWidget);
-        expect(find.text(cancelString), findsOneWidget);
+      testWidgets('Material2 - Widgets have correct label capitalization', (WidgetTester tester) async {
+        await startPicker(tester, (TimeOfDay? time) {}, materialType: MaterialType.material2);
+        expect(find.text('SELECT TIME'), findsOneWidget);
+        expect(find.text('CANCEL'), findsOneWidget);
       });
 
-      testWidgets('Widgets have correct label capitalization in input mode', (WidgetTester tester) async {
+      testWidgets('Material3 - Widgets have correct label capitalization', (WidgetTester tester) async {
+        await startPicker(tester, (TimeOfDay? time) {}, materialType: MaterialType.material3);
+        expect(find.text('Select time'), findsOneWidget);
+        expect(find.text('Cancel'), findsOneWidget);
+      });
+
+      testWidgets('Material2 - Widgets have correct label capitalization in input mode', (WidgetTester tester) async {
         await startPicker(tester, (TimeOfDay? time) {},
-            entryMode: TimePickerEntryMode.input, materialType: materialType);
-        expect(find.text(enterTimeString), findsOneWidget);
-        expect(find.text(cancelString), findsOneWidget);
+            entryMode: TimePickerEntryMode.input, materialType: MaterialType.material2);
+        expect(find.text('ENTER TIME'), findsOneWidget);
+        expect(find.text('CANCEL'), findsOneWidget);
+      });
+
+      testWidgets('Material3 - Widgets have correct label capitalization in input mode', (WidgetTester tester) async {
+        await startPicker(tester, (TimeOfDay? time) {},
+            entryMode: TimePickerEntryMode.input, materialType: MaterialType.material3);
+        expect(find.text('Enter time'), findsOneWidget);
+        expect(find.text('Cancel'), findsOneWidget);
       });
 
       testWidgets('respects MediaQueryData.alwaysUse24HourFormat == false', (WidgetTester tester) async {
@@ -313,211 +514,6 @@ void main() {
         // ignore: avoid_dynamic_calls
         expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
       });
-
-      switch (materialType) {
-        case MaterialType.material2:
-          testWidgets('Dialog size - dial mode', (WidgetTester tester) async {
-            addTearDown(tester.view.reset);
-
-            const Size timePickerPortraitSize =  Size(310, 468);
-            const Size timePickerLandscapeSize = Size(524, 342);
-            const Size timePickerLandscapeSizeM2 = Size(508, 300);
-            const EdgeInsets padding = EdgeInsets.fromLTRB(8, 18, 8, 8);
-            double width;
-            double height;
-
-            // portrait
-            tester.view.physicalSize = const Size(800, 800.5);
-            tester.view.devicePixelRatio = 1;
-            await mediaQueryBoilerplate(tester, materialType: materialType);
-
-            width = timePickerPortraitSize.width + padding.horizontal;
-            height = timePickerPortraitSize.height + padding.vertical;
-            expect(
-              tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
-              Size(width, height),
-            );
-
-            await tester.tap(find.text(okString)); // dismiss the dialog
-            await tester.pumpAndSettle();
-
-            // landscape
-            tester.view.physicalSize = const Size(800.5, 800);
-            tester.view.devicePixelRatio = 1;
-            await mediaQueryBoilerplate(
-              tester,
-              alwaysUse24HourFormat: true,
-              materialType: materialType,
-            );
-
-            width =  timePickerLandscapeSize.width + padding.horizontal;
-            height = timePickerLandscapeSizeM2.height + padding.vertical;
-            expect(
-              tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
-              Size(width, height),
-            );
-          });
-
-          testWidgets('Dialog size - input mode', (WidgetTester tester) async {
-            const TimePickerEntryMode entryMode = TimePickerEntryMode.input;
-            const Size timePickerInputSize = Size(312, 216);
-            const Size dayPeriodPortraitSize = Size(52, 80);
-            const EdgeInsets padding = EdgeInsets.fromLTRB(8, 18, 8, 8);
-            final double height = timePickerInputSize.height + padding.vertical;
-            double width;
-
-            await mediaQueryBoilerplate(
-              tester,
-              entryMode: entryMode,
-              materialType: materialType,
-            );
-
-            width = timePickerInputSize.width + padding.horizontal;
-            expect(
-              tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
-              Size(width, height),
-            );
-
-            await tester.tap(find.text(okString)); // dismiss the dialog
-            await tester.pumpAndSettle();
-
-            await mediaQueryBoilerplate(
-              tester,
-              alwaysUse24HourFormat: true,
-              entryMode: entryMode,
-              materialType: materialType,
-            );
-            width = timePickerInputSize.width - dayPeriodPortraitSize.width - 12 + padding.horizontal + 16;
-            expect(
-              tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
-              Size(width, height),
-            );
-          });
-
-          testWidgets('respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
-            await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, materialType: materialType);
-
-            final List<String> labels00To22 = List<String>.generate(12, (int index) {
-              return (index * 2).toString().padLeft(2, '0');
-            });
-            final CustomPaint dialPaint = tester.widget(findDialPaint);
-            final dynamic dialPainter = dialPaint.painter;
-            // ignore: avoid_dynamic_calls
-            final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
-            // ignore: avoid_dynamic_calls
-            expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
-
-            // ignore: avoid_dynamic_calls
-            final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
-            // ignore: avoid_dynamic_calls
-            expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
-          });
-        case MaterialType.material3:
-          testWidgets('Dialog size - dial mode', (WidgetTester tester) async {
-            addTearDown(tester.view.reset);
-
-            const Size timePickerPortraitSize =  Size(310, 468);
-            const Size timePickerLandscapeSize = Size(524, 342);
-            const EdgeInsets padding = EdgeInsets.all(24.0);
-            double width;
-            double height;
-
-            // portrait
-            tester.view.physicalSize = const Size(800, 800.5);
-            tester.view.devicePixelRatio = 1;
-            await mediaQueryBoilerplate(tester, materialType: materialType);
-
-            width = timePickerPortraitSize.width + padding.horizontal;
-            height = timePickerPortraitSize.height + padding.vertical;
-            expect(
-              tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
-              Size(width, height),
-            );
-
-            await tester.tap(find.text(okString)); // dismiss the dialog
-            await tester.pumpAndSettle();
-
-            // landscape
-            tester.view.physicalSize = const Size(800.5, 800);
-            tester.view.devicePixelRatio = 1;
-            await mediaQueryBoilerplate(
-              tester,
-              alwaysUse24HourFormat: true,
-              materialType: materialType,
-            );
-
-            width =  timePickerLandscapeSize.width + padding.horizontal;
-            height = timePickerLandscapeSize.height + padding.vertical;
-            expect(
-              tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
-              Size(width, height),
-            );
-          });
-
-          testWidgets('Dialog size - input mode', (WidgetTester tester) async {
-            final ThemeData theme = ThemeData(useMaterial3: true);
-            const TimePickerEntryMode entryMode = TimePickerEntryMode.input;
-            const double textScaleFactor = 1.0;
-            const Size timePickerMinInputSize = Size(312, 216);
-            const Size dayPeriodPortraitSize = Size(52, 80);
-            const EdgeInsets padding = EdgeInsets.all(24.0);
-            final double height = timePickerMinInputSize.height * textScaleFactor + padding.vertical;
-            double width;
-
-            await mediaQueryBoilerplate(
-              tester,
-              entryMode: entryMode,
-              materialType: materialType,
-            );
-
-            width = timePickerMinInputSize.width - (theme.useMaterial3 ? 32 : 0) + padding.horizontal;
-            expect(
-              tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
-              Size(width, height),
-            );
-
-            await tester.tap(find.text(okString)); // dismiss the dialog
-            await tester.pumpAndSettle();
-
-            await mediaQueryBoilerplate(
-              tester,
-              alwaysUse24HourFormat: true,
-              entryMode: entryMode,
-              materialType: materialType,
-            );
-
-            width = timePickerMinInputSize.width - dayPeriodPortraitSize.width - 12 + padding.horizontal;
-            expect(
-              tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
-              Size(width, height),
-            );
-          });
-
-          testWidgets('respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
-            await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, materialType: materialType);
-
-            final List<String> labels00To23 = List<String>.generate(24, (int index) {
-              return index == 0 ? '00' : index.toString();
-            });
-            final List<bool> inner0To23 = List<bool>.generate(24, (int index) => index >= 12);
-
-            final CustomPaint dialPaint = tester.widget(findDialPaint);
-            final dynamic dialPainter = dialPaint.painter;
-            // ignore: avoid_dynamic_calls
-            final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
-            // ignore: avoid_dynamic_calls
-            expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
-            // ignore: avoid_dynamic_calls
-            expect(primaryLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
-
-            // ignore: avoid_dynamic_calls
-            final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
-            // ignore: avoid_dynamic_calls
-            expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
-            // ignore: avoid_dynamic_calls
-            expect(selectedLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
-          });
-      }
 
       testWidgets('when change orientation, should reflect in render objects', (WidgetTester tester) async {
         addTearDown(tester.view.reset);
@@ -708,10 +704,12 @@ void main() {
         expect(find.text(helperText), findsOneWidget);
       });
 
-      testWidgets('OK Cancel button and helpText layout', (WidgetTester tester) async {
+      testWidgets('Material2 - OK Cancel button and helpText layout', (WidgetTester tester) async {
+        const String selectTimeString = 'SELECT TIME';
+        const String cancelString = 'CANCEL';
         Widget buildFrame(TextDirection textDirection) {
           return MaterialApp(
-            theme: ThemeData(useMaterial3: materialType == MaterialType.material3),
+            theme: ThemeData(useMaterial3: false),
             home: Material(
               child: Center(
                 child: Builder(
@@ -742,21 +740,13 @@ void main() {
         await tester.tap(find.text('X'));
         await tester.pumpAndSettle();
 
-        switch (materialType) {
-          case MaterialType.material2:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(154, 155)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(
-              ParagraphBuilder.shouldDisableRoundingHack ? const Offset(280.5, 165) : const Offset(281, 165),
-            ));
-            expect(tester.getBottomRight(find.text(okString)).dx, 644);
-            expect(tester.getBottomLeft(find.text(okString)).dx, 616);
-            expect(tester.getBottomRight(find.text(cancelString)).dx, 582);
-          case MaterialType.material3:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(138, 129)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(295.0, 149.0)));
-            expect(tester.getBottomLeft(find.text(okString)).dx, 615.5);
-            expect(tester.getBottomRight(find.text(cancelString)).dx, 578);
-        }
+        expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(154, 155)));
+        expect(tester.getBottomRight(find.text(selectTimeString)), equals(
+          ParagraphBuilder.shouldDisableRoundingHack ? const Offset(280.5, 165) : const Offset(281, 165),
+        ));
+        expect(tester.getBottomRight(find.text(okString)).dx, 644);
+        expect(tester.getBottomLeft(find.text(okString)).dx, 616);
+        expect(tester.getBottomRight(find.text(cancelString)).dx, 582);
 
         await tester.tap(find.text(okString));
         await tester.pumpAndSettle();
@@ -765,22 +755,71 @@ void main() {
         await tester.tap(find.text('X'));
         await tester.pumpAndSettle();
 
-        switch (materialType) {
-          case MaterialType.material2:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(
-              ParagraphBuilder.shouldDisableRoundingHack ? const Offset(519.5, 155) : const Offset(519, 155),
-            ));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(646, 165)));
-            expect(tester.getBottomLeft(find.text(okString)).dx, 156);
-            expect(tester.getBottomRight(find.text(okString)).dx, 184);
-            expect(tester.getBottomLeft(find.text(cancelString)).dx, 218);
-          case MaterialType.material3:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(505.0, 129.0)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(662, 149)));
-            expect(tester.getBottomLeft(find.text(okString)).dx, 155.5);
-            expect(tester.getBottomRight(find.text(okString)).dx, 184.5);
-            expect(tester.getBottomLeft(find.text(cancelString)).dx, 222);
+        expect(tester.getTopLeft(find.text(selectTimeString)), equals(
+          ParagraphBuilder.shouldDisableRoundingHack ? const Offset(519.5, 155) : const Offset(519, 155),
+        ));
+        expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(646, 165)));
+        expect(tester.getBottomLeft(find.text(okString)).dx, 156);
+        expect(tester.getBottomRight(find.text(okString)).dx, 184);
+        expect(tester.getBottomLeft(find.text(cancelString)).dx, 218);
+
+        await tester.tap(find.text(okString));
+        await tester.pumpAndSettle();
+      });
+
+      testWidgets('Material3 - OK Cancel button and helpText layout', (WidgetTester tester) async {
+        const String selectTimeString = 'Select time';
+        const String cancelString = 'Cancel';
+        Widget buildFrame(TextDirection textDirection) {
+          return MaterialApp(
+            theme: ThemeData(useMaterial3: true),
+            home: Material(
+              child: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      child: const Text('X'),
+                      onPressed: () {
+                        showTimePicker(
+                          context: context,
+                          initialTime: const TimeOfDay(hour: 7, minute: 0),
+                          builder: (BuildContext context, Widget? child) {
+                            return Directionality(
+                              textDirection: textDirection,
+                              child: child!,
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
         }
+
+        await tester.pumpWidget(buildFrame(TextDirection.ltr));
+        await tester.tap(find.text('X'));
+        await tester.pumpAndSettle();
+
+        expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(138, 129)));
+        expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(295.0, 149.0)));
+        expect(tester.getBottomLeft(find.text(okString)).dx, 615.5);
+        expect(tester.getBottomRight(find.text(cancelString)).dx, 578);
+
+        await tester.tap(find.text(okString));
+        await tester.pumpAndSettle();
+
+        await tester.pumpWidget(buildFrame(TextDirection.rtl));
+        await tester.tap(find.text('X'));
+        await tester.pumpAndSettle();
+
+        expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(505.0, 129.0)));
+        expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(662, 149)));
+        expect(tester.getBottomLeft(find.text(okString)).dx, 155.5);
+        expect(tester.getBottomRight(find.text(okString)).dx, 184.5);
+        expect(tester.getBottomLeft(find.text(cancelString)).dx, 222);
 
         await tester.tap(find.text(okString));
         await tester.pumpAndSettle();
@@ -996,9 +1035,9 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgets('provides semantics information for header and footer', (WidgetTester tester) async {
+      testWidgets('Material2 - provides semantics information for header and footer', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
-        await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, materialType: materialType);
+        await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, materialType: MaterialType.material2);
 
         expect(semantics, isNot(includesNodeWith(label: ':')));
         expect(
@@ -1011,7 +1050,32 @@ void main() {
           hasLength(1),
           reason: '07 appears once in the header',
         );
-        expect(semantics, includesNodeWith(label: cancelString));
+        expect(semantics, includesNodeWith(label: 'CANCEL'));
+        expect(semantics, includesNodeWith(label: okString));
+
+        // In 24-hour mode we don't have AM/PM control.
+        expect(semantics, isNot(includesNodeWith(label: amString)));
+        expect(semantics, isNot(includesNodeWith(label: pmString)));
+
+        semantics.dispose();
+      });
+
+      testWidgets('Material3 - provides semantics information for header and footer', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, materialType: MaterialType.material3);
+
+        expect(semantics, isNot(includesNodeWith(label: ':')));
+        expect(
+          semantics.nodesWith(value: 'Select minutes 00'),
+          hasLength(1),
+          reason: '00 appears once in the header',
+        );
+        expect(
+          semantics.nodesWith(value: 'Select hours 07'),
+          hasLength(1),
+          reason: '07 appears once in the header',
+        );
+        expect(semantics, includesNodeWith(label: 'Cancel'));
         expect(semantics, includesNodeWith(label: okString));
 
         // In 24-hour mode we don't have AM/PM control.
