@@ -14206,7 +14206,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Kirjautunut sisään';
 
   @override
-  String get tabLabelRaw => r'Välilehti $tabIndex/$tabCount';
+  String get tabLabelRaw => r'Välilehti $tabIndex kautta $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
