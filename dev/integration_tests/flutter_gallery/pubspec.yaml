@@ -11,7 +11,7 @@ dependencies:
   intl: 0.18.1
   connectivity: 3.0.6
   string_scanner: 1.2.0
-  url_launcher: 6.1.11
+  url_launcher: 6.1.12
   # This is listed as direct so it can be manually pinned
   url_launcher_android: 6.0.17
   cupertino_icons: 1.0.5
@@ -277,4 +277,4 @@ flutter:
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Regular.ttf
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Light.ttf
 
-# PUBSPEC CHECKSUM: 4c03
+# PUBSPEC CHECKSUM: 9c04
