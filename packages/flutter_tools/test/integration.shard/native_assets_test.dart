@@ -59,6 +59,11 @@ const String exampleAppName = '${packageName}_example';
 const String dylibName = 'lib$packageName.dylib';
 
 void main() {
+  if (platform.isWindows || platform.isLinux) {
+    // TODO(https://github.com/flutter/flutter/issues/129757): Implement.
+    return;
+  }
+
   setUpAll(() {
     processManager.runSync(<String>[
       flutterBin,
