@@ -55,7 +55,7 @@ ScrollController primaryScrollController(WidgetTester tester) {
   return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
 }
 
-TextStyle? iconStyle(WidgetTester tester, IconData icon) {
+TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
   final RichText iconRichText = tester.widget<RichText>(
     find.descendant(of: find.byIcon(icon).first, matching: find.byType(RichText)),
   );
@@ -575,7 +575,7 @@ void main() {
       ),
     );
 
-    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+    Color? iconColor() => _iconStyle(tester, Icons.menu)?.color;
     final Color iconColorM2 = themeData.colorScheme.onPrimary;
     final Color iconColorM3 = themeData.colorScheme.onSurfaceVariant;
     expect(iconColor(), useMaterial3 ? iconColorM3 : iconColorM2);
@@ -616,7 +616,7 @@ void main() {
       ),
     );
 
-    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+    Color? iconColor() => _iconStyle(tester, Icons.menu)?.color;
 
     expect(iconColor(), color);
   });
@@ -655,7 +655,7 @@ void main() {
       ),
     );
 
-    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+    Color? iconColor() => _iconStyle(tester, Icons.menu)?.color;
     final Color iconColorM2 = themeData.colorScheme.onPrimary;
     final Color iconColorM3 = themeData.colorScheme.onSurfaceVariant;
     expect(iconColor(), useMaterial3 ? iconColorM3 : iconColorM2);
@@ -696,7 +696,7 @@ void main() {
       ),
     );
 
-    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+    Color? iconColor() => _iconStyle(tester, Icons.menu)?.color;
 
     expect(iconColor(), color);
   });
@@ -3123,8 +3123,8 @@ void main() {
     expect(actionIconTheme.color, foregroundColor);
 
     // Test icon color
-    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
-    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+    Color? leadingIconColor() => _iconStyle(tester, Icons.add_circle)?.color;
+    Color? actionIconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
 
     expect(leadingIconColor(), foregroundColor);
     expect(actionIconColor(), foregroundColor);
@@ -3156,8 +3156,8 @@ void main() {
     Color textColor() {
       return tester.renderObject<RenderParagraph>(find.text('title')).text.style!.color!;
     }
-    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
-    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+    Color? leadingIconColor() => _iconStyle(tester, Icons.add_circle)?.color;
+    Color? actionIconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
 
     // M2 default color are onPrimary, and M3 has onSurface for leading and title,
     // onSurfaceVariant for actions.
@@ -3191,9 +3191,9 @@ void main() {
         ),
       );
 
-      Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
-      Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
-      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+      Color? leadingIconColor() => _iconStyle(tester, Icons.add_circle)?.color;
+      Color? actionIconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+      Color? actionIconButtonColor() => _iconStyle(tester, Icons.add)?.color;
 
       expect(leadingIconColor(), iconColor);
       expect(actionIconColor(), iconColor);
@@ -3227,9 +3227,9 @@ void main() {
         ),
       );
 
-      Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
-      Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
-      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+      Color? leadingIconColor() => _iconStyle(tester, Icons.add_circle)?.color;
+      Color? actionIconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+      Color? actionIconButtonColor() => _iconStyle(tester, Icons.add)?.color;
 
       expect(leadingIconColor(), themeData.colorScheme.onSurface);
       expect(actionIconColor(), actionsIconColor);
@@ -3265,9 +3265,9 @@ void main() {
         ),
       );
 
-      Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
-      Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
-      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+      Color? leadingIconColor() => _iconStyle(tester, Icons.add_circle)?.color;
+      Color? actionIconColor() => _iconStyle(tester, Icons.ac_unit)?.color;
+      Color? actionIconButtonColor() => _iconStyle(tester, Icons.add)?.color;
 
       expect(leadingIconColor(), overallIconColor);
       expect(actionIconColor(), actionsIconColor);
@@ -3302,10 +3302,10 @@ void main() {
         ),
       );
 
-      Color? leadingIconButtonColor() => iconStyle(tester, Icons.menu)?.color;
-      double? leadingIconButtonSize() => iconStyle(tester, Icons.menu)?.fontSize;
-      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
-      double? actionIconButtonSize() => iconStyle(tester, Icons.menu)?.fontSize;
+      Color? leadingIconButtonColor() => _iconStyle(tester, Icons.menu)?.color;
+      double? leadingIconButtonSize() => _iconStyle(tester, Icons.menu)?.fontSize;
+      Color? actionIconButtonColor() => _iconStyle(tester, Icons.add)?.color;
+      double? actionIconButtonSize() => _iconStyle(tester, Icons.menu)?.fontSize;
 
       expect(leadingIconButtonColor(), Colors.yellow);
       expect(leadingIconButtonSize(), 30.0);
@@ -3338,8 +3338,8 @@ void main() {
         ),
       );
 
-      Color? leadingIconButtonColor() => iconStyle(tester, Icons.arrow_back)?.color;
-      double? leadingIconButtonSize() => iconStyle(tester, Icons.arrow_back)?.fontSize;
+      Color? leadingIconButtonColor() => _iconStyle(tester, Icons.arrow_back)?.color;
+      double? leadingIconButtonSize() => _iconStyle(tester, Icons.arrow_back)?.fontSize;
 
       expect(leadingIconButtonColor(), Colors.yellow);
       expect(leadingIconButtonSize(), 30.0);
@@ -3374,10 +3374,10 @@ void main() {
         ),
       );
 
-      Color? leadingIconButtonColor() => iconStyle(tester, Icons.menu)?.color;
-      double? leadingIconButtonSize() => iconStyle(tester, Icons.menu)?.fontSize;
-      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
-      double? actionIconButtonSize() => iconStyle(tester, Icons.add)?.fontSize;
+      Color? leadingIconButtonColor() => _iconStyle(tester, Icons.menu)?.color;
+      double? leadingIconButtonSize() => _iconStyle(tester, Icons.menu)?.fontSize;
+      Color? actionIconButtonColor() => _iconStyle(tester, Icons.add)?.color;
+      double? actionIconButtonSize() => _iconStyle(tester, Icons.add)?.fontSize;
 
       // The leading icon button uses the style in the IconButtonTheme because only actionsIconTheme is provided.
       expect(leadingIconButtonColor(), Colors.red);
@@ -3413,8 +3413,8 @@ void main() {
         ),
       );
 
-      Color? actionIconButtonColor() => iconStyle(tester, Icons.arrow_back)?.color;
-      double? actionIconButtonSize() => iconStyle(tester, Icons.arrow_back)?.fontSize;
+      Color? actionIconButtonColor() => _iconStyle(tester, Icons.arrow_back)?.color;
+      double? actionIconButtonSize() => _iconStyle(tester, Icons.arrow_back)?.fontSize;
 
       expect(actionIconButtonColor(), Colors.yellow);
       expect(actionIconButtonSize(), 30.0);
@@ -3446,11 +3446,36 @@ void main() {
         ),
       );
 
-      Color? leadingIconButtonColor() => iconStyle(tester, Icons.menu)?.color;
-      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+      Color? leadingIconButtonColor() => _iconStyle(tester, Icons.menu)?.color;
+      Color? actionIconButtonColor() => _iconStyle(tester, Icons.add)?.color;
 
       expect(leadingIconButtonColor(), Colors.purple);
       expect(actionIconButtonColor(), Colors.purple);
+    });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/130485.
+    testWidgets('Material3 - AppBar.iconTheme correctly applies custom white color in dark mode', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(useMaterial3: true, brightness: Brightness.dark);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              iconTheme: const IconThemeData(color: Colors.white),
+              leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+              actions: <Widget>[
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconButtonColor() => _iconStyle(tester, Icons.menu)?.color;
+      Color? actionIconButtonColor() => _iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconButtonColor(), Colors.white);
+      expect(actionIconButtonColor(), Colors.white);
     });
   });
 

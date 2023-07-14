@@ -963,9 +963,9 @@ class _IconButtonM3 extends ButtonStyleButton {
 
     bool isIconThemeDefault(Color? color) {
       if (isDark) {
-        return color == kDefaultIconLightColor;
+        return identical(color, kDefaultIconLightColor);
       }
-      return color == kDefaultIconDarkColor;
+      return identical(color, kDefaultIconDarkColor);
     }
     final bool isDefaultColor = isIconThemeDefault(iconTheme.color);
     final bool isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;
