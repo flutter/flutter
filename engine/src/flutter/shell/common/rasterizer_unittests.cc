@@ -990,7 +990,6 @@ TEST(RasterizerTest, TeardownFreesResourceCache) {
 
   SkPaint paint;
   sk_surface->getCanvas()->drawPaint(paint);
-  sk_surface->getCanvas()->flush();
   context->flushAndSubmit(true);
 
   EXPECT_EQ(context->getResourceCachePurgeableBytes(), 0ul);

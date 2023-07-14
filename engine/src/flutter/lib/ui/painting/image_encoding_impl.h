@@ -9,6 +9,7 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 
 namespace flutter {
@@ -41,7 +42,9 @@ sk_sp<SkImage> ConvertToRasterUsingResourceContext(
   }
 
   surface->getCanvas()->drawImage(image, 0, 0);
-  surface->getCanvas()->flush();
+  if (resource_context) {
+    resource_context->flushAndSubmit();
+  }
 
   auto snapshot = surface->makeImageSnapshot();
 

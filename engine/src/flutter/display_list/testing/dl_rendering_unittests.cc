@@ -492,7 +492,6 @@ class RenderEnvironment {
     renderer.Render(canvas, info);
     canvas->restoreToCount(restore_count);
 
-    canvas->flush();
     if (GrDirectContext* dContext =
             GrAsDirectContext(surface->recordingContext())) {
       dContext->flushAndSubmit(surface, /*syncCpu=*/true);

@@ -248,9 +248,6 @@ class DidDrawCanvas final : public SkCanvasVirtualEnforcer<SkNoDrawCanvas> {
                              const SkPaint*,
                              SrcRectConstraint) override;
 
-  // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
-  void onFlush() override;
-
   void MarkDrawIfNonTransparentPaint(const SkPaint& paint);
 
   FML_DISALLOW_COPY_AND_ASSIGN(DidDrawCanvas);

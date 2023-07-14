@@ -268,8 +268,8 @@ bool GPUSurfaceGLSkia::PresentSurface(const SurfaceFrame& frame,
   delegate_->GLContextSetDamageRegion(frame.submit_info().buffer_damage);
 
   {
-    TRACE_EVENT0("flutter", "SkCanvas::Flush");
-    onscreen_surface_->getCanvas()->flush();
+    TRACE_EVENT0("flutter", "GrDirectContext::flushAndSubmit");
+    context_->flushAndSubmit();
   }
 
   GLPresentInfo present_info = {
