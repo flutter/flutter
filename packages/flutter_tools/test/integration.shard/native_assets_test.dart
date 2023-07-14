@@ -140,7 +140,10 @@ void main() {
             ],
             logging: false,
           );
-          expect(result.exitCode, 0);
+          if (result.exitCode != 0) {
+            throw Exception(
+                'flutter run failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+          }
           final String stdout = result.stdout.join('\n');
           // Check that we did not fail to resolve the native function in the
           // dynamic library.
@@ -179,7 +182,10 @@ void main() {
         ],
         logging: false,
       );
-      expect(result.exitCode, 0);
+      if (result.exitCode != 0) {
+        throw Exception(
+            'flutter test failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+      }
     });
   });
 
@@ -203,7 +209,10 @@ void main() {
             ],
             workingDirectory: exampleDirectory.path,
           );
-          expect(result.exitCode, 0);
+          if (result.exitCode != 0) {
+            throw Exception(
+                'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+          }
 
           if (buildSubcommand == 'macos') {
             expectDylibIsBundledMacos(exampleDirectory, buildMode);
@@ -274,7 +283,10 @@ void main() {
           ],
           workingDirectory: exampleDirectory.path,
         );
-        expect(result.exitCode, 0);
+        if (result.exitCode != 0) {
+          throw Exception(
+              'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+        }
 
         for (final String buildMode in buildModes) {
           expectDylibIsBundledWithFrameworks(exampleDirectory, buildMode,
@@ -346,7 +358,7 @@ extension on String {
 
 Future<Directory> createTestProject(
     String packageName, Directory tempDirectory) async {
-  final ProcessResult createResult = processManager.runSync(
+  final ProcessResult result = processManager.runSync(
     <String>[
       flutterBin,
       'create',
@@ -357,7 +369,10 @@ Future<Directory> createTestProject(
     workingDirectory: tempDirectory.path,
   );
 
-  expect(createResult.exitCode, 0);
+  if (result.exitCode != 0) {
+    throw Exception(
+        'flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+  }
 
   final Directory packageDirectory = tempDirectory.childDirectory(packageName);
   return packageDirectory;
