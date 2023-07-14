@@ -57,7 +57,7 @@ abstract class AssetBundle {
   /// Throws an exception if the asset is not found.
   ///
   /// The returned [ByteData] can be converted to a [Uint8List] (a list of bytes)
-  /// using [ByteData.sublistView]. Lists of bytes can be used with APIs that
+  /// using [Uint8List.sublistView]. Lists of bytes can be used with APIs that
   /// accept [Uint8List] objects, such as [decodeImageFromList], as well as any
   /// API that accepts a [List<int>], such as [File.writeAsBytes] or
   /// [Utf8Codec.decode] (accessible via [utf8]).
