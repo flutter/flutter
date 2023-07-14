@@ -26,11 +26,8 @@ int32_t CountStringViewInstances(const std::vector<std::string>& strings,
 TEST(PassBindingsCacheTest, bindPipeline) {
   auto context = CreateMockVulkanContext();
   PassBindingsCache cache;
-  auto pool = CommandPoolVK::GetThreadLocal(context.get());
-  CommandEncoderVK encoder(context->GetDeviceHolder(),
-                           context->GetGraphicsQueue(), pool,
-                           context->GetFenceWaiter());
-  auto buffer = encoder.GetCommandBuffer();
+  auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
+  auto buffer = encoder->GetCommandBuffer();
   VkPipeline vk_pipeline = reinterpret_cast<VkPipeline>(0xfeedface);
   vk::Pipeline pipeline(vk_pipeline);
   cache.BindPipeline(buffer, vk::PipelineBindPoint::eGraphics, pipeline);
@@ -43,11 +40,8 @@ TEST(PassBindingsCacheTest, bindPipeline) {
 TEST(PassBindingsCacheTest, setStencilReference) {
   auto context = CreateMockVulkanContext();
   PassBindingsCache cache;
-  auto pool = CommandPoolVK::GetThreadLocal(context.get());
-  CommandEncoderVK encoder(context->GetDeviceHolder(),
-                           context->GetGraphicsQueue(), pool,
-                           context->GetFenceWaiter());
-  auto buffer = encoder.GetCommandBuffer();
+  auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
+  auto buffer = encoder->GetCommandBuffer();
   cache.SetStencilReference(
       buffer, vk::StencilFaceFlagBits::eVkStencilFrontAndBack, 123);
   cache.SetStencilReference(
@@ -61,11 +55,8 @@ TEST(PassBindingsCacheTest, setStencilReference) {
 TEST(PassBindingsCacheTest, setScissor) {
   auto context = CreateMockVulkanContext();
   PassBindingsCache cache;
-  auto pool = CommandPoolVK::GetThreadLocal(context.get());
-  CommandEncoderVK encoder(context->GetDeviceHolder(),
-                           context->GetGraphicsQueue(), pool,
-                           context->GetFenceWaiter());
-  auto buffer = encoder.GetCommandBuffer();
+  auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
+  auto buffer = encoder->GetCommandBuffer();
   vk::Rect2D scissors;
   cache.SetScissor(buffer, 0, 1, &scissors);
   cache.SetScissor(buffer, 0, 1, &scissors);
@@ -77,11 +68,8 @@ TEST(PassBindingsCacheTest, setScissor) {
 TEST(PassBindingsCacheTest, setViewport) {
   auto context = CreateMockVulkanContext();
   PassBindingsCache cache;
-  auto pool = CommandPoolVK::GetThreadLocal(context.get());
-  CommandEncoderVK encoder(context->GetDeviceHolder(),
-                           context->GetGraphicsQueue(), pool,
-                           context->GetFenceWaiter());
-  auto buffer = encoder.GetCommandBuffer();
+  auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
+  auto buffer = encoder->GetCommandBuffer();
   vk::Viewport viewports;
   cache.SetViewport(buffer, 0, 1, &viewports);
   cache.SetViewport(buffer, 0, 1, &viewports);

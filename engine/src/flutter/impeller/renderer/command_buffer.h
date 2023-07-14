@@ -104,14 +104,14 @@ class CommandBuffer {
   ///
   /// @return     A valid blit pass or null.
   ///
-  std::shared_ptr<BlitPass> CreateBlitPass() const;
+  std::shared_ptr<BlitPass> CreateBlitPass();
 
   //----------------------------------------------------------------------------
   /// @brief      Create a compute pass to record compute commands into.
   ///
   /// @return     A valid compute pass or null.
   ///
-  std::shared_ptr<ComputePass> CreateComputePass() const;
+  std::shared_ptr<ComputePass> CreateComputePass();
 
  protected:
   std::weak_ptr<const Context> context_;
@@ -121,13 +121,13 @@ class CommandBuffer {
   virtual std::shared_ptr<RenderPass> OnCreateRenderPass(
       RenderTarget render_target) = 0;
 
-  virtual std::shared_ptr<BlitPass> OnCreateBlitPass() const = 0;
+  virtual std::shared_ptr<BlitPass> OnCreateBlitPass() = 0;
 
   [[nodiscard]] virtual bool OnSubmitCommands(CompletionCallback callback) = 0;
 
   virtual void OnWaitUntilScheduled() = 0;
 
-  virtual std::shared_ptr<ComputePass> OnCreateComputePass() const = 0;
+  virtual std::shared_ptr<ComputePass> OnCreateComputePass() = 0;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBuffer);

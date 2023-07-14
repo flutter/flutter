@@ -61,7 +61,7 @@ std::shared_ptr<RenderPass> CommandBuffer::CreateRenderPass(
   return nullptr;
 }
 
-std::shared_ptr<BlitPass> CommandBuffer::CreateBlitPass() const {
+std::shared_ptr<BlitPass> CommandBuffer::CreateBlitPass() {
   auto pass = OnCreateBlitPass();
   if (pass && pass->IsValid()) {
     pass->SetLabel("BlitPass");
@@ -70,7 +70,7 @@ std::shared_ptr<BlitPass> CommandBuffer::CreateBlitPass() const {
   return nullptr;
 }
 
-std::shared_ptr<ComputePass> CommandBuffer::CreateComputePass() const {
+std::shared_ptr<ComputePass> CommandBuffer::CreateComputePass() {
   if (!IsValid()) {
     return nullptr;
   }
