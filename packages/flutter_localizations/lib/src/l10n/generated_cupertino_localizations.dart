@@ -3983,7 +3983,7 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Valitse kaikki';
 
   @override
-  String get tabSemanticsLabelRaw => r'Välilehti $tabIndex/$tabCount';
+  String get tabSemanticsLabelRaw => r'Välilehti $tabIndex kautta $tabCount';
 
   @override
   String? get timerPickerHourLabelFew => null;
