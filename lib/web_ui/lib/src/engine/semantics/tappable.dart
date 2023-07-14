@@ -40,8 +40,7 @@ class Tappable extends RoleManager {
 
   @override
   void update() {
-    final DomElement element = semanticsObject.element;
-    if (semanticsObject.enabledState() == EnabledState.disabled || !semanticsObject.isTappable) {
+    if (!semanticsObject.isTappable || semanticsObject.enabledState() == EnabledState.disabled) {
       _stopListening();
     } else {
       if (_clickListener == null) {
@@ -52,7 +51,7 @@ class Tappable extends RoleManager {
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
               semanticsObject.id, ui.SemanticsAction.tap, null);
         });
-        element.addEventListener('click', _clickListener);
+        semanticsObject.element.addEventListener('click', _clickListener);
       }
     }
   }

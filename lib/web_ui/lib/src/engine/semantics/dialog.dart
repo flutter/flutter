@@ -76,6 +76,10 @@ class RouteName extends RoleManager {
     // semantics code. Since reparenting can be done with no update to either
     // the Dialog or RouteName we'd have to scan intermediate nodes for
     // structural changes.
+    if (!semanticsObject.namesRoute) {
+      return;
+    }
+
     if (semanticsObject.isLabelDirty) {
       final Dialog? dialog = _dialog;
       if (dialog != null) {

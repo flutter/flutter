@@ -44,6 +44,9 @@ void runSemanticsTests() {
   group('longestIncreasingSubsequence', () {
     _testLongestIncreasingSubsequence();
   });
+  group('Role managers', () {
+    _testRoleManagerLifecycle();
+  });
   group('container', () {
     _testContainer();
   });
@@ -88,6 +91,60 @@ void runSemanticsTests() {
   });
   group('focusable', () {
     _testFocusable();
+  });
+}
+
+void _testRoleManagerLifecycle() {
+  test('Secondary role managers are added upon node initialization', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    // Check that roles are initialized immediately
+    {
+      final SemanticsTester tester = SemanticsTester(semantics());
+      tester.updateNode(
+        id: 0,
+        isButton: true,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+
+      expectSemanticsTree('<sem role="button" style="$rootSemanticStyle"></sem>');
+
+      final SemanticsObject node = semantics().debugSemanticsTree![0]!;
+      expect(node.primaryRole?.role, PrimaryRole.button);
+      expect(
+        node.primaryRole?.debugSecondaryRoles,
+        containsAll(<Role>[Role.focusable, Role.tappable, Role.labelAndValue]),
+      );
+      expect(tester.getSemanticsObject(0).element.tabIndex, -1);
+    }
+
+    // Check that roles apply their functionality upon update.
+    {
+      final SemanticsTester tester = SemanticsTester(semantics());
+      tester.updateNode(
+        id: 0,
+        label: 'a label',
+        isFocusable: true,
+        isButton: true,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+
+      expectSemanticsTree('<sem aria-label="a label" role="button" style="$rootSemanticStyle"></sem>');
+
+      final SemanticsObject node = semantics().debugSemanticsTree![0]!;
+      expect(node.primaryRole?.role, PrimaryRole.button);
+      expect(
+        node.primaryRole?.debugSecondaryRoles,
+        containsAll(<Role>[Role.focusable, Role.tappable, Role.labelAndValue]),
+      );
+      expect(tester.getSemanticsObject(0).element.tabIndex, 0);
+    }
+
+    semantics().semanticsEnabled = false;
   });
 }
 
@@ -2681,28 +2738,62 @@ void _testFocusable() {
     expect(element.tabIndex, -1);
     domDocument.body!.append(element);
 
+    // Start managing element
     manager.manage(1, element);
     expect(element.tabIndex, 0);
     expect(capturedActions, isEmpty);
+    expect(domDocument.activeElement, isNot(element));
 
+    // Request focus
     manager.changeFocus(true);
     pumpSemantics(); // triggers post-update callbacks
+    expect(domDocument.activeElement, element);
     expect(capturedActions, <CapturedAction>[
       (1, ui.SemanticsAction.didGainAccessibilityFocus, null),
     ]);
     capturedActions.clear();
 
+    // Give up focus
     manager.changeFocus(false);
     pumpSemantics(); // triggers post-update callbacks
     expect(capturedActions, <CapturedAction>[
       (1, ui.SemanticsAction.didLoseAccessibilityFocus, null),
     ]);
     capturedActions.clear();
+    expect(domDocument.activeElement, isNot(element));
 
-    manager.stopManaging();
+    // Request focus again
     manager.changeFocus(true);
     pumpSemantics(); // triggers post-update callbacks
-    expect(capturedActions, isEmpty);
+    expect(domDocument.activeElement, element);
+    expect(capturedActions, <CapturedAction>[
+      (1, ui.SemanticsAction.didGainAccessibilityFocus, null),
+    ]);
+    capturedActions.clear();
+
+    // Stop managing
+    manager.stopManaging();
+    pumpSemantics(); // triggers post-update callbacks
+    expect(
+      reason: 'Even though the element was blurred after stopManaging there '
+              'should be no notification to the framework because the framework '
+              'should already know. Otherwise, it would not have asked to stop '
+              'managing the node.',
+      capturedActions,
+      isEmpty,
+    );
+    expect(domDocument.activeElement, isNot(element));
+
+    // Attempt to request focus when not managing an element.
+    manager.changeFocus(true);
+    pumpSemantics(); // triggers post-update callbacks
+    expect(
+      reason: 'Attempting to request focus on a node that is not managed should '
+              'not result in any notifications to the framework.',
+      capturedActions,
+      isEmpty,
+    );
+    expect(domDocument.activeElement, isNot(element));
 
     semantics().semanticsEnabled = false;
   });

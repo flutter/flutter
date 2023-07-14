@@ -30,15 +30,20 @@ import 'semantics.dart';
 class Focusable extends RoleManager {
   Focusable(SemanticsObject semanticsObject)
       : _focusManager = AccessibilityFocusManager(semanticsObject.owner),
-        super(Role.focusable, semanticsObject) {
-    _focusManager.manage(semanticsObject.id, semanticsObject.element);
-  }
+        super(Role.focusable, semanticsObject);
 
   final AccessibilityFocusManager _focusManager;
 
   @override
   void update() {
-    _focusManager.changeFocus(semanticsObject.hasFocus && (!semanticsObject.hasEnabledState || semanticsObject.isEnabled));
+    if (semanticsObject.isFocusable) {
+      if (!_focusManager.isManaging) {
+        _focusManager.manage(semanticsObject.id, semanticsObject.element);
+      }
+      _focusManager.changeFocus(semanticsObject.hasFocus && (!semanticsObject.hasEnabledState || semanticsObject.isEnabled));
+    } else {
+      _focusManager.stopManaging();
+    }
   }
 
   @override
@@ -78,6 +83,9 @@ class AccessibilityFocusManager {
   final EngineSemanticsOwner _owner;
 
   _FocusTarget? _target;
+
+  /// Whether this focus manager is managing a focusable target.
+  bool get isManaging => _target != null;
 
   /// Starts managing the focus of the given [element].
   ///
@@ -127,6 +135,7 @@ class AccessibilityFocusManager {
   /// Stops managing the focus of the current element, if any.
   void stopManaging() {
     final _FocusTarget? target = _target;
+    _target = null;
 
     if (target == null) {
       /// Nothing is being managed. Just return.
@@ -135,7 +144,11 @@ class AccessibilityFocusManager {
 
     target.element.removeEventListener('focus', target.domFocusListener);
     target.element.removeEventListener('blur', target.domBlurListener);
-    _target = null;
+
+    // Blur the element after removing listeners. If this method is being called
+    // it indicates that the framework already knows that this node should not
+    // have focus, and there's no need to notify it.
+    target.element.blur();
   }
 
   void _setFocusFromDom(bool acquireFocus) {

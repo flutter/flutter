@@ -449,39 +449,29 @@ abstract class PrimaryRoleManager {
   @visibleForTesting
   List<Role> get debugSecondaryRoles => _secondaryRoleManagers?.map((RoleManager manager) => manager.role).toList() ?? const <Role>[];
 
-  /// Adds generic focus management features, if applicable.
+  /// Adds generic focus management features.
   void addFocusManagement() {
-    if (semanticsObject.isFocusable) {
-      addSecondaryRole(Focusable(semanticsObject));
-    }
+    addSecondaryRole(Focusable(semanticsObject));
   }
 
-  /// Adds generic live region features, if applicable.
+  /// Adds generic live region features.
   void addLiveRegion() {
-    if (semanticsObject.isLiveRegion) {
-      addSecondaryRole(LiveRegion(semanticsObject));
-    }
+    addSecondaryRole(LiveRegion(semanticsObject));
   }
 
-  /// Adds generic route name features, if applicable.
+  /// Adds generic route name features.
   void addRouteName() {
-    if (semanticsObject.namesRoute) {
-      addSecondaryRole(RouteName(semanticsObject));
-    }
+    addSecondaryRole(RouteName(semanticsObject));
   }
 
-  /// Adds generic label features, if applicable.
+  /// Adds generic label features.
   void addLabelAndValue() {
-    if (semanticsObject.hasLabel || semanticsObject.hasValue || semanticsObject.hasTooltip) {
-      addSecondaryRole(LabelAndValue(semanticsObject));
-    }
+    addSecondaryRole(LabelAndValue(semanticsObject));
   }
 
   /// Adds generic functionality for handling taps and clicks.
   void addTappable() {
-    if (semanticsObject.isTappable) {
-      addSecondaryRole(Tappable(semanticsObject));
-    }
+    addSecondaryRole(Tappable(semanticsObject));
   }
 
   /// Adds a secondary role to this primary role manager.
@@ -531,7 +521,7 @@ abstract class PrimaryRoleManager {
   /// gesture mode changes.
   @mustCallSuper
   void dispose() {
-    semanticsObject.clearAriaRole();
+    semanticsObject.element.removeAttribute('role');
     _isDisposed = true;
   }
 }
@@ -1462,11 +1452,6 @@ class SemanticsObject {
   /// Sets the `role` ARIA attribute.
   void setAriaRole(String ariaRoleName) {
     element.setAttribute('role', ariaRoleName);
-  }
-
-  /// Removes the `role` HTML attribue, if any.
-  void clearAriaRole() {
-    element.removeAttribute('role');
   }
 
   /// The primary role of this node.
