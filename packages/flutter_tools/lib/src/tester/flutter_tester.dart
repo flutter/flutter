@@ -166,7 +166,7 @@ class FlutterTesterDevice extends Device {
       );
     } else {
       await ensureNoNativeAssetsUnimplementedOs(
-          projectUri, const LocalPlatform().operatingSystem);
+          projectUri, const LocalPlatform().operatingSystem, _fileSystem);
       nativeAssetsYaml = null;
     }
 

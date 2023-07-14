@@ -484,7 +484,7 @@ class HotRunner extends ResidentRunner {
           );
         } else {
           await ensureNoNativeAssetsUnimplementedOs(
-              projectUri, const LocalPlatform().operatingSystem);
+              projectUri, const LocalPlatform().operatingSystem, fileSystem);
           nativeAssetsYaml = null;
         }
       case TargetPlatform.android_arm:
@@ -499,7 +499,7 @@ class HotRunner extends ResidentRunner {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
         await ensureNoNativeAssetsUnimplementedOs(
-            projectUri, targetPlatform.toString());
+            projectUri, targetPlatform.toString(), fileSystem);
         nativeAssetsYaml = null;
     }
     return nativeAssetsYaml;

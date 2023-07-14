@@ -146,7 +146,10 @@ Future<bool> isDisabledAndNoNativeAssets(Uri workingDirectory) async {
 }
 
 Future<void> ensureNoNativeAssetsUnimplementedOs(
-    Uri workingDirectory, String os) async {
+    Uri workingDirectory, String os, FileSystem fileSystem) async {
+  if (fileSystem is MemoryFileSystem) {
+    return; // https://github.com/dart-lang/native/issues/90
+  }
   final PackageLayout packageLayout =
       await PackageLayout.fromRootPackageRoot(workingDirectory);
   final List<Package> packagesWithNativeAssets =
