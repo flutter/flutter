@@ -80,7 +80,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/83668
-  testWidgetsWithLeakTracking('Scaffold.bottomSheet update test', (WidgetTester tester) async {
+  testWidgets('Scaffold.bottomSheet update test', (WidgetTester tester) async {
     Widget buildFrame(Widget? bottomSheet) {
       return MaterialApp(
         home: Scaffold(
@@ -260,7 +260,7 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Verify that a scrollControlled BottomSheet can be dismissed', (WidgetTester tester) async {
+  testWidgets('Verify that a scrollControlled BottomSheet can be dismissed', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
