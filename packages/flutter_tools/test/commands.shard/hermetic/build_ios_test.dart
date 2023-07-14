@@ -241,7 +241,7 @@ void main() {
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
-    final bool supported = BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
+    final bool supported = BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false, fileSystem: fileSystem).supported;
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'ios', '--no-pub']
     ), supported ? throwsToolExit() : throwsA(isA<UsageException>()));

@@ -516,6 +516,7 @@ class IOSSimulator extends Device {
       targetOverride: mainPath,
       environmentType: EnvironmentType.simulator,
       deviceID: id,
+      fileSystem: globals.fs,
     );
     if (!buildResult.success) {
       await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, globals.logger);

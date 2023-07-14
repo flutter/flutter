@@ -56,8 +56,8 @@ void main() {
       BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false, fileSystem: MemoryFileSystem.test()),
       BuildWebCommand(fileSystem: fileSystem, logger: BufferLogger.test(), verboseHelp: false),
       BuildApkCommand(logger: BufferLogger.test()),
-      BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false),
-      BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false),
+      BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false, fileSystem: MemoryFileSystem.test()),
+      BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false, fileSystem: MemoryFileSystem.test()),
       BuildAppBundleCommand(logger: BufferLogger.test()),
       BuildAarCommand(
         logger: BufferLogger.test(),

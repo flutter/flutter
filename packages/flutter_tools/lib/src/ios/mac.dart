@@ -135,6 +135,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   String? deviceID,
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
+  required FileSystem fileSystem,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
@@ -240,7 +241,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final Uri? nativeAssetsYaml = await dryRunNativeAssetsiOS(
     projectUri: project.directory.uri,
-    fileSystem: globals.fs,
+    fileSystem: fileSystem,
   );
   await updateGeneratedXcodeProperties(
     project: project,
@@ -283,7 +284,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       '-workspace', workspacePath.basename,
       '-scheme', scheme,
       if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
-        'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
+        'BUILD_DIR=${fileSystem.path.absolute(getIosBuildDirectory())}',
     ]);
   }
 
@@ -347,7 +348,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   RunResult? buildResult;
   XCResult? xcResult;
 
-  final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_ios_build_temp_dir');
+  final Directory tempDir = fileSystem.systemTempDirectory
+      .createTempSync('flutter_ios_build_temp_dir');
   try {
     if (globals.logger.hasTerminal) {
       scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
@@ -397,7 +399,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (buildAction == XcodeBuildAction.archive) {
       buildCommands.addAll(<String>[
         '-archivePath',
-        globals.fs.path.absolute(app.archiveBundlePath),
+        fileSystem.path.absolute(app.archiveBundlePath),
         'archive',
       ]);
     }
@@ -466,15 +468,15 @@ Future<XcodeBuildResult> buildXcodeProject({
         targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
       }
       final String? appBundle = buildSettings['WRAPPER_NAME'];
-      final String expectedOutputDirectory = globals.fs.path.join(
+      final String expectedOutputDirectory = fileSystem.path.join(
         targetBuildDir,
         appBundle,
       );
-      if (globals.fs.directory(expectedOutputDirectory).existsSync()) {
+      if (fileSystem.directory(expectedOutputDirectory).existsSync()) {
         // Copy app folder to a place where other tools can find it without knowing
         // the BuildInfo.
         outputDir = targetBuildDir.replaceFirst('/$configuration-', '/');
-        globals.fs.directory(outputDir).createSync(recursive: true);
+        fileSystem.directory(outputDir).createSync(recursive: true);
 
         // rsync instead of copy to maintain timestamps to support incremental
         // app install deltas. Use --delete to remove incompatible artifacts
@@ -490,7 +492,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           ],
           throwOnError: true,
         );
-        outputDir = globals.fs.path.join(
+        outputDir = fileSystem.path.join(
           outputDir,
           appBundle,
         );
@@ -498,8 +500,8 @@ Future<XcodeBuildResult> buildXcodeProject({
         globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
       }
     } else {
-      outputDir = globals.fs.path.absolute(app.archiveBundleOutputPath);
-      if (!globals.fs.isDirectorySync(outputDir)) {
+      outputDir = fileSystem.path.absolute(app.archiveBundleOutputPath);
+      if (!fileSystem.isDirectorySync(outputDir)) {
         globals.printError('Archive succeeded but the expected xcarchive at $outputDir not found');
       }
     }
