@@ -11,7 +11,6 @@
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
-#include "impeller/renderer/backend/vulkan/limits_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 
 namespace impeller {
@@ -264,19 +263,12 @@ ToVKTextureMemoryPropertyFlags(StorageMode mode,
   FML_UNREACHABLE();
 }
 
-static VmaAllocationCreateFlags ToVmaAllocationCreateFlags(StorageMode mode,
-                                                           size_t size) {
+static VmaAllocationCreateFlags ToVmaAllocationCreateFlags(StorageMode mode) {
   VmaAllocationCreateFlags flags = 0;
   switch (mode) {
     case StorageMode::kHostVisible:
-      if (size >= kImageSizeThresholdForDedicatedMemoryAllocation) {
-        flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
-      }
       return flags;
     case StorageMode::kDevicePrivate:
-      if (size >= kImageSizeThresholdForDedicatedMemoryAllocation) {
-        flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
-      }
       return flags;
     case StorageMode::kDeviceTransient:
       return flags;
@@ -318,8 +310,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     alloc_nfo.preferredFlags =
         static_cast<VkMemoryPropertyFlags>(ToVKTextureMemoryPropertyFlags(
             desc.storage_mode, supports_memoryless_textures));
-    alloc_nfo.flags = ToVmaAllocationCreateFlags(
-        desc.storage_mode, desc.GetByteSizeOfBaseMipLevel());
+    alloc_nfo.flags = ToVmaAllocationCreateFlags(desc.storage_mode);
 
     auto create_info_native =
         static_cast<vk::ImageCreateInfo::NativeType>(image_info);
