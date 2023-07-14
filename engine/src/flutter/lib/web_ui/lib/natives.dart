@@ -16,10 +16,3 @@ class DartPluginRegistrant {
         '`ensureInitialized` is not implemented on the web.');
   }
 }
-
-List<int> saveCompilationTrace() {
-  assert(
-    throw UnimplementedError('saveCompilationTrace is not implemented on the web.'),
-  );
-  throw UnimplementedError();
-}
