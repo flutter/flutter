@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -2914,6 +2915,175 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
     );
 
     expect(material.clipBehavior, Clip.antiAlias);
+  });
+
+ testWidgets('Tap on button behind snack bar defined by width', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size.square(200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const String buttonText = 'Show snackbar';
+    const String snackbarContent = 'Snackbar';
+    const String buttonText2 = 'Try press me';
+
+    final Completer<void> completer = Completer<void>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        width: 100,
+                        content: Text(snackbarContent),
+                      ),
+                    );
+                  },
+                  child: const Text(buttonText),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    completer.complete();
+                  },
+                  child: const Text(buttonText2),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text(buttonText));
+    await tester.pumpAndSettle();
+
+    expect(find.text(snackbarContent), findsOneWidget);
+    await tester.tapAt(tester.getTopLeft(find.text(buttonText2)));
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    expect(completer.isCompleted, true);
+  });
+
+
+  testWidgets('Tap on button behind snack bar defined by margin', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/78537.
+    tester.view.physicalSize = const Size.square(200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const String buttonText = 'Show snackbar';
+    const String snackbarContent = 'Snackbar';
+    const String buttonText2 = 'Try press me';
+
+    final Completer<void> completer = Completer<void>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.only(left: 100),
+                        content: Text(snackbarContent),
+                      ),
+                    );
+                  },
+                  child: const Text(buttonText),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    completer.complete();
+                  },
+                  child: const Text(buttonText2),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text(buttonText));
+    await tester.pumpAndSettle();
+
+    expect(find.text(snackbarContent), findsOneWidget);
+    await tester.tapAt(tester.getTopLeft(find.text(buttonText2)));
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    expect(completer.isCompleted, true);
+  });
+
+  testWidgets("Can't tap on button behind snack bar defined by margin and HitTestBehavior.opaque", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/78537.
+    tester.view.physicalSize = const Size.square(200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const String buttonText = 'Show snackbar';
+    const String snackbarContent = 'Snackbar';
+    const String buttonText2 = 'Try press me';
+
+    final Completer<void> completer = Completer<void>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        hitTestBehavior: HitTestBehavior.opaque,
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.only(left: 100),
+                        content: Text(snackbarContent),
+                      ),
+                    );
+                  },
+                  child: const Text(buttonText),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    completer.complete();
+                  },
+                  child: const Text(buttonText2),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text(buttonText));
+    await tester.pumpAndSettle();
+
+    expect(find.text(snackbarContent), findsOneWidget);
+    await tester.tapAt(tester.getTopLeft(find.text(buttonText2)));
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    expect(completer.isCompleted, false);
   });
 }
 
