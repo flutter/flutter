@@ -94,6 +94,8 @@ class Entity {
 
   std::optional<Color> AsBackgroundColor(ISize target_size) const;
 
+  Scalar DeriveTextScale() const;
+
  private:
   Matrix transformation_;
   std::shared_ptr<Contents> contents_;

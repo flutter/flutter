@@ -696,8 +696,18 @@ class ContentContext {
                                        const SubpassCallback& subpass_callback,
                                        bool msaa_enabled = true) const;
 
+  void SetLazyGlyphAtlas(
+      const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas) {
+    lazy_glyph_atlas_ = lazy_glyph_atlas;
+  }
+
+  std::shared_ptr<LazyGlyphAtlas> GetLazyGlyphAtlas() const {
+    return lazy_glyph_atlas_;
+  }
+
  private:
   std::shared_ptr<Context> context_;
+  std::shared_ptr<LazyGlyphAtlas> lazy_glyph_atlas_;
 
   template <class T>
   using Variants = std::unordered_map<ContentContextOptions,

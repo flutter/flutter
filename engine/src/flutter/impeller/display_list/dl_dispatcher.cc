@@ -1104,8 +1104,7 @@ void DlDispatcher::drawDisplayList(
 void DlDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                 SkScalar x,
                                 SkScalar y) {
-  Scalar scale = canvas_.GetCurrentTransformation().GetMaxBasisLengthXY();
-  const auto text_frame = TextFrameFromTextBlob(blob, scale);
+  const auto text_frame = TextFrameFromTextBlob(blob);
   if (paint_.style == Paint::Style::kStroke) {
     auto path = skia_conversions::PathDataFromTextBlob(blob);
     auto bounds = text_frame.GetBounds();
