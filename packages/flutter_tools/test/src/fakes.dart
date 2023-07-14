@@ -481,7 +481,7 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isFlutterWebWasmEnabled;
-  
+
   @override
   final bool isNativeAssetsEnabled;
 
