@@ -35,7 +35,7 @@ void sendJsonMessage({
     channel,
     // This recreates a combination of OptionalMethodChannel, JSONMethodCodec,
     // and _DefaultBinaryMessenger in the framework.
-    utf8.encoder.convert(
+    utf8.encode(
       const JsonCodec().encode(json)
     ).buffer.asByteData(),
     callback,

@@ -3338,7 +3338,7 @@ Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) {
   ).then((_) => _sendFontChangeMessage());
 }
 
-final ByteData _fontChangeMessage = utf8.encoder.convert(
+final ByteData _fontChangeMessage = utf8.encode(
   json.encode(<String, Object?>{'type': 'fontsChange'})
 ).buffer.asByteData();
 

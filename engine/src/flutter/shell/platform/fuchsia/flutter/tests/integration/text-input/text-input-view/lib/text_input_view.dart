@@ -91,7 +91,7 @@ class TestApp {
   void _reportTextInput(String text) {
     print('text-input-view reporting keyboard input to KeyboardInputListener');
 
-    final message = utf8.encoder.convert(json.encode({
+    final message = utf8.encode(json.encode({
       'method': 'KeyboardInputListener.ReportTextInput',
       'text': text,
     })).buffer.asByteData();
