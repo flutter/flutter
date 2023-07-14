@@ -62,7 +62,7 @@ void main() {
   test('Adds rootBundle LICENSES to LicenseRegistry', () async {
     binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
       if (const StringCodec().decodeMessage(message) == 'NOTICES.Z' && !kIsWeb) {
-        return ByteData.sublistView(gzip.encode(utf8.encode(combinedLicenses)));
+        return Uint8List.fromList(gzip.encode(utf8.encode(combinedLicenses))).buffer.asByteData();
       }
       if (const StringCodec().decodeMessage(message) == 'NOTICES' && kIsWeb) {
         return const StringCodec().encodeMessage(combinedLicenses);
@@ -89,7 +89,7 @@ void main() {
     int flutterAssetsCallCount = 0;
     binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
       flutterAssetsCallCount += 1;
-      return ByteData.sublistView(utf8.encode('test_asset_data'.codeUnits));
+      return ByteData.sublistView(utf8.encode('test_asset_data'));
     });
 
     await rootBundle.loadString('test_asset');
