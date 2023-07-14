@@ -12,6 +12,8 @@
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/fml/logging.h"
 
+#include "third_party/skia/include/core/SkColorFilter.h"
+
 namespace flutter {
 
 // clang-format off

@@ -11,6 +11,7 @@
 #include "flutter/display_list/dl_vertices.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"
+#include "third_party/skia/include/core/SkTileMode.h"
 
 namespace flutter {
 namespace testing {
