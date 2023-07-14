@@ -430,8 +430,7 @@ targets:
         []
 
   - name: Linux firebase_abstract_method_smoke_test
-    presubmit: true # DO NOT MERGE
-    bringup: false # Flaky https://github.com/flutter/flutter/issues/124691
+    bringup: false
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
