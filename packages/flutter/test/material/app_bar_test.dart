@@ -1685,6 +1685,36 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight + 100.0);
   });
 
+  testWidgets('AppBar.title sees the correct padding from MediaQuery', (WidgetTester tester) async {
+    bool titleBuilt = false;
+    await tester.pumpWidget(
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(padding: EdgeInsets.fromLTRB(12, 34, 56, 78)),
+            child: Scaffold(
+              appBar: AppBar(
+                title: Builder(builder: (BuildContext context) {
+                  titleBuilt = true;
+                  final EdgeInsets padding = MediaQuery.paddingOf(context);
+                  expect(padding, EdgeInsets.zero);
+                  return const Text('heh');
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(titleBuilt, isTrue);
+  });
+
   testWidgets('AppBar updates when you add a drawer', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

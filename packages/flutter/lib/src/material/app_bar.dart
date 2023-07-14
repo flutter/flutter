@@ -951,48 +951,43 @@ class _AppBarState extends State<AppBar> {
 
     Widget? title = widget.title;
     if (title != null) {
-      bool? namesRoute;
-      switch (theme.platform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          namesRoute = true;
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          break;
-      }
+      final bool? namesRoute = switch (theme.platform) {
+        TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.linux || TargetPlatform.windows => true,
+        TargetPlatform.iOS || TargetPlatform.macOS => null,
+      };
 
-      title = _AppBarTitleBox(child: title);
+      Widget wrappedTitle = _AppBarTitleBox(child: title);
       if (!widget.excludeHeaderSemantics) {
-        title = Semantics(
+        wrappedTitle = Semantics(
           namesRoute: namesRoute,
           header: true,
           child: title,
         );
       }
 
-      title = DefaultTextStyle(
-        style: titleTextStyle!,
-        softWrap: false,
-        overflow: TextOverflow.ellipsis,
-        child: title,
-      );
-
       // Set maximum text scale factor to [_kMaxTitleTextScaleFactor] for the
       // title to keep the visual hierarchy the same even with larger font
       // sizes. To opt out, wrap the [title] widget in a [MediaQuery] widget
       // with [MediaQueryData.textScaleFactor] set to
       // `MediaQuery.textScaleFactorOf(context)`.
-      final MediaQueryData mediaQueryData = MediaQuery.of(context);
-      title = MediaQuery(
-        data: mediaQueryData.copyWith(
-          textScaleFactor: math.min(
-            mediaQueryData.textScaleFactor,
-            _kMaxTitleTextScaleFactor,
-          ),
-        ),
-        child: title,
+      title = Builder(
+        builder: (BuildContext context) {
+          final MediaQueryData mediaQueryData = MediaQuery.of(context);
+          return MediaQuery(
+            data: mediaQueryData.copyWith(
+              textScaleFactor: math.min(
+                mediaQueryData.textScaleFactor,
+                _kMaxTitleTextScaleFactor,
+              ),
+            ),
+            child: DefaultTextStyle(
+              style: titleTextStyle!,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              child: wrappedTitle,
+            ),
+          );
+        }
       );
     }
 
@@ -1284,10 +1279,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         title: effectiveTitle,
         actions: actions,
         flexibleSpace: (title == null && flexibleSpace != null && !excludeHeaderSemantics)
-          ? Semantics(
-              header: true,
-              child: flexibleSpace,
-            )
+          ? Semantics(header: true, child: flexibleSpace)
           : flexibleSpace,
         bottom: bottom,
         elevation: isScrolledUnder ? elevation : 0.0,
