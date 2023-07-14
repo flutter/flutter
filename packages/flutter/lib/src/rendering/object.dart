@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show PictureRecorder;
-import 'dart:ui';
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -14,7 +13,6 @@ import 'package:flutter/semantics.dart';
 
 import 'debug.dart';
 import 'layer.dart';
-import 'proxy_box.dart';
 
 export 'package:flutter/foundation.dart' show
   DiagnosticPropertiesBuilder,
