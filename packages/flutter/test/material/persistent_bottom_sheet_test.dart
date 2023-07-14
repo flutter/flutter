@@ -24,7 +24,7 @@ void main() {
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
-  testWidgetsWithLeakTracking('Persistent draggableScrollableSheet localHistoryEntries test', (WidgetTester tester) async {
+  testWidgets('Persistent draggableScrollableSheet localHistoryEntries test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/110123
     Widget buildFrame(Widget? bottomSheet) {
       return MaterialApp(
@@ -349,7 +349,7 @@ void main() {
     expect(find.byType(FloatingActionButton).hitTestable(), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Verify that a back button resets a persistent BottomSheet', (WidgetTester tester) async {
+  testWidgets('Verify that a back button resets a persistent BottomSheet', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -531,7 +531,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Scaffold.bottomSheet', (WidgetTester tester) async {
+  testWidgets('Scaffold.bottomSheet', (WidgetTester tester) async {
     final Key bottomSheetKey = UniqueKey();
 
     await tester.pumpWidget(
