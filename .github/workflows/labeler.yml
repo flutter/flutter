@@ -19,4 +19,4 @@ jobs:
     # Source available at https://github.com/actions/labeler/blob/main/README.md
     - uses: actions/labeler@ac9175f8a1f3625fd0d4fb234536d26811351594
       with:
-        sync-labels: false
+        sync-labels: ''
