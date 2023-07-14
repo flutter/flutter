@@ -135,7 +135,7 @@ void main() {
       await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', 'testy5']);
       expect((await command.usageValues).commandCreateProjectType, 'plugin_ffi');
 
-      await runner.run(<String>['create', '--no-pub', '--template=package_ffi', 'testy5']);
+      await runner.run(<String>['create', '--no-pub', '--template=package_ffi', 'testy6']);
       expect((await command.usageValues).commandCreateProjectType, 'package_ffi');
     }));
 
