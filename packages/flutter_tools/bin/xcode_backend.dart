@@ -217,19 +217,21 @@ class Context {
     final String projectPath = '$sourceRoot/..';
     final String nativeAssetsPath =
         '$projectPath/build/native_assets/ios/';
-    runSync(
-      'rsync',
-      <String>[
-        '-8', // Avoid mangling filenames with encodings that do not match the current locale.
-        '-av',
-        '--filter',
-        '- .DS_Store',
-        '--filter',
-        '- native_assets.yaml',
-        nativeAssetsPath,
-        xcodeFrameworksDir,
-      ],
-    );
+    if (Directory(nativeAssetsPath).existsSync()) {
+      runSync(
+        'rsync',
+        <String>[
+          '-8', // Avoid mangling filenames with encodings that do not match the current locale.
+          '-av',
+          '--filter',
+          '- .DS_Store',
+          '--filter',
+          '- native_assets.yaml',
+          nativeAssetsPath,
+          xcodeFrameworksDir,
+        ],
+      );
+    }
 
     addVmServiceBonjourService();
   }

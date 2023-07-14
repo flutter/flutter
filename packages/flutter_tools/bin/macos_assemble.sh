@@ -153,8 +153,9 @@ EmbedFrameworks() {
   local project_path="${SOURCE_ROOT}/.."
   local native_assets_path="${project_path}/build/native_assets/macos/"
   local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
-  RunCommand mkdir -p -- "${xcode_frameworks_dir}"
-  RunCommand rsync -av --filter "- .DS_Store" --filter "- native_assets.yaml" "${native_assets_path}" "${xcode_frameworks_dir}"
+  if [[ -d "$native_assets_path" ]]; then
+    RunCommand rsync -av --filter "- .DS_Store" --filter "- native_assets.yaml" "${native_assets_path}" "${xcode_frameworks_dir}"
+  fi
 }
 
 # Main entry point.
