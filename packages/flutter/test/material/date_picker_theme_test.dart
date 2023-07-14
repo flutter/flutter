@@ -630,7 +630,6 @@ void main() {
   });
 
   testWidgets('DatePickerDialog resolves DatePickerTheme.dayOverlayColor states', (WidgetTester tester) async {
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final MaterialStateProperty<Color> dayOverlayColor = MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
         return const Color(0xff00ff00);
@@ -687,12 +686,23 @@ void main() {
     // Test the pressed overlay color.
     await gesture.down(tester.getCenter(find.text('20')));
     await tester.pumpAndSettle();
-    expect(
-      inkFeatures,
-      paints
-        ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
-        ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
-    );
+    if (kIsWeb) {
+      // An extra circle is painted on the web for the hovered state.
+      expect(
+        inkFeatures,
+        paints
+          ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
+          ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
+          ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
+      );
+    } else {
+      expect(
+        inkFeatures,
+        paints
+          ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
+          ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
+      );
+    }
 
     await gesture.removePointer();
     await tester.pumpAndSettle();
@@ -712,7 +722,6 @@ void main() {
   });
 
   testWidgets('DatePickerDialog resolves DatePickerTheme.yearOverlayColor states', (WidgetTester tester) async {
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final MaterialStateProperty<Color> yearOverlayColor = MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
         return const Color(0xff00ff00);
@@ -795,7 +804,6 @@ void main() {
   });
 
   testWidgets('DateRangePickerDialog resolves DatePickerTheme.rangeSelectionOverlayColor states', (WidgetTester tester) async {
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final MaterialStateProperty<Color> rangeSelectionOverlayColor = MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
         return const Color(0xff00ff00);
@@ -850,11 +858,22 @@ void main() {
     // Test the pressed overlay color.
     await gesture.down(tester.getCenter(find.text('18')));
     await tester.pumpAndSettle();
-    expect(
-      inkFeatures,
-      paints
-        ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
-        ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
-    );
+    if (kIsWeb) {
+      // An extra circle is painted on the web for the hovered state.
+      expect(
+        inkFeatures,
+        paints
+          ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
+          ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
+          ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
+      );
+    } else {
+      expect(
+        inkFeatures,
+        paints
+          ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
+          ..circle(color: rangeSelectionOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
+      );
+    }
   });
 }
