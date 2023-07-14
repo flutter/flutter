@@ -177,7 +177,8 @@ class KernelSnapshot extends Target {
     final List<String> extraFrontEndOptions = decodeCommaSeparated(environment.defines, kExtraFrontEndOptions);
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
-    final String? nativeAssets = environment.defines[kNativeAssets];
+    String? nativeAssets = environment.defines[kNativeAssets];
+    nativeAssets = nativeAssets?.isEmpty ?? true ? null : nativeAssets;
 
     TargetModel targetModel = TargetModel.flutter;
     if (targetPlatform == TargetPlatform.fuchsia_x64 ||
