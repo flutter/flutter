@@ -60,7 +60,7 @@ const String dylibName = 'lib$packageName.dylib';
 
 void main() {
   if (platform.isWindows || platform.isLinux) {
-    // TODO(https://github.com/flutter/flutter/issues/129757): Implement.
+    // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
     return;
   }
 
