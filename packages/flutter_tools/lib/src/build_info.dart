@@ -38,7 +38,7 @@ class BuildInfo {
     this.webRenderer = WebRendererMode.auto,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
-    this.dartDefineConfigJsonMap,
+    this.dartDefineConfigJsonMap = const <String, Object?>{},
     this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
@@ -144,7 +144,7 @@ class BuildInfo {
   ///
   /// An additional field `dartDefineConfigJsonMap` is provided to represent the native JSON value of the configuration file
   ///
-  final Map<String, Object>? dartDefineConfigJsonMap;
+  final Map<String, Object?> dartDefineConfigJsonMap;
 
   /// If provided, an output directory where one or more v8-style heap snapshots
   /// will be written for code size profiling.
@@ -267,7 +267,7 @@ class BuildInfo {
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
     final Map<String, String> map = <String, String>{};
-    dartDefineConfigJsonMap?.forEach((String key, Object value) {
+    dartDefineConfigJsonMap.forEach((String key, Object? value) {
       map[key] = '$value';
     });
     final Map<String, String> environmentMap = <String, String>{
@@ -324,20 +324,18 @@ class BuildInfo {
         '-Pbundle-sksl-path=$bundleSkSLPath',
       if (codeSizeDirectory != null)
         '-Pcode-size-directory=$codeSizeDirectory',
-      for (String projectArg in androidProjectArgs)
+      for (final String projectArg in androidProjectArgs)
         '-P$projectArg',
     ];
-    if (dartDefineConfigJsonMap != null) {
-      final Iterable<String> gradleConfKeys = result.map((final String gradleConf) => gradleConf.split('=')[0].substring(2));
-      dartDefineConfigJsonMap!.forEach((String key, Object value) {
-        if (gradleConfKeys.contains(key)) {
-          globals.printWarning(
-              'The key: [$key] already exists, you cannot use gradle variables that have been used by the system!');
-        } else {
-          result.add('-P$key=$value');
-        }
-      });
-    }
+    final Iterable<String> gradleConfKeys = result.map((final String gradleConf) => gradleConf.split('=')[0].substring(2));
+    dartDefineConfigJsonMap.forEach((String key, Object? value) {
+      if (gradleConfKeys.contains(key)) {
+        globals.printWarning(
+            'The key: [$key] already exists, you cannot use gradle variables that have been used by the system!');
+      } else {
+        result.add('-P$key=$value');
+      }
+    });
     return result;
   }
 }

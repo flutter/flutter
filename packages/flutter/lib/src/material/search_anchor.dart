@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -46,7 +47,7 @@ typedef SearchAnchorChildBuilder = Widget Function(BuildContext context, SearchC
 ///
 /// The `controller` callback provided to [SearchAnchor.suggestionsBuilder] can be used
 /// to close the search view and control the editable field on the view.
-typedef SuggestionsBuilder = Iterable<Widget> Function(BuildContext context, SearchController controller);
+typedef SuggestionsBuilder = FutureOr<Iterable<Widget>> Function(BuildContext context, SearchController controller);
 
 /// Signature for a function that creates a [Widget] to layout the suggestion list.
 ///
@@ -84,6 +85,19 @@ typedef ViewBuilder = Widget Function(Iterable<Widget> suggestions);
 /// [SearchAnchor] for a title.
 ///
 /// ** See code in examples/api/lib/material/search_anchor/search_anchor.1.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to fetch the search suggestions from a remote API.
+///
+/// ** See code in examples/api/lib/material/search_anchor/search_anchor.3.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example demonstrates fetching the search suggestions asynchronously and
+/// debouncing network calls.
+///
+/// ** See code in examples/api/lib/material/search_anchor/search_anchor.4.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -357,17 +371,6 @@ class _SearchAnchorState extends State<SearchAnchor> {
     Navigator.of(context).pop();
   }
 
-  Rect? getRect(GlobalKey key) {
-    final BuildContext? context = key.currentContext;
-    if (context != null) {
-      final RenderBox searchBarBox = context.findRenderObject()! as RenderBox;
-      final Size boxSize = searchBarBox.size;
-      final Offset boxLocation = searchBarBox.localToGlobal(Offset.zero);
-      return boxLocation & boxSize;
-    }
-    return null;
-  }
-
   bool toggleVisibility() {
     setState(() {
       _anchorIsVisible = !_anchorIsVisible;
@@ -468,7 +471,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     if (context != null) {
       final RenderBox searchBarBox = context.findRenderObject()! as RenderBox;
       final Size boxSize = searchBarBox.size;
-      final Offset boxLocation = searchBarBox.localToGlobal(Offset.zero);
+      final NavigatorState navigator = Navigator.of(context);
+      final Offset boxLocation = searchBarBox.localToGlobal(Offset.zero, ancestor: navigator.context.findRenderObject());
       return boxLocation & boxSize;
     }
     return null;
@@ -498,7 +502,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   }
 
   void updateTweens(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
+    final RenderBox navigator = Navigator.of(context).context.findRenderObject()! as RenderBox;
+    final Size screenSize = navigator.size;
     final Rect anchorRect = getRect() ?? Rect.zero;
 
     final BoxConstraints effectiveConstraints = viewConstraints ?? viewTheme.constraints ?? viewDefaults.constraints!;
@@ -579,11 +584,10 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
               viewHeaderTextStyle: viewHeaderTextStyle,
               viewHeaderHintStyle: viewHeaderHintStyle,
               dividerColor: dividerColor,
-              viewConstraints: viewConstraints,
               showFullScreenView: showFullScreenView,
               animation: curvedAnimation,
-              getRect: getRect,
               topPadding: topPadding,
+              viewMaxWidth: _rectTween.end!.width,
               viewRect: viewRect,
               viewDefaults: viewDefaults,
               viewTheme: viewTheme,
@@ -616,11 +620,10 @@ class _ViewContent extends StatefulWidget {
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
-    this.viewConstraints,
     required this.showFullScreenView,
-    required this.getRect,
     required this.topPadding,
     required this.animation,
+    required this.viewMaxWidth,
     required this.viewRect,
     required this.viewDefaults,
     required this.viewTheme,
@@ -641,11 +644,10 @@ class _ViewContent extends StatefulWidget {
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
-  final BoxConstraints? viewConstraints;
   final bool showFullScreenView;
-  final ValueGetter<Rect?> getRect;
   final double topPadding;
   final Animation<double> animation;
+  final double viewMaxWidth;
   final Rect viewRect;
   final SearchViewThemeData viewDefaults;
   final SearchViewThemeData viewTheme;
@@ -661,7 +663,7 @@ class _ViewContentState extends State<_ViewContent> {
   Size? _screenSize;
   late Rect _viewRect;
   late final SearchController _controller;
-  late Iterable<Widget> result;
+  Iterable<Widget> result = <Widget>[];
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -687,13 +689,15 @@ class _ViewContentState extends State<_ViewContent> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    result = widget.suggestionsBuilder(context, _controller);
     final Size updatedScreenSize = MediaQuery.of(context).size;
 
-    if (_screenSize != updatedScreenSize && widget.showFullScreenView) {
+    if (_screenSize != updatedScreenSize) {
       _screenSize = updatedScreenSize;
-      _viewRect = Offset.zero & _screenSize!;
+      if (widget.showFullScreenView) {
+        _viewRect = Offset.zero & _screenSize!;
+      }
     }
+    unawaited(updateSuggestions());
   }
 
   Widget viewBuilder(Iterable<Widget> suggestions) {
@@ -709,10 +713,13 @@ class _ViewContentState extends State<_ViewContent> {
     return widget.viewBuilder!(suggestions);
   }
 
-  void updateSuggestions() {
-    setState(() {
-      result = widget.suggestionsBuilder(context, _controller);
-    });
+  Future<void> updateSuggestions() async {
+    final Iterable<Widget> suggestions = await widget.suggestionsBuilder(context, _controller);
+    if (mounted) {
+      setState(() {
+        result = suggestions;
+      });
+    }
   }
 
   @override
@@ -782,56 +789,64 @@ class _ViewContentState extends State<_ViewContent> {
             color: effectiveBackgroundColor,
             surfaceTintColor: effectiveSurfaceTint,
             elevation: effectiveElevation,
-            child: FadeTransition(
-              opacity: CurvedAnimation(
-                parent: widget.animation,
-                curve: _kViewIconsFadeOnInterval,
-                reverseCurve: _kViewIconsFadeOnInterval.flipped,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: widget.topPadding),
-                    child: SafeArea(
-                      top: false,
-                      bottom: false,
-                      child: SearchBar(
-                        constraints: widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null,
-                        focusNode: _focusNode,
-                        leading: widget.viewLeading ?? defaultLeading,
-                        trailing: widget.viewTrailing ?? defaultTrailing,
-                        hintText: widget.viewHintText,
-                        backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                        overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                        elevation: const MaterialStatePropertyAll<double>(0.0),
-                        textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
-                        hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
-                        controller: _controller,
-                        onChanged: (_) {
-                          updateSuggestions();
-                        },
-                      ),
-                    ),
+            child: ClipRect(
+              clipBehavior: Clip.antiAlias,
+              child: OverflowBox(
+                alignment: Alignment.topLeft,
+                maxWidth: math.min(widget.viewMaxWidth, _screenSize!.width),
+                minWidth: 0,
+                child: FadeTransition(
+                  opacity: CurvedAnimation(
+                    parent: widget.animation,
+                    curve: _kViewIconsFadeOnInterval,
+                    reverseCurve: _kViewIconsFadeOnInterval.flipped,
                   ),
-                  FadeTransition(
-                    opacity: CurvedAnimation(
-                      parent: widget.animation,
-                      curve: _kViewDividerFadeOnInterval,
-                      reverseCurve: _kViewFadeOnInterval.flipped,
-                    ),
-                    child: viewDivider),
-                  Expanded(
-                    child: FadeTransition(
-                      opacity: CurvedAnimation(
-                        parent: widget.animation,
-                        curve: _kViewListFadeOnInterval,
-                        reverseCurve: _kViewListFadeOnInterval.flipped,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(top: widget.topPadding),
+                        child: SafeArea(
+                          top: false,
+                          bottom: false,
+                          child: SearchBar(
+                            constraints: widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null,
+                            focusNode: _focusNode,
+                            leading: widget.viewLeading ?? defaultLeading,
+                            trailing: widget.viewTrailing ?? defaultTrailing,
+                            hintText: widget.viewHintText,
+                            backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                            overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                            elevation: const MaterialStatePropertyAll<double>(0.0),
+                            textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
+                            hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
+                            controller: _controller,
+                            onChanged: (_) {
+                              updateSuggestions();
+                            },
+                          ),
+                        ),
                       ),
-                      child: viewBuilder(result),
-                    ),
+                      FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: widget.animation,
+                          curve: _kViewDividerFadeOnInterval,
+                          reverseCurve: _kViewFadeOnInterval.flipped,
+                        ),
+                        child: viewDivider),
+                      Expanded(
+                        child: FadeTransition(
+                          opacity: CurvedAnimation(
+                            parent: widget.animation,
+                            curve: _kViewListFadeOnInterval,
+                            reverseCurve: _kViewListFadeOnInterval.flipped,
+                          ),
+                          child: viewBuilder(result),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -995,6 +1010,7 @@ class SearchBar extends StatefulWidget {
     this.trailing,
     this.onTap,
     this.onChanged,
+    this.onSubmitted,
     this.constraints,
     this.elevation,
     this.backgroundColor,
@@ -1042,6 +1058,10 @@ class SearchBar extends StatefulWidget {
 
   /// Invoked upon user input.
   final ValueChanged<String>? onChanged;
+
+  /// Called when the user indicates that they are done editing the text in the
+  /// field.
+  final ValueChanged<String>? onSubmitted;
 
   /// Optional size constraints for the search bar.
   ///
@@ -1235,13 +1255,24 @@ class _SearchBarState extends State<SearchBar> {
                       child: TextField(
                         focusNode: _focusNode,
                         onChanged: widget.onChanged,
+                        onSubmitted: widget.onSubmitted,
                         controller: widget.controller,
                         style: effectiveTextStyle,
                         decoration: InputDecoration(
-                          border: InputBorder.none,
                           hintText: widget.hintText,
+                        ).applyDefaults(InputDecorationTheme(
                           hintStyle: effectiveHintStyle,
-                        ),
+
+                          // The configuration below is to make sure that the text field
+                          // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                          enabledBorder: InputBorder.none,
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                          // Setting `isDense` to true to allow the text field height to be
+                          // smaller than 48.0
+                          isDense: true,
+                        )),
                       ),
                     ),
                   )
@@ -1262,8 +1293,6 @@ class _SearchBarState extends State<SearchBar> {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _SearchBarDefaultsM3 extends SearchBarThemeData {
   _SearchBarDefaultsM3(this.context);
@@ -1334,8 +1363,6 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _SearchViewDefaultsM3 extends SearchViewThemeData {
   _SearchViewDefaultsM3(this.context, {required this.isFullScreen});

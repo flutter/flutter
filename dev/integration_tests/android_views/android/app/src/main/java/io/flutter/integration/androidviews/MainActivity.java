@@ -47,7 +47,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-        switch(methodCall.method) {
+        switch (methodCall.method) {
             case "pipeFlutterViewEvents":
                 result.success(null);
                 return;

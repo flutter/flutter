@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:dds/dap.dart';
-import 'package:dds/src/dap/protocol_generated.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -250,6 +249,24 @@ void main() {
 
       expectLines(
           (await outputEventsFuture).join(),
+          <Object>[
+            startsWith('Reloaded'),
+            'topLevelFunction',
+          ],
+          allowExtras: true,
+      );
+
+      // Repeat the test for hot reload with custom syntax.
+      final Future<List<String>> customOutputEventsFuture = dap.client.stdoutOutput
+          // But skip any topLevelFunctions that come before the reload.
+          .skipWhile((String output) => output.startsWith('topLevelFunction'))
+          .take(2)
+          .toList();
+
+      await dap.client.customSyntaxHotReload();
+
+      expectLines(
+          (await customOutputEventsFuture).join(),
           <Object>[
             startsWith('Reloaded'),
             'topLevelFunction',

@@ -176,7 +176,7 @@ Future<void> _runABTest({
 
     abTest.addBResult(localEngineResult);
 
-    if (silent != true && i < runsPerTest) {
+    if (!silent && i < runsPerTest) {
       section('A/B results so far');
       print(abTest.printSummary());
     }
@@ -186,7 +186,7 @@ Future<void> _runABTest({
   final File jsonFile = _uniqueFile(resultsFile);
   jsonFile.writeAsStringSync(const JsonEncoder.withIndent('  ').convert(abTest.jsonMap));
 
-  if (silent != true) {
+  if (!silent) {
     section('Raw results');
     print(abTest.rawResults());
   }

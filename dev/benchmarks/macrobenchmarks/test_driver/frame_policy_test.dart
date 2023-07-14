@@ -13,7 +13,7 @@ Future<void> main() => driver.integrationDriver(
     final Map<String, dynamic> fullyLiveResult =
         data?['fullyLive'] as Map<String,dynamic>;
 
-    if(benchmarkLiveResult['frame_count'] as int < 10
+    if (benchmarkLiveResult['frame_count'] as int < 10
        || fullyLiveResult['frame_count'] as int < 10) {
       print('Failure Details:\nNot Enough frames collected: '
             'benchmarkLive ${benchmarkLiveResult['frameCount']}, '

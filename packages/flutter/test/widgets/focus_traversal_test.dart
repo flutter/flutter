@@ -331,7 +331,7 @@ void main() {
             policy: WidgetOrderTraversalPolicy(),
             child: Center(
               child: Builder(builder: (BuildContext context) {
-                return MaterialButton(
+                return ElevatedButton(
                   key: key1,
                   focusNode: testNode1,
                   autofocus: true,
@@ -340,7 +340,7 @@ void main() {
                       MaterialPageRoute<void>(
                         builder: (BuildContext context) {
                           return Center(
-                            child: MaterialButton(
+                            child: ElevatedButton(
                               key: key2,
                               focusNode: testNode2,
                               autofocus: true,
@@ -385,6 +385,49 @@ void main() {
       expect(firstFocusNode.hasFocus, isTrue);
       expect(scope.hasFocus, isTrue);
     });
+
+    testWidgets('Custom requestFocusCallback gets called on the next/previous focus.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final FocusNode testNode1 = FocusNode(debugLabel: 'Focus Node');
+      bool calledCallback = false;
+
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          policy: WidgetOrderTraversalPolicy(
+            requestFocusCallback: (FocusNode node, {double? alignment,
+              ScrollPositionAlignmentPolicy? alignmentPolicy,
+              Curve? curve,
+              Duration? duration}) {
+              calledCallback = true;
+            },
+          ),
+          child: FocusScope(
+            debugLabel: 'key1',
+            child: Focus(
+              key: key1,
+              focusNode: testNode1,
+              child: Container(),
+            ),
+          ),
+        ),
+      );
+
+      final Element element = tester.element(find.byKey(key1));
+      final FocusNode scope = FocusScope.of(element);
+      scope.nextFocus();
+
+      await tester.pump();
+
+      expect(calledCallback, isTrue);
+
+      calledCallback = false;
+
+      scope.previousFocus();
+      await tester.pump();
+
+      expect(calledCallback, isTrue);
+    });
+
   });
 
   group(ReadingOrderTraversalPolicy, () {
@@ -824,6 +867,51 @@ void main() {
       }
       expect(order, orderedEquals(<int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]));
     });
+
+    testWidgets('Custom requestFocusCallback gets called on the next/previous focus.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final FocusNode testNode1 = FocusNode(debugLabel: 'Focus Node');
+      bool calledCallback = false;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(
+              requestFocusCallback: (FocusNode node, {double? alignment,
+                ScrollPositionAlignmentPolicy? alignmentPolicy,
+                Curve? curve,
+                Duration? duration}) {
+                calledCallback = true;
+              },
+            ),
+            child: FocusScope(
+              debugLabel: 'key1',
+              child: Focus(
+                key: key1,
+                focusNode: testNode1,
+                child: Container(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Element element = tester.element(find.byKey(key1));
+      final FocusNode scope = FocusScope.of(element);
+      scope.nextFocus();
+
+      await tester.pump();
+
+      expect(calledCallback, isTrue);
+
+      calledCallback = false;
+
+      scope.previousFocus();
+      await tester.pump();
+
+      expect(calledCallback, isTrue);
+    });
   });
 
   group(OrderedTraversalPolicy, () {
@@ -1130,7 +1218,7 @@ void main() {
               child: Builder(builder: (BuildContext context) {
                 return FocusTraversalOrder(
                   order: const NumericFocusOrder(0),
-                  child: MaterialButton(
+                  child: ElevatedButton(
                     key: key1,
                     focusNode: testNode1,
                     autofocus: true,
@@ -1141,7 +1229,7 @@ void main() {
                             return Center(
                               child: FocusTraversalOrder(
                                 order: const NumericFocusOrder(0),
-                                child: MaterialButton(
+                                child: ElevatedButton(
                                   key: key2,
                                   focusNode: testNode2,
                                   autofocus: true,
@@ -1187,6 +1275,51 @@ void main() {
 
       expect(firstFocusNode.hasFocus, isTrue);
       expect(scope.hasFocus, isTrue);
+    });
+
+    testWidgets('Custom requestFocusCallback gets called on the next/previous focus.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final FocusNode testNode1 = FocusNode(debugLabel: 'Focus Node');
+      bool calledCallback = false;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(
+              requestFocusCallback: (FocusNode node, {double? alignment,
+                ScrollPositionAlignmentPolicy? alignmentPolicy,
+                Curve? curve,
+                Duration? duration}) {
+                calledCallback = true;
+              },
+            ),
+            child: FocusScope(
+              debugLabel: 'key1',
+              child: Focus(
+                key: key1,
+                focusNode: testNode1,
+                child: Container(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Element element = tester.element(find.byKey(key1));
+      final FocusNode scope = FocusScope.of(element);
+      scope.nextFocus();
+
+      await tester.pump();
+
+      expect(calledCallback, isTrue);
+
+      calledCallback = false;
+
+      scope.previousFocus();
+      await tester.pump();
+
+      expect(calledCallback, isTrue);
     });
   });
 
@@ -2324,6 +2457,60 @@ void main() {
 
       expect(events.length, 2);
     }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('Custom requestFocusCallback gets called on focusInDirection up/down/left/right.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final FocusNode testNode1 = FocusNode(debugLabel: 'Focus Node');
+      bool calledCallback = false;
+
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          policy: ReadingOrderTraversalPolicy(
+            requestFocusCallback: (FocusNode node, {double? alignment,
+              ScrollPositionAlignmentPolicy? alignmentPolicy,
+              Curve? curve,
+              Duration? duration}) {
+              calledCallback = true;
+            },
+          ),
+          child: FocusScope(
+            debugLabel: 'key1',
+            child: Focus(
+              key: key1,
+              focusNode: testNode1,
+              child: Container(),
+            ),
+          ),
+        ),
+      );
+
+      final Element element = tester.element(find.byKey(key1));
+      final FocusNode scope = FocusScope.of(element);
+      scope.focusInDirection(TraversalDirection.up);
+
+      await tester.pump();
+
+      expect(calledCallback, isTrue);
+
+      calledCallback = false;
+
+      scope.focusInDirection(TraversalDirection.down);
+      await tester.pump();
+
+      expect(calledCallback, isTrue);
+
+      calledCallback = false;
+
+      scope.focusInDirection(TraversalDirection.left);
+      await tester.pump();
+
+      expect(calledCallback, isTrue);
+
+      scope.focusInDirection(TraversalDirection.right);
+      await tester.pump();
+
+      expect(calledCallback, isTrue);
+    });
   });
 
   group(FocusTraversalGroup, () {
@@ -2864,6 +3051,42 @@ void main() {
       PreviousFocusAction().toKeyEventResult(const PreviousFocusIntent(), false),
       KeyEventResult.skipRemainingHandlers,
     );
+  });
+
+  testWidgets('RequestFocusAction calls the RequestFocusIntent.requestFocusCallback', (WidgetTester tester) async {
+    bool calledCallback = false;
+    final FocusNode nodeA = FocusNode();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: TextButton(
+            focusNode: nodeA,
+            child: const Text('A'),
+            onPressed: () {},
+          ),
+        )
+      )
+    );
+
+    RequestFocusAction().invoke(RequestFocusIntent(nodeA));
+    await tester.pump();
+    expect(nodeA.hasFocus, isTrue);
+
+    nodeA.unfocus();
+    await tester.pump();
+    expect(nodeA.hasFocus, isFalse);
+
+    final RequestFocusIntent focusIntentWithCallback = RequestFocusIntent(nodeA, requestFocusCallback: (FocusNode node, {
+      double? alignment,
+      ScrollPositionAlignmentPolicy? alignmentPolicy,
+      Curve? curve,
+      Duration? duration
+    }) => calledCallback = true);
+
+    RequestFocusAction().invoke(focusIntentWithCallback);
+    await tester.pump();
+    expect(calledCallback, isTrue);
   });
 }
 

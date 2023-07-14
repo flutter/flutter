@@ -103,6 +103,9 @@ abstract class MaterialLocalizations {
   /// Label for "cut" edit buttons and menu items.
   String get cutButtonLabel;
 
+  /// Label for "scan text" OCR edit buttons and menu items.
+  String get scanTextButtonLabel;
+
   /// Label for OK buttons and menu items.
   String get okButtonLabel;
 
@@ -884,7 +887,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
       return null;
     }
-    return DateTime(year, month, day);
+
+    try {
+      return DateTime(year, month, day);
+    } on ArgumentError {
+      return null;
+    }
   }
 
   @override
@@ -1153,6 +1161,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get cutButtonLabel => 'Cut';
+
+  @override
+  String get scanTextButtonLabel => 'Scan text';
 
   @override
   String get okButtonLabel => 'OK';

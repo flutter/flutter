@@ -22,7 +22,7 @@ void main() {
     expect(identical(CardTheme.lerp(theme, theme, 0.5), theme), true);
   });
 
-  testWidgets('Passing no CardTheme returns defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - Passing no CardTheme returns defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(MaterialApp(
       theme: theme,
@@ -117,8 +117,8 @@ void main() {
     expect(material.color, cardTheme.color);
   });
 
-  testWidgets('ThemeData properties are used when no CardTheme is set', (WidgetTester tester) async {
-    final ThemeData themeData = _themeData();
+  testWidgets('Material3 - ThemeData properties are used when no CardTheme is set', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -128,10 +128,10 @@ void main() {
     ));
 
     final Material material = _getCardMaterial(tester);
-    expect(material.color, themeData.cardColor);
+    expect(material.color, themeData.colorScheme.surface);
   });
 
-  testWidgets('CardTheme customizes shape', (WidgetTester tester) async {
+  testWidgets('Material3 - CardTheme customizes shape', (WidgetTester tester) async {
     const CardTheme cardTheme = CardTheme(
       color: Colors.white,
       shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
@@ -161,10 +161,25 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
-    testWidgets('Passing no CardTheme returns defaults - M2', (WidgetTester tester) async {
+    testWidgets('Material2 - ThemeData properties are used when no CardTheme is set', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(useMaterial3: false);
+
+      await tester.pumpWidget(MaterialApp(
+        theme: themeData,
+        home: const Scaffold(
+          body: Card(),
+        ),
+      ));
+
+      final Material material = _getCardMaterial(tester);
+      expect(material.color, themeData.cardColor);
+    });
+
+    testWidgets('Material2 - Passing no CardTheme returns defaults', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: const Scaffold(
@@ -186,7 +201,7 @@ void main() {
       ));
     });
 
-    testWidgets('CardTheme customizes shape - M2', (WidgetTester tester) async {
+    testWidgets('Material2 - CardTheme customizes shape', (WidgetTester tester) async {
       const CardTheme cardTheme = CardTheme(
         color: Colors.white,
         shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),

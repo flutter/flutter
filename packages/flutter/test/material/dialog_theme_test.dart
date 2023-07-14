@@ -171,7 +171,7 @@ void main() {
       actions: <Widget>[ ],
       alignment: Alignment.topRight,
     );
-    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(alignment: Alignment.bottomLeft));
+    final ThemeData theme = ThemeData(useMaterial3: false, dialogTheme: const DialogTheme(alignment: Alignment.bottomLeft));
 
     await tester.pumpWidget(
       _appWithDialog(tester, dialog, theme: theme),
@@ -193,7 +193,7 @@ void main() {
       title: Text('Title'),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(shape: customBorder));
+    final ThemeData theme = ThemeData(useMaterial3: false, dialogTheme: const DialogTheme(shape: customBorder));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -248,7 +248,7 @@ void main() {
 
   testWidgets('Custom Icon Color - Theme - lowest preference', (WidgetTester tester) async {
     const Color iconThemeColor = Colors.yellow;
-    final ThemeData theme = ThemeData(iconTheme: const IconThemeData(color: iconThemeColor));
+    final ThemeData theme = ThemeData(useMaterial3: false, iconTheme: const IconThemeData(color: iconThemeColor));
     const AlertDialog dialog = AlertDialog(
       icon: Icon(Icons.ac_unit),
       actions: <Widget>[ ],
@@ -320,7 +320,7 @@ void main() {
       title: Text(titleText),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(titleLarge: titleTextStyle));
+    final ThemeData theme = ThemeData(useMaterial3: false, textTheme: const TextTheme(titleLarge: titleTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -419,7 +419,7 @@ void main() {
       content: Text(contentText),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(titleMedium: contentTextStyle));
+    final ThemeData theme = ThemeData(useMaterial3: false, textTheme: const TextTheme(titleMedium: contentTextStyle));
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));

@@ -153,7 +153,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   TestPlatformDispatcher({
     required PlatformDispatcher platformDispatcher,
   }) : _platformDispatcher = platformDispatcher {
-    _updateViews();
+    _updateViewsAndDisplays();
     _platformDispatcher.onMetricsChanged = _handleMetricsChanged;
   }
 
@@ -167,7 +167,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       : null;
   }
 
-  final Map<Object, TestFlutterView> _testViews = <Object, TestFlutterView>{};
+  final Map<int, TestFlutterView> _testViews = <int, TestFlutterView>{};
+  final Map<int, TestDisplay> _testDisplays = <int, TestDisplay>{};
 
   @override
   VoidCallback? get onMetricsChanged => _platformDispatcher.onMetricsChanged;
@@ -178,7 +179,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   void _handleMetricsChanged() {
-    _updateViews();
+    _updateViewsAndDisplays();
     _onMetricsChanged?.call();
   }
 
@@ -394,10 +395,10 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  SemanticsActionCallback? get onSemanticsAction => _platformDispatcher.onSemanticsAction;
+  SemanticsActionEventCallback? get onSemanticsActionEvent => _platformDispatcher.onSemanticsActionEvent;
   @override
-  set onSemanticsAction(SemanticsActionCallback? callback) {
-    _platformDispatcher.onSemanticsAction = callback;
+  set onSemanticsActionEvent(SemanticsActionEventCallback? callback) {
+    _platformDispatcher.onSemanticsActionEvent = callback;
   }
 
   @override
@@ -509,16 +510,53 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   Iterable<TestFlutterView> get views => _testViews.values;
 
-  void _updateViews() {
-    final List<Object> extraKeys = <Object>[..._testViews.keys];
+  @override
+  FlutterView? view({required int id}) => _testViews[id];
+
+  @override
+  Iterable<TestDisplay> get displays => _testDisplays.values;
+
+  void _updateViewsAndDisplays() {
+    final List<Object> extraDisplayKeys = <Object>[..._testDisplays.keys];
+    for (final Display display in _platformDispatcher.displays) {
+      extraDisplayKeys.remove(display.id);
+      if (!_testDisplays.containsKey(display.id)) {
+        _testDisplays[display.id] = TestDisplay(this, display);
+      }
+    }
+    extraDisplayKeys.forEach(_testDisplays.remove);
+
+    final List<Object> extraViewKeys = <Object>[..._testViews.keys];
     for (final FlutterView view in _platformDispatcher.views) {
-      extraKeys.remove(view.viewId);
+      // TODO(pdblasi-google): Remove this try-catch once the Display API is stable and supported on all platforms
+      late final TestDisplay display;
+      try {
+        final Display realDisplay = view.display;
+        if (_testDisplays.containsKey(realDisplay.id)) {
+          display = _testDisplays[view.display.id]!;
+        } else {
+          display = _UnsupportedDisplay(
+            this,
+            view,
+            'PlatformDispatcher did not contain a Display with id ${realDisplay.id}, '
+            'which was expected by FlutterView ($view)',
+          );
+        }
+      } catch (error){
+        display = _UnsupportedDisplay(this, view, error);
+      }
+
+      extraViewKeys.remove(view.viewId);
       if (!_testViews.containsKey(view.viewId)) {
-        _testViews[view.viewId] = TestFlutterView(view: view, platformDispatcher: this);
+        _testViews[view.viewId] = TestFlutterView(
+          view: view,
+          platformDispatcher: this,
+          display: display,
+        );
       }
     }
 
-    extraKeys.forEach(_testViews.remove);
+    extraViewKeys.forEach(_testViews.remove);
   }
 
   @override
@@ -625,7 +663,11 @@ class TestFlutterView implements FlutterView {
   TestFlutterView({
     required FlutterView view,
     required TestPlatformDispatcher platformDispatcher,
-  }) : _view = view, _platformDispatcher = platformDispatcher;
+    required TestDisplay display,
+  }) :
+    _view = view,
+    _platformDispatcher = platformDispatcher,
+    _display = display;
 
   /// The [FlutterView] backing this [TestFlutterView].
   final FlutterView _view;
@@ -635,7 +677,11 @@ class TestFlutterView implements FlutterView {
   final TestPlatformDispatcher _platformDispatcher;
 
   @override
-  Object get viewId => _view.viewId;
+  TestDisplay get display => _display;
+  final TestDisplay _display;
+
+  @override
+  int get viewId => _view.viewId;
 
   /// The device pixel ratio to use for this test.
   ///
@@ -646,20 +692,21 @@ class TestFlutterView implements FlutterView {
   /// See also:
   ///
   ///   * [FlutterView.devicePixelRatio] for the standard implementation
+  ///   * [TestDisplay.devicePixelRatio] which will stay in sync with this value
   ///   * [resetDevicePixelRatio] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  double get devicePixelRatio => _devicePixelRatio ?? _view.devicePixelRatio;
-  double? _devicePixelRatio;
+  double get devicePixelRatio => _display._devicePixelRatio ?? _view.devicePixelRatio;
   set devicePixelRatio(double value) {
-    _devicePixelRatio = value;
-    platformDispatcher.onMetricsChanged?.call();
+    _display.devicePixelRatio = value;
   }
 
   /// Resets [devicePixelRatio] for this test view to the default value for this view.
+  ///
+  /// This will also reset the [devicePixelRatio] for the [TestDisplay]
+  /// that is related to this view.
   void resetDevicePixelRatio() {
-    _devicePixelRatio = null;
-    platformDispatcher.onMetricsChanged?.call();
+    _display.resetDevicePixelRatio();
   }
 
   /// The display features to use for this test.
@@ -944,6 +991,158 @@ class TestFlutterView implements FlutterView {
   @override
   dynamic noSuchMethod(Invocation invocation) {
     return null;
+  }
+}
+
+/// A version of [Display] that can be modified to allow for testing various
+/// use cases.
+///
+/// Updates to the [TestDisplay] will be surfaced through
+/// [PlatformDispatcher.onMetricsChanged].
+class TestDisplay implements Display {
+  /// Creates a new [TestDisplay] backed by the given [Display].
+  TestDisplay(TestPlatformDispatcher platformDispatcher, Display display)
+  : _platformDispatcher = platformDispatcher, _display = display;
+
+  final Display _display;
+  final TestPlatformDispatcher _platformDispatcher;
+
+  @override
+  int get id => _display.id;
+
+  /// The device pixel ratio to use for this test.
+  ///
+  /// Defaults to the value provided by [Display.devicePixelRatio]. This
+  /// can only be set in a test environment to emulate different display
+  /// configurations. A standard [Display] is not mutable from the framework.
+  ///
+  /// See also:
+  ///
+  ///   * [Display.devicePixelRatio] for the standard implementation
+  ///   * [TestFlutterView.devicePixelRatio] which will stay in sync with this value
+  ///   * [resetDevicePixelRatio] to reset this value specifically
+  ///   * [reset] to reset all test values for this display
+  @override
+  double get devicePixelRatio => _devicePixelRatio ?? _display.devicePixelRatio;
+  double? _devicePixelRatio;
+  set devicePixelRatio(double value) {
+    _devicePixelRatio = value;
+    _platformDispatcher.onMetricsChanged?.call();
+  }
+
+  /// Resets [devicePixelRatio] to the default value for this display.
+  ///
+  /// This will also reset the [devicePixelRatio] for any [TestFlutterView]s
+  /// that are related to this display.
+  void resetDevicePixelRatio() {
+    _devicePixelRatio = null;
+    _platformDispatcher.onMetricsChanged?.call();
+  }
+
+  /// The refresh rate to use for this test.
+  ///
+  /// Defaults to the value provided by [Display.refreshRate]. This
+  /// can only be set in a test environment to emulate different display
+  /// configurations. A standard [Display] is not mutable from the framework.
+  ///
+  /// See also:
+  ///
+  ///   * [Display.refreshRate] for the standard implementation
+  ///   * [resetRefreshRate] to reset this value specifically
+  ///   * [reset] to reset all test values for this display
+  @override
+  double get refreshRate => _refreshRate ?? _display.refreshRate;
+  double? _refreshRate;
+  set refreshRate(double value) {
+    _refreshRate = value;
+    _platformDispatcher.onMetricsChanged?.call();
+  }
+
+  /// Resets [refreshRate] to the default value for this display.
+  void resetRefreshRate() {
+    _refreshRate = null;
+    _platformDispatcher.onMetricsChanged?.call();
+  }
+
+  /// The size of the [Display] to use for this test.
+  ///
+  /// Defaults to the value provided by [Display.refreshRate]. This
+  /// can only be set in a test environment to emulate different display
+  /// configurations. A standard [Display] is not mutable from the framework.
+  ///
+  /// See also:
+  ///
+  ///   * [Display.refreshRate] for the standard implementation
+  ///   * [resetRefreshRate] to reset this value specifically
+  ///   * [reset] to reset all test values for this display
+  @override
+  Size get size => _size ?? _display.size;
+  Size? _size;
+  set size(Size value) {
+    _size = value;
+    _platformDispatcher.onMetricsChanged?.call();
+  }
+
+  /// Resets [size] to the default value for this display.
+  void resetSize() {
+    _size = null;
+    _platformDispatcher.onMetricsChanged?.call();
+  }
+
+  /// Resets all values on this [TestDisplay].
+  ///
+  /// See also:
+  ///   * [resetDevicePixelRatio] to reset [devicePixelRatio] specifically
+  ///   * [resetRefreshRate] to reset [refreshRate] specifically
+  ///   * [resetSize] to reset [size] specifically
+  void reset() {
+    resetDevicePixelRatio();
+    resetRefreshRate();
+    resetSize();
+  }
+
+  /// This gives us some grace time when the dart:ui side adds something to
+  /// [Display], and makes things easier when we do rolls to give
+  /// us time to catch up.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return null;
+  }
+}
+
+// TODO(pdblasi-google): Remove this once the Display API is stable and supported on all platforms
+class _UnsupportedDisplay implements TestDisplay {
+  _UnsupportedDisplay(this._platformDispatcher, this._view, this.error);
+
+  final FlutterView _view;
+  final Object? error;
+
+  @override
+  final TestPlatformDispatcher _platformDispatcher;
+
+  @override
+  double get devicePixelRatio => _devicePixelRatio ?? _view.devicePixelRatio;
+  @override
+  double? _devicePixelRatio;
+  @override
+  set devicePixelRatio(double value) {
+    _devicePixelRatio = value;
+    _platformDispatcher.onMetricsChanged?.call();
+  }
+
+  @override
+  void resetDevicePixelRatio() {
+    _devicePixelRatio = null;
+    _platformDispatcher.onMetricsChanged?.call();
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnsupportedError(
+      'The Display API is unsupported in this context. '
+      'As of the last metrics change on PlatformDispatcher, this was the error '
+      'given when trying to prepare the display for testing: $error',
+    );
   }
 }
 
@@ -1684,23 +1883,6 @@ class TestWindow implements SingletonFlutterWindow {
   }
 
   @Deprecated(
-    'Use WidgetTester.platformDispatcher.onSemanticsAction instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
-  )
-  @override
-  SemanticsActionCallback? get onSemanticsAction => platformDispatcher.onSemanticsAction;
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.onSemanticsAction instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
-  )
-  @override
-  set onSemanticsAction(SemanticsActionCallback? callback) {
-    platformDispatcher.onSemanticsAction = callback;
-  }
-
-  @Deprecated(
     'Use WidgetTester.platformDispatcher.accessibilityFeatures instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
@@ -1909,7 +2091,7 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
   @override
-  Object get viewId => _view.viewId;
+  int get viewId => _view.viewId;
 
   /// This gives us some grace time when the dart:ui side adds something to
   /// [SingletonFlutterWindow], and makes things easier when we do rolls to give

@@ -60,6 +60,8 @@ enum _MediaQueryAspect {
   invertColors,
   /// Specifies the aspect corresponding to [MediaQueryData.highContrast].
   highContrast,
+  /// Specifies the aspect corresponding to [MediaQueryData.onOffSwitchLabels].
+  onOffSwitchLabels,
   /// Specifies the aspect corresponding to [MediaQueryData.disableAnimations].
   disableAnimations,
   /// Specifies the aspect corresponding to [MediaQueryData.boldText].
@@ -153,6 +155,7 @@ class MediaQueryData {
     this.accessibleNavigation = false,
     this.invertColors = false,
     this.highContrast = false,
+    this.onOffSwitchLabels = false,
     this.disableAnimations = false,
     this.boldText = false,
     this.navigationMode = NavigationMode.traditional,
@@ -220,6 +223,7 @@ class MediaQueryData {
       disableAnimations = platformData?.disableAnimations ?? view.platformDispatcher.accessibilityFeatures.disableAnimations,
       boldText = platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
       highContrast = platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
+      onOffSwitchLabels = platformData?.onOffSwitchLabels ?? view.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
       alwaysUse24HourFormat = platformData?.alwaysUse24HourFormat ?? view.platformDispatcher.alwaysUse24HourFormat,
       navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
       gestureSettings = DeviceGestureSettings.fromView(view),
@@ -416,6 +420,15 @@ class MediaQueryData {
   /// or above.
   final bool highContrast;
 
+  /// Whether the user requested to show on/off labels inside switches on iOS,
+  /// via Settings -> Accessibility -> Display & Text Size -> On/Off Labels.
+  ///
+  /// See also:
+  ///
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
+  final bool onOffSwitchLabels;
+
   /// Whether the platform is requesting that animations be disabled or reduced
   /// as much as possible.
   ///
@@ -488,6 +501,7 @@ class MediaQueryData {
     EdgeInsets? systemGestureInsets,
     bool? alwaysUse24HourFormat,
     bool? highContrast,
+    bool? onOffSwitchLabels,
     bool? disableAnimations,
     bool? invertColors,
     bool? accessibleNavigation,
@@ -508,6 +522,7 @@ class MediaQueryData {
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
       highContrast: highContrast ?? this.highContrast,
+      onOffSwitchLabels: onOffSwitchLabels ?? this.onOffSwitchLabels,
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
@@ -699,6 +714,7 @@ class MediaQueryData {
         && other.systemGestureInsets == systemGestureInsets
         && other.alwaysUse24HourFormat == alwaysUse24HourFormat
         && other.highContrast == highContrast
+        && other.onOffSwitchLabels == onOffSwitchLabels
         && other.disableAnimations == disableAnimations
         && other.invertColors == invertColors
         && other.accessibleNavigation == accessibleNavigation
@@ -719,6 +735,7 @@ class MediaQueryData {
     viewInsets,
     alwaysUse24HourFormat,
     highContrast,
+    onOffSwitchLabels,
     disableAnimations,
     invertColors,
     accessibleNavigation,
@@ -742,6 +759,7 @@ class MediaQueryData {
       'alwaysUse24HourFormat: $alwaysUse24HourFormat',
       'accessibleNavigation: $accessibleNavigation',
       'highContrast: $highContrast',
+      'onOffSwitchLabels: $onOffSwitchLabels',
       'disableAnimations: $disableAnimations',
       'invertColors: $invertColors',
       'boldText: $boldText',
@@ -756,16 +774,24 @@ class MediaQueryData {
 /// Establishes a subtree in which media queries resolve to the given data.
 ///
 /// For example, to learn the size of the current media (e.g., the window
-/// containing your app), you can read the [MediaQueryData.size] property from
-/// the [MediaQueryData] returned by [MediaQuery.of]:
-/// `MediaQuery.of(context).size`.
+/// containing your app), you can use [MediaQuery.sizeOf]:
+/// `MediaQuery.sizeOf(context)`.
 ///
-/// Querying the current media using [MediaQuery.of] will cause your widget to
-/// rebuild automatically whenever the [MediaQueryData] changes (e.g., if the
-/// user rotates their device).
+/// Querying the current media using specific methods (for example,
+/// [MediaQuery.sizeOf] and [MediaQuery.paddingOf]) will cause your widget to
+/// rebuild automatically whenever the property you query changes.
 ///
-/// If no [MediaQuery] is in scope then the [MediaQuery.of] method will throw an
-/// exception. Alternatively, [MediaQuery.maybeOf] may be used, which returns
+/// On the other hand, querying using [MediaQuery.of] will cause your widget to
+/// rebuild automatically whenever any field of the [MediaQueryData] changes
+/// (e.g., if the user rotates their device). Therefore, if you are only
+/// concerned with one or a few fields of [MediaQueryData], prefer using
+/// the specific methods (for example: [MediaQuery.sizeOf] and
+/// [MediaQuery.paddingOf]).
+///
+/// If no [MediaQuery] is in scope then the series of methods like
+/// [MediaQuery.of] and [MediaQuery.sizeOf] will throw an exception.
+/// Alternatively, the "maybe-" variant methods (such as [MediaQuery.maybeOf]
+/// and [MediaQuery.maybeSizeOf]) can be used, which returns
 /// null instead of throwing if no [MediaQuery] is in scope.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=A3WrA4zAaPw}
@@ -1247,6 +1273,25 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// the [MediaQueryData.highContrast] property of the ancestor [MediaQuery] changes.
   static bool? maybeHighContrastOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.highContrast)?.highContrast;
 
+  /// Returns onOffSwitchLabels for the nearest MediaQuery ancestor or false, if no
+  /// such ancestor exists.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.onOffSwitchLabels], which indicates the platform's
+  ///    desire to show on/off labels inside switches.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.onOffSwitchLabels] property of the ancestor [MediaQuery] changes.
+  static bool onOffSwitchLabelsOf(BuildContext context) => maybeOnOffSwitchLabelsOf(context) ?? false;
+
+  /// Returns onOffSwitchLabels for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.onOffSwitchLabels] property of the ancestor [MediaQuery] changes.
+  static bool? maybeOnOffSwitchLabelsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.onOffSwitchLabels)?.onOffSwitchLabels;
+
   /// Returns disableAnimations for the nearest MediaQuery ancestor or
   /// [Brightness.light], if no such ancestor exists.
   ///
@@ -1396,6 +1441,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
             }
           case _MediaQueryAspect.highContrast:
             if (data.highContrast != oldWidget.data.highContrast) {
+              return true;
+            }
+          case _MediaQueryAspect.onOffSwitchLabels:
+            if (data.onOffSwitchLabels != oldWidget.data.onOffSwitchLabels) {
               return true;
             }
           case _MediaQueryAspect.disableAnimations:

@@ -63,6 +63,11 @@ bool FlutterWindow::OnCreate() {
     visible = true;
   });
 
+  // Flutter can complete the first frame before the "show window" callback is
+  // registered. The following call ensures a frame is pending to ensure the
+  // window is shown. It is a no-op if the first frame hasn't completed yet.
+  flutter_controller_->ForceRedraw();
+
   // Create a method channel to check the window's visibility.
   flutter::MethodChannel<> channel(
       flutter_controller_->engine()->messenger(), "tests.flutter.dev/windows_startup_test",

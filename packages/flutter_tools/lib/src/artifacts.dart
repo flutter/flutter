@@ -1108,7 +1108,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
           );
         case Artifact.wasmOptBinary:
           return _fileSystem.path.join(
-            _getDartSdkPath(), 'bin', 'snapshots',
+            _getDartSdkPath(), 'bin', 'utils',
             _artifactToFileName(artifact, _platform, mode),
           );
         case Artifact.genSnapshot:

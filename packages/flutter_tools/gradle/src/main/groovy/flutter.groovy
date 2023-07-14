@@ -731,6 +731,85 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
+    // Add a task that can be called on Flutter projects that prints application id of a build
+    // variant.
+    //
+    // This task prints the application id in this format:
+    //
+    // ApplicationId: com.example.my_id
+    //
+    // Format of the output of this task is used by `AndroidProject.getApplicationIdForVariant`.
+    private static void addTasksForPrintApplicationId(Project project) {
+        project.android.applicationVariants.all { variant ->
+            // Warning: The name of this task is used by `AndroidProject.getApplicationIdForVariant`.
+            project.tasks.register("print${variant.name.capitalize()}ApplicationId") {
+                description "Prints out application id for the given build variant of this Android project"
+                doLast {
+                    println "ApplicationId: ${variant.applicationId}";
+                }
+            }
+        }
+    }
+
+    // Add a task that can be called on Flutter projects that prints app link domains of a build
+    // variant.
+    //
+    // The app link domains refer to the host attributes of data tags in the apps' intent filters
+    // that support http/https schemes. See
+    // https://developer.android.com/guide/topics/manifest/intent-filter-element.
+    //
+    // This task prints app link domains in this format:
+    //
+    // Domain: domain.com
+    // Domain: another-domain.dev
+    //
+    // Format of the output of this task is used by `AndroidProject.getAppLinkDomainsForVariant`.
+    private static void addTasksForPrintAppLinkDomains(Project project) {
+        project.android.applicationVariants.all { variant ->
+            // Warning: The name of this task is used by `AndroidProject.getAppLinkDomainsForVariant`.
+            project.tasks.register("print${variant.name.capitalize()}AppLinkDomains") {
+                description "Prints out app links domain for the given build variant of this Android project"
+                variant.outputs.all { output ->
+                    def processResources = output.hasProperty("processResourcesProvider") ?
+                            output.processResourcesProvider.get() : output.processResources
+                    dependsOn processResources.name
+                }
+                doLast {
+                    variant.outputs.all { output ->
+                        def processResources = output.hasProperty("processResourcesProvider") ?
+                                output.processResourcesProvider.get() : output.processResources
+                        def manifest = new XmlParser().parse(processResources.manifestFile)
+                        manifest.application.activity.each { activity ->
+                            // Find intent filters that have autoVerify = true and support http/https
+                            // scheme.
+                            activity.'intent-filter'.findAll { filter ->
+                                def hasAutoVerify = filter.attributes().any { entry ->
+                                    return entry.key.getLocalPart() == "autoVerify" && entry.value
+                                }
+                                def hasHttpOrHttps = filter.data.any { data ->
+                                    data.attributes().any { entry ->
+                                        return entry.key.getLocalPart() == "scheme" &&
+                                               (entry.value == "http" || entry.value == "https")
+                                    }
+                                }
+                                return hasAutoVerify && hasHttpOrHttps
+                            }.each { appLinkIntent ->
+                                // Print out the host attributes in data tags.
+                                appLinkIntent.data.each { data ->
+                                    data.attributes().each { entry ->
+                                        if (entry.key.getLocalPart() == "host") {
+                                            println "Domain: ${entry.value}"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Returns a Flutter build mode suitable for the specified Android buildType.
      *
@@ -904,7 +983,11 @@ class FlutterPlugin implements Plugin<Project> {
             validateDeferredComponentsValue = project.property('validate-deferred-components').toBoolean()
         }
         addTaskForJavaVersion(project)
-        addTaskForPrintBuildVariants(project)
+        if(isFlutterAppProject()) {
+            addTaskForPrintBuildVariants(project)
+            addTasksForPrintApplicationId(project)
+            addTasksForPrintAppLinkDomains(project)
+        }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {

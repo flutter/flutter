@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:core';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 import 'package:meta/meta.dart';
 
-export 'package:leak_tracker/leak_tracker.dart' show LeakTrackingTestConfig, StackTraceCollectionConfig;
+export 'package:leak_tracker/leak_tracker.dart' show LeakDiagnosticConfig, LeakTrackingTestConfig;
 
 /// Set of objects, that does not hold the objects from garbage collection.
 ///
@@ -51,13 +54,13 @@ void testWidgetsWithLeakTracking(
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
-  LeakTrackingTestConfig leakTrackingConfig = const LeakTrackingTestConfig(),
+  LeakTrackingTestConfig leakTrackingTestConfig = const LeakTrackingTestConfig(),
 }) {
   Future<void> wrappedCallback(WidgetTester tester) async {
     await _withFlutterLeakTracking(
       () async => callback(tester),
       tester,
-      leakTrackingConfig,
+      leakTrackingTestConfig,
     );
   }
 
@@ -81,7 +84,7 @@ bool _webWarningPrinted = false;
 /// The method will fail if wrapped code contains memory leaks.
 ///
 /// See details in documentation for `withLeakTracking` at
-/// https://github.com/dart-lang/leak_tracker/blob/main/lib/src/orchestration.dart#withLeakTracking
+/// https://github.com/dart-lang/leak_tracker/blob/main/lib/src/leak_tracking/orchestration.dart
 ///
 /// The Flutter related enhancements are:
 /// 1. Listens to [MemoryAllocations] events.
@@ -96,7 +99,7 @@ Future<void> _withFlutterLeakTracking(
 ) async {
   // Leak tracker does not work for web platform.
   if (kIsWeb) {
-    final bool shouldPrintWarning = !_webWarningPrinted && LeakTrackingTestConfig.warnForNonSupportedPlatforms;
+    final bool shouldPrintWarning = !_webWarningPrinted && LeakTrackerGlobalSettings.warnForNonSupportedPlatforms;
     if (shouldPrintWarning) {
       _webWarningPrinted = true;
       debugPrint('Leak tracking is not supported on web platform.\nTo turn off this message, set `LeakTrackingTestConfig.warnForNonSupportedPlatforms` to false.');
@@ -117,7 +120,7 @@ Future<void> _withFlutterLeakTracking(
       Leaks leaks = await withLeakTracking(
         callback,
         asyncCodeRunner: asyncCodeRunner,
-        stackTraceCollectionConfig: config.stackTraceCollectionConfig,
+        leakDiagnosticConfig: config.leakDiagnosticConfig,
         shouldThrowOnLeaks: false,
       );
 
@@ -142,28 +145,50 @@ class LeakCleaner {
 
   final LeakTrackingTestConfig config;
 
+  static Map<(String, LeakType), int> _countByClassAndType(Leaks leaks) {
+    final Map<(String, LeakType), int> result = <(String, LeakType), int>{};
+
+    for (final MapEntry<LeakType, List<LeakReport>> entry in leaks.byType.entries) {
+      for (final LeakReport leak in entry.value) {
+        final (String, LeakType) classAndType = (leak.type, entry.key);
+        result[classAndType] = (result[classAndType] ?? 0) + 1;
+      }
+    }
+    return result;
+  }
+
   Leaks clean(Leaks leaks) {
+    final Map<(String, LeakType), int> countByClassAndType = _countByClassAndType(leaks);
+
     final Leaks result =  Leaks(<LeakType, List<LeakReport>>{
-      for (LeakType leakType in leaks.byType.keys)
-        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak)).toList()
+      for (final LeakType leakType in leaks.byType.keys)
+        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak, countByClassAndType)).toList()
     });
     return result;
   }
 
   /// Returns true if [leak] should be reported as failure.
-  bool _shouldReportLeak(LeakType leakType, LeakReport leak) {
-    // Tracking for non-GCed is temporarily disabled.
-    // TODO(polina-c): turn on tracking for non-GCed after investigating existing leaks.
-    if (leakType != LeakType.notDisposed) {
-      return false;
+  bool _shouldReportLeak(LeakType leakType, LeakReport leak, Map<(String, LeakType), int> countByClassAndType) {
+    final String leakingClass = leak.type;
+    final (String, LeakType) classAndType = (leakingClass, leakType);
+
+    bool isAllowedForClass(Map<String, int?> allowList) {
+      if (!allowList.containsKey(leakingClass)) {
+        return false;
+      }
+      final int? allowedCount = allowList[leakingClass];
+      if (allowedCount == null) {
+        return true;
+      }
+      return allowedCount >= countByClassAndType[classAndType]!;
     }
 
     switch (leakType) {
       case LeakType.notDisposed:
-        return !config.notDisposedAllowList.contains(leak.type);
+        return !isAllowedForClass(config.notDisposedAllowList);
       case LeakType.notGCed:
       case LeakType.gcedLate:
-        return !config.notGCedAllowList.contains(leak.type);
+        return !isAllowedForClass(config.notGCedAllowList);
     }
   }
 }

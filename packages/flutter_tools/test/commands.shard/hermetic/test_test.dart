@@ -743,7 +743,7 @@ dev_dependencies:
       '--no-pub',
     ]);
 
-    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     expect(fileExists, true);
 
   }, overrides: <Type, Generator>{
@@ -764,7 +764,7 @@ dev_dependencies:
       '--no-test-assets',
     ]);
 
-    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
     expect(fileExists, false);
 
   }, overrides: <Type, Generator>{

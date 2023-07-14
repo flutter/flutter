@@ -34,6 +34,31 @@ import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
 
+abstract class DotEnvRegex {
+  // Dot env multi-line block value regex
+  static final RegExp multiLineBlock = RegExp(r'^\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*=\s*"""\s*(.*)$');
+
+  // Dot env full line value regex (eg FOO=bar)
+  // Entire line will be matched including key and value
+  static final RegExp keyValue = RegExp(r'^\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*=\s*(.*)?$');
+
+  // Dot env value wrapped in double quotes regex (eg FOO="bar")
+  // Value between double quotes will be matched (eg only bar in "bar")
+  static final RegExp doubleQuotedValue = RegExp(r'^"(.*)"\s*(\#\s*.*)?$');
+
+  // Dot env value wrapped in single quotes regex (eg FOO='bar')
+  // Value between single quotes will be matched (eg only bar in 'bar')
+  static final RegExp singleQuotedValue = RegExp(r"^'(.*)'\s*(\#\s*.*)?$");
+
+  // Dot env value wrapped in back quotes regex (eg FOO=`bar`)
+  // Value between back quotes will be matched (eg only bar in `bar`)
+  static final RegExp backQuotedValue = RegExp(r'^`(.*)`\s*(\#\s*.*)?$');
+
+  // Dot env value without quotes regex (eg FOO=bar)
+  // Value without quotes will be matched (eg full value after the equals sign)
+  static final RegExp unquotedValue = RegExp(r'^([^#\n\s]*)\s*(?:\s*#\s*(.*))?$');
+}
+
 enum ExitStatus {
   success,
   warning,
@@ -304,7 +329,10 @@ abstract class FlutterCommand extends Command<void> {
   /// Path to the Dart's package config file.
   ///
   /// This can be overridden by some of its subclasses.
-  String? get packagesPath => globalResults?['packages'] as String?;
+  String? get packagesPath => stringArg(FlutterGlobalOptions.kPackagesOption, global: true);
+
+  /// Whether flutter is being run from our CI.
+  bool get usingCISystem => boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
 
   /// The value of the `--filesystem-scheme` argument.
   ///
@@ -609,17 +637,17 @@ abstract class FlutterCommand extends Command<void> {
       valueHelp: 'foo=bar',
       splitCommas: false,
     );
-    useDartDefineConfigJsonFileOption();
+    useDartDefineFromFileOption();
   }
 
-  void useDartDefineConfigJsonFileOption() {
+  void useDartDefineFromFileOption() {
     argParser.addMultiOption(
       FlutterOptions.kDartDefineFromFileOption,
-      help: 'The path of a json format file where flutter define a global constant pool. '
-          'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
-          'and int.fromEnvironment constructors; the key and field are json values.\n'
+      help:
+          'The path of a .json or .env file containing key-value pairs that will be available as environment variables.\n'
+          'These can be accessed using the String.fromEnvironment, bool.fromEnvironment, and int.fromEnvironment constructors.\n'
           'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefineFromFileOption}" multiple times.',
-      valueHelp: 'use-define-config.json',
+      valueHelp: 'use-define-config.json|.env',
       splitCommas: false,
     );
   }
@@ -1172,7 +1200,7 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons')
-      && buildMode.isPrecompiled == true
+      && buildMode.isPrecompiled
       && boolArg('tree-shake-icons');
 
     final String? bundleSkSLPath = argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
@@ -1187,7 +1215,7 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
-    final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
+    final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
     WebRendererMode webRenderer = WebRendererMode.auto;
@@ -1320,44 +1348,52 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
-  List<String> extractDartDefines({Map<String, Object>? defineConfigJsonMap}) {
+  List<String> extractDartDefines({required Map<String, Object?> defineConfigJsonMap}) {
     final List<String> dartDefines = <String>[];
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
       dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
     }
 
-    if (defineConfigJsonMap == null) {
-      return dartDefines;
-    }
-    defineConfigJsonMap.forEach((String key, Object value) {
+    defineConfigJsonMap.forEach((String key, Object? value) {
       dartDefines.add('$key=$value');
     });
 
     return dartDefines;
   }
 
-  Map<String, Object>? extractDartDefineConfigJsonMap() {
-    final Map<String, Object> dartDefineConfigJsonMap = <String, Object>{};
+  Map<String, Object?> extractDartDefineConfigJsonMap() {
+    final Map<String, Object?> dartDefineConfigJsonMap = <String, Object?>{};
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
-      final List<String> configJsonPaths = stringsArg(
-          FlutterOptions.kDartDefineFromFileOption,
+      final List<String> configFilePaths = stringsArg(
+        FlutterOptions.kDartDefineFromFileOption,
       );
 
-      for (final String path in configJsonPaths) {
+      for (final String path in configFilePaths) {
         if (!globals.fs.isFileSync(path)) {
           throwToolExit('Json config define file "--${FlutterOptions
               .kDartDefineFromFileOption}=$path" is not a file, '
               'please fix first!');
         }
 
-        final String configJsonRaw = globals.fs.file(path).readAsStringSync();
+        final String configRaw = globals.fs.file(path).readAsStringSync();
+
+        // Determine whether the file content is JSON or .env format.
+        String configJsonRaw;
+        if (configRaw.trim().startsWith('{')) {
+          configJsonRaw = configRaw;
+        } else {
+
+          // Convert env file to JSON.
+          configJsonRaw = convertEnvFileToJsonRaw(configRaw);
+        }
+
         try {
           // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
           (json.decode(configJsonRaw) as Map<String, dynamic>)
-              .forEach((String key, dynamic value) {
-            dartDefineConfigJsonMap[key] = value as Object;
+              .forEach((String key, Object? value) {
+            dartDefineConfigJsonMap[key] = value;
           });
         } on FormatException catch (err) {
           throwToolExit('Json config define file "--${FlutterOptions
@@ -1368,6 +1404,82 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     return dartDefineConfigJsonMap;
+  }
+
+  /// Parse a property line from an env file.
+  /// Supposed property structure should be:
+  ///   key=value
+  ///
+  /// Where: key is a string without spaces and value is a string.
+  /// Value can also contain '=' char.
+  ///
+  /// Returns a record of key and value as strings.
+  MapEntry<String, String> _parseProperty(String line) {
+    if (DotEnvRegex.multiLineBlock.hasMatch(line)) {
+      throwToolExit('Multi-line value is not supported: $line');
+    }
+
+    final Match? keyValueMatch = DotEnvRegex.keyValue.firstMatch(line);
+    if (keyValueMatch == null) {
+      throwToolExit('Unable to parse file provided for '
+        '--${FlutterOptions.kDartDefineFromFileOption}.\n'
+        'Invalid property line: $line');
+    }
+
+    final String key = keyValueMatch.group(1)!;
+    final String value = keyValueMatch.group(2) ?? '';
+
+    // Remove wrapping quotes and trailing line comment.
+    final Match? doubleQuotedValueMatch = DotEnvRegex.doubleQuotedValue.firstMatch(value);
+    if (doubleQuotedValueMatch != null) {
+      return MapEntry<String, String>(key, doubleQuotedValueMatch.group(1)!);
+    }
+
+    final Match? singleQuotedValueMatch = DotEnvRegex.singleQuotedValue.firstMatch(value);
+    if (singleQuotedValueMatch != null) {
+      return MapEntry<String, String>(key, singleQuotedValueMatch.group(1)!);
+    }
+
+    final Match? backQuotedValueMatch = DotEnvRegex.backQuotedValue.firstMatch(value);
+    if (backQuotedValueMatch != null) {
+      return MapEntry<String, String>(key, backQuotedValueMatch.group(1)!);
+    }
+
+    final Match? unquotedValueMatch = DotEnvRegex.unquotedValue.firstMatch(value);
+    if (unquotedValueMatch != null) {
+      return MapEntry<String, String>(key, unquotedValueMatch.group(1)!);
+    }
+
+    return MapEntry<String, String>(key, value);
+  }
+
+  /// Converts an .env file string to its equivalent JSON string.
+  ///
+  /// For example, the .env file string
+  ///   key=value # comment
+  ///   complexKey="foo#bar=baz"
+  /// would be converted to a JSON string equivalent to:
+  ///   {
+  ///     "key": "value",
+  ///     "complexKey": "foo#bar=baz"
+  ///   }
+  ///
+  /// Multiline values are not supported.
+  String convertEnvFileToJsonRaw(String configRaw) {
+    final List<String> lines = configRaw
+        .split('\n')
+        .map((String line) => line.trim())
+        .where((String line) => line.isNotEmpty)
+        .where((String line) => !line.startsWith('#')) // Remove comment lines.
+        .toList();
+
+    final Map<String, String> propertyMap = <String, String>{};
+    for (final String line in lines) {
+      final MapEntry<String, String> property = _parseProperty(line);
+      propertyMap[property.key] = property.value;
+    }
+
+    return jsonEncode(propertyMap);
   }
 
   /// Updates dart-defines based on [webRenderer].
@@ -1634,17 +1746,30 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   ///
   /// If no flag named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
-  bool boolArg(String name) => argResults![name] as bool;
+  bool boolArg(String name, {bool global = false}) {
+    if (global) {
+      return globalResults![name] as bool;
+    }
+    return argResults![name] as bool;
+  }
 
   /// Gets the parsed command-line option named [name] as a `String`.
   ///
   /// If no option named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
-  String? stringArg(String name) => argResults![name] as String?;
+  String? stringArg(String name, {bool global = false}) {
+    if (global) {
+      return globalResults![name] as String?;
+    }
+    return argResults![name] as String?;
+  }
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
-  List<String> stringsArg(String name) {
-    return argResults![name]! as List<String>? ?? <String>[];
+  List<String> stringsArg(String name, {bool global = false}) {
+    if (global) {
+      return globalResults![name] as List<String>;
+    }
+    return argResults![name] as List<String>;
   }
 }
 

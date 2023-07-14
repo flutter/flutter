@@ -26,9 +26,9 @@ void main() {
     const DividerThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[]);
   });
@@ -44,9 +44,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[
       'color: Color(0xffffffff)',
@@ -57,7 +57,7 @@ void main() {
     ]);
   });
 
-  group('Horizontal Divider', () {
+  group('Material3 - Horizontal Divider', () {
     testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: true);
       await tester.pumpWidget(MaterialApp(
@@ -159,7 +159,7 @@ void main() {
     });
   });
 
-  group('Vertical Divider', () {
+  group('Material3 - Vertical Divider', () {
     testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: true);
       await tester.pumpWidget(MaterialApp(
@@ -266,13 +266,15 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
-    group('Horizontal Divider', () {
+    group('Material2 - Horizontal Divider', () {
       testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
-          home: Scaffold(
+        await tester.pumpWidget(MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
             body: Divider(),
           ),
         ));
@@ -284,7 +286,7 @@ void main() {
         final BoxDecoration decoration = container.decoration! as BoxDecoration;
         expect(decoration.border!.bottom.width, 0.0);
 
-        final ThemeData theme = ThemeData();
+        final ThemeData theme = ThemeData(useMaterial3: false);
         expect(decoration.border!.bottom.color, theme.dividerColor);
 
         final Rect dividerRect = tester.getRect(find.byType(Divider));
@@ -311,10 +313,11 @@ void main() {
       });
     });
 
-    group('Vertical Divider', () {
+    group('Material2 - Vertical Divider', () {
       testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
-          home: Scaffold(
+        await tester.pumpWidget(MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
             body: VerticalDivider(),
           ),
         ));
@@ -327,7 +330,7 @@ void main() {
         final Border border = decoration.border! as Border;
         expect(border.left.width, 0.0);
 
-        final ThemeData theme = ThemeData();
+        final ThemeData theme = ThemeData(useMaterial3: false);
         expect(border.left.color, theme.dividerColor);
 
         final Rect dividerRect = tester.getRect(find.byType(VerticalDivider));

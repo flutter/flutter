@@ -3,26 +3,30 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
 import 'message_parser.dart';
 
 /// Run the localizations generation script with the configuration [options].
-LocalizationsGenerator generateLocalizations({
+Future<LocalizationsGenerator> generateLocalizations({
   required Directory projectDir,
   Directory? dependenciesDir,
   required LocalizationOptions options,
   required Logger logger,
   required FileSystem fileSystem,
-}) {
+  required Artifacts artifacts,
+  required ProcessManager processManager,
+}) async {
   // If generating a synthetic package, generate a warning if
   // flutter: generate is not set.
   final FlutterManifest? flutterManifest = FlutterManifest.createFromPath(
@@ -42,6 +46,9 @@ LocalizationsGenerator generateLocalizations({
   }
 
   precacheLanguageAndRegionTags();
+
+  // Use \r\n if project's pubspec file contains \r\n.
+  final bool useCRLF = fileSystem.file('pubspec.yaml').readAsStringSync().contains('\r\n');
 
   LocalizationsGenerator generator;
   try {
@@ -67,10 +74,40 @@ LocalizationsGenerator generateLocalizations({
       suppressWarnings: options.suppressWarnings,
     )
       ..loadResources()
-      ..writeOutputFiles(isFromYaml: true);
+      ..writeOutputFiles(isFromYaml: true, useCRLF: useCRLF);
   } on L10nException catch (e) {
     throwToolExit(e.message);
   }
+
+  final List<String> outputFileList = generator.outputFileList;
+  final File? untranslatedMessagesFile = generator.untranslatedMessagesFile;
+
+  if (options.format) {
+    final List<String> formatFileList = outputFileList.toList();
+    if (untranslatedMessagesFile != null) {
+      // Don't format the messages file using `dart format`.
+      formatFileList.remove(untranslatedMessagesFile.absolute.path);
+    }
+    if (formatFileList.isEmpty) {
+      return generator;
+    }
+    final String dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final List<String> command = <String>[dartBinary, 'format', ...formatFileList];
+    final ProcessResult result = await processManager.run(command);
+    if (result.exitCode != 0) {
+      throw ProcessException(
+        dartBinary,
+        command,
+        '''
+`dart format` failed with exit code ${result.exitCode}
+
+stdout:\n${result.stdout}\n
+stderr:\n${result.stderr}''',
+        result.exitCode,
+      );
+    }
+  }
+
   return generator;
 }
 
@@ -1122,6 +1159,7 @@ class LocalizationsGenerator {
       // When traversing through a placeholderExpr node, return "$placeholderName".
       // When traversing through a pluralExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
       // When traversing through a selectExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
+      // When traversing through an argumentExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
       // When traversing through a message node, return concatenation of all of "generateVariables(child)" for each child.
       String generateVariables(Node node, { bool isRoot = false }) {
         switch (node.type) {
@@ -1224,6 +1262,34 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
               .replaceAll('@(selectCases)', selectLogicArgs.join('\n'))
             );
             return '\$$tempVarName';
+          case ST.argumentExpr:
+            requiresIntlImport = true;
+            assert(node.children[1].type == ST.identifier);
+            assert(node.children[3].type == ST.argType);
+            assert(node.children[7].type == ST.identifier);
+            final String identifierName = node.children[1].value!;
+            final Node formatType = node.children[7];
+            // Check that formatType is a valid intl.DateFormat.
+            if (!validDateFormats.contains(formatType.value)) {
+              throw L10nParserException(
+                'Date format "${formatType.value!}" for placeholder '
+                '$identifierName does not have a corresponding DateFormat '
+                "constructor\n. Check the intl library's DateFormat class "
+                'constructors for allowed date formats, or set "isCustomDateFormat" attribute '
+                'to "true".',
+                _inputFileNames[locale]!,
+                message.resourceId,
+                translationForMessage,
+                formatType.positionInMessage,
+              );
+            }
+            final String tempVarName = getTempVariableName();
+            tempVariables.add(dateVariableTemplate
+              .replaceAll('@(varName)', tempVarName)
+              .replaceAll('@(formatType)', formatType.value!)
+              .replaceAll('@(argument)', identifierName)
+            );
+            return '\$$tempVarName';
           // ignore: no_default_cases
           default:
             throw Exception('Cannot call "generateHelperMethod" on node type ${node.type}');
@@ -1246,7 +1312,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     }
   }
 
-  List<String> writeOutputFiles({ bool isFromYaml = false }) {
+  List<String> writeOutputFiles({ bool isFromYaml = false, bool useCRLF = false }) {
     // First, generate the string contents of all necessary files.
     final String generatedLocalizationsFile = _generateCode();
 
@@ -1264,7 +1330,9 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       syntheticPackageDirectory.createSync(recursive: true);
       final File flutterGenPubspec = syntheticPackageDirectory.childFile('pubspec.yaml');
       if (!flutterGenPubspec.existsSync()) {
-        flutterGenPubspec.writeAsStringSync(emptyPubspecTemplate);
+        flutterGenPubspec.writeAsStringSync(
+          useCRLF ? emptyPubspecTemplate.replaceAll('\n', '\r\n') : emptyPubspecTemplate
+        );
       }
     }
 
@@ -1283,11 +1351,13 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
 
     // Generate the required files for localizations.
     _languageFileMap.forEach((File file, String contents) {
-      file.writeAsStringSync(contents);
+      file.writeAsStringSync(useCRLF ? contents.replaceAll('\n', '\r\n') : contents);
       _outputFileList.add(file.absolute.path);
     });
 
-    baseOutputFile.writeAsStringSync(generatedLocalizationsFile);
+    baseOutputFile.writeAsStringSync(
+      useCRLF ? generatedLocalizationsFile.replaceAll('\n', '\r\n') : generatedLocalizationsFile
+    );
     final File? messagesFile = untranslatedMessagesFile;
     if (messagesFile != null) {
       _generateUntranslatedMessagesFile(logger, messagesFile);
@@ -1323,12 +1393,12 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       if (!inputsAndOutputsListFileLocal.existsSync()) {
         inputsAndOutputsListFileLocal.createSync(recursive: true);
       }
-
+      final String filesListContent = json.encode(<String, Object> {
+        'inputs': _inputFileList,
+        'outputs': _outputFileList,
+      });
       inputsAndOutputsListFileLocal.writeAsStringSync(
-        json.encode(<String, Object> {
-          'inputs': _inputFileList,
-          'outputs': _outputFileList,
-        }),
+        useCRLF ? filesListContent.replaceAll('\n', '\r\n') : filesListContent,
       );
     }
 

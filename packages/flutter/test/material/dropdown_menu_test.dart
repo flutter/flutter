@@ -112,7 +112,8 @@ void main() {
   testWidgets('The width of the text field should always be the same as the menu view',
     (WidgetTester tester) async {
 
-    final ThemeData themeData = ThemeData();
+    final ThemeData themeData = ThemeData(useMaterial3: false);
+    final bool useMaterial3 = themeData.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -128,7 +129,7 @@ void main() {
 
     final Finder textField = find.byType(TextField);
     final Size anchorSize = tester.getSize(textField);
-    expect(anchorSize, const Size(180.0, 56.0));
+    expect(anchorSize, useMaterial3 ? const Size(195.0, 60.0) : const Size(180.0, 56.0));
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
@@ -138,7 +139,7 @@ void main() {
       matching: find.byType(Material),
     );
     final Size menuSize = tester.getSize(menuMaterial);
-    expect(menuSize, const Size(180.0, 304.0));
+    expect(menuSize, useMaterial3 ? const Size(195.0, 304.0) : const Size(180.0, 304.0));
 
     // The text field should have same width as the menu
     // when the width property is not null.
@@ -146,7 +147,7 @@ void main() {
 
     final Finder anchor = find.byType(TextField);
     final Size size = tester.getSize(anchor);
-    expect(size, const Size(200.0, 56.0));
+    expect(size, useMaterial3 ? const Size(200.0, 60.0) : const Size(200.0, 56.0));
 
     await tester.tap(anchor);
     await tester.pumpAndSettle();
@@ -215,9 +216,74 @@ void main() {
     expect(box.size.width, customWidth);
   });
 
+  testWidgets('The width of MenuAnchor respects MenuAnchor.expandedInsets', (WidgetTester tester) async {
+    const double parentWidth = 500.0;
+    final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
+    for (final ShortMenu value in ShortMenu.values) {
+      final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
+      shortMenuItems.add(entry);
+    }
+    Widget buildMenuAnchor({EdgeInsets? expandedInsets}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: parentWidth,
+            height: parentWidth,
+            child: DropdownMenu<ShortMenu>(
+              expandedInsets: expandedInsets,
+              dropdownMenuEntries: shortMenuItems,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // By default, the width of the text field is determined by the menu children.
+    await tester.pumpWidget(buildMenuAnchor());
+    RenderBox box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, 136.0);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    Size buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').hitTestable());
+    expect(buttonSize.width, 136.0);
+
+    // If expandedInsets is EdgeInsets.zero, the width should be the same as its parent.
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildMenuAnchor(expandedInsets: EdgeInsets.zero));
+    box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, parentWidth);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+    expect(buttonSize.width, parentWidth);
+
+    // If expandedInsets is not zero, the width of the text field should be adjusted
+    // based on the EdgeInsets.left and EdgeInsets.right. The top and bottom values
+    // will be ignored.
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildMenuAnchor(expandedInsets: const EdgeInsets.only(left: 35.0, top: 50.0, right: 20.0)));
+    box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, parentWidth - 35.0 - 20.0);
+    final Rect containerRect = tester.getRect(find.byType(SizedBox).first);
+    final Rect dropdownMenuRect = tester.getRect(find.byType(TextField));
+    expect(dropdownMenuRect.top, containerRect.top);
+
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0'));
+    expect(buttonSize.width, parentWidth - 35.0 - 20.0);
+  });
+
   testWidgets('The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
+    final bool material3 = themeData.useMaterial3;
     await tester.pumpWidget(buildTest(themeData, menuChildren));
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -237,7 +303,7 @@ void main() {
       matching: find.byType(Padding),
     ).first;
     final Size menuViewSize = tester.getSize(menuView);
-    expect(menuViewSize, const Size(180.0, 304.0)); // 304 = 288 + vertical padding(2 * 8)
+    expect(menuViewSize, material3 ? const Size(195.0, 304.0) : const Size(180.0, 304.0)); // 304 = 288 + vertical padding(2 * 8)
 
     // Constrains the menu height.
     await tester.pumpWidget(Container());
@@ -253,7 +319,7 @@ void main() {
     ).first;
 
     final Size updatedMenuSize = tester.getSize(updatedMenu);
-    expect(updatedMenuSize, const Size(180.0, 100.0));
+    expect(updatedMenuSize, material3 ? const Size(195.0, 100.0) : const Size(180.0, 100.0));
   });
 
   testWidgets('The text in the menu button should be aligned with the text of '
@@ -1313,6 +1379,29 @@ void main() {
     await tester.pumpWidget(buildFrame());
     expect(find.text(errorText), findsOneWidget);
   });
+
+  testWidgets('Can scroll to the highlighted item', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
+          menuHeight: 100, // Give a small number so the list can only show 2 or 3 items.
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 5').hitTestable(), findsNothing);
+    await tester.enterText(find.byType(TextField), '5');
+    await tester.pumpAndSettle();
+    // Item 5 should show up.
+    expect(find.text('Item 5').hitTestable(), findsOneWidget);
+  });
+
 }
 
 enum TestMenu {

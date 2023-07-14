@@ -210,7 +210,7 @@ void main() {
 
     for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
       final RenderWrap wrap;
-      switch(clip){
+      switch (clip){
         case Clip.none:
         case Clip.hardEdge:
         case Clip.antiAlias:

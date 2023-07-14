@@ -315,8 +315,10 @@ class DriveCommand extends RunCommandBase {
         profileMemory: stringArg('profile-memory'),
       );
 
-      // If the test is sent a signal or times out, take a screenshot
-      _registerScreenshotCallbacks(device);
+      if (screenshot != null) {
+        // If the test is sent a signal or times out, take a screenshot
+        _registerScreenshotCallbacks(device, _fileSystem.directory(screenshot));
+      }
 
       final int testResult = await testResultFuture;
 
@@ -327,7 +329,7 @@ class DriveCommand extends RunCommandBase {
 
       if (testResult != 0 && screenshot != null) {
         // Take a screenshot while the app is still running.
-        await _takeScreenshot(device);
+        await _takeScreenshot(device, _fileSystem.directory(screenshot));
         screenshotTaken = true;
       }
 
@@ -342,11 +344,11 @@ class DriveCommand extends RunCommandBase {
       if (testResult != 0) {
         throwToolExit(null);
       }
-    } on Exception catch(_) {
+    } on Exception catch (_) {
       // On exceptions, including ToolExit, take a screenshot on the device
       // unless a screenshot was already taken on test failure.
       if (!screenshotTaken && screenshot != null) {
-        await _takeScreenshot(device);
+        await _takeScreenshot(device, _fileSystem.directory(screenshot));
       }
       rethrow;
     }
@@ -369,7 +371,7 @@ class DriveCommand extends RunCommandBase {
     return timeoutSeconds;
   }
 
-  void _registerScreenshotCallbacks(Device device) {
+  void _registerScreenshotCallbacks(Device device, Directory screenshotDir) {
     _logger.printTrace('Registering signal handlers...');
     final Map<ProcessSignal, Object> tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
@@ -378,7 +380,7 @@ class DriveCommand extends RunCommandBase {
         (ProcessSignal signal) {
           _unregisterScreenshotCallbacks();
           _logger.printError('Caught $signal');
-          return _takeScreenshot(device);
+          return _takeScreenshot(device, screenshotDir);
         },
       );
     }
@@ -390,7 +392,7 @@ class DriveCommand extends RunCommandBase {
         Duration(seconds: timeoutSeconds),
         () {
           _unregisterScreenshotCallbacks();
-          _takeScreenshot(device);
+          _takeScreenshot(device, screenshotDir);
           throwToolExit('Timed out after $timeoutSeconds seconds');
         }
       );
@@ -450,13 +452,12 @@ class DriveCommand extends RunCommandBase {
     return '${pathWithNoExtension}_test${_fileSystem.path.extension(appFile)}';
   }
 
-  Future<void> _takeScreenshot(Device device) async {
+  Future<void> _takeScreenshot(Device device, Directory outputDirectory) async {
     if (!device.supportsScreenshot) {
       return;
     }
     try {
-      final Directory outputDirectory = _fileSystem.directory(screenshot)
-        ..createSync(recursive: true);
+      outputDirectory.createSync(recursive: true);
       final File outputFile = _fsUtils.getUniqueFile(
         outputDirectory,
         'drive',
