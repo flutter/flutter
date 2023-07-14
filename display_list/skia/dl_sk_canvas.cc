@@ -8,6 +8,8 @@
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 #include "flutter/fml/trace_event.h"
 
+#include "third_party/skia/include/core/SkColorFilter.h"
+
 namespace flutter {
 
 // clang-format off

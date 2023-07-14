@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 
+#include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 
