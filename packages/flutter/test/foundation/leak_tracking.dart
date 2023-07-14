@@ -169,11 +169,18 @@ class LeakCleaner {
 
   /// Returns true if [leak] should be reported as failure.
   bool _shouldReportLeak(LeakType leakType, LeakReport leak, Map<(String, LeakType), int> countByClassAndType) {
-    if (leakType == LeakType.notDisposed && config.allowAllNotDisposed) {
-      return false;
-    } else if (config.allowAllNotGCed) {
-      return false;
+    switch (leakType) {
+      case LeakType.notDisposed:
+        if (config.allowAllNotDisposed) {
+          return false;
+        }
+      case LeakType.notGCed:
+      case LeakType.gcedLate:
+        if (config.allowAllNotGCed) {
+          return false;
+        }
     }
+
     final String leakingClass = leak.type;
     final (String, LeakType) classAndType = (leakingClass, leakType);
 
