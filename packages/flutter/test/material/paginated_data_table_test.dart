@@ -170,6 +170,138 @@ void main() {
     log.clear();
   });
 
+  testWidgets('PaginatedDataTable fotter page number', (WidgetTester tester) async {
+    final TestDataSource source = TestDataSource();
+    int rowsPerPage = 2;
+
+    Widget buildTable(TestDataSource source, int rowsPerPage) {
+      return PaginatedDataTable(
+        header: const Text('Test table'),
+        source: source,
+        rowsPerPage: rowsPerPage,
+        showFirstLastButtons: true,
+        availableRowsPerPage: const <int>[
+          2, 3, 4, 5, 7, 8,
+        ],
+        onRowsPerPageChanged: (int? rowsPerPage) {
+        },
+        onPageChanged: (int rowIndex) {
+        },
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+
+    expect(find.text('1–2 of 500'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Next page'));
+    await tester.pump();
+
+    expect(find.text('3–4 of 500'), findsOneWidget);
+
+    final Finder lastPageButton = find.ancestor(
+      of: find.byTooltip('Last page'),
+      matching: find.byWidgetPredicate((Widget widget) => widget is IconButton),
+    );
+
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
+
+    await tester.tap(lastPageButton);
+    await tester.pump();
+
+    expect(find.text('499–500 of 500'), findsOneWidget);
+
+    final PaginatedDataTableState state =  tester.state(find.byType(PaginatedDataTable));
+
+    state.pageTo(1);
+    rowsPerPage = 3;
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+
+    expect(find.textContaining('1–3 of 500'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Next page'));
+    await tester.pump();
+
+    expect(find.text('4–6 of 500'), findsOneWidget);
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
+
+    await tester.tap(lastPageButton);
+    await tester.pump();
+
+    expect(find.text('499–500 of 500'), findsOneWidget);
+
+    state.pageTo(1);
+    rowsPerPage = 4;
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+
+    expect(find.textContaining('1–4 of 500'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Next page'));
+    await tester.pump();
+
+    expect(find.text('5–8 of 500'), findsOneWidget);
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
+
+    await tester.tap(lastPageButton);
+    await tester.pump();
+
+    expect(find.text('497–500 of 500'), findsOneWidget);
+
+
+    state.pageTo(1);
+    rowsPerPage = 5;
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+
+    expect(find.textContaining('1–5 of 500'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Next page'));
+    await tester.pump();
+
+    expect(find.text('6–10 of 500'), findsOneWidget);
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
+
+    await tester.tap(lastPageButton);
+    await tester.pump();
+
+    expect(find.text('496–500 of 500'), findsOneWidget);
+
+    state.pageTo(1);
+    rowsPerPage = 8;
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+
+    expect(find.textContaining('1–8 of 500'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Next page'));
+    await tester.pump();
+
+    expect(find.text('9–16 of 500'), findsOneWidget);
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
+
+    await tester.tap(lastPageButton);
+    await tester.pump();
+
+    expect(find.text('497–500 of 500'), findsOneWidget);
+  });
+
   testWidgets('PaginatedDataTable control test', (WidgetTester tester) async {
     TestDataSource source = TestDataSource()
       ..generation = 42;
