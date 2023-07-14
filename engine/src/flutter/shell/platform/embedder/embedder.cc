@@ -999,7 +999,7 @@ MakeRenderTargetFromBackingStoreImpeller(
 
   impeller::RenderTarget render_target_desc;
 
-  render_target_desc.SetColorAttachment(color0, framebuffer->target);
+  render_target_desc.SetColorAttachment(color0, 0u);
   render_target_desc.SetStencilAttachment(stencil0);
 
   return std::make_unique<flutter::EmbedderRenderTargetImpeller>(

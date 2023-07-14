@@ -247,7 +247,8 @@ bool EntityPass::Render(ContentContext& renderer,
                         const RenderTarget& render_target) const {
   auto root_render_target = render_target;
 
-  if (root_render_target.GetColorAttachments().empty()) {
+  if (root_render_target.GetColorAttachments().find(0u) ==
+      root_render_target.GetColorAttachments().end()) {
     VALIDATION_LOG << "The root RenderTarget must have a color attachment.";
     return false;
   }
@@ -341,7 +342,7 @@ bool EntityPass::Render(ContentContext& renderer,
 
   // The safety check for fetching this color attachment is at the beginning of
   // this method.
-  auto color0 = root_render_target.GetColorAttachments().find(0)->second;
+  auto color0 = root_render_target.GetColorAttachments().find(0u)->second;
 
   // If a root stencil was provided by the caller, then verify that it has a
   // configuration which can be used to render this pass.
