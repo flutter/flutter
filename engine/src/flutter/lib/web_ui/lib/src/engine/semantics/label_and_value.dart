@@ -68,7 +68,6 @@ class LabelAndValue extends RoleManager {
 
   void _cleanUpDom() {
     semanticsObject.element.removeAttribute('aria-label');
-    semanticsObject.clearAriaRole();
   }
 
   @override
