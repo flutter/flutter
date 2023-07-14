@@ -951,22 +951,13 @@ class _AppBarState extends State<AppBar> {
 
     Widget? title = widget.title;
     if (title != null) {
-      bool? namesRoute;
-      switch (theme.platform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          namesRoute = true;
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          break;
-      }
-
       title = _AppBarTitleBox(child: title);
       if (!widget.excludeHeaderSemantics) {
         title = Semantics(
-          namesRoute: namesRoute,
+          namesRoute: switch (theme.platform) {
+            TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.linux || TargetPlatform.windows => true,
+            TargetPlatform.iOS || TargetPlatform.macOS => null,
+          },
           header: true,
           child: title,
         );
