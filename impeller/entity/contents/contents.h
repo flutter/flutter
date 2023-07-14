@@ -14,6 +14,7 @@
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/renderer/snapshot.h"
+#include "impeller/typographer/lazy_glyph_atlas.h"
 
 namespace impeller {
 
@@ -52,6 +53,12 @@ class Contents {
   Contents();
 
   virtual ~Contents();
+
+  /// @brief  Add any text data to the specified lazy atlas. The scale parameter
+  ///         must be used again later when drawing the text.
+  virtual void PopulateGlyphAtlas(
+      const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
+      Scalar scale) {}
 
   virtual bool Render(const ContentContext& renderer,
                       const Entity& entity,

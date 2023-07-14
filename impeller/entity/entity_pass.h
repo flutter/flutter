@@ -79,6 +79,12 @@ class EntityPass {
   ///         of child passes. The iteration order is depth-first.
   void IterateAllEntities(const std::function<bool(Entity&)>& iterator);
 
+  /// @brief  Iterate all entities in this pass, recursively including entities
+  ///         of child passes. The iteration order is depth-first and does not
+  ///         allow modification of the entities.
+  void IterateAllEntities(
+      const std::function<bool(const Entity&)>& iterator) const;
+
   /// @brief  Iterate entities in this pass up until the first subpass is found.
   ///         This is useful for limiting look-ahead optimizations.
   ///
