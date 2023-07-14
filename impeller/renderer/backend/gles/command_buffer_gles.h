@@ -41,10 +41,10 @@ class CommandBufferGLES final : public CommandBuffer {
   std::shared_ptr<RenderPass> OnCreateRenderPass(RenderTarget target) override;
 
   // |CommandBuffer|
-  std::shared_ptr<BlitPass> OnCreateBlitPass() const override;
+  std::shared_ptr<BlitPass> OnCreateBlitPass() override;
 
   // |CommandBuffer|
-  std::shared_ptr<ComputePass> OnCreateComputePass() const override;
+  std::shared_ptr<ComputePass> OnCreateComputePass() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBufferGLES);
 };

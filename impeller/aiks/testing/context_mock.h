@@ -36,7 +36,7 @@ class CommandBufferMock : public CommandBuffer {
     return command_buffer->OnCreateRenderPass(render_target);
   }
 
-  MOCK_CONST_METHOD0(OnCreateBlitPass, std::shared_ptr<BlitPass>());
+  MOCK_METHOD0(OnCreateBlitPass, std::shared_ptr<BlitPass>());
   static std::shared_ptr<BlitPass> ForwardOnCreateBlitPass(
       CommandBuffer* command_buffer) {
     return command_buffer->OnCreateBlitPass();
@@ -53,7 +53,7 @@ class CommandBufferMock : public CommandBuffer {
     return command_buffer->OnWaitUntilScheduled();
   }
 
-  MOCK_CONST_METHOD0(OnCreateComputePass, std::shared_ptr<ComputePass>());
+  MOCK_METHOD0(OnCreateComputePass, std::shared_ptr<ComputePass>());
   static std::shared_ptr<ComputePass> ForwardOnCreateComputePass(
       CommandBuffer* command_buffer) {
     return command_buffer->OnCreateComputePass();

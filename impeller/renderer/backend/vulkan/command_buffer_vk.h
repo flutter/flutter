@@ -12,25 +12,27 @@
 namespace impeller {
 
 class ContextVK;
+class CommandEncoderFactoryVK;
 class CommandEncoderVK;
 
 class CommandBufferVK final
     : public CommandBuffer,
-      public BackendCast<CommandBufferVK, CommandBuffer> {
+      public BackendCast<CommandBufferVK, CommandBuffer>,
+      public std::enable_shared_from_this<CommandBufferVK> {
  public:
   // |CommandBuffer|
   ~CommandBufferVK() override;
 
-  const std::shared_ptr<CommandEncoderVK>& GetEncoder() const;
+  const std::shared_ptr<CommandEncoderVK>& GetEncoder();
 
  private:
   friend class ContextVK;
 
   std::shared_ptr<CommandEncoderVK> encoder_;
-  bool is_valid_ = false;
+  std::shared_ptr<CommandEncoderFactoryVK> encoder_factory_;
 
   CommandBufferVK(std::weak_ptr<const Context> context,
-                  std::shared_ptr<CommandEncoderVK> encoder);
+                  std::shared_ptr<CommandEncoderFactoryVK> encoder_factory);
 
   // |CommandBuffer|
   void SetLabel(const std::string& label) const override;
@@ -48,10 +50,10 @@ class CommandBufferVK final
   std::shared_ptr<RenderPass> OnCreateRenderPass(RenderTarget target) override;
 
   // |CommandBuffer|
-  std::shared_ptr<BlitPass> OnCreateBlitPass() const override;
+  std::shared_ptr<BlitPass> OnCreateBlitPass() override;
 
   // |CommandBuffer|
-  std::shared_ptr<ComputePass> OnCreateComputePass() const override;
+  std::shared_ptr<ComputePass> OnCreateComputePass() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBufferVK);
 };

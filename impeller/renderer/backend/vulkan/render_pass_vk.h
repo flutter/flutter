@@ -16,6 +16,8 @@
 
 namespace impeller {
 
+class CommandBufferVK;
+
 class RenderPassVK final : public RenderPass {
  public:
   // |RenderPass|
@@ -24,14 +26,14 @@ class RenderPassVK final : public RenderPass {
  private:
   friend class CommandBufferVK;
 
-  std::weak_ptr<CommandEncoderVK> encoder_;
+  std::weak_ptr<CommandBufferVK> command_buffer_;
   std::string debug_label_;
   bool is_valid_ = false;
   mutable PassBindingsCache pass_bindings_cache_;
 
   RenderPassVK(const std::shared_ptr<const Context>& context,
                const RenderTarget& target,
-               std::weak_ptr<CommandEncoderVK> encoder);
+               std::weak_ptr<CommandBufferVK> command_buffer);
 
   // |RenderPass|
   bool IsValid() const override;

@@ -10,6 +10,8 @@
 
 namespace impeller {
 
+class CommandBufferVK;
+
 class ComputePassVK final : public ComputePass {
  public:
   // |ComputePass|
@@ -18,12 +20,12 @@ class ComputePassVK final : public ComputePass {
  private:
   friend class CommandBufferVK;
 
-  std::weak_ptr<CommandEncoderVK> encoder_;
+  std::weak_ptr<CommandBufferVK> command_buffer_;
   std::string label_;
   bool is_valid_ = false;
 
   ComputePassVK(std::weak_ptr<const Context> context,
-                std::weak_ptr<CommandEncoderVK> encoder);
+                std::weak_ptr<CommandBufferVK> command_buffer);
 
   // |ComputePass|
   bool IsValid() const override;
