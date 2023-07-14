@@ -205,20 +205,20 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     return regions;
   }
 
-  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHints) {
+  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHints, String widgetName) {
     overflowHints ??= <DiagnosticsNode>[];
     if (overflowHints.isEmpty) {
       overflowHints.add(ErrorDescription(
-        'The edge of the $runtimeType that is '
+        'The edge of the $widgetName that is '
         'overflowing has been marked in the rendering with a yellow and black '
         'striped pattern. This is usually caused by the contents being too big '
-        'for the $runtimeType.',
+        'for the $widgetName.',
       ));
       overflowHints.add(ErrorHint(
         'This is considered an error condition because it indicates that there '
         'is content that cannot be seen. If the content is legitimately bigger '
         'than the available space, consider clipping it with a ClipRect widget '
-        'before putting it in the $runtimeType, or using a scrollable '
+        'before putting it in the $widgetName, or using a scrollable '
         'container, like a ListView.',
       ));
     }
@@ -244,7 +244,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     // be visualized in debugging tools.
     FlutterError.reportError(
       FlutterErrorDetails(
-        exception: FlutterError('A $runtimeType overflowed by $overflowText.'),
+        exception: FlutterError('A $widgetName overflowed by $overflowText.'),
         library: 'rendering library',
         context: ErrorDescription('during layout'),
         informationCollector: () => <DiagnosticsNode>[
@@ -253,7 +253,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
           if (kDebugMode && debugCreator != null)
             DiagnosticsDebugCreator(debugCreator!),
           ...overflowHints!,
-          describeForError('The specific $runtimeType in question is'),
+          describeForError('The specific $widgetName in question is'),
           // TODO(jacobr): this line is ascii art that it would be nice to
           // handle a little more generically in GUI debugging clients in the
           // future.
@@ -266,7 +266,34 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
   /// To be called when the overflow indicators should be painted.
   ///
   /// Typically only called if there is an overflow, and only from within a
-  /// debug build.
+  /// debug build. This is expected to be called during a [RenderObject.paint]
+  /// method.
+  ///
+  /// The `context` and `offset` arguments are those passed to the
+  /// [RenderObject.paint] method.
+  ///
+  /// The `containerRect` rectangle represents the area that might have been
+  /// overflowed. The coordinate system has [Offset.zero] at the top-left corner
+  /// of render object. Typically this is `Offset.zero & size` for a [RenderBox]
+  /// (the surface area of the render object).
+  ///
+  /// The `childRect` is the rectangle of the overflowing child (or children),
+  /// in the same coordinate space as `containerRect`. It is expected to
+  /// overflow `containerRect` in some manner.
+  ///
+  /// The `oveflowHints` argument provides information to be conveyed to the
+  /// [FlutterErrorDetails.informationCollector] when the message is rendered in
+  /// the console. If this argument is null, information will be synthesized,
+  /// using the `widgetName` argument as the name of the object reporting the
+  /// overflow.
+  ///
+  /// The `fatalInTests` argument specifies whether the message shown in the
+  /// console should count as a fatal error if seen in tests. This should be set
+  /// to true (the default) for new render objects reporting overflow. It can be
+  /// set to false if overflow diagnostics are being added to the render object
+  /// after it has already existed for some time. This prevents the newly-added
+  /// diagnostics from breaking existing tests that happen to trip the new
+  /// overflow warning.
   ///
   /// See example code in [DebugOverflowIndicatorMixin] documentation.
   void paintOverflowIndicator(
@@ -275,6 +302,8 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     Rect containerRect,
     Rect childRect, {
     List<DiagnosticsNode>? overflowHints,
+    String? widgetName,
+    bool fatalInTests = true,
   }) {
     final RelativeRect overflow = RelativeRect.fromRect(containerRect, childRect);
 
@@ -310,7 +339,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
 
     if (_overflowReportNeeded) {
       _overflowReportNeeded = false;
-      _reportOverflow(overflow, overflowHints);
+      _reportOverflow(overflow, overflowHints, widgetName ?? objectRuntimeType(this, 'widget'));
     }
   }
 

@@ -726,6 +726,7 @@ void main() {
     ));
 
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)), paints..clipRect());
+    expect(tester.takeException(), isNotNull); // overflow warning
   });
 
   testWidgets('Hit test children in wrap', (WidgetTester tester) async {
@@ -750,6 +751,7 @@ void main() {
         ),
       ],
     ));
+    expect(tester.takeException(), isNotNull); // overflow warning
 
     await tester.tapAt(const Offset(209.0, 314.0));
     expect(log, isEmpty);
@@ -771,7 +773,7 @@ void main() {
     expect(wrap.toStringShallow(), hasOneLineDescription);
   });
 
-  testWidgets('RenderWrap toString control test', (WidgetTester tester) async {
+  testWidgets('RenderWrap width', (WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       direction: Axis.vertical,
       runSpacing: 7.0,
@@ -783,6 +785,7 @@ void main() {
         SizedBox(width: 500.0, height: 400.0),
       ],
     ));
+    expect(tester.takeException(), isNotNull); // overflow warning
 
     final RenderBox wrap = tester.renderObject(find.byType(Wrap));
     final double width = wrap.getMinIntrinsicWidth(600.0);

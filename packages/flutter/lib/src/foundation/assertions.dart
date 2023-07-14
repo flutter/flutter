@@ -408,6 +408,7 @@ class FlutterErrorDetails with Diagnosticable {
     this.stackFilter,
     this.informationCollector,
     this.silent = false,
+    this.fatalInTests = true,
   });
 
   /// Creates a copy of the error details but with the given fields replaced
@@ -418,6 +419,7 @@ class FlutterErrorDetails with Diagnosticable {
     InformationCollector? informationCollector,
     String? library,
     bool? silent,
+    bool? fatalInTests,
     StackTrace? stack,
     IterableFilter<String>? stackFilter,
   }) {
@@ -427,6 +429,7 @@ class FlutterErrorDetails with Diagnosticable {
       informationCollector: informationCollector ?? this.informationCollector,
       library: library ?? this.library,
       silent: silent ?? this.silent,
+      fatalInTests: fatalInTests ?? this.fatalInTests,
       stack: stack ?? this.stack,
       stackFilter: stackFilter ?? this.stackFilter,
     );
@@ -587,7 +590,35 @@ class FlutterErrorDetails with Diagnosticable {
   /// example, the HTTP library sets this flag so as to not report every 404
   /// error to the console on end-user devices, while still allowing a custom
   /// error handler to see the errors even in release builds.
+  ///
+  /// Some errors are reported with `silent: false` but still do not trigger in
+  /// release builds, because the code that reports the error is only itself
+  /// included in debug builds. For example, asserts are only compiled in debug
+  /// builds.
   final bool silent;
+
+  /// Whether this error should cause a test failure when caught by the test
+  /// framework, if the test does not handle it using
+  /// [WidgetTester.takeException].
+  ///
+  /// When this is true, tests will fail if another (fatal-in-tests) exception
+  /// is caught, or when the test ends, unless the test calls
+  /// [WidgetTester.takeException] first.
+  ///
+  /// When this is false, the test framework will instead discard the exception
+  /// when the next exception is caught or when the test ends.
+  ///
+  /// This allows new exceptions to be introduced without causing existing test
+  /// to fail.
+  ///
+  /// When an exception is ignored because `fatalInTests` is false, a warning is
+  /// printed to the console (along with the error message). To silence this
+  /// message, call [WidgetTester.takeException] (and use [expect] to check that
+  /// its return value is what you expect), or, change the code to not cause the
+  /// exception to be thrown.
+  ///
+  /// This property defaults to true.
+  final bool fatalInTests;
 
   /// Converts the [exception] to a string.
   ///

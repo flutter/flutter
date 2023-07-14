@@ -4,7 +4,10 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
+import 'debug_overflow_indicator.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
@@ -105,7 +108,8 @@ class WrapParentData extends ContainerBoxParentData<RenderBox> {
 /// [runSpacing] and [runAlignment].
 class RenderWrap extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, WrapParentData>,
-         RenderBoxContainerDefaultsMixin<RenderBox, WrapParentData> {
+         RenderBoxContainerDefaultsMixin<RenderBox, WrapParentData>,
+         DebugOverflowIndicatorMixin {
   /// Creates a wrap render object.
   ///
   /// By default, the wrap layout is horizontal and both the children and the
@@ -734,21 +738,38 @@ class RenderWrap extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // TODO(ianh): move the debug flex overflow paint logic somewhere common so
-    // it can be reused here
-    if (_hasVisualOverflow && clipBehavior != Clip.none) {
-      _clipRectLayer.layer = context.pushClipRect(
-        needsCompositing,
-        offset,
-        Offset.zero & size,
-        defaultPaint,
-        clipBehavior: clipBehavior,
-        oldLayer: _clipRectLayer.layer,
-      );
-    } else {
+    if (!_hasVisualOverflow) {
       _clipRectLayer.layer = null;
       defaultPaint(context, offset);
+      return;
     }
+
+    _clipRectLayer.layer = context.pushClipRect(
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      defaultPaint,
+      clipBehavior: clipBehavior,
+      oldLayer: _clipRectLayer.layer,
+    );
+
+    assert(() {
+      if (size.isEmpty) {
+        // When the object is size zero, we don't bother reporting overflow because
+        // it's probably unrelated to the Wrap itself.
+        return true;
+      }
+      Rect overflowRect = Offset.zero & size;
+      RenderBox? child = firstChild;
+      while (child != null) {
+        final WrapParentData childParentData = child.parentData! as WrapParentData;
+        overflowRect = overflowRect.expandToInclude((childParentData.offset + offset) & child.size);
+        child = childParentData.nextSibling;
+      }
+      // TODO(ianh): This warning was added in the summer of 2023. Consider making the warning fatal eventually.
+      paintOverflowIndicator(context, offset, Offset.zero & size, overflowRect, widgetName: 'Wrap', fatalInTests: false);
+      return true;
+    }());
   }
 
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
@@ -770,5 +791,16 @@ class RenderWrap extends RenderBox
     properties.add(DoubleProperty('crossAxisAlignment', runSpacing));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
+  }
+
+  @override
+  String toStringShort() {
+    String header = super.toStringShort();
+    if (!kReleaseMode) {
+      if (_hasVisualOverflow) {
+        header += ' OVERFLOWING';
+      }
+    }
+    return header;
   }
 }

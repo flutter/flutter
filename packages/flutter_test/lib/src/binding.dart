@@ -699,18 +699,18 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   /// Returns the exception most recently caught by the Flutter framework.
   ///
-  /// Call this if you expect an exception during a test. If an exception is
-  /// thrown and this is not called, then the exception is rethrown when
-  /// the [testWidgets] call completes.
-  ///
-  /// If two exceptions are thrown in a row without the first one being
-  /// acknowledged with a call to this method, then when the second exception is
-  /// thrown, they are both dumped to the console and then the second is
-  /// rethrown from the exception handler. This will likely result in the
-  /// framework entering a highly unstable state and everything collapsing.
-  ///
   /// It's safe to call this when there's no pending exception; it will return
-  /// null in that case.
+  /// null in that case. This can be used to verify the precise timing of an
+  /// exception.
+  ///
+  /// If an exception is caught by the Flutter framework, the test is allowed to
+  /// continue (so that this method can be called). If this method is not
+  /// called, however, and the exception in question was marked as
+  /// [FlutterErrorDetails.fatalInTests] (the default), then the test will
+  /// fail.
+  ///
+  /// This will either happen at the end of the test, or when a second exception
+  /// (with [FlutterErrorDetails.fatalInTests] set) is caught by the framework.
   dynamic takeException() {
     assert(inTest);
     final dynamic result = _pendingExceptionDetails?.exception;
@@ -795,11 +795,45 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   Zone? _parentZone;
 
+  void _swallowNonFatalErrors() {
+    if (_pendingExceptionDetails == null || _pendingExceptionDetails!.fatalInTests) {
+      return;
+    }
+    // We have a non-fatal error to report to the console.
+    final DebugPrintCallback oldDebugPrint = debugPrint;
+    try {
+      debugPrint = debugPrintOverride; // just in case the test overrides it
+      FlutterError.dumpErrorToConsole(
+        _pendingExceptionDetails!.copyWith(
+          informationCollector: () sync* {
+            if (_pendingExceptionDetails!.informationCollector != null) {
+              yield* _pendingExceptionDetails!.informationCollector!();
+            }
+            yield ErrorSpacer();
+            yield ErrorDescription('This exception was marked as non-fatal in tests.');
+            yield ErrorDescription(
+              'To silence this warning, either adjust the test or app logic to avoid '
+              'throwing this exception, or explicitly catch the exception in the test '
+              'using "tester.takeException()".'
+            );
+            yield ErrorHint('This exception may become fatal in future versions of Flutter.');
+          }
+        ),
+        forceReport: true,
+      );
+    } finally {
+      debugPrint = oldDebugPrint;
+      _pendingExceptionDetails = null;
+    }
+  }
+
   VoidCallback _createTestCompletionHandler(String testDescription, Completer<void> completer) {
+    // This runs at the end of the test.
     return () {
       // This can get called twice, in the case of a Future without listeners failing, and then
       // our main future completing.
       assert(Zone.current == _parentZone);
+      _swallowNonFatalErrors();
       if (_pendingExceptionDetails != null) {
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(_pendingExceptionDetails!, testDescription);
@@ -861,6 +895,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _oldStackTraceDemangler = FlutterError.demangleStackTrace;
     int exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
+      _swallowNonFatalErrors();
       if (_pendingExceptionDetails != null) {
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
         if (exceptionCount == 0) {

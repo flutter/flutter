@@ -219,7 +219,7 @@ void main() {
         case null:
           wrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200]);
       }
-      layout(wrap, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
+      layout(wrap, constraints: viewport, phase: EnginePhase.composite, onErrors: absorbOverflowedErrors);
       context.paintChild(wrap, Offset.zero);
       // By default, clipBehavior should be Clip.none
       expect(context.clipBehavior, equals(clip ?? Clip.none));
