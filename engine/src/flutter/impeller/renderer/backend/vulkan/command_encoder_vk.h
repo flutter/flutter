@@ -10,6 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
+#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/device_holder.h"
 #include "impeller/renderer/backend/vulkan/queue_vk.h"
@@ -26,14 +27,29 @@ class TextureSourceVK;
 class TrackedObjectsVK;
 class FenceWaiterVK;
 
+class CommandEncoderFactoryVK {
+ public:
+  CommandEncoderFactoryVK(const std::weak_ptr<const ContextVK>& context);
+
+  std::shared_ptr<CommandEncoderVK> Create();
+
+  void SetLabel(const std::string& label);
+
+ private:
+  std::weak_ptr<const ContextVK> context_;
+  std::optional<std::string> label_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(CommandEncoderFactoryVK);
+};
+
 class CommandEncoderVK {
  public:
   using SubmitCallback = std::function<void(bool)>;
 
   // Visible for testing.
-  CommandEncoderVK(const std::weak_ptr<const DeviceHolder>& device_holder,
+  CommandEncoderVK(std::weak_ptr<const DeviceHolder> device_holder,
+                   std::shared_ptr<TrackedObjectsVK> tracked_objects,
                    const std::shared_ptr<QueueVK>& queue,
-                   const std::shared_ptr<CommandPoolVK>& pool,
                    std::shared_ptr<FenceWaiterVK> fence_waiter);
 
   ~CommandEncoderVK();
@@ -69,10 +85,10 @@ class CommandEncoderVK {
   friend class ContextVK;
 
   std::weak_ptr<const DeviceHolder> device_holder_;
-  std::shared_ptr<QueueVK> queue_;
-  std::shared_ptr<FenceWaiterVK> fence_waiter_;
   std::shared_ptr<TrackedObjectsVK> tracked_objects_;
-  bool is_valid_ = false;
+  std::shared_ptr<QueueVK> queue_;
+  const std::shared_ptr<FenceWaiterVK> fence_waiter_;
+  bool is_valid_ = true;
 
   void Reset();
 

@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/vulkan/compute_pass_vk.h"
 
 #include "flutter/fml/trace_event.h"
+#include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/compute_pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
@@ -12,8 +13,9 @@
 namespace impeller {
 
 ComputePassVK::ComputePassVK(std::weak_ptr<const Context> context,
-                             std::weak_ptr<CommandEncoderVK> encoder)
-    : ComputePass(std::move(context)), encoder_(std::move(encoder)) {
+                             std::weak_ptr<CommandBufferVK> command_buffer)
+    : ComputePass(std::move(context)),
+      command_buffer_(std::move(command_buffer)) {
   is_valid_ = true;
 }
 
@@ -203,9 +205,13 @@ bool ComputePassVK::OnEncodeCommands(const Context& context,
   FML_DCHECK(!grid_size.IsEmpty() && !thread_group_size.IsEmpty());
 
   const auto& vk_context = ContextVK::Cast(context);
-  auto encoder = encoder_.lock();
+  auto command_buffer = command_buffer_.lock();
+  if (!command_buffer) {
+    VALIDATION_LOG << "Command buffer died before commands could be encoded.";
+    return false;
+  }
+  auto encoder = command_buffer->GetEncoder();
   if (!encoder) {
-    VALIDATION_LOG << "Command encoder died before commands could be encoded.";
     return false;
   }
 

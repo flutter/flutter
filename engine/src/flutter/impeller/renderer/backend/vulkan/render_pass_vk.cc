@@ -15,6 +15,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler.h"
 #include "impeller/core/shader_types.h"
+#include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
@@ -137,8 +138,8 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
 
 RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
                            const RenderTarget& target,
-                           std::weak_ptr<CommandEncoderVK> encoder)
-    : RenderPass(context, target), encoder_(std::move(encoder)) {
+                           std::weak_ptr<CommandBufferVK> command_buffer)
+    : RenderPass(context, target), command_buffer_(std::move(command_buffer)) {
   is_valid_ = true;
 }
 
@@ -555,9 +556,13 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
 
   const auto& vk_context = ContextVK::Cast(context);
 
-  auto encoder = encoder_.lock();
+  auto command_buffer = command_buffer_.lock();
+  if (!command_buffer) {
+    VALIDATION_LOG << "Command buffer died before commands could be encoded.";
+    return false;
+  }
+  auto encoder = command_buffer->GetEncoder();
   if (!encoder) {
-    VALIDATION_LOG << "Command encoder died before commands could be encoded.";
     return false;
   }
 

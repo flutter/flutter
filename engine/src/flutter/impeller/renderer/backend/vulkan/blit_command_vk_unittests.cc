@@ -13,9 +13,7 @@ namespace testing {
 TEST(BlitCommandVkTest, BlitCopyTextureToTextureCommandVK) {
   auto context = CreateMockVulkanContext();
   auto pool = CommandPoolVK::GetThreadLocal(context.get());
-  CommandEncoderVK encoder(context->GetDeviceHolder(),
-                           context->GetGraphicsQueue(), pool,
-                           context->GetFenceWaiter());
+  auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitCopyTextureToTextureCommandVK cmd;
   cmd.source = context->GetResourceAllocator()->CreateTexture({
       .size = ISize(100, 100),
@@ -23,18 +21,15 @@ TEST(BlitCommandVkTest, BlitCopyTextureToTextureCommandVK) {
   cmd.destination = context->GetResourceAllocator()->CreateTexture({
       .size = ISize(100, 100),
   });
-  bool result = cmd.Encode(encoder);
+  bool result = cmd.Encode(*encoder.get());
   EXPECT_TRUE(result);
-  EXPECT_TRUE(encoder.IsTracking(cmd.source));
-  EXPECT_TRUE(encoder.IsTracking(cmd.destination));
+  EXPECT_TRUE(encoder->IsTracking(cmd.source));
+  EXPECT_TRUE(encoder->IsTracking(cmd.destination));
 }
 
 TEST(BlitCommandVkTest, BlitCopyTextureToBufferCommandVK) {
   auto context = CreateMockVulkanContext();
-  auto pool = CommandPoolVK::GetThreadLocal(context.get());
-  CommandEncoderVK encoder(context->GetDeviceHolder(),
-                           context->GetGraphicsQueue(), pool,
-                           context->GetFenceWaiter());
+  auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitCopyTextureToBufferCommandVK cmd;
   cmd.source = context->GetResourceAllocator()->CreateTexture({
       .size = ISize(100, 100),
@@ -42,18 +37,15 @@ TEST(BlitCommandVkTest, BlitCopyTextureToBufferCommandVK) {
   cmd.destination = context->GetResourceAllocator()->CreateBuffer({
       .size = 1,
   });
-  bool result = cmd.Encode(encoder);
+  bool result = cmd.Encode(*encoder.get());
   EXPECT_TRUE(result);
-  EXPECT_TRUE(encoder.IsTracking(cmd.source));
-  EXPECT_TRUE(encoder.IsTracking(cmd.destination));
+  EXPECT_TRUE(encoder->IsTracking(cmd.source));
+  EXPECT_TRUE(encoder->IsTracking(cmd.destination));
 }
 
 TEST(BlitCommandVkTest, BlitCopyBufferToTextureCommandVK) {
   auto context = CreateMockVulkanContext();
-  auto pool = CommandPoolVK::GetThreadLocal(context.get());
-  CommandEncoderVK encoder(context->GetDeviceHolder(),
-                           context->GetGraphicsQueue(), pool,
-                           context->GetFenceWaiter());
+  auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitCopyBufferToTextureCommandVK cmd;
   cmd.destination = context->GetResourceAllocator()->CreateTexture({
       .size = ISize(100, 100),
@@ -63,26 +55,23 @@ TEST(BlitCommandVkTest, BlitCopyBufferToTextureCommandVK) {
                        .size = 1,
                    })
                    ->AsBufferView();
-  bool result = cmd.Encode(encoder);
+  bool result = cmd.Encode(*encoder.get());
   EXPECT_TRUE(result);
-  EXPECT_TRUE(encoder.IsTracking(cmd.source.buffer));
-  EXPECT_TRUE(encoder.IsTracking(cmd.destination));
+  EXPECT_TRUE(encoder->IsTracking(cmd.source.buffer));
+  EXPECT_TRUE(encoder->IsTracking(cmd.destination));
 }
 
 TEST(BlitCommandVkTest, BlitGenerateMipmapCommandVK) {
   auto context = CreateMockVulkanContext();
-  auto pool = CommandPoolVK::GetThreadLocal(context.get());
-  CommandEncoderVK encoder(context->GetDeviceHolder(),
-                           context->GetGraphicsQueue(), pool,
-                           context->GetFenceWaiter());
+  auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitGenerateMipmapCommandVK cmd;
   cmd.texture = context->GetResourceAllocator()->CreateTexture({
       .size = ISize(100, 100),
       .mip_count = 2,
   });
-  bool result = cmd.Encode(encoder);
+  bool result = cmd.Encode(*encoder.get());
   EXPECT_TRUE(result);
-  EXPECT_TRUE(encoder.IsTracking(cmd.texture));
+  EXPECT_TRUE(encoder->IsTracking(cmd.texture));
 }
 
 }  // namespace testing

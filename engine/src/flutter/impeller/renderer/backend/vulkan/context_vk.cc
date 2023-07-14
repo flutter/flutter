@@ -452,13 +452,9 @@ std::shared_ptr<PipelineLibrary> ContextVK::GetPipelineLibrary() const {
 }
 
 std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
-  auto encoder = CreateGraphicsCommandEncoder();
-  if (!encoder) {
-    return nullptr;
-  }
   return std::shared_ptr<CommandBufferVK>(
-      new CommandBufferVK(shared_from_this(),  //
-                          std::move(encoder))  //
+      new CommandBufferVK(shared_from_this(),                     //
+                          CreateGraphicsCommandEncoderFactory())  //
   );
 }
 
@@ -544,22 +540,9 @@ std::shared_ptr<ResourceManagerVK> ContextVK::GetResourceManager() const {
   return resource_manager_;
 }
 
-std::unique_ptr<CommandEncoderVK> ContextVK::CreateGraphicsCommandEncoder()
-    const {
-  auto tls_pool = CommandPoolVK::GetThreadLocal(this);
-  if (!tls_pool) {
-    return nullptr;
-  }
-  auto encoder = std::unique_ptr<CommandEncoderVK>(new CommandEncoderVK(
-      device_holder_,          //
-      queues_.graphics_queue,  //
-      tls_pool,                //
-      fence_waiter_            //
-      ));
-  if (!encoder->IsValid()) {
-    return nullptr;
-  }
-  return encoder;
+std::unique_ptr<CommandEncoderFactoryVK>
+ContextVK::CreateGraphicsCommandEncoderFactory() const {
+  return std::make_unique<CommandEncoderFactoryVK>(weak_from_this());
 }
 
 }  // namespace impeller
