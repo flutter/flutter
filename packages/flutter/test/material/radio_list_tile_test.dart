@@ -1012,7 +1012,7 @@ void main() {
     );
   });
 
-  testWidgets('RadioListTile respects hoverColor', (WidgetTester tester) async {
+  testWidgets('Material3 - RadioListTile respects hoverColor', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     final Color? hoverColor = Colors.orange[500];
@@ -1078,7 +1078,7 @@ void main() {
     );
   });
 
-  testWidgets('RadioListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
+  testWidgets('Material3 - RadioListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color fillColor = Color(0xFF000000);
@@ -1339,7 +1339,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('RadioListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
+    testWidgets('Material2 - RadioListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
       const Color fillColor = Color(0xFF000000);
@@ -1443,7 +1443,7 @@ void main() {
       );
     });
 
-    testWidgets('RadioListTile respects hoverColor', (WidgetTester tester) async {
+    testWidgets('Material2 - RadioListTile respects hoverColor', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       int? groupValue = 0;
       final Color? hoverColor = Colors.orange[500];
