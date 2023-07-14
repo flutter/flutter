@@ -28,14 +28,14 @@ class TextContents final : public Contents {
 
   void SetTextFrame(const TextFrame& frame);
 
-  void SetGlyphAtlas(std::shared_ptr<LazyGlyphAtlas> atlas);
-
   void SetColor(Color color);
 
   Color GetColor() const;
 
+  // |Contents|
   bool CanInheritOpacity(const Entity& entity) const override;
 
+  // |Contents|
   void SetInheritedOpacity(Scalar opacity) override;
 
   void SetOffset(Vector2 offset);
@@ -46,19 +46,25 @@ class TextContents final : public Contents {
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
+  void PopulateGlyphAtlas(
+      const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
+      Scalar scale) override;
+
+  // |Contents|
   bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
 
  private:
   TextFrame frame_;
+  Scalar scale_ = 1.0;
   Color color_;
   Scalar inherited_opacity_ = 1.0;
-  mutable std::shared_ptr<LazyGlyphAtlas> lazy_atlas_;
   Vector2 offset_;
 
   std::shared_ptr<GlyphAtlas> ResolveAtlas(
       GlyphAtlas::Type type,
+      const std::shared_ptr<LazyGlyphAtlas>& lazy_atlas,
       std::shared_ptr<GlyphAtlasContext> atlas_context,
       std::shared_ptr<Context> context) const;
 

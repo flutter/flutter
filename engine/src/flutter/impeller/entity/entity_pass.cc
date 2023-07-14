@@ -8,6 +8,7 @@
 #include <utility>
 #include <variant>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/trace_event.h"
@@ -252,6 +253,18 @@ bool EntityPass::Render(ContentContext& renderer,
     VALIDATION_LOG << "The root RenderTarget must have a color attachment.";
     return false;
   }
+
+  renderer.SetLazyGlyphAtlas(std::make_shared<LazyGlyphAtlas>());
+  fml::ScopedCleanupClosure reset_lazy_glyph_atlas(
+      [&renderer]() { renderer.SetLazyGlyphAtlas(nullptr); });
+
+  IterateAllEntities([lazy_glyph_atlas =
+                          renderer.GetLazyGlyphAtlas()](const Entity& entity) {
+    if (auto contents = entity.GetContents()) {
+      contents->PopulateGlyphAtlas(lazy_glyph_atlas, entity.DeriveTextScale());
+    }
+    return true;
+  });
 
   StencilCoverageStack stencil_coverage_stack = {StencilCoverageLayer{
       .coverage = Rect::MakeSize(root_render_target.GetRenderTargetSize()),
@@ -873,6 +886,28 @@ void EntityPass::IterateAllEntities(
     }
     if (auto subpass = std::get_if<std::unique_ptr<EntityPass>>(&element)) {
       subpass->get()->IterateAllEntities(iterator);
+      continue;
+    }
+    FML_UNREACHABLE();
+  }
+}
+
+void EntityPass::IterateAllEntities(
+    const std::function<bool(const Entity&)>& iterator) const {
+  if (!iterator) {
+    return;
+  }
+
+  for (const auto& element : elements_) {
+    if (auto entity = std::get_if<Entity>(&element)) {
+      if (!iterator(*entity)) {
+        return;
+      }
+      continue;
+    }
+    if (auto subpass = std::get_if<std::unique_ptr<EntityPass>>(&element)) {
+      const EntityPass* entity_pass = subpass->get();
+      entity_pass->IterateAllEntities(iterator);
       continue;
     }
     FML_UNREACHABLE();
