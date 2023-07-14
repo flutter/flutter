@@ -134,7 +134,7 @@ void main() {
       );
       expect(
         saveButtonBottomLeft.dx,
-        const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? moreOrLessEquals(711.6, epsilon: 1e-5) : (800 - 89.0),
+        ParagraphBuilder.shouldDisableRoundingHack ? moreOrLessEquals(711.6, epsilon: 1e-5) : (800 - 89.0),
       );
       expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy);
       expect(entryButtonBottomLeft.dx, saveButtonBottomLeft.dx - 48.0);

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show ParagraphBuilder;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -618,12 +620,12 @@ void main() {
       ),
     );
 
-    const Size textButtonSize = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
-      ? Size(68.5, 48.0)
-      : Size(69.0, 48.0);
-    const Size textSize = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
-      ? Size(52.5, 18.0)
-      : Size(53.0, 18.0);
+    final Size textButtonSize = ui.ParagraphBuilder.shouldDisableRoundingHack
+      ? const Size(68.5, 48.0)
+      : const Size(69.0, 48.0);
+    final Size textSize = ui.ParagraphBuilder.shouldDisableRoundingHack
+      ? const Size(52.5, 18.0)
+      : const Size(53.0, 18.0);
     expect(tester.getSize(find.byType(TextButton)), textButtonSize);
     expect(tester.getSize(find.byType(Text)), textSize);
 

@@ -1509,7 +1509,7 @@ void main() {
   });
 
   test('TextPainter line breaking does not round to integers', () {
-    if (! const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')) {
+    if (!ui.ParagraphBuilder.shouldDisableRoundingHack) {
       return;
     }
     const double fontSize = 1.25;

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show ParagraphBuilder;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -489,7 +491,7 @@ void main() {
     const double indicatorWeight = 3.0;
 
 
-    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+    final RRect rrect = ui.ParagraphBuilder.shouldDisableRoundingHack
       ? RRect.fromLTRBAndCorners(
           64.75,
           tabBarBox.size.height - indicatorWeight,
