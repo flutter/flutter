@@ -257,7 +257,7 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
     },
-    // TODO(polina-c): remove after widgets/app.dart/defaultActions stops holding objects.
+    // TODO(polina-c): remove after resolving
     // https://github.com/flutter/flutter/issues/130354
     leakTrackingTestConfig: const LeakTrackingTestConfig(
       allowAllNotGCed: true,
