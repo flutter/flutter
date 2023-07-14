@@ -19,8 +19,8 @@ import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 
 import '../src/common.dart';
-import 'overall_experience_test.dart'; // Reuse test infrastructure.
 import 'test_utils.dart' show fileSystem, platform;
+import 'transition_test_utils.dart';
 
 final String hostOs = platform.operatingSystem;
 
