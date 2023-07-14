@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import 'feedback_tester.dart';
 
 void main() {
@@ -250,12 +251,17 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('landscape', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('landscape', (WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizeLandscape);
       expect(tester.widget<Text>(find.text('Jan 15 – Jan 25, 2016')).style?.fontSize, 24);
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
-    });
+    },
+    // TODO(polina-c): remove after widgets/app.dart/defaultActions stops holding objects.
+    // https://github.com/flutter/flutter/issues/130354
+    leakTrackingTestConfig: const LeakTrackingTestConfig(
+      allowAllNotGCed: true,
+    ));
   });
 
   testWidgets('Save and help text is used', (WidgetTester tester) async {
