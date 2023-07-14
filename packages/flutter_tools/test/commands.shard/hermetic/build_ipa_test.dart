@@ -197,7 +197,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -217,7 +217,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -237,7 +237,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -262,7 +262,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -291,7 +291,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -318,7 +318,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -347,7 +347,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -395,7 +395,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -444,7 +444,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -493,7 +493,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -541,7 +541,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -567,7 +567,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -616,7 +616,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -639,7 +639,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -696,7 +696,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -730,7 +730,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -761,7 +761,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -793,7 +793,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -827,7 +827,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -856,7 +856,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -908,7 +908,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -962,7 +962,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -1012,7 +1012,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -1051,7 +1051,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -1132,7 +1132,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -1211,7 +1211,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -1270,7 +1270,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -1329,7 +1329,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -1388,7 +1388,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -1448,7 +1448,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -1552,7 +1552,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -1632,7 +1632,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
@@ -1710,7 +1710,7 @@ void main() {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );

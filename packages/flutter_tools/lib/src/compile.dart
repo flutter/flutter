@@ -717,7 +717,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
     final String inputKey = Uuid().generateV4();
 
-    if (nativeAssets != null) {
+    if (nativeAssets != null && nativeAssets.isNotEmpty) {
       server.stdin.writeln('native-assets $nativeAssets');
       _logger.printTrace('<- native-assets $nativeAssets');
     }
@@ -863,8 +863,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
       }
     }));
 
-    _server?.stdin.writeln('native-assets $nativeAssetsUri');
-    _logger.printTrace('<- native-assets $nativeAssetsUri');
+    if (nativeAssetsUri != null && nativeAssetsUri.isNotEmpty) {
+      _server?.stdin.writeln('native-assets $nativeAssetsUri');
+      _logger.printTrace('<- native-assets $nativeAssetsUri');
+    }
 
     _server?.stdin.writeln('compile $scriptUri');
     _logger.printTrace('<- compile $scriptUri');

@@ -7,6 +7,7 @@ import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
@@ -22,8 +23,8 @@ Future<Uri?> dryRunNativeAssetsiOS({
   required Uri projectUri,
   required FileSystem fileSystem,
 }) async {
-  if (fileSystem is MemoryFileSystem) {
-    return null; // https://github.com/dart-lang/native/issues/90
+  if (await hasNoPackageConfig(projectUri, fileSystem)) {
+    return null;
   }
   if (await isDisabledAndNoNativeAssets(projectUri)) {
     return null;
@@ -62,8 +63,8 @@ Future<void> buildNativeAssetsiOS({
   String? codesignIdentity,
   required FileSystem fileSystem,
 }) async {
-  if (fileSystem is MemoryFileSystem) {
-    return; // https://github.com/dart-lang/native/issues/90
+  if (await hasNoPackageConfig(projectUri, fileSystem)) {
+    return;
   }
   if (await isDisabledAndNoNativeAssets(projectUri)) {
     return;

@@ -319,7 +319,7 @@ IOSDevice setUpIOSDevice({
     '123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
+    fileSystem: fileSystem!,
     platform: macPlatform,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     logger: logger,

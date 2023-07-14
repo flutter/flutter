@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/memory.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
@@ -27,8 +26,8 @@ Future<Uri?> dryRunNativeAssetsMacOS({
   bool flutterTester = false,
   required FileSystem fileSystem,
 }) async {
-  if (fileSystem is MemoryFileSystem) {
-    return null; // https://github.com/dart-lang/native/issues/90
+  if (await hasNoPackageConfig(projectUri, fileSystem)) {
+    return null;
   }
   if (await isDisabledAndNoNativeAssets(projectUri)) {
     return null;
@@ -75,8 +74,8 @@ Future<Uri?> buildNativeAssetsMacOS({
   bool writeYamlFile = true,
   required FileSystem fileSystem,
 }) async {
-  if (fileSystem is MemoryFileSystem) {
-    return null; // https://github.com/dart-lang/native/issues/90
+  if (await hasNoPackageConfig(projectUri, fileSystem)) {
+    return null;
   }
   if (await isDisabledAndNoNativeAssets(projectUri)) {
     return null;
@@ -125,6 +124,19 @@ Future<Uri?> buildNativeAssetsMacOS({
   return null;
 }
 
+Future<bool> hasNoPackageConfig(
+    Uri workingDirectory, FileSystem fileSystem) async {
+  final File packageConfigJson = fileSystem
+      .directory(workingDirectory.toFilePath())
+      .childFile('.dart_tool/package_config.json');
+  final bool packageConfigExists = await packageConfigJson.exists();
+  if (!packageConfigExists) {
+    globals.logger.printTrace(
+        'No package config found. Skipping native assets compilation.');
+  }
+  return !packageConfigExists;
+}
+
 Future<bool> isDisabledAndNoNativeAssets(Uri workingDirectory) async {
   if (featureFlags.isNativeAssetsEnabled) {
     return false;
@@ -147,8 +159,8 @@ Future<bool> isDisabledAndNoNativeAssets(Uri workingDirectory) async {
 
 Future<void> ensureNoNativeAssetsUnimplementedOs(
     Uri workingDirectory, String os, FileSystem fileSystem) async {
-  if (fileSystem is MemoryFileSystem) {
-    return; // https://github.com/dart-lang/native/issues/90
+  if (await hasNoPackageConfig(workingDirectory, fileSystem)) {
+    return;
   }
   final PackageLayout packageLayout =
       await PackageLayout.fromRootPackageRoot(workingDirectory);
