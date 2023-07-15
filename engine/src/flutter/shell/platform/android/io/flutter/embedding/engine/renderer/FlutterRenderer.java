@@ -370,19 +370,20 @@ public class FlutterRenderer implements TextureRegistry {
    * android.view.TextureView.SurfaceTextureListener}
    */
   public void stopRenderingToSurface() {
-    flutterJNI.onSurfaceDestroyed();
+    if (surface != null) {
+      flutterJNI.onSurfaceDestroyed();
 
-    surface = null;
+      // TODO(mattcarroll): the source of truth for this call should be FlutterJNI, which is where
+      // the call to onFlutterUiDisplayed() comes from. However, no such native callback exists yet,
+      // so until the engine and FlutterJNI are configured to call us back when rendering stops,
+      // we will manually monitor that change here.
+      if (isDisplayingFlutterUi) {
+        flutterUiDisplayListener.onFlutterUiNoLongerDisplayed();
+      }
 
-    // TODO(mattcarroll): the source of truth for this call should be FlutterJNI, which is where
-    // the call to onFlutterUiDisplayed() comes from. However, no such native callback exists yet,
-    // so until the engine and FlutterJNI are configured to call us back when rendering stops,
-    // we will manually monitor that change here.
-    if (isDisplayingFlutterUi) {
-      flutterUiDisplayListener.onFlutterUiNoLongerDisplayed();
+      isDisplayingFlutterUi = false;
+      surface = null;
     }
-
-    isDisplayingFlutterUi = false;
   }
 
   /**
