@@ -22,6 +22,7 @@
 namespace flutter {
 namespace {
 
+// Keep this in sync with _kImplicitViewId in ../platform_dispatcher.dart.
 constexpr int kImplicitViewId = 0;
 
 Dart_Handle ToByteData(const fml::Mapping& buffer) {
