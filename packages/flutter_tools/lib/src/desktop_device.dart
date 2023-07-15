@@ -209,8 +209,6 @@ abstract class DesktopDevice extends Device {
   /// steps to be run.
   void onAttached(ApplicationPackage package, BuildInfo buildInfo, Process process) {}
 
-  bool get supportsImpeller => false;
-
   /// Computes a set of environment variables used to pass debugging information
   /// to the engine without interfering with application level command line
   /// arguments.
@@ -268,14 +266,12 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.purgePersistentCache) {
       addFlag('purge-persistent-cache=true');
     }
-    if (supportsImpeller) {
-      switch (debuggingOptions.enableImpeller) {
-        case ImpellerStatus.enabled:
-          addFlag('enable-impeller=true');
-        case ImpellerStatus.disabled:
-        case ImpellerStatus.platformDefault:
-          addFlag('enable-impeller=false');
-      }
+    switch (debuggingOptions.enableImpeller) {
+      case ImpellerStatus.enabled:
+        addFlag('enable-impeller=true');
+      case ImpellerStatus.disabled:
+      case ImpellerStatus.platformDefault:
+        addFlag('enable-impeller=false');
     }
     // Options only supported when there is a VM Service connection between the
     // tool and the device, usually in debug or profile mode.

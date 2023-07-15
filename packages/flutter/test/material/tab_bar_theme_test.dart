@@ -7,6 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui' as ui show ParagraphBuilder;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -608,8 +610,8 @@ void main() {
         ..line(
           color: theme.colorScheme.primary,
           strokeWidth: indicatorWeight,
-          p1: const Offset(bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 65.75 : 65.5, indicatorY),
-          p2: const Offset(bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 134.25 : 134.5, indicatorY),
+          p1: Offset(ui.ParagraphBuilder.shouldDisableRoundingHack ? 65.75 : 65.5, indicatorY),
+          p2: Offset(ui.ParagraphBuilder.shouldDisableRoundingHack ? 134.25 : 134.5, indicatorY),
         ),
     );
   });

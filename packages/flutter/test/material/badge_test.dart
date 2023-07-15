@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show ParagraphBuilder;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -51,7 +53,7 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+    final RRect rrect = ui.ParagraphBuilder.shouldDisableRoundingHack
       ? RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8))
       : RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8));
     expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
@@ -93,7 +95,7 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), const Offset(0, -4));
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+    final RRect rrect = ui.ParagraphBuilder.shouldDisableRoundingHack
       ? RRect.fromLTRBR(-4, -4, 15.5, 12, const Radius.circular(8))
       : RRect.fromLTRBR(-4, -4, 16, 12, const Radius.circular(8));
     expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
@@ -150,7 +152,7 @@ void main() {
     // T = alignment.top
     // R = L + '0'.width + padding.width
     // B = T + largeSize, R = largeSize/2
-    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+    final RRect rrect = ui.ParagraphBuilder.shouldDisableRoundingHack
       ? RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8))
       : RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8));
     expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));

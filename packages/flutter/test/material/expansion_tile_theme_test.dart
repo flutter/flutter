@@ -292,7 +292,7 @@ void main() {
     // Check the expanded text color when textColor is applied.
     expect(getTextColor(), textColor);
     // Check the expanded ShapeBorder when shape is applied.
-    expect(shapeDecoration.shape, collapsedShape);
+    expect(shapeDecoration.shape, shape);
 
     // Check the child position when expandedAlignment is applied.
     final Rect childRect = tester.getRect(find.text('Tile 1'));

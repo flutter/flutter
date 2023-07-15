@@ -747,7 +747,7 @@ void main() {
           case MaterialType.material2:
             expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(154, 155)));
             expect(tester.getBottomRight(find.text(selectTimeString)), equals(
-              const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? const Offset(280.5, 165) : const Offset(281, 165),
+              ParagraphBuilder.shouldDisableRoundingHack ? const Offset(280.5, 165) : const Offset(281, 165),
             ));
             expect(tester.getBottomRight(find.text(okString)).dx, 644);
             expect(tester.getBottomLeft(find.text(okString)).dx, 616);
@@ -769,7 +769,7 @@ void main() {
         switch (materialType) {
           case MaterialType.material2:
             expect(tester.getTopLeft(find.text(selectTimeString)), equals(
-              const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? const Offset(519.5, 155) : const Offset(519, 155),
+              ParagraphBuilder.shouldDisableRoundingHack ? const Offset(519.5, 155) : const Offset(519, 155),
             ));
             expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(646, 165)));
             expect(tester.getBottomLeft(find.text(okString)).dx, 156);

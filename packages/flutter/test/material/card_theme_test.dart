@@ -10,8 +10,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 void main() {
   test('CardTheme copyWith, ==, hashCode basics', () {
     expect(const CardTheme(), const CardTheme().copyWith());
@@ -24,7 +22,7 @@ void main() {
     expect(identical(CardTheme.lerp(theme, theme, 0.5), theme), true);
   });
 
-  testWidgetsWithLeakTracking('Passing no CardTheme returns defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - Passing no CardTheme returns defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(MaterialApp(
       theme: theme,
@@ -47,7 +45,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('Card uses values from CardTheme', (WidgetTester tester) async {
+  testWidgets('Card uses values from CardTheme', (WidgetTester tester) async {
     final CardTheme cardTheme = _cardTheme();
 
     await tester.pumpWidget(MaterialApp(
@@ -69,7 +67,7 @@ void main() {
     expect(material.shape, cardTheme.shape);
   });
 
-  testWidgetsWithLeakTracking('Card widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgets('Card widget properties take priority over theme', (WidgetTester tester) async {
     const Clip clip = Clip.hardEdge;
     const Color color = Colors.orange;
     const Color shadowColor = Colors.pink;
@@ -104,7 +102,7 @@ void main() {
     expect(material.shape, shape);
   });
 
-  testWidgetsWithLeakTracking('CardTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
+  testWidgets('CardTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
     final CardTheme cardTheme = _cardTheme();
     final ThemeData themeData = _themeData().copyWith(cardTheme: cardTheme);
 
@@ -119,9 +117,8 @@ void main() {
     expect(material.color, cardTheme.color);
   });
 
-  testWidgetsWithLeakTracking('ThemeData properties are used when no CardTheme is set', (WidgetTester tester) async {
-    final ThemeData themeData = _themeData();
-    final bool material3 = themeData.useMaterial3;
+  testWidgets('Material3 - ThemeData properties are used when no CardTheme is set', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -131,10 +128,10 @@ void main() {
     ));
 
     final Material material = _getCardMaterial(tester);
-    expect(material.color, material3 ? themeData.colorScheme.surface: themeData.cardColor);
+    expect(material.color, themeData.colorScheme.surface);
   });
 
-  testWidgetsWithLeakTracking('CardTheme customizes shape', (WidgetTester tester) async {
+  testWidgets('Material3 - CardTheme customizes shape', (WidgetTester tester) async {
     const CardTheme cardTheme = CardTheme(
       color: Colors.white,
       shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
@@ -168,7 +165,21 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('Passing no CardTheme returns defaults - M2', (WidgetTester tester) async {
+    testWidgets('Material2 - ThemeData properties are used when no CardTheme is set', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(useMaterial3: false);
+
+      await tester.pumpWidget(MaterialApp(
+        theme: themeData,
+        home: const Scaffold(
+          body: Card(),
+        ),
+      ));
+
+      final Material material = _getCardMaterial(tester);
+      expect(material.color, themeData.cardColor);
+    });
+
+    testWidgets('Material2 - Passing no CardTheme returns defaults', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: const Scaffold(
@@ -190,7 +201,7 @@ void main() {
       ));
     });
 
-    testWidgetsWithLeakTracking('CardTheme customizes shape - M2', (WidgetTester tester) async {
+    testWidgets('Material2 - CardTheme customizes shape', (WidgetTester tester) async {
       const CardTheme cardTheme = CardTheme(
         color: Colors.white,
         shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
