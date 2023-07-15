@@ -381,6 +381,9 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
     if (debuggingOptions.buildInfo.isDebug) {
       await runSourceGenerators();
+
+      await performPreHotRestart();
+
       // Full restart is always false for web, since the extra recompile is wasteful.
       final UpdateFSReport report = await _updateDevFS();
       if (report.success) {
