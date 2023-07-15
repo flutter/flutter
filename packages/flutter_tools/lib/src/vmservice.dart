@@ -697,7 +697,7 @@ class FlutterVmService {
   }
 
   Future<void> flutterInvokePreHotRestartCallbacks({
-    @required String isolateId,
+    required String isolateId,
   }) async {
     await invokeFlutterExtensionRpcRaw(
       'ext.flutter.invokePreHotRestartCallbacks',

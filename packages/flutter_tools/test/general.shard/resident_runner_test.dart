@@ -160,7 +160,7 @@ const FakeVmServiceRequest evictShader = FakeVmServiceRequest(
 final List<FakeVmServiceRequest> preHotRestartCallbacks = <FakeVmServiceRequest>[
   listViews,
   FakeVmServiceRequest(method: 'ext.flutter.invokePreHotRestartCallbacks', args: <String, Object>{
-    'isolateId': fakeFlutterView.uiIsolate.id,
+    'isolateId': fakeFlutterView.uiIsolate!.id!,
   }),
 ];
 

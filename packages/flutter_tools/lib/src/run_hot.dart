@@ -578,10 +578,10 @@ class HotRunner extends ResidentRunner {
     });
     final List<Future<void>> preHotRestartFutures = <Future<void>>[];
     for (final FlutterDevice device in flutterDevices) {
-      final List<FlutterView> views = await device.vmService.getFlutterViews();
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
-        preHotRestartFutures.add(device.vmService.flutterInvokePreHotRestartCallbacks(
-          isolateId: view.uiIsolate.id,
+        preHotRestartFutures.add(device.vmService!.flutterInvokePreHotRestartCallbacks(
+          isolateId: view.uiIsolate!.id!,
         ));
       }
     }
