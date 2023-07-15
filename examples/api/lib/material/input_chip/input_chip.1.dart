@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+@immutable
 class Topping {
+  const Topping(this.name, {this.emoji});
   final String name;
   final String? emoji;
-
-  const Topping(this.name, {this.emoji});
 
   @override
   bool operator ==(Object other) =>
@@ -25,13 +25,13 @@ class Topping {
   }
 }
 
-const availableToppings = <Topping>[
-  Topping("Avocado", emoji: "🥑"),
-  Topping("Tomato", emoji: "🍅"),
-  Topping("Cheese", emoji: "🧀"),
-  Topping("Lettuce", emoji: "🥬"),
-  Topping("Cucumber", emoji: "🥒"),
-  Topping("Beans"),
+const List<Topping> availableToppings = <Topping>[
+  Topping('Avocado', emoji: '🥑'),
+  Topping('Tomato', emoji: '🍅'),
+  Topping('Cheese', emoji: '🧀'),
+  Topping('Lettuce', emoji: '🥬'),
+  Topping('Cucumber', emoji: '🥒'),
+  Topping('Beans'),
 ];
 
 void main() => runApp(const EditableChipFieldApp());
@@ -54,18 +54,18 @@ class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  MainScreenState createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
-  var _suggestions = <Topping>[];
-  var _toppings = <Topping>{
-    const Topping("Ham", emoji: "🍖"),
+class MainScreenState extends State<MainScreen> {
+  List<Topping> _suggestions = <Topping>[];
+  Set<Topping> _toppings = <Topping>{
+    const Topping('Ham', emoji: '🍖'),
   };
 
-  var _results = <Topping>{};
+  Set<Topping> _results = <Topping>{};
 
-  final _chipFocusNode = FocusNode();
+  final FocusNode _chipFocusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -97,8 +97,8 @@ class _MainScreenState extends State<MainScreen> {
                 },
               ),
             ),
-          if (_results.isNotEmpty) ...[
-            Text("You selected: ${_results.length} topping/s!"),
+          if (_results.isNotEmpty) ...<Widget>[
+            Text('You selected: ${_results.length} topping/s!'),
             Expanded(
               child: ListView.builder(
                 itemCount: _results.length,
@@ -113,12 +113,13 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void _onSearchChanged(String value) async {
-    final results = await _suggestionCallback(value);
+  Future<void> _onSearchChanged(String value) async {
+    final List<Topping> results = await _suggestionCallback(value);
     setState(() {
       _results = <Topping>{};
-      _suggestions =
-          results.where((topping) => !_toppings.contains(topping)).toList();
+      _suggestions = results
+          .where((Topping topping) => !_toppings.contains(topping))
+          .toList();
     });
   }
 
@@ -166,7 +167,7 @@ class _MainScreenState extends State<MainScreen> {
   void _selectSuggestion(Topping topping) {
     setState(() {
       _toppings.add(topping);
-      _suggestions = List.empty();
+      _suggestions = List<Topping>.empty();
     });
   }
 
@@ -175,12 +176,12 @@ class _MainScreenState extends State<MainScreen> {
   void _onSubmitted(String text) {
     if (text.trim().isNotEmpty) {
       setState(() {
-        _toppings = {..._toppings, Topping(text.trim())};
+        _toppings = <Topping>{..._toppings, Topping(text.trim())};
       });
     } else {
       _chipFocusNode.unfocus();
       setState(() {
-        _results = {..._toppings};
+        _results = <Topping>{..._toppings};
         _toppings = <Topping>{};
       });
     }
@@ -195,7 +196,7 @@ class _MainScreenState extends State<MainScreen> {
 
   FutureOr<List<Topping>> _suggestionCallback(String text) {
     if (text.isNotEmpty) {
-      return availableToppings.where((topping) {
+      return availableToppings.where((Topping topping) {
         return topping.name.toLowerCase().contains(text.toLowerCase());
       }).toList();
     }
@@ -204,6 +205,17 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 class ChipsInput<T> extends StatefulWidget {
+  const ChipsInput({
+    super.key,
+    required this.values,
+    this.decoration = const InputDecoration(),
+    required this.chipBuilder,
+    required this.onChanged,
+    this.onChipTapped,
+    this.onSubmitted,
+    this.onTextChanged,
+    this.focusNode,
+  });
   final Set<T> values;
 
   final InputDecoration decoration;
@@ -217,25 +229,13 @@ class ChipsInput<T> extends StatefulWidget {
 
   final Widget Function(BuildContext context, T data) chipBuilder;
 
-  const ChipsInput({
-    Key? key,
-    this.values = const {},
-    this.decoration = const InputDecoration(),
-    required this.chipBuilder,
-    required this.onChanged,
-    this.onChipTapped,
-    this.onSubmitted,
-    this.onTextChanged,
-    this.focusNode,
-  }) : super(key: key);
-
   @override
   ChipsInputState<T> createState() => ChipsInputState<T>();
 }
 
 class ChipsInputState<T> extends State<ChipsInput<T>>
     implements TextInputClient {
-  static const kObjectReplacementChar = 0xFFFD;
+  static const int kObjectReplacementChar = 0xFFFD;
 
   FocusNode? _lastChipFocusNode;
 
@@ -271,9 +271,9 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
   @override
   void updateEditingValue(TextEditingValue value) {
     print("New: '${value.text}' Old: '${_value.text}'");
-    final oldCount = _countReplacements(_value);
-    final newCount = _countReplacements(value);
-    print("New count: $newCount Old count: $oldCount");
+    final int oldCount = _countReplacements(_value);
+    final int newCount = _countReplacements(value);
+    print('New count: $newCount Old count: $oldCount');
 
     setState(() {
       if (newCount < oldCount) {
@@ -331,9 +331,9 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
     //_updateTextInputState();
     _syncTextValue();
 
-    var chipsChildren = widget.values.map<Widget>(
-      (data) {
-        final child = widget.chipBuilder(context, data);
+    final List<Widget> chipsChildren = widget.values.map<Widget>(
+      (T data) {
+        final Widget child = widget.chipBuilder(context, data);
         if (_lastChipFocusNode != null) {
           _lastChipFocusNode!.requestFocus();
           return Focus(focusNode: _lastChipFocusNode, child: child);
@@ -382,14 +382,14 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
 
   String get text {
     return String.fromCharCodes(
-      _value.text.codeUnits.where((ch) => ch != kObjectReplacementChar),
+      _value.text.codeUnits.where((int ch) => ch != kObjectReplacementChar),
     );
   }
 
-  bool get _hasInputConnection => _connection?.attached == true;
+  bool get _hasInputConnection => _connection?.attached ?? false;
 
   void _requestKeyboard() {
-    if (_focusNode.hasFocus == true) {
+    if (_focusNode.hasFocus) {
       _openInputConnection();
     } else {
       FocusScope.of(context).requestFocus(_focusNode);
@@ -397,7 +397,7 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
   }
 
   void _scrollToEnd() {
-    Future.delayed(
+    Future<void>.delayed(
         const Duration(milliseconds: 100),
         () => _scrollController.animateTo(
             _scrollController.position.maxScrollExtent,
@@ -433,18 +433,20 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
   }
 
   int _countReplacementsInString(String value) {
-    return value.codeUnits.where((ch) => ch == kObjectReplacementChar).length;
+    return value.codeUnits
+        .where((int ch) => ch == kObjectReplacementChar)
+        .length;
   }
 
   int get currentReplacementCount => _countReplacements(_value);
 
   void _syncTextValue() {
-    final currentTextEditingValue = _value;
-    final newChipCount = widget.values.length;
-    final oldChipCount = _countReplacements(currentTextEditingValue);
+    final TextEditingValue currentTextEditingValue = _value;
+    final int newChipCount = widget.values.length;
+    final int oldChipCount = _countReplacements(currentTextEditingValue);
 
-    var text =
-        String.fromCharCodes(List.filled(newChipCount, kObjectReplacementChar));
+    String text = String.fromCharCodes(
+        List<int>.filled(newChipCount, kObjectReplacementChar));
     if (newChipCount == oldChipCount) {
       text += this.text;
     }
@@ -458,12 +460,9 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
 
 class _TextCaret extends StatefulWidget {
   const _TextCaret({
-    Key? key,
-    this.duration = const Duration(milliseconds: 500),
     this.resumed = false,
-  }) : super(key: key);
+  });
 
-  final Duration duration;
   final bool resumed;
 
   @override
@@ -472,13 +471,15 @@ class _TextCaret extends StatefulWidget {
 
 class _TextCursorState extends State<_TextCaret>
     with SingleTickerProviderStateMixin {
+  final Duration _duration = const Duration(milliseconds: 500);
+
   bool _displayed = false;
   late Timer _timer;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(widget.duration, _onTimer);
+    _timer = Timer.periodic(_duration, _onTimer);
   }
 
   void _onTimer(Timer timer) {
@@ -493,7 +494,7 @@ class _TextCursorState extends State<_TextCaret>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     return FractionallySizedBox(
       heightFactor: 0.7,
       child: Opacity(
