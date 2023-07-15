@@ -393,4 +393,20 @@ public class FlutterRendererTest {
     // Verify behavior under test.
     assertEquals(1, invocationCount.get());
   }
+
+  @Test
+  public void itDoesDispatchSurfaceDestructionNotificationOnlyOnce() {
+    // Setup the test.
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+
+    flutterRenderer.startRenderingToSurface(fakeSurface, /*keepCurrentSurface=*/ false);
+
+    // Execute the behavior under test.
+    // Simulate calling |FlutterRenderer#stopRenderingToSurface| twice with different code paths.
+    flutterRenderer.stopRenderingToSurface();
+    flutterRenderer.stopRenderingToSurface();
+
+    // Verify behavior under test.
+    verify(fakeFlutterJNI, times(1)).onSurfaceDestroyed();
+  }
 }
