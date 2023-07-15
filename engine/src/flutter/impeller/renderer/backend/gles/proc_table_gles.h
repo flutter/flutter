@@ -139,6 +139,7 @@ struct GLProc {
   PROC(GetShaderInfoLog);                    \
   PROC(GetShaderiv);                         \
   PROC(GetString);                           \
+  PROC(GetStringi);                          \
   PROC(GetUniformLocation);                  \
   PROC(IsBuffer);                            \
   PROC(IsFramebuffer);                       \
