@@ -375,7 +375,7 @@ class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixi
     // Only constrain the width to the maximum width of the paragraph.
     // Leave height unconstrained, which will overflow if expanded past.
     child.layout(BoxConstraints(maxWidth: constraints.maxWidth / scale), parentUsesSize: true);
-    size = child.size * scale;
+    size = constraints.constrain(child.size * scale);
   }
 
   @override
