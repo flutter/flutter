@@ -26,6 +26,16 @@ static std::string GetGLString(const ProcTableGLES& gl, GLenum name) {
   return reinterpret_cast<const char*>(str);
 }
 
+static std::string GetGLStringi(const ProcTableGLES& gl,
+                                GLenum name,
+                                int index) {
+  auto str = gl.GetStringi(name, index);
+  if (str == nullptr) {
+    return "";
+  }
+  return reinterpret_cast<const char*>(str);
+}
+
 static bool DetermineIfES(const std::string& version) {
   return HasPrefix(version, "OpenGL ES");
 }
@@ -70,14 +80,22 @@ DescriptionGLES::DescriptionGLES(const ProcTableGLES& gl)
       renderer_(GetGLString(gl, GL_RENDERER)),
       gl_version_string_(GetGLString(gl, GL_VERSION)),
       sl_version_string_(GetGLString(gl, GL_SHADING_LANGUAGE_VERSION)) {
-  const auto extensions = GetGLString(gl, GL_EXTENSIONS);
-  std::stringstream extensions_stream(extensions);
-  std::string extension;
-  while (std::getline(extensions_stream, extension, ' ')) {
-    extensions_.insert(extension);
-  }
-
   is_es_ = DetermineIfES(gl_version_string_);
+
+  if (is_es_) {
+    const auto extensions = GetGLString(gl, GL_EXTENSIONS);
+    std::stringstream extensions_stream(extensions);
+    std::string extension;
+    while (std::getline(extensions_stream, extension, ' ')) {
+      extensions_.insert(extension);
+    }
+  } else {
+    int extension_count = 0;
+    gl.GetIntegerv(GL_NUM_EXTENSIONS, &extension_count);
+    for (auto i = 0; i < extension_count; i++) {
+      extensions_.insert(GetGLStringi(gl, GL_EXTENSIONS, i));
+    }
+  }
 
   auto gl_version = DetermineVersion(gl_version_string_);
   if (!gl_version.has_value()) {
