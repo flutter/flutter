@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
-import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, StringAttribute, TextDirection;
+import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, SemanticsUpdate, SemanticsUpdateBuilder, StringAttribute, TextDirection;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -52,7 +51,7 @@ typedef SemanticsActionHandler = void Function(Object? args);
 /// Signature for a function that receives a semantics update and returns no result.
 ///
 /// Used by [SemanticsOwner.onSemanticsUpdate].
-typedef SemanticsUpdateCallback = void Function(ui.SemanticsUpdate update);
+typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 
 /// Signature for the [SemanticsConfiguration.childConfigurationsDelegate].
 ///
@@ -2668,7 +2667,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
-  void _addToUpdate(ui.SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
+  void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
     final Int32List childrenInTraversalOrder;
@@ -3288,7 +3287,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
+    final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
     for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
