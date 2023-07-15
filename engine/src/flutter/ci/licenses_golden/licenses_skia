@@ -1,4 +1,4 @@
-Signature: c25e6a306f4ed0359e6b0ed93e35dbfb
+Signature: ac76c9389d7ee1e69c8300664dcafc5c
 
 ====================================================================================================
 LIBRARY: etc1
@@ -386,7 +386,6 @@ FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/canvas_flush.md
 FILE: ../../../third_party/skia/relnotes/const_context.md
-FILE: ../../../third_party/skia/relnotes/mesh_ganesh.md
 FILE: ../../../third_party/skia/relnotes/runtimeeffect_const.md
 FILE: ../../../third_party/skia/relnotes/runtimeeffect_image.md
 FILE: ../../../third_party/skia/relnotes/tiledimages.md
@@ -8902,7 +8901,6 @@ ORIGIN: ../../../third_party/skia/include/core/SkTextureCompressionType.h + ../.
 ORIGIN: ../../../third_party/skia/include/core/SkTiledImageUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/ganesh/GrExternalTextureGenerator.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/ganesh/SkImageGanesh.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/gpu/ganesh/SkMeshGanesh.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/ganesh/mtl/SkSurfaceMetal.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/BackendSemaphore.h + ../../../third_party/skia/LICENSE
@@ -8975,8 +8973,6 @@ ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrDeferredDisplayListPriv.h + .
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrDeferredDisplayListRecorder.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrFragmentProcessors.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrFragmentProcessors.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrMeshBuffers.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrMeshBuffers.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrPromiseImageTexture.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/effects/GrColorTableEffect.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/effects/GrColorTableEffect.h + ../../../third_party/skia/LICENSE
@@ -9108,7 +9104,6 @@ FILE: ../../../third_party/skia/include/core/SkTextureCompressionType.h
 FILE: ../../../third_party/skia/include/core/SkTiledImageUtils.h
 FILE: ../../../third_party/skia/include/gpu/ganesh/GrExternalTextureGenerator.h
 FILE: ../../../third_party/skia/include/gpu/ganesh/SkImageGanesh.h
-FILE: ../../../third_party/skia/include/gpu/ganesh/SkMeshGanesh.h
 FILE: ../../../third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h
 FILE: ../../../third_party/skia/include/gpu/ganesh/mtl/SkSurfaceMetal.h
 FILE: ../../../third_party/skia/include/gpu/graphite/BackendSemaphore.h
@@ -9181,8 +9176,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/GrDeferredDisplayListPriv.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrDeferredDisplayListRecorder.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrFragmentProcessors.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrFragmentProcessors.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrMeshBuffers.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrMeshBuffers.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrPromiseImageTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/effects/GrColorTableEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/effects/GrColorTableEffect.h
