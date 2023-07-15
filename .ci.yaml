@@ -1588,7 +1588,6 @@ targets:
         [
           {"dependency": "android_virtual_device", "version": "33"}
         ]
-      use_emulator: "true"
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
