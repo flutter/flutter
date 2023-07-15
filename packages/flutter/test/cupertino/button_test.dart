@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 const TextStyle testStyle = TextStyle(
-  fontFamily: 'Ahem',
   fontSize: 10.0,
   letterSpacing: 0.0,
 );
@@ -176,11 +177,11 @@ void main() {
 
     expect(value, isFalse);
     // No animating by default.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
     await tester.tap(find.byType(CupertinoButton));
     expect(value, isTrue);
     // Animates.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 
   testWidgets("Disabled button doesn't animate", (WidgetTester tester) async {
@@ -188,10 +189,46 @@ void main() {
       onPressed: null,
       child: Text('Tap me'),
     )));
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
     await tester.tap(find.byType(CupertinoButton));
     // Still doesn't animate.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+  });
+
+  testWidgets('Enabled button animates', (WidgetTester tester) async {
+    await tester.pumpWidget(boilerplate(child: CupertinoButton(
+      child: const Text('Tap me'),
+      onPressed: () { },
+    )));
+
+    await tester.tap(find.byType(CupertinoButton));
+    // Enter animation.
+    await tester.pump();
+    FadeTransition transition = tester.firstWidget(find.byType(FadeTransition));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.403, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 100));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.400, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.650, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.894, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(0.988, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
   });
 
   testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
@@ -324,7 +361,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.light),
+        data: const MediaQueryData(),
         child: boilerplate(child: const CupertinoButton(
           color: bgColor,
           disabledColor: inactive,
@@ -414,6 +451,32 @@ void main() {
       ),
     ).decoration as BoxDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+  });
+
+  testWidgets('Hovering over Cupertino button updates cursor to clickable on Web', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoButton.filled(
+            onPressed: () { },
+            child: const Text('Tap me'),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    final Offset button = tester.getCenter(find.byType(CupertinoButton));
+    await gesture.moveTo(button);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 }
 

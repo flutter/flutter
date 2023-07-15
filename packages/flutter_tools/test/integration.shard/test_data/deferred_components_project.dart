@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../../src/common.dart';
 import 'deferred_components_config.dart';
 import 'project.dart';
@@ -15,7 +13,7 @@ class DeferredComponentsProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.12.0-0 <3.0.0"
+    sdk: '>=3.0.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -47,7 +45,7 @@ class DeferredComponentsProject extends Project {
         libFuture = DeferredLibrary.loadLibrary();
         libFuture?.whenComplete(() => deferredText = 'complete ${DeferredLibrary.add(10, 42)}');
       }
-      runApp(new MyApp());
+      runApp(MyApp());
       await Future.delayed(const Duration(milliseconds: 50));
     }
   }
@@ -56,9 +54,9 @@ class DeferredComponentsProject extends Project {
     @override
     Widget build(BuildContext context) {
       topLevelFunction();
-      return new MaterialApp( // BUILD BREAKPOINT
+      return MaterialApp( // BUILD BREAKPOINT
         title: 'Flutter Demo',
-        home: new Container(),
+        home: Container(),
       );
     }
   }
@@ -84,7 +82,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   ''';
 
   @override
-  String get deferredComponentsGolden => r'''
+  String? get deferredComponentsGolden => r'''
   loading-units:
     - id: 2
       libraries:
@@ -131,10 +129,12 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   rootProject.buildDir = '../build'
   subprojects {
       project.buildDir = "${rootProject.buildDir}/${project.name}"
+  }
+  subprojects {
       project.evaluationDependsOn(':app')
   }
 
-  task clean(type: Delete) {
+  tasks.register("clean", Delete) {
       delete rootProject.buildDir
   }
   ''';
@@ -175,7 +175,8 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
   android {
-      compileSdkVersion 30
+      compileSdkVersion flutter.compileSdkVersion
+      ndkVersion flutter.ndkVersion
 
       sourceSets {
           main.java.srcDirs += 'src/main/kotlin'
@@ -188,8 +189,8 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
       defaultConfig {
           // Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
           applicationId "ninja.qian.splitaottest1"
-          minSdkVersion 16
-          targetSdkVersion 30
+          minSdkVersion flutter.minSdkVersion
+          targetSdkVersion flutter.targetSdkVersion
           versionCode flutterVersionCode.toInteger()
           versionName flutterVersionName
       }
@@ -476,7 +477,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
     0xe5, 0x87, 0x64, 0x4d, 0x36, 0x12, 0x40, 0xc4, 0x67, 0x78, 0xce, 0x38, 0x60, 0x24, 0xdf, 0x3c,
     0xc0, 0xbb, 0xf7, 0x7d, 0x2f, 0x66, 0x56, 0xfb, 0xfa, 0x75, 0x2a, 0xe5, 0x23, 0x7a, 0xad, 0x5c,
     0xef, 0x2d, 0xa1, 0xb6, 0x7c, 0xbd, 0xfa, 0xb3, 0xdc, 0x68, 0x55, 0xd1, 0xa0, 0xac, 0x8c, 0x06,
-    0x62, 0x21, 0xe9, 0x7d, 0x64, 0xd0, 0x60, 0xb3, 0x12, 0x2e, 0x6a, 0x50, 0xf4
+    0x62, 0x21, 0xe9, 0x7d, 0x64, 0xd0, 0x60, 0xb3, 0x12, 0x2e, 0x6a, 0x50, 0xf4,
   ];
 
   @override
@@ -548,7 +549,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
     <!-- Theme applied to the Android Window while the process is starting -->
     <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
         <!-- Show a splash screen on the activity. Automatically removed when
-             Flutter draws its first frame -->
+             the Flutter engine draws its first frame -->
         <item name="android:windowBackground">@drawable/launch_background</item>
     </style>
     <!-- Theme applied to the Android Window as soon as the process has started.
@@ -602,7 +603,7 @@ class NoAndroidDynamicFeatureModuleDeferredComponentsConfig extends BasicDeferre
 /// Missing golden
 class NoGoldenDeferredComponentsConfig extends BasicDeferredComponentsConfig {
   @override
-  String get deferredComponentsGolden => null;
+  String? get deferredComponentsGolden => null;
 }
 
 /// Missing golden

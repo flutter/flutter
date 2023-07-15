@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/deferred_component.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals_null_migrated.dart' as globals show platform, printError, xcode;
+import '../../globals.dart' as globals show xcode;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -17,6 +15,7 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'shader_compiler.dart';
 
 /// Prepares the asset bundle in the format expected by flutter.gradle.
 ///
@@ -43,10 +42,11 @@ abstract class AndroidAssetBundle extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir
       .childDirectory('flutter_assets')
       ..createSync(recursive: true);
@@ -67,12 +67,9 @@ abstract class AndroidAssetBundle extends Target {
       outputDirectory,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
+      shaderTarget: ShaderTarget.impellerAndroid,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       assetDepfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
@@ -161,12 +158,11 @@ class AndroidAot extends AotElfBase {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getNameForAndroidArch(
-      getAndroidArchForName(getNameForTargetPlatform(targetPlatform)));
+    return getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
   }
 
   @override
-  String get name => 'android_aot_${getNameForBuildMode(buildMode)}_'
+  String get name => 'android_aot_${buildMode.cliName}_'
     '${getNameForTargetPlatform(targetPlatform)}';
 
   /// The specific Android ABI we are building for.
@@ -181,7 +177,7 @@ class AndroidAot extends AotElfBase {
   List<Source> get inputs => <Source>[
     const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/android.dart'),
     const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.hostArtifact(HostArtifact.engineDartBinary),
+    const Source.artifact(Artifact.engineDartBinary),
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
       mode: buildMode,
@@ -207,16 +203,15 @@ class AndroidAot extends AotElfBase {
   @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
-      reportTimings: false,
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode,
+      xcode: globals.xcode!,
       processManager: environment.processManager,
       artifacts: environment.artifacts,
     );
     final Directory output = environment.buildDir.childDirectory(_androidAbiName);
-    final String splitDebugInfo = environment.defines[kSplitDebugInfo];
-    if (environment.defines[kBuildMode] == null) {
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'aot_elf');
     }
     if (!output.existsSync()) {
@@ -224,14 +219,14 @@ class AndroidAot extends AotElfBase {
     }
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
     final List<File> outputs = <File>[]; // outputs for the depfile
-    final String manifestPath = '${output.path}${globals.platform.pathSeparator}manifest.json';
+    final String manifestPath = '${output.path}${environment.platform.pathSeparator}manifest.json';
     if (environment.defines[kDeferredComponents] == 'true') {
       extraGenSnapshotOptions.add('--loading_unit_manifest=$manifestPath');
       outputs.add(environment.fileSystem.file(manifestPath));
     }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final String codeSizeDirectory = environment.defines[kCodeSizeDirectory];
+    final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
     if (codeSizeDirectory != null) {
       final File codeSizeFile = environment.fileSystem
@@ -244,12 +239,12 @@ class AndroidAot extends AotElfBase {
       extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
     }
 
+    final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
       mainPath: environment.buildDir.childFile('app.dill').path,
       outputPath: output.path,
-      bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
       splitDebugInfo: splitDebugInfo,
       dartObfuscation: dartObfuscation,
@@ -264,11 +259,7 @@ class AndroidAot extends AotElfBase {
         outputs.add(environment.fileSystem.file(unit.path));
       }
     }
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       Depfile(<File>[], outputs),
       environment.buildDir.childFile('flutter_$name.d'),
       writeEmpty: true,
@@ -294,12 +285,11 @@ class AndroidAotBundle extends Target {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getNameForAndroidArch(
-      getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)));
+    return getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)).archName;
   }
 
   @override
-  String get name => 'android_aot_bundle_${getNameForBuildMode(dependency.buildMode)}_'
+  String get name => 'android_aot_bundle_${dependency.buildMode.cliName}_'
     '${getNameForTargetPlatform(dependency.targetPlatform)}';
 
   TargetPlatform get targetPlatform => dependency.targetPlatform;
@@ -351,11 +341,7 @@ class AndroidAotBundle extends Target {
       inputs.add(manifestFile);
       outputs.add(destinationFile);
     }
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       Depfile(inputs, outputs),
       environment.buildDir.childFile('flutter_$name.d'),
       writeEmpty: true,
@@ -376,21 +362,20 @@ class AndroidAotDeferredComponentsBundle extends Target {
   /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [buildMode].
   ///
   /// If [components] is not provided, it will be read from the pubspec.yaml manifest.
-  AndroidAotDeferredComponentsBundle(this.dependency, {List<DeferredComponent> components}) : _components = components;
+  AndroidAotDeferredComponentsBundle(this.dependency, {List<DeferredComponent>? components}) : _components = components;
 
   /// The [AndroidAotBundle] instance this bundle rule depends on.
   final AndroidAotBundle dependency;
 
-  List<DeferredComponent> _components;
+  List<DeferredComponent>? _components;
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getNameForAndroidArch(
-      getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)));
+    return getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)).archName;
   }
 
   @override
-  String get name => 'android_aot_deferred_components_bundle_${getNameForBuildMode(dependency.buildMode)}_'
+  String get name => 'android_aot_deferred_components_bundle_${dependency.buildMode.cliName}_'
     '${getNameForTargetPlatform(dependency.targetPlatform)}';
 
   TargetPlatform get targetPlatform => dependency.targetPlatform;
@@ -423,21 +408,17 @@ class AndroidAotDeferredComponentsBundle extends Target {
     _components ??= FlutterProject.current().manifest.deferredComponents ?? <DeferredComponent>[];
     final List<String> abis = <String>[_androidAbiName];
     final List<LoadingUnit> generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(environment.outputDir, environment.logger, abis: abis);
-    for (final DeferredComponent component in _components) {
+    for (final DeferredComponent component in _components!) {
       component.assignLoadingUnits(generatedLoadingUnits);
     }
-    final Depfile libDepfile = copyDeferredComponentSoFiles(environment, _components, generatedLoadingUnits, environment.projectDir.childDirectory('build'), abis, dependency.buildMode);
+    final Depfile libDepfile = copyDeferredComponentSoFiles(environment, _components!, generatedLoadingUnits, environment.projectDir.childDirectory('build'), abis, dependency.buildMode);
 
     final File manifestFile = environment.outputDir.childDirectory(_androidAbiName).childFile('manifest.json');
     if (manifestFile.existsSync()) {
       libDepfile.inputs.add(manifestFile);
     }
 
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       libDepfile,
       environment.buildDir.childFile('flutter_$name.d'),
       writeEmpty: true,
@@ -469,26 +450,28 @@ Set<String> deferredComponentsTargets = <String>{
 /// Assigned components are components that have determined which loading units contains
 /// the dart libraries it has via the DeferredComponent.assignLoadingUnits method.
 Depfile copyDeferredComponentSoFiles(
-    Environment env,
-    List<DeferredComponent> components,
-    List<LoadingUnit> loadingUnits,
-    Directory buildDir, // generally `<projectDir>/build`
-    List<String> abis,
-    BuildMode buildMode,) {
+  Environment env,
+  List<DeferredComponent> components,
+  List<LoadingUnit> loadingUnits,
+  Directory buildDir, // generally `<projectDir>/build`
+  List<String> abis,
+  BuildMode buildMode,
+) {
   final List<File> inputs = <File>[];
   final List<File> outputs = <File>[];
   final Set<int> usedLoadingUnits = <int>{};
   // Copy all .so files for loading units that are paired with a deferred component.
   for (final String abi in abis) {
     for (final DeferredComponent component in components) {
-      if (!component.assigned) {
-        globals.printError('Deferred component require loading units to be assigned.');
+      final Set<LoadingUnit>? loadingUnits = component.loadingUnits;
+      if (loadingUnits == null || !component.assigned) {
+        env.logger.printError('Deferred component require loading units to be assigned.');
         return Depfile(inputs, outputs);
       }
-      for (final LoadingUnit unit in component.loadingUnits) {
+      for (final LoadingUnit unit in loadingUnits) {
         // ensure the abi for the unit is one of the abis we build for.
-        final List<String> splitPath = unit.path.split(env.fileSystem.path.separator);
-        if (splitPath[splitPath.length - 2] != abi) {
+        final List<String>? splitPath = unit.path?.split(env.fileSystem.path.separator);
+        if (splitPath == null || splitPath[splitPath.length - 2] != abi) {
           continue;
         }
         usedLoadingUnits.add(unit.id);
@@ -497,7 +480,7 @@ Depfile copyDeferredComponentSoFiles(
             .childDirectory(component.name)
             .childDirectory('intermediates')
             .childDirectory('flutter')
-            .childDirectory(buildMode.name)
+            .childDirectory(buildMode.cliName)
             .childDirectory('deferred_libs')
             .childDirectory(abi)
             .childFile('libapp.so-${unit.id}.part.so');
@@ -518,8 +501,8 @@ Depfile copyDeferredComponentSoFiles(
         continue;
       }
         // ensure the abi for the unit is one of the abis we build for.
-      final List<String> splitPath = unit.path.split(env.fileSystem.path.separator);
-      if (splitPath[splitPath.length - 2] != abi) {
+      final List<String>? splitPath = unit.path?.split(env.fileSystem.path.separator);
+      if (splitPath == null || splitPath[splitPath.length - 2] != abi) {
         continue;
       }
       final File destination = env.outputDir

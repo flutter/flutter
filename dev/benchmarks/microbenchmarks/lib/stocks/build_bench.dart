@@ -11,8 +11,8 @@ import '../common.dart';
 
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
-Future<void> main() async {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+Future<List<double>> runBuildBenchmark() async {
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
   // We control the framePolicy below to prevent us from scheduling frames in
@@ -21,6 +21,7 @@ Future<void> main() async {
 
   final Stopwatch watch = Stopwatch();
   int iterations = 0;
+  final List<double> values = <double>[];
 
   await benchmarkWidgets((WidgetTester tester) async {
     stocks.main();
@@ -33,8 +34,10 @@ Future<void> main() async {
     final Element appState = tester.element(find.byType(stocks.StocksApp));
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
 
-    watch.start();
-    while (watch.elapsed < kBenchmarkTime) {
+    Duration elapsed = Duration.zero;
+    while (elapsed < kBenchmarkTime) {
+      watch.reset();
+      watch.start();
       appState.markNeedsBuild();
       // We don't use tester.pump() because we're trying to drive it in an
       // artificially high load to find out how much CPU each frame takes.
@@ -43,15 +46,20 @@ Future<void> main() async {
       // We use Timer.run to ensure there's a microtask flush in between
       // the two calls below.
       await tester.pumpBenchmark(Duration(milliseconds: iterations * 16));
+      watch.stop();
       iterations += 1;
+      elapsed += Duration(microseconds: watch.elapsedMicroseconds);
+      values.add(watch.elapsedMicroseconds.toDouble());
     }
-    watch.stop();
   });
+  return values;
+}
 
+Future<void> main() async {
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
-  printer.addResult(
+  printer.addResultStatistics(
     description: 'Stock build',
-    value: watch.elapsedMicroseconds / iterations,
+    values: await runBuildBenchmark(),
     unit: 'µs per iteration',
     name: 'stock_build_iteration',
   );

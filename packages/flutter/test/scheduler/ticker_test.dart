@@ -8,6 +8,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  Future<void> setAppLifeCycleState(AppLifecycleState state) async {
+    final ByteData? message =
+        const StringCodec().encodeMessage(state.toString());
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+  }
+
   testWidgets('Ticker mute control test', (WidgetTester tester) async {
     int tickCount = 0;
     void handleTick(Duration duration) {
@@ -117,6 +124,8 @@ void main() {
     expect(lastDuration, const Duration(milliseconds: 20));
 
     ticker.dispose();
+
+    timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
   testWidgets('Ticker can be slowed down with time dilation', (WidgetTester tester) async {
@@ -133,6 +142,8 @@ void main() {
     expect(lastDuration, const Duration(milliseconds: 5));
 
     ticker.dispose();
+
+    timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
   testWidgets('Ticker stops ticking when application is paused', (WidgetTester tester) async {
@@ -148,17 +159,18 @@ void main() {
     expect(ticker.isActive, isTrue);
     expect(tickCount, equals(0));
 
-    final ByteData? message = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    setAppLifeCycleState(AppLifecycleState.paused);
+
     expect(ticker.isTicking, isFalse);
     expect(ticker.isActive, isTrue);
 
     ticker.stop();
+
+    setAppLifeCycleState(AppLifecycleState.resumed);
   });
 
   testWidgets('Ticker can be created before application unpauses', (WidgetTester tester) async {
-    final ByteData? pausedMessage = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', pausedMessage, (_) { });
+    setAppLifeCycleState(AppLifecycleState.paused);
 
     int tickCount = 0;
     void handleTick(Duration duration) {
@@ -176,8 +188,7 @@ void main() {
     expect(tickCount, equals(0));
     expect(ticker.isTicking, isFalse);
 
-    final ByteData? resumedMessage = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', resumedMessage, (_) { });
+    setAppLifeCycleState(AppLifecycleState.resumed);
 
     await tester.pump(const Duration(milliseconds: 10));
 

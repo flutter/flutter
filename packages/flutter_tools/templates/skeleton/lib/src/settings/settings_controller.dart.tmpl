@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'settings_service.dart';
@@ -35,10 +34,10 @@ class SettingsController with ChangeNotifier {
   Future<void> updateThemeMode(ThemeMode? newThemeMode) async {
     if (newThemeMode == null) return;
 
-    // Dot not perform any work if new and old ThemeMode are identical
+    // Do not perform any work if new and old ThemeMode are identical
     if (newThemeMode == _themeMode) return;
 
-    // Otherwise, store the new theme mode in memory
+    // Otherwise, store the new ThemeMode in memory
     _themeMode = newThemeMode;
 
     // Important! Inform listeners a change has occurred.

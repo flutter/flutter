@@ -13,6 +13,8 @@ import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
 void main() {
+  LiveTestWidgetsFlutterBinding.ensureInitialized();
+
   late VmService vmService;
   late LiveTestWidgetsFlutterBinding binding;
   setUpAll(() async {
@@ -27,7 +29,7 @@ void main() {
     await vmService.streamListen(EventStreams.kExtension);
 
     // Initialize bindings
-    binding = LiveTestWidgetsFlutterBinding();
+    binding = LiveTestWidgetsFlutterBinding.instance;
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
     binding.attachRootWidget(const SizedBox.expand());
     expect(binding.framesEnabled, true);
@@ -72,9 +74,9 @@ void main() {
     expect(event.extensionKind, 'Flutter.ImageSizesForFrame');
     expect(
       jsonEncode(event.extensionData!.data),
-      '{"test.png":{"source":"test.png","displaySize":{"width":200.0,"height":100.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":106666,"decodedSizeInBytes":480000}}',
+      contains('"test.png":{"source":"test.png","displaySize":{"width":600.0,"height":300.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":960000,"decodedSizeInBytes":480000}'),
     );
-  }, skip: isBrowser); // uses dart:isolate and io
+  }, skip: isBrowser); // [intended] uses dart:isolate and io.
 
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
@@ -104,9 +106,9 @@ void main() {
     expect(event.extensionKind, 'Flutter.ImageSizesForFrame');
     expect(
       jsonEncode(event.extensionData!.data),
-      '{"test.png":{"source":"test.png","displaySize":{"width":300.0,"height":300.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":480000,"decodedSizeInBytes":480000}}',
+      contains('"test.png":{"source":"test.png","displaySize":{"width":900.0,"height":900.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":4320000,"decodedSizeInBytes":480000}'),
     );
-  }, skip: isBrowser); // uses dart:isolate and io
+  }, skip: isBrowser); // [intended] uses dart:isolate and io.
 }
 
 class TestCanvas implements Canvas {

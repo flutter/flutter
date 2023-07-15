@@ -3,11 +3,20 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../rendering/rendering_tester.dart';
+
+class SpyFixedExtentScrollController extends FixedExtentScrollController {
+  /// Override for test visibility only.
+  @override
+  bool get hasListeners => super.hasListeners;
+}
 
 void main() {
   testWidgets('Picker respects theme styling', (WidgetTester tester) async {
@@ -110,7 +119,7 @@ void main() {
 
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '1').first),
-        const Offset(0.0, 175.0),
+        offsetMoreOrLessEquals(const Offset(0.0, 170.0), epsilon: 0.5),
       );
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '0').first),
@@ -182,9 +191,9 @@ void main() {
             width: 300.0,
             child: CupertinoPicker(
               itemExtent: 15.0,
-              children: const <Widget>[Text('1'), Text('1')],
               onSelectedItemChanged: (int i) {},
               selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(background: Color(0x12345678)),
+              children: const <Widget>[Text('1'), Text('1')],
             ),
           ),
         ),
@@ -226,6 +235,7 @@ void main() {
 
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
+          return null;
         });
 
         await tester.pumpWidget(
@@ -279,6 +289,7 @@ void main() {
 
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
+          return null;
         });
 
         await tester.pumpWidget(
@@ -337,7 +348,7 @@ void main() {
       // The item that was in the center now moved a bit.
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '10')),
-        const Offset(200.0, 280.0),
+        const Offset(200.0, 250.0),
       );
 
       await tester.pumpAndSettle();
@@ -356,7 +367,7 @@ void main() {
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '10')).dy,
         // It's down by 100.0 now.
-        moreOrLessEquals(350.0, epsilon: 0.5),
+        moreOrLessEquals(340.0, epsilon: 0.5),
       );
       expect(selectedItems, <int>[9]);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
@@ -394,9 +405,11 @@ void main() {
         warnIfMissed: false, // has an IgnorePointer
       );
 
-      // Should have been flung far enough that even the first item goes off
-      // screen and gets removed.
-      expect(find.widgetWithText(SizedBox, '0').evaluate().isEmpty, true);
+      if (debugDefaultTargetPlatformOverride == TargetPlatform.iOS) {
+        // Should have been flung far enough that even the first item goes off
+        // screen and gets removed.
+        expect(find.widgetWithText(SizedBox, '0').evaluate().isEmpty, true);
+      }
 
       expect(
         selectedItems,
@@ -418,6 +431,159 @@ void main() {
         // Falling back to 0 shouldn't produce more callbacks.
         <int>[8, 6, 4, 2, 0],
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
+
+  testWidgets('Picker adapts to MaterialApp dark mode', (WidgetTester tester) async {
+    Widget buildCupertinoPicker(Brightness brightness) {
+      return MaterialApp(
+        theme: ThemeData(brightness: brightness),
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 300.0,
+            width: 300.0,
+            child: CupertinoPicker(
+              itemExtent: 50.0,
+              onSelectedItemChanged: (_) { },
+              children: List<Widget>.generate(3, (int index) {
+                return SizedBox(
+                  height: 50.0,
+                  width: 300.0,
+                  child: Text(index.toString()),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // CupertinoPicker with light theme.
+    await tester.pumpWidget(buildCupertinoPicker(Brightness.light));
+    RenderParagraph paragraph = tester.renderObject(find.text('1'));
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+
+    // CupertinoPicker with dark theme.
+    await tester.pumpWidget(buildCupertinoPicker(Brightness.dark));
+    paragraph = tester.renderObject(find.text('1'));
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+  });
+
+  group('CupertinoPickerDefaultSelectionOverlay', () {
+    testWidgets('should be using directional decoration', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          theme: const CupertinoThemeData(brightness: Brightness.light),
+          home: CupertinoPicker(
+            itemExtent: 15.0,
+            onSelectedItemChanged: (int i) {},
+            selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(background: Color(0x12345678)),
+            children: const <Widget>[Text('1'), Text('1')],
+          ),
+        ),
+      );
+
+      final Finder selectionContainer = find.byType(Container);
+      final Container container = tester.firstWidget<Container>(selectionContainer);
+      final EdgeInsetsGeometry? margin = container.margin;
+      final BorderRadiusGeometry? borderRadius = (container.decoration as BoxDecoration?)?.borderRadius;
+
+      expect(margin, isA<EdgeInsetsDirectional>());
+      expect(borderRadius, isA<BorderRadiusDirectional>());
+    });
+  });
+
+  testWidgets('Scroll controller is detached upon dispose', (WidgetTester tester) async {
+    final SpyFixedExtentScrollController controller = SpyFixedExtentScrollController();
+    expect(controller.hasListeners, false);
+    expect(controller.positions.length, 0);
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: Center(
+          child: CupertinoPicker(
+            scrollController: controller,
+            itemExtent: 50.0,
+            onSelectedItemChanged: (_) { },
+            children: List<Widget>.generate(3, (int index) {
+              return SizedBox(
+                width: 300.0,
+                child: Text(index.toString()),
+              );
+            }),
+          ),
+        ),
+      ),
+    ));
+    expect(controller.hasListeners, true);
+    expect(controller.positions.length, 1);
+
+    await tester.pumpWidget(const SizedBox.expand());
+    expect(controller.hasListeners, false);
+    expect(controller.positions.length, 0);
+  });
+
+  testWidgets('Registers taps and does not crash with certain diameterRatio', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/126491
+
+    final List<int> children = List<int>.generate(100, (int index) => index);
+    final List<int> paintedChildren = <int>[];
+    final Set<int> tappedChildren = <int>{};
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: Center(
+          child: SizedBox(
+            height: 120,
+            child: CupertinoPicker(
+              itemExtent: 55,
+              diameterRatio: 0.9,
+              onSelectedItemChanged: (int index) {},
+              children: children
+                .map<Widget>((int index) =>
+                  GestureDetector(
+                    key: ValueKey<int>(index),
+                    onTap: () {
+                      tappedChildren.add(index);
+                    },
+                    child: SizedBox(
+                      width: 55,
+                      height: 55,
+                      child: CustomPaint(
+                        painter: TestCallbackPainter(onPaint: () {
+                          paintedChildren.add(index);
+                        }),
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    // Children are painted two times for whatever reason
+    expect(paintedChildren, <int>[0, 1, 0, 1]);
+
+    // Expect hitting 0 and 1, which are painted
+    await tester.tap(find.byKey(const ValueKey<int>(0)));
+    expect(tappedChildren, const <int>[0]);
+
+    await tester.tap(find.byKey(const ValueKey<int>(1)));
+    expect(tappedChildren, const <int>[0, 1]);
+
+    // The third child is not painted, so is not hit
+    await tester.tap(find.byKey(const ValueKey<int>(2)), warnIfMissed: false);
+    expect(tappedChildren, const <int>[0, 1]);
+  });
+
 }

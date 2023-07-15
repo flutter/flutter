@@ -44,8 +44,7 @@ class MultiRootFileSystem extends ForwardingFileSystem {
     required FileSystem delegate,
     required String scheme,
     required List<String> roots,
-  })   : assert(delegate != null),
-        assert(roots.isNotEmpty),
+  })   : assert(roots.isNotEmpty),
         _scheme = scheme,
         _roots = roots.map((String root) => delegate.path.normalize(root)).toList(),
         super(delegate);
@@ -210,14 +209,12 @@ abstract class MultiRootFileSystemEntity<T extends FileSystemEntity,
 }
 
 class MultiRootFile extends MultiRootFileSystemEntity<File, io.File>
-    with ForwardingFile {
+    // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
+    with ForwardingFile { // ignore: prefer_mixin
   MultiRootFile({
-    required MultiRootFileSystem fileSystem,
-    required io.File delegate,
-  }) : super(
-    fileSystem: fileSystem,
-    delegate: delegate,
-  );
+    required super.fileSystem,
+    required super.delegate,
+  });
 
   @override
   String toString() =>
@@ -226,14 +223,12 @@ class MultiRootFile extends MultiRootFileSystemEntity<File, io.File>
 
 class MultiRootDirectory
     extends MultiRootFileSystemEntity<Directory, io.Directory>
-    with ForwardingDirectory<Directory> {
+    // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
+    with ForwardingDirectory<Directory> { // ignore: prefer_mixin
   MultiRootDirectory({
-    required MultiRootFileSystem fileSystem,
-    required io.Directory delegate,
-  }) : super(
-    fileSystem: fileSystem,
-    delegate: delegate,
-  );
+    required super.fileSystem,
+    required super.delegate,
+  });
 
   // For the childEntity methods, we first obtain an instance of the entity
   // from the underlying file system, then invoke childEntity() on it, then
@@ -256,14 +251,12 @@ class MultiRootDirectory
 }
 
 class MultiRootLink extends MultiRootFileSystemEntity<Link, io.Link>
-    with ForwardingLink {
+    // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
+    with ForwardingLink { // ignore: prefer_mixin
   MultiRootLink({
-    required MultiRootFileSystem fileSystem,
-    required io.Link delegate,
-  }) : super(
-    fileSystem: fileSystem,
-    delegate: delegate,
-  );
+    required super.fileSystem,
+    required super.delegate,
+  });
 
   @override
   String toString() =>

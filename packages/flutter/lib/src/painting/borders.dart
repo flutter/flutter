@@ -26,11 +26,10 @@ enum BorderStyle {
 /// A [Border] consists of four [BorderSide] objects: [Border.top],
 /// [Border.left], [Border.right], and [Border.bottom].
 ///
-/// Note that setting [BorderSide.width] to 0.0 will result in hairline
-/// rendering. A more involved explanation is present in [BorderSide.width].
+/// Setting [BorderSide.width] to 0.0 will result in hairline rendering; see
+/// [BorderSide.width] for a more involved explanation.
 ///
 /// {@tool snippet}
-///
 /// This sample shows how [BorderSide] objects can be used in a [Container], via
 /// a [BoxDecoration] and a [Border], to decorate some [Text]. In this example,
 /// the text has a thick bar above it that is light blue, and a thick bar below
@@ -58,7 +57,7 @@ enum BorderStyle {
 ///    ([TableBorder.horizontalInside] and [TableBorder.verticalInside]), both
 ///    of which are also [BorderSide] objects.
 @immutable
-class BorderSide {
+class BorderSide with Diagnosticable {
   /// Creates the side of a border.
   ///
   /// By default, the border is 1.0 logical pixels wide and solid black.
@@ -66,10 +65,8 @@ class BorderSide {
     this.color = const Color(0xFF000000),
     this.width = 1.0,
     this.style = BorderStyle.solid,
-  }) : assert(color != null),
-       assert(width != null),
-       assert(width >= 0.0),
-       assert(style != null);
+    this.strokeAlign = strokeAlignInside,
+  }) : assert(width >= 0.0);
 
   /// Creates a [BorderSide] that represents the addition of the two given
   /// [BorderSide]s.
@@ -83,22 +80,24 @@ class BorderSide {
   ///
   /// The arguments must not be null.
   static BorderSide merge(BorderSide a, BorderSide b) {
-    assert(a != null);
-    assert(b != null);
     assert(canMerge(a, b));
     final bool aIsNone = a.style == BorderStyle.none && a.width == 0.0;
     final bool bIsNone = b.style == BorderStyle.none && b.width == 0.0;
-    if (aIsNone && bIsNone)
+    if (aIsNone && bIsNone) {
       return BorderSide.none;
-    if (aIsNone)
+    }
+    if (aIsNone) {
       return b;
-    if (bIsNone)
+    }
+    if (bIsNone) {
       return a;
+    }
     assert(a.color == b.color);
     assert(a.style == b.style);
     return BorderSide(
       color: a.color, // == b.color
       width: a.width + b.width,
+      strokeAlign: math.max(a.strokeAlign, b.strokeAlign),
       style: a.style, // == b.style
     );
   }
@@ -109,7 +108,7 @@ class BorderSide {
   /// The width of this side of the border, in logical pixels.
   ///
   /// Setting width to 0.0 will result in a hairline border. This means that
-  /// the border will have the width of one physical pixel. Also, hairline
+  /// the border will have the width of one physical pixel. Hairline
   /// rendering takes shortcuts when the path overlaps a pixel more than once.
   /// This means that it will render faster than otherwise, but it might
   /// double-hit pixels, giving it a slightly darker/lighter result.
@@ -126,17 +125,68 @@ class BorderSide {
   /// A hairline black border that is not rendered.
   static const BorderSide none = BorderSide(width: 0.0, style: BorderStyle.none);
 
+  /// The relative position of the stroke on a [BorderSide] in an
+  /// [OutlinedBorder] or [Border].
+  ///
+  /// Values typically range from -1.0 ([strokeAlignInside], inside border,
+  /// default) to 1.0 ([strokeAlignOutside], outside border), without any
+  /// bound constraints (e.g., a value of -2.0 is not typical, but allowed).
+  /// A value of 0 ([strokeAlignCenter]) will center the border on the edge
+  /// of the widget.
+  ///
+  /// When set to [strokeAlignInside], the stroke is drawn completely inside
+  /// the widget. For [strokeAlignCenter] and [strokeAlignOutside], a property
+  /// such as [Container.clipBehavior] can be used in an outside widget to clip
+  /// it. If [Container.decoration] has a border, the container may incorporate
+  /// [width] as additional padding:
+  /// - [strokeAlignInside] provides padding with full [width].
+  /// - [strokeAlignCenter] provides padding with half [width].
+  /// - [strokeAlignOutside] provides zero padding, as stroke is drawn entirely outside.
+  ///
+  /// This property is not honored by [toPaint] (because the [Paint] object
+  /// cannot represent it); it is intended that classes that use [BorderSide]
+  /// objects implement this property when painting borders by suitably
+  /// inflating or deflating their regions.
+  ///
+  /// {@tool dartpad}
+  /// This example shows an animation of how [strokeAlign] affects the drawing
+  /// when applied to borders of various shapes.
+  ///
+  /// ** See code in examples/api/lib/painting/borders/border_side.stroke_align.0.dart **
+  /// {@end-tool}
+  final double strokeAlign;
+
+  /// The border is drawn fully inside of the border path.
+  ///
+  /// This is a constant for use with [strokeAlign].
+  ///
+  /// This is the default value for [strokeAlign].
+  static const double strokeAlignInside = -1.0;
+
+  /// The border is drawn on the center of the border path, with half of the
+  /// [BorderSide.width] on the inside, and the other half on the outside of
+  /// the path.
+  ///
+  /// This is a constant for use with [strokeAlign].
+  static const double strokeAlignCenter = 0.0;
+
+  /// The border is drawn on the outside of the border path.
+  ///
+  /// This is a constant for use with [strokeAlign].
+  static const double strokeAlignOutside = 1.0;
+
   /// Creates a copy of this border but with the given fields replaced with the new values.
   BorderSide copyWith({
     Color? color,
     double? width,
     BorderStyle? style,
+    double? strokeAlign,
   }) {
-    assert(width == null || width >= 0.0);
     return BorderSide(
       color: color ?? this.color,
       width: width ?? this.width,
       style: style ?? this.style,
+      strokeAlign: strokeAlign ?? this.strokeAlign,
     );
   }
 
@@ -157,7 +207,6 @@ class BorderSide {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   BorderSide scale(double t) {
-    assert(t != null);
     return BorderSide(
       color: color,
       width: math.max(0.0, width * t),
@@ -167,6 +216,9 @@ class BorderSide {
 
   /// Create a [Paint] object that, if used to stroke a line, will draw the line
   /// in this border's style.
+  ///
+  /// The [strokeAlign] property is not reflected in the [Paint]; consumers must
+  /// implement that directly by inflating or deflating their region appropriately.
   ///
   /// Not all borders use this method to paint their border sides. For example,
   /// non-uniform rectangular [Border]s have beveled edges and so paint their
@@ -194,11 +246,10 @@ class BorderSide {
   ///
   /// The arguments must not be null.
   static bool canMerge(BorderSide a, BorderSide b) {
-    assert(a != null);
-    assert(b != null);
     if ((a.style == BorderStyle.none && a.width == 0.0) ||
-        (b.style == BorderStyle.none && b.width == 0.0))
+        (b.style == BorderStyle.none && b.width == 0.0)) {
       return true;
+    }
     return a.style == b.style
         && a.color == b.color;
   }
@@ -209,64 +260,103 @@ class BorderSide {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
-    assert(a != null);
-    assert(b != null);
-    assert(t != null);
-    if (t == 0.0)
+    if (identical(a, b)) {
       return a;
-    if (t == 1.0)
+    }
+    if (t == 0.0) {
+      return a;
+    }
+    if (t == 1.0) {
       return b;
+    }
     final double width = ui.lerpDouble(a.width, b.width, t)!;
-    if (width < 0.0)
+    if (width < 0.0) {
       return BorderSide.none;
-    if (a.style == b.style) {
+    }
+    if (a.style == b.style && a.strokeAlign == b.strokeAlign) {
       return BorderSide(
         color: Color.lerp(a.color, b.color, t)!,
         width: width,
         style: a.style, // == b.style
+        strokeAlign: a.strokeAlign, // == b.strokeAlign
       );
     }
-    Color colorA, colorB;
+    final Color colorA, colorB;
     switch (a.style) {
       case BorderStyle.solid:
         colorA = a.color;
-        break;
       case BorderStyle.none:
         colorA = a.color.withAlpha(0x00);
-        break;
     }
     switch (b.style) {
       case BorderStyle.solid:
         colorB = b.color;
-        break;
       case BorderStyle.none:
         colorB = b.color.withAlpha(0x00);
-        break;
+    }
+    if (a.strokeAlign != b.strokeAlign) {
+      return BorderSide(
+        color: Color.lerp(colorA, colorB, t)!,
+        width: width,
+        strokeAlign: ui.lerpDouble(a.strokeAlign, b.strokeAlign, t)!,
+      );
     }
     return BorderSide(
       color: Color.lerp(colorA, colorB, t)!,
       width: width,
-      style: BorderStyle.solid,
+      strokeAlign: a.strokeAlign, // == b.strokeAlign
     );
   }
 
+  /// Get the amount of the stroke width that lies inside of the [BorderSide].
+  ///
+  /// For example, this will return the [width] for a [strokeAlign] of -1, half
+  /// the [width] for a [strokeAlign] of 0, and 0 for a [strokeAlign] of 1.
+  double get strokeInset => width * (1 - (1 + strokeAlign) / 2);
+
+  /// Get the amount of the stroke width that lies outside of the [BorderSide].
+  ///
+  /// For example, this will return 0 for a [strokeAlign] of -1, half the
+  /// [width] for a [strokeAlign] of 0, and the [width] for a [strokeAlign]
+  /// of 1.
+  double get strokeOutset => width * (1 + strokeAlign) / 2;
+
+  /// The offset of the stroke, taking into account the stroke alignment.
+  ///
+  /// For example, this will return the negative [width] of the stroke
+  /// for a [strokeAlign] of -1, 0 for a [strokeAlign] of 0, and the
+  /// [width] for a [strokeAlign] of -1.
+  double get strokeOffset => width * strokeAlign;
+
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is BorderSide
         && other.color == color
         && other.width == width
-        && other.style == style;
+        && other.style == style
+        && other.strokeAlign == strokeAlign;
   }
 
   @override
-  int get hashCode => hashValues(color, width, style);
+  int get hashCode => Object.hash(color, width, style, strokeAlign);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)';
+  String toStringShort() => 'BorderSide';
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: const Color(0xFF000000)));
+    properties.add(DoubleProperty('width', width, defaultValue: 1.0));
+    properties.add(DoubleProperty('strokeAlign', strokeAlign, defaultValue: strokeAlignInside));
+    properties.add(EnumProperty<BorderStyle>('style', style, defaultValue: BorderStyle.solid));
+  }
 }
 
 /// Base class for shape outlines.
@@ -380,8 +470,9 @@ abstract class ShapeBorder {
   /// Instead of calling this directly, use [ShapeBorder.lerp].
   @protected
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    if (a == null)
+    if (a == null) {
       return scale(t);
+    }
     return null;
   }
 
@@ -412,8 +503,9 @@ abstract class ShapeBorder {
   /// Instead of calling this directly, use [ShapeBorder.lerp].
   @protected
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    if (b == null)
+    if (b == null) {
       return scale(1.0 - t);
+    }
     return null;
   }
 
@@ -426,12 +518,16 @@ abstract class ShapeBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ShapeBorder? lerp(ShapeBorder? a, ShapeBorder? b, double t) {
-    assert(t != null);
+    if (identical(a, b)) {
+      return a;
+    }
     ShapeBorder? result;
-    if (b != null)
+    if (b != null) {
       result = b.lerpFrom(a, t);
-    if (result == null && a != null)
+    }
+    if (result == null && a != null) {
       result = a.lerpTo(b, t);
+    }
     return result ?? (t < 0.5 ? a : b);
   }
 
@@ -477,6 +573,78 @@ abstract class ShapeBorder {
   ///  * [Path.contains], which can tell if an [Offset] is within a [Path].
   Path getInnerPath(Rect rect, { TextDirection? textDirection });
 
+  /// Paint a canvas with the appropriate shape.
+  ///
+  /// On [ShapeBorder] subclasses whose [preferPaintInterior] method returns
+  /// true, this should be faster than using [Canvas.drawPath] with the path
+  /// provided by [getOuterPath]. (If [preferPaintInterior] returns false,
+  /// then this method asserts in debug mode and does nothing in release mode.)
+  ///
+  /// Subclasses are expected to implement this method when the [Canvas] API
+  /// has a dedicated method to draw the relevant shape. For example,
+  /// [CircleBorder] uses this to call [Canvas.drawCircle], and
+  /// [RoundedRectangleBorder] uses this to call [Canvas.drawRRect].
+  ///
+  /// Subclasses that implement this must ensure that calling [paintInterior]
+  /// is semantically equivalent to (i.e. renders the same pixels as) calling
+  /// [Canvas.drawPath] with the same [Paint] and the [Path] returned from
+  /// [getOuterPath], and must also override [preferPaintInterior] to
+  /// return true.
+  ///
+  /// For example, a shape that draws a rectangle might implement
+  /// [getOuterPath], [paintInterior], and [preferPaintInterior] as follows:
+  ///
+  /// ```dart
+  /// class RectangleBorder extends OutlinedBorder {
+  ///   // ...
+  ///
+  ///   @override
+  ///   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  ///    return Path()
+  ///      ..addRect(rect);
+  ///   }
+  ///
+  ///   @override
+  ///   void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
+  ///    canvas.drawRect(rect, paint);
+  ///   }
+  ///
+  ///   @override
+  ///   bool get preferPaintInterior => true;
+  ///
+  ///   // ...
+  /// }
+  /// ```
+  ///
+  /// When a shape can only be drawn using path, [preferPaintInterior] must
+  /// return false. In that case, classes such as [ShapeDecoration] will cache
+  /// the path from [getOuterPath] and call [Canvas.drawPath] directly.
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
+    assert(!preferPaintInterior, '$runtimeType.preferPaintInterior returns true but $runtimeType.paintInterior is not implemented.');
+    assert(false, '$runtimeType.preferPaintInterior returns false, so it is an error to call its paintInterior method.');
+  }
+
+  /// Reports whether [paintInterior] is implemented.
+  ///
+  /// Classes such as [ShapeDecoration] prefer to use [paintInterior] if this
+  /// getter returns true. This is intended to enable faster painting; instead
+  /// of computing a shape using [getOuterPath] and then drawing it using
+  /// [Canvas.drawPath], the path can be drawn directly to the [Canvas] using
+  /// dedicated methods such as [Canvas.drawRect] or [Canvas.drawCircle].
+  ///
+  /// By default, this getter returns false.
+  ///
+  /// Subclasses that implement [paintInterior] should override this to return
+  /// true. Subclasses should only override [paintInterior] if doing so enables
+  /// faster rendering than is possible with [Canvas.drawPath] (so, in
+  /// particular, subclasses should not call [Canvas.drawPath] in
+  /// [paintInterior]).
+  ///
+  /// See also:
+  ///
+  ///  * [paintInterior], whose API documentation has an example implementation.
+  bool get preferPaintInterior => false;
+
   /// Paints the border within the given [Rect] on the given [Canvas].
   ///
   /// The `textDirection` argument must be provided and non-null if the border
@@ -499,7 +667,10 @@ abstract class OutlinedBorder extends ShapeBorder {
   /// const constructors so that they can be used in const expressions.
   ///
   /// The value of [side] must not be null.
-  const OutlinedBorder({ this.side = BorderSide.none }) : assert(side != null);
+  const OutlinedBorder({ this.side = BorderSide.none });
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.all(math.max(side.strokeInset, 0));
 
   /// The border outline's color and weight.
   ///
@@ -510,6 +681,47 @@ abstract class OutlinedBorder extends ShapeBorder {
   /// Returns a copy of this OutlinedBorder that draws its outline with the
   /// specified [side], if [side] is non-null.
   OutlinedBorder copyWith({ BorderSide? side });
+
+  @override
+  ShapeBorder scale(double t);
+
+  @override
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+    if (a == null) {
+      return scale(t);
+    }
+    return null;
+  }
+
+  @override
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+    if (b == null) {
+      return scale(1.0 - t);
+    }
+    return null;
+  }
+
+  /// Linearly interpolates between two [OutlinedBorder]s.
+  ///
+  /// This defers to `b`'s [lerpTo] function if `b` is not null. If `b` is
+  /// null or if its [lerpTo] returns null, it uses `a`'s [lerpFrom]
+  /// function instead. If both return null, it returns `a` before `t=0.5`
+  /// and `b` after `t=0.5`.
+  ///
+  /// {@macro dart.ui.shadow.lerp}
+  static OutlinedBorder? lerp(OutlinedBorder? a, OutlinedBorder? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
+    ShapeBorder? result;
+    if (b != null) {
+      result = b.lerpFrom(a, t);
+    }
+    if (result == null && a != null) {
+      result = a.lerpTo(b, t);
+    }
+    return result as OutlinedBorder? ?? (t < 0.5 ? a : b);
+  }
 }
 
 /// Represents the addition of two otherwise-incompatible borders.
@@ -517,8 +729,7 @@ abstract class OutlinedBorder extends ShapeBorder {
 /// The borders are listed from the outside to the inside.
 class _CompoundBorder extends ShapeBorder {
   _CompoundBorder(this.borders)
-    : assert(borders != null),
-      assert(borders.length >= 2),
+    : assert(borders.length >= 2),
       assert(!borders.any((ShapeBorder border) => border is _CompoundBorder));
 
   final List<ShapeBorder> borders;
@@ -581,7 +792,6 @@ class _CompoundBorder extends ShapeBorder {
   }
 
   static _CompoundBorder lerp(ShapeBorder? a, ShapeBorder? b, double t) {
-    assert(t != null);
     assert(a is _CompoundBorder || b is _CompoundBorder); // Not really necessary, but all call sites currently intend this.
     final List<ShapeBorder?> aList = a is _CompoundBorder ? a.borders : <ShapeBorder?>[a];
     final List<ShapeBorder?> bList = b is _CompoundBorder ? b.borders : <ShapeBorder?>[b];
@@ -601,18 +811,21 @@ class _CompoundBorder extends ShapeBorder {
       // is inserted before the shape that is going away, so that the outer path changes to
       // the new border earlier rather than later. (This affects, among other things, where
       // the ShapeDecoration class puts its background.)
-      if (localB != null)
+      if (localB != null) {
         results.add(localB.scale(t));
-      if (localA != null)
+      }
+      if (localA != null) {
         results.add(localA.scale(1.0 - t));
+      }
     }
     return _CompoundBorder(results);
   }
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    for (int index = 0; index < borders.length - 1; index += 1)
+    for (int index = 0; index < borders.length - 1; index += 1) {
       rect = borders[index].dimensions.resolve(textDirection).deflateRect(rect);
+    }
     return borders.last.getInnerPath(rect, textDirection: textDirection);
   }
 
@@ -620,6 +833,14 @@ class _CompoundBorder extends ShapeBorder {
   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return borders.first.getOuterPath(rect, textDirection: textDirection);
   }
+
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    borders.first.paintInterior(canvas, rect, paint, textDirection: textDirection);
+  }
+
+  @override
+  bool get preferPaintInterior => borders.every((ShapeBorder border) => border.preferPaintInterior);
 
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
@@ -631,16 +852,18 @@ class _CompoundBorder extends ShapeBorder {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _CompoundBorder
         && listEquals<ShapeBorder>(other.borders, borders);
   }
 
   @override
-  int get hashCode => hashList(borders);
+  int get hashCode => Object.hashAll(borders);
 
   @override
   String toString() {
@@ -677,12 +900,6 @@ void paintBorder(
   BorderSide bottom = BorderSide.none,
   BorderSide left = BorderSide.none,
 }) {
-  assert(canvas != null);
-  assert(rect != null);
-  assert(top != null);
-  assert(right != null);
-  assert(bottom != null);
-  assert(left != null);
 
   // We draw the borders as filled shapes, unless the borders are hairline
   // borders, in which case we use PaintingStyle.stroke, with the stroke width
@@ -706,7 +923,6 @@ void paintBorder(
         path.lineTo(rect.left + left.width, rect.top + top.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }
@@ -725,7 +941,6 @@ void paintBorder(
         path.lineTo(rect.right - right.width, rect.top + top.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }
@@ -744,7 +959,6 @@ void paintBorder(
         path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }
@@ -763,7 +977,6 @@ void paintBorder(
         path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }

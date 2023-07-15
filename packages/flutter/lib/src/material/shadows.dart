@@ -8,7 +8,7 @@ import 'package:flutter/painting.dart';
 // Currently, only the elevation values that are bound to one or more widgets are
 // defined here.
 
-/// Map of elevation offsets used by material design to [BoxShadow] definitions.
+/// Map of elevation offsets used by Material Design to [BoxShadow] definitions.
 ///
 /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24.
 ///
@@ -34,32 +34,32 @@ const Map<int, List<BoxShadow>> _elevationToShadow = <int, List<BoxShadow>>{
 
   1: <BoxShadow>[
     BoxShadow(offset: Offset(0.0, 2.0), blurRadius: 1.0, spreadRadius: -1.0, color: _kKeyUmbraOpacity),
-    BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 1.0, spreadRadius: 0.0, color: _kKeyPenumbraOpacity),
-    BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 3.0, spreadRadius: 0.0, color: _kAmbientShadowOpacity),
+    BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 1.0, color: _kKeyPenumbraOpacity),
+    BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 3.0, color: _kAmbientShadowOpacity),
   ],
 
   2: <BoxShadow>[
     BoxShadow(offset: Offset(0.0, 3.0), blurRadius: 1.0, spreadRadius: -2.0, color: _kKeyUmbraOpacity),
-    BoxShadow(offset: Offset(0.0, 2.0), blurRadius: 2.0, spreadRadius: 0.0, color: _kKeyPenumbraOpacity),
-    BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 5.0, spreadRadius: 0.0, color: _kAmbientShadowOpacity),
+    BoxShadow(offset: Offset(0.0, 2.0), blurRadius: 2.0, color: _kKeyPenumbraOpacity),
+    BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 5.0, color: _kAmbientShadowOpacity),
   ],
 
   3: <BoxShadow>[
     BoxShadow(offset: Offset(0.0, 3.0), blurRadius: 3.0, spreadRadius: -2.0, color: _kKeyUmbraOpacity),
-    BoxShadow(offset: Offset(0.0, 3.0), blurRadius: 4.0, spreadRadius: 0.0, color: _kKeyPenumbraOpacity),
-    BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 8.0, spreadRadius: 0.0, color: _kAmbientShadowOpacity),
+    BoxShadow(offset: Offset(0.0, 3.0), blurRadius: 4.0, color: _kKeyPenumbraOpacity),
+    BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 8.0, color: _kAmbientShadowOpacity),
   ],
 
   4: <BoxShadow>[
     BoxShadow(offset: Offset(0.0, 2.0), blurRadius: 4.0, spreadRadius: -1.0, color: _kKeyUmbraOpacity),
-    BoxShadow(offset: Offset(0.0, 4.0), blurRadius: 5.0, spreadRadius: 0.0, color: _kKeyPenumbraOpacity),
-    BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 10.0, spreadRadius: 0.0, color: _kAmbientShadowOpacity),
+    BoxShadow(offset: Offset(0.0, 4.0), blurRadius: 5.0, color: _kKeyPenumbraOpacity),
+    BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 10.0, color: _kAmbientShadowOpacity),
   ],
 
   6: <BoxShadow>[
     BoxShadow(offset: Offset(0.0, 3.0), blurRadius: 5.0, spreadRadius: -1.0, color: _kKeyUmbraOpacity),
-    BoxShadow(offset: Offset(0.0, 6.0), blurRadius: 10.0, spreadRadius: 0.0, color: _kKeyPenumbraOpacity),
-    BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 18.0, spreadRadius: 0.0, color: _kAmbientShadowOpacity),
+    BoxShadow(offset: Offset(0.0, 6.0), blurRadius: 10.0, color: _kKeyPenumbraOpacity),
+    BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 18.0, color: _kAmbientShadowOpacity),
   ],
 
   8: <BoxShadow>[

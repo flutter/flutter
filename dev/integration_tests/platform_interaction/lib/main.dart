@@ -16,7 +16,7 @@ void main() {
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({Key? key}) : super(key: key);
+  const TestApp({super.key});
 
   @override
   State<TestApp> createState() => _TestAppState();
@@ -31,10 +31,11 @@ class _TestAppState extends State<TestApp> {
 
   void _executeNextStep() {
     setState(() {
-      if (_step < steps.length)
+      if (_step < steps.length) {
         _result = steps[_step++]();
-      else
+      } else {
         _result = Future<TestStepResult>.value(TestStepResult.complete);
+      }
     });
   }
 

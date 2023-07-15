@@ -25,18 +25,18 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
 
     final AndroidPlugin androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
     final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey]! as IOSPlugin;
-    final String androidPluginClass = androidPlugin.pluginClass;
-    final String iosPluginClass = iosPlugin.pluginClass;
 
-    expect(iosPluginClass, 'SamplePlugin');
-    expect(androidPluginClass, 'SamplePlugin');
+    expect(iosPlugin.pluginClass, 'SamplePlugin');
     expect(iosPlugin.classPrefix, 'FLT');
+    expect(iosPlugin.sharedDarwinSource, isFalse);
+    expect(androidPlugin.pluginClass, 'SamplePlugin');
     expect(androidPlugin.package, 'com.flutter.dev');
   });
 
@@ -48,10 +48,12 @@ void main() {
       '  pluginClass: ASamplePlugin\n'
       ' ios:\n'
       '  pluginClass: ISamplePlugin\n'
+      '  sharedDarwinSource: true\n'
       ' linux:\n'
       '  pluginClass: LSamplePlugin\n'
       ' macos:\n'
       '  pluginClass: MSamplePlugin\n'
+      '  sharedDarwinSource: true\n'
       ' web:\n'
       '  pluginClass: WebSamplePlugin\n'
       '  fileName: web_plugin.dart\n'
@@ -63,6 +65,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -73,15 +76,15 @@ void main() {
     final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
     final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey]! as WebPlugin;
     final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
-    final String androidPluginClass = androidPlugin.pluginClass;
-    final String iosPluginClass = iosPlugin.pluginClass;
 
-    expect(iosPluginClass, 'ISamplePlugin');
-    expect(androidPluginClass, 'ASamplePlugin');
+    expect(iosPlugin.pluginClass, 'ISamplePlugin');
     expect(iosPlugin.classPrefix, '');
+    expect(iosPlugin.sharedDarwinSource, isTrue);
+    expect(androidPlugin.pluginClass, 'ASamplePlugin');
     expect(androidPlugin.package, 'com.flutter.dev');
     expect(linuxPlugin.pluginClass, 'LSamplePlugin');
     expect(macOSPlugin.pluginClass, 'MSamplePlugin');
+    expect(macOSPlugin.sharedDarwinSource, isTrue);
     expect(webPlugin.pluginClass, 'WebSamplePlugin');
     expect(webPlugin.fileName, 'web_plugin.dart');
     expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
@@ -112,6 +115,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -122,15 +126,15 @@ void main() {
     final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
     final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey]! as WebPlugin;
     final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
-    final String androidPluginClass = androidPlugin.pluginClass;
-    final String iosPluginClass = iosPlugin.pluginClass;
 
-    expect(iosPluginClass, 'ISamplePlugin');
-    expect(androidPluginClass, 'ASamplePlugin');
+    expect(iosPlugin.pluginClass, 'ISamplePlugin');
     expect(iosPlugin.classPrefix, '');
+    expect(iosPlugin.sharedDarwinSource, isFalse);
+    expect(androidPlugin.pluginClass, 'ASamplePlugin');
     expect(androidPlugin.package, 'com.flutter.dev');
     expect(linuxPlugin.pluginClass, 'LSamplePlugin');
     expect(macOSPlugin.pluginClass, 'MSamplePlugin');
+    expect(macOSPlugin.sharedDarwinSource, isFalse);
     expect(webPlugin.pluginClass, 'WebSamplePlugin');
     expect(webPlugin.fileName, 'web_plugin.dart');
     expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
@@ -138,9 +142,12 @@ void main() {
 
   testWithoutContext('Plugin parsing allows for Dart-only plugins without a pluginClass', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    /// This is currently supported only on macOS, linux, Windows.
     const String pluginYamlRaw = 'implements: same_plugin\n' // this should be ignored by the tool
       'platforms:\n'
+      ' android:\n'
+      '  dartPluginClass: ASamplePlugin\n'
+      ' ios:\n'
+      '  dartPluginClass: ISamplePlugin\n'
       ' linux:\n'
       '  dartPluginClass: LSamplePlugin\n'
       ' macos:\n'
@@ -153,17 +160,24 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
 
+    final AndroidPlugin androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
+    final IOSPlugin iOSPlugin = plugin.platforms[IOSPlugin.kConfigKey]! as IOSPlugin;
     final LinuxPlugin linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey]! as LinuxPlugin;
     final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
     final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
 
+    expect(androidPlugin.pluginClass, isNull);
+    expect(iOSPlugin.pluginClass, isNull);
     expect(linuxPlugin.pluginClass, isNull);
     expect(macOSPlugin.pluginClass, isNull);
     expect(windowsPlugin.pluginClass, isNull);
+    expect(androidPlugin.dartPluginClass, 'ASamplePlugin');
+    expect(iOSPlugin.dartPluginClass, 'ISamplePlugin');
     expect(linuxPlugin.dartPluginClass, 'LSamplePlugin');
     expect(macOSPlugin.dartPluginClass, 'MSamplePlugin');
     expect(windowsPlugin.dartPluginClass, 'WinSamplePlugin');
@@ -184,6 +198,7 @@ void main() {
         _kTestPluginName,
         _kTestPluginPath,
         pluginYaml,
+        null,
         const <String>[],
         fileSystem: fileSystem,
       ),
@@ -213,12 +228,15 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
 
     expect(plugin.platforms, <String, PluginPlatform>{});
     expect(plugin.defaultPackagePlatforms, <String, String>{
+      'android': 'sample_package_android',
+      'ios': 'sample_package_ios',
       'linux': 'sample_package_linux',
       'macos': 'sample_package_macos',
       'windows': 'sample_package_windows',
@@ -242,6 +260,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -260,14 +279,14 @@ void main() {
       ' windows:\n'
       '  pluginClass: WinSamplePlugin\n'
       '  supportedVariants:\n'
-      '    - win32\n'
-      '    - uwp\n';
+      '    - win32\n';
 
     final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
     final Plugin plugin = Plugin.fromYaml(
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -275,8 +294,30 @@ void main() {
     final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
     expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>[
       PluginPlatformVariant.win32,
-      PluginPlatformVariant.winuwp,
     ]);
+  });
+
+  testWithoutContext('Web plugin tool exits if fileName field missing', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' web:\n'
+      '  pluginClass: WebSamplePlugin\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+      () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message: 'The plugin `$_kTestPluginName` is missing the required field `fileName` in pubspec.yaml',
+      ),
+    );
   });
 
   testWithoutContext('Windows assumes win32 when no variants are given', () {
@@ -291,6 +332,7 @@ void main() {
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
@@ -308,22 +350,20 @@ void main() {
       ' windows:\n'
       '  pluginClass: WinSamplePlugin\n'
       '  supportedVariants:\n'
-      '    - not_yet_invented_variant\n'
-      '    - uwp\n';
+      '    - not_yet_invented_variant\n';
 
     final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
     final Plugin plugin = Plugin.fromYaml(
       _kTestPluginName,
       _kTestPluginPath,
       pluginYaml,
+      null,
       const <String>[],
       fileSystem: fileSystem,
     );
 
     final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
-    expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>{
-      PluginPlatformVariant.winuwp,
-    });
+    expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>{});
   });
 
   testWithoutContext('Plugin parsing throws a fatal error on an empty plugin', () {
@@ -335,6 +375,7 @@ void main() {
         _kTestPluginName,
         _kTestPluginPath,
         pluginYaml,
+        null,
         const <String>[],
         fileSystem: fileSystem,
       ),
@@ -352,6 +393,7 @@ void main() {
         _kTestPluginName,
         _kTestPluginPath,
         pluginYaml,
+        null,
         const <String>[],
         fileSystem: fileSystem,
       ),
@@ -371,6 +413,7 @@ void main() {
         _kTestPluginName,
         _kTestPluginPath,
         pluginYaml,
+        null,
         const <String>[],
         fileSystem: fileSystem,
       ),

@@ -8,7 +8,6 @@ import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
 import 'sliver_fixed_extent_list.dart';
-import 'sliver_multi_box_adaptor.dart';
 
 /// A sliver that contains multiple box children that each fill the viewport.
 ///
@@ -31,12 +30,10 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   ///
   /// The [childManager] argument must not be null.
   RenderSliverFillViewport({
-    required RenderSliverBoxChildManager childManager,
+    required super.childManager,
     double viewportFraction = 1.0,
-  }) : assert(viewportFraction != null),
-       assert(viewportFraction > 0.0),
-       _viewportFraction = viewportFraction,
-       super(childManager: childManager);
+  }) : assert(viewportFraction > 0.0),
+       _viewportFraction = viewportFraction;
 
   @override
   double get itemExtent => constraints.viewportMainAxisExtent * viewportFraction;
@@ -49,9 +46,9 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double value) {
-    assert(value != null);
-    if (_viewportFraction == value)
+    if (_viewportFraction == value) {
       return;
+    }
     _viewportFraction = value;
     markNeedsLayout();
   }
@@ -81,18 +78,19 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
 class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a scrollable [RenderBox] which is
   /// sized to fit the remaining space in the viewport.
-  RenderSliverFillRemainingWithScrollable({ RenderBox? child }) : super(child: child);
+  RenderSliverFillRemainingWithScrollable({ super.child });
 
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
     final double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
-    if (child != null)
+    if (child != null) {
       child!.layout(constraints.asBoxConstraints(
         minExtent: extent,
         maxExtent: extent,
       ));
+    }
 
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
@@ -103,8 +101,9 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
       maxPaintExtent: paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
-    if (child != null)
+    if (child != null) {
       setChildParentData(child!, constraints, geometry!);
+    }
   }
 }
 
@@ -131,7 +130,7 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
 class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a non-scrollable [RenderBox] which is
   /// sized to fit the remaining space in the viewport.
-  RenderSliverFillRemaining({ RenderBox? child }) : super(child: child);
+  RenderSliverFillRemaining({ super.child });
 
   @override
   void performLayout() {
@@ -145,10 +144,8 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
       switch (constraints.axis) {
         case Axis.horizontal:
           childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);
-          break;
         case Axis.vertical:
           childExtent = child!.getMaxIntrinsicHeight(constraints.crossAxisExtent);
-          break;
       }
 
       // If the childExtent is greater than the computed extent, we want to use
@@ -176,8 +173,9 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
       maxPaintExtent: paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
-    if (child != null)
+    if (child != null) {
       setChildParentData(child!, constraints, geometry!);
+    }
   }
 }
 
@@ -204,7 +202,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
 class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a non-scrollable [RenderBox] which is
   /// sized to fit the remaining space plus any overscroll in the viewport.
-  RenderSliverFillRemainingAndOverscroll({ RenderBox? child }) : super(child: child);
+  RenderSliverFillRemainingAndOverscroll({ super.child });
 
   @override
   void performLayout() {
@@ -221,10 +219,8 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
       switch (constraints.axis) {
         case Axis.horizontal:
           childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);
-          break;
         case Axis.vertical:
           childExtent = child!.getMaxIntrinsicHeight(constraints.crossAxisExtent);
-          break;
       }
 
       // If the childExtent is greater than the computed extent, we want to use
@@ -253,7 +249,8 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
       maxPaintExtent: maxExtent,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
-    if (child != null)
+    if (child != null) {
       setChildParentData(child!, constraints, geometry!);
+    }
   }
 }

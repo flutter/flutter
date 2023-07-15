@@ -8,12 +8,20 @@ REM This should match the ci.sh file in this directory.
 REM This is called from the LUCI recipes:
 REM https://flutter.googlesource.com/recipes/+/refs/heads/master/recipe_modules/adhoc_validation/resources/customer_testing.bat
 
-pub get
+ECHO.
+ECHO Updating pub packages...
+CALL dart pub get
 CD ..\tools
-pub get
+CALL dart pub get
 CD ..\customer_testing
 
+ECHO.
+ECHO Finding correct version of customer tests...
 CMD /S /C "IF EXIST "..\..\bin\cache\pkg\tests\" RMDIR /S /Q ..\..\bin\cache\pkg\tests"
 git clone https://github.com/flutter/tests.git ..\..\bin\cache\pkg\tests
 FOR /F "usebackq tokens=*" %%a IN (`dart --enable-asserts ..\tools\bin\find_commit.dart ..\..\bin\cache\pkg\tests`) DO git -C ..\..\bin\cache\pkg\tests checkout %%a
-dart --enable-asserts run_tests.dart --skip-on-fetch-failure --skip-template ..\..\bin\cache\pkg\tests\registry\*.test
+
+ECHO.
+ECHO Running tests...
+CD ..\..\bin\cache\pkg\tests
+CALL dart --enable-asserts ..\..\..\..\dev\customer_testing\run_tests.dart --verbose --skip-on-fetch-failure --skip-template registry/*.test

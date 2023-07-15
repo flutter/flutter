@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 @TestOn('chrome') // Uses web-only Flutter SDK
+library;
 
 import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,7 +14,7 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 void main() {
   // Disabling tester emulation because this test relies on real message channel communication.
-  ui.debugEmulateFlutterTesterEnvironment = false; // ignore: undefined_prefixed_name
+  ui_web.debugEmulateFlutterTesterEnvironment = false;
 
   group('Plugin Event Channel', () {
     setUp(() {
@@ -93,7 +94,7 @@ void main() {
           PluginEventChannel<String>('test3');
 
       final StreamController<String> controller = StreamController<String>(
-          onListen: expectAsync0<void>(() {}, count: 1));
+          onListen: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(),
@@ -109,7 +110,7 @@ void main() {
           PluginEventChannel<String>('test3');
 
       final StreamController<String> controller = StreamController<String>(
-          onListen: expectAsync0<void>(() {}, count: 1));
+          onListen: expectAsync0<void>(() {}));
       sendingChannel.setController(controller);
 
       expect(listeningChannel.receiveBroadcastStream(),

@@ -202,8 +202,9 @@ void main() {
   testWidgets('MergeableMaterial paints shadows', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Scaffold(
           body: SingleChildScrollView(
             child: MergeableMaterial(
               children: <MergeableMaterialItem>[
@@ -229,6 +230,36 @@ void main() {
       paints
         ..shadow(elevation: 2.0)
         ..rrect(rrect: rrect, color: Colors.white, hasMaskFilter: false),
+    );
+    debugDisableShadows = true;
+  });
+
+  testWidgets('MergeableMaterial skips shadow for zero elevation', (WidgetTester tester) async {
+    debugDisableShadows = false;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: MergeableMaterial(
+              elevation: 0,
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(MergeableMaterial),
+      isNot(paints..shadow(elevation: 0.0)),
     );
     debugDisableShadows = true;
   });
@@ -1057,6 +1088,75 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
   });
 
+  testWidgets('MergeableMaterial insert and separate slice', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: MergeableMaterial(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
+    expect(box.size.height, equals(100));
+
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: MergeableMaterial(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+                MaterialGap(
+                  key: ValueKey<String>('x'),
+                ),
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(box.size.height, lessThan(216));
+
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Shifting);
+    matches(getBorderRadius(tester, 1), RadiusType.Shifting, RadiusType.Round);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(box.size.height, equals(216));
+
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+    matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
+  });
+
   bool isDivider(BoxDecoration decoration, bool top, bool bottom) {
     const BorderSide side = BorderSide(color: Color(0x1F000000), width: 0.5);
 
@@ -1070,8 +1170,9 @@ void main() {
 
   testWidgets('MergeableMaterial dividers', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Scaffold(
           body: SingleChildScrollView(
             child: MergeableMaterial(
               hasDividers: true,
@@ -1127,8 +1228,9 @@ void main() {
     expect(isDivider(boxes[offset + 3], true, false), isTrue);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Scaffold(
           body: SingleChildScrollView(
             child: MergeableMaterial(
               hasDividers: true,

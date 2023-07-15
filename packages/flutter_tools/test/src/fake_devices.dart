@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/application_package.dart';
@@ -30,8 +28,8 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'fastStart': false,
         'flutterExit': true,
         'hardwareRendering': true,
-        'startPaused': true
-      }
+        'startPaused': true,
+      },
     }
   ),
   FakeDeviceJsonData(
@@ -52,9 +50,61 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'fastStart': false,
         'flutterExit': true,
         'hardwareRendering': true,
-        'startPaused': true
-      }
+        'startPaused': true,
+      },
+    },
+  ),
+  FakeDeviceJsonData(
+    FakeDevice(
+      'wireless android',
+      'wireless-android',
+      type: PlatformType.android,
+      connectionInterface: DeviceConnectionInterface.wireless,
+    ),
+    <String, Object>{
+      'name': 'wireless android',
+      'id': 'wireless-android',
+      'isSupported': true,
+      'targetPlatform': 'android-arm',
+      'emulator': true,
+      'sdk': 'Test SDK (1.2.3)',
+      'capabilities': <String, Object>{
+        'hotReload': true,
+        'hotRestart': true,
+        'screenshot': false,
+        'fastStart': false,
+        'flutterExit': true,
+        'hardwareRendering': true,
+        'startPaused': true,
+      },
     }
+  ),
+  FakeDeviceJsonData(
+    FakeDevice(
+      'wireless ios',
+      'wireless-ios',
+      type:PlatformType.ios,
+      connectionInterface: DeviceConnectionInterface.wireless,
+    )
+      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.ios)
+      ..sdkNameAndVersion = Future<String>.value('iOS 16'),
+    <String,Object>{
+      'name': 'wireless ios',
+      'id': 'wireless-ios',
+      'isSupported': true,
+      'targetPlatform': 'ios',
+      'emulator': true,
+      'sdk': 'iOS 16',
+      'capabilities': <String, Object>{
+        'hotReload': true,
+        'hotRestart': true,
+        'screenshot': false,
+        'fastStart': false,
+        'flutterExit': true,
+        'hardwareRendering': true,
+        'startPaused': true,
+      },
+    },
   ),
 ];
 
@@ -63,9 +113,13 @@ class FakeDevice extends Device {
   FakeDevice(this.name, String id, {
     bool ephemeral = true,
     bool isSupported = true,
+    bool isSupportedForProject = true,
+    this.isConnected = true,
+    this.connectionInterface = DeviceConnectionInterface.attached,
     PlatformType type = PlatformType.web,
-    LaunchResult launchResult,
+    LaunchResult? launchResult,
   }) : _isSupported = isSupported,
+      _isSupportedForProject = isSupportedForProject,
       _launchResult = launchResult ?? LaunchResult.succeeded(),
       super(
         id,
@@ -75,31 +129,32 @@ class FakeDevice extends Device {
       );
 
   final bool _isSupported;
+  final bool _isSupportedForProject;
   final LaunchResult _launchResult;
 
   @override
   final String name;
 
   @override
-  Future<LaunchResult> startApp(covariant ApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+  Future<LaunchResult> startApp(ApplicationPackage? package, {
+    String? mainPath,
+    String? route,
+    DebuggingOptions? debuggingOptions,
+    Map<String, dynamic>? platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   }) async => _launchResult;
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {
-    String userIdentifier,
+  Future<bool> stopApp(ApplicationPackage? app, {
+    String? userIdentifier,
   }) async => true;
 
   @override
   Future<bool> uninstallApp(
-  covariant ApplicationPackage app, {
-    String userIdentifier,
+    ApplicationPackage app, {
+    String? userIdentifier,
   }) async => true;
 
   @override
@@ -112,10 +167,16 @@ class FakeDevice extends Device {
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
+  bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
 
   @override
   bool isSupported() => _isSupported;
+
+  @override
+  bool isConnected;
+
+  @override
+  DeviceConnectionInterface connectionInterface;
 
   @override
   Future<bool> isLocalEmulator = Future<bool>.value(true);
@@ -133,25 +194,30 @@ class FakeDeviceJsonData {
 }
 
 class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
-  FakePollingDeviceDiscovery() : super('mock');
+  FakePollingDeviceDiscovery({
+    this.requiresExtendedWirelessDeviceDiscovery = false,
+  })  : super('mock');
 
   final List<Device> _devices = <Device>[];
   final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
   final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
     lastPollingTimeout = timeout;
     return _devices;
   }
 
-  Duration lastPollingTimeout;
+  Duration? lastPollingTimeout;
 
   @override
   bool get supportsPlatform => true;
 
   @override
   bool get canListAnything => true;
+
+  @override
+  bool requiresExtendedWirelessDeviceDiscovery;
 
   void addDevice(Device device) {
     _devices.add(device);
@@ -164,10 +230,21 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   }
 
   void setDevices(List<Device> devices) {
-    while(_devices.isNotEmpty) {
+    while (_devices.isNotEmpty) {
       _removeDevice(_devices.first);
     }
     devices.forEach(addDevice);
+  }
+
+  bool discoverDevicesCalled = false;
+
+  @override
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) {
+    discoverDevicesCalled = true;
+    return super.discoverDevices(timeout: timeout);
   }
 
   @override
@@ -185,19 +262,15 @@ class FakeDeviceLogReader extends DeviceLogReader {
   @override
   String get name => 'FakeLogReader';
 
-  StreamController<String> _cachedLinesController;
-
   bool disposed = false;
 
   final List<String> _lineQueue = <String>[];
-  StreamController<String> get _linesController {
-    _cachedLinesController ??= StreamController<String>
+  late final StreamController<String> _linesController =
+    StreamController<String>
         .broadcast(onListen: () {
       _lineQueue.forEach(_linesController.add);
       _lineQueue.clear();
     });
-    return _cachedLinesController;
-  }
 
   @override
   Stream<String> get logLines => _linesController.stream;

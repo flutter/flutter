@@ -11,8 +11,11 @@ Add a dependency on the `integration_test` and `flutter_test` package in the
 `pubspec.yaml` of the example app:
 
 ```yaml
-integration_test:
-  sdk: flutter
+dev_dependencies:
+  integration_test:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
 ```
 
 Create a `integration_test/` directory for your package. In this directory,
@@ -83,7 +86,7 @@ flutter drive \
 ### Web
 
 Make sure you have [enabled web support](https://flutter.dev/docs/get-started/web#set-up)
-then [download and run](https://flutter.dev/docs/cookbook/testing/integration/introduction#6b-web)
+then [download and run](https://docs.flutter.dev/cookbook/testing/integration/introduction#5b-web)
 the web driver in another process.
 
 Use following command to execute the tests:
@@ -100,22 +103,22 @@ flutter drive \
 You can use `integration_test` to take screenshots of the UI rendered on the mobile device or
 Web browser at a specific time during the test.
 
-This feature is currently supported on Android, and Web.
+This feature is currently supported on Android, iOS, and Web.
 
-#### Android
+#### Android and iOS
 
 **integration_test/screenshot_test.dart**
 
 ```dart
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized()
+      as IntegrationTestWidgetsFlutterBinding;
 
   testWidgets('screenshot', (WidgetTester tester) async {
     // Build the app.
     app.main();
 
-    // This is required prior to taking the screenshot.
+    // This is required prior to taking the screenshot (Android only).
     await binding.convertFlutterSurfaceToImage();
 
     // Trigger a frame.
@@ -126,7 +129,8 @@ void main() {
 ```
 
 You can use a driver script to pull in the screenshot from the device.
-This way, you can store the images locally on your computer.
+This way, you can store the images locally on your computer. On iOS, the
+screenshot will also be available in Xcode test results.
 
 **test_driver/integration_test.dart**
 
@@ -152,8 +156,8 @@ Future<void> main() async {
 
 ```dart
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized()
+      as IntegrationTestWidgetsFlutterBinding;
 
   testWidgets('screenshot', (WidgetTester tester) async {
     // Build the app.
@@ -217,6 +221,13 @@ physical):
 ./gradlew app:connectedAndroidTest -Ptarget=`pwd`/../integration_test/foo_test.dart
 ```
 
+Note:
+To use `--dart-define` with `gradlew` you must `base64` encode all parameters,
+and pass them to gradle in a comma separated list:
+```bash
+./gradlew project:task -Pdart-defines="{base64(key=value)},[...]"
+```
+
 ## Firebase Test Lab
 
 If this is your first time testing with Firebase Test Lab, you'll need to follow
@@ -276,6 +287,7 @@ end
 ```
 
 To build `integration_test/foo_test.dart` from the command line, run:
+
 ```sh
 flutter build ios --config-only integration_test/foo_test.dart
 ```
@@ -305,7 +317,13 @@ dev_target="14.3"
 flutter build ios integration_test/foo_test.dart --release
 
 pushd ios
-xcodebuild -workspace Runner.xcworkspace -scheme Runner -config Flutter/Release.xcconfig -derivedDataPath $output -sdk iphoneos build-for-testing
+xcodebuild build-for-testing \
+  -workspace Runner.xcworkspace \
+  -scheme Runner \
+  -xcconfig Flutter/Release.xcconfig \
+  -configuration Release \
+  -derivedDataPath \
+  $output -sdk iphoneos
 popd
 
 pushd $product
@@ -316,11 +334,15 @@ popd
 You can verify locally that your tests are successful by running the following command:
 
 ```sh
-xcodebuild test-without-building -xctestrun "build/ios_integ/Build/Products/Runner_iphoneos14.3-arm64.xctestrun" -destination id=<YOUR_DEVICE_ID>
+xcodebuild test-without-building \
+  -xctestrun "build/ios_integ/Build/Products/Runner_iphoneos14.3-arm64.xctestrun" \
+  -destination id=<YOUR_DEVICE_ID>
 ```
 
 Once everything is ok, you can upload the resulting zip to Firebase Test Lab (change the model with your values):
 
 ```sh
-gcloud firebase test ios run --test "build/ios_integ/ios_tests.zip" --device model=iphone11pro,version=14.1,locale=fr_FR,orientation=portrait
+gcloud firebase test ios run \
+  --test "build/ios_integ/Build/Products/ios_tests.zip" \
+  --device model=iphone11pro,version=14.1,locale=fr_FR,orientation=portrait
 ```

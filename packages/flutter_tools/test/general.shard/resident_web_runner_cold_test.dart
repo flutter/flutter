@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -29,9 +26,9 @@ import '../src/context.dart';
 import '../src/test_build_system.dart';
 
 void main() {
-  FakeFlutterDevice mockFlutterDevice;
-  FakeWebDevFS mockWebDevFS;
-  FileSystem fileSystem;
+  late FakeFlutterDevice mockFlutterDevice;
+  late FakeWebDevFS mockWebDevFS;
+  late FileSystem fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -53,8 +50,6 @@ void main() {
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       ipv6: true,
-      stayResident: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -82,8 +77,6 @@ void main() {
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       ipv6: true,
-      stayResident: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -106,8 +99,6 @@ void main() {
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       ipv6: true,
-      stayResident: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -129,8 +120,6 @@ void main() {
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       ipv6: true,
-      stayResident: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -157,8 +146,6 @@ void main() {
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       ipv6: true,
-      stayResident: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -193,28 +180,31 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   }
 }
 
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
 class FakeWebDevice extends Fake implements Device {
   @override
   String get name => 'web';
 
   @override
   Future<bool> stopApp(
-    covariant ApplicationPackage app, {
-    String userIdentifier,
+    ApplicationPackage? app, {
+    String? userIdentifier,
   }) async {
     return true;
   }
 
   @override
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    ApplicationPackage? package, {
+    String? mainPath,
+    String? route,
+    DebuggingOptions? debuggingOptions,
+    Map<String, dynamic>? platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     return LaunchResult.succeeded();
   }
@@ -227,14 +217,14 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   final FakeWebDevice device;
 
 
-  DevFS _devFS;
+  DevFS? _devFS;
 
   @override
-  DevFS get devFS => _devFS;
+  DevFS? get devFS => _devFS;
 
   @override
-  set devFS(DevFS value) { }
+  set devFS(DevFS? value) { }
 
   @override
-  FlutterVmService vmService;
+  FlutterVmService? vmService;
 }

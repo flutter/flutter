@@ -1,0 +1,7 @@
+include: ../../analysis_options.yaml
+
+linter:
+  rules:
+    # Tests try to catch errors all the time, so we don't worry about these lints for tests:
+    avoid_catches_without_on_clauses: false
+    avoid_catching_errors: false

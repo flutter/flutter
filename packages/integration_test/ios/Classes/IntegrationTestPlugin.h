@@ -12,15 +12,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Test results that are sent from Dart when integration test completes. Before the
- * completion, it is
- * @c nil.
+ * completion, it is @c nil.
  */
 @property(nonatomic, readonly, nullable) NSDictionary<NSString *, NSString *> *testResults;
 
-/** Fetches the singleton instance of the plugin. */
-+ (IntegrationTestPlugin *)instance;
+/**
+ * Mapping of screenshot images by suggested names, captured by the dart tests.
+ */
+@property (copy, readonly) NSDictionary<NSString *, UIImage *> *capturedScreenshotsByName;
 
-- (void)setupChannels:(id<FlutterBinaryMessenger>)binaryMessenger;
+/** Fetches the singleton instance of the plugin. */
++ (instancetype)instance;
 
 - (instancetype)init NS_UNAVAILABLE;
 

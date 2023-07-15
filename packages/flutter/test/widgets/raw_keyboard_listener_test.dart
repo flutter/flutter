@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
-    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, onKey: null, child: Container()));
-    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, onKey: null, child: Container()));
+    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, child: Container()));
+    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, child: Container()));
     await tester.pumpWidget(Container());
   });
 
@@ -44,7 +44,7 @@ void main() {
 
     await tester.pumpWidget(Container());
     focusNode.dispose();
-  }, skip: isBrowser); // This is a Fuchsia-specific test.
+  }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
 
   testWidgets('Web key event', (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];

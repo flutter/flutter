@@ -22,12 +22,11 @@ const String _communityEditionId = 'IdeaIC';
 
 /// A doctor validator for both Intellij and Android Studio.
 abstract class IntelliJValidator extends DoctorValidator {
-  IntelliJValidator(String title, this.installPath, {
+  IntelliJValidator(super.title, this.installPath, {
     required FileSystem fileSystem,
     required UserMessages userMessages,
   }) : _fileSystem = fileSystem,
-       _userMessages = userMessages,
-       super(title);
+       _userMessages = userMessages;
 
   final String installPath;
   final FileSystem _fileSystem;
@@ -115,7 +114,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     }
 
     return ValidationResult(
-      _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
+      _hasIssues(messages) ? ValidationType.partial : ValidationType.success,
       messages,
       statusInfo: _userMessages.intellijStatusInfo(version),
     );
@@ -126,11 +125,6 @@ abstract class IntelliJValidator extends DoctorValidator {
   }
 
   void _validateIntelliJVersion(List<ValidationMessage> messages, Version minVersion) {
-    // Ignore unknown versions.
-    if (minVersion == Version.unknown) {
-      return;
-    }
-
     final Version? installedVersion = Version.parse(version);
     if (installedVersion == null) {
       return;
@@ -382,6 +376,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     'IntelliJ IDEA.app': _ultimateEditionId,
     'IntelliJ IDEA Ultimate.app': _ultimateEditionId,
     'IntelliJ IDEA CE.app': _communityEditionId,
+    'IntelliJ IDEA Community Edition.app': _communityEditionId,
   };
 
   static Iterable<DoctorValidator> installed({
@@ -488,6 +483,17 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
           ]),
       ));
     }
+
+    // Remove JetBrains Toolbox link apps. These tiny apps just
+    // link to the full app, will get detected elsewhere in our search.
+    validators.removeWhere((DoctorValidator validator) {
+      final String identifierKey = plistParser.getValueFromFile(
+        (validator as IntelliJValidatorOnMac).plistFile,
+        PlistParser.kCFBundleIdentifierKey,
+      ) as String;
+      return identifierKey.contains('com.jetbrains.toolbox.linkapp');
+    });
+
     return validators;
   }
 
@@ -500,7 +506,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   @override
   String get version {
-    return _version ??= _plistParser.getValueFromFile(
+    return _version ??= _plistParser.getValueFromFile<String>(
         plistFile,
         PlistParser.kCFBundleShortVersionStringKey,
       ) ?? 'unknown';
@@ -514,7 +520,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     }
 
     final String? altLocation = _plistParser
-      .getValueFromFile(plistFile, 'JetBrainsToolboxApp');
+      .getValueFromFile<String>(plistFile, 'JetBrainsToolboxApp');
 
     if (altLocation != null) {
       _pluginsPath = '$altLocation.plugins';

@@ -24,18 +24,11 @@ class BottomNavigationBarItem {
   /// The argument [icon] should not be null and the argument [label] should not be null when used in a Material Design's [BottomNavigationBar].
   const BottomNavigationBarItem({
     required this.icon,
-    @Deprecated(
-      'Use "label" instead, as it allows for an improved text-scaling experience. '
-      'This feature was deprecated after v1.19.0.',
-    )
-    this.title,
     this.label,
     Widget? activeIcon,
     this.backgroundColor,
     this.tooltip,
-  }) : activeIcon = activeIcon ?? icon,
-       assert(label == null || title == null),
-       assert(icon != null);
+  }) : activeIcon = activeIcon ?? icon;
 
   /// The icon of the item.
   ///
@@ -67,15 +60,6 @@ class BottomNavigationBarItem {
   ///  * [BottomNavigationBarItem.icon], for a description of how to pair icons.
   final Widget activeIcon;
 
-  /// The title of the item. If the title is not provided only the icon will be shown when not used in a Material Design [BottomNavigationBar].
-  ///
-  /// This field is deprecated, use [label] instead.
-  @Deprecated(
-    'Use "label" instead, as it allows for an improved text-scaling experience. '
-    'This feature was deprecated after v1.19.0.',
-  )
-  final Widget? title;
-
   /// The text label for this [BottomNavigationBarItem].
   ///
   /// This will be used to create a [Text] widget to put in the bottom navigation bar.
@@ -96,12 +80,10 @@ class BottomNavigationBarItem {
   ///    the icons themselves.
   final Color? backgroundColor;
 
-  /// The text to display in the tooltip for this [BottomNavigationBarItem], when
-  /// the user long presses the item.
+  /// The text to display in the [Tooltip] for this [BottomNavigationBarItem].
   ///
-  /// The [Tooltip] will only appear on an item in a Material design [BottomNavigationBar], and
-  /// when the string is not empty.
+  /// A [Tooltip] will only appear on this item if [tooltip] is set to a non-empty string.
   ///
-  /// Defaults to null, in which case the [label] text will be used.
+  /// Defaults to null, in which case the tooltip is not shown.
   final String? tooltip;
 }

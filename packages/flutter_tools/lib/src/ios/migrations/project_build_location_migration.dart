@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../../base/file_system.dart';
-import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
 import '../../xcode_project.dart';
 
@@ -11,21 +10,19 @@ import '../../xcode_project.dart';
 class ProjectBuildLocationMigration extends ProjectMigrator {
   ProjectBuildLocationMigration(
     IosProject project,
-    Logger logger,
-  ) : _xcodeProjectWorkspaceData = project.xcodeProjectWorkspaceData,
-      super(logger);
+    super.logger,
+  ) : _xcodeProjectWorkspaceData = project.xcodeProjectWorkspaceData;
 
   final File _xcodeProjectWorkspaceData;
 
   @override
-  bool migrate() {
+  void migrate() {
     if (!_xcodeProjectWorkspaceData.existsSync()) {
       logger.printTrace('Xcode project workspace data not found, skipping build location migration.');
-      return true;
+      return;
     }
 
     processFileLines(_xcodeProjectWorkspaceData);
-    return true;
   }
 
   @override

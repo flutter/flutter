@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
+import 'package:file/file.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../globals.dart' as globals;
 import 'fuchsia_sdk.dart';
 
 // Usage: ffx [-c <config>] [-e <env>] [-t <target>] [-T <timeout>] [-v] [<command>] [<args>]
@@ -28,19 +27,23 @@ import 'fuchsia_sdk.dart';
 //   config            View and switch default and user configurations
 //   daemon            Interact with/control the ffx daemon
 //   target            Interact with a target device or emulator
+//   session           Control the current session. See
+//                     https://fuchsia.dev/fuchsia-src/concepts/session/introduction
+//                     for details.
 
 /// A simple wrapper for the Fuchsia SDK's 'ffx' tool.
 class FuchsiaFfx {
   FuchsiaFfx({
-    @required FuchsiaArtifacts fuchsiaArtifacts,
-    @required Logger logger,
-    @required ProcessManager processManager,
-  })  : _fuchsiaArtifacts = fuchsiaArtifacts,
-        _logger = logger,
-        _processUtils =
-            ProcessUtils(logger: logger, processManager: processManager);
+    FuchsiaArtifacts? fuchsiaArtifacts,
+    Logger? logger,
+    ProcessManager? processManager,
+  })  : _fuchsiaArtifacts = fuchsiaArtifacts ?? globals.fuchsiaArtifacts,
+        _logger = logger ?? globals.logger,
+        _processUtils = ProcessUtils(
+            logger: logger ?? globals.logger,
+            processManager: processManager ?? globals.processManager);
 
-  final FuchsiaArtifacts _fuchsiaArtifacts;
+  final FuchsiaArtifacts? _fuchsiaArtifacts;
   final Logger _logger;
   final ProcessUtils _processUtils;
 
@@ -48,18 +51,20 @@ class FuchsiaFfx {
   /// formatted as follows:
   ///
   /// abcd::abcd:abc:abcd:abcd%qemu scare-cable-skip-joy
-  Future<List<String>> list({Duration timeout}) async {
-    if (_fuchsiaArtifacts.ffx == null || !_fuchsiaArtifacts.ffx.existsSync()) {
+  Future<List<String>?> list({Duration? timeout}) async {
+    final File? ffx = _fuchsiaArtifacts?.ffx;
+    if (ffx == null || !ffx.existsSync()) {
       throwToolExit('Fuchsia ffx tool not found.');
     }
     final List<String> command = <String>[
-      _fuchsiaArtifacts.ffx.path,
-      if (timeout != null)
-        ...<String>['-T', '${timeout.inSeconds}'],
+      ffx.path,
+      if (timeout != null) ...<String>['-T', '${timeout.inSeconds}'],
       'target',
       'list',
-      '--format',
-      's'
+      // TODO(akbiggs): Revert -f back to --format once we've verified that
+      // analytics spam is coming from here.
+      '-f',
+      's',
     ];
     final RunResult result = await _processUtils.run(command);
     if (result.exitCode != 0) {
@@ -76,15 +81,16 @@ class FuchsiaFfx {
   ///
   /// The string [deviceName] should be the name of the device from the
   /// 'list' command, e.g. 'scare-cable-skip-joy'.
-  Future<String> resolve(String deviceName) async {
-    if (_fuchsiaArtifacts.ffx == null || !_fuchsiaArtifacts.ffx.existsSync()) {
+  Future<String?> resolve(String deviceName) async {
+    final File? ffx = _fuchsiaArtifacts?.ffx;
+    if (ffx == null || !ffx.existsSync()) {
       throwToolExit('Fuchsia ffx tool not found.');
     }
     final List<String> command = <String>[
-      _fuchsiaArtifacts.ffx.path,
+      ffx.path,
       'target',
       'list',
-      '--format',
+      '-f',
       'a',
       deviceName,
     ];
@@ -94,5 +100,51 @@ class FuchsiaFfx {
       return null;
     }
     return result.stdout.trim();
+  }
+
+  /// Show information about the current session
+  ///
+  /// Returns `null` if the command failed, which can be interpreted as there is
+  /// no usable session.
+  Future<String?> sessionShow() async {
+    final File? ffx = _fuchsiaArtifacts?.ffx;
+    if (ffx == null || !ffx.existsSync()) {
+      throwToolExit('Fuchsia ffx tool not found.');
+    }
+    final List<String> command = <String>[
+      ffx.path,
+      'session',
+      'show',
+    ];
+    final RunResult result = await _processUtils.run(command);
+    if (result.exitCode != 0) {
+      _logger.printError('ffx failed: ${result.stderr}');
+      return null;
+    }
+    return result.stdout;
+  }
+
+  /// Add an element to the current session
+  ///
+  /// [url] should be formatted as a Fuchsia-style package URL, e.g.:
+  ///     fuchsia-pkg://fuchsia.com/flutter_gallery#meta/flutter_gallery.cmx
+  /// Returns true on success and false on failure.
+  Future<bool> sessionAdd(String url) async {
+    final File? ffx = _fuchsiaArtifacts?.ffx;
+    if (ffx == null || !ffx.existsSync()) {
+      throwToolExit('Fuchsia ffx tool not found.');
+    }
+    final List<String> command = <String>[
+      ffx.path,
+      'session',
+      'add',
+      url,
+    ];
+    final RunResult result = await _processUtils.run(command);
+    if (result.exitCode != 0) {
+      _logger.printError('ffx failed: ${result.stderr}');
+      return false;
+    }
+    return true;
   }
 }

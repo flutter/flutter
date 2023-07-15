@@ -61,36 +61,13 @@ import 'value_listenable_builder.dart';
 ///
 /// ## Example Code
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold_center}
+/// {@tool dartpad}
 /// This example shows an [IconButton] that "zooms" in when the widget first
 /// builds (its size smoothly increases from 0 to 24) and whenever the button
 /// is pressed, it smoothly changes its size to the new target value of either
 /// 48 or 24.
 ///
-/// ```dart
-/// double targetValue = 24.0;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return TweenAnimationBuilder<double>(
-///     tween: Tween<double>(begin: 0, end: targetValue),
-///     duration: const Duration(seconds: 1),
-///     builder: (BuildContext context, double size, Widget? child) {
-///       return IconButton(
-///         iconSize: size,
-///         color: Colors.blue,
-///         icon: child!,
-///         onPressed: () {
-///           setState(() {
-///             targetValue = targetValue == 24.0 ? 48.0 : 24.0;
-///           });
-///         },
-///       );
-///     },
-///     child: const Icon(Icons.aspect_ratio),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/tween_animation_builder/tween_animation_builder.0.dart **
 /// {@end-tool}
 ///
 /// ## Relationship to [ImplicitlyAnimatedWidget]s and [AnimatedWidget]s
@@ -124,17 +101,14 @@ class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget 
   /// [TweenAnimationBuilder], its properties should not be accessed or changed
   /// anymore to avoid interference with the [TweenAnimationBuilder].
   const TweenAnimationBuilder({
-    Key? key,
+    super.key,
     required this.tween,
-    required Duration duration,
-    Curve curve = Curves.linear,
+    required super.duration,
+    super.curve,
     required this.builder,
-    VoidCallback? onEnd,
+    super.onEnd,
     this.child,
-  }) : assert(tween != null),
-       assert(curve != null),
-       assert(builder != null),
-       super(key: key, duration: duration, curve: curve, onEnd: onEnd);
+  });
 
   /// Defines the target value for the animation.
   ///

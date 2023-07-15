@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 class TestDragData {
   const TestDragData(
@@ -22,136 +22,6 @@ class TestDragData {
 }
 
 void main() {
-  group('getSemanticsData', () {
-    testWidgets('throws when there are no semantics', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: Text('hello'),
-          ),
-        ),
-      );
-
-      expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
-    }, semanticsEnabled: false);
-
-    testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
-      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Row(
-              children: const <Widget>[
-                Text('hello'),
-                Text('hello'),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
-      semanticsHandle.dispose();
-    });
-
-    testWidgets('Returns the correct SemanticsData', (WidgetTester tester) async {
-      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: OutlinedButton(
-                onPressed: () { },
-                child: const Text('hello'),
-            ),
-          ),
-        ),
-      );
-
-      final SemanticsNode node = tester.getSemantics(find.text('hello'));
-      final SemanticsData semantics = node.getSemanticsData();
-      expect(semantics.label, 'hello');
-      expect(semantics.hasAction(SemanticsAction.tap), true);
-      expect(semantics.hasFlag(SemanticsFlag.isButton), true);
-      semanticsHandle.dispose();
-    });
-
-    testWidgets('Can enable semantics for tests via semanticsEnabled', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: OutlinedButton(
-                onPressed: () { },
-                child: const Text('hello'),
-            ),
-          ),
-        ),
-      );
-
-      final SemanticsNode node = tester.getSemantics(find.text('hello'));
-      final SemanticsData semantics = node.getSemanticsData();
-      expect(semantics.label, 'hello');
-      expect(semantics.hasAction(SemanticsAction.tap), true);
-      expect(semantics.hasFlag(SemanticsFlag.isButton), true);
-    }, semanticsEnabled: true);
-
-    testWidgets('Returns merged SemanticsData', (WidgetTester tester) async {
-      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
-      const Key key = Key('test');
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              label: 'A',
-              child: Semantics(
-                label: 'B',
-                child: Semantics(
-                  key: key,
-                  label: 'C',
-                  child: Container(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final SemanticsNode node = tester.getSemantics(find.byKey(key));
-      final SemanticsData semantics = node.getSemanticsData();
-      expect(semantics.label, 'A\nB\nC');
-      semanticsHandle.dispose();
-    });
-
-    testWidgets('Does not return partial semantics', (WidgetTester tester) async {
-      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
-      final Key key = UniqueKey();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MergeSemantics(
-              child: Semantics(
-                container: true,
-                label: 'A',
-                child: Semantics(
-                  container: true,
-                  key: key,
-                  label: 'B',
-                  child: Container(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final SemanticsNode node = tester.getSemantics(find.byKey(key));
-      final SemanticsData semantics = node.getSemanticsData();
-      expect(semantics.label, 'A\nB');
-      semanticsHandle.dispose();
-    });
-  });
-
   testWidgets(
     'WidgetTester.drag must break the offset into multiple parallel components if '
     'the drag goes outside the touch slop values',
@@ -415,13 +285,14 @@ void main() {
       await tester.tap(find.text('test'), buttons: kSecondaryMouseButton);
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
-        if (i == 0)
+      for (int i = 0; i < logs.length; i++) {
+        if (i == 0) {
           expect(logs[i], 'down $b');
-        else if (i != logs.length - 1)
+        } else if (i != logs.length - 1) {
           expect(logs[i], 'move $b');
-        else
+        } else {
           expect(logs[i], 'up 0');
+        }
       }
     },
   );
@@ -471,13 +342,14 @@ void main() {
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
-        if (i == 0)
+      for (int i = 0; i < logs.length; i++) {
+        if (i == 0) {
           expect(logs[i], 'down $b');
-        else if (i != logs.length - 1)
+        } else if (i != logs.length - 1) {
           expect(logs[i], 'move $b');
-        else
+        } else {
           expect(logs[i], 'up 0');
+        }
       }
     },
   );
@@ -502,13 +374,48 @@ void main() {
       await tester.drag(find.text('test'), const Offset(-150.0, 200.0), buttons: kSecondaryMouseButton);
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
-        if (i == 0)
+      for (int i = 0; i < logs.length; i++) {
+        if (i == 0) {
           expect(logs[i], 'down $b');
-        else if (i != logs.length - 1)
+        } else if (i != logs.length - 1) {
           expect(logs[i], 'move $b');
-        else
+        } else {
           expect(logs[i], 'up 0');
+        }
+      }
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.drag works with trackpad kind',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerPanZoomStart: (PointerPanZoomStartEvent event) => logs.add('panZoomStart'),
+            onPointerPanZoomUpdate: (PointerPanZoomUpdateEvent event) => logs.add('panZoomUpdate ${event.pan}'),
+            onPointerPanZoomEnd: (PointerPanZoomEndEvent event) => logs.add('panZoomEnd'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.drag(find.text('test'), const Offset(-150.0, 200.0), kind: PointerDeviceKind.trackpad);
+
+      for (int i = 0; i < logs.length; i++) {
+        if (i == 0) {
+          expect(logs[i], 'panZoomStart');
+        } else if (i != logs.length - 1) {
+          expect(logs[i], startsWith('panZoomUpdate'));
+        } else {
+          expect(logs[i], 'panZoomEnd');
+        }
       }
     },
   );
@@ -534,13 +441,14 @@ void main() {
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
-        if (i == 0)
+      for (int i = 0; i < logs.length; i++) {
+        if (i == 0) {
           expect(logs[i], 'down $b');
-        else if (i != logs.length - 1)
+        } else if (i != logs.length - 1) {
           expect(logs[i], 'move $b');
-        else
+        } else {
           expect(logs[i], 'up 0');
+        }
       }
     },
   );
@@ -598,13 +506,14 @@ void main() {
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
-        if (i == 0)
+      for (int i = 0; i < logs.length; i++) {
+        if (i == 0) {
           expect(logs[i], 'down $b');
-        else if (i != logs.length - 1)
+        } else if (i != logs.length - 1) {
           expect(logs[i], 'move $b');
-        else
+        } else {
           expect(logs[i], 'up 0');
+        }
       }
     },
   );
@@ -648,6 +557,34 @@ void main() {
   );
 
   testWidgets(
+    'WidgetTester.tap appears in stack trace on error',
+    (WidgetTester tester) async {
+      // Regression test from https://github.com/flutter/flutter/pull/123946
+      await tester.pumpWidget(
+          const MaterialApp(home: Scaffold(body: Text('target'))));
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.text('target')), pointer: 1);
+      addTearDown(() => gesture.up());
+
+      Trace? stackTrace;
+      try {
+        await tester.tap(find.text('target'), pointer: 1);
+      } on Error catch (e) {
+        stackTrace = Trace.from(e.stackTrace!);
+      }
+      expect(stackTrace, isNotNull);
+
+      final int tapFrame = stackTrace!.frames.indexWhere(
+              (Frame frame) => frame.member == 'WidgetController.tap');
+      expect(tapFrame, greaterThanOrEqualTo(0));
+      expect(stackTrace.frames[tapFrame].package, 'flutter_test');
+      expect(stackTrace.frames[tapFrame+1].member, 'main.<fn>');
+      expect(stackTrace.frames[tapFrame+1].package, null);
+    },
+  );
+
+  testWidgets(
     'ensureVisible: scrolls to make widget visible',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -663,12 +600,12 @@ void main() {
       );
 
       // Make sure widget isn't on screen
-      expect(find.text('Item 15', skipOffstage: true), findsNothing);
+      expect(find.text('Item 15'), findsNothing);
 
       await tester.ensureVisible(find.text('Item 15', skipOffstage: false));
       await tester.pumpAndSettle();
 
-      expect(find.text('Item 15', skipOffstage: true), findsOneWidget);
+      expect(find.text('Item 15'), findsOneWidget);
     },
   );
 
@@ -698,7 +635,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Now the widget is on screen.
-        expect(find.text('Item 45', skipOffstage: true), findsOneWidget);
+        expect(find.text('Item 45'), findsOneWidget);
       },
     );
 
@@ -729,7 +666,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Now the widget is on screen.
-        expect(find.text('Item 45', skipOffstage: true), findsOneWidget);
+        expect(find.text('Item 45'), findsOneWidget);
       },
     );
 
@@ -799,7 +736,330 @@ void main() {
       await tester.pumpAndSettle();
 
       // Now the widget is on screen.
-      expect(find.text('Item b-45', skipOffstage: true), findsOneWidget);
+      expect(find.text('Item b-45'), findsOneWidget);
     });
   });
+
+  testWidgets('platformDispatcher exposes the platformDispatcher from binding', (WidgetTester tester) async {
+    expect(tester.platformDispatcher, tester.binding.platformDispatcher);
+  });
+
+  testWidgets('view exposes the implicitView from platformDispatcher', (WidgetTester tester) async {
+    expect(tester.view, tester.platformDispatcher.implicitView);
+  });
+
+  testWidgets('viewOf finds a view when the view is implicit', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Center(
+        child: Text('Test'),
+      )
+    ));
+
+    expect(() => tester.viewOf(find.text('Test')), isNot(throwsA(anything)));
+    expect(tester.viewOf(find.text('Test')), isA<TestFlutterView>());
+  });
+
+  group('SemanticsController', () {
+    group('find', () {
+      testWidgets('throws when there are no semantics', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+              body: Text('hello'),
+            ),
+          ),
+        );
+
+        expect(() => tester.semantics.find(find.text('hello')), throwsStateError);
+      }, semanticsEnabled: false);
+
+      testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+              body: Row(
+                children: <Widget>[
+                  Text('hello'),
+                  Text('hello'),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(() => tester.semantics.find(find.text('hello')), throwsStateError);
+      });
+
+      testWidgets('Returns the correct SemanticsData', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: OutlinedButton(
+                onPressed: () { },
+                child: const Text('hello'),
+              ),
+            ),
+          ),
+        );
+
+        final SemanticsNode node = tester.semantics.find(find.text('hello'));
+        final SemanticsData semantics = node.getSemanticsData();
+        expect(semantics.label, 'hello');
+        expect(semantics.hasAction(SemanticsAction.tap), true);
+        expect(semantics.hasFlag(SemanticsFlag.isButton), true);
+      });
+
+      testWidgets('Can enable semantics for tests via semanticsEnabled', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: OutlinedButton(
+                onPressed: () { },
+                child: const Text('hello'),
+              ),
+            ),
+          ),
+        );
+
+        final SemanticsNode node = tester.semantics.find(find.text('hello'));
+        final SemanticsData semantics = node.getSemanticsData();
+        expect(semantics.label, 'hello');
+        expect(semantics.hasAction(SemanticsAction.tap), true);
+        expect(semantics.hasFlag(SemanticsFlag.isButton), true);
+      });
+
+      testWidgets('Returns merged SemanticsData', (WidgetTester tester) async {
+        const Key key = Key('test');
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Semantics(
+                label: 'A',
+                child: Semantics(
+                  label: 'B',
+                  child: Semantics(
+                    key: key,
+                    label: 'C',
+                    child: Container(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final SemanticsNode node = tester.semantics.find(find.byKey(key));
+        final SemanticsData semantics = node.getSemanticsData();
+        expect(semantics.label, 'A\nB\nC');
+      });
+
+      testWidgets('Does not return partial semantics', (WidgetTester tester) async {
+        final Key key = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: MergeSemantics(
+                child: Semantics(
+                  container: true,
+                  label: 'A',
+                  child: Semantics(
+                    container: true,
+                    key: key,
+                    label: 'B',
+                    child: Container(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final SemanticsNode node = tester.semantics.find(find.byKey(key));
+        final SemanticsData semantics = node.getSemanticsData();
+        expect(semantics.label, 'A\nB');
+      });
+    });
+
+    group('simulatedTraversal', () {
+      final List<Matcher> fullTraversalMatchers = <Matcher>[
+        containsSemantics(isHeader: true, label: 'Semantics Test'),
+        containsSemantics(isTextField: true),
+        containsSemantics(label: 'Off Switch'),
+        containsSemantics(hasToggledState: true),
+        containsSemantics(label: 'On Switch'),
+        containsSemantics(hasToggledState: true, isToggled: true),
+        containsSemantics(label: "Multiline\nIt's a\nmultiline label!"),
+        containsSemantics(label: 'Slider'),
+        containsSemantics(isSlider: true, value: '50%'),
+        containsSemantics(label: 'Enabled Button'),
+        containsSemantics(isButton: true, label: 'Tap'),
+        containsSemantics(label: 'Disabled Button'),
+        containsSemantics(isButton: true, label: "Don't Tap"),
+        containsSemantics(label: 'Checked Radio'),
+        containsSemantics(hasCheckedState: true, isChecked: true),
+        containsSemantics(label: 'Unchecked Radio'),
+        containsSemantics(hasCheckedState: true, isChecked: false),
+      ];
+
+      testWidgets('produces expected traversal', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
+
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(),
+          orderedEquals(fullTraversalMatchers));
+      });
+
+      testWidgets('starts traversal at semantics node for `start`', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
+
+        // We're expecting the traversal to start where the slider is.
+        final List<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]..removeRange(0, 8);
+
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(start: find.byType(Slider)),
+          orderedEquals(expectedMatchers));
+      });
+
+      testWidgets('throws StateError if `start` not found in traversal', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
+
+        // We look for a SingleChildScrollView since the view itself isn't
+        // important for accessibility, so it won't show up in the traversal
+        expect(
+          () => tester.semantics.simulatedAccessibilityTraversal(start: find.byType(SingleChildScrollView)),
+          throwsA(isA<StateError>()),
+        );
+      });
+
+      testWidgets('ends traversal at semantics node for `end`', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
+
+        // We're expecting the traversal to end where the slider is, inclusive.
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(0, 9);
+
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(end: find.byType(Slider)),
+          orderedEquals(expectedMatchers));
+      });
+
+      testWidgets('throws StateError if `end` not found in traversal', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
+
+        // We look for a SingleChildScrollView since the view itself isn't
+        // important for semantics, so it won't show up in the traversal
+        expect(
+          () => tester.semantics.simulatedAccessibilityTraversal(end: find.byType(SingleChildScrollView)),
+          throwsA(isA<StateError>()),
+        );
+      });
+
+      testWidgets('returns traversal between `start` and `end` if both are provided', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
+
+        // We're expecting the traversal to start at the text field and end at the slider.
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(1, 9);
+
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(
+            start: find.byType(TextField),
+            end: find.byType(Slider),
+          ),
+          orderedEquals(expectedMatchers));
+      });
+
+      testWidgets('can do fuzzy traversal match with `containsAllInOrder`', (WidgetTester tester) async {
+        await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
+
+        // Grab a sample of the matchers to validate that not every matcher is
+        // needed to validate a traversal when using `containsAllInOrder`.
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]
+          ..removeAt(0)
+          ..removeLast()
+          ..mapIndexed<Matcher?>((int i, Matcher element) => i.isEven ? element : null)
+          .whereNotNull();
+
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(),
+          containsAllInOrder(expectedMatchers));
+      });
+    });
+  });
+}
+
+class _SemanticsTestWidget extends StatelessWidget {
+  const _SemanticsTestWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Semantics Test')),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            const _SemanticsTestCard(
+              label: 'TextField',
+              widget: TextField(),
+            ),
+            _SemanticsTestCard(
+              label: 'Off Switch',
+              widget: Switch(value: false, onChanged: (bool value) {}),
+            ),
+            _SemanticsTestCard(
+              label: 'On Switch',
+              widget: Switch(value: true, onChanged: (bool value) {}),
+            ),
+            const _SemanticsTestCard(
+              label: 'Multiline',
+              widget: Text("It's a\nmultiline label!", maxLines: 2),
+            ),
+            _SemanticsTestCard(
+              label: 'Slider',
+              widget: Slider(value: .5, onChanged: (double value) {}),
+            ),
+            _SemanticsTestCard(
+              label: 'Enabled Button',
+              widget: TextButton(onPressed: () {}, child: const Text('Tap')),
+            ),
+            const _SemanticsTestCard(
+              label: 'Disabled Button',
+              widget: TextButton(onPressed: null, child: Text("Don't Tap")),
+            ),
+            _SemanticsTestCard(
+              label: 'Checked Radio',
+              widget: Radio<String>(
+                value: 'checked',
+                groupValue: 'checked',
+                onChanged: (String? value) {},
+              ),
+            ),
+            _SemanticsTestCard(
+              label: 'Unchecked Radio',
+              widget: Radio<String>(
+                value: 'unchecked',
+                groupValue: 'checked',
+                onChanged: (String? value) {},
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SemanticsTestCard extends StatelessWidget {
+  const _SemanticsTestCard({required this.label, required this.widget});
+
+  final String label;
+  final Widget widget;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        title: Text(label),
+        trailing: SizedBox(width: 200, child: widget),
+      ),
+    );
+  }
 }

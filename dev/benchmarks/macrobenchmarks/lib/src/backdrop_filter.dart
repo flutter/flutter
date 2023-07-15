@@ -7,7 +7,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class BackdropFilterPage extends StatefulWidget {
-  const BackdropFilterPage({Key? key}) : super(key: key);
+  const BackdropFilterPage({super.key});
 
   @override
   State<BackdropFilterPage> createState() => _BackdropFilterPageState();
@@ -91,7 +91,7 @@ class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProv
                 child: addBlur(grid(txt, 17, 5), _blurGroup),
               ),
               const SizedBox(height: 20),
-              Container(
+              ColoredBox(
                 color: Colors.white,
                 child:Row(
                   mainAxisAlignment: MainAxisAlignment.center,

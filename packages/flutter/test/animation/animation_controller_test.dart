@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
@@ -16,9 +14,10 @@ import '../scheduler/scheduler_tester.dart';
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
-    WidgetsBinding.instance!.resetEpoch();
-    ui.window.onBeginFrame = null;
-    ui.window.onDrawFrame = null;
+    WidgetsBinding.instance
+        ..resetEpoch()
+        ..platformDispatcher.onBeginFrame = null
+        ..platformDispatcher.onDrawFrame = null;
   });
 
   test('Can set value during status callback', () {
@@ -51,6 +50,7 @@ void main() {
     expect(didDismiss, isTrue);
 
     controller.stop();
+    controller.dispose();
   });
 
   test('Receives status callbacks for forward and reverse', () {
@@ -112,6 +112,7 @@ void main() {
     expect(valueLog, equals(<AnimationStatus>[]));
 
     controller.stop();
+    controller.dispose();
   });
 
   test('Forward and reverse from values', () {
@@ -138,6 +139,7 @@ void main() {
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.dismissed, AnimationStatus.forward ]));
     expect(valueLog, equals(<double>[ 0.0 ]));
     expect(controller.value, equals(0.0));
+    controller.dispose();
   });
 
   test('Forward and reverse with different durations', () {
@@ -201,6 +203,7 @@ void main() {
     tick(const Duration(milliseconds: 310));
     expect(controller.value, moreOrLessEquals(0.0));
     controller.stop();
+    controller.dispose();
   });
 
   test('Forward only from value', () {
@@ -220,6 +223,7 @@ void main() {
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward ]));
     expect(valueLog, equals(<double>[ 0.2 ]));
     expect(controller.value, equals(0.2));
+    controller.dispose();
   });
 
   test('Can fling to upper and lower bounds', () {
@@ -250,6 +254,8 @@ void main() {
     tick(const Duration(seconds: 6));
     expect(largeRangeController.value, -30.0);
     largeRangeController.stop();
+    controller.dispose();
+    largeRangeController.dispose();
   });
 
   test('Custom springDescription can be applied', () {
@@ -273,6 +279,8 @@ void main() {
     tick(const Duration(milliseconds: 50));
 
     expect(customSpringController.value < controller.value, true);
+    controller.dispose();
+    customSpringController.dispose();
   });
 
   test('lastElapsedDuration control test', () {
@@ -286,6 +294,7 @@ void main() {
     tick(const Duration(milliseconds: 40));
     expect(controller.lastElapsedDuration, equals(const Duration(milliseconds: 20)));
     controller.stop();
+    controller.dispose();
   });
 
   test('toString control test', () {
@@ -305,6 +314,7 @@ void main() {
     tick(const Duration(milliseconds: 50));
     expect(controller, hasOneLineDescription);
     controller.stop();
+    controller.dispose();
   });
 
   test('velocity test - linear', () {
@@ -348,6 +358,7 @@ void main() {
     expect(controller.velocity, 0.0);
 
     controller.stop();
+    controller.dispose();
   });
 
   test('Disposed AnimationController toString works', () {
@@ -400,7 +411,8 @@ void main() {
       vsync: const TestVSync(),
     );
     expect(() { controller.repeat(); }, throwsFlutterError);
-    expect(() { controller.repeat(period: null); }, throwsFlutterError);
+    expect(() { controller.repeat(); }, throwsFlutterError);
+    controller.dispose();
   });
 
   test('Do not animate if already at target', () {
@@ -415,6 +427,7 @@ void main() {
     controller.animateTo(0.5, duration: const Duration(milliseconds: 100));
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.completed ]));
     expect(controller.value, equals(0.5));
+    controller.dispose();
   });
 
   test('Do not animate to upperBound if already at upperBound', () {
@@ -422,8 +435,6 @@ void main() {
 
     final AnimationController controller = AnimationController(
       value: 1.0,
-      upperBound: 1.0,
-      lowerBound: 0.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -431,6 +442,7 @@ void main() {
     controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.completed ]));
     expect(controller.value, equals(1.0));
+    controller.dispose();
   });
 
   test('Do not animate to lowerBound if already at lowerBound', () {
@@ -438,8 +450,6 @@ void main() {
 
     final AnimationController controller = AnimationController(
       value: 0.0,
-      upperBound: 1.0,
-      lowerBound: 0.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -447,6 +457,7 @@ void main() {
     controller.animateTo(0.0, duration: const Duration(milliseconds: 100));
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.completed ]));
     expect(controller.value, equals(0.0));
+    controller.dispose();
   });
 
   test('Do not animate if already at target mid-flight (forward)', () {
@@ -469,6 +480,7 @@ void main() {
     controller.animateTo(currentValue, duration: const Duration(milliseconds: 100));
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     expect(controller.value, currentValue);
+    controller.dispose();
   });
 
   test('Do not animate if already at target mid-flight (reverse)', () {
@@ -491,6 +503,7 @@ void main() {
     controller.animateTo(currentValue, duration: const Duration(milliseconds: 100));
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.completed ]));
     expect(controller.value, currentValue);
+    controller.dispose();
   });
 
   test('animateTo can deal with duration == Duration.zero', () {
@@ -502,8 +515,9 @@ void main() {
     controller.forward(from: 0.2);
     expect(controller.value, 0.2);
     controller.animateTo(1.0, duration: Duration.zero);
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0), reason: 'Expected no animation.');
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0), reason: 'Expected no animation.');
     expect(controller.value, 1.0);
+    controller.dispose();
   });
 
   test('resetting animation works at all phases', () {
@@ -511,8 +525,6 @@ void main() {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -557,13 +569,12 @@ void main() {
     expect(controller.value, 0.0);
     expect(controller.status, AnimationStatus.dismissed);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed, AnimationStatus.dismissed ]));
+    controller.dispose();
   });
 
   test('setting value directly sets correct status', () {
     final AnimationController controller = AnimationController(
       value: 0.0,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       vsync: const TestVSync(),
     );
 
@@ -585,6 +596,7 @@ void main() {
     controller.value = 0.0;
     expect(controller.value, 0.0);
     expect(controller.status, AnimationStatus.dismissed);
+    controller.dispose();
   });
 
   test('animateTo sets correct status', () {
@@ -592,8 +604,6 @@ void main() {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -631,6 +641,7 @@ void main() {
     expect(controller.value, 0.0);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
+    controller.dispose();
   });
 
   test('after a reverse call animateTo sets correct status', () {
@@ -638,8 +649,6 @@ void main() {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 1.0,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -659,6 +668,7 @@ void main() {
     expect(controller.value, 0.5);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
+    controller.dispose();
   });
 
   test('after a forward call animateTo sets correct status', () {
@@ -666,8 +676,6 @@ void main() {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       value: 0.0,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -687,6 +695,7 @@ void main() {
     expect(controller.value, 0.5);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
+    controller.dispose();
   });
 
   test(
@@ -696,8 +705,6 @@ void main() {
       final AnimationController controller = AnimationController(
         duration: const Duration(milliseconds: 100),
         value: 0.0,
-        lowerBound: 0.0,
-        upperBound: 1.0,
         vsync: const TestVSync(),
       );
 
@@ -737,6 +744,7 @@ void main() {
       tick(Duration.zero);
       tick(const Duration(milliseconds: 150));
       expect(controller.value, 0.0);
+      controller.dispose();
     },
   );
 
@@ -747,8 +755,6 @@ void main() {
       final AnimationController controller = AnimationController(
         duration: const Duration(milliseconds: 100),
         value: 0.0,
-        lowerBound: 0.0,
-        upperBound: 1.0,
         vsync: const TestVSync(),
       );
 
@@ -779,6 +785,7 @@ void main() {
       tick(Duration.zero);
       tick(const Duration(milliseconds: 125));
       expect(controller.value, 1.0);
+      controller.dispose();
     },
   );
 
@@ -789,6 +796,8 @@ void main() {
 
       final AnimationController repeating = AnimationController.unbounded(vsync: const TestVSync());
       expect(repeating.animationBehavior, AnimationBehavior.preserve);
+      controller.dispose();
+      repeating.dispose();
     });
 
     test('AnimationBehavior.preserve runs at normal speed when animatingTo', () {
@@ -814,13 +823,13 @@ void main() {
       expect(controller.value, 1.0);
       expect(controller.status, AnimationStatus.completed);
       debugSemanticsDisableAnimations = false;
+      controller.dispose();
     });
 
     test('AnimationBehavior.normal runs at 20x speed when animatingTo', () {
       debugSemanticsDisableAnimations = true;
       final AnimationController controller = AnimationController(
         vsync: const TestVSync(),
-        animationBehavior: AnimationBehavior.normal,
       );
 
       expect(controller.value, 0.0);
@@ -839,6 +848,7 @@ void main() {
       expect(controller.value, 1.0);
       expect(controller.status, AnimationStatus.completed);
       debugSemanticsDisableAnimations = null;
+      controller.dispose();
     });
 
     test('AnimationBehavior.normal runs "faster" than AnimationBehavior.preserve', () {
@@ -850,14 +860,16 @@ void main() {
         vsync: const TestVSync(),
       );
 
-      controller.fling(velocity: 1.0, animationBehavior: AnimationBehavior.preserve);
-      fastController.fling(velocity: 1.0, animationBehavior: AnimationBehavior.normal);
+      controller.fling(animationBehavior: AnimationBehavior.preserve);
+      fastController.fling(animationBehavior: AnimationBehavior.normal);
       tick(Duration.zero);
       tick(const Duration(milliseconds: 50));
 
       // We don't assert a specific faction that normal animation.
       expect(controller.value < fastController.value, true);
       debugSemanticsDisableAnimations = null;
+      controller.dispose();
+      fastController.dispose();
     });
   });
 
@@ -889,6 +901,7 @@ void main() {
     tick(Duration.zero);
     tick(const Duration(seconds: 2));
     expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
+    controller.dispose();
   });
 
   test('Simulations run forward even after a reverse run', () {
@@ -909,6 +922,7 @@ void main() {
     tick(Duration.zero);
     tick(const Duration(seconds: 2));
     expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
+    controller.dispose();
   });
 
   test('Repeating animation with reverse: true report as forward and reverse', () {
@@ -927,6 +941,7 @@ void main() {
     statuses.clear();
     tick(const Duration(seconds: 1));
     expect(statuses, <AnimationStatus>[AnimationStatus.reverse]);
+    controller.dispose();
   });
 
   test('AnimateBack can runs successfully with just "reverseDuration" property set', () {

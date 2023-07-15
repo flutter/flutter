@@ -14,7 +14,6 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
     required this.maxExtent,
     required this.child,
     this.vsync = const TestVSync(),
-    this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
   });
 
   final Widget child;
@@ -29,7 +28,7 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
   final TickerProvider? vsync;
 
   @override
-  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
+  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration();
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child;
@@ -233,7 +232,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
+          data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Material(
@@ -243,7 +242,7 @@ void main() {
                   Container(
                     color: Colors.red,
                   ),
-                  Container(
+                  ColoredBox(
                     color: Colors.green,
                     child: TextField(
                       controller: textController,
@@ -277,7 +276,7 @@ void main() {
     final ScrollController scrollController = ScrollController();
     final TextEditingController controller = TextEditingController();
     final FocusNode focusNode = FocusNode();
-    controller.text = 'Start\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nEnd';
+    controller.text = "Start${'\n' * 39}End";
 
     await tester.pumpWidget(MaterialApp(
       home: Center(
@@ -321,6 +320,58 @@ void main() {
     expect(find.byType(EditableText), findsOneWidget);
     expect(render.size.height, greaterThan(500.0));
     expect(scrollController.offset, greaterThan(0.0));
+  });
+
+  testWidgets('focused multi-line editable does not scroll to old position when non-collapsed selection set', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final TextEditingController controller = TextEditingController();
+    final FocusNode focusNode = FocusNode();
+    final String text = "Start${'\n' * 39}End";
+    controller.value = TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length - 3));
+
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: SizedBox(
+          height: 300.0,
+          child: ListView(
+            controller: scrollController,
+            children: <Widget>[
+              EditableText(
+                backgroundCursorColor: Colors.grey,
+                maxLines: null, // multiline
+                controller: controller,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    // Bring keyboard up and verify that end of EditableText is not on screen.
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pumpAndSettle();
+
+    scrollController.jumpTo(0.0);
+    await tester.pumpAndSettle();
+    final RenderBox render = tester.renderObject(find.byType(EditableText));
+    expect(render.size.height, greaterThan(500.0));
+    expect(scrollController.offset, 0.0);
+
+    // Change selection to non-collapased so that cursor isn't shown
+    // and the location requires a bit of scroll.
+    tester.testTextInput.updateEditingValue(TextEditingValue(
+      text: text,
+      selection: const TextSelection(baseOffset: 26, extentOffset: 27),
+    ));
+    await tester.pumpAndSettle();
+
+    // Selection extent scrolls into view.
+    expect(find.byType(EditableText), findsOneWidget);
+    expect(render.size.height, greaterThan(500.0));
+    expect(scrollController.offset, 28.0);
   });
 
   testWidgets('scrolls into view with scrollInserts after the keyboard pops up', (WidgetTester tester) async {
@@ -383,12 +434,11 @@ void main() {
               height: 600.0,
               width: 600.0,
               child: CustomScrollView(
-                controller: controller = ScrollController(initialScrollOffset: 0),
+                controller: controller = ScrollController(),
                 slivers: List<Widget>.generate(50, (int i) {
                   return i == 10
                   ? SliverPersistentHeader(
                     pinned: true,
-                    floating: false,
                     delegate: _TestSliverPersistentHeaderDelegate(
                       minExtent: 50,
                       maxExtent: 50,
@@ -446,12 +496,11 @@ void main() {
               height: 600.0,
               width: 600.0,
               child: CustomScrollView(
-                controller: controller = ScrollController(initialScrollOffset: 0),
+                controller: controller = ScrollController(),
                 slivers: List<Widget>.generate(50, (int i) {
                   return i == 10
                     ? SliverPersistentHeader(
                       pinned: true,
-                      floating: false,
                       delegate: _TestSliverPersistentHeaderDelegate(
                         minExtent: 50,
                         maxExtent: 50,
@@ -556,7 +605,14 @@ void main() {
         focusNode.requestFocus();
         await tester.pumpAndSettle();
 
-        expect(isCaretOnScreen(tester), !readOnly);
+        if (kIsWeb) {
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+          await tester.pump();
+        }
+
+        // On web, the entire field is selected, and only part of that selection
+        // is visible on the screen.
+        expect(isCaretOnScreen(tester), !readOnly && !kIsWeb);
         expect(scrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
         expect(editableScrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
       });
@@ -743,7 +799,7 @@ void main() {
 }
 
 class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
-  const NoImplicitScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const NoImplicitScrollPhysics({ super.parent });
 
   @override
   bool get allowImplicitScrolling => false;

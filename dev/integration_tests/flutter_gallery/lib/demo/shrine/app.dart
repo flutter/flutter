@@ -4,16 +4,16 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gallery/demo/shrine/backdrop.dart';
-import 'package:flutter_gallery/demo/shrine/category_menu_page.dart';
-import 'package:flutter_gallery/demo/shrine/colors.dart';
-import 'package:flutter_gallery/demo/shrine/expanding_bottom_sheet.dart';
-import 'package:flutter_gallery/demo/shrine/home.dart';
-import 'package:flutter_gallery/demo/shrine/login.dart';
-import 'package:flutter_gallery/demo/shrine/supplemental/cut_corners_border.dart';
+import 'backdrop.dart';
+import 'category_menu_page.dart';
+import 'colors.dart';
+import 'expanding_bottom_sheet.dart';
+import 'home.dart';
+import 'login.dart';
+import 'supplemental/cut_corners_border.dart';
 
 class ShrineApp extends StatefulWidget {
-  const ShrineApp({Key? key}) : super(key: key);
+  const ShrineApp({super.key});
 
   @override
   State<ShrineApp> createState() => _ShrineAppState();
@@ -37,6 +37,11 @@ class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // The automatically applied scrollbars on desktop can cause a crash for
+      // demos where many scrollables are all attached to the same
+      // PrimaryScrollController. The gallery needs to be migrated before
+      // enabling this. https://github.com/flutter/gallery/issues/523
+      scrollBehavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
       title: 'Shrine',
       home: HomePage(
         backdrop: Backdrop(
@@ -82,7 +87,6 @@ ThemeData _buildShrineTheme() {
     primaryColor: kShrinePink100,
     scaffoldBackgroundColor: kShrineBackgroundWhite,
     cardColor: kShrineBackgroundWhite,
-    errorColor: kShrineErrorRed,
     primaryIconTheme: _customIconTheme(base.iconTheme),
     inputDecorationTheme: const InputDecorationTheme(border: CutCornersBorder()),
     textTheme: _buildShrineTextTheme(base.textTheme),
@@ -93,11 +97,11 @@ ThemeData _buildShrineTheme() {
 
 TextTheme _buildShrineTextTheme(TextTheme base) {
   return base.copyWith(
-    headline5: base.headline5!.copyWith(fontWeight: FontWeight.w500),
-    headline6: base.headline6!.copyWith(fontSize: 18.0),
-    caption: base.caption!.copyWith(fontWeight: FontWeight.w400, fontSize: 14.0),
-    bodyText1: base.bodyText1!.copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
-    button: base.button!.copyWith(fontWeight: FontWeight.w500, fontSize: 14.0),
+    headlineSmall: base.headlineSmall!.copyWith(fontWeight: FontWeight.w500),
+    titleLarge: base.titleLarge!.copyWith(fontSize: 18.0),
+    bodySmall: base.bodySmall!.copyWith(fontWeight: FontWeight.w400, fontSize: 14.0),
+    bodyLarge: base.bodyLarge!.copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+    labelLarge: base.labelLarge!.copyWith(fontWeight: FontWeight.w500, fontSize: 14.0),
   ).apply(
     fontFamily: 'Raleway',
     displayColor: kShrineBrown900,
@@ -107,9 +111,7 @@ TextTheme _buildShrineTextTheme(TextTheme base) {
 
 const ColorScheme kShrineColorScheme = ColorScheme(
   primary: kShrinePink100,
-  primaryVariant: kShrineBrown900,
   secondary: kShrinePink50,
-  secondaryVariant: kShrineBrown900,
   surface: kShrineSurfaceWhite,
   background: kShrineBackgroundWhite,
   error: kShrineErrorRed,

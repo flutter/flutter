@@ -24,6 +24,7 @@ void main() {
     }) {
     return MaterialApp(
       theme:  ThemeData(
+        useMaterial3: false,
         materialTapTargetSize: MaterialTapTargetSize.padded,
       ),
       home: Scaffold(
@@ -184,7 +185,7 @@ void main() {
           sliverBox,
           SliverFillRemaining(
             hasScrollBody: false,
-            child: Container(
+            child: ColoredBox(
               key: key,
               color: Colors.blue,
               child: Align(
@@ -259,7 +260,6 @@ void main() {
               key: key,
               color: Colors.blue[300],
               child: Align(
-                alignment: Alignment.center,
                 child: Padding(
                   padding: const EdgeInsets.all(50.0),
                   child: ElevatedButton(
@@ -296,7 +296,6 @@ void main() {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 const Flexible(
-                  fit: FlexFit.loose,
                   child: Center(child: FlutterLogo(size: 100)),
                 ),
                 ElevatedButton(
@@ -389,7 +388,7 @@ void main() {
             SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,
-              child: Container(
+              child: ColoredBox(
                 key: key,
                 color: Colors.blue,
                 child: Align(
@@ -448,7 +447,6 @@ void main() {
                 key: key,
                 color: Colors.blue[300],
                 child: Align(
-                  alignment: Alignment.center,
                   child: Padding(
                     padding: const EdgeInsets.all(50.0),
                     child: ElevatedButton(
@@ -568,7 +566,6 @@ void main() {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const Flexible(
-                    fit: FlexFit.loose,
                     child: Center(child: FlutterLogo(size: 100)),
                   ),
                   ElevatedButton(
@@ -677,7 +674,7 @@ void main() {
             SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,
-              child: Container(
+              child: ColoredBox(
                 key: key,
                 color: Colors.blue,
                 child: Align(
@@ -728,7 +725,6 @@ void main() {
                 key: key,
                 color: Colors.blue[300],
                 child: Align(
-                  alignment: Alignment.center,
                   child: Padding(
                     padding: const EdgeInsets.all(50.0),
                     child: ElevatedButton(

@@ -29,8 +29,10 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 
 /// An iOS style scrollbar.
 ///
-/// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
+/// To add a scrollbar to a [ScrollView], wrap the scroll view widget in
 /// a [CupertinoScrollbar] widget.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DbkIQSvwnZc}
 ///
 /// {@macro flutter.widgets.Scrollbar}
 ///
@@ -38,71 +40,22 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 /// animate from [thickness] and [radius] to [thicknessWhileDragging] and
 /// [radiusWhileDragging], respectively.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool dartpad}
 /// This sample shows a [CupertinoScrollbar] that fades in and out of view as scrolling occurs.
 /// The scrollbar will fade into view as the user scrolls, and fade out when scrolling stops.
 /// The `thickness` of the scrollbar will animate from 6 pixels to the `thicknessWhileDragging` of 10
 /// when it is dragged by the user. The `radius` of the scrollbar thumb corners will animate from 34
 /// to the `radiusWhileDragging` of 0 when the scrollbar is being dragged by the user.
 ///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
-///
-/// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   return CupertinoScrollbar(
-///     thickness: 6.0,
-///     thicknessWhileDragging: 10.0,
-///     radius: const Radius.circular(34.0),
-///     radiusWhileDragging: Radius.zero,
-///     child: ListView.builder(
-///       itemCount: 120,
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/scrollbar/cupertino_scrollbar.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-/// When `isAlwaysShown` is true, the scrollbar thumb will remain visible without the
+/// {@tool dartpad}
+/// When [thumbVisibility] is true, the scrollbar thumb will remain visible without the
 /// fade animation. This requires that a [ScrollController] is provided to controller,
 /// or that the [PrimaryScrollController] is available.
 ///
-/// ```dart imports
-/// import 'package:flutter/cupertino.dart';
-/// ```
-///
-/// ```dart
-/// final ScrollController _controllerOne = ScrollController();
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return CupertinoScrollbar(
-///     thickness: 6.0,
-///     thicknessWhileDragging: 10.0,
-///     radius: const Radius.circular(34.0),
-///     radiusWhileDragging: Radius.zero,
-///     controller: _controllerOne,
-///     isAlwaysShown: true,
-///     child: ListView.builder(
-///       controller: _controllerOne,
-///       itemCount: 120,
-///       itemBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: Text('item $index'),
-///         );
-///       },
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/scrollbar/cupertino_scrollbar.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -118,34 +71,24 @@ class CupertinoScrollbar extends RawScrollbar {
   /// The [child] should be a source of [ScrollNotification] notifications,
   /// typically a [Scrollable] widget.
   const CupertinoScrollbar({
-    Key? key,
-    required Widget child,
-    ScrollController? controller,
-    bool isAlwaysShown = false,
-    double thickness = defaultThickness,
+    super.key,
+    required super.child,
+    super.controller,
+    bool? thumbVisibility,
+    double super.thickness = defaultThickness,
     this.thicknessWhileDragging = defaultThicknessWhileDragging,
-    Radius radius = defaultRadius,
+    Radius super.radius = defaultRadius,
     this.radiusWhileDragging = defaultRadiusWhileDragging,
     ScrollNotificationPredicate? notificationPredicate,
-    ScrollbarOrientation? scrollbarOrientation,
-  }) : assert(thickness != null),
-       assert(thickness < double.infinity),
-       assert(thicknessWhileDragging != null),
+    super.scrollbarOrientation,
+  }) : assert(thickness < double.infinity),
        assert(thicknessWhileDragging < double.infinity),
-       assert(radius != null),
-       assert(radiusWhileDragging != null),
        super(
-         key: key,
-         child: child,
-         controller: controller,
-         isAlwaysShown: isAlwaysShown,
-         thickness: thickness,
-         radius: radius,
+         thumbVisibility: thumbVisibility ?? false,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: const Duration(milliseconds: 100),
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
-         scrollbarOrientation: scrollbarOrientation,
        );
 
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].
@@ -213,7 +156,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       ..mainAxisMargin = _kScrollbarMainAxisMargin
       ..crossAxisMargin = _kScrollbarCrossAxisMargin
       ..radius = _radius
-      ..padding = MediaQuery.of(context).padding
+      ..padding = MediaQuery.paddingOf(context)
       ..minLength = _kScrollbarMinLength
       ..minOverscrollLength = _kScrollbarMinOverscrollLength
       ..scrollbarOrientation = widget.scrollbarOrientation;
@@ -227,14 +170,15 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   @override
   void handleThumbPressStart(Offset localPosition) {
     super.handleThumbPressStart(localPosition);
-    final Axis direction = getScrollbarDirection()!;
+    final Axis? direction = getScrollbarDirection();
+    if (direction == null) {
+      return;
+    }
     switch (direction) {
       case Axis.vertical:
         _pressStartAxisPosition = localPosition.dy;
-        break;
       case Axis.horizontal:
         _pressStartAxisPosition = localPosition.dx;
-        break;
     }
   }
 
@@ -257,19 +201,17 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
     }
     _thicknessAnimationController.reverse();
     super.handleThumbPressEnd(localPosition, velocity);
-    switch(direction) {
+    switch (direction) {
       case Axis.vertical:
         if (velocity.pixelsPerSecond.dy.abs() < 10 &&
           (localPosition.dy - _pressStartAxisPosition).abs() > 0) {
           HapticFeedback.mediumImpact();
         }
-        break;
       case Axis.horizontal:
         if (velocity.pixelsPerSecond.dx.abs() < 10 &&
           (localPosition.dx - _pressStartAxisPosition).abs() > 0) {
           HapticFeedback.mediumImpact();
         }
-        break;
     }
   }
 

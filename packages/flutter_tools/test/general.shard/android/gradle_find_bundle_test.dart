@@ -19,6 +19,19 @@ void main() {
     fileSystem = MemoryFileSystem.test();
   });
 
+  testWithoutContext('Finds app bundle when flavor contains multiple dimensions in release mode', () {
+    final FlutterProject project = generateFakeAppBundle('fooBarRelease', 'app-foo-bar-release.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(BuildMode.release, 'fooBar', treeShakeIcons: false),
+      BufferLogger.test(),
+      TestUsage(),
+    );
+
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/fooBarRelease/app-foo-bar-release.aab');
+  });
+
   testWithoutContext('Finds app bundle when flavor contains underscores in release mode', () {
     final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
@@ -84,6 +97,19 @@ void main() {
     expect(bundle.path, '/build/app/outputs/bundle/release/app.aab');
   });
 
+   testWithoutContext('Finds app bundle when flavor contains multiple dimensions in debug mode', () {
+    final FlutterProject project = generateFakeAppBundle('fooBarDebug', 'app-foo-bar-debug.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(BuildMode.debug, 'fooBar', treeShakeIcons: false),
+      BufferLogger.test(),
+      TestUsage(),
+    );
+
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/fooBarDebug/app-foo-bar-debug.aab');
+  });
+
   testWithoutContext('Finds app bundle when flavor contains underscores in debug mode', () {
     final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app.aab', fileSystem);
     final File bundle = findBundleFile(
@@ -147,6 +173,19 @@ void main() {
 
     expect(bundle, isNotNull);
     expect(bundle.path, '/build/app/outputs/bundle/debug/app.aab');
+  });
+
+  testWithoutContext('Finds app bundle when flavor contains multiple dimensions in profile mode', () {
+    final FlutterProject project = generateFakeAppBundle('fooBarProfile', 'app-foo-bar-profile.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(BuildMode.profile, 'fooBar', treeShakeIcons: false),
+      BufferLogger.test(),
+      TestUsage(),
+    );
+
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/fooBarProfile/app-foo-bar-profile.aab');
   });
 
   testWithoutContext('Finds app bundle when flavor contains underscores in profile mode', () {
@@ -305,6 +344,34 @@ void main() {
     expect(bundle.path, '/build/app/outputs/bundle/foo_barDebug/app-foo_bar-debug.aab');
   });
 
+  testWithoutContext(
+      'Finds app bundle when flavor contains underscores and uppercase letters in release mode - Gradle 4.1', () {
+    final FlutterProject project = generateFakeAppBundle('foo_BarRelease', 'app-foo_Bar-release.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(BuildMode.release, 'Foo_Bar', treeShakeIcons: false),
+      BufferLogger.test(),
+      TestUsage(),
+    );
+
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/foo_BarRelease/app-foo_Bar-release.aab');
+  });
+
+  testWithoutContext(
+      'Finds app bundle when flavor contains underscores and uppercase letters in debug mode - Gradle 4.1', () {
+    final FlutterProject project = generateFakeAppBundle('foo_BarDebug', 'app-foo_Bar-debug.aab', fileSystem);
+    final File bundle = findBundleFile(
+      project,
+      const BuildInfo(BuildMode.debug, 'Foo_Bar', treeShakeIcons: false),
+      BufferLogger.test(),
+      TestUsage(),
+    );
+
+    expect(bundle, isNotNull);
+    expect(bundle.path, '/build/app/outputs/bundle/foo_BarDebug/app-foo_Bar-debug.aab');
+  });
+
   testWithoutContext('AAB not found', () {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final TestUsage testUsage = TestUsage();
@@ -329,7 +396,7 @@ void main() {
         'gradle',
         label: 'gradle-expected-file-not-found',
         parameters: CustomDimensions.fromMap(<String, String> {
-          'cd37': 'androidGradlePluginVersion: 6.7, fileExtension: .aab',
+          'cd37': 'androidGradlePluginVersion: 7.5, fileExtension: .aab',
         }),
       ),
     ));

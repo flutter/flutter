@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -27,9 +25,7 @@ final FakePlatform macOS = FakePlatform(
   operatingSystem: 'macos',
 );
 
-final FakePlatform linux = FakePlatform(
-  operatingSystem: 'linux',
-);
+final FakePlatform linux = FakePlatform();
 
 void main() {
   testWithoutContext('default configuration', () async {
@@ -62,10 +58,10 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['release/executable'],
-          stdout: 'Hello World',
-          stderr: 'Goodnight, Moon',
+          stdout: 'Hello World\n',
+          stderr: 'Goodnight, Moon\n',
           completer: completer,
-        )
+        ),
       ]),
       logger: BufferLogger.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
@@ -82,7 +78,7 @@ void main() {
 
     final DeviceLogReader logReader = device.getLogReader(app: package);
 
-    expect(logReader.logLines, emits('Hello WorldGoodnight, Moon'));
+    expect(logReader.logLines, emitsInAnyOrder(<String>['Hello World', 'Goodnight, Moon']));
     completer.complete();
   });
 
@@ -97,7 +93,7 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: linux,
       ),
-    ).devices, isEmpty);
+    ).devices(), isEmpty);
   });
 
   testWithoutContext('No devices listed if platform is supported and feature is disabled', () async {
@@ -108,12 +104,12 @@ void main() {
       platform: macOS,
       operatingSystemUtils: FakeOperatingSystemUtils(),
       macOSWorkflow: MacOSWorkflow(
-        featureFlags: TestFeatureFlags(isMacOSEnabled: false),
+        featureFlags: TestFeatureFlags(),
         platform: macOS,
       ),
     );
 
-    expect(await macOSDevices.devices, isEmpty);
+    expect(await macOSDevices.devices(), isEmpty);
   });
 
   testWithoutContext('devices listed if platform is supported and feature is enabled', () async {
@@ -129,7 +125,7 @@ void main() {
       ),
     );
 
-    expect(await macOSDevices.devices, hasLength(1));
+    expect(await macOSDevices.devices(), hasLength(1));
   });
 
   testWithoutContext('has a well known device id macos', () async {
@@ -201,7 +197,7 @@ void main() {
   testWithoutContext('target platform display name on ARM', () async {
     final FakeOperatingSystemUtils fakeOperatingSystemUtils =
         FakeOperatingSystemUtils();
-    fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_arm;
+    fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_arm64;
     final MacOSDevice device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -239,9 +235,9 @@ void main() {
     const String profilePath = 'profile/executable';
     const String releasePath = 'release/executable';
 
-    expect(device.executablePathForDevice(package, BuildMode.debug), debugPath);
-    expect(device.executablePathForDevice(package, BuildMode.profile), profilePath);
-    expect(device.executablePathForDevice(package, BuildMode.release), releasePath);
+    expect(device.executablePathForDevice(package, BuildInfo.debug), debugPath);
+    expect(device.executablePathForDevice(package, BuildInfo.profile), profilePath);
+    expect(device.executablePathForDevice(package, BuildInfo.release), releasePath);
   });
 }
 
@@ -255,16 +251,12 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class FakeMacOSApp extends Fake implements MacOSApp {
   @override
-  String executable(BuildMode buildMode) {
-    switch (buildMode) {
-      case BuildMode.debug:
-        return 'debug/executable';
-      case BuildMode.profile:
-        return 'profile/executable';
-      case BuildMode.release:
-        return 'release/executable';
-      default:
-        throw StateError('');
-    }
+  String executable(BuildInfo buildInfo) {
+    return switch (buildInfo) {
+      BuildInfo.debug => 'debug/executable',
+      BuildInfo.profile => 'profile/executable',
+      BuildInfo.release => 'release/executable',
+      _ => throw StateError('')
+    };
   }
 }

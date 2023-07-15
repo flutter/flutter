@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show window, SemanticsFlag;
+import 'dart:ui' show DisplayFeature, DisplayFeatureState, DisplayFeatureType, SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -62,6 +63,75 @@ void main() {
 
     expect(find.text('One'), findsNothing);
     expect(find.text('Next'), findsOneWidget);
+  });
+
+  testWidgets('PopupMenuButton calls onOpened callback when the menu is opened', (WidgetTester tester) async {
+    int opens = 0;
+    late BuildContext popupContext;
+    final Key noItemsKey = UniqueKey();
+    final Key noCallbackKey = UniqueKey();
+    final Key withCallbackKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<int>(
+                key: noItemsKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[];
+                },
+                onOpened: () => opens++,
+              ),
+              PopupMenuButton<int>(
+                key: noCallbackKey,
+                itemBuilder: (BuildContext context) {
+                  popupContext = context;
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+              ),
+              PopupMenuButton<int>(
+                key: withCallbackKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me, too!'),
+                    ),
+                  ];
+                },
+                onOpened: () => opens++,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Make sure callback is not called when the menu is not shown
+    await tester.tap(find.byKey(noItemsKey));
+    await tester.pump();
+    expect(opens, equals(0));
+
+    // Make sure everything works if no callback is provided
+    await tester.tap(find.byKey(noCallbackKey));
+    await tester.pump();
+    expect(opens, equals(0));
+
+    // Close the opened menu
+    Navigator.of(popupContext).pop();
+    await tester.pump();
+
+    // Make sure callback is called when the button is tapped
+    await tester.tap(find.byKey(withCallbackKey));
+    await tester.pump();
+    expect(opens, equals(1));
   });
 
   testWidgets('PopupMenuButton calls onCanceled callback when an item is not selected', (WidgetTester tester) async {
@@ -130,9 +200,10 @@ void main() {
     expect(cancels, equals(2));
   });
 
-  testWidgets('disabled PopupMenuButton will not call itemBuilder, onSelected or onCanceled', (WidgetTester tester) async {
+  testWidgets('disabled PopupMenuButton will not call itemBuilder, onOpened, onSelected or onCanceled', (WidgetTester tester) async {
     final GlobalKey popupButtonKey = GlobalKey();
     bool itemBuilderCalled = false;
+    bool onOpenedCalled = false;
     bool onSelectedCalled = false;
     bool onCanceledCalled = false;
 
@@ -158,6 +229,7 @@ void main() {
                         ),
                       ];
                     },
+                    onOpened: ()=> onOpenedCalled = true,
                     onSelected: (int selected) => onSelectedCalled = true,
                     onCanceled: () => onCanceledCalled = true,
                   ),
@@ -177,6 +249,7 @@ void main() {
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isFalse);
+    expect(onOpenedCalled, isFalse);
     expect(onSelectedCalled, isFalse);
 
     // Try to bring up the popup menu and tap outside it to cancel the menu
@@ -185,6 +258,7 @@ void main() {
     await tester.tapAt(Offset.zero);
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isFalse);
+    expect(onOpenedCalled, isFalse);
     expect(onCanceledCalled, isFalse);
 
     // Test again, with directional navigation mode and after focusing the button.
@@ -198,6 +272,7 @@ void main() {
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isFalse);
+    expect(onOpenedCalled, isFalse);
     expect(onSelectedCalled, isFalse);
 
     // Try to bring up the popup menu and tap outside it to cancel the menu
@@ -206,6 +281,7 @@ void main() {
     await tester.tapAt(Offset.zero);
     await tester.pumpAndSettle();
     expect(itemBuilderCalled, isFalse);
+    expect(onOpenedCalled, isFalse);
     expect(onCanceledCalled, isFalse);
   });
 
@@ -213,6 +289,7 @@ void main() {
     final Key popupButtonKey = UniqueKey();
     final GlobalKey childKey = GlobalKey();
     bool itemBuilderCalled = false;
+    bool onOpenedCalled = false;
     bool onSelectedCalled = false;
 
     await tester.pumpWidget(
@@ -233,6 +310,7 @@ void main() {
                     ),
                   ];
                 },
+                onOpened: () => onOpenedCalled = true,
                 onSelected: (int selected) => onSelectedCalled = true,
               ),
             ],
@@ -245,6 +323,7 @@ void main() {
 
     expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
     expect(itemBuilderCalled, isFalse);
+    expect(onOpenedCalled, isFalse);
     expect(onSelectedCalled, isFalse);
   });
 
@@ -438,7 +517,6 @@ void main() {
                   itemBuilderCalled = true;
                   return <PopupMenuEntry<int>>[
                     PopupMenuItem<int>(
-                      enabled: true,
                       value: 1,
                       child: Text('Tap me please!', key: childKey),
                     ),
@@ -557,9 +635,9 @@ void main() {
     testWidgets('PopupMenuButton fails when given both child and icon', (WidgetTester tester) async {
       expect(() {
         PopupMenuButton<int>(
-            child: const Text('heyo'),
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
+            child: const Text('heyo'),
         );
       }, throwsAssertionError);
     });
@@ -659,7 +737,6 @@ void main() {
                   expect(newRect.left, lessThan(rect.left));
                 }
               }
-              break;
             case TextDirection.ltr:
               expect(newRect.left, rect.left);
               if (doneHorizontally) {
@@ -671,7 +748,6 @@ void main() {
                   expect(newRect.right, greaterThan(rect.right));
                 }
               }
-              break;
           }
           rect = newRect;
         } while (tester.binding.hasScheduledFrame);
@@ -703,7 +779,6 @@ void main() {
               }
               expect(newRect.top, rect.top);
               expect(newRect.bottom, greaterThan(rect.bottom));
-              break;
             case 1:
               if (newRect.top == rect.top) {
                 verticalStage = 2;
@@ -712,11 +787,9 @@ void main() {
               }
               expect(newRect.top, lessThan(rect.top));
               expect(newRect.bottom, rect.bottom);
-              break;
             case 2:
               expect(newRect.bottom, rect.bottom);
               expect(newRect.top, rect.top);
-              break;
             default:
               assert(false);
           }
@@ -732,7 +805,6 @@ void main() {
                   expect(newRect.left, lessThan(rect.left));
                 }
               }
-              break;
             case TextDirection.ltr:
               expect(newRect.left, rect.left);
               if (doneHorizontally) {
@@ -744,7 +816,6 @@ void main() {
                   expect(newRect.right, greaterThan(rect.right));
                 }
               }
-              break;
           }
           rect = newRect;
         } while (tester.binding.hasScheduledFrame);
@@ -852,6 +923,66 @@ void main() {
 
     final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
     expect(tester.getTopLeft(popupFinder), buttonTopLeft);
+  });
+
+  testWidgets('PopupMenu positioning around display features', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            size: Size(800, 600),
+            displayFeatures: <DisplayFeature>[
+              // A 20-pixel wide vertical display feature, similar to a foldable
+              // with a visible hinge. Splits the display into two "virtual screens"
+              // and the popup menu should never overlap the display feature.
+              DisplayFeature(
+                bounds: Rect.fromLTRB(390, 0, 410, 600),
+                type: DisplayFeatureType.cutout,
+                state: DisplayFeatureState.unknown,
+              ),
+            ],
+          ),
+          child: Scaffold(
+            body: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<dynamic>(
+                  builder: (BuildContext context) {
+                    return Padding(
+                      // Position the button in the top-right of the first "virtual screen"
+                      padding: const EdgeInsets.only(right:390.0),
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: PopupMenuButton<int>(
+                          key: buttonKey,
+                          itemBuilder: (_) => <PopupMenuItem<int>>[
+                            const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+                            const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+                          ],
+                          child: const Text('Show Menu'),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    final Finder popupFinder = find.bySemanticsLabel('Popup menu');
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    // Since the display feature splits the display into 2 sub-screens, popup
+    // menu should be positioned to fit in the first virtual screen, where the
+    // originating button is.
+    // The 8 pixels is [_kMenuScreenPadding].
+    expect(tester.getTopRight(popupFinder), const Offset(390 - 8, 8));
   });
 
   testWidgets('PopupMenu removes MediaQuery padding', (WidgetTester tester) async {
@@ -1063,7 +1194,11 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+              ),
             ],
           ),
         ],
@@ -1147,7 +1282,11 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+              ),
             ],
           ),
         ],
@@ -1266,7 +1405,11 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+              ),
             ],
           ),
         ],
@@ -1417,6 +1560,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: PopupMenuButton<String>(
@@ -1561,7 +1705,6 @@ void main() {
     );
   });
 
-
   testWidgets('CheckedPopupMenuItem custom padding', (WidgetTester tester) async {
     final Key popupMenuButtonKey = UniqueKey();
     final Type menuItemType = const CheckedPopupMenuItem<String>(child: Text('item')).runtimeType;
@@ -1632,12 +1775,13 @@ void main() {
       double fontSize = 24,
     }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         builder: (BuildContext context, Widget? child) {
           return Directionality(
             textDirection: textDirection,
             child: PopupMenuTheme(
               data: PopupMenuTheme.of(context).copyWith(
-                textStyle: Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: fontSize),
+                textStyle: Theme.of(context).textTheme.titleMedium!.copyWith(fontSize: fontSize),
               ),
               child: child!,
             ),
@@ -1700,8 +1844,8 @@ void main() {
     expect(() {
       PopupMenuButton<int>(
         itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[],
-        child: Container(),
         icon: const Icon(Icons.error),
+        child: Container(),
       );
     }, throwsAssertionError);
   });
@@ -1980,11 +2124,10 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -2007,7 +2150,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -2031,7 +2174,87 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('CheckedPopupMenuItem changes mouse cursor when hovered', (WidgetTester tester) async {
+    const Key key = ValueKey<int>(1);
+    // Test CheckedPopupMenuItem() constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: CheckedPopupMenuItem<int>(
+                  key: key,
+                  mouseCursor: SystemMouseCursors.text,
+                  value: 1,
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test default cursor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: CheckedPopupMenuItem<int>(
+                  key: key,
+                  value: 1,
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: CheckedPopupMenuItem<int>(
+                  key: key,
+                  value: 1,
+                  enabled: false,
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('PopupMenu in AppBar does not overlap with the status bar', (WidgetTester tester) async {
@@ -2043,7 +2266,7 @@ void main() {
 
     const double statusBarHeight = 24.0;
     final PopupMenuItem<int> firstItem = choices[0];
-    int _selectedValue = choices[0].value!;
+    int selectedValue = choices[0].value!;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2062,10 +2285,10 @@ void main() {
                   PopupMenuButton<int>(
                     onSelected: (int result) {
                       setState(() {
-                        _selectedValue = result;
+                        selectedValue = result;
                       });
                     },
-                    initialValue: _selectedValue,
+                    initialValue: selectedValue,
                     itemBuilder: (BuildContext context) {
                       return choices;
                     },
@@ -2142,6 +2365,7 @@ void main() {
 
     Widget buildFrame(double width, double height) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         builder: (BuildContext context, Widget? child) {
           return MediaQuery(
             data: const MediaQueryData(
@@ -2156,20 +2380,22 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             title: const Text('PopupMenu Test'),
-            actions: <Widget>[PopupMenuButton<int>(
-              child: SizedBox(
-                key: buttonKey,
-                height: height,
-                width: width,
-                child: const ColoredBox(
-                  color: Colors.pink,
+            actions: <Widget>[
+              PopupMenuButton<int>(
+                child: SizedBox(
+                  key: buttonKey,
+                  height: height,
+                  width: width,
+                  child: const ColoredBox(
+                    color: Colors.pink,
+                  ),
                 ),
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                  const PopupMenuItem<int>(value: 1, child: Text('-1-')),
+                  const PopupMenuItem<int>(value: 2, child: Text('-2-')),
+                ],
               ),
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                const PopupMenuItem<int>(value: 1, child: Text('-1-')),
-                const PopupMenuItem<int>(value: 2, child: Text('-2-')),
-              ],
-            )],
+            ],
           ),
           body: Container(),
         ),
@@ -2199,6 +2425,7 @@ void main() {
 
     Widget buildFrame(double width, double height) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         builder: (BuildContext context, Widget? child) {
           return MediaQuery(
             data: const MediaQueryData(
@@ -2210,30 +2437,32 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             title: const Text('PopupMenu Test'),
-            actions: <Widget>[PopupMenuButton<int>(
-              child: SizedBox(
-                key: buttonKey,
-                height: height,
-                width: width,
-                child: const ColoredBox(
-                  color: Colors.pink,
-                ),
-              ),
-              itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<int>>[
-                  PopupMenuItem<int>(
-                    value: 1,
-                    child: Builder(
-                      builder: (BuildContext context) {
-                        mediaQueryPadding = MediaQuery.of(context).padding;
-                        return Text('-1-' * 500); // A long long text string.
-                      },
-                    ),
+            actions: <Widget>[
+              PopupMenuButton<int>(
+                child: SizedBox(
+                  key: buttonKey,
+                  height: height,
+                  width: width,
+                  child: const ColoredBox(
+                    color: Colors.pink,
                   ),
-                  const PopupMenuItem<int>(value: 2, child: Text('-2-')),
-                ];
-              },
-            )],
+                ),
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    PopupMenuItem<int>(
+                      value: 1,
+                      child: Builder(
+                        builder: (BuildContext context) {
+                          mediaQueryPadding = MediaQuery.paddingOf(context);
+                          return Text('-1-' * 500); // A long long text string.
+                        },
+                      ),
+                    ),
+                    const PopupMenuItem<int>(value: 2, child: Text('-2-')),
+                  ];
+                },
+              ),
+            ],
           ),
           body: const SizedBox.shrink(),
         ),
@@ -2370,10 +2599,10 @@ void main() {
     }
 
     await buildFrame();
-    expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 24);
+    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), const Size(24, 24));
 
     await buildFrame(iconSize: 50);
-    expect(tester.widget<IconButton>(find.byType(IconButton)).iconSize, 50);
+    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), const Size(50, 50));
   });
 
   testWidgets('does not crash in small overlay', (WidgetTester tester) async {
@@ -2480,23 +2709,616 @@ void main() {
     // The 8.0 pixels is [_kMenuScreenPadding].
     expect(popupMenu, const Offset(8.0, 50.0));
   });
+
+  testWidgets('PopupMenuButton custom splash radius', (WidgetTester tester) async {
+    Future<void> buildFrameWithoutChild({double? splashRadius}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            body: Center(
+              child: PopupMenuButton<String>(
+                splashRadius: splashRadius,
+                itemBuilder: (_) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'value',
+                    child: Text('child'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<void> buildFrameWithChild({double? splashRadius}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PopupMenuButton<String>(
+                splashRadius: splashRadius,
+                child: const Text('An item'),
+                itemBuilder: (_) => <PopupMenuEntry<String>>[
+                  const PopupMenuDivider(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+
+    await buildFrameWithoutChild();
+    expect(tester.widget<InkResponse>(find.byType(InkResponse)).radius,
+        Material.defaultSplashRadius);
+    await buildFrameWithChild();
+    expect(tester.widget<InkWell>(find.byType(InkWell)).radius, null);
+
+
+    const double testSplashRadius = 50;
+
+    await buildFrameWithoutChild(splashRadius: testSplashRadius);
+    expect(tester.widget<InkResponse>(find.byType(InkResponse)).radius,
+        testSplashRadius);
+    await buildFrameWithChild(splashRadius: testSplashRadius);
+    expect(tester.widget<InkWell>(find.byType(InkWell)).radius,
+        testSplashRadius);
+  });
+
+  testWidgets('Can override menu size constraints', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    final Type menuItemType = const PopupMenuItem<String>(child: Text('item')).runtimeType;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              constraints: const BoxConstraints(
+                minWidth: 500,
+              ),
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).width, 500);
+  });
+
+  testWidgets('Can change menu position and offset', (WidgetTester tester) async {
+    PopupMenuButton<int> buildMenuButton({required PopupMenuPosition position}) {
+      return PopupMenuButton<int>(
+        position: position,
+        itemBuilder: (BuildContext context) {
+          return <PopupMenuItem<int>>[
+            PopupMenuItem<int>(
+              value: 1,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return const Text('AAA');
+                },
+              ),
+            ),
+          ];
+        },
+      );
+    }
+
+    // Popup menu with `MenuPosition.over (default) with default offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: buildMenuButton(position: PopupMenuPosition.over),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 8.0));
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    // Popup menu with `MenuPosition.under`(custom) with default offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: buildMenuButton(position: PopupMenuPosition.under),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 40.0));
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    // Popup menu with `MenuPosition.over (default) with custom offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: PopupMenuButton<int>(
+              offset: const Offset(0.0, 50),
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<int>>[
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return const Text('AAA');
+                      },
+                    ),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 50.0));
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    // Popup menu with `MenuPosition.under (custom) with custom offset`.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: PopupMenuButton<int>(
+              offset: const Offset(0.0, 50),
+              position: PopupMenuPosition.under,
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<int>>[
+                  PopupMenuItem<int>(
+                    value: 1,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return const Text('AAA');
+                      },
+                    ),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(8.0, 90.0));
+  });
+
+  testWidgets("PopupMenuButton icon inherits IconTheme's size", (WidgetTester tester) async {
+    Widget buildPopupMenu({double? themeIconSize, double? iconSize}) {
+      return MaterialApp(
+        theme: ThemeData(
+          iconTheme: IconThemeData(
+            size: themeIconSize,
+          ),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              iconSize: iconSize,
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Popup menu with default icon size.
+    await tester.pumpWidget(buildPopupMenu());
+    // Default PopupMenuButton icon size is 24.0.
+    expect(tester.getSize(find.byIcon(Icons.more_vert)), const Size(24.0, 24.0));
+
+    // Popup menu with custom theme icon size.
+    await tester.pumpWidget(buildPopupMenu(themeIconSize: 30.0));
+    await tester.pumpAndSettle();
+    // PopupMenuButton icon inherits IconTheme's size.
+    expect(tester.getSize(find.byIcon(Icons.more_vert)), const Size(30.0, 30.0));
+
+    // Popup menu with custom icon size.
+    await tester.pumpWidget(buildPopupMenu(themeIconSize: 30.0, iconSize: 50.0));
+    await tester.pumpAndSettle();
+    // PopupMenuButton icon size overrides IconTheme's size.
+    expect(tester.getSize(find.byIcon(Icons.more_vert)), const Size(50.0, 50.0));
+  });
+
+  testWidgets('Popup menu clip behavior', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/107215
+    final Key popupButtonKey = UniqueKey();
+    const double radius = 20.0;
+
+    Widget buildPopupMenu({required Clip clipBehavior}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupButtonKey,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(radius)),
+              ),
+              clipBehavior: clipBehavior,
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('Item 0'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Popup menu with default ClipBehavior.
+    await tester.pumpWidget(buildPopupMenu(clipBehavior: Clip.none));
+
+    // Open the popup to build and show the menu contents.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    Material material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.clipBehavior, Clip.none);
+
+    // Close the popup menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pumpAndSettle();
+
+    // Popup menu with custom ClipBehavior.
+    await tester.pumpWidget(buildPopupMenu(clipBehavior: Clip.hardEdge));
+
+    // Open the popup to build and show the menu contents.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.clipBehavior, Clip.hardEdge);
+  });
+
+  testWidgets('Uses closed loop focus traversal', (WidgetTester tester) async {
+    FocusNode nodeA() => Focus.of(find.text('A').evaluate().single);
+    FocusNode nodeB() => Focus.of(find.text('B').evaluate().single);
+
+    final GlobalKey popupButtonKey = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: PopupMenuButton<String>(
+            key: popupButtonKey,
+            itemBuilder: (_) => const <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(
+                value: 'a',
+                child: Text('A'),
+              ),
+              PopupMenuItem<String>(
+                value: 'b',
+                child: Text('B'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    // Open the popup to build and show the menu contents.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    Future<bool> nextFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const NextFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    Future<bool> previousFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const PreviousFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    // Start at A
+    nodeA().requestFocus();
+    await tester.pump();
+    expect(nodeA().hasFocus, true);
+    expect(nodeB().hasFocus, false);
+
+    // A -> B
+    expect(await nextFocus(), true);
+    expect(nodeA().hasFocus, false);
+    expect(nodeB().hasFocus, true);
+
+    // B -> A (wrap around)
+    expect(await nextFocus(), true);
+    expect(nodeA().hasFocus, true);
+    expect(nodeB().hasFocus, false);
+
+    // B <- A
+    expect(await previousFocus(), true);
+    expect(nodeA().hasFocus, false);
+    expect(nodeB().hasFocus, true);
+
+    // A <- B (wrap around)
+    expect(await previousFocus(), true);
+    expect(nodeA().hasFocus, true);
+    expect(nodeB().hasFocus, false);
+  });
+
+  testWidgets('Popup menu scrollbar inherits ScrollbarTheme', (WidgetTester tester) async {
+    final Key popupButtonKey = UniqueKey();
+    const ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(
+      thumbColor: MaterialStatePropertyAll<Color?>(Color(0xffff0000)),
+      thumbVisibility: MaterialStatePropertyAll<bool?>(true),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          scrollbarTheme: scrollbarTheme,
+          useMaterial3: true,
+        ),
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<void>(
+                key: popupButtonKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<void>>[
+                    const PopupMenuItem<void>(
+                      height: 1000,
+                      child: Text('Example'),
+                    ),
+                  ];
+                },
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Scrollbar), findsOneWidget);
+    // Test Scrollbar thumb color.
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(color: const Color(0xffff0000)),
+    );
+
+    // Close the menu.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pumpAndSettle();
+
+    // Test local ScrollbarTheme overrides global ScrollbarTheme.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          scrollbarTheme: scrollbarTheme,
+          useMaterial3: true,
+        ),
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              ScrollbarTheme(
+                data: scrollbarTheme.copyWith(
+                  thumbColor: const MaterialStatePropertyAll<Color?>(Color(0xff0000ff)),
+                ),
+                child: PopupMenuButton<void>(
+                  key: popupButtonKey,
+                  itemBuilder: (BuildContext context) {
+                    return <PopupMenuEntry<void>>[
+                      const PopupMenuItem<void>(
+                        height: 1000,
+                        child: Text('Example'),
+                      ),
+                    ];
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Scrollbar), findsOneWidget);
+    // Scrollbar thumb color should be updated.
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(color: const Color(0xff0000ff)),
+    );
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Popup menu with RouteSettings', (WidgetTester tester) async {
+    late RouteSettings currentRouteSetting;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[
+          _ClosureNavigatorObserver(onDidChange: (Route<dynamic> newRoute) {
+            currentRouteSetting = newRoute.settings;
+          }),
+        ],
+        home: const Material(
+          child: Center(
+            child: ElevatedButton(
+              onPressed: null,
+              child: Text('Go'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.text('Go'));
+    const RouteSettings exampleSetting = RouteSettings(name: 'simple');
+
+    showMenu<void>(
+      context: context,
+      position: RelativeRect.fill,
+      items: const <PopupMenuItem<void>>[
+        PopupMenuItem<void>(child: Text('foo')),
+      ],
+      routeSettings: exampleSetting,
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.text('foo'), findsOneWidget);
+    expect(currentRouteSetting, exampleSetting);
+
+    await tester.tap(find.text('foo'));
+    await tester.pumpAndSettle();
+    expect(currentRouteSetting.name, '/');
+  });
+
+  testWidgets('Popup menu is positioned under the child', (WidgetTester tester) async {
+    final Key popupButtonKey = UniqueKey();
+    final Key childKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<void>(
+                key: popupButtonKey,
+                position: PopupMenuPosition.under,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<void>>[
+                    const PopupMenuItem<void>(
+                      child: Text('Example'),
+                    ),
+                  ];
+                },
+                child: SizedBox(
+                  key: childKey,
+                  height: 50,
+                  width: 50,
+                )
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    final Offset childBottomLeft = tester.getBottomLeft(find.byKey(childKey));
+    final Offset menuTopLeft = tester.getTopLeft(find.bySemanticsLabel('Popup menu'));
+    expect(childBottomLeft, menuTopLeft);
+  });
+
+  testWidgets('PopupmenuItem onTap should be calling after Navigator.pop', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            actions: <Widget>[
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[
+                  PopupMenuItem<int>(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return const SizedBox(
+                            height: 200.0,
+                            child: Center(child: Text('ModalBottomSheet')),
+                          );
+                        },
+                      );
+                    },
+                    value: 10,
+                    child: const Text('ACTION'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<int>));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('ACTION'));
+    await tester.pumpAndSettle();
+
+    // Verify that the ModalBottomSheet is displayed
+    final Finder modalBottomSheet = find.text('ModalBottomSheet');
+    expect(modalBottomSheet, findsOneWidget);
+  });
 }
 
-class TestApp extends StatefulWidget {
+class TestApp extends StatelessWidget {
   const TestApp({
-    Key? key,
+    super.key,
     required this.textDirection,
     this.child,
-  }) : super(key: key);
+  });
 
   final TextDirection textDirection;
   final Widget? child;
 
-  @override
-  State<TestApp> createState() => _TestAppState();
-}
-
-class _TestAppState extends State<TestApp> {
   @override
   Widget build(BuildContext context) {
     return Localizations(
@@ -2506,16 +3328,16 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(window),
+        data: MediaQueryData.fromView(View.of(context)),
         child: Directionality(
-          textDirection: widget.textDirection,
+          textDirection: textDirection,
           child: Navigator(
             onGenerateRoute: (RouteSettings settings) {
               assert(settings.name == '/');
               return MaterialPageRoute<void>(
                 settings: settings,
                 builder: (BuildContext context) => Material(
-                  child: widget.child,
+                  child: child,
                 ),
               );
             },
@@ -2536,4 +3358,22 @@ class MenuObserver extends NavigatorObserver {
     }
     super.didPush(route, previousRoute);
   }
+}
+
+class _ClosureNavigatorObserver extends NavigatorObserver {
+  _ClosureNavigatorObserver({required this.onDidChange});
+
+  final void Function(Route<dynamic> newRoute) onDidChange;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(route);
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(previousRoute!);
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(previousRoute!);
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => onDidChange(newRoute!);
 }

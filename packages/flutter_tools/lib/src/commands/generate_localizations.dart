@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../globals_null_migrated.dart' as globals;
 import '../localizations/gen_l10n.dart';
-import '../localizations/gen_l10n_types.dart';
 import '../localizations/localizations_utils.dart';
 import '../runner/flutter_command.dart';
 
@@ -21,14 +20,17 @@ import '../runner/flutter_command.dart';
 /// [internationalization user guide](flutter.dev/go/i18n-user-guide).
 class GenerateLocalizationsCommand extends FlutterCommand {
   GenerateLocalizationsCommand({
-    FileSystem fileSystem,
-    Logger logger,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Artifacts artifacts,
+    required ProcessManager processManager,
   }) :
     _fileSystem = fileSystem,
-    _logger = logger {
+    _logger = logger,
+    _artifacts = artifacts,
+    _processManager = processManager {
     argParser.addOption(
       'arb-dir',
-      defaultsTo: globals.fs.path.join('lib', 'l10n'),
       help: 'The directory where the template and translated arb files are located.',
     );
     argParser.addOption(
@@ -45,13 +47,11 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     );
     argParser.addOption(
       'template-arb-file',
-      defaultsTo: 'app_en.arb',
       help: 'The template arb file that will be used as the basis for '
             'generating the Dart localization and messages files.',
     );
     argParser.addOption(
       'output-localization-file',
-      defaultsTo: 'app_localizations.dart',
       help: 'The filename for the output localization and localizations '
             'delegate classes.',
     );
@@ -108,7 +108,6 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     );
     argParser.addFlag(
       'use-deferred-loading',
-      defaultsTo: false,
       help: 'Whether to generate the Dart localization file with locales imported '
             'as deferred, allowing for lazy loading of each locale in Flutter web.\n'
             '\n'
@@ -174,19 +173,39 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     );
     argParser.addFlag(
       'nullable-getter',
+      defaultsTo: true,
       help: 'Whether or not the localizations class getter is nullable.\n'
             '\n'
             'By default, this value is set to true so that '
             'Localizations.of(context) returns a nullable value '
-            'for backwards compatibility. If this value is set to true, then '
+            'for backwards compatibility. If this value is set to false, then '
             'a null check is performed on the returned value of '
             'Localizations.of(context), removing the need for null checking in '
             'user code.'
+    );
+    argParser.addFlag(
+      'format',
+      help: 'When specified, the "dart format" command is run after generating the localization files.'
+    );
+    argParser.addFlag(
+      'use-escaping',
+      help: 'Whether or not to use escaping for messages.\n'
+            '\n'
+            'By default, this value is set to false for backwards compatibility. '
+            'Turning this flag on will cause the parser to treat any special characters '
+            'contained within pairs of single quotes as normal strings and treat all '
+            'consecutive pairs of single quotes as a single quote character.',
+    );
+    argParser.addFlag(
+      'suppress-warnings',
+      help: 'When specified, all warnings will be suppressed.\n'
     );
   }
 
   final FileSystem _fileSystem;
   final Logger _logger;
+  final Artifacts _artifacts;
+  final ProcessManager _processManager;
 
   @override
   String get description => 'Generate localizations for the current project.';
@@ -195,11 +214,27 @@ class GenerateLocalizationsCommand extends FlutterCommand {
   String get name => 'gen-l10n';
 
   @override
+  String get category => FlutterCommandCategory.project;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
+    // Validate the rest of the args.
+    if (argResults!.rest.isNotEmpty) {
+      throwToolExit('Unexpected positional argument "${argResults!.rest.first}".');
+    }
+    // Keep in mind that this is also defined in the following locations:
+    // 1. flutter_tools/lib/src/build_system/targets/localizations.dart
+    // 2. flutter_tools/test/general.shard/build_system/targets/localizations_test.dart
+    // Keep the value consistent in all three locations to ensure behavior is the
+    // same across "flutter gen-l10n" and "flutter run".
+    final String defaultArbDir = _fileSystem.path.join('lib', 'l10n');
+    // Get all options associated with gen-l10n.
+    final LocalizationOptions options;
     if (_fileSystem.file('l10n.yaml').existsSync()) {
-      final LocalizationOptions options = parseLocalizationsOptions(
+      options = parseLocalizationsOptionsFromYAML(
         file: _fileSystem.file('l10n.yaml'),
         logger: _logger,
+        defaultArbDir: defaultArbDir,
       );
       _logger.printStatus(
         'Because l10n.yaml exists, the options defined there will be used '
@@ -207,58 +242,22 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         'To use the command line arguments, delete the l10n.yaml file in the '
         'Flutter project.\n\n'
       );
-      generateLocalizations(
-        logger: _logger,
-        options: options,
-        projectDir: _fileSystem.currentDirectory,
-        dependenciesDir: null,
-        fileSystem: _fileSystem,
+    } else {
+      options = parseLocalizationsOptionsFromCommand(
+        command: this,
+        defaultArbDir: defaultArbDir
       );
-      return FlutterCommandResult.success();
     }
 
-    final String inputPathString = stringArg('arb-dir');
-    final String outputPathString = stringArg('output-dir');
-    final String outputFileString = stringArg('output-localization-file');
-    final String templateArbFileName = stringArg('template-arb-file');
-    final String untranslatedMessagesFile = stringArg('untranslated-messages-file');
-    final String classNameString = stringArg('output-class');
-    final List<String> preferredSupportedLocales = stringsArg('preferred-supported-locales');
-    final String headerString = stringArg('header');
-    final String headerFile = stringArg('header-file');
-    final bool useDeferredLoading = boolArg('use-deferred-loading');
-    final String inputsAndOutputsListPath = stringArg('gen-inputs-and-outputs-list');
-    final bool useSyntheticPackage = boolArg('synthetic-package');
-    final String projectPathString = stringArg('project-dir');
-    final bool areResourceAttributesRequired = boolArg('required-resource-attributes');
-    final bool usesNullableGetter = boolArg('nullable-getter');
-
-    precacheLanguageAndRegionTags();
-
-    try {
-      LocalizationsGenerator(
-        fileSystem: _fileSystem,
-        inputPathString: inputPathString,
-        outputPathString: outputPathString,
-        templateArbFileName: templateArbFileName,
-        outputFileString: outputFileString,
-        classNameString: classNameString,
-        preferredSupportedLocales: preferredSupportedLocales,
-        headerString: headerString,
-        headerFile: headerFile,
-        useDeferredLoading: useDeferredLoading,
-        inputsAndOutputsListPath: inputsAndOutputsListPath,
-        useSyntheticPackage: useSyntheticPackage,
-        projectPathString: projectPathString,
-        areResourceAttributesRequired: areResourceAttributesRequired,
-        untranslatedMessagesFile: untranslatedMessagesFile,
-        usesNullableGetter: usesNullableGetter,
-      )
-        ..loadResources()
-        ..writeOutputFiles(_logger);
-    } on L10nException catch (e) {
-      throwToolExit(e.message);
-    }
+    // Run the localizations generator.
+    await generateLocalizations(
+      logger: _logger,
+      options: options,
+      projectDir: _fileSystem.currentDirectory,
+      fileSystem: _fileSystem,
+      artifacts: _artifacts,
+      processManager: _processManager,
+    );
 
     return FlutterCommandResult.success();
   }

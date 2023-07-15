@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -152,7 +152,7 @@ Future<void> main() async {
 
     // Border color is resolved correctly.
     final BoxDecoration decoration1 = renderDecoratedBox.decoration as BoxDecoration;
-    expect(decoration1.border!.top.color.value, 0x4C000000);
+    expect(decoration1.border!.top.color.value, 0x4D000000);
 
     // Switch to dark mode.
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
@@ -316,7 +316,7 @@ Future<void> main() async {
 
     // Verify height with bottom padding.
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
+      data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: 40.0)),
       child: CupertinoTabScaffold(
         tabBar: tabBar,
         tabBuilder: (BuildContext context, int index) {
@@ -325,6 +325,103 @@ Future<void> main() async {
       ),
     ));
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, 90.0);
+  });
+
+  testWidgets('Set custom height', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/51704
+    const double tabBarHeight = 56.0;
+    final CupertinoTabBar tabBar = CupertinoTabBar(
+      height: tabBarHeight,
+      items: <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+          label: 'Aka',
+        ),
+        BottomNavigationBarItem(
+          icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+          label: 'Shiro',
+        ),
+      ],
+    );
+
+    // Verify height with no bottom padding.
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabScaffold(
+        tabBar: tabBar,
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      ),
+    ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight);
+
+    // Verify height with bottom padding.
+    const double bottomPadding = 40.0;
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: bottomPadding)),
+      child: CupertinoTabScaffold(
+        tabBar: tabBar,
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      ),
+    ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
+  });
+
+  testWidgets('Ensure bar height will not change when toggle keyboard', (WidgetTester tester) async {
+    const double tabBarHeight = 56.0;
+    final CupertinoTabBar tabBar = CupertinoTabBar(
+      height: tabBarHeight,
+      items: <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+          label: 'Aka',
+        ),
+        BottomNavigationBarItem(
+          icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+          label: 'Shiro',
+        ),
+      ],
+    );
+
+    const double bottomPadding = 34.0;
+
+    // Test the height is correct when keyboard not showing.
+    // So viewInset should be 0.0.
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(
+        padding: EdgeInsets.only(bottom: bottomPadding),
+        viewPadding: EdgeInsets.only(bottom: bottomPadding),
+      ),
+      child: CupertinoTabScaffold(
+        tabBar: tabBar,
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      ),
+    ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
+
+    // Now show keyboard, and test the bar height will not change.
+    await pumpWidgetWithBoilerplate(tester,
+      MediaQuery(
+        data: const MediaQueryData(
+          viewPadding: EdgeInsets.only(bottom: bottomPadding),
+          viewInsets: EdgeInsets.only(bottom: 336.0),
+        ),
+        child:  CupertinoTabScaffold(
+          tabBar: tabBar,
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    // Expect the bar height should not change.
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
   });
 
   testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
@@ -429,7 +526,7 @@ Future<void> main() async {
     semantics.dispose();
   });
 
-  testWidgets('Title of items should be nullable', (WidgetTester tester) async {
+  testWidgets('Label of items should be nullable', (WidgetTester tester) async {
     final MemoryImage iconProvider = MemoryImage(Uint8List.fromList(kTransparentImage));
     final List<int> itemsTapped = <int>[];
 
@@ -524,5 +621,41 @@ Future<void> main() async {
     final BoxDecoration boxDecorationHiddenBorder =
         decoratedBoxHiddenBorder.decoration as BoxDecoration;
     expect(boxDecorationHiddenBorder.border, isNull);
+  });
+
+  testWidgets('Hovering over tab bar item updates cursor to clickable on Web', (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(
+      tester,
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Center(
+          child: CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.alarm),
+                label: 'Tab 1',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.app_badge),
+                label: 'Tab 2',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    final Offset tabItem = tester.getCenter(find.text('Tab 1'));
+    await gesture.moveTo(tabItem);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 }

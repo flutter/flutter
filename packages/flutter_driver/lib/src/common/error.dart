@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show stderr, FileSystemException;
+import 'dart:io' show FileSystemException, stderr;
 
 /// Standard error thrown by Flutter Driver API.
 class DriverError extends Error {
@@ -21,8 +21,9 @@ class DriverError extends Error {
 
   @override
   String toString() {
-    if (originalError == null)
+    if (originalError == null) {
       return 'DriverError: $message\n';
+    }
     return '''
 DriverError: $message
 Original error: $originalError

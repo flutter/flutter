@@ -21,7 +21,6 @@ const String kFirstRecompileTime  = 'FirstRecompileTime';
 const String kSecondStartupTime = 'SecondStartupTime';
 const String kSecondRestartTime = 'SecondRestartTime';
 
-
 abstract class WebDevice {
   static const String chrome = 'chrome';
   static const String webServer = 'web-server';
@@ -43,14 +42,13 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
       await inDirectory<void>(_editedFlutterGalleryDir, () async {
         {
-          final Process packagesGet = await startProcess(
-              path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['packages', 'get'],
+          await flutter(
+            'packages',
+            options: <String>['get'],
           );
-          await packagesGet.exitCode;
-          final Process process = await startProcess(
-              path.join(flutterDirectory.path, 'bin', 'flutter'),
-              flutterCommandArgs('run', options),
+          final Process process = await startFlutter(
+            'run',
+            options: options,
           );
 
           final Completer<void> stdoutDone = Completer<void>();
@@ -61,7 +59,8 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
-            // TODO(jonahwilliams): non-dwds builds do not know when the browser is loaded.
+            // non-dwds builds do not know when the browser is loaded so keep trying
+            // until this succeeds.
             if (line.contains('Ignoring terminal input')) {
               Future<void>.delayed(const Duration(seconds: 1)).then((void _) {
                 process.stdin.write(restarted ? 'q' : 'r');
@@ -128,9 +127,9 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
         {
 
           final Stopwatch sw = Stopwatch()..start();
-          final Process process = await startProcess(
-              path.join(flutterDirectory.path, 'bin', 'flutter'),
-              flutterCommandArgs('run', options),
+          final Process process = await startFlutter(
+            'run',
+            options: options,
           );
           final Completer<void> stdoutDone = Completer<void>();
           final Completer<void> stderrDone = Completer<void>();
@@ -139,7 +138,8 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
-            // TODO(jonahwilliams): non-dwds builds do not know when the browser is loaded.
+            // non-dwds builds do not know when the browser is loaded so keep trying
+            // until this succeeds.
             if (line.contains('Ignoring terminal input')) {
               Future<void>.delayed(const Duration(seconds: 1)).then((void _) {
                 process.stdin.write(restarted ? 'q' : 'r');

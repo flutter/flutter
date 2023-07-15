@@ -2,47 +2,77 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 
+import '../android/android_sdk.dart';
+import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../commands/build_linux.dart';
 import '../commands/build_macos.dart';
 import '../commands/build_windows.dart';
-import '../globals_null_migrated.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
 import 'build_appbundle.dart';
 import 'build_bundle.dart';
-import 'build_fuchsia.dart';
 import 'build_ios.dart';
 import 'build_ios_framework.dart';
+import 'build_macos_framework.dart';
 import 'build_web.dart';
-import 'build_winuwp.dart';
 
 class BuildCommand extends FlutterCommand {
-  BuildCommand({ bool verboseHelp = false }) {
-    addSubcommand(BuildAarCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildIOSCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildIOSFrameworkCommand(
-      buildSystem: globals.buildSystem,
+  BuildCommand({
+    required FileSystem fileSystem,
+    required BuildSystem buildSystem,
+    required OperatingSystemUtils osUtils,
+    required Logger logger,
+    required AndroidSdk? androidSdk,
+    bool verboseHelp = false,
+  }){
+    _addSubcommand(
+        BuildAarCommand(
+          fileSystem: fileSystem,
+          androidSdk: androidSdk,
+          logger: logger,
+          verboseHelp: verboseHelp,
+        )
+    );
+    _addSubcommand(BuildApkCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildIOSFrameworkCommand(
+      logger: logger,
+      buildSystem: buildSystem,
       verboseHelp: verboseHelp,
     ));
-    addSubcommand(BuildIOSArchiveCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildWebCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildMacosCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildLinuxCommand(
-      operatingSystemUtils: globals.os,
+    _addSubcommand(BuildMacOSFrameworkCommand(
+      logger: logger,
+      buildSystem: buildSystem,
+      verboseHelp: verboseHelp,
+    ));
+    _addSubcommand(BuildIOSArchiveCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildWebCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      verboseHelp: verboseHelp,
+    ));
+    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildLinuxCommand(
+      logger: logger,
+      operatingSystemUtils: osUtils,
       verboseHelp: verboseHelp
     ));
-    addSubcommand(BuildWindowsCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildWindowsUwpCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));
+    _addSubcommand(BuildWindowsCommand(logger: logger, verboseHelp: verboseHelp));
+  }
+
+  void _addSubcommand(BuildSubCommand command) {
+    if (command.supported) {
+      addSubcommand(command);
+    }
   }
 
   @override
@@ -52,16 +82,27 @@ class BuildCommand extends FlutterCommand {
   final String description = 'Build an executable app or install bundle.';
 
   @override
-  Future<FlutterCommandResult> runCommand() async => null;
+  String get category => FlutterCommandCategory.project;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand() {
+  BuildSubCommand({
+    required Logger logger,
+    required bool verboseHelp
+  }): _logger = logger {
     requiresPubspecYaml();
+    usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
+
+  final Logger _logger;
 
   @override
   bool get reportNullSafety => true;
+
+  bool get supported => true;
 
   /// Display a message describing the current null safety runtime mode
   /// that was selected.
@@ -69,18 +110,16 @@ abstract class BuildSubCommand extends FlutterCommand {
   /// This is similar to the run message in run_hot.dart
   @protected
   void displayNullSafetyMode(BuildInfo buildInfo) {
-    globals.printStatus('');
-    if (buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-      globals.printStatus('💪 Building with sound null safety 💪', emphasis: true);
-    } else {
-      globals.printStatus(
-        'Building without sound null safety',
+    if (buildInfo.nullSafetyMode != NullSafetyMode.sound) {
+      _logger.printStatus('');
+      _logger.printStatus(
+        'Building without sound null safety ⚠️',
         emphasis: true,
       );
-      globals.printStatus(
-        'For more information see https://dart.dev/null-safety/unsound-null-safety',
+      _logger.printStatus(
+        'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
       );
     }
-    globals.printStatus('');
+    _logger.printStatus('');
   }
 }

@@ -7,11 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
-class TestDrag extends Drag {
-}
-
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('Should recognize pan', (GestureTester tester) {
     final MultiTapGestureRecognizer tap = MultiTapGestureRecognizer(longTapDelay: kLongPressTimeout);
@@ -71,11 +68,10 @@ void main() {
   });
 
   testGesture('Can filter based on device kind', (GestureTester tester) {
-    final MultiTapGestureRecognizer tap =
-        MultiTapGestureRecognizer(
-          longTapDelay: kLongPressTimeout,
-          kind: PointerDeviceKind.touch,
-        );
+    final MultiTapGestureRecognizer tap = MultiTapGestureRecognizer(
+      longTapDelay: kLongPressTimeout,
+      supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+    );
 
     final List<String> log = <String>[];
 
@@ -86,7 +82,7 @@ void main() {
     tap.onTapCancel = (int pointer) { log.add('tap-cancel $pointer'); };
 
 
-    final TestPointer touchPointer5 = TestPointer(5, PointerDeviceKind.touch);
+    final TestPointer touchPointer5 = TestPointer(5);
     final PointerDownEvent down5 = touchPointer5.down(const Offset(10.0, 10.0));
     tap.addPointer(down5);
     tester.closeArena(5);
@@ -102,7 +98,7 @@ void main() {
     // Mouse down should be ignored by the recognizer.
     expect(log, isEmpty);
 
-    final TestPointer touchPointer7 = TestPointer(7, PointerDeviceKind.touch);
+    final TestPointer touchPointer7 = TestPointer(7);
     final PointerDownEvent down7 = touchPointer7.down(const Offset(15.0, 15.0));
     tap.addPointer(down7);
     tester.closeArena(7);
@@ -145,35 +141,5 @@ void main() {
     log.clear();
 
     tap.dispose();
-  });
-
-  testWidgets('DoubleTapGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        DoubleTapGestureRecognizer(
-            kind: PointerDeviceKind.touch,
-            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
-  });
-
-  testWidgets('MultiTapGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        MultiTapGestureRecognizer(
-            kind: PointerDeviceKind.touch,
-            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
   });
 }

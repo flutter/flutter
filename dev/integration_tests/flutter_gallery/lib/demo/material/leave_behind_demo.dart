@@ -33,7 +33,7 @@ class LeaveBehindItem implements Comparable<LeaveBehindItem> {
 }
 
 class LeaveBehindDemo extends StatefulWidget {
-  const LeaveBehindDemo({ Key? key }) : super(key: key);
+  const LeaveBehindDemo({ super.key });
 
   static const String routeName = '/material/leave-behind';
 
@@ -68,19 +68,14 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       switch (action) {
         case LeaveBehindDemoAction.reset:
           initListItems();
-          break;
         case LeaveBehindDemoAction.horizontalSwipe:
           _dismissDirection = DismissDirection.horizontal;
-          break;
         case LeaveBehindDemoAction.leftSwipe:
           _dismissDirection = DismissDirection.endToStart;
-          break;
         case LeaveBehindDemoAction.rightSwipe:
           _dismissDirection = DismissDirection.startToEnd;
-          break;
         case LeaveBehindDemoAction.confirmDismiss:
           _confirmDismiss = !_confirmDismiss;
-          break;
       }
     });
   }
@@ -131,6 +126,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     } else {
       body = Scrollbar(
         child: ListView(
+          primary: true,
           children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
             return _LeaveBehindListItem(
               confirmDismiss: _confirmDismiss,
@@ -188,13 +184,12 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
 
 class _LeaveBehindListItem extends StatelessWidget {
   const _LeaveBehindListItem({
-    Key? key,
     required this.item,
     required this.onArchive,
     required this.onDelete,
     required this.dismissDirection,
     required this.confirmDismiss,
-  }) : super(key: key);
+  });
 
   final LeaveBehindItem item;
   final DismissDirection dismissDirection;
@@ -222,17 +217,18 @@ class _LeaveBehindListItem extends StatelessWidget {
         key: ObjectKey(item),
         direction: dismissDirection,
         onDismissed: (DismissDirection direction) {
-          if (direction == DismissDirection.endToStart)
+          if (direction == DismissDirection.endToStart) {
             _handleArchive();
-          else
+          } else {
             _handleDelete();
+          }
         },
         confirmDismiss: !confirmDismiss ? null : (DismissDirection dismissDirection) async {
-          switch(dismissDirection) {
+          switch (dismissDirection) {
             case DismissDirection.endToStart:
-              return await _showConfirmationDialog(context, 'archive') == true;
+              return await _showConfirmationDialog(context, 'archive') ?? false;
             case DismissDirection.startToEnd:
-              return await _showConfirmationDialog(context, 'delete') == true;
+              return await _showConfirmationDialog(context, 'delete') ?? false;
             case DismissDirection.horizontal:
             case DismissDirection.vertical:
             case DismissDirection.up:
@@ -242,7 +238,7 @@ class _LeaveBehindListItem extends StatelessWidget {
           }
           return false;
         },
-        background: Container(
+        background: ColoredBox(
           color: theme.primaryColor,
           child: const Center(
             child: ListTile(
@@ -250,7 +246,7 @@ class _LeaveBehindListItem extends StatelessWidget {
             ),
           ),
         ),
-        secondaryBackground: Container(
+        secondaryBackground: ColoredBox(
           color: theme.primaryColor,
           child: const Center(
             child: ListTile(
@@ -276,7 +272,6 @@ class _LeaveBehindListItem extends StatelessWidget {
   Future<bool?> _showConfirmationDialog(BuildContext context, String action) {
     return showDialog<bool>(
       context: context,
-      barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Do you want to $action this item?'),

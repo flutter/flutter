@@ -2,11 +2,83 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
+  testWidgets('shadow effect is not doubled', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123064
+    debugDisableShadows = false;
+
+    const double elevation = 1;
+    const Color shadowColor = Colors.black;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
+        home: const Scaffold(
+          bottomNavigationBar: BottomAppBar(
+            elevation: elevation,
+            shadowColor: shadowColor,
+          ),
+        ),
+      ),
+    );
+
+    final Finder finder = find.byType(BottomAppBar);
+    expect(finder, paints..shadow(color: shadowColor, elevation: elevation));
+    expect(finder, paintsExactlyCountTimes(#drawShadow, 1));
+
+    debugDisableShadows = true;
+  });
+
+  testWidgets('only one layer with `color` is painted', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/122667
+    const Color bottomAppBarColor = Colors.black45;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
+        home: const Scaffold(
+          bottomNavigationBar: BottomAppBar(
+            color: bottomAppBarColor,
+
+            // Avoid getting a surface tint color, to keep the color check below simple
+            elevation: 0,
+          ),
+        ),
+      ),
+    );
+
+    // There should be just one color layer, and with the specified color.
+    final Finder finder = find.descendant(
+      of: find.byType(BottomAppBar),
+      matching: find.byWidgetPredicate((Widget widget) {
+        // A color layer is probably a [PhysicalShape] or [PhysicalModel],
+        // either used directly or backing a [Material] (one without
+        // [MaterialType.transparency]).
+        return widget is PhysicalShape || widget is PhysicalModel;
+      }),
+    );
+    final Widget widget = tester.widgetList(finder).single;
+    if (widget is PhysicalShape) {
+      expect(widget.color, bottomAppBarColor);
+    } else if (widget is PhysicalModel) {
+      expect(widget.color, bottomAppBarColor);
+    } else {
+      // Should be unreachable: compare with the finder.
+      assert(false);
+    }
+  });
+
   testWidgets('no overlap with floating action button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -48,19 +120,20 @@ void main() {
           child: RepaintBoundary(
             key: key,
             child: MaterialApp(
+              theme: ThemeData(useMaterial3: false),
               home: Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: () { },
                 ),
                 floatingActionButtonLocation: location,
-                bottomNavigationBar: BottomAppBar(
+                bottomNavigationBar: const BottomAppBar(
                   shape: AutomaticNotchedShape(
-                    BeveledRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                    ContinuousRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                    BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(50.0))),
+                    ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30.0))),
                   ),
                   notchMargin: 10.0,
                   color: Colors.green,
-                  child: const SizedBox(height: 100.0),
+                  child: SizedBox(height: 100.0),
                 ),
               ),
             ),
@@ -79,12 +152,76 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/51675,
-  // https://github.com/flutter/flutter/issues/44572
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
-  testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
+  testWidgets('Custom Padding', (WidgetTester tester) async {
+    const EdgeInsets customPadding = EdgeInsets.all(10);
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        home: Builder(
+          builder: (BuildContext context) {
+            return const Scaffold(
+              body: Align(
+                alignment: Alignment.bottomCenter,
+                child: BottomAppBar(
+                  padding: customPadding,
+                  child: ColoredBox(
+                    color: Colors.green,
+                    child: SizedBox(width: 300, height: 60),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final BottomAppBar bottomAppBar = tester.widget(find.byType(BottomAppBar));
+    expect(bottomAppBar.padding, customPadding);
+    final Rect babRect = tester.getRect(find.byType(BottomAppBar));
+    final Rect childRect = tester.getRect(find.byType(ColoredBox));
+    expect(childRect, const Rect.fromLTRB(250, 530, 550, 590));
+    expect(babRect, const Rect.fromLTRB(240, 520, 560, 600));
+  });
+
+  testWidgets('Custom Padding in Material 3', (WidgetTester tester) async {
+    const EdgeInsets customPadding = EdgeInsets.all(10);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: Builder(
+          builder: (BuildContext context) {
+            return const Scaffold(
+              body: Align(
+                alignment: Alignment.bottomCenter,
+                child: BottomAppBar(
+                  padding: customPadding,
+                  child: ColoredBox(
+                    color: Colors.green,
+                    child: SizedBox(width: 300, height: 60),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final BottomAppBar bottomAppBar = tester.widget(find.byType(BottomAppBar));
+    expect(bottomAppBar.padding, customPadding);
+    final Rect babRect = tester.getRect(find.byType(BottomAppBar));
+    final Rect childRect = tester.getRect(find.byType(ColoredBox));
+    expect(childRect, const Rect.fromLTRB(250, 530, 550, 590));
+    expect(babRect, const Rect.fromLTRB(240, 520, 560, 600));
+  });
+
+  testWidgets('color defaults to Theme.bottomAppBarColor in M2', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
@@ -110,6 +247,7 @@ void main() {
   testWidgets('color overrides theme color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
@@ -130,14 +268,66 @@ void main() {
 
     final PhysicalShape physicalShape =
       tester.widget(find.byType(PhysicalShape).at(0));
+    final Material material = tester.widget(find.byType(Material).at(1));
 
     expect(physicalShape.color, const Color(0xff0000ff));
+    expect(material.color, null); /* no value in Material 2. */
+  });
+
+
+  testWidgets('color overrides theme color with Material 3', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(useMaterial3: true).copyWith(
+          bottomAppBarColor: const Color(0xffffff00)),
+        home: Builder(
+          builder: (BuildContext context) {
+            return const Scaffold(
+                floatingActionButton: FloatingActionButton(
+                  onPressed: null,
+                ),
+                bottomNavigationBar: BottomAppBar(
+                  color: Color(0xff0000ff),
+                  surfaceTintColor: Colors.transparent,
+                ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final PhysicalShape physicalShape = tester.widget(
+        find.descendant(of: find.byType(BottomAppBar), matching: find.byType(PhysicalShape)));
+
+    expect(physicalShape.color, const Color(0xff0000ff));
+  });
+
+  testWidgets('Shadow color is transparent in Material 3', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true,
+        ),
+        home: const Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+          ),
+          bottomNavigationBar: BottomAppBar(
+            color: Color(0xff0000ff),
+          ),
+        ),
+      )
+    );
+
+    final PhysicalShape physicalShape = tester.widget(
+        find.descendant(of: find.byType(BottomAppBar), matching: find.byType(PhysicalShape)));
+
+    expect(physicalShape.shadowColor, Colors.transparent);
   });
 
   testWidgets('dark theme applies an elevation overlay color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.dark()),
+        theme: ThemeData.from(useMaterial3: false, colorScheme: const ColorScheme.dark()),
         home: Scaffold(
           bottomNavigationBar: BottomAppBar(
             color: const ColorScheme.dark().surface,
@@ -169,9 +359,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomNavigationBar: BottomAppBar(
-            shape: null,
-          ),
+          bottomNavigationBar: BottomAppBar(),
         ),
       ),
     );
@@ -191,9 +379,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomNavigationBar: ShapeListener(BottomAppBar(
-            shape: null,
-          )),
+          bottomNavigationBar: ShapeListener(BottomAppBar()),
           floatingActionButton: FloatingActionButton(
             onPressed: null,
             child: Icon(Icons.add),
@@ -325,8 +511,9 @@ void main() {
 
   testWidgets('observes safe area', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: MediaQuery(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const MediaQuery(
           data: MediaQueryData(
             padding: EdgeInsets.all(50.0),
           ),
@@ -351,12 +538,11 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomNavigationBar:
-              BottomAppBar(
-                shape: RectangularNotch(),
-                notchMargin: 0.0,
-                child: SizedBox(height: 100.0),
-              ),
+          bottomNavigationBar: BottomAppBar(
+            shape: RectangularNotch(),
+            notchMargin: 0.0,
+            child: SizedBox(height: 100.0),
+          ),
         ),
       ),
     );
@@ -384,8 +570,10 @@ void main() {
 
   testWidgets('BottomAppBar with shape when Scaffold.bottomNavigationBar == null', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80878
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
+        theme: theme,
         home: Scaffold(
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           floatingActionButton: FloatingActionButton(
@@ -413,7 +601,131 @@ void main() {
     );
 
     expect(tester.getRect(find.byType(FloatingActionButton)), const Rect.fromLTRB(372, 528, 428, 584));
-    expect(tester.getSize(find.byType(BottomAppBar)), const Size(800, 50));
+    expect(tester.getSize(find.byType(BottomAppBar)), theme.useMaterial3 ? const Size(800, 80) : const Size(800, 50));
+  });
+
+  testWidgets('notch with margin and top padding, home safe area', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/90024
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          padding: EdgeInsets.only(top: 128),
+        ),
+        child: MaterialApp(
+          useInheritedMediaQuery: true,
+          home: SafeArea(
+            child: Scaffold(
+              bottomNavigationBar: ShapeListener(
+                BottomAppBar(
+                  shape: RectangularNotch(),
+                  notchMargin: 6.0,
+                  child: SizedBox(height: 100.0),
+                ),
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: null,
+                child: Icon(Icons.add),
+              ),
+              floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
+    final RenderBox babBox = tester.renderObject(find.byType(BottomAppBar));
+    final Size babSize = babBox.size;
+    final RenderBox fabBox = tester.renderObject(find.byType(FloatingActionButton));
+    final Size fabSize = fabBox.size;
+
+    final double fabLeft = (babSize.width / 2.0) - (fabSize.width / 2.0) - 6.0;
+    final double fabRight = fabLeft + fabSize.width + 6.0;
+    final double fabBottom = 6.0 + fabSize.height / 2.0;
+
+    final Path expectedPath = Path()
+      ..moveTo(0.0, 0.0)
+      ..lineTo(fabLeft, 0.0)
+      ..lineTo(fabLeft, fabBottom)
+      ..lineTo(fabRight, fabBottom)
+      ..lineTo(fabRight, 0.0)
+      ..lineTo(babSize.width, 0.0)
+      ..lineTo(babSize.width, babSize.height)
+      ..lineTo(0.0, babSize.height)
+      ..close();
+
+    final Path actualPath = shapeListenerState.cache.value;
+
+    expect(
+      actualPath,
+      coversSameAreaAs(
+        expectedPath,
+        areaToCompare: (Offset.zero & babSize).inflate(5.0),
+      ),
+    );
+  });
+
+  testWidgets('BottomAppBar does not apply custom clipper without FAB', (WidgetTester tester) async {
+    Widget buildWidget({Widget? fab}) {
+      return MaterialApp(
+        home: Scaffold(
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: fab,
+          bottomNavigationBar: BottomAppBar(
+            color: Colors.green,
+            shape: const CircularNotchedRectangle(),
+            child: Container(height: 50),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildWidget(fab: FloatingActionButton(onPressed: () { })));
+
+    PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
+    expect(physicalShape.clipper.toString(), '_BottomAppBarClipper');
+
+    await tester.pumpWidget(buildWidget());
+
+    physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
+    expect(physicalShape.clipper.toString(), 'ShapeBorderClipper');
+  });
+
+  testWidgets('BottomAppBar adds bottom padding to height', (WidgetTester tester) async {
+    const double bottomPadding = 35.0;
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: bottomPadding),
+          viewPadding: EdgeInsets.only(bottom: bottomPadding),
+        ),
+        child: MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Scaffold(
+            floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
+            floatingActionButton: FloatingActionButton(onPressed: () { }),
+            bottomNavigationBar: BottomAppBar(
+              child: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    final Rect bottomAppBar = tester.getRect(find.byType(BottomAppBar));
+    final Rect iconButton = tester.getRect(find.widgetWithIcon(IconButton, Icons.search));
+    final Rect fab = tester.getRect(find.byType(FloatingActionButton));
+
+    // The height of the bottom app bar should be its height(default is 80.0) + bottom safe area height.
+    expect(bottomAppBar.height, 80.0 + bottomPadding);
+
+    // The vertical position of the icon button and fab should be center of the area excluding the bottom padding.
+    final double barCenter = bottomAppBar.topLeft.dy + (bottomAppBar.height - bottomPadding) / 2;
+    expect(iconButton.center.dy, barCenter);
+    expect(fab.center.dy, barCenter);
   });
 }
 
@@ -454,7 +766,7 @@ class ClipCachePainter extends CustomPainter {
 }
 
 class ShapeListener extends StatefulWidget {
-  const ShapeListener(this.child, { Key? key }) : super(key: key);
+  const ShapeListener(this.child, { super.key });
 
   final Widget child;
 
@@ -487,8 +799,9 @@ class RectangularNotch extends NotchedShape {
 
   @override
   Path getOuterPath(Rect host, Rect? guest) {
-    if (guest == null)
+    if (guest == null) {
       return Path()..addRect(host);
+    }
     return Path()
       ..moveTo(host.left, host.top)
       ..lineTo(guest.left, host.top)

@@ -47,6 +47,15 @@ void main() {
       },
     );
   });
+  test('FocusSemanticEvent.toMap', () {
+    expect(
+      const FocusSemanticEvent().toMap(),
+      <String, dynamic>{
+        'type': 'focus',
+        'data': <String, dynamic>{},
+      },
+    );
+  });
 }
 
 class TestSemanticsEvent extends SemanticsEvent {
@@ -58,10 +67,12 @@ class TestSemanticsEvent extends SemanticsEvent {
   @override
   Map<String, dynamic> getDataMap() {
     final Map<String, dynamic> result = <String, dynamic>{};
-    if (text != null)
+    if (text != null) {
       result['text'] = text;
-    if (number != null)
+    }
+    if (number != null) {
       result['number'] = number;
+    }
     return result;
   }
 }

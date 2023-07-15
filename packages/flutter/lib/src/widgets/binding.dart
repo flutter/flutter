@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback, PlatformDispatcher;
+import 'dart:ui' show AccessibilityFeatures, AppExitResponse, AppLifecycleState, FrameTiming, Locale, PlatformDispatcher, TimingsCallback;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -16,7 +16,10 @@ import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
+import 'platform_menu_bar.dart';
 import 'router.dart';
+import 'service_extensions.dart';
+import 'view.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
@@ -26,60 +29,34 @@ typedef PreHotRestartCallback = Object? Function();
 
 /// Interface for classes that register with the Widgets layer binding.
 ///
-/// When used as a mixin, provides no-op method implementations.
+/// This can be used by any class, not just widgets. It provides an interface
+/// which is used by [WidgetsBinding.addObserver] and
+/// [WidgetsBinding.removeObserver] to notify objects of changes in the
+/// environment, such as changes to the device metrics or accessibility
+/// settings. It is used to implement features such as [MediaQuery].
 ///
-/// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
+/// This class can be extended directly, or mixed in, to get default behaviors
+/// for all of the handlers. Alternatively it can can be used with the
+/// `implements` keyword, in which case all the handlers must be implemented
+/// (and the analyzer will list those that have been omitted).
 ///
-/// This class can be extended directly, to get default behaviors for all of the
-/// handlers, or can used with the `implements` keyword, in which case all the
-/// handlers must be implemented (and the analyzer will list those that have
-/// been omitted).
+/// To start receiving notifications, call `WidgetsBinding.instance.addObserver`
+/// with a reference to the object implementing the [WidgetsBindingObserver]
+/// interface. To avoid memory leaks, call
+/// `WidgetsBinding.instance.removeObserver` to unregister the object when it
+/// reaches the end of its lifecycle.
 ///
-/// {@tool snippet}
-///
-/// This [StatefulWidget] implements the parts of the [State] and
+/// {@tool dartpad}
+/// This sample shows how to implement parts of the [State] and
 /// [WidgetsBindingObserver] protocols necessary to react to application
 /// lifecycle messages. See [didChangeAppLifecycleState].
 ///
-/// ```dart
-/// class AppLifecycleReactor extends StatefulWidget {
-///   const AppLifecycleReactor({ Key? key }) : super(key: key);
-///
-///   @override
-///   State<AppLifecycleReactor> createState() => _AppLifecycleReactorState();
-/// }
-///
-/// class _AppLifecycleReactorState extends State<AppLifecycleReactor> with WidgetsBindingObserver {
-///   @override
-///   void initState() {
-///     super.initState();
-///     WidgetsBinding.instance!.addObserver(this);
-///   }
-///
-///   @override
-///   void dispose() {
-///     WidgetsBinding.instance!.removeObserver(this);
-///     super.dispose();
-///   }
-///
-///   late AppLifecycleState _notification;
-///
-///   @override
-///   void didChangeAppLifecycleState(AppLifecycleState state) {
-///     setState(() { _notification = state; });
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Text('Last notification: $_notification');
-///   }
-/// }
-/// ```
-/// {@end-tool}
-///
 /// To respond to other notifications, replace the [didChangeAppLifecycleState]
-/// method above with other methods from this class.
-abstract class WidgetsBindingObserver {
+/// method in this example with other methods from this class.
+///
+/// ** See code in examples/api/lib/widgets/binding/widget_binding_observer.0.dart **
+/// {@end-tool}
+abstract mixin class WidgetsBindingObserver {
   /// Called when the system tells the app to pop the current route.
   /// For example, on Android, this is called when the user presses
   /// the back button.
@@ -106,6 +83,10 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes the `pushRoute` notification from
   /// [SystemChannels.navigation].
+  @Deprecated(
+    'Use didPushRouteInformation instead. '
+    'This feature was deprecated after v3.8.0-14.0.pre.'
+  )
   Future<bool> didPushRoute(String route) => Future<bool>.value(false);
 
   /// Called when the host tells the application to push a new
@@ -119,9 +100,20 @@ abstract class WidgetsBindingObserver {
   /// [SystemChannels.navigation].
   ///
   /// The default implementation is to call the [didPushRoute] directly with the
-  /// [RouteInformation.location].
+  /// string constructed from [RouteInformation.uri]'s path and query parameters.
+  // TODO(chunhtai): remove the default implementation once `didPushRoute` is
+  // removed.
   Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
-    return didPushRoute(routeInformation.location!);
+    final Uri uri = routeInformation.uri;
+    return didPushRoute(
+      Uri.decodeComponent(
+        Uri(
+          path: uri.path.isEmpty ? '/' : uri.path,
+          queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+          fragment: uri.fragment.isEmpty ? null : uri.fragment,
+        ).toString(),
+      ),
+    );
   }
 
   /// Called when the application's dimensions change. For example,
@@ -138,7 +130,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// ```dart
   /// class MetricsReactor extends StatefulWidget {
-  ///   const MetricsReactor({ Key? key }) : super(key: key);
+  ///   const MetricsReactor({ super.key });
   ///
   ///   @override
   ///   State<MetricsReactor> createState() => _MetricsReactorState();
@@ -150,19 +142,21 @@ abstract class WidgetsBindingObserver {
   ///   @override
   ///   void initState() {
   ///     super.initState();
-  ///     _lastSize = WidgetsBinding.instance!.window.physicalSize;
-  ///     WidgetsBinding.instance!.addObserver(this);
+  ///     // [View.of] exposes the view from `WidgetsBinding.instance.platformDispatcher.views`
+  ///     // into which this widget is drawn.
+  ///     _lastSize = View.of(context).physicalSize;
+  ///     WidgetsBinding.instance.addObserver(this);
   ///   }
   ///
   ///   @override
   ///   void dispose() {
-  ///     WidgetsBinding.instance!.removeObserver(this);
+  ///     WidgetsBinding.instance.removeObserver(this);
   ///     super.dispose();
   ///   }
   ///
   ///   @override
   ///   void didChangeMetrics() {
-  ///     setState(() { _lastSize = WidgetsBinding.instance!.window.physicalSize; });
+  ///     setState(() { _lastSize = View.of(context).physicalSize; });
   ///   }
   ///
   ///   @override
@@ -196,7 +190,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
-  ///   const TextScaleFactorReactor({ Key? key }) : super(key: key);
+  ///   const TextScaleFactorReactor({ super.key });
   ///
   ///   @override
   ///   State<TextScaleFactorReactor> createState() => _TextScaleFactorReactorState();
@@ -206,12 +200,12 @@ abstract class WidgetsBindingObserver {
   ///   @override
   ///   void initState() {
   ///     super.initState();
-  ///     WidgetsBinding.instance!.addObserver(this);
+  ///     WidgetsBinding.instance.addObserver(this);
   ///   }
   ///
   ///   @override
   ///   void dispose() {
-  ///     WidgetsBinding.instance!.removeObserver(this);
+  ///     WidgetsBinding.instance.removeObserver(this);
   ///     super.dispose();
   ///   }
   ///
@@ -219,7 +213,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   void didChangeTextScaleFactor() {
-  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance!.window.textScaleFactor; });
+  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance.platformDispatcher.textScaleFactor; });
   ///   }
   ///
   ///   @override
@@ -259,6 +253,21 @@ abstract class WidgetsBindingObserver {
   /// This method exposes notifications from [SystemChannels.lifecycle].
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
+  /// Called when a request is received from the system to exit the application.
+  ///
+  /// If any observer responds with [AppExitResponse.cancel], it will cancel the
+  /// exit. All observers will be asked before exiting.
+  ///
+  /// {@macro flutter.services.binding.ServicesBinding.requestAppExit}
+  ///
+  /// See also:
+  ///
+  /// * [ServicesBinding.exitApplication] for a function to call that will request
+  ///   that the application exits.
+  Future<AppExitResponse> didRequestAppExit() async {
+    return AppExitResponse.exit;
+  }
+
   /// Called when the system is running low on memory.
   ///
   /// This method exposes the `memoryPressure` notification from
@@ -290,14 +299,22 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     // properly setup the [defaultBinaryMessenger] instance.
     _buildOwner = BuildOwner();
     buildOwner!.onBuildScheduled = _handleBuildScheduled;
-    window.onLocaleChanged = handleLocaleChanged;
-    window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
+    platformDispatcher.onLocaleChanged = handleLocaleChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     assert(() {
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
       return true;
     }());
+    platformMenuDelegate = DefaultPlatformMenuDelegate();
   }
+
+  /// The current [WidgetsBinding], if one has been created.
+  ///
+  /// Provides access to the features exposed by this mixin. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
+  static WidgetsBinding get instance => BindingBase.checkInstance(_instance);
+  static WidgetsBinding? _instance;
 
   void _debugAddStackFilters() {
     const PartialStackFrame elementInflateWidget = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'Element', method: 'inflateWidget');
@@ -380,21 +397,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     ));
   }
 
-  /// The current [WidgetsBinding], if one has been created.
-  ///
-  /// If you need the binding to be constructed before calling [runApp],
-  /// you can ensure a Widget binding has been constructed by calling the
-  /// `WidgetsFlutterBinding.ensureInitialized()` function.
-  static WidgetsBinding? get instance => _instance;
-  static WidgetsBinding? _instance;
-
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
 
     if (!kReleaseMode) {
       registerServiceExtension(
-        name: 'debugDumpApp',
+        name: WidgetsServiceExtensions.debugDumpApp.name,
         callback: (Map<String, String> parameters) async {
           final String data = _debugDumpAppString();
           return <String, Object>{
@@ -403,14 +412,25 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
+      registerServiceExtension(
+        name: WidgetsServiceExtensions.debugDumpFocusTree.name,
+        callback: (Map<String, String> parameters) async {
+          final String data = focusManager.toStringDeep();
+          return <String, Object>{
+            'data': data,
+          };
+        },
+      );
+
       if (!kIsWeb) {
         registerBoolServiceExtension(
-          name: 'showPerformanceOverlay',
+          name: WidgetsServiceExtensions.showPerformanceOverlay.name,
           getter: () =>
           Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
           setter: (bool value) {
-            if (WidgetsApp.showPerformanceOverlayOverride == value)
+            if (WidgetsApp.showPerformanceOverlayOverride == value) {
               return Future<void>.value();
+            }
             WidgetsApp.showPerformanceOverlayOverride = value;
             return _forceRebuild();
           },
@@ -418,7 +438,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       }
 
       registerServiceExtension(
-        name: 'didSendFirstFrameEvent',
+        name: WidgetsServiceExtensions.didSendFirstFrameEvent.name,
         callback: (_) async {
           return <String, dynamic>{
             // This is defined to return a STRING, not a boolean.
@@ -429,10 +449,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
-      // This returns 'true' when the first frame is rasterized, and the trace
-      // event 'Rasterized first useful frame' is sent out.
       registerServiceExtension(
-        name: 'didSendFirstFrameRasterizedEvent',
+        name: WidgetsServiceExtensions.didSendFirstFrameRasterizedEvent.name,
         callback: (_) async {
           return <String, dynamic>{
             // This is defined to return a STRING, not a boolean.
@@ -444,7 +462,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       );
 
       registerServiceExtension(
-        name: 'fastReassemble',
+        name: WidgetsServiceExtensions.fastReassemble.name,
         callback: (Map<String, Object> params) async {
           // This mirrors the implementation of the 'reassemble' callback registration
           // in lib/src/foundation/binding.dart, but with the extra binding config used
@@ -462,38 +480,32 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
-        name: 'profileWidgetBuilds',
+        name: WidgetsServiceExtensions.profileWidgetBuilds.name,
         getter: () async => debugProfileBuildsEnabled,
         setter: (bool value) async {
-          if (debugProfileBuildsEnabled != value)
-            debugProfileBuildsEnabled = value;
-        },
+          debugProfileBuildsEnabled = value;
+        }
+      );
+      registerBoolServiceExtension(
+        name: WidgetsServiceExtensions.profileUserWidgetBuilds.name,
+        getter: () async => debugProfileBuildsEnabledUserWidgets,
+        setter: (bool value) async {
+          debugProfileBuildsEnabledUserWidgets = value;
+        }
       );
     }
 
     assert(() {
       registerBoolServiceExtension(
-        name: 'debugAllowBanner',
+        name: WidgetsServiceExtensions.debugAllowBanner.name,
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
         setter: (bool value) {
-          if (WidgetsApp.debugAllowBannerOverride == value)
+          if (WidgetsApp.debugAllowBannerOverride == value) {
             return Future<void>.value();
+          }
           WidgetsApp.debugAllowBannerOverride = value;
           return _forceRebuild();
         },
-      );
-
-      // This service extension is deprecated and will be removed by 12/1/2018.
-      // Use ext.flutter.inspector.show instead.
-      registerBoolServiceExtension(
-          name: 'debugWidgetInspector',
-          getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
-          setter: (bool value) {
-            if (WidgetsApp.debugShowWidgetInspectorOverride == value)
-              return Future<void>.value();
-            WidgetsApp.debugShowWidgetInspectorOverride = value;
-            return _forceRebuild();
-          },
       );
 
       registerServiceExtension(name: 'invokePreHotRestartCallbacks', callback: (Map<String, Object> params) async {
@@ -528,8 +540,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   Future<void> _forceRebuild() {
-    if (renderViewElement != null) {
-      buildOwner!.reassemble(renderViewElement!, null);
+    if (rootElement != null) {
+      buildOwner!.reassemble(rootElement!, null);
       return endOfFrame;
     }
     return Future<void>.value();
@@ -591,6 +603,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// See [FocusManager] for more details.
   FocusManager get focusManager => _buildOwner!.focusManager;
 
+  /// A delegate that communicates with a platform plugin for serializing and
+  /// managing platform-rendered menu bars created by [PlatformMenuBar].
+  ///
+  /// This is set by default to a [DefaultPlatformMenuDelegate] instance in
+  /// [initInstances].
+  late PlatformMenuDelegate platformMenuDelegate;
+
   final List<WidgetsBindingObserver> _observers = <WidgetsBindingObserver>[];
 
   /// Registers the given object as a binding observer. Binding
@@ -623,31 +642,49 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
 
   @override
+  Future<AppExitResponse> handleRequestAppExit() async {
+    bool didCancel = false;
+    for (final WidgetsBindingObserver observer in _observers) {
+      if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
+        didCancel = true;
+        // Don't early return. For the case where someone is just using the
+        // observer to know when exit happens, we want to call all the
+        // observers, even if we already know we're going to cancel.
+      }
+    }
+    return didCancel ? AppExitResponse.cancel : AppExitResponse.exit;
+  }
+
+  @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeMetrics();
+    }
   }
 
   @override
   void handleTextScaleFactorChanged() {
     super.handleTextScaleFactorChanged();
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeTextScaleFactor();
+    }
   }
 
   @override
   void handlePlatformBrightnessChanged() {
     super.handlePlatformBrightnessChanged();
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangePlatformBrightness();
+    }
   }
 
   @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeAccessibilityFeatures();
+    }
   }
 
   /// Called when the system locale changes.
@@ -658,7 +695,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void handleLocaleChanged() {
-    dispatchLocalesChanged(window.locales);
+    dispatchLocalesChanged(platformDispatcher.locales);
   }
 
   /// Notify all the observers that the locale has changed (using
@@ -670,8 +707,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void dispatchLocalesChanged(List<Locale>? locales) {
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeLocales(locales);
+    }
   }
 
   /// Notify all the observers that the active set of [AccessibilityFeatures]
@@ -683,8 +721,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void dispatchAccessibilityFeaturesChanged() {
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeAccessibilityFeatures();
+    }
   }
 
   /// Called when the system pops the current route.
@@ -703,9 +742,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [SystemChannels.navigation].
   @protected
   Future<void> handlePopRoute() async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
-      if (await observer.didPopRoute())
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (await observer.didPopRoute()) {
         return;
+      }
     }
     SystemNavigator.pop();
   }
@@ -723,23 +763,23 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   Future<void> handlePushRoute(String route) async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
-      if (await observer.didPushRoute(route))
+    final RouteInformation routeInformation = RouteInformation(uri: Uri.parse(route));
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (await observer.didPushRouteInformation(routeInformation)) {
         return;
+      }
     }
   }
 
   Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
-      if (
-        await observer.didPushRouteInformation(
-          RouteInformation(
-            location: routeArguments['location'] as String,
-            state: routeArguments['state'] as Object?,
-          ),
-        )
-      )
-      return;
+    final RouteInformation routeInformation = RouteInformation(
+      uri: Uri.parse(routeArguments['location'] as String),
+      state: routeArguments['state'] as Object?,
+    );
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (await observer.didPushRouteInformation(routeInformation)) {
+        return;
+      }
     }
   }
 
@@ -758,15 +798,17 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     super.handleAppLifecycleStateChanged(state);
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeAppLifecycleState(state);
+    }
   }
 
   @override
   void handleMemoryPressure() {
     super.handleMemoryPressure();
-    for (final WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers) {
       observer.didHaveMemoryPressure();
+    }
   }
 
   bool _needToReportFirstFrame = true;
@@ -935,19 +977,20 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }
-        SchedulerBinding.instance!.removeTimingsCallback(firstFrameCallback!);
+        SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback!);
         firstFrameCallback = null;
         _firstFrameCompleter.complete();
       };
       // Callback is only invoked when FlutterView.render is called. When
       // sendFramesToEngine is set to false during the frame, it will not be
       // called and we need to remove the callback (see below).
-      SchedulerBinding.instance!.addTimingsCallback(firstFrameCallback!);
+      SchedulerBinding.instance.addTimingsCallback(firstFrameCallback!);
     }
 
     try {
-      if (renderViewElement != null)
-        buildOwner!.buildScope(renderViewElement!);
+      if (rootElement != null) {
+        buildOwner!.buildScope(rootElement!);
+      }
       super.drawFrame();
       buildOwner!.finalizeTree();
     } finally {
@@ -966,21 +1009,43 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       // This frame is deferred and not the first frame sent to the engine that
       // should be reported.
       _needToReportFirstFrame = true;
-      SchedulerBinding.instance!.removeTimingsCallback(firstFrameCallback!);
+      SchedulerBinding.instance.removeTimingsCallback(firstFrameCallback!);
     }
   }
 
-  /// The [Element] that is at the root of the hierarchy (and which wraps the
-  /// [RenderView] object at the root of the rendering hierarchy).
+  /// The [Element] that is at the root of the element tree hierarchy.
   ///
   /// This is initialized the first time [runApp] is called.
-  Element? get renderViewElement => _renderViewElement;
-  Element? _renderViewElement;
+  Element? get rootElement => _rootElement;
+  Element? _rootElement;
+
+  /// Deprecated. Will be removed in a future version of Flutter.
+  ///
+  /// Use [rootElement] instead.
+  @Deprecated(
+    'Use rootElement instead. '
+    'This feature was deprecated after v3.9.0-16.0.pre.'
+  )
+  Element? get renderViewElement => rootElement;
 
   bool _readyToProduceFrames = false;
 
   @override
   bool get framesEnabled => super.framesEnabled && _readyToProduceFrames;
+
+  /// Used by [runApp] to wrap the provided `rootWidget` in the default [View].
+  ///
+  /// The [View] determines into what [FlutterView] the app is rendered into.
+  /// This is currently [PlatformDispatcher.implicitView] from [platformDispatcher].
+  ///
+  /// The `rootWidget` widget provided to this method must not already be
+  /// wrapped in a [View].
+  Widget wrapWithDefaultView(Widget rootWidget) {
+    return View(
+      view: platformDispatcher.implicitView!,
+      child: rootWidget,
+    );
+  }
 
   /// Schedules a [Timer] for attaching the root widget.
   ///
@@ -993,7 +1058,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     });
   }
 
-  /// Takes a widget and attaches it to the [renderViewElement], creating it if
+  /// Takes a widget and attaches it to the [rootElement], creating it if
   /// necessary.
   ///
   /// This is called by [runApp] to configure the widget tree.
@@ -1003,23 +1068,23 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which inflates a
   ///    widget and attaches it to the render tree.
   void attachRootWidget(Widget rootWidget) {
-    final bool isBootstrapFrame = renderViewElement == null;
+    final bool isBootstrapFrame = rootElement == null;
     _readyToProduceFrames = true;
-    _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
+    _rootElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
       child: rootWidget,
-    ).attachToRenderTree(buildOwner!, renderViewElement as RenderObjectToWidgetElement<RenderBox>?);
+    ).attachToRenderTree(buildOwner!, rootElement as RenderObjectToWidgetElement<RenderBox>?);
     if (isBootstrapFrame) {
-      SchedulerBinding.instance!.ensureVisualUpdate();
+      SchedulerBinding.instance.ensureVisualUpdate();
     }
   }
 
-  /// Whether the [renderViewElement] has been initialized.
+  /// Whether the [rootElement] has been initialized.
   ///
   /// This will be false until [runApp] is called (or [WidgetTester.pumpWidget]
   /// is called in the context of a [TestWidgetsFlutterBinding]).
-  bool get isRootWidgetAttached => _renderViewElement != null;
+  bool get isRootWidgetAttached => _rootElement != null;
 
   @override
   Future<void> performReassemble() {
@@ -1028,8 +1093,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       return true;
     }());
 
-    if (renderViewElement != null) {
-      buildOwner!.reassemble(renderViewElement!, BindingBase.debugReassembleConfig);
+    if (rootElement != null) {
+      buildOwner!.reassemble(rootElement!, BindingBase.debugReassembleConfig);
     }
     return super.performReassemble();
   }
@@ -1072,7 +1137,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// method again with the matched locale of the first call omitted from
   /// `supportedLocales`.
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
-    return window.computePlatformResolvedLocale(supportedLocales);
+    return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
   }
 }
 
@@ -1100,18 +1165,19 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
 ///    ensure the widget, element, and render trees are all built.
 void runApp(Widget app) {
-  WidgetsFlutterBinding.ensureInitialized()
-    ..scheduleAttachRootWidget(app)
+  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  assert(binding.debugCheckZone('runApp'));
+  binding
+    ..scheduleAttachRootWidget(binding.wrapWithDefaultView(app))
     ..scheduleWarmUpFrame();
 }
 
 String _debugDumpAppString() {
-  assert(WidgetsBinding.instance != null);
-  const String mode = kDebugMode ? 'DEBUG MODE' : 'PROFILE MODE';
+  const String mode = kDebugMode ? 'DEBUG MODE' : kReleaseMode ? 'RELEASE MODE' : 'PROFILE MODE';
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('${WidgetsBinding.instance.runtimeType} - $mode');
-  if (WidgetsBinding.instance!.renderViewElement != null) {
-    buffer.writeln(WidgetsBinding.instance!.renderViewElement!.toStringDeep());
+  if (WidgetsBinding.instance.rootElement != null) {
+    buffer.writeln(WidgetsBinding.instance.rootElement!.toStringDeep());
   } else {
     buffer.writeln('<no tree currently mounted>');
   }
@@ -1120,8 +1186,7 @@ String _debugDumpAppString() {
 
 /// Print a string representation of the currently running app.
 void debugDumpApp() {
-  final String value = _debugDumpAppString();
-  debugPrint(value);
+  debugPrint(_debugDumpAppString());
 }
 
 /// A bridge from a [RenderObject] to an [Element] tree.
@@ -1190,7 +1255,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   String toStringShort() => debugShortDescription ?? super.toStringShort();
 }
 
-/// A [RootRenderObjectElement] that is hosted by a [RenderObject].
+/// The root of the element tree that is hosted by a [RenderObject].
 ///
 /// This element class is the instantiation of a [RenderObjectToWidgetAdapter]
 /// widget. It can be used only as the root of an [Element] tree (it cannot be
@@ -1200,16 +1265,13 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
 /// whose container is the [RenderView] that connects to the Flutter engine. In
 /// this usage, it is normally instantiated by the bootstrapping logic in the
 /// [WidgetsFlutterBinding] singleton created by [runApp].
-class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObjectElement {
+class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectElement with RootElementMixin {
   /// Creates an element that is hosted by a [RenderObject].
   ///
   /// The [RenderObject] created by this element is not automatically set as a
   /// child of the hosting [RenderObject]. To actually attach this element to
   /// the render tree, call [RenderObjectToWidgetAdapter.attachToRenderTree].
-  RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
-
-  @override
-  RenderObjectToWidgetAdapter<T> get widget => super.widget as RenderObjectToWidgetAdapter<T>;
+  RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> super.widget);
 
   Element? _child;
 
@@ -1217,8 +1279,9 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (_child != null)
+    if (_child != null) {
       visitor(_child!);
+    }
   }
 
   @override
@@ -1263,7 +1326,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   @pragma('vm:notify-debugger-on-exception')
   void _rebuild() {
     try {
-      _child = updateChild(_child, widget.child, _rootChildSlot);
+      _child = updateChild(_child, (widget as RenderObjectToWidgetAdapter<T>).child, _rootChildSlot);
     } catch (exception, stack) {
       final FlutterErrorDetails details = FlutterErrorDetails(
         exception: exception,
@@ -1302,22 +1365,35 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 /// A concrete binding for applications based on the Widgets framework.
 ///
 /// This is the glue that binds the framework to the Flutter engine.
+///
+/// When using the widgets framework, this binding, or one that
+/// implements the same interfaces, must be used. The following
+/// mixins are used to implement this binding:
+///
+/// * [GestureBinding], which implements the basics of hit testing.
+/// * [SchedulerBinding], which introduces the concepts of frames.
+/// * [ServicesBinding], which provides access to the plugin subsystem.
+/// * [PaintingBinding], which enables decoding images.
+/// * [SemanticsBinding], which supports accessibility.
+/// * [RendererBinding], which handles the render tree.
+/// * [WidgetsBinding], which handles the widget tree.
 class WidgetsFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding, ServicesBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
-
-  /// Returns an instance of the [WidgetsBinding], creating and
-  /// initializing it if necessary. If one is created, it will be a
-  /// [WidgetsFlutterBinding]. If one was previously initialized, then
-  /// it will at least implement [WidgetsBinding].
+  /// Returns an instance of the binding that implements
+  /// [WidgetsBinding]. If no binding has yet been initialized, the
+  /// [WidgetsFlutterBinding] class is used to create and initialize
+  /// one.
   ///
   /// You only need to call this method if you need the binding to be
   /// initialized before calling [runApp].
   ///
   /// In the `flutter_test` framework, [testWidgets] initializes the
   /// binding instance to a [TestWidgetsFlutterBinding], not a
-  /// [WidgetsFlutterBinding].
+  /// [WidgetsFlutterBinding]. See
+  /// [TestWidgetsFlutterBinding.ensureInitialized].
   static WidgetsBinding ensureInitialized() {
-    if (WidgetsBinding.instance == null)
+    if (WidgetsBinding._instance == null) {
       WidgetsFlutterBinding();
-    return WidgetsBinding.instance!;
+    }
+    return WidgetsBinding.instance;
   }
 }

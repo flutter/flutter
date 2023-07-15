@@ -71,7 +71,7 @@ Future<void> restoreAndVerify(WidgetTester tester) async {
 }
 
 class TestWidget extends StatefulWidget {
-  const TestWidget({Key? key, this.useExternal = false}) : super(key: key);
+  const TestWidget({super.key, this.useExternal = false});
 
   final bool useExternal;
 
@@ -100,7 +100,6 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   Widget build(BuildContext context) {
     return Material(
       child: Align(
-        alignment: Alignment.center,
         child: SizedBox(
           width: 50,
           child: CupertinoTextField(

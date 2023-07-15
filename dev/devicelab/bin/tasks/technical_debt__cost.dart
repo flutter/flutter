@@ -36,35 +36,46 @@ final RegExp dartVersionPattern = RegExp(r'// *@dart *= *(\d+).(\d+)');
 final Version firstNullSafeDartVersion = Version(2, 12, 0);
 
 Future<double> findCostsForFile(File file) async {
-  if (path.extension(file.path) == '.py')
+  if (path.extension(file.path) == '.py') {
     return pythonCost;
+  }
   if (path.extension(file.path) != '.dart' &&
       path.extension(file.path) != '.yaml' &&
-      path.extension(file.path) != '.sh')
+      path.extension(file.path) != '.sh') {
     return 0.0;
+  }
   final bool isTest = file.path.endsWith('_test.dart');
   final bool isDart = file.path.endsWith('.dart');
   double total = 0.0;
   for (final String line in await file.readAsLines()) {
-    if (line.contains(todoPattern))
+    if (line.contains(todoPattern)) {
       total += todoCost;
-    if (line.contains(ignorePattern))
+    }
+    if (line.contains(ignorePattern)) {
       total += ignoreCost;
-    if (line.contains(ignoreForFilePattern))
+    }
+    if (line.contains(ignoreForFilePattern)) {
       total += ignoreForFileCost;
-    if (!isTest && line.contains(asDynamicPattern))
+    }
+    if (!isTest && line.contains(asDynamicPattern)) {
       total += asDynamicCost;
-    if (line.contains(deprecationPattern))
+    }
+    if (line.contains(deprecationPattern)) {
       total += deprecationCost;
-    if (line.contains(legacyDeprecationPattern))
+    }
+    if (line.contains(legacyDeprecationPattern)) {
       total += legacyDeprecationCost;
-    if (isTest && line.contains('skip:'))
+    }
+    if (isTest && line.contains('skip:') && !line.contains('[intended]')) {
       total += skipCost;
-    if (isDart && isOptingOutOfNullSafety(line))
+    }
+    if (isDart && isOptingOutOfNullSafety(line)) {
       total += fileNullSafetyMigrationCost;
+    }
   }
-  if (path.basename(file.path) == 'pubspec.yaml' && !packageIsNullSafe(file))
+  if (path.basename(file.path) == 'pubspec.yaml' && !packageIsNullSafe(file)) {
     total += packageNullSafetyMigrationCost;
+  }
   return total;
 }
 
@@ -89,12 +100,14 @@ bool packageIsNullSafe(File file) {
 }
 
 Future<int> findGlobalsForFile(File file) async {
-  if (path.extension(file.path) != '.dart')
+  if (path.extension(file.path) != '.dart') {
     return 0;
+  }
   int total = 0;
   for (final String line in await file.readAsLines()) {
-    if (line.contains(globalsPattern))
+    if (line.contains(globalsPattern)) {
       total += 1;
+    }
   }
   return total;
 }
@@ -106,11 +119,13 @@ Future<double> findCostsForRepo() async {
     workingDirectory: flutterDirectory.path,
   );
   double total = 0.0;
-  await for (final String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()))
+  await for (final String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
     total += await findCostsForFile(File(path.join(flutterDirectory.path, entry)));
+  }
   final int gitExitCode = await git.exitCode;
-  if (gitExitCode != 0)
+  if (gitExitCode != 0) {
     throw Exception('git exit with unexpected error code $gitExitCode');
+  }
   return total;
 }
 
@@ -121,11 +136,13 @@ Future<int> findGlobalsForTool() async {
     workingDirectory: flutterDirectory.path,
   );
   int total = 0;
-  await for (final String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()))
+  await for (final String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
     total += await findGlobalsForFile(File(path.join(flutterDirectory.path, entry)));
+  }
   final int gitExitCode = await git.exitCode;
-  if (gitExitCode != 0)
+  if (gitExitCode != 0) {
     throw Exception('git exit with unexpected error code $gitExitCode');
+  }
   return total;
 }
 
@@ -135,8 +152,9 @@ Future<int> countDependencies() async {
     options: <String>['--transitive-closure'],
   )).split('\n');
   final int count = lines.where((String line) => line.contains('->')).length;
-  if (count < 2) // we'll always have flutter and flutter_test, at least...
+  if (count < 2) {
     throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
+  }
   return count;
 }
 
@@ -146,8 +164,9 @@ Future<int> countConsumerDependencies() async {
     options: <String>['--transitive-closure', '--consumer-only'],
   )).split('\n');
   final int count = lines.where((String line) => line.contains('->')).length;
-  if (count < 2) // we'll always have flutter and flutter_test, at least...
+  if (count < 2) {
     throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
+  }
   return count;
 }
 

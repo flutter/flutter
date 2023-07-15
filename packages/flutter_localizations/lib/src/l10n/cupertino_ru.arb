@@ -31,5 +31,6 @@
   "selectAllButtonLabel": "Выбрать все",
   "tabSemanticsLabel": "Вкладка $tabIndex из $tabCount",
   "modalBarrierDismissLabel": "Закрыть",
-  "searchTextFieldPlaceholderLabel": "Поиск"
+  "searchTextFieldPlaceholderLabel": "Поиск",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

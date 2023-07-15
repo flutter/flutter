@@ -7,6 +7,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+export 'dart:io' show HttpClientResponse;
+export 'dart:typed_data' show Uint8List;
+
 /// Signature for getting notified when chunks of bytes are received while
 /// consolidating the bytes of an [HttpClientResponse] into a [Uint8List].
 ///
@@ -48,26 +51,24 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
   bool autoUncompress = true,
   BytesReceivedCallback? onBytesReceived,
 }) {
-  assert(autoUncompress != null);
   final Completer<Uint8List> completer = Completer<Uint8List>.sync();
 
   final _OutputBuffer output = _OutputBuffer();
   ByteConversionSink sink = output;
   int? expectedContentLength = response.contentLength;
-  if (expectedContentLength == -1)
+  if (expectedContentLength == -1) {
     expectedContentLength = null;
+  }
   switch (response.compressionState) {
     case HttpClientResponseCompressionState.compressed:
       if (autoUncompress) {
         // We need to un-compress the bytes as they come in.
         sink = gzip.decoder.startChunkedConversion(output);
       }
-      break;
     case HttpClientResponseCompressionState.decompressed:
       // response.contentLength will not match our bytes stream, so we declare
       // that we don't know the expected content length.
       expectedContentLength = null;
-      break;
     case HttpClientResponseCompressionState.notCompressed:
       // Fall-through.
       break;

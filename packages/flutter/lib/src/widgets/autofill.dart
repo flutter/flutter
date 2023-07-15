@@ -51,96 +51,11 @@ enum AutofillContextAction {
 /// autofillable input fields in an [AutofillGroup], so the user input of the
 /// [Form] can be saved for future autofill by the platform.
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
-///
+/// {@tool dartpad}
 /// An example form with autofillable fields grouped into different
-/// `AutofillGroup`s.
+/// [AutofillGroup]s.
 ///
-/// ```dart
-///  bool isSameAddress = true;
-///  final TextEditingController shippingAddress1 = TextEditingController();
-///  final TextEditingController shippingAddress2 = TextEditingController();
-///  final TextEditingController billingAddress1 = TextEditingController();
-///  final TextEditingController billingAddress2 = TextEditingController();
-///
-///  final TextEditingController creditCardNumber = TextEditingController();
-///  final TextEditingController creditCardSecurityCode = TextEditingController();
-///
-///  final TextEditingController phoneNumber = TextEditingController();
-///
-///  @override
-///  Widget build(BuildContext context) {
-///    return ListView(
-///      children: <Widget>[
-///        const Text('Shipping address'),
-///        // The address fields are grouped together as some platforms are
-///        // capable of autofilling all of these fields in one go.
-///        AutofillGroup(
-///          child: Column(
-///            children: <Widget>[
-///              TextField(
-///                controller: shippingAddress1,
-///                autofillHints: const <String>[AutofillHints.streetAddressLine1],
-///              ),
-///              TextField(
-///                controller: shippingAddress2,
-///                autofillHints: const <String>[AutofillHints.streetAddressLine2],
-///              ),
-///            ],
-///          ),
-///        ),
-///        const Text('Billing address'),
-///        Checkbox(
-///          value: isSameAddress,
-///          onChanged: (bool? newValue) {
-///            if (newValue != null) {
-///              setState(() { isSameAddress = newValue; });
-///            }
-///          },
-///        ),
-///        // Again the address fields are grouped together for the same reason.
-///        if (!isSameAddress) AutofillGroup(
-///          child: Column(
-///            children: <Widget>[
-///              TextField(
-///                controller: billingAddress1,
-///                autofillHints: const <String>[AutofillHints.streetAddressLine1],
-///              ),
-///              TextField(
-///                controller: billingAddress2,
-///                autofillHints: const <String>[AutofillHints.streetAddressLine2],
-///              ),
-///            ],
-///          ),
-///        ),
-///        const Text('Credit Card Information'),
-///        // The credit card number and the security code are grouped together
-///        // as some platforms are capable of autofilling both fields.
-///        AutofillGroup(
-///          child: Column(
-///            children: <Widget>[
-///              TextField(
-///                controller: creditCardNumber,
-///                autofillHints: const <String>[AutofillHints.creditCardNumber],
-///              ),
-///              TextField(
-///                controller: creditCardSecurityCode,
-///                autofillHints: const <String>[AutofillHints.creditCardSecurityCode],
-///              ),
-///            ],
-///          ),
-///        ),
-///        const Text('Contact Phone Number'),
-///        // The phone number field can still be autofilled despite lacking an
-///        // `AutofillScope`.
-///        TextField(
-///          controller: phoneNumber,
-///          autofillHints: const <String>[AutofillHints.telephoneNumber],
-///        ),
-///      ],
-///    );
-///  }
-/// ```
+/// ** See code in examples/api/lib/widgets/autofill/autofill_group.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -152,23 +67,65 @@ class AutofillGroup extends StatefulWidget {
   ///
   /// The [child] argument must not be null.
   const AutofillGroup({
-    Key? key,
+    super.key,
     required this.child,
     this.onDisposeAction = AutofillContextAction.commit,
-  }) : assert(child != null),
-       super(key: key);
+  });
 
-  /// Returns the closest [AutofillGroupState] which encloses the given context.
+  /// Returns the [AutofillGroupState] of the closest [AutofillGroup] widget
+  /// which encloses the given context, or null if one cannot be found.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [AutofillGroup] in the [context], if there is one.
   ///
   /// {@macro flutter.widgets.AutofillGroupState}
   ///
   /// See also:
   ///
+  /// * [AutofillGroup.of], which is similar to this method, but asserts if an
+  ///   [AutofillGroup] cannot be found.
   /// * [EditableTextState], where this method is used to retrieve the closest
   ///   [AutofillGroupState].
-  static AutofillGroupState? of(BuildContext context) {
+  static AutofillGroupState? maybeOf(BuildContext context) {
     final _AutofillScope? scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
     return scope?._scope;
+  }
+
+  /// Returns the [AutofillGroupState] of the closest [AutofillGroup] widget
+  /// which encloses the given context.
+  ///
+  /// If no instance is found, this method will assert in debug mode and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [AutofillGroup] in the [context].
+  ///
+  /// {@macro flutter.widgets.AutofillGroupState}
+  ///
+  /// See also:
+  ///
+  /// * [AutofillGroup.maybeOf], which is similar to this method, but returns
+  ///   null if an [AutofillGroup] cannot be found.
+  /// * [EditableTextState], where this method is used to retrieve the closest
+  ///   [AutofillGroupState].
+  static AutofillGroupState of(BuildContext context) {
+    final AutofillGroupState? groupState = maybeOf(context);
+    assert(() {
+      if (groupState == null) {
+        throw FlutterError(
+          'AutofillGroup.of() was called with a context that does not contain an '
+          'AutofillGroup widget.\n'
+          'No AutofillGroup widget ancestor could be found starting from the '
+          'context that was passed to AutofillGroup.of(). This can happen '
+          'because you are using a widget that looks for an AutofillGroup '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return groupState!;
   }
 
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -181,8 +138,7 @@ class AutofillGroup extends StatefulWidget {
   /// {@macro flutter.services.TextInput.finishAutofillContext}
   ///
   /// Defaults to [AutofillContextAction.commit], which prompts the platform to
-  /// save the user input and destroy the current autofill context. No action
-  /// will be taken if [onDisposeAction] is set to null.
+  /// save the user input and destroy the current autofill context.
   final AutofillContextAction onDisposeAction;
 
   @override
@@ -214,12 +170,12 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   bool _isTopmostAutofillGroup = false;
 
   @override
-  AutofillClient? getAutofillClient(String tag) => _clients[tag];
+  AutofillClient? getAutofillClient(String autofillId) => _clients[autofillId];
 
   @override
   Iterable<AutofillClient> get autofillClients {
     return _clients.values
-      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration != null);
+      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration.enabled);
   }
 
   /// Adds the [AutofillClient] to this [AutofillGroup].
@@ -233,16 +189,14 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   /// * [EditableTextState.didChangeDependencies], where this method is called
   ///   to update the current [AutofillScope] when needed.
   void register(AutofillClient client) {
-    assert(client != null);
     _clients.putIfAbsent(client.autofillId, () => client);
   }
 
   /// Removes an [AutofillClient] with the given `autofillId` from this
   /// [AutofillGroup].
   ///
-  /// Typically, this should be called by autofillable [TextInputClient]s in
-  /// [State.dispose] and [State.didChangeDependencies], when the input field
-  /// needs to be removed from the [AutofillGroup] it is currently registered to.
+  /// Typically, this should be called by a text field when it's being disposed,
+  /// or before it's registered with a different [AutofillGroup].
   ///
   /// See also:
   ///
@@ -252,14 +206,14 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   ///   from the current [AutofillScope] when the widget is about to be removed
   ///   from the tree.
   void unregister(String autofillId) {
-    assert(autofillId != null && _clients.containsKey(autofillId));
+    assert(_clients.containsKey(autofillId));
     _clients.remove(autofillId);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _isTopmostAutofillGroup = AutofillGroup.of(context) == null;
+    _isTopmostAutofillGroup = AutofillGroup.maybeOf(context) == null;
   }
 
   @override
@@ -274,26 +228,23 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   void dispose() {
     super.dispose();
 
-    if (!_isTopmostAutofillGroup || widget.onDisposeAction == null)
+    if (!_isTopmostAutofillGroup) {
       return;
+    }
     switch (widget.onDisposeAction) {
       case AutofillContextAction.cancel:
         TextInput.finishAutofillContext(shouldSave: false);
-        break;
       case AutofillContextAction.commit:
-        TextInput.finishAutofillContext(shouldSave: true);
-        break;
+        TextInput.finishAutofillContext();
     }
   }
 }
 
 class _AutofillScope extends InheritedWidget {
   const _AutofillScope({
-    Key? key,
-    required Widget child,
+    required super.child,
     AutofillGroupState? autofillScopeState,
-  }) : _scope = autofillScopeState,
-       super(key: key, child: child);
+  }) : _scope = autofillScopeState;
 
   final AutofillGroupState? _scope;
 

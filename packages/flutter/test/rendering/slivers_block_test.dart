@@ -25,8 +25,9 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   @override
   void createChild(int index, { required RenderBox? after }) {
-    if (index < 0 || index >= children.length)
+    if (index < 0 || index >= children.length) {
       return;
+    }
     try {
       _currentlyUpdatingChildIndex = index;
       _renderObject.insert(children[index], after: after);
@@ -113,6 +114,8 @@ class ViewportOffsetSpy extends ViewportOffset {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderSliverList basic test - down', () {
     RenderObject inner;
     RenderBox a, b, c, d, e;
@@ -126,7 +129,6 @@ void main() {
       ],
     );
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 0.0,
@@ -278,7 +280,6 @@ void main() {
       ],
     );
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -313,7 +314,6 @@ void main() {
     );
     inner = childManager.createRenderObject();
     final RenderViewport root = RenderViewport(
-      axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       children: <RenderSliver>[

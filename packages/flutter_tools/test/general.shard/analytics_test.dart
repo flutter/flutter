@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -28,6 +30,7 @@ import 'package:usage/usage_io.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
+import '../src/test_build_system.dart';
 import '../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -36,13 +39,16 @@ void main() {
   });
 
   group('analytics', () {
-    Directory tempDir;
-    Config testConfig;
+    late Directory tempDir;
+    late Config testConfig;
+    late FileSystem fs;
+    const String flutterRoot = '/path/to/flutter';
 
     setUp(() {
-      Cache.flutterRoot = '../..';
+      Cache.flutterRoot = flutterRoot;
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
       testConfig = Config.test();
+      fs = MemoryFileSystem.test();
     });
 
     tearDown(() {
@@ -74,7 +80,7 @@ void main() {
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
+      FlutterVersion: () => FakeFlutterVersion(),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
@@ -98,7 +104,7 @@ void main() {
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
+      FlutterVersion: () => FakeFlutterVersion(),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
@@ -107,53 +113,54 @@ void main() {
     });
 
     testUsingContext('Usage records one feature in experiment setting', () async {
-      testConfig.setValue(flutterWebFeature.configSetting, true);
+      testConfig.setValue(flutterWebFeature.configSetting!, true);
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
-      final String featuresKey = cdKey(CustomDimensionsEnum.enabledFlutterFeatures);
+      final String featuresKey = CustomDimensionsEnum.enabledFlutterFeatures.cdKey;
 
       expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
+      FlutterVersion: () => FakeFlutterVersion(),
       Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Usage records multiple features in experiment setting', () async {
-      testConfig.setValue(flutterWebFeature.configSetting, true);
-      testConfig.setValue(flutterLinuxDesktopFeature.configSetting, true);
-      testConfig.setValue(flutterMacOSDesktopFeature.configSetting, true);
+      testConfig.setValue(flutterWebFeature.configSetting!, true);
+      testConfig.setValue(flutterLinuxDesktopFeature.configSetting!, true);
+      testConfig.setValue(flutterMacOSDesktopFeature.configSetting!, true);
       final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
-      final String featuresKey = cdKey(CustomDimensionsEnum.enabledFlutterFeatures);
+      final String featuresKey = CustomDimensionsEnum.enabledFlutterFeatures.cdKey;
 
       expect(
         globals.fs.file('test').readAsStringSync(),
         contains('$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'),
       );
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(clock: const SystemClock()),
+      FlutterVersion: () => FakeFlutterVersion(),
       Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
   group('analytics with fakes', () {
-    MemoryFileSystem memoryFileSystem;
-    FakeStdio fakeStdio;
-    TestUsage testUsage;
-    FakeClock fakeClock;
-    FakeDoctor doctor;
+    late MemoryFileSystem memoryFileSystem;
+    late FakeStdio fakeStdio;
+    late TestUsage testUsage;
+    late FakeClock fakeClock;
+    late FakeDoctor doctor;
+    late FakeAndroidStudio androidStudio;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -161,6 +168,7 @@ void main() {
       testUsage = TestUsage();
       fakeClock = FakeClock();
       doctor = FakeDoctor();
+      androidStudio = FakeAndroidStudio();
     });
 
     testUsingContext('flutter commands send timing events', () async {
@@ -176,6 +184,7 @@ void main() {
         ),
       ));
     }, overrides: <Type, Generator>{
+      AndroidStudio: () => androidStudio,
       SystemClock: () => fakeClock,
       Doctor: () => doctor,
       Usage: () => testUsage,
@@ -195,6 +204,7 @@ void main() {
         ),
       ));
     }, overrides: <Type, Generator>{
+      AndroidStudio: () => androidStudio,
       SystemClock: () => fakeClock,
       Doctor: () => doctor,
       Usage: () => testUsage,
@@ -209,8 +219,14 @@ void main() {
     });
 
     testUsingContext('compound command usage path', () async {
-      final BuildCommand buildCommand = BuildCommand();
-      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk'] as FlutterCommand;
+      final BuildCommand buildCommand = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        osUtils: FakeOperatingSystemUtils(),
+      );
+      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk']! as FlutterCommand;
 
       expect(await buildApkCommand.usagePath, 'build/apk');
     }, overrides: <Type, Generator>{
@@ -279,7 +295,7 @@ void main() {
   });
 
   group('analytics bots', () {
-    Directory tempDir;
+    late Directory tempDir;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_bots_test.');
@@ -340,8 +356,8 @@ Analytics throwingAnalyticsIOFactory(
   String trackingId,
   String applicationName,
   String applicationVersion, {
-  String analyticsUrl,
-  Directory documentDirectory,
+  String? analyticsUrl,
+  Directory? documentDirectory,
 }) {
   throw const FileSystemException('Could not create file');
 }
@@ -367,7 +383,11 @@ class FakeDoctor extends Fake implements Doctor {
     bool androidLicenses = false,
     bool verbose = true,
     bool showColor = true,
-    AndroidLicenseValidator androidLicenseValidator,
+    AndroidLicenseValidator? androidLicenseValidator,
+    bool showPii = true,
+    List<ValidatorTask>? startedValidatorTasks,
+    bool sendEvent = true,
+    FlutterVersion? version,
   }) async {
     return diagnoseSucceeds;
   }

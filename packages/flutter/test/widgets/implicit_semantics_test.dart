@@ -17,9 +17,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Semantics(
           container: true,
-          explicitChildNodes: false,
-          child: Column(
-            children: const <Widget>[
+          child: const Column(
+            children: <Widget>[
               Text('Michael Goderbauer'),
               Text('goderbauer@google.com'),
             ],
@@ -52,8 +51,8 @@ void main() {
         child: Semantics(
           container: true,
           explicitChildNodes: true,
-          child: Column(
-            children: const <Widget>[
+          child: const Column(
+            children: <Widget>[
               Text('Michael Goderbauer'),
               Text('goderbauer@google.com'),
             ],
@@ -99,8 +98,8 @@ void main() {
           explicitChildNodes: true,
           child: Semantics(
             label: 'Signed in as',
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('Michael Goderbauer'),
                 Text('goderbauer@google.com'),
               ],
@@ -139,11 +138,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Semantics(
           container: true,
-          explicitChildNodes: false,
           child: Semantics(
             label: 'Signed in as',
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('Michael Goderbauer'),
                 Text('goderbauer@google.com'),
               ],
@@ -182,7 +180,6 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Semantics(
           container: true,
-          explicitChildNodes: false,
           child: Column(
             children: <Widget>[
               Semantics(

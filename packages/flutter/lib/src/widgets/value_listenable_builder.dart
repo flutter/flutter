@@ -47,7 +47,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///
 /// ```dart
 /// class MyHomePage extends StatefulWidget {
-///   const MyHomePage({Key? key, required this.title}) : super(key: key);
+///   const MyHomePage({super.key, required this.title});
 ///   final String title;
 ///
 ///   @override
@@ -115,13 +115,11 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   /// The [child] is optional but is good practice to use if part of the widget
   /// subtree does not depend on the value of the [valueListenable].
   const ValueListenableBuilder({
-    Key? key,
+    super.key,
     required this.valueListenable,
     required this.builder,
     this.child,
-  }) : assert(valueListenable != null),
-       assert(builder != null),
-       super(key: key);
+  });
 
   /// The [ValueListenable] whose value you depend on in order to build.
   ///
@@ -142,10 +140,11 @@ class ValueListenableBuilder<T> extends StatefulWidget {
 
   /// A [valueListenable]-independent widget which is passed back to the [builder].
   ///
-  /// This argument is optional and can be null if the entire widget subtree
-  /// the [builder] builds depends on the value of the [valueListenable]. For
-  /// example, if the [valueListenable] is a [String] and the [builder] simply
-  /// returns a [Text] widget with the [String] value.
+  /// This argument is optional and can be null if the entire widget subtree the
+  /// [builder] builds depends on the value of the [valueListenable]. For
+  /// example, in the case where the [valueListenable] is a [String] and the
+  /// [builder] returns a [Text] widget with the current [String] value, there
+  /// would be no useful [child].
   final Widget? child;
 
   @override
@@ -164,12 +163,12 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
 
   @override
   void didUpdateWidget(ValueListenableBuilder<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget.valueListenable != widget.valueListenable) {
       oldWidget.valueListenable.removeListener(_valueChanged);
       value = widget.valueListenable.value;
       widget.valueListenable.addListener(_valueChanged);
     }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override

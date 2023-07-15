@@ -2,11 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+// TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
+const bool skipPerspectiveTextGoldens = isBrowser;
 
 // A number of the hit tests below say "warnIfMissed: false". This is because
 // the way the CupertinoPicker works, the hits don't actually reach the labels,
@@ -117,7 +127,6 @@ void main() {
         CupertinoApp(
           home: CupertinoTimerPicker(
             onTimerDurationChanged: (_) { },
-            backgroundColor: null,
           ),
         ),
       );
@@ -137,6 +146,20 @@ void main() {
 
       final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
       expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.black), false);
+    });
+
+    testWidgets('specified item extent value is applied', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTimerPicker(
+            itemExtent: 42,
+            onTimerDurationChanged: (_) { },
+          ),
+        ),
+      );
+
+      final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
+      expect(pickers.any((CupertinoPicker picker) => picker.itemExtent != 42), false);
     });
 
     testWidgets('columns are ordered correctly when text direction is ltr', (WidgetTester tester) async {
@@ -245,7 +268,6 @@ void main() {
             minuteInterval: 10,
             secondInterval: 12,
             initialTimerDuration: const Duration(hours: 10, minutes: 40, seconds: 48),
-            mode: CupertinoTimerPickerMode.hms,
             onTimerDurationChanged: (Duration d) {
               duration = d;
             },
@@ -291,7 +313,6 @@ void main() {
         CupertinoApp(
           home: CupertinoDatePicker(
             onDateTimeChanged: (_) { },
-            backgroundColor: null,
           ),
         ),
       );
@@ -311,6 +332,20 @@ void main() {
 
       final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
       expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.black), false);
+    });
+
+    testWidgets('specified item extent value is applied', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoDatePicker(
+            itemExtent: 55,
+            onDateTimeChanged: (_) { },
+          ),
+        ),
+      );
+
+      final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
+      expect(pickers.any((CupertinoPicker picker) => picker.itemExtent != 55), false);
     });
 
     testWidgets('initial date honors minuteInterval', (WidgetTester tester) async {
@@ -371,7 +406,6 @@ void main() {
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
                 onDateTimeChanged: (DateTime dateTime) => selectedDateTime = dateTime,
                 initialDateTime: DateTime(2018, 1, 1, 10, 30),
               ),
@@ -393,10 +427,9 @@ void main() {
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
                 onDateTimeChanged: (DateTime dateTime) => selectedDateTime = dateTime,
                 // Change the initial date, but it shouldn't affect the present state.
-                initialDateTime: DateTime(2016, 4, 5, 15, 00),
+                initialDateTime: DateTime(2016, 4, 5, 15),
               ),
             ),
           ),
@@ -421,7 +454,7 @@ void main() {
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.date,
                 onDateTimeChanged: (_) { },
-                initialDateTime: DateTime(2018, 9, 15, 0, 0),
+                initialDateTime: DateTime(2018, 9, 15),
               ),
             ),
           ),
@@ -441,7 +474,6 @@ void main() {
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
                 onDateTimeChanged: (_) { },
                 initialDateTime: DateTime(2018, 9, 15, 3, 14),
               ),
@@ -456,13 +488,33 @@ void main() {
       expect(find.text('AM'), findsOneWidget);
     });
 
+    testWidgets('monthYear picker has expected string', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.monthYear,
+                onDateTimeChanged: (_) { },
+                initialDateTime: DateTime(2018, 9),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('September'), findsOneWidget);
+      expect(find.text('2018'), findsOneWidget);
+    });
+
     testWidgets('width of picker in date and time mode is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.dateAndTime,
               onDateTimeChanged: (_) { },
               initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
@@ -481,7 +533,6 @@ void main() {
               height: 400.0,
               width: 800.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
                 onDateTimeChanged: (_) { },
                 initialDateTime: DateTime(2018, 1, 1, 10, 30),
               ),
@@ -583,6 +634,115 @@ void main() {
         tester.getCenter(find.text('10')).dx - tester.getCenter(find.text('AM')).dx,
         distance,
       );
+    });
+
+    testWidgets('width of picker in monthYear mode is consistent', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.monthYear,
+                onDateTimeChanged: (_) { },
+                initialDateTime: DateTime(2018),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Distance between the first column and the last column.
+      final double distance =
+          tester.getCenter(find.text('January')).dx - tester.getCenter(find.text('2018')).dx;
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 800.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.monthYear,
+                onDateTimeChanged: (_) { },
+                initialDateTime: DateTime(2018),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Distance between the first and the last column should be the same.
+      expect(
+        tester.getCenter(find.text('January')).dx - tester.getCenter(find.text('2018')).dx,
+        distance,
+      );
+    });
+
+    testWidgets('wheel does not bend outwards', (WidgetTester tester) async {
+
+      final Widget dateWidget = CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.date,
+        onDateTimeChanged: (_) { },
+        initialDateTime: DateTime(2018, 1, 1, 10, 30),
+      );
+
+      const String centerMonth = 'January';
+      const List<String> visibleMonthsExceptTheCenter = <String>[
+        'September',
+        'October',
+        'November',
+        'December',
+        'February',
+        'March',
+        'April',
+        'May',
+      ];
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: SizedBox(
+                height: 200.0,
+                width: 300.0,
+                child: dateWidget,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The wheel does not bend outwards.
+      for (final String month in visibleMonthsExceptTheCenter) {
+        expect(
+          tester.getBottomLeft(find.text(centerMonth)).dx,
+          lessThan(tester.getBottomLeft(find.text(month)).dx),
+        );
+      }
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: SizedBox(
+                height: 200.0,
+                width: 3000.0,
+                child: dateWidget,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The wheel does not bend outwards at large widths.
+      for (final String month in visibleMonthsExceptTheCenter) {
+        expect(
+          tester.getBottomLeft(find.text(centerMonth)).dx,
+          lessThan(tester.getBottomLeft(find.text(month)).dx),
+        );
+      }
     });
 
     testWidgets('picker automatically scrolls away from invalid date on month change', (WidgetTester tester) async {
@@ -708,7 +868,6 @@ void main() {
                 height: 400.0,
                 width: 400.0,
                 child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.dateAndTime,
                   minimumDate: minimum,
                   maximumDate: maximum,
                   onDateTimeChanged: (DateTime newDate) {
@@ -850,6 +1009,65 @@ void main() {
       },
     );
 
+    testWidgets(
+      'monthYear picker automatically scrolls away from invalid date, '
+      "and onDateTimeChanged doesn't report these dates",
+      (WidgetTester tester) async {
+        late DateTime date;
+        final DateTime minimum = DateTime(2016, 2);
+        final DateTime maximum = DateTime(2018, 12);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                height: 400.0,
+                width: 400.0,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.monthYear,
+                  minimumDate: minimum,
+                  maximumDate: maximum,
+                  onDateTimeChanged: (DateTime newDate) {
+                    date = newDate;
+                    // Callback doesn't transiently go into invalid dates.
+                    expect(newDate.isAtSameMomentAs(minimum) || newDate.isAfter(minimum), isTrue);
+                    expect(newDate.isAtSameMomentAs(maximum) || newDate.isBefore(maximum), isTrue);
+                  },
+                  initialDateTime: DateTime(2017, 2),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.drag(find.text('2017'), const Offset(0.0, 100.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+        await tester.pump();
+        await tester.pumpAndSettle(); // Now the autoscrolling should happen.
+
+        expect(
+          date,
+          DateTime(2016, 2),
+        );
+
+        await tester.drag(find.text('2016'), const Offset(0.0, -100.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+        await tester.pump(); // Once to trigger the post frame animate call.
+        await tester.pumpAndSettle();
+
+        expect(
+          date,
+          DateTime(2018, 12),
+        );
+
+        await tester.drag(find.text('2016'), const Offset(0.0, 32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+        await tester.pump(); // Once to trigger the post frame animate call.
+        await tester.pumpAndSettle();
+
+        expect(
+          date,
+          DateTime(2017, 12),
+        );
+      },
+    );
+
     testWidgets('picker automatically scrolls away from invalid date on day change', (WidgetTester tester) async {
       late DateTime date;
       await tester.pumpWidget(
@@ -947,7 +1165,6 @@ void main() {
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
                 minimumDate: minDate,
                 onDateTimeChanged: (DateTime newDate) { },
                 initialDateTime: minDate.add(const Duration(days: 1)),
@@ -1156,7 +1373,6 @@ void main() {
               // This is too small to draw the picker out fully.
               width: 100,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
                 initialDateTime: DateTime(2019, 1, 1, 4),
                 onDateTimeChanged: (_) {},
               ),
@@ -1174,7 +1390,7 @@ void main() {
     });
 
     testWidgets('DatePicker golden tests', (WidgetTester tester) async {
-      Widget _buildApp(CupertinoDatePickerMode mode) {
+      Widget buildApp(CupertinoDatePickerMode mode) {
         return CupertinoApp(
           home: Center(
             child: SizedBox(
@@ -1193,32 +1409,48 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.time));
-      await expectLater(
-        find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.time.initial.png'),
-      );
+      await tester.pumpWidget(buildApp(CupertinoDatePickerMode.time));
+      if (!skipPerspectiveTextGoldens) {
+        await expectLater(
+          find.byType(CupertinoDatePicker),
+          matchesGoldenFile('date_picker_test.time.initial.png'),
+        );
+      }
 
-      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.date));
-      await expectLater(
-        find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.date.initial.png'),
-      );
+      await tester.pumpWidget(buildApp(CupertinoDatePickerMode.date));
+      if (!skipPerspectiveTextGoldens) {
+        await expectLater(
+          find.byType(CupertinoDatePicker),
+          matchesGoldenFile('date_picker_test.date.initial.png'),
+        );
+      }
 
-      await tester.pumpWidget(_buildApp(CupertinoDatePickerMode.dateAndTime));
-      await expectLater(
-        find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.datetime.initial.png'),
-      );
+      await tester.pumpWidget(buildApp(CupertinoDatePickerMode.monthYear));
+      if (!skipPerspectiveTextGoldens) {
+        await expectLater(
+          find.byType(CupertinoDatePicker),
+          matchesGoldenFile('date_picker_test.monthyear.initial.png'),
+        );
+      }
+
+      await tester.pumpWidget(buildApp(CupertinoDatePickerMode.dateAndTime));
+      if (!skipPerspectiveTextGoldens) {
+        await expectLater(
+          find.byType(CupertinoDatePicker),
+          matchesGoldenFile('date_picker_test.datetime.initial.png'),
+        );
+      }
 
       // Slightly drag the hour component to make the current hour off-center.
       await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2), warnIfMissed: false); // see top of file
       await tester.pump();
 
-      await expectLater(
-        find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.datetime.drag.png'),
-      );
+      if (!skipPerspectiveTextGoldens) {
+        await expectLater(
+          find.byType(CupertinoDatePicker),
+          matchesGoldenFile('date_picker_test.datetime.drag.png'),
+        );
+      }
     });
 
     testWidgets('DatePicker displays the date in correct order', (WidgetTester tester) async {
@@ -1250,6 +1482,50 @@ void main() {
       );
     });
 
+    testWidgets('monthYear DatePicker displays the date in correct order', (WidgetTester tester) async {
+      Widget buildApp(DatePickerDateOrder order) {
+        return CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                key: ValueKey<DatePickerDateOrder>(order),
+                dateOrder: order,
+                mode: CupertinoDatePickerMode.monthYear,
+                onDateTimeChanged: (DateTime newDate) {},
+                initialDateTime: DateTime(2018, 1, 14, 10, 30),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp(DatePickerDateOrder.dmy));
+      expect(
+        tester.getTopLeft(find.text('January')).dx,
+        lessThan(tester.getTopLeft(find.text('2018')).dx),
+      );
+
+      await tester.pumpWidget(buildApp(DatePickerDateOrder.mdy));
+      expect(
+        tester.getTopLeft(find.text('January')).dx,
+        lessThan(tester.getTopLeft(find.text('2018')).dx),
+      );
+
+      await tester.pumpWidget(buildApp(DatePickerDateOrder.ydm));
+      expect(
+        tester.getTopLeft(find.text('2018')).dx,
+        lessThan(tester.getTopLeft(find.text('January')).dx),
+      );
+
+      await tester.pumpWidget(buildApp(DatePickerDateOrder.ymd));
+      expect(
+        tester.getTopLeft(find.text('2018')).dx,
+        lessThan(tester.getTopLeft(find.text('January')).dx),
+      );
+    });
+
     testWidgets('DatePicker displays hours and minutes correctly in RTL', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
@@ -1260,7 +1536,6 @@ void main() {
                 width: 500,
                 height: 400,
                 child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.dateAndTime,
                   initialDateTime: DateTime(2019, 1, 1, 4),
                   onDateTimeChanged: (_) {},
                 ),
@@ -1304,19 +1579,23 @@ void main() {
       ),
     );
 
-    await expectLater(
-      find.byType(CupertinoTimerPicker),
-      matchesGoldenFile('timer_picker_test.datetime.initial.png'),
-    );
+    if (!skipPerspectiveTextGoldens) {
+      await expectLater(
+        find.byType(CupertinoTimerPicker),
+        matchesGoldenFile('timer_picker_test.datetime.initial.png'),
+      );
+    }
 
     // Slightly drag the minute component to make the current minute off-center.
     await tester.drag(find.text('59'), Offset(0, _kRowOffset.dy / 2), warnIfMissed: false); // see top of file
     await tester.pump();
 
-    await expectLater(
-      find.byType(CupertinoTimerPicker),
-      matchesGoldenFile('timer_picker_test.datetime.drag.png'),
-    );
+    if (!skipPerspectiveTextGoldens) {
+      await expectLater(
+        find.byType(CupertinoTimerPicker),
+        matchesGoldenFile('timer_picker_test.datetime.drag.png'),
+      );
+    }
   });
 
   testWidgets('TimerPicker only changes hour label after scrolling stops', (WidgetTester tester) async {
@@ -1391,7 +1670,6 @@ void main() {
       CupertinoApp(
         home: CupertinoTimerPicker(
           key: key,
-          mode: CupertinoTimerPickerMode.hms,
           initialTimerDuration: const Duration(hours: 5, minutes: 17, seconds: 19),
           onTimerDurationChanged: (Duration d) {},
         ),
@@ -1493,7 +1771,6 @@ void main() {
       children: <Matcher>[
         matchesSemantics(
           hasIncreaseAction: true,
-          hasDecreaseAction: false,
           increasedValue: '1',
           value: '0',
           textDirection: TextDirection.ltr,
@@ -1518,6 +1795,162 @@ void main() {
     ));
     expect(lastSelectedItem, 1);
     handle.dispose();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/98567
+  testWidgets('picker semantics action test', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    debugResetSemanticsIdCounter();
+    final DateTime initialDate = DateTime(2018, 6, 8);
+    late DateTime? date;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              onDateTimeChanged: (DateTime newDate) => date = newDate,
+              initialDateTime: initialDate,
+              maximumDate: initialDate.add(const Duration(days: 2)),
+              minimumDate: initialDate.subtract(const Duration(days: 2)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(4, SemanticsAction.decrease);
+    await tester.pumpAndSettle();
+
+    expect(date, DateTime(2018, 6, 7));
+
+    handle.dispose();
+  });
+
+  testWidgets('DatePicker adapts to MaterialApp dark mode', (WidgetTester tester) async {
+    Widget buildDatePicker(Brightness brightness) {
+      return MaterialApp(
+        theme: ThemeData(brightness: brightness),
+        home: CupertinoDatePicker(
+          mode: CupertinoDatePickerMode.date,
+          onDateTimeChanged: (DateTime neData) {},
+          initialDateTime: DateTime(2018, 10, 10),
+        ),
+      );
+    }
+
+    // CupertinoDatePicker with light theme.
+    await tester.pumpWidget(buildDatePicker(Brightness.light));
+    RenderParagraph paragraph = tester.renderObject(find.text('October').first);
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+
+    // CupertinoDatePicker with dark theme.
+    await tester.pumpWidget(buildDatePicker(Brightness.dark));
+    paragraph = tester.renderObject(find.text('October').first);
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+  });
+
+  testWidgets('TimerPicker adapts to MaterialApp dark mode', (WidgetTester tester) async {
+    Widget buildTimerPicker(Brightness brightness) {
+      return MaterialApp(
+        theme: ThemeData(brightness: brightness),
+        home: CupertinoTimerPicker(
+          mode: CupertinoTimerPickerMode.hm,
+          onTimerDurationChanged: (Duration newDuration) {},
+          initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
+        ),
+      );
+    }
+
+    // CupertinoTimerPicker with light theme.
+    await tester.pumpWidget(buildTimerPicker(Brightness.light));
+    RenderParagraph paragraph = tester.renderObject(find.text('hours'));
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+
+    // CupertinoTimerPicker with light theme.
+    await tester.pumpWidget(buildTimerPicker(Brightness.dark));
+    paragraph = tester.renderObject(find.text('hours'));
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+  });
+
+  testWidgets('TimerPicker minDate - maxDate with minuteInterval', (WidgetTester tester) async {
+    late DateTime date;
+    final DateTime minimum = DateTime(2022, 6, 14, 3, 31);
+    final DateTime initial = DateTime(2022, 6, 14, 3, 40);
+    final DateTime maximum = DateTime(2022, 6, 14, 3, 49);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              initialDateTime: initial,
+              minimumDate: minimum,
+              maximumDate: maximum,
+              minuteInterval: 5,
+              use24hFormat: true,
+              onDateTimeChanged: (DateTime newDate) {
+                date = newDate;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Drag picker minutes to min date
+    await tester.drag(find.text('40'), const Offset(0.0, 32.0), touchSlopY: 0.0, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    // Returns to min date.
+    expect(
+      date,
+      DateTime(2022, 6, 14, 3, 35),
+    );
+
+    // Drag picker minutes to max date
+    await tester.drag(find.text('50'), const Offset(0.0, -64.0), touchSlopY: 0.0, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    // Returns to max date.
+    expect(
+      date,
+      DateTime(2022, 6, 14, 3, 45),
+    );
+  });
+
+  testWidgets('date picker has expected day of week', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              onDateTimeChanged: (_) { },
+              initialDateTime: DateTime(2018, 9, 15),
+              showDayOfWeek: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('September'), findsOneWidget);
+    expect(find.textContaining('Sat').last, findsOneWidget);
+    expect(find.textContaining('15').last, findsOneWidget);
+    expect(find.text('2018'), findsOneWidget);
   });
 }
 

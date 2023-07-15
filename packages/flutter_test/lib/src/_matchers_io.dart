@@ -6,10 +6,10 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
-import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
+import 'package:matcher/expect.dart';
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/hooks.dart' show TestFailure;
 
 import 'binding.dart';
 import 'finders.dart';
@@ -24,12 +24,21 @@ Future<ui.Image> captureImage(Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent! as RenderObject;
+    renderObject = renderObject.parent!;
   }
   assert(!renderObject.debugNeedsPaint);
   final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
   return layer.toImage(renderObject.paintBounds);
 }
+
+/// Whether or not [captureImage] is supported.
+///
+/// This can be used to skip tests on platforms that don't support
+/// capturing images.
+///
+/// Currently this is true except when tests are running in the context of a web
+/// browser (`flutter test --platform chrome`).
+const bool canCaptureImage = true;
 
 /// The matcher created by [matchesGoldenFile]. This class is enabled when the
 /// test is running on a VM using conditional import.
@@ -69,10 +78,13 @@ class MatchesGoldenFile extends AsyncMatcher {
       }
     }
     Future<ui.Image?> imageFuture;
+    final bool disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
     if (item is Future<ui.Image?>) {
       imageFuture = item;
+      disposeImage = false;
     } else if (item is ui.Image) {
       imageFuture = Future<ui.Image>.value(item);
+      disposeImage = false;
     } else if (item is Finder) {
       final Iterable<Element> elements = item.evaluate();
       if (elements.isEmpty) {
@@ -81,30 +93,38 @@ class MatchesGoldenFile extends AsyncMatcher {
         return 'matched too many widgets';
       }
       imageFuture = captureImage(elements.single);
+      disposeImage = true;
     } else {
-      throw 'must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>';
+      throw AssertionError('must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
     }
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
     return binding.runAsync<String?>(() async {
       final ui.Image? image = await imageFuture;
       if (image == null) {
-        throw 'Future<Image> completed to null';
-      }
-      final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null)
-        return 'could not encode screenshot.';
-      if (autoUpdateGoldenFiles) {
-        await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
-        return null;
+        throw AssertionError('Future<Image> completed to null');
       }
       try {
-        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
-        return success ? null : 'does not match';
-      } on TestFailure catch (ex) {
-        return ex.message;
+        final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+        if (bytes == null) {
+          return 'could not encode screenshot.';
+        }
+        if (autoUpdateGoldenFiles) {
+          await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
+          return null;
+        }
+        try {
+          final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
+          return success ? null : 'does not match';
+        } on TestFailure catch (ex) {
+          return ex.message;
+        }
+      } finally {
+        if (disposeImage) {
+          image.dispose();
+        }
       }
-    }, additionalTime: const Duration(minutes: 1));
+    });
   }
 
   @override

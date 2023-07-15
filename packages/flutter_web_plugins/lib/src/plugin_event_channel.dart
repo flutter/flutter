@@ -43,8 +43,7 @@ class PluginEventChannel<T> {
     this.name, [
     this.codec = const StandardMethodCodec(),
     this.binaryMessenger,
-  ]) : assert(name != null),
-       assert(codec != null);
+  ]);
 
   /// The logical channel on which communication happens.
   ///
@@ -71,7 +70,7 @@ class PluginEventChannel<T> {
     'Replace calls to the "controller" setter with calls to the "setController" method. '
     'This feature was deprecated after v1.23.0-7.0.pre.'
   )
-  set controller(StreamController<T> controller) {
+  set controller(StreamController<T> controller) { // ignore: avoid_setters_without_getters
     setController(controller);
   }
 
@@ -108,7 +107,7 @@ class _EventChannelHandler<T> {
     this.codec,
     this.controller,
     this.messenger,
-  ) : assert(messenger != null);
+  );
 
   final String name;
   final MethodCodec codec;

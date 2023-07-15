@@ -12,7 +12,6 @@ void main() {
       applyHeightToFirstAscent: false,
     );
     const TextHeightBehavior behavior2 = TextHeightBehavior(
-      applyHeightToLastDescent: true,
       applyHeightToFirstAscent: false,
     );
 
@@ -38,7 +37,6 @@ void main() {
       applyHeightToFirstAscent: false,
     );
     const TextHeightBehavior behavior2 = TextHeightBehavior(
-      applyHeightToLastDescent: true,
       applyHeightToFirstAscent: false,
     );
 
@@ -118,7 +116,7 @@ void main() {
 
       await tester.pumpWidget(Builder(
         builder: (BuildContext context) {
-          textHeightBehavior = DefaultTextHeightBehavior.of(context);
+          textHeightBehavior = DefaultTextHeightBehavior.maybeOf(context);
           return textWidget;
         },
       ));

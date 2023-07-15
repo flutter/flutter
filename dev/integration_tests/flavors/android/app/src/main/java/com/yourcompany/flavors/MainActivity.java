@@ -6,21 +6,22 @@ package com.yourcompany.flavors;
 
 import android.os.Bundle;
 
-import io.flutter.app.FlutterActivity;
+import androidx.annotation.NonNull;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    GeneratedPluginRegistrant.registerWith(this);
-    new MethodChannel(getFlutterView(), "flavor").setMethodCallHandler(new MethodChannel.MethodCallHandler() {
-      @Override
-      public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-        result.success(BuildConfig.FLAVOR);
-      }
-    });
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    GeneratedPluginRegistrant.registerWith(flutterEngine);
+    new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "flavor")
+        .setMethodCallHandler(
+            (call, result) -> {
+                result.success(BuildConfig.FLAVOR);
+        }
+    );
   }
 }

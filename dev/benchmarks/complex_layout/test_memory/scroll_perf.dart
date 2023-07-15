@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:complex_layout/main.dart';
+import 'package:complex_layout/src/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,11 +28,10 @@ Future<void> main() async {
     },
     behavior: HitTestBehavior.opaque,
     child: const IgnorePointer(
-      ignoring: true,
       child: ComplexLayoutApp(),
     ),
   ));
-  await SchedulerBinding.instance?.endOfFrame;
+  await SchedulerBinding.instance.endOfFrame;
 
   /// Wait 50ms to allow the raster thread to actually put up the frame. (The
   /// endOfFrame future ends when we send the data to the engine, before
@@ -50,9 +49,9 @@ Future<void> main() async {
       child: ComplexLayoutApp(),
     ),
   ));
-  await SchedulerBinding.instance?.endOfFrame;
+  await SchedulerBinding.instance.endOfFrame;
 
-  final WidgetController controller = LiveWidgetController(WidgetsBinding.instance!);
+  final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
 
   // Scroll down
   for (int iteration = 0; iteration < maxIterations; iteration += 1) {

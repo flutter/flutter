@@ -271,6 +271,34 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.text('x')).localToGlobal(Offset.zero), const Offset(0.0, 200.0));
   });
 
+  testWidgets('SliverPadding with no child reports correct geometry as scroll offset changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/64506
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          controller: controller,
+          slivers: const <Widget>[
+            SliverPadding(padding: EdgeInsets.all(100.0)),
+            SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('x'))),
+          ],
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderBox>(find.text('x')).localToGlobal(Offset.zero), const Offset(0.0, 200.0));
+    expect(
+      tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).geometry!.paintExtent,
+      200.0,
+    );
+    controller.jumpTo(50.0);
+    await tester.pump();
+    expect(
+      tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).geometry!.paintExtent,
+      150.0,
+    );
+  });
+
   testWidgets('Viewport+SliverPadding changing padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -320,7 +348,6 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Viewport(
-          axisDirection: AxisDirection.down,
           offset: ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
             SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
@@ -367,7 +394,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).afterPadding, 1.0);
+    expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding, skipOffstage: false)).afterPadding, 1.0);
   });
 
   testWidgets('SliverPadding propagates geometry offset corrections', (WidgetTester tester) async {

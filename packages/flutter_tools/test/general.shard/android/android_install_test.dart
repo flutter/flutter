@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -33,7 +31,7 @@ const FakeCommand kInstallCommand = FakeCommand(
     '-r',
     '--user',
     '10',
-    'app.apk'
+    'app-debug.apk',
   ],
 );
 const FakeCommand kStoreShaCommand = FakeCommand(
@@ -41,8 +39,8 @@ const FakeCommand kStoreShaCommand = FakeCommand(
 );
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger logger;
+  late FileSystem fileSystem;
+  late BufferLogger logger;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -50,15 +48,16 @@ void main() {
   });
 
   AndroidDevice setUpAndroidDevice({
-    AndroidSdk androidSdk,
-    ProcessManager processManager,
+    AndroidSdk? androidSdk,
+    ProcessManager? processManager,
   }) {
     androidSdk ??= FakeAndroidSdk();
     return AndroidDevice('1234',
+      modelID: 'TestModel',
       logger: logger,
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       androidSdk: androidSdk,
-      fileSystem: fileSystem ?? MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       processManager: processManager ?? FakeProcessManager.any(),
     );
   }
@@ -72,9 +71,9 @@ void main() {
         stdout: '[ro.build.version.sdk]: [11]',
       ),
     ]);
-    final File apk = fileSystem.file('app.apk')..createSync();
+    final File apk = fileSystem.file('app-debug.apk')..createSync();
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -88,9 +87,9 @@ void main() {
   });
 
   testWithoutContext('Cannot install app if APK file is missing', () async {
-    final File apk = fileSystem.file('app.apk');
+    final File apk = fileSystem.file('app-debug.apk');
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -116,9 +115,9 @@ void main() {
       kInstallCommand,
       kStoreShaCommand,
     ]);
-    final File apk = fileSystem.file('app.apk')..createSync();
+    final File apk = fileSystem.file('app-debug.apk')..createSync();
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -145,9 +144,9 @@ void main() {
       kInstallCommand,
       kStoreShaCommand,
     ]);
-    final File apk = fileSystem.file('app.apk')..createSync();
+    final File apk = fileSystem.file('app-debug.apk')..createSync();
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -183,15 +182,15 @@ void main() {
           '-r',
           '--user',
           'jane',
-          'app.apk'
+          'app-debug.apk',
         ],
         exitCode: 1,
         stderr: 'Exception occurred while executing: java.lang.IllegalArgumentException: Bad user number: jane',
       ),
     ]);
-    final File apk = fileSystem.file('app.apk')..createSync();
+    final File apk = fileSystem.file('app-debug.apk')..createSync();
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -222,10 +221,10 @@ void main() {
         stdout: 'example_sha',
       ),
     ]);
-    final File apk = fileSystem.file('app.apk')..createSync();
-    fileSystem.file('app.apk.sha1').writeAsStringSync('example_sha');
+    final File apk = fileSystem.file('app-debug.apk')..createSync();
+    fileSystem.file('app-debug.apk.sha1').writeAsStringSync('example_sha');
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -255,7 +254,7 @@ void main() {
         stdout: 'different_example_sha',
       ),
       const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', 'app.apk'],
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', 'app-debug.apk'],
         exitCode: 1,
         stderr: '[INSTALL_FAILED_INSUFFICIENT_STORAGE]',
       ),
@@ -263,10 +262,10 @@ void main() {
       kInstallCommand,
       const FakeCommand(command: <String>['adb', '-s', '1234', 'shell', 'echo', '-n', 'example_sha', '>', '/data/local/tmp/sky.app.sha1']),
     ]);
-    final File apk = fileSystem.file('app.apk')..createSync();
-    fileSystem.file('app.apk.sha1').writeAsStringSync('example_sha');
+    final File apk = fileSystem.file('app-debug.apk')..createSync();
+    fileSystem.file('app-debug.apk.sha1').writeAsStringSync('example_sha');
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',
@@ -292,14 +291,14 @@ void main() {
           stdout: '\n'
       ),
       const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', 'app.apk'],
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', 'app-debug.apk'],
         exitCode: 1,
         stderr: '[INSTALL_FAILED_INSUFFICIENT_STORAGE]',
       ),
     ]);
-    final File apk = fileSystem.file('app.apk')..createSync();
+    final File apk = fileSystem.file('app-debug.apk')..createSync();
     final AndroidApk androidApk = AndroidApk(
-      file: apk,
+      applicationPackage: apk,
       id: 'app',
       versionCode: 22,
       launchActivity: 'Main',

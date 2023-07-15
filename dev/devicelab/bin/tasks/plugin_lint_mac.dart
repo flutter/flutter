@@ -19,6 +19,12 @@ Future<void> main() async {
       section('Lint integration_test');
 
       await inDirectory(tempDir, () async {
+        // Update pod repo.
+        await exec(
+          'pod',
+          <String>['repo', 'update'],
+        );
+
         // Relative to this script.
         final String flutterRoot = path.dirname(path.dirname(path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))))));
         print('Flutter root at $flutterRoot');
@@ -31,13 +37,12 @@ Future<void> main() async {
             'lib',
             'lint',
             iosintegrationTestPodspec,
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--use-libraries',
             '--verbose',
+            // TODO(cyanglaz): remove allow-warnings when https://github.com/flutter/flutter/issues/125812 is fixed.
+            // https://github.com/flutter/flutter/issues/125812
+            '--allow-warnings',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
 
         final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
@@ -47,12 +52,11 @@ Future<void> main() async {
             'lib',
             'lint',
             macosintegrationTestPodspec,
-            '--configuration=Debug', // Release targets unsupported arm64 Apple Silicon. Use Debug to only build against targeted x86_64 macOS.
             '--verbose',
+            // TODO(cyanglaz): remove allow-warnings when https://github.com/flutter/flutter/issues/125812 is fixed.
+            // https://github.com/flutter/flutter/issues/125812
+            '--allow-warnings',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -84,13 +88,9 @@ Future<void> main() async {
             'lib',
             'lint',
             objcPodspecPath,
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--allow-warnings',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -103,14 +103,10 @@ Future<void> main() async {
             'lib',
             'lint',
             objcPodspecPath,
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--allow-warnings',
             '--use-libraries',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -141,14 +137,10 @@ Future<void> main() async {
           <String>[
             'lib',
             'lint',
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             swiftPodspecPath,
             '--allow-warnings',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -161,14 +153,10 @@ Future<void> main() async {
             'lib',
             'lint',
             swiftPodspecPath,
-            '--configuration=Debug', // Release targets unsupported arm64 simulators. Use Debug to only build against targeted x86_64 simulator devices.
             '--allow-warnings',
             '--use-libraries',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
         );
       });
 
@@ -185,11 +173,6 @@ Future<void> main() async {
             '--allow-warnings',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
-          // TODO(jmagman): Flutter cannot build against ARM https://github.com/flutter/flutter/issues/69221
-          canFail: true,
         );
       });
 
@@ -206,11 +189,6 @@ Future<void> main() async {
             '--use-libraries',
             '--verbose',
           ],
-          environment: <String, String>{
-            'LANG': 'en_US.UTF-8',
-          },
-          // TODO(jmagman): Flutter cannot build against ARM https://github.com/flutter/flutter/issues/69221
-          canFail: true,
         );
       });
 
@@ -239,7 +217,7 @@ Future<void> main() async {
       // Add the new plugins we just made.
       pubspecContent = pubspecContent.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  $objcPluginName:\n    path: $objcPluginPath\n  $swiftPluginName:\n    path: $swiftPluginPath\n  url_launcher:\n  url_launcher_macos:\n',
+        '\ndependencies:\n  $objcPluginName:\n    path: $objcPluginPath\n  $swiftPluginName:\n    path: $swiftPluginPath\n  url_launcher: 6.0.16\n  url_launcher_macos:\n',
       );
       objcPubspec.writeAsStringSync(pubspecContent, flush: true);
 
@@ -248,7 +226,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
           // TODO(jmagman): Make Objective-C applications handle Swift libraries https://github.com/flutter/flutter/issues/16049
           canFail: true
@@ -272,7 +250,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
         );
       });
@@ -305,7 +283,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
         );
       });
@@ -326,7 +304,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
         );
       });
@@ -390,7 +368,7 @@ Future<void> main() async {
           'build',
           options: <String>[
             'ios',
-            '--no-codesign'
+            '--no-codesign',
           ],
         );
       });
@@ -399,7 +377,7 @@ Future<void> main() async {
 
       final File podfileLockFile = File(path.join(swiftAppPath, 'ios', 'Podfile.lock'));
       final String podfileLockOutput = podfileLockFile.readAsStringSync();
-      if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher/ios"')
+      if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher_ios/ios"')
         || !podfileLockOutput.contains(':path: Flutter')
           // test_plugin_objc no longer supports iOS, shouldn't be present.
         || podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_objc/ios"')
@@ -417,7 +395,7 @@ Future<void> main() async {
 
       checkDirectoryExists(path.join(
         pluginSymlinks,
-        'url_launcher',
+        'url_launcher_ios',
         'ios',
       ));
 
@@ -447,7 +425,7 @@ void _validateIosPodfile(String appPath) {
 
   final File podfileLockFile = File(path.join(appPath, 'ios', 'Podfile.lock'));
   final String podfileLockOutput = podfileLockFile.readAsStringSync();
-  if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher/ios"')
+  if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher_ios/ios"')
     || !podfileLockOutput.contains(':path: Flutter')
     || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_objc/ios"')
     || !podfileLockOutput.contains(':path: ".symlinks/plugins/test_plugin_swift/ios"')
@@ -479,7 +457,7 @@ void _validateIosPodfile(String appPath) {
 
   checkDirectoryExists(path.join(
     pluginSymlinks,
-    'url_launcher',
+    'url_launcher_ios',
     'ios',
   ));
 
@@ -499,6 +477,13 @@ void _validateIosPodfile(String appPath) {
     'test_plugin_swift',
     'ios',
   ));
+
+  // Make sure no Xcode build settings are leaking derived data/build directory into the ios directory.
+  checkDirectoryNotExists(path.join(
+    appPath,
+    'ios',
+    'build',
+  ));
 }
 
 void _validateMacOSPodfile(String appPath) {
@@ -509,7 +494,7 @@ void _validateMacOSPodfile(String appPath) {
   if (!podfileLockOutput.contains(':path: Flutter/ephemeral\n')
       || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos')
       || !podfileLockOutput.contains(':path: Flutter/ephemeral/.symlinks/plugins/test_plugin_swift/macos')
-      || podfileLockOutput.contains('url_launcher/')) {
+      || podfileLockOutput.contains('url_launcher_ios/')) {
     print(podfileLockOutput);
     throw TaskResult.failure('macOS Podfile.lock does not contain expected pods');
   }
@@ -539,7 +524,7 @@ void _validateMacOSPodfile(String appPath) {
 
   checkDirectoryNotExists(path.join(
     pluginSymlinks,
-    'url_launcher',
+    'url_launcher_ios',
   ));
 
   checkDirectoryExists(path.join(

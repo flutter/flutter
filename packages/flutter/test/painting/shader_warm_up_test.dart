@@ -5,57 +5,25 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestCanvas implements Canvas {
-  TestCanvas();
-
-  final List<Invocation> invocations = <Invocation>[];
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    invocations.add(invocation);
-  }
+Future<void> main() async {
+  test('ShaderWarmUp', () {
+    final FakeShaderWarmUp shaderWarmUp = FakeShaderWarmUp();
+    PaintingBinding.shaderWarmUp = shaderWarmUp;
+    debugCaptureShaderWarmUpImage = expectAsync1((ui.Image image) => true);
+    WidgetsFlutterBinding.ensureInitialized();
+    expect(shaderWarmUp.ranWarmUp, true);
+  }, skip: kIsWeb && !isCanvasKit); // [intended] Testing only for canvasKit
 }
 
-void main() {
-  test('DefaultShaderWarmUp has expected canvas invocations', () {
-    final TestCanvas canvas = TestCanvas();
-    const DefaultShaderWarmUp s = DefaultShaderWarmUp();
-    s.warmUpOnCanvas(canvas);
+class FakeShaderWarmUp extends ShaderWarmUp {
+  bool ranWarmUp = false;
 
-    bool hasDrawRectAfterClipRRect = false;
-    for (int i = 0; i < canvas.invocations.length - 1; i += 1) {
-      if (canvas.invocations[i].memberName == #clipRRect && canvas.invocations[i + 1].memberName == #drawRect) {
-        hasDrawRectAfterClipRRect = true;
-        break;
-      }
-    }
-
-    expect(hasDrawRectAfterClipRRect, true);
-  });
-
-  test('ShaderWarmUp.execute disposes the image and picture', () async {
-    const DefaultShaderWarmUp shaderWarmUp = DefaultShaderWarmUp();
-    late ui.Picture capturedPicture;
-    late ui.Image capturedImage;
-    debugCaptureShaderWarmUpPicture = (ui.Picture picture) {
-      capturedPicture = picture;
-      expect(picture.approximateBytesUsed, greaterThan(0));
-      return true;
-    };
-    debugCaptureShaderWarmUpImage = (ui.Image image) {
-      capturedImage = image;
-      expect(image.width, 100);
-      expect(image.height, 100);
-      return true;
-    };
-    await shaderWarmUp.execute();
-    expect(
-      () => capturedPicture.approximateBytesUsed,
-      throwsA(isA<String>().having((String message) => message, 'message', 'Object has been disposed.')),
-    );
-    expect(capturedImage.debugDisposed, true);
-  }, skip: kIsWeb); // Browser doesn't support approximateBytesUsed and doesn't rasterize the picture at this time.
+  @override
+  Future<bool> warmUpOnCanvas(ui.Canvas canvas) {
+    ranWarmUp = true;
+    return Future<bool>.delayed(Duration.zero, () => true);
+  }
 }

@@ -38,7 +38,7 @@ class Photo {
 }
 
 class GridPhotoViewer extends StatefulWidget {
-  const GridPhotoViewer({ Key? key, this.photo }) : super(key: key);
+  const GridPhotoViewer({ super.key, this.photo });
 
   final Photo? photo;
 
@@ -118,8 +118,9 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
 
   void _handleOnScaleEnd(ScaleEndDetails details) {
     final double magnitude = details.velocity.pixelsPerSecond.distance;
-    if (magnitude < _kMinFlingVelocity)
+    if (magnitude < _kMinFlingVelocity) {
       return;
+    }
     final Offset direction = details.velocity.pixelsPerSecond / magnitude;
     final double distance = (Offset.zero & context.size!).shortestSide;
     _flingAnimation = _controller.drive(Tween<Offset>(
@@ -155,12 +156,11 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
 
 class GridDemoPhotoItem extends StatelessWidget {
   GridDemoPhotoItem({
-    Key? key,
+    super.key,
     required this.photo,
     required this.tileStyle,
     required this.onBannerTap,
-  }) : assert(photo.isValid),
-       super(key: key);
+  }) : assert(photo.isValid);
 
   final Photo photo;
   final GridDemoTileStyle tileStyle;
@@ -245,7 +245,7 @@ class GridDemoPhotoItem extends StatelessWidget {
 }
 
 class GridListDemo extends StatefulWidget {
-  const GridListDemo({ Key? key }) : super(key: key);
+  const GridListDemo({ super.key });
 
   static const String routeName = '/material/grid-list';
 

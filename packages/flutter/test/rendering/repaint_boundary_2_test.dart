@@ -15,7 +15,7 @@ void main() {
 }
 
 class RelayoutBoundariesCrash extends StatefulWidget {
-  const RelayoutBoundariesCrash({Key? key}) : super(key: key);
+  const RelayoutBoundariesCrash({super.key});
 
   @override
   RelayoutBoundariesCrashState createState() => RelayoutBoundariesCrashState();

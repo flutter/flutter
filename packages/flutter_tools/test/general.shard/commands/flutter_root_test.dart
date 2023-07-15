@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -15,13 +13,13 @@ import '../../src/common.dart';
 void main() {
   testWithoutContext('Cache can initialize flutter root from environment variable', () {
     final String defaultFlutterRoot = Cache.defaultFlutterRoot(
-        fileSystem: MemoryFileSystem.test(),
-        userMessages: UserMessages(),
-        platform: FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': 'path/to/flutter'
-            }
-        )
+      fileSystem: MemoryFileSystem.test(),
+      userMessages: UserMessages(),
+      platform: FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': 'path/to/flutter',
+        },
+      ),
     );
 
     expect(defaultFlutterRoot, '/path/to/flutter');

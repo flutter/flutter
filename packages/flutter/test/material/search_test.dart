@@ -7,23 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/clipboard_utils.dart';
 import '../widgets/semantics_tester.dart';
-
-class MockClipboard {
-  dynamic _clipboardData = <String, dynamic>{
-    'text': null,
-  };
-
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case 'Clipboard.getData':
-        return _clipboardData;
-      case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments;
-        break;
-    }
-  }
-}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -32,12 +17,12 @@ void main() {
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
   testWidgets('Changing query moves cursor to the end of query', (WidgetTester tester) async {
@@ -124,7 +109,7 @@ void main() {
 
     // Simulate system back button
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
 
     expect(selectedResults, <String?>[null]);
@@ -336,7 +321,6 @@ void main() {
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
       passInInitialQuery: true,
-      initialQuery: null,
     ));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
@@ -350,7 +334,6 @@ void main() {
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
       passInInitialQuery: true,
-      initialQuery: null,
     ));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
@@ -372,7 +355,6 @@ void main() {
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
       passInInitialQuery: true,
-      initialQuery: null,
     ));
 
     // runs while search fades in
@@ -572,8 +554,13 @@ void main() {
     await tester.pumpAndSettle();
 
     final Text hintText = tester.widget(find.text(searchHintText));
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+
     expect(hintText.style?.color, delegate.searchFieldStyle?.color);
     expect(hintText.style?.fontSize, delegate.searchFieldStyle?.fontSize);
+    expect(textField.style?.color, delegate.searchFieldStyle?.color);
+    expect(textField.style?.fontSize, delegate.searchFieldStyle?.fontSize);
+
   });
 
   testWidgets('keyboard show search button by default', (WidgetTester tester) async {
@@ -602,8 +589,172 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], TextInputAction.done.toString());
   });
 
+  testWidgets('Custom flexibleSpace value', (WidgetTester tester) async {
+    const Widget flexibleSpace = Text('custom flexibleSpace');
+    final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.byWidget(flexibleSpace), findsOneWidget);
+  });
+
+
+  group('contributes semantics with custom flexibleSpace', () {
+    const Widget flexibleSpace = Text('FlexibleSpace');
+
+    TestSemantics buildExpected({ required String routeName }) {
+      final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
+          debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
+          debugDefaultTargetPlatformOverride == TargetPlatform.linux;
+      return TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 2,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.scopesRoute,
+                      SemanticsFlag.namesRoute,
+                    ],
+                    label: routeName,
+                    textDirection: TextDirection.ltr,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 4,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 6,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 8,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isButton,
+                                  SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocusable,
+                                ],
+                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                tooltip: 'Back',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                id: 9,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.isTextField,
+                                  SemanticsFlag.isFocused,
+                                  SemanticsFlag.isHeader,
+                                  if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
+                                    debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                                ],
+                                actions: <SemanticsAction>[
+                                  if (isDesktop)
+                                    SemanticsAction.didGainAccessibilityFocus,
+                                  if (isDesktop)
+                                    SemanticsAction.didLoseAccessibilityFocus,
+                                  SemanticsAction.tap,
+                                  SemanticsAction.setSelection,
+                                  SemanticsAction.setText,
+                                  SemanticsAction.paste,
+                                ],
+                                label: 'Search',
+                                textDirection: TextDirection.ltr,
+                                textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                              ),
+                              TestSemantics(
+                                id: 10,
+                                label: 'Bottom',
+                                textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ),
+                          TestSemantics(
+                            id: 7,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 11,
+                                label: 'FlexibleSpace',
+                                textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      TestSemantics(
+                        id: 5,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isButton,
+                          SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
+                        ],
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: 'Suggestions',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    testWidgets('includes routeName on Android', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
+      await tester.pumpWidget(TestHomePage(
+        delegate: delegate,
+      ));
+
+      await tester.tap(find.byTooltip('Search'));
+      await tester.pumpAndSettle();
+
+      expect(semantics, hasSemantics(
+        buildExpected(routeName: 'Search'),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+
+      semantics.dispose();
+    });
+
+    testWidgets('does not include routeName', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
+      await tester.pumpWidget(TestHomePage(
+        delegate: delegate,
+      ));
+
+      await tester.tap(find.byTooltip('Search'));
+      await tester.pumpAndSettle();
+
+      expect(semantics, hasSemantics(
+        buildExpected(routeName: ''),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ));
+
+      semantics.dispose();
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  });
+
+
   group('contributes semantics', () {
     TestSemantics buildExpected({ required String routeName }) {
+      final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
+                             debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
+                             debugDefaultTargetPlatformOverride == TargetPlatform.linux;
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -634,7 +785,7 @@ void main() {
                               SemanticsFlag.isFocusable,
                             ],
                             actions: <SemanticsAction>[SemanticsAction.tap],
-                            label: 'Back',
+                            tooltip: 'Back',
                             textDirection: TextDirection.ltr,
                           ),
                           TestSemantics(
@@ -647,8 +798,10 @@ void main() {
                                 debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
                             ],
                             actions: <SemanticsAction>[
-                              if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS)
+                              if (isDesktop)
                                 SemanticsAction.didGainAccessibilityFocus,
+                              if (isDesktop)
+                                SemanticsAction.didLoseAccessibilityFocus,
                               SemanticsAction.tap,
                               SemanticsAction.setSelection,
                               SemanticsAction.setText,
@@ -746,7 +899,7 @@ void main() {
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
   testWidgets('text in search bar contrasts background (light mode)', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData.light();
+    final ThemeData themeData = ThemeData(useMaterial3: false);
     final _TestSearchDelegate delegate = _TestSearchDelegate(
       defaultAppBarTheme: true,
     );
@@ -761,20 +914,20 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final Material appBarBackground = tester.widget<Material>(find.descendant(
+    final Material appBarBackground = tester.widgetList<Material>(find.descendant(
       of: find.byType(AppBar),
       matching: find.byType(Material),
-    ));
+    )).first;
     expect(appBarBackground.color, Colors.white);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
-    expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
+    expect(textField.style!.color, themeData.textTheme.bodyLarge!.color);
     expect(textField.style!.color, isNot(equals(Colors.white)));
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
   testWidgets('text in search bar contrasts background (dark mode)', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData.dark();
+    final ThemeData themeData = ThemeData.dark(useMaterial3: false);
     final _TestSearchDelegate delegate = _TestSearchDelegate(
       defaultAppBarTheme: true,
     );
@@ -789,25 +942,22 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final Material appBarBackground = tester.widget<Material>(find.descendant(
+    final Material appBarBackground = tester.widgetList<Material>(find.descendant(
       of: find.byType(AppBar),
       matching: find.byType(Material),
-    ));
+    )).first;
     expect(appBarBackground.color, themeData.primaryColor);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
-    expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
+    expect(textField.style!.color, themeData.textTheme.bodyLarge!.color);
     expect(textField.style!.color, isNot(equals(themeData.primaryColor)));
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/78144
-  testWidgets('`Leading` and `Actions` nullable test', (WidgetTester tester) async {
+  testWidgets('`Leading`, `Actions` and `FlexibleSpace` nullable test', (WidgetTester tester) async {
     // The search delegate page is displayed with no issues
-    // even with a null return values for [buildLeading] and [buildActions].
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
-      result: 'Result',
-      suggestions: 'Suggestions',
-    );
+    // even with a null return values for [buildLeading], [buildActions] and [flexibleSpace].
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
     final List<String> selectedResults = <String>[];
 
     await tester.pumpWidget(TestHomePage(
@@ -846,10 +996,7 @@ void main() {
     final _MyNavigatorObserver rootObserver = _MyNavigatorObserver();
     final _MyNavigatorObserver localObserver = _MyNavigatorObserver();
 
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
-      result: 'Result',
-      suggestions: 'Suggestions',
-    );
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
 
     await tester.pumpWidget(MaterialApp(
       navigatorObservers: <NavigatorObserver>[rootObserver],
@@ -901,17 +1048,53 @@ void main() {
     expect(rootObserver.pushCount, 1);
     expect(localObserver.pushCount, 1);
   });
+
+  testWidgets('Query text field shows toolbar initially', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/95588
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final List<String> selectedResults = <String>[];
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+      results: selectedResults,
+    ));
+
+    // Open search.
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final Finder textFieldFinder = find.byType(TextField);
+    final TextField textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.controller!.text.length, 0);
+
+    mockClipboard.handleMethodCall(const MethodCall(
+      'Clipboard.setData',
+      <String, dynamic>{
+        'text': 'pasteablestring',
+      },
+    ));
+
+    // Long press shows toolbar.
+    await tester.longPress(textFieldFinder);
+    await tester.pump();
+    expect(find.text('Paste'), findsOneWidget);
+
+    await tester.tap(find.text('Paste'));
+    await tester.pump();
+    expect(textField.controller!.text.length, 15);
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }
 
 class TestHomePage extends StatelessWidget {
   const TestHomePage({
-    Key? key,
+    super.key,
     this.results,
     required this.delegate,
     this.passInInitialQuery = false,
     this.initialQuery,
     this.themeData,
-  }) : super(key: key);
+  });
 
   final List<String?>? results;
   final SearchDelegate<String> delegate;
@@ -962,22 +1145,21 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
+    this.flexibleSpace ,
     this.defaultAppBarTheme = false,
-    InputDecorationTheme? searchFieldDecorationTheme,
-    TextStyle? searchFieldStyle,
+    super.searchFieldDecorationTheme,
+    super.searchFieldStyle,
     String? searchHint,
-    TextInputAction textInputAction = TextInputAction.search,
+    super.textInputAction,
   }) : super(
           searchFieldLabel: searchHint,
-          textInputAction: textInputAction,
-          searchFieldStyle: searchFieldStyle,
-          searchFieldDecorationTheme: searchFieldDecorationTheme,
         );
 
   final bool defaultAppBarTheme;
   final String suggestions;
   final String result;
   final List<Widget> actions;
+  final Widget? flexibleSpace;
   static const Color hintTextColor = Colors.green;
 
   @override
@@ -1014,7 +1196,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   @override
   Widget buildSuggestions(BuildContext context) {
     queriesForSuggestions.add(query);
-    return MaterialButton(
+    return ElevatedButton(
       onPressed: () {
         showResults(context);
       },
@@ -1034,6 +1216,11 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   }
 
   @override
+  Widget? buildFlexibleSpace(BuildContext context) {
+    return flexibleSpace;
+  }
+
+  @override
   PreferredSizeWidget buildBottom(BuildContext context) {
     return const PreferredSize(
       preferredSize: Size.fromHeight(56.0),
@@ -1043,14 +1230,6 @@ class _TestSearchDelegate extends SearchDelegate<String> {
 }
 
 class _TestEmptySearchDelegate extends SearchDelegate<String> {
-  _TestEmptySearchDelegate({
-    this.suggestions = 'Suggestions',
-    this.result = 'Result',
-  }) : super();
-
-  final String suggestions;
-  final String result;
-
   @override
   Widget? buildLeading(BuildContext context) => null;
 
@@ -1059,11 +1238,11 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return MaterialButton(
+    return ElevatedButton(
       onPressed: () {
         showResults(context);
       },
-      child: Text(suggestions),
+      child: const Text('Suggestions'),
     );
   }
 
@@ -1080,7 +1259,7 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
         tooltip: 'Close',
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
-          close(context, result);
+          close(context, 'Result');
         },
       ),
     );

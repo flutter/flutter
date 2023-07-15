@@ -17,6 +17,7 @@ export 'src/gestures/drag_details.dart';
 export 'src/gestures/eager.dart';
 export 'src/gestures/events.dart';
 export 'src/gestures/force_press.dart';
+export 'src/gestures/gesture_settings.dart';
 export 'src/gestures/hit_test.dart';
 export 'src/gestures/long_press.dart';
 export 'src/gestures/lsq_solver.dart';

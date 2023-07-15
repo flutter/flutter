@@ -7,7 +7,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class PostBackdropFilterPage extends StatefulWidget {
-  const PostBackdropFilterPage({Key? key}) : super(key: key);
+  const PostBackdropFilterPage({super.key});
 
   @override
   State<PostBackdropFilterPage> createState() => _PostBackdropFilterPageState();
@@ -74,9 +74,9 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
               ),
               getConditionalBackdrop(),
               RepaintBoundary(
-                child: Container(
+                child: ColoredBox(
                   color: Colors.white,
-                  child:Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       const Text('Include BackdropFilter:'),
@@ -93,7 +93,7 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
                     ],
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ],

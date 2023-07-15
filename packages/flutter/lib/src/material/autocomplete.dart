@@ -12,148 +12,44 @@ import 'theme.dart';
 
 /// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
 ///
-/// {@tool dartpad --template=freeform}
+/// {@youtube 560 315 https://www.youtube.com/watch?v=-Nny8kzW380}
+///
+/// {@tool dartpad}
 /// This example shows how to create a very basic Autocomplete widget using the
 /// default UI.
 ///
-/// ```dart main
-/// import 'package:flutter/material.dart';
-///
-/// void main() => runApp(const AutocompleteExampleApp());
-///
-/// class AutocompleteExampleApp extends StatelessWidget {
-///   const AutocompleteExampleApp({Key? key}) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         appBar: AppBar(
-///           title: const Text('Autocomplete Basic'),
-///         ),
-///         body: const Center(
-///           child: AutocompleteBasicExample(),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-///
-/// class AutocompleteBasicExample extends StatelessWidget {
-///   const AutocompleteBasicExample({Key? key}) : super(key: key);
-///
-///   static const List<String> _kOptions = <String>[
-///     'aardvark',
-///     'bobcat',
-///     'chameleon',
-///   ];
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Autocomplete<String>(
-///       optionsBuilder: (TextEditingValue textEditingValue) {
-///         if (textEditingValue.text == '') {
-///           return const Iterable<String>.empty();
-///         }
-///         return _kOptions.where((String option) {
-///           return option.contains(textEditingValue.text.toLowerCase());
-///         });
-///       },
-///       onSelected: (String selection) {
-///         print('You just selected $selection');
-///       },
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/autocomplete/autocomplete.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad --template=freeform}
+/// {@tool dartpad}
 /// This example shows how to create an Autocomplete widget with a custom type.
 /// Try searching with text from the name or email field.
 ///
-/// ```dart main
-/// import 'package:flutter/material.dart';
+/// ** See code in examples/api/lib/material/autocomplete/autocomplete.1.dart **
+/// {@end-tool}
 ///
-/// void main() => runApp(const AutocompleteExampleApp());
+/// {@tool dartpad}
+/// This example shows how to create an Autocomplete widget whose options are
+/// fetched over the network.
 ///
-/// class AutocompleteExampleApp extends StatelessWidget {
-///   const AutocompleteExampleApp({Key? key}) : super(key: key);
+/// ** See code in examples/api/lib/material/autocomplete/autocomplete.2.dart **
+/// {@end-tool}
 ///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         appBar: AppBar(
-///           title: const Text('Autocomplete Basic User'),
-///         ),
-///         body: const Center(
-///           child: AutocompleteBasicUserExample(),
-///         ),
-///       ),
-///     );
-///   }
-/// }
+/// {@tool dartpad}
+/// This example shows how to create an Autocomplete widget whose options are
+/// fetched over the network. It uses debouncing to wait to perform the network
+/// request until after the user finishes typing.
 ///
-/// @immutable
-/// class User {
-///   const User({
-///     required this.email,
-///     required this.name,
-///   });
+/// ** See code in examples/api/lib/material/autocomplete/autocomplete.3.dart **
+/// {@end-tool}
 ///
-///   final String email;
-///   final String name;
+/// {@tool dartpad}
+/// This example shows how to create an Autocomplete widget whose options are
+/// fetched over the network. It includes both debouncing and error handling, so
+/// that failed network requests show an error to the user and can be recovered
+/// from. Try toggling the network Switch widget to simulate going offline.
 ///
-///   @override
-///   String toString() {
-///     return '$name, $email';
-///   }
-///
-///   @override
-///   bool operator ==(Object other) {
-///     if (other.runtimeType != runtimeType) {
-///       return false;
-///     }
-///     return other is User
-///         && other.name == name
-///         && other.email == email;
-///   }
-///
-///   @override
-///   int get hashCode => hashValues(email, name);
-/// }
-///
-/// class AutocompleteBasicUserExample extends StatelessWidget {
-///   const AutocompleteBasicUserExample({Key? key}) : super(key: key);
-///
-///   static const List<User> _userOptions = <User>[
-///     User(name: 'Alice', email: 'alice@example.com'),
-///     User(name: 'Bob', email: 'bob@example.com'),
-///     User(name: 'Charlie', email: 'charlie123@gmail.com'),
-///   ];
-///
-///   static String _displayStringForOption(User option) => option.name;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Autocomplete<User>(
-///       displayStringForOption: _displayStringForOption,
-///       optionsBuilder: (TextEditingValue textEditingValue) {
-///         if (textEditingValue.text == '') {
-///           return const Iterable<User>.empty();
-///         }
-///         return _userOptions.where((User option) {
-///           return option.toString().contains(textEditingValue.text.toLowerCase());
-///         });
-///       },
-///       onSelected: (User selection) {
-///         print('You just selected ${_displayStringForOption(selection)}');
-///       },
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/autocomplete/autocomplete.4.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -163,17 +59,16 @@ import 'theme.dart';
 class Autocomplete<T extends Object> extends StatelessWidget {
   /// Creates an instance of [Autocomplete].
   const Autocomplete({
-    Key? key,
+    super.key,
     required this.optionsBuilder,
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
     this.onSelected,
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
+    this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.initialValue,
-  }) : assert(displayStringForOption != null),
-       assert(optionsBuilder != null),
-       super(key: key);
+  });
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -195,6 +90,9 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// If not provided, will build a standard Material-style list of results by
   /// default.
   final AutocompleteOptionsViewBuilder<T>? optionsViewBuilder;
+
+  /// {@macro flutter.widgets.RawAutocomplete.optionsViewOpenDirection}
+  final OptionsViewOpenDirection optionsViewOpenDirection;
 
   /// The maximum height used for the default Material options list widget.
   ///
@@ -222,6 +120,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
       fieldViewBuilder: fieldViewBuilder,
       initialValue: initialValue,
       optionsBuilder: optionsBuilder,
+      optionsViewOpenDirection: optionsViewOpenDirection,
       optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
         return _AutocompleteOptions<T>(
           displayStringForOption: displayStringForOption,
@@ -238,11 +137,10 @@ class Autocomplete<T extends Object> extends StatelessWidget {
 // The default Material-style Autocomplete text field.
 class _AutocompleteField extends StatelessWidget {
   const _AutocompleteField({
-    Key? key,
     required this.focusNode,
     required this.textEditingController,
     required this.onFieldSubmitted,
-  }) : super(key: key);
+  });
 
   final FocusNode focusNode;
 
@@ -265,12 +163,12 @@ class _AutocompleteField extends StatelessWidget {
 // The default Material-style Autocomplete options.
 class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   const _AutocompleteOptions({
-    Key? key,
+    super.key,
     required this.displayStringForOption,
     required this.onSelected,
     required this.options,
     required this.maxOptionsHeight,
-  }) : super(key: key);
+  });
 
   final AutocompleteOptionToString<T> displayStringForOption;
 
@@ -301,7 +199,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
                   builder: (BuildContext context) {
                     final bool highlight = AutocompleteHighlightedOption.of(context) == index;
                     if (highlight) {
-                      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) {
+                      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
                         Scrollable.ensureVisible(context, alignment: 0.5);
                       });
                     }

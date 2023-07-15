@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 import 'base/async_guard.dart';
 import 'base/terminal.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 class ValidatorTask {
   ValidatorTask(this.validator, this.result);
@@ -36,7 +36,7 @@ enum ValidationType {
   missing,
   partial,
   notAvailable,
-  installed,
+  success,
 }
 
 enum ValidationMessageType {
@@ -52,6 +52,11 @@ abstract class DoctorValidator {
   final String title;
 
   String get slowWarning => 'This is taking an unexpectedly long time...';
+
+  static const Duration _slowWarningDuration = Duration(seconds: 10);
+
+  /// Duration before the spinner should display [slowWarning].
+  Duration get slowWarningDuration => _slowWarningDuration;
 
   Future<ValidationResult> validate();
 }
@@ -111,23 +116,18 @@ class GroupedValidator extends DoctorValidator {
     for (final ValidationResult result in results) {
       statusInfo ??= result.statusInfo;
       switch (result.type) {
-        case ValidationType.installed:
+        case ValidationType.success:
           if (mergedType == ValidationType.missing) {
             mergedType = ValidationType.partial;
           }
-          break;
         case ValidationType.notAvailable:
         case ValidationType.partial:
           mergedType = ValidationType.partial;
-          break;
         case ValidationType.crash:
         case ValidationType.missing:
-          if (mergedType == ValidationType.installed) {
+          if (mergedType == ValidationType.success) {
             mergedType = ValidationType.partial;
           }
-          break;
-        default:
-          throw 'Unrecognized validation type: ${result.type}';
       }
       mergedMessages.addAll(result.messages);
     }
@@ -139,7 +139,7 @@ class GroupedValidator extends DoctorValidator {
 
 @immutable
 class ValidationResult {
-  /// [ValidationResult.type] should only equal [ValidationResult.installed]
+  /// [ValidationResult.type] should only equal [ValidationResult.success]
   /// if no [messages] are hints or errors.
   const ValidationResult(this.type, this.messages, { this.statusInfo });
 
@@ -162,13 +162,12 @@ class ValidationResult {
   final List<ValidationMessage> messages;
 
   String get leadingBox {
-    assert(type != null);
     switch (type) {
       case ValidationType.crash:
         return '[☠]';
       case ValidationType.missing:
         return '[✗]';
-      case ValidationType.installed:
+      case ValidationType.success:
         return '[✓]';
       case ValidationType.notAvailable:
       case ValidationType.partial:
@@ -177,13 +176,12 @@ class ValidationResult {
   }
 
   String get coloredLeadingBox {
-    assert(type != null);
     switch (type) {
       case ValidationType.crash:
         return globals.terminal.color(leadingBox, TerminalColor.red);
       case ValidationType.missing:
         return globals.terminal.color(leadingBox, TerminalColor.red);
-      case ValidationType.installed:
+      case ValidationType.success:
         return globals.terminal.color(leadingBox, TerminalColor.green);
       case ValidationType.notAvailable:
       case ValidationType.partial:
@@ -193,19 +191,23 @@ class ValidationResult {
 
   /// The string representation of the type.
   String get typeStr {
-    assert(type != null);
     switch (type) {
       case ValidationType.crash:
         return 'crash';
       case ValidationType.missing:
         return 'missing';
-      case ValidationType.installed:
+      case ValidationType.success:
         return 'installed';
       case ValidationType.notAvailable:
         return 'notAvailable';
       case ValidationType.partial:
         return 'partial';
     }
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($type, $messages, $statusInfo)';
   }
 }
 
@@ -223,26 +225,33 @@ class ValidationMessage {
   ///
   /// The [contextUrl] may be supplied to link to external resources. This
   /// is displayed after the informative message in verbose modes.
-  const ValidationMessage(this.message, {this.contextUrl}) : type = ValidationMessageType.information;
+  const ValidationMessage(this.message, { this.contextUrl, String? piiStrippedMessage })
+      : type = ValidationMessageType.information, piiStrippedMessage = piiStrippedMessage ?? message;
 
   /// Create a validation message with information for a failing validator.
-  const ValidationMessage.error(this.message)
+  const ValidationMessage.error(this.message, { String? piiStrippedMessage })
     : type = ValidationMessageType.error,
+      piiStrippedMessage = piiStrippedMessage ?? message,
       contextUrl = null;
 
   /// Create a validation message with information for a partially failing
   /// validator.
-  const ValidationMessage.hint(this.message)
+  const ValidationMessage.hint(this.message, { String? piiStrippedMessage })
     : type = ValidationMessageType.hint,
+      piiStrippedMessage = piiStrippedMessage ?? message,
       contextUrl = null;
 
   final ValidationMessageType type;
   final String? contextUrl;
   final String message;
+  /// Optional message with PII stripped, to show instead of [message].
+  final String piiStrippedMessage;
 
   bool get isError => type == ValidationMessageType.error;
 
   bool get isHint => type == ValidationMessageType.hint;
+
+  bool get isInformation => type == ValidationMessageType.information;
 
   String get indicator {
     switch (type) {
@@ -287,7 +296,8 @@ class NoIdeValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     return ValidationResult(
-      ValidationType.missing,
+      // Info hint to user they do not have a supported IDE installed
+      ValidationType.notAvailable,
       globals.userMessages.noIdeInstallationInfo.map((String ideInfo) => ValidationMessage(ideInfo)).toList(),
       statusInfo: globals.userMessages.noIdeStatusInfo,
     );
@@ -295,7 +305,7 @@ class NoIdeValidator extends DoctorValidator {
 }
 
 class ValidatorWithResult extends DoctorValidator {
-  ValidatorWithResult(String title, this.result) : super(title);
+  ValidatorWithResult(super.title, this.result);
 
   final ValidationResult result;
 

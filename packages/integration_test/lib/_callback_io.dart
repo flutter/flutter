@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:flutter/services.dart';
@@ -40,10 +41,8 @@ class IOCallbackManager implements CallbackManager {
                   data: testRunner.reportData,
                 ).toJson(),
         };
-        break;
       case 'get_health':
         response = <String, String>{'status': 'ok'};
-        break;
       default:
         throw UnimplementedError('$command is not implemented');
     }
@@ -60,37 +59,40 @@ class IOCallbackManager implements CallbackManager {
     // comes up in the future. For example: `WebCallbackManager.cleanup`.
   }
 
-  // Whether the Flutter surface uses an Image.
-  bool _usesFlutterImage = false;
+  // [convertFlutterSurfaceToImage] has been called and [takeScreenshot] is ready to capture the surface (Android only).
+  bool _isSurfaceRendered = false;
 
   @override
   Future<void> convertFlutterSurfaceToImage() async {
-    assert(!_usesFlutterImage, 'Surface already converted to an image');
+    if (!Platform.isAndroid) {
+      // No-op on other platforms.
+      return;
+    }
+    assert(!_isSurfaceRendered, 'Surface already converted to an image');
     await integrationTestChannel.invokeMethod<void>(
       'convertFlutterSurfaceToImage',
-      null,
     );
-    _usesFlutterImage = true;
+    _isSurfaceRendered = true;
 
     addTearDown(() async {
-      assert(_usesFlutterImage, 'Surface is not an image');
+      assert(_isSurfaceRendered, 'Surface is not an image');
       await integrationTestChannel.invokeMethod<void>(
         'revertFlutterImage',
-        null,
       );
-      _usesFlutterImage = false;
+      _isSurfaceRendered = false;
     });
   }
 
   @override
-  Future<Map<String, dynamic>> takeScreenshot(String screenshot) async {
-    if (!_usesFlutterImage) {
+  Future<Map<String, dynamic>> takeScreenshot(String screenshot, [Map<String, Object?>? args]) async {
+    assert(args == null, '[args] handling has not been implemented for this platform');
+    if (Platform.isAndroid && !_isSurfaceRendered) {
       throw StateError('Call convertFlutterSurfaceToImage() before taking a screenshot');
     }
     integrationTestChannel.setMethodCallHandler(_onMethodChannelCall);
     final List<int>? rawBytes = await integrationTestChannel.invokeMethod<List<int>>(
       'captureScreenshot',
-      null,
+      <String, dynamic>{'name': screenshot},
     );
     if (rawBytes == null) {
       throw StateError('Expected a list of bytes, but instead captureScreenshot returned null');
@@ -104,8 +106,7 @@ class IOCallbackManager implements CallbackManager {
   Future<dynamic> _onMethodChannelCall(MethodCall call) async {
     switch (call.method) {
       case 'scheduleFrame':
-        window.scheduleFrame();
-        break;
+        PlatformDispatcher.instance.scheduleFrame();
     }
     return null;
   }

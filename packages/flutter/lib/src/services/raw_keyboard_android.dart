@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 // Android sets the 0x80000000 bit on a character to indicate that it is a
 // combining character, so we use this mask to remove that bit to make it a
@@ -39,11 +42,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     this.productId = 0,
     this.deviceId = 0,
     this.repeatCount = 0,
-  }) : assert(flags != null),
-       assert(codePoint != null),
-       assert(keyCode != null),
-       assert(scanCode != null),
-       assert(metaState != null);
+  });
 
   /// The current set of additional flags for this event.
   ///
@@ -97,7 +96,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   /// The modifiers that were present when the key event occurred.
   ///
   /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getMetaState()>
-  /// for the numerical values of the `metaState`. Many of these constants are
+  /// for the numerical values of the [metaState]. Many of these constants are
   /// also replicated as static constants in this class.
   ///
   /// See also:
@@ -121,13 +120,13 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   /// The vendor ID of the device that produced the event.
   ///
   /// See <https://developer.android.com/reference/android/view/InputDevice.html#getVendorId()>
-  /// for the numerical values of the `vendorId`.
+  /// for the numerical values of the [vendorId].
   final int vendorId;
 
   /// The product ID of the device that produced the event.
   ///
   /// See <https://developer.android.com/reference/android/view/InputDevice.html#getProductId()>
-  /// for the numerical values of the `productId`.
+  /// for the numerical values of the [productId].
   final int productId;
 
   /// The ID of the device that produced the event.
@@ -224,7 +223,6 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 
   @override
   bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
-    assert(side != null);
     switch (key) {
       case ModifierKey.controlModifier:
         return _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
@@ -285,6 +283,44 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
         return KeyboardSide.all;
     }
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<int>('flags', flags));
+    properties.add(DiagnosticsProperty<int>('codePoint', codePoint));
+    properties.add(DiagnosticsProperty<int>('plainCodePoint', plainCodePoint));
+    properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+    properties.add(DiagnosticsProperty<int>('scanCode', scanCode));
+    properties.add(DiagnosticsProperty<int>('metaState', metaState));
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is RawKeyEventDataAndroid
+        && other.flags == flags
+        && other.codePoint == codePoint
+        && other.plainCodePoint == plainCodePoint
+        && other.keyCode == keyCode
+        && other.scanCode == scanCode
+        && other.metaState == metaState;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    flags,
+    codePoint,
+    plainCodePoint,
+    keyCode,
+    scanCode,
+    metaState,
+  );
 
   // Modifier key masks.
 
@@ -430,11 +466,4 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
   static const int modifierScrollLock = 0x400000;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataAndroid')}(keyLabel: $keyLabel flags: $flags, codePoint: $codePoint, '
-      'keyCode: $keyCode, scanCode: $scanCode, metaState: $metaState, '
-      'modifiers down: $modifiersPressed)';
-  }
 }

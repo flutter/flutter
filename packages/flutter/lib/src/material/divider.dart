@@ -12,7 +12,7 @@ import 'theme.dart';
 
 /// A thin horizontal line, with padding on either side.
 ///
-/// In the material design language, this represents a divider. Dividers can be
+/// In the Material Design language, this represents a divider. Dividers can be
 /// used in lists, [Drawer]s, and elsewhere to separate content.
 ///
 /// To create a divider between [ListTile] items, consider using
@@ -23,8 +23,7 @@ import 'theme.dart';
 /// The box's total height is controlled by [height]. The appropriate
 /// padding is automatically computed from the height.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
+/// {@tool dartpad}
 /// This sample shows how to display a Divider between an orange and blue box
 /// inside a column. The Divider is 20 logical pixels in height and contains a
 /// vertically centered black line that is 5 logical pixels thick. The black
@@ -32,64 +31,29 @@ import 'theme.dart';
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/divider.png)
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Center(
-///     child: Column(
-///       children: <Widget>[
-///         Expanded(
-///           child: Container(
-///             color: Colors.amber,
-///             child: const Center(
-///               child: Text('Above'),
-///             ),
-///           ),
-///         ),
-///         const Divider(
-///           height: 20,
-///           thickness: 5,
-///           indent: 20,
-///           endIndent: 20,
-///         ),
-///         // Subheader example from Material spec.
-///         // https://material.io/components/dividers#types
-///         Container(
-///           padding: const EdgeInsets.only(left: 20),
-///           child: Align(
-///             alignment: AlignmentDirectional.centerStart,
-///             child: Text(
-///               'Subheader',
-///               style: Theme.of(context).textTheme.caption,
-///               textAlign: TextAlign.start,
-///             ),
-///           ),
-///         ),
-///         Expanded(
-///           child: Container(
-///             color: Theme.of(context).colorScheme.primary,
-///             child: const Center(
-///               child: Text('Below'),
-///             ),
-///           ),
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/divider/divider.0.dart **
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of [Divider] widget, as described in:
+/// https://m3.material.io/components/divider/overview
+///
+/// ** See code in examples/api/lib/material/divider/divider.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [PopupMenuDivider], which is the equivalent but for popup menus.
 ///  * [ListTile.divideTiles], another approach to dividing widgets in a list.
+///  * [VerticalDivider], which is the vertical analog of this widget.
 ///  * <https://material.io/design/components/dividers.html>
 class Divider extends StatelessWidget {
-  /// Creates a material design divider.
+  /// Creates a Material Design divider.
   ///
   /// The [height], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.
   const Divider({
-    Key? key,
+    super.key,
     this.height,
     this.thickness,
     this.indent,
@@ -98,8 +62,7 @@ class Divider extends StatelessWidget {
   }) : assert(height == null || height >= 0.0),
        assert(thickness == null || thickness >= 0.0),
        assert(indent == null || indent >= 0.0),
-       assert(endIndent == null || endIndent >= 0.0),
-       super(key: key);
+       assert(endIndent == null || endIndent >= 0.0);
 
 
   /// The divider's height extent.
@@ -150,7 +113,9 @@ class Divider extends StatelessWidget {
   /// Computes the [BorderSide] that represents a divider.
   ///
   /// If [color] is null, then [DividerThemeData.color] is used. If that is also
-  /// null, then [ThemeData.dividerColor] is used.
+  /// null, then if [ThemeData.useMaterial3] is true then it defaults to
+  /// [ThemeData.colorScheme]'s [ColorScheme.outlineVariant]. Otherwise
+  /// [ThemeData.dividerColor] is used.
   ///
   /// If [width] is null, then [DividerThemeData.thickness] is used. If that is
   /// also null, then this defaults to 0.0 (a hairline border).
@@ -177,11 +142,12 @@ class Divider extends StatelessWidget {
   /// ```
   /// {@end-tool}
   static BorderSide createBorderSide(BuildContext? context, { Color? color, double? width }) {
-    final Color? effectiveColor = color
-        ?? (context != null ? (DividerTheme.of(context).color ?? Theme.of(context).dividerColor) : null);
-    final double effectiveWidth =  width
-        ?? (context != null ? DividerTheme.of(context).thickness : null)
-        ?? 0.0;
+    final DividerThemeData? dividerTheme = context != null ? DividerTheme.of(context) : null;
+    final DividerThemeData? defaults = context != null
+      ? Theme.of(context).useMaterial3 ? _DividerDefaultsM3(context) : _DividerDefaultsM2(context)
+      : null;
+    final Color? effectiveColor = color ?? dividerTheme?.color ?? defaults?.color;
+    final double effectiveWidth =  width ?? dividerTheme?.thickness ?? defaults?.thickness ?? 0.0;
 
     // Prevent assertion since it is possible that context is null and no color
     // is specified.
@@ -198,11 +164,13 @@ class Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final DividerThemeData dividerTheme = DividerTheme.of(context);
-    final double height = this.height ?? dividerTheme.space ?? 16.0;
-    final double thickness = this.thickness ?? dividerTheme.thickness ?? 0.0;
-    final double indent = this.indent ?? dividerTheme.indent ?? 0.0;
-    final double endIndent = this.endIndent ?? dividerTheme.endIndent ?? 0.0;
+    final DividerThemeData defaults = theme.useMaterial3 ? _DividerDefaultsM3(context) : _DividerDefaultsM2(context);
+    final double height = this.height ?? dividerTheme.space ?? defaults.space!;
+    final double thickness = this.thickness ?? dividerTheme.thickness ?? defaults.thickness!;
+    final double indent = this.indent ?? dividerTheme.indent ?? defaults.indent!;
+    final double endIndent = this.endIndent ?? dividerTheme.endIndent ?? defaults.endIndent!;
 
     return SizedBox(
       height: height,
@@ -223,66 +191,41 @@ class Divider extends StatelessWidget {
 
 /// A thin vertical line, with padding on either side.
 ///
-/// In the material design language, this represents a divider. Vertical
+/// In the Material Design language, this represents a divider. Vertical
 /// dividers can be used in horizontally scrolling lists, such as a
 /// [ListView] with [ListView.scrollDirection] set to [Axis.horizontal].
 ///
 /// The box's total width is controlled by [width]. The appropriate
 /// padding is automatically computed from the width.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
-///
-/// This sample shows how to display a [VerticalDivider] between an purple and orange box
+/// {@tool dartpad}
+/// This sample shows how to display a [VerticalDivider] between a purple and orange box
 /// inside a [Row]. The [VerticalDivider] is 20 logical pixels in width and contains a
 /// horizontally centered black line that is 1 logical pixels thick. The grey
 /// line is indented by 20 logical pixels.
 ///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Container(
-///     padding: const EdgeInsets.all(10),
-///     child: Row(
-///       children: <Widget>[
-///         Expanded(
-///           child: Container(
-///             decoration: BoxDecoration(
-///               borderRadius: BorderRadius.circular(10),
-///               color: Colors.deepPurpleAccent,
-///             ),
-///           ),
-///         ),
-///         const VerticalDivider(
-///           color: Colors.grey,
-///           thickness: 1,
-///           indent: 20,
-///           endIndent: 0,
-///           width: 20,
-///         ),
-///         Expanded(
-///           child: Container(
-///             decoration: BoxDecoration(
-///               borderRadius: BorderRadius.circular(10),
-///               color: Colors.deepOrangeAccent,
-///             ),
-///           ),
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/material/divider/vertical_divider.0.dart **
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of [VerticalDivider] widget, as described in:
+/// https://m3.material.io/components/divider/overview
+///
+/// ** See code in examples/api/lib/material/divider/vertical_divider.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ListView.separated], which can be used to generate vertical dividers.
+///  * [Divider], which is the horizontal analog of this widget.
 ///  * <https://material.io/design/components/dividers.html>
 class VerticalDivider extends StatelessWidget {
-  /// Creates a material design vertical divider.
+  /// Creates a Material Design vertical divider.
   ///
   /// The [width], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.
   const VerticalDivider({
-    Key? key,
+    super.key,
     this.width,
     this.thickness,
     this.indent,
@@ -291,8 +234,7 @@ class VerticalDivider extends StatelessWidget {
   }) : assert(width == null || width >= 0.0),
        assert(thickness == null || thickness >= 0.0),
        assert(indent == null || indent >= 0.0),
-       assert(endIndent == null || endIndent >= 0.0),
-       super(key: key);
+       assert(endIndent == null || endIndent >= 0.0);
 
   /// The divider's width.
   ///
@@ -341,11 +283,13 @@ class VerticalDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final DividerThemeData dividerTheme = DividerTheme.of(context);
-    final double width = this.width ?? dividerTheme.space ?? 16.0;
-    final double thickness = this.thickness ?? dividerTheme.thickness ?? 0.0;
-    final double indent = this.indent ?? dividerTheme.indent ?? 0.0;
-    final double endIndent = this.endIndent ?? dividerTheme.endIndent ?? 0.0;
+    final DividerThemeData defaults = theme.useMaterial3 ? _DividerDefaultsM3(context) : _DividerDefaultsM2(context);
+    final double width = this.width ?? dividerTheme.space ?? defaults.space!;
+    final double thickness = this.thickness ?? dividerTheme.thickness ?? defaults.thickness!;
+    final double indent = this.indent ?? dividerTheme.indent ?? defaults.indent!;
+    final double endIndent = this.endIndent ?? dividerTheme.endIndent ?? defaults.endIndent!;
 
     return SizedBox(
       width: width,
@@ -363,3 +307,38 @@ class VerticalDivider extends StatelessWidget {
     );
   }
 }
+
+class _DividerDefaultsM2 extends DividerThemeData {
+  const _DividerDefaultsM2(this.context) : super(
+    space: 16,
+    thickness: 0,
+    indent: 0,
+    endIndent: 0,
+  );
+
+  final BuildContext context;
+
+  @override Color? get color => Theme.of(context).dividerColor;
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - Divider
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+class _DividerDefaultsM3 extends DividerThemeData {
+  const _DividerDefaultsM3(this.context) : super(
+    space: 16,
+    thickness: 1.0,
+    indent: 0,
+    endIndent: 0,
+  );
+
+  final BuildContext context;
+
+  @override Color? get color => Theme.of(context).colorScheme.outlineVariant;
+}
+
+// END GENERATED TOKEN PROPERTIES - Divider

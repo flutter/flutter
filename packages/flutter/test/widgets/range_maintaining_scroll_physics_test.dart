@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class ExpandingBox extends StatefulWidget {
-  const ExpandingBox({ Key? key, required this.collapsedSize, required this.expandedSize }) : super(key: key);
+  const ExpandingBox({ super.key, required this.collapsedSize, required this.expandedSize });
 
   final double collapsedSize;
   final double expandedSize;
@@ -122,7 +123,7 @@ void main() {
     final TestGesture drag1 = await tester.startGesture(const Offset(10.0, 500.0));
     expect(await tester.pumpAndSettle(), 1); // Nothing to animate
     await drag1.moveTo(const Offset(10.0, 0.0));
-    expect(await tester.pumpAndSettle(), 1); // Nothing to animate
+    expect(await tester.pumpAndSettle(), 2); // Nothing to animate, only one semantics update
     await drag1.up();
     expect(await tester.pumpAndSettle(), 1); // Nothing to animate
     expect(position.pixels, moreOrLessEquals(500.0));
@@ -132,14 +133,14 @@ void main() {
     final TestGesture drag2 = await tester.startGesture(const Offset(10.0, 500.0));
     expect(await tester.pumpAndSettle(), 1); // Nothing to animate
     await drag2.moveTo(const Offset(10.0, 100.0));
-    expect(await tester.pumpAndSettle(), 1); // Nothing to animate
+    expect(await tester.pumpAndSettle(), 2); // Nothing to animate, only one semantics update
     expect(position.maxScrollExtent, 900.0);
     expect(position.pixels, lessThanOrEqualTo(900.0));
     expect(position.activity, isInstanceOf<DragScrollActivity>());
 
     final _ExpandingBoxState expandingBoxState = tester.state<_ExpandingBoxState>(find.byType(ExpandingBox));
     expandingBoxState.toggleSize();
-    expect(await tester.pumpAndSettle(), 1); // Nothing to animate
+    expect(await tester.pumpAndSettle(), 2); // Nothing to animate, only one semantics update
     expect(position.activity, isInstanceOf<DragScrollActivity>());
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
@@ -150,7 +151,7 @@ void main() {
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
     expect(position.pixels, 50.0);
-    expect(await tester.pumpAndSettle(), 1); // Nothing to animate
+    expect(await tester.pumpAndSettle(), 2); // Nothing to animate, only one semantics update
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
     expect(position.pixels, 50.0);
@@ -230,7 +231,7 @@ void main() {
     expect(bike2.center, bike1.shift(const Offset(100.0, 0.0)).center);
   });
 
-  testWidgets('Changing the size of the viewport while you are overdragged', (WidgetTester tester) async {
+  testWidgets('changing the size of the viewport when overscrolled', (WidgetTester tester) async {
     Widget build(double height) {
       return Directionality(
         textDirection: TextDirection.rtl,
@@ -263,10 +264,86 @@ void main() {
     final Rect newPosition = tester.getRect(find.byType(Placeholder));
     expect(oldPosition, newPosition);
   });
+
+  testWidgets('inserting and removing an item when overscrolled', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/62890
+
+    const double itemExtent = 100.0;
+    final UniqueKey key = UniqueKey();
+    final Finder finder = find.byKey(key);
+    Widget build({required bool twoItems}) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: ScrollConfiguration(
+          behavior: const RangeMaintainingTestScrollBehavior(),
+          child: Align(
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+              child: ListView(
+                children: <Widget>[
+                  SizedBox(height: itemExtent, child: Placeholder(key: key)),
+                  if (twoItems)
+                    const SizedBox(height: itemExtent, child: Placeholder()),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(twoItems: false));
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+
+    // overscroll bottom
+    final TestGesture drag1 = await tester.startGesture(tester.getCenter(finder));
+    await tester.pump();
+    await drag1.moveBy(const Offset(0.0, -50.0));
+    await tester.pump();
+
+    final double oldOverscroll1 = position.pixels - position.maxScrollExtent;
+    final Rect oldPosition1 = tester.getRect(finder);
+    await tester.pumpWidget(build(twoItems: true));
+    // verify inserting new item didn't change the position of the first one
+    expect(oldPosition1, tester.getRect(finder));
+    // verify the overscroll changed by the size of the added item
+    final double newOverscroll1 = position.pixels - position.maxScrollExtent;
+    expect(oldOverscroll1, isPositive);
+    expect(newOverscroll1, isNegative);
+    expect(newOverscroll1, oldOverscroll1 - itemExtent);
+
+    await drag1.up();
+
+    // verify there's no ballistic animation, because we weren't overscrolled
+    expect(await tester.pumpAndSettle(), 1);
+
+    // overscroll bottom
+    final TestGesture drag2 = await tester.startGesture(tester.getCenter(finder));
+    await tester.pump();
+    await drag2.moveBy(const Offset(0.0, -100.0));
+    await tester.pump();
+
+    final double oldOverscroll2 = position.pixels - position.maxScrollExtent;
+    // should find nothing because item is not visible
+    expect(finder, findsNothing);
+    await tester.pumpWidget(build(twoItems: false));
+    // verify removing an item changed the position of the first one, because prior it was not visible
+    expect(oldPosition1, tester.getRect(finder));
+    // verify the overscroll was maintained
+    final double newOverscroll2 = position.pixels - position.maxScrollExtent;
+    expect(oldOverscroll2, isPositive);
+    expect(oldOverscroll2, newOverscroll2);
+
+    await drag2.up();
+
+    // verify there's a ballistic animation from overscroll
+    expect(await tester.pumpAndSettle(), 9);
+  });
 }
 
 class TabBarDemo extends StatelessWidget {
-  const TabBarDemo({Key? key}) : super(key: key);
+  const TabBarDemo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -301,7 +378,7 @@ class RangeMaintainingTestScrollBehavior extends ScrollBehavior {
   const RangeMaintainingTestScrollBehavior();
 
   @override
-  TargetPlatform getPlatform(BuildContext context) => throw 'should not be called';
+  TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {

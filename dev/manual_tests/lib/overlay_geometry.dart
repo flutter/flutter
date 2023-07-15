@@ -56,11 +56,11 @@ class _MarkerPainter extends CustomPainter {
 
 class Marker extends StatelessWidget {
   const Marker({
-    Key? key,
+    super.key,
     this.type = MarkerType.touch,
     this.position,
     this.size = 40.0,
-  }) : super(key: key);
+  });
 
   final Offset? position;
   final double size;
@@ -86,7 +86,7 @@ class Marker extends StatelessWidget {
 }
 
 class OverlayGeometryApp extends StatefulWidget {
-  const OverlayGeometryApp({Key? key}) : super(key: key);
+  const OverlayGeometryApp({super.key});
 
   @override
   OverlayGeometryAppState createState() => OverlayGeometryAppState();
@@ -105,8 +105,9 @@ class CardBuilder extends SliverChildDelegate {
 
   @override
   Widget? build(BuildContext context, int index) {
-    if (index >= cardModels.length)
+    if (index >= cardModels.length) {
       return null;
+    }
     final CardModel cardModel = cardModels[index];
     return GestureDetector(
       key: cardModel.key,
@@ -171,8 +172,8 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       markers[MarkerType.topLeft] = box!.localToGlobal(Offset.zero);
       final Size size = box.size;
       markers[MarkerType.bottomRight] = box.localToGlobal(Offset(size.width, size.height));
-      final ScrollableState? scrollable = Scrollable.of(target.currentContext!);
-      markersScrollOffset = scrollable!.position.pixels;
+      final ScrollableState scrollable = Scrollable.of(target.currentContext!);
+      markersScrollOffset = scrollable.position.pixels;
     });
   }
 

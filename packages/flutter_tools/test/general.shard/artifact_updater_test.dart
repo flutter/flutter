@@ -17,7 +17,7 @@ import '../src/common.dart';
 import '../src/fake_http_client.dart';
 import '../src/fakes.dart';
 
-final Platform testPlatform = FakePlatform(environment: const <String, String>{});
+final Platform testPlatform = FakePlatform();
 
 void main() {
   testWithoutContext('ArtifactUpdater can download a zip archive', () async {
@@ -32,6 +32,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await artifactUpdater.downloadZipArchive(
@@ -55,6 +56,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
     // Unrelated file from another cache.
     fileSystem.file('out/bar').createSync(recursive: true);
@@ -70,6 +72,49 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
     expect(fileSystem.file('out/bar'), exists);
     expect(fileSystem.file('out/test/foo.txt'), isNot(exists));
+  });
+
+  testWithoutContext('ArtifactUpdater will delete any denylisted files from the outputDirectory', () async {
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final Directory tempStorage = fileSystem.currentDirectory.childDirectory('temp');
+    final String localZipPath = tempStorage.childFile('test.zip').path;
+    File? desiredArtifact;
+    File? entitlementsFile;
+    File? nestedWithoutEntitlementsFile;
+    operatingSystemUtils.unzipCallbacks[localZipPath] = (Directory outputDirectory) {
+      desiredArtifact = outputDirectory.childFile('artifact.bin')..createSync();
+      entitlementsFile = outputDirectory.childFile('entitlements.txt')..createSync();
+      nestedWithoutEntitlementsFile = outputDirectory
+          .childDirectory('dir')
+          .childFile('without_entitlements.txt')
+          ..createSync(recursive: true);
+    };
+    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: FakeHttpClient.any(),
+      tempStorage: tempStorage..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
+    );
+
+    // entitlements file cached from before the tool had a denylist
+    final File staleEntitlementsFile = fileSystem.file('out/path/to/entitlements.txt')..createSync(recursive: true);
+
+    expect(staleEntitlementsFile, exists);
+    await artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http://test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+    expect(logger.statusText, contains('test message'));
+    expect(desiredArtifact, exists);
+    expect(entitlementsFile, isNot(exists));
+    expect(nestedWithoutEntitlementsFile, isNot(exists));
+    expect(staleEntitlementsFile, isNot(exists));
   });
 
   testWithoutContext('ArtifactUpdater will not validate the md5 hash if the '
@@ -92,6 +137,7 @@ void main() {
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await artifactUpdater.downloadZipArchive(
@@ -120,13 +166,14 @@ void main() {
           headers: <String, List<String>>{
             'x-goog-hash': <String>[
               'foo-bar-baz',
-              'md5=k7iFrf4NoInN9jSQT9WfcQ=='
+              'md5=k7iFrf4NoInN9jSQT9WfcQ==',
             ],
           }
         )),
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await artifactUpdater.downloadZipArchive(
@@ -155,7 +202,7 @@ void main() {
            headers: <String, List<String>>{
              'x-goog-hash': <String>[
               'foo-bar-baz',
-              'md5=k7iFrf4SQT9WfcQ=='
+              'md5=k7iFrf4SQT9WfcQ==',
             ],
           }
         )),
@@ -163,13 +210,14 @@ void main() {
            headers: <String, List<String>>{
              'x-goog-hash': <String>[
               'foo-bar-baz',
-              'md5=k7iFrf4SQT9WfcQ=='
+              'md5=k7iFrf4SQT9WfcQ==',
             ],
           }
         )),
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await expectLater(() async => artifactUpdater.downloadZipArchive(
@@ -198,6 +246,7 @@ void main() {
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await artifactUpdater.downloadZipArchive(
@@ -225,6 +274,7 @@ void main() {
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await expectLater(() async => artifactUpdater.downloadZipArchive(
@@ -247,19 +297,20 @@ void main() {
       operatingSystemUtils: operatingSystemUtils,
       platform: FakePlatform(
         environment: <String, String>{
-          'FLUTTER_STORAGE_BASE_URL': 'foo-bar'
+          'FLUTTER_STORAGE_BASE_URL': 'foo-bar',
         },
       ),
       httpClient: FakeHttpClient.list(<FakeRequest>[
-        FakeRequest(Uri.parse('http:///foo-bar/test.zip'), responseError: ArgumentError())
+        FakeRequest(Uri.parse('http://foo-bar/test.zip'), responseError: ArgumentError()),
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://foo-bar/test.zip'],
     );
 
     await expectLater(() async => artifactUpdater.downloadZipArchive(
       'test message',
-      Uri.parse('http:///foo-bar/test.zip'),
+      Uri.parse('http://foo-bar/test.zip'),
       fileSystem.currentDirectory.childDirectory('out'),
     ), throwsToolExit());
 
@@ -281,6 +332,7 @@ void main() {
       ]),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await expectLater(() async => artifactUpdater.downloadZipArchive(
@@ -305,6 +357,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
     operatingSystemUtils.failures = 1;
 
@@ -318,7 +371,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will de-download a file if unzipping fails on windows', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils(windows: true);
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -329,6 +382,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
     operatingSystemUtils.failures = 1;
 
@@ -353,6 +407,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
     operatingSystemUtils.failures = 2;
 
@@ -366,7 +421,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will bail if unzipping fails more than twice on Windows', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils(windows: true);
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -377,6 +432,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
     operatingSystemUtils.failures = 2;
 
@@ -401,6 +457,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     await artifactUpdater.downloadZippedTarball(
@@ -423,6 +480,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     artifactUpdater.downloadedFiles.addAll(<File>[
@@ -450,6 +508,7 @@ void main() {
       httpClient: FakeHttpClient.any(),
       tempStorage: fileSystem.currentDirectory.childDirectory('temp')
         ..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
     );
 
     final Directory errorDirectory = fileSystem.currentDirectory
@@ -470,10 +529,13 @@ void main() {
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  FakeOperatingSystemUtils({this.windows = false});
-
   int failures = 0;
-  final bool windows;
+
+  /// A mapping of zip [file] paths to callbacks that receive the [targetDirectory].
+  ///
+  /// Use this to have [unzip] generate an arbitrary set of [FileSystemEntity]s
+  /// under [targetDirectory].
+  final Map<String, void Function(Directory)> unzipCallbacks = <String, void Function(Directory)>{};
 
   @override
   void unzip(File file, Directory targetDirectory) {
@@ -481,8 +543,12 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
       failures -= 1;
       throw Exception();
     }
-    targetDirectory.childFile(file.fileSystem.path.basenameWithoutExtension(file.path))
-      .createSync();
+    if (unzipCallbacks.containsKey(file.path)) {
+      unzipCallbacks[file.path]!(targetDirectory);
+    } else {
+      targetDirectory.childFile(file.fileSystem.path.basenameWithoutExtension(file.path))
+        .createSync();
+    }
   }
 
   @override

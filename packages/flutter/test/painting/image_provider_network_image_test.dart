@@ -5,8 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:typed_data';
-import 'dart:ui' show Codec, FrameInfo;
+import 'dart:ui' show Codec, FrameInfo, ImmutableBuffer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -16,27 +15,30 @@ import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
 
 void main() {
-  TestRenderingFlutterBinding();
+  TestRenderingFlutterBinding.ensureInitialized();
+  HttpOverrides.global = _FakeHttpOverrides();
 
-  Future<Codec>  _basicDecoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
-    return PaintingBinding.instance!.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
+  Future<Codec>  basicDecoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    return PaintingBinding.instance.instantiateImageCodecFromBuffer(buffer, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
   }
 
   late _FakeHttpClient httpClient;
 
   setUp(() {
+    _FakeHttpOverrides.createHttpClientCalls = 0;
     httpClient = _FakeHttpClient();
     debugNetworkImageHttpClientProvider = () => httpClient;
   });
 
   tearDown(() {
     debugNetworkImageHttpClientProvider = null;
-    PaintingBinding.instance!.imageCache!.clear();
-    PaintingBinding.instance!.imageCache!.clearLiveImages();
+    expect(_FakeHttpOverrides.createHttpClientCalls, 0);
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
   });
 
   test('Expect thrown exception with statusCode - evicts from cache and drains', () async {
-    final int errorStatusCode = HttpStatus.notFound;
+    const int errorStatusCode = HttpStatus.notFound;
     const String requestUrl = 'foo-url';
 
     httpClient.request.response.statusCode = errorStatusCode;
@@ -44,13 +46,13 @@ void main() {
     final Completer<dynamic> caughtError = Completer<dynamic>();
 
     final ImageProvider imageProvider = NetworkImage(nonconst(requestUrl));
-    expect(imageCache!.pendingImageCount, 0);
-    expect(imageCache!.statusForKey(imageProvider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
+    expect(imageCache.statusForKey(imageProvider).untracked, true);
 
     final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
 
-    expect(imageCache!.pendingImageCount, 1);
-    expect(imageCache!.statusForKey(imageProvider).pending, true);
+    expect(imageCache.pendingImageCount, 1);
+    expect(imageCache.statusForKey(imageProvider).pending, true);
 
     result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
     }, onError: (dynamic error, StackTrace? stackTrace) {
@@ -59,8 +61,8 @@ void main() {
 
     final dynamic err = await caughtError.future;
 
-    expect(imageCache!.pendingImageCount, 0);
-    expect(imageCache!.statusForKey(imageProvider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
+    expect(imageCache.statusForKey(imageProvider).untracked, true);
 
     expect(
       err,
@@ -69,7 +71,7 @@ void main() {
         .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl)),
     );
     expect(httpClient.request.response.drained, true);
-  }, skip: isBrowser); // Browser implementation does not use HTTP client but an <img> tag.
+  }, skip: isBrowser); // [intended] Browser implementation does not use HTTP client but an <img> tag.
 
   test('Uses the HttpClient provided by debugNetworkImageHttpClientProvider if set', () async {
     httpClient.thrownError = 'client1';
@@ -77,7 +79,7 @@ void main() {
 
     Future<void> loadNetworkImage() async {
       final NetworkImage networkImage = NetworkImage(nonconst('foo'));
-      final ImageStreamCompleter completer = networkImage.load(networkImage, _basicDecoder);
+      final ImageStreamCompleter completer = networkImage.loadBuffer(networkImage, basicDecoder);
       completer.addListener(ImageStreamListener(
         (ImageInfo image, bool synchronousCall) { },
         onError: (dynamic error, StackTrace? stackTrace) {
@@ -94,7 +96,7 @@ void main() {
     debugNetworkImageHttpClientProvider = () => client2;
     await loadNetworkImage();
     expect(capturedErrors, <dynamic>['client1', 'client2']);
-  }, skip: isBrowser); // Browser implementation does not use HTTP client but an <img> tag.
+  }, skip: isBrowser); // [intended] Browser implementation does not use HTTP client but an <img> tag.
 
   test('Propagates http client errors during resolve()', () async {
     httpClient.thrownError = Error();
@@ -155,7 +157,7 @@ void main() {
       expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, kTransparentImage.length));
       expect(events[i].expectedTotalBytes, kTransparentImage.length);
     }
-  }, skip: isBrowser); // Browser loads images through <img> not Http.
+  }, skip: isBrowser); // [intended] Browser loads images through <img> not Http.
 
   test('NetworkImage is evicted from cache on SocketException', () async {
     final _FakeHttpClient mockHttpClient = _FakeHttpClient();
@@ -163,13 +165,13 @@ void main() {
     debugNetworkImageHttpClientProvider = () => mockHttpClient;
 
     final ImageProvider imageProvider = NetworkImage(nonconst('testing.url'));
-    expect(imageCache!.pendingImageCount, 0);
-    expect(imageCache!.statusForKey(imageProvider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
+    expect(imageCache.statusForKey(imageProvider).untracked, true);
 
     final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
 
-    expect(imageCache!.pendingImageCount, 1);
-    expect(imageCache!.statusForKey(imageProvider).pending, true);
+    expect(imageCache.pendingImageCount, 1);
+    expect(imageCache.statusForKey(imageProvider).pending, true);
     final Completer<dynamic> caughtError = Completer<dynamic>();
     result.addListener(ImageStreamListener(
       (ImageInfo info, bool syncCall) {},
@@ -182,14 +184,14 @@ void main() {
 
     expect(err, isA<SocketException>());
 
-    expect(imageCache!.pendingImageCount, 0);
-    expect(imageCache!.statusForKey(imageProvider).untracked, true);
-    expect(imageCache!.containsKey(result), isFalse);
+    expect(imageCache.pendingImageCount, 0);
+    expect(imageCache.statusForKey(imageProvider).untracked, true);
+    expect(imageCache.containsKey(result), isFalse);
 
     debugNetworkImageHttpClientProvider = null;
-  }, skip: isBrowser); // Browser does not resolve images this way.
+  }, skip: isBrowser); // [intended] Browser does not resolve images this way.
 
-  Future<Codec> _decoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
     return FakeCodec();
   }
 
@@ -207,10 +209,26 @@ void main() {
 
     const NetworkImage provider = NetworkImage(url);
 
-    final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, url);
   });
+}
+
+/// Override `HttpClient()` to throw an error.
+///
+/// This ensures that these tests never cause a call to the [HttpClient]
+/// constructor.
+///
+/// Regression test for <https://github.com/flutter/flutter/issues/129532>.
+class _FakeHttpOverrides extends HttpOverrides {
+  static int createHttpClientCalls = 0;
+
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    createHttpClientCalls++;
+    throw Exception('This test tried to create an HttpClient.');
+  }
 }
 
 class _FakeHttpClient extends Fake implements HttpClient {
@@ -225,6 +243,7 @@ class _FakeHttpClient extends Fake implements HttpClient {
     return request;
   }
 }
+
 class _FakeHttpClientRequest extends Fake implements HttpClientRequest {
   final _FakeHttpClientResponse response = _FakeHttpClientResponse();
 
@@ -261,7 +280,7 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
   @override
   Future<E> drain<E>([E? futureValue]) async {
     drained = true;
-    return futureValue ?? <int>[] as E;
+    return futureValue ?? futureValue as E; // Mirrors the implementation in Stream.
   }
 }
 

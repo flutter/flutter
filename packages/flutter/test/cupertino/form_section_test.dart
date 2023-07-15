@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -152,7 +153,7 @@ void main() {
     expect(find.byType(ClipRRect), findsOneWidget);
   });
 
-  testWidgets('Not setting clipBehavior does not clip children section', (WidgetTester tester) async {
+  testWidgets('Not setting clipBehavior does not produce a RenderClipRRect object', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -163,6 +164,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(ClipRRect), findsNothing);
+    final Iterable<RenderClipRRect> renderClips = tester.allRenderObjects.whereType<RenderClipRRect>();
+    expect(renderClips, isEmpty);
   });
 }

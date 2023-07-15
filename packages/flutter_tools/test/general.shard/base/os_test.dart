@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -44,7 +45,7 @@ void main() {
           exitCode: 1,
         ),
       );
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
       expect(utils.which(kExecutable), isNull);
     });
 
@@ -58,7 +59,7 @@ void main() {
           stdout: kPath1,
         ),
       );
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
       expect(utils.which(kExecutable)!.path, kPath1);
     });
 
@@ -73,7 +74,7 @@ void main() {
           stdout: '$kPath1\n$kPath2',
         ),
       );
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'linux'));
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
       final List<File> result = utils.whichAll(kExecutable);
       expect(result, hasLength(2));
       expect(result[0].path, kPath1);
@@ -177,7 +178,7 @@ void main() {
       );
 
       final OperatingSystemUtils utils =
-      createOSUtils(FakePlatform(operatingSystem: 'linux'));
+      createOSUtils(FakePlatform());
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
@@ -193,7 +194,7 @@ void main() {
       );
 
       final OperatingSystemUtils utils =
-      createOSUtils(FakePlatform(operatingSystem: 'linux'));
+      createOSUtils(FakePlatform());
       expect(utils.hostPlatform, HostPlatform.linux_arm64);
     });
 
@@ -218,7 +219,7 @@ void main() {
 
       final OperatingSystemUtils utils =
       createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(utils.hostPlatform, HostPlatform.darwin_arm);
+      expect(utils.hostPlatform, HostPlatform.darwin_arm64);
     });
 
     testWithoutContext('macOS 11 x86', () async {
@@ -312,6 +313,13 @@ void main() {
         ),
         const FakeCommand(
           command: <String>[
+            'uname',
+            '-m',
+          ],
+          stdout: 'arm64',
+        ),
+        const FakeCommand(
+          command: <String>[
             'which',
             'sysctl',
           ],
@@ -327,7 +335,57 @@ void main() {
 
       final OperatingSystemUtils utils =
           createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(utils.name, 'product version build darwin-arm');
+      expect(utils.name, 'product version build darwin-arm64');
+    });
+
+    testWithoutContext('macOS ARM on Rosetta name', () async {
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'sw_vers',
+            '-productName',
+          ],
+          stdout: 'product',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sw_vers',
+            '-productVersion',
+          ],
+          stdout: 'version',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sw_vers',
+            '-buildVersion',
+          ],
+          stdout: 'build',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'uname',
+            '-m',
+          ],
+          stdout: 'x86_64', // Running on Rosetta
+        ),
+        const FakeCommand(
+          command: <String>[
+            'which',
+            'sysctl',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'sysctl',
+            'hw.optional.arm64',
+          ],
+          stdout: 'hw.optional.arm64: 1',
+        ),
+      ]);
+
+      final OperatingSystemUtils utils =
+      createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      expect(utils.name, 'product version build darwin-arm64 (Rosetta)');
     });
 
     testWithoutContext('macOS x86 name', () async {
@@ -352,6 +410,13 @@ void main() {
             '-buildVersion',
           ],
           stdout: 'build',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'uname',
+            '-m',
+          ],
+          stdout: 'x86_64',
         ),
         const FakeCommand(
           command: <String>[
@@ -410,7 +475,6 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
-          operatingSystem: 'linux',
           operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
         ),
         processManager: fakeProcessManager,
@@ -442,7 +506,6 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
-          operatingSystem: 'linux',
           operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
         ),
         processManager: fakeProcessManager,
@@ -463,7 +526,6 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
-          operatingSystem: 'linux',
           operatingSystemVersion: 'Linux 1.2.3-abcd #1 SMP PREEMPT Sat Jan 1 00:00:00 UTC 2000',
         ),
         processManager: fakeProcessManager,
@@ -493,12 +555,38 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(
-          operatingSystem: 'linux',
           operatingSystemVersion: 'undefinedOperatingSystemVersion',
         ),
         processManager: fakeProcessManager,
       );
       expect(utils.name, 'Pretty Name');
+    });
+
+    // See https://snyk.io/research/zip-slip-vulnerability for more context
+    testWithoutContext('Windows validates paths when unzipping', () {
+      // on POSIX systems we use the `unzip` binary, which will fail to extract
+      // files with paths outside the target directory
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final File fakeZipFile = fs.file('archive.zip');
+      final Directory targetDirectory = fs.directory('output')..createSync(recursive: true);
+      const String content = 'hello, world!';
+      final Archive archive = Archive()..addFile(
+        // This file would be extracted outside of the target extraction dir
+        ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
+      );
+      final List<int> zipData = ZipEncoder().encode(archive)!;
+      fakeZipFile.writeAsBytesSync(zipData);
+      expect(
+        () => utils.unzip(fakeZipFile, targetDirectory),
+        throwsA(
+          isA<StateError>().having(
+            (StateError error) => error.message,
+            'correct error message',
+            contains('Tried to extract the file '),
+          ),
+        ),
+      );
     });
   });
 
@@ -527,7 +615,7 @@ void main() {
     final OperatingSystemUtils osUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       processManager: fakeProcessManager,
     );
 
@@ -590,6 +678,7 @@ void main() {
         ),
         FakeCommand(command: <String>[
           'rsync',
+          '-8',
           '-av',
           '--delete',
           tempDirectory.childDirectory('dirA').path,
@@ -597,6 +686,7 @@ void main() {
         ]),
         FakeCommand(command: <String>[
           'rsync',
+          '-8',
           '-av',
           '--delete',
           tempDirectory.childDirectory('dirB').path,
@@ -618,7 +708,7 @@ void main() {
       final OperatingSystemUtils linuxOsUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'linux'),
+        platform: FakePlatform(),
         processManager: fakeProcessManager,
       );
 

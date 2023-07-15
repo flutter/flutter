@@ -47,7 +47,7 @@ class LicenseCollector {
 
     for (final Package package in packageConfig.packages) {
       final Uri packageUri = package.packageUriRoot;
-      if (packageUri == null || packageUri.scheme != 'file') {
+      if (packageUri.scheme != 'file') {
         continue;
       }
       // First check for NOTICES, then fallback to LICENSE
@@ -82,11 +82,10 @@ class LicenseCollector {
       }
     }
 
-    final List<String> combinedLicensesList = packageLicenses.keys
-      .map<String>((String license) {
-        final List<String> packageNames = packageLicenses[license]!.toList()
-          ..sort();
-        return '${packageNames.join('\n')}\n\n$license';
+    final List<String> combinedLicensesList = packageLicenses.entries
+      .map<String>((MapEntry<String, Set<String>> entry) {
+        final List<String> packageNames = entry.value.toList()..sort();
+        return '${packageNames.join('\n')}\n\n${entry.key}';
       }).toList();
     combinedLicensesList.sort();
 

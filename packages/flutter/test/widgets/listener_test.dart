@@ -66,7 +66,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture();
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Listener)));
 
     expect(log, equals(<String>[
@@ -183,7 +182,6 @@ void main() {
       const Offset moved = Offset(20, 30);
       final Offset center = tester.getCenter(find.byKey(key));
       final TestGesture gesture = await tester.startGesture(center);
-      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -261,7 +259,6 @@ void main() {
       final Offset center = tester.getCenter(find.byKey(key));
       final Offset topLeft = tester.getTopLeft(find.byKey(key));
       final TestGesture gesture = await tester.startGesture(center);
-      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -272,7 +269,7 @@ void main() {
 
       final Matrix4 expectedTransform = Matrix4.identity()
         ..scale(1 / scaleFactor, 1 / scaleFactor, 1.0)
-        ..translate(-topLeft.dx, -topLeft.dy, 0);
+        ..translate(-topLeft.dx, -topLeft.dy);
 
       expect(center, isNot(const Offset(50, 50)));
 
@@ -338,7 +335,6 @@ void main() {
       const Offset moved = Offset(20, 30);
       final Offset downPosition = tester.getCenter(find.byKey(key)) + const Offset(10, 5);
       final TestGesture gesture = await tester.startGesture(downPosition);
-      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -350,7 +346,7 @@ void main() {
       const Offset offset = Offset((800 - 100) / 2, (600 - 100) / 2);
       final Matrix4 expectedTransform = Matrix4.identity()
         ..rotateZ(-math.pi / 2)
-        ..translate(-offset.dx, -offset.dy, 0.0);
+        ..translate(-offset.dx, -offset.dy);
 
       final Offset localDownPosition = const Offset(50, 50) + const Offset(5, -10);
       expect(down.localPosition, within(distance: 0.001, from: localDownPosition));
@@ -406,6 +402,7 @@ void main() {
       onPointerDown: (PointerDownEvent event) {},
       onPointerUp: (PointerUpEvent event) {},
       onPointerMove: (PointerMoveEvent event) {},
+      onPointerHover: (PointerHoverEvent event) {},
       onPointerCancel: (PointerCancelEvent event) {},
       onPointerSignal: (PointerSignalEvent event) {},
       behavior: HitTestBehavior.opaque,
@@ -422,7 +419,7 @@ void main() {
       'constraints: MISSING',
       'size: MISSING',
       'behavior: opaque',
-      'listeners: down, move, up, cancel, signal',
+      'listeners: down, move, up, hover, cancel, signal',
     ]);
   });
 }

@@ -25,11 +25,11 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
 
 SPEC CHECKSUMS:
-  connectivity_macos: 9f30e9d0e67a0bc08a0c563ee82310b51ca6e818
-  FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
+  connectivity_macos: 5dae6ee11d320fac7c05f0d08bd08fc32b5514d9
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  url_launcher_macos: 45af3d61de06997666568a7149c1be98b41c95d4
+  url_launcher_macos: 5335912b679c073563f29d89d33d10d459f95451
 
-PODFILE CHECKSUM: 6eac6b3292e5142cfc23bdeb71848a40ec51c14c
+PODFILE CHECKSUM: 2e6060c123c393d6beb3ee5b7beaf789de4d2e47
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.12.0

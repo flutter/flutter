@@ -13,7 +13,7 @@ void main() {
   late DateTime initialDate;
 
   setUp(() {
-    firstDate = DateTime(2001, DateTime.january, 1);
+    firstDate = DateTime(2001);
     lastDate = DateTime(2031, DateTime.december, 31);
     initialDate = DateTime(2016, DateTime.january, 15);
   });
@@ -31,7 +31,7 @@ void main() {
       // Tests a different first day of week.
       const Locale('ru', 'RU'): <String, dynamic>{
         'textDirection': TextDirection.ltr,
-        'expectedDaysOfWeek': <String>['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'],
+        'expectedDaysOfWeek': <String>['В', 'П', 'В', 'С', 'Ч', 'П', 'С',],
         'expectedDaysOfMonth': List<String>.generate(30, (int i) => '${i + 1}'),
         'expectedMonthYearHeader': 'сентябрь 2017 г.',
       },
@@ -93,82 +93,123 @@ void main() {
   });
 
   testWidgets('locale parameter overrides ambient locale', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      locale: const Locale('en', 'US'),
-      supportedLocales: const <Locale>[
-        Locale('en', 'US'),
-        Locale('fr', 'CA'),
-      ],
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: Material(
-        child: Builder(
-          builder: (BuildContext context) {
-            return TextButton(
-              onPressed: () async {
-                await showDatePicker(
-                  context: context,
-                  initialDate: initialDate,
-                  firstDate: firstDate,
-                  lastDate: lastDate,
-                  locale: const Locale('fr', 'CA'),
-                );
-              },
-              child: const Text('X'),
-            );
-          },
+    Widget buildFrame(bool useMaterial3) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: useMaterial3),
+        locale: const Locale('en', 'US'),
+        supportedLocales: const <Locale>[
+          Locale('en', 'US'),
+          Locale('fr', 'CA'),
+        ],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                onPressed: () async {
+                  await showDatePicker(
+                    context: context,
+                    initialDate: initialDate,
+                    firstDate: firstDate,
+                    lastDate: lastDate,
+                    locale: const Locale('fr', 'CA'),
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
         ),
-      ),
-    ));
+      );
+    }
 
+    Element getPicker() => tester.element(find.byType(CalendarDatePicker));
+
+    await tester.pumpWidget(buildFrame(true));
     await tester.tap(find.text('X'));
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
-    final Element picker = tester.element(find.byType(CalendarDatePicker));
     expect(
-      Localizations.localeOf(picker),
+      Localizations.localeOf(getPicker()),
       const Locale('fr', 'CA'),
     );
+    expect(
+      Directionality.of(getPicker()),
+      TextDirection.ltr,
+    );
+
+    await tester.tap(find.text('Annuler'));
+
+    // The tests below are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
+
+    await tester.pumpWidget(buildFrame(false));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
 
     expect(
-      Directionality.of(picker),
+      Localizations.localeOf(getPicker()),
+      const Locale('fr', 'CA'),
+    );
+    expect(
+      Directionality.of(getPicker()),
       TextDirection.ltr,
     );
 
     await tester.tap(find.text('ANNULER'));
+
   });
 
   testWidgets('textDirection parameter overrides ambient textDirection', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      locale: const Locale('en', 'US'),
-      supportedLocales: const <Locale>[
-        Locale('en', 'US'),
-      ],
-      home: Material(
-        child: Builder(
-          builder: (BuildContext context) {
-            return TextButton(
-              onPressed: () async {
-                await showDatePicker(
-                  context: context,
-                  initialDate: initialDate,
-                  firstDate: firstDate,
-                  lastDate: lastDate,
-                  textDirection: TextDirection.rtl,
-                );
-              },
-              child: const Text('X'),
-            );
-          },
+    Widget buildFrame(bool useMaterial3) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: useMaterial3),
+        locale: const Locale('en', 'US'),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                onPressed: () async {
+                  await showDatePicker(
+                    context: context,
+                    initialDate: initialDate,
+                    firstDate: firstDate,
+                    lastDate: lastDate,
+                    textDirection: TextDirection.rtl,
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
         ),
-      ),
-    ));
+      );
+    }
 
+    Element getPicker() => tester.element(find.byType(CalendarDatePicker));
+
+    await tester.pumpWidget(buildFrame(true));
     await tester.tap(find.text('X'));
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
-    final Element picker = tester.element(find.byType(CalendarDatePicker));
     expect(
-      Directionality.of(picker),
+      Directionality.of(getPicker()),
+      TextDirection.rtl,
+    );
+
+    await tester.tap(find.text('Cancel'));
+
+    // The tests below are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
+
+    await tester.pumpWidget(buildFrame(false));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(
+      Directionality.of(getPicker()),
       TextDirection.rtl,
     );
 
@@ -176,45 +217,70 @@ void main() {
   });
 
   testWidgets('textDirection parameter takes precedence over locale parameter', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      locale: const Locale('en', 'US'),
-      supportedLocales: const <Locale>[
-        Locale('en', 'US'),
-        Locale('fr', 'CA'),
-      ],
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: Material(
-        child: Builder(
-          builder: (BuildContext context) {
-            return TextButton(
-              onPressed: () async {
-                await showDatePicker(
-                  context: context,
-                  initialDate: initialDate,
-                  firstDate: firstDate,
-                  lastDate: lastDate,
-                  locale: const Locale('fr', 'CA'),
-                  textDirection: TextDirection.rtl,
-                );
-              },
-              child: const Text('X'),
-            );
-          },
+    Widget buildFrame(bool useMaterial3) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: useMaterial3),
+        locale: const Locale('en', 'US'),
+        supportedLocales: const <Locale>[
+          Locale('en', 'US'),
+          Locale('fr', 'CA'),
+        ],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                onPressed: () async {
+                  await showDatePicker(
+                    context: context,
+                    initialDate: initialDate,
+                    firstDate: firstDate,
+                    lastDate: lastDate,
+                    locale: const Locale('fr', 'CA'),
+                    textDirection: TextDirection.rtl,
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
         ),
-      ),
-    ));
+      );
+    }
 
+    Element getPicker() => tester.element(find.byType(CalendarDatePicker));
+
+    await tester.pumpWidget(buildFrame(true));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    final Element picker = tester.element(find.byType(CalendarDatePicker));
     expect(
-      Localizations.localeOf(picker),
+      Localizations.localeOf(getPicker()),
       const Locale('fr', 'CA'),
     );
 
     expect(
-      Directionality.of(picker),
+      Directionality.of(getPicker()),
+      TextDirection.rtl,
+    );
+
+    await tester.tap(find.text('Annuler'));
+
+    // The tests below are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
+
+    await tester.pumpWidget(buildFrame(false));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(
+      Localizations.localeOf(getPicker()),
+      const Locale('fr', 'CA'),
+    );
+
+    expect(
+      Directionality.of(getPicker()),
       TextDirection.rtl,
     );
 
@@ -229,11 +295,10 @@ void main() {
     const Size kCommonScreenSizePortrait = Size(1070, 1770);
     const Size kCommonScreenSizeLandscape = Size(1770, 1070);
 
-    Future<void> _showPicker(WidgetTester tester, Locale locale, Size size) async {
-      tester.binding.window.physicalSizeTestValue = size;
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-      tester.binding.window.devicePixelRatioTestValue = 1.0;
-      addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+    Future<void> showPicker(WidgetTester tester, Locale locale, Size size) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -263,22 +328,22 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/20171
     testWidgets('common screen size - portrait - Chinese', (WidgetTester tester) async {
-      await _showPicker(tester, const Locale('zh', 'CN'), kCommonScreenSizePortrait);
+      await showPicker(tester, const Locale('zh', 'CN'), kCommonScreenSizePortrait);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('common screen size - landscape - Chinese', (WidgetTester tester) async {
-      await _showPicker(tester, const Locale('zh', 'CN'), kCommonScreenSizeLandscape);
+      await showPicker(tester, const Locale('zh', 'CN'), kCommonScreenSizeLandscape);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('common screen size - portrait - Japanese', (WidgetTester tester) async {
-      await _showPicker(tester, const Locale('ja', 'JA'), kCommonScreenSizePortrait);
+      await showPicker(tester, const Locale('ja', 'JA'), kCommonScreenSizePortrait);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('common screen size - landscape - Japanese', (WidgetTester tester) async {
-      await _showPicker(tester, const Locale('ja', 'JA'), kCommonScreenSizeLandscape);
+      await showPicker(tester, const Locale('ja', 'JA'), kCommonScreenSizeLandscape);
       expect(tester.takeException(), isNull);
     });
   });

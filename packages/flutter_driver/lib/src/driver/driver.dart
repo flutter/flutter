@@ -21,6 +21,7 @@ import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
+import '../common/text_input_action.dart';
 import '../common/wait.dart';
 import 'timeline.dart';
 import 'vmservice_driver.dart';
@@ -431,11 +432,6 @@ abstract class FlutterDriver {
     double dyScroll = 0.0,
     Duration? timeout,
   }) async {
-    assert(scrollable != null);
-    assert(item != null);
-    assert(alignment != null);
-    assert(dxScroll != null);
-    assert(dyScroll != null);
     assert(dxScroll != 0.0 || dyScroll != 0.0);
 
     // Kick off an (unawaited) waitFor that will complete when the item we're
@@ -508,8 +504,34 @@ abstract class FlutterDriver {
   /// invoked when the widget is focused, as the [SystemChannels.textInput]
   /// channel will be mocked out.
   Future<void> setTextEntryEmulation({ required bool enabled, Duration? timeout }) async {
-    assert(enabled != null);
     await sendCommand(SetTextEntryEmulation(enabled, timeout: timeout));
+  }
+
+  /// Simulate the user posting a text input action.
+  ///
+  /// The available action types can be found in [TextInputAction]. The [sendTextInputAction]
+  /// does not check whether the [TextInputAction] performed is acceptable
+  /// based on the client arguments of the text input.
+  ///
+  /// This can be called even if the [TestTextInput] has not been [TestTextInput.register]ed.
+  ///
+  /// Example:
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// test('submit text in a text field', () async {
+  ///   var textField = find.byValueKey('enter-text-field');
+  ///   await driver.tap(textField);  // acquire focus
+  ///   await driver.enterText('Hello!');  // enter text
+  ///   await driver.waitFor(find.text('Hello!'));  // verify text appears on UI
+  ///   await driver.sendTextInputAction(TextInputAction.done);  // submit text
+  /// });
+  /// ```
+  /// {@end-tool}
+  ///
+  Future<void> sendTextInputAction(TextInputAction action,
+      {Duration? timeout}) async {
+    await sendCommand(SendTextInputAction(action, timeout: timeout));
   }
 
   /// Sends a string and returns a string.
@@ -556,53 +578,55 @@ abstract class FlutterDriver {
   ///
   /// The image will be returned as a PNG.
   ///
-  ///  HACK: There will be a 2-second artificial delay before screenshotting,
-  ///        the delay here is to deal with a race between the driver script and
-  ///        the raster thread (formerly known as the GPU thread). The issue is
-  ///        that driver API synchronizes with the framework based on transient
-  ///        callbacks, which are out of sync with the raster thread.
-  ///        Here's the timeline of events in ASCII art:
+  /// **Warning:** This is not reliable.
   ///
-  ///        -------------------------------------------------------------------
-  ///        Without this delay:
-  ///        -------------------------------------------------------------------
-  ///        UI    : <-- build -->
-  ///        Raster:               <-- rasterize -->
-  ///        Gap   :              | random |
-  ///        Driver:                        <-- screenshot -->
+  /// There is a two-second artificial delay before screenshotting. The delay
+  /// here is to deal with a race between the driver script and the raster
+  /// thread (formerly known as the GPU thread). The issue is that the driver
+  /// API synchronizes with the framework based on transient callbacks, which
+  /// are out of sync with the raster thread.
   ///
-  ///        In the diagram above, the gap is the time between the last driver
-  ///        action taken, such as a `tap()`, and the subsequent call to
-  ///        `screenshot()`. The gap is random because it is determined by the
-  ///        unpredictable network communication between the driver process and
-  ///        the application. If this gap is too short, which it typically will
-  ///        be, the screenshot is taken before the raster thread is done
-  ///        rasterizing the frame, so the screenshot of the previous frame is
-  ///        taken, which is wrong.
+  /// Here's the timeline of events in ASCII art:
   ///
-  ///        -------------------------------------------------------------------
-  ///        With this delay, if we're lucky:
-  ///        -------------------------------------------------------------------
-  ///        UI    : <-- build -->
-  ///        Raster:               <-- rasterize -->
-  ///        Gap   :              |    2 seconds or more   |
-  ///        Driver:                                        <-- screenshot -->
+  ///     ---------------------------------------------------------------
+  ///     Without this delay:
+  ///     ---------------------------------------------------------------
+  ///     UI    : <-- build -->
+  ///     Raster:               <-- rasterize -->
+  ///     Gap   :              | random |
+  ///     Driver:                        <-- screenshot -->
   ///
-  ///        The two-second gap should be long enough for the raster thread to
-  ///        finish rasterizing the frame, but not longer than necessary to keep
-  ///        driver tests as fast a possible.
+  /// In the diagram above, the gap is the time between the last driver action
+  /// taken, such as a `tap()`, and the subsequent call to `screenshot()`. The
+  /// gap is random because it is determined by the unpredictable communication
+  /// channel between the driver process and the application. If this gap is too
+  /// short, which it typically will be, the screenshot is taken before the
+  /// raster thread is done rasterizing the frame, so the screenshot of the
+  /// previous frame is taken, which is not what is intended.
   ///
-  ///        -------------------------------------------------------------------
-  ///        With this delay, if we're not lucky:
-  ///        -------------------------------------------------------------------
-  ///        UI    : <-- build -->
-  ///        Raster:               <-- rasterize randomly slow today -->
-  ///        Gap   :              |    2 seconds or more   |
-  ///        Driver:                                        <-- screenshot -->
+  ///     ---------------------------------------------------------------
+  ///     With this delay, if we're lucky:
+  ///     ---------------------------------------------------------------
+  ///     UI    : <-- build -->
+  ///     Raster:               <-- rasterize -->
+  ///     Gap   :              |    2 seconds or more   |
+  ///     Driver:                                        <-- screenshot -->
   ///
-  ///        In practice, sometimes the device gets really busy for a while and
-  ///        even two seconds isn't enough, which means that this is still racy
-  ///        and a source of flakes.
+  /// The two-second gap should be long enough for the raster thread to finish
+  /// rasterizing the frame, but not longer than necessary to keep driver tests
+  /// as fast a possible.
+  ///
+  ///     ---------------------------------------------------------------
+  ///     With this delay, if we're not lucky:
+  ///     ---------------------------------------------------------------
+  ///     UI    : <-- build -->
+  ///     Raster:               <-- rasterize randomly slow today -->
+  ///     Gap   :              |    2 seconds or more   |
+  ///     Driver:                                        <-- screenshot -->
+  ///
+  /// In practice, sometimes the device gets really busy for a while and even
+  /// two seconds isn't enough, which means that this is still racy and a source
+  /// of flakes.
   Future<List<int>> screenshot() async {
     throw UnimplementedError();
   }
@@ -625,7 +649,7 @@ abstract class FlutterDriver {
   ///       ...
   ///     ]
   ///
-  /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
+  /// [getFlagList]: https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#getflaglist
   ///
   /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
   Future<List<Map<String, dynamic>>> getVmFlags() async {

@@ -9,7 +9,7 @@ import 'transformations_demo_edit_board_point.dart';
 import 'transformations_demo_gesture_transformable.dart';
 
 class TransformationsDemo extends StatefulWidget {
-  const TransformationsDemo({ Key? key }) : super(key: key);
+  const TransformationsDemo({ super.key });
 
   static const String routeName = '/transformations';
 
@@ -93,10 +93,10 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
   Widget get instructionDialog {
     return AlertDialog(
       title: const Text('2D Transformations'),
-      content: Column(
+      content: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: const <Widget>[
+        children: <Widget>[
           Text('Tap to edit hex tiles, and use gestures to move around the scene:\n'),
           Text('- Drag to pan.'),
           Text('- Pinch to zoom.'),
@@ -182,6 +182,7 @@ class BoardPainter extends CustomPainter {
       );
       final Vertices vertices = board!.getVerticesForBoardPoint(boardPoint, color);
       canvas.drawVertices(vertices, BlendMode.color, Paint());
+      vertices.dispose();
     }
 
     board!.forEach(drawBoardPoint);

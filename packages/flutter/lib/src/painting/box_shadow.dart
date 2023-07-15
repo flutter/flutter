@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 import 'dart:ui' as ui show Shadow, lerpDouble;
 
@@ -29,17 +28,23 @@ import 'debug.dart';
 class BoxShadow extends ui.Shadow {
   /// Creates a box shadow.
   ///
-  /// By default, the shadow is solid black with zero [offset], [blurRadius],
-  /// and [spreadRadius].
+  /// By default, the shadow is solid black with zero [offset], zero [blurRadius],
+  /// zero [spreadRadius], and [BlurStyle.normal].
   const BoxShadow({
-    Color color = const Color(0xFF000000),
-    Offset offset = Offset.zero,
-    double blurRadius = 0.0,
+    super.color,
+    super.offset,
+    super.blurRadius,
     this.spreadRadius = 0.0,
-  }) : super(color: color, offset: offset, blurRadius: blurRadius);
+    this.blurStyle = BlurStyle.normal,
+  });
 
   /// The amount the box should be inflated prior to applying the blur.
   final double spreadRadius;
+
+  /// The [BlurStyle] to use for this shadow.
+  ///
+  /// Defaults to [BlurStyle.normal].
+  final BlurStyle blurStyle;
 
   /// Create the [Paint] object that corresponds to this shadow description.
   ///
@@ -51,10 +56,11 @@ class BoxShadow extends ui.Shadow {
   Paint toPaint() {
     final Paint result = Paint()
       ..color = color
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma);
+      ..maskFilter = MaskFilter.blur(blurStyle, blurSigma);
     assert(() {
-      if (debugDisableShadows)
+      if (debugDisableShadows) {
         result.maskFilter = null;
+      }
       return true;
     }());
     return result;
@@ -68,29 +74,33 @@ class BoxShadow extends ui.Shadow {
       offset: offset * factor,
       blurRadius: blurRadius * factor,
       spreadRadius: spreadRadius * factor,
+      blurStyle: blurStyle,
     );
   }
 
   /// Linearly interpolate between two box shadows.
   ///
-  /// If either box shadow is null, this function linearly interpolates from a
+  /// If either box shadow is null, this function linearly interpolates from
   /// a box shadow that matches the other box shadow in color but has a zero
   /// offset and a zero blurRadius.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxShadow? lerp(BoxShadow? a, BoxShadow? b, double t) {
-    assert(t != null);
-    if (a == null && b == null)
-      return null;
-    if (a == null)
+    if (identical(a, b)) {
+      return a;
+    }
+    if (a == null) {
       return b!.scale(t);
-    if (b == null)
+    }
+    if (b == null) {
       return a.scale(1.0 - t);
+    }
     return BoxShadow(
       color: Color.lerp(a.color, b.color, t)!,
       offset: Offset.lerp(a.offset, b.offset, t)!,
       blurRadius: ui.lerpDouble(a.blurRadius, b.blurRadius, t)!,
       spreadRadius: ui.lerpDouble(a.spreadRadius, b.spreadRadius, t)!,
+      blurStyle: a.blurStyle == BlurStyle.normal ? b.blurStyle : a.blurStyle,
     );
   }
 
@@ -100,9 +110,9 @@ class BoxShadow extends ui.Shadow {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static List<BoxShadow>? lerpList(List<BoxShadow>? a, List<BoxShadow>? b, double t) {
-    assert(t != null);
-    if (a == null && b == null)
-      return null;
+    if (identical(a, b)) {
+      return a;
+    }
     a ??= <BoxShadow>[];
     b ??= <BoxShadow>[];
     final int commonLength = math.min(a.length, b.length);
@@ -115,20 +125,23 @@ class BoxShadow extends ui.Shadow {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is BoxShadow
         && other.color == color
         && other.offset == offset
         && other.blurRadius == blurRadius
-        && other.spreadRadius == spreadRadius;
+        && other.spreadRadius == spreadRadius
+        && other.blurStyle == blurStyle;
   }
 
   @override
-  int get hashCode => hashValues(color, offset, blurRadius, spreadRadius);
+  int get hashCode => Object.hash(color, offset, blurRadius, spreadRadius, blurStyle);
 
   @override
-  String toString() => 'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)})';
+  String toString() => 'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)}, $blurStyle)';
 }

@@ -127,9 +127,11 @@ abstract class MultiChildLayoutDelegate {
 
   /// True if a non-null LayoutChild was provided for the specified id.
   ///
-  /// Call this from the [performLayout] or [getSize] methods to
-  /// determine which children are available, if the child list might
-  /// vary.
+  /// Call this from the [performLayout] method to determine which children
+  /// are available, if the child list might vary.
+  ///
+  /// This method cannot be called from [getSize] as the size is not allowed
+  /// to depend on the children.
   bool hasChild(Object childId) => _idToChild![childId] != null;
 
   /// Ask the child to update its layout within the limits specified by
@@ -185,11 +187,6 @@ abstract class MultiChildLayoutDelegate {
         throw FlutterError(
           'The $this custom multichild layout delegate tried to position out a non-existent child:\n'
           'There is no child with the id "$childId".',
-        );
-      }
-      if (offset == null) {
-        throw FlutterError(
-          'The $this custom multichild layout delegate provided a null position for the child with id "$childId".',
         );
       }
       return true;
@@ -248,7 +245,6 @@ abstract class MultiChildLayoutDelegate {
                 'to lay out the following '
                 '${_debugChildrenNeedingLayout!.length > 1 ? 'children' : 'child'}',
               properties: _debugChildrenNeedingLayout!.map<DiagnosticsNode>(_debugDescribeChild).toList(),
-              style: DiagnosticsTreeStyle.whitespace,
             ),
           ]);
         }
@@ -312,27 +308,28 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   RenderCustomMultiChildLayoutBox({
     List<RenderBox>? children,
     required MultiChildLayoutDelegate delegate,
-  }) : assert(delegate != null),
-       _delegate = delegate {
+  }) : _delegate = delegate {
     addAll(children);
   }
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! MultiChildLayoutParentData)
+    if (child.parentData is! MultiChildLayoutParentData) {
       child.parentData = MultiChildLayoutParentData();
+    }
   }
 
   /// The delegate that controls the layout of the children.
   MultiChildLayoutDelegate get delegate => _delegate;
   MultiChildLayoutDelegate _delegate;
   set delegate(MultiChildLayoutDelegate newDelegate) {
-    assert(newDelegate != null);
-    if (_delegate == newDelegate)
+    if (_delegate == newDelegate) {
       return;
+    }
     final MultiChildLayoutDelegate oldDelegate = _delegate;
-    if (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRelayout(oldDelegate))
+    if (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRelayout(oldDelegate)) {
       markNeedsLayout();
+    }
     _delegate = newDelegate;
     if (attached) {
       oldDelegate._relayout?.removeListener(markNeedsLayout);
@@ -364,32 +361,36 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   @override
   double computeMinIntrinsicWidth(double height) {
     final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
-    if (width.isFinite)
+    if (width.isFinite) {
       return width;
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
-    if (width.isFinite)
+    if (width.isFinite) {
       return width;
+    }
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
-    if (height.isFinite)
+    if (height.isFinite) {
       return height;
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
-    if (height.isFinite)
+    if (height.isFinite) {
       return height;
+    }
     return 0.0;
   }
 

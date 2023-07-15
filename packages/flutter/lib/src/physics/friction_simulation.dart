@@ -7,7 +7,24 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import 'simulation.dart';
-import 'tolerance.dart';
+
+export 'tolerance.dart' show Tolerance;
+
+/// Numerically determine the input value which produces output value [target]
+/// for a function [f], given its first-derivative [df].
+double _newtonsMethod({
+  required double initialGuess,
+  required double target,
+  required double Function(double) f,
+  required double Function(double) df,
+  required int iterations
+}) {
+  double guess = initialGuess;
+  for (int i = 0; i < iterations; i++) {
+    guess = guess - (f(guess) - target) / df(guess);
+  }
+  return guess;
+}
 
 /// A simulation that applies a drag to slow a particle down.
 ///
@@ -24,12 +41,21 @@ class FrictionSimulation extends Simulation {
     double drag,
     double position,
     double velocity, {
-    Tolerance tolerance = Tolerance.defaultTolerance,
+    super.tolerance,
+    double constantDeceleration = 0
   }) : _drag = drag,
        _dragLog = math.log(drag),
        _x = position,
        _v = velocity,
-       super(tolerance: tolerance);
+       _constantDeceleration = constantDeceleration * velocity.sign {
+      _finalTime = _newtonsMethod(
+        initialGuess: 0,
+        target: 0,
+        f: dx,
+        df: (double time) => (_v * math.pow(_drag, time) * _dragLog) - _constantDeceleration,
+        iterations: 10
+      );
+    }
 
   /// Creates a new friction simulation with its fluid drag coefficient (_cₓ_) set so
   /// as to ensure that the simulation starts and ends at the specified
@@ -58,6 +84,12 @@ class FrictionSimulation extends Simulation {
   final double _dragLog;
   final double _x;
   final double _v;
+  final double _constantDeceleration;
+  // The time at which the simulation should be stopped.
+  // This is needed when constantDeceleration is not zero (on Desktop), when
+  // using the pure friction simulation, acceleration naturally reduces to zero
+  // and creates a stopping point.
+  double _finalTime = double.infinity; // needs to be infinity for newtonsMethod call in constructor.
 
   // Return the drag value for a FrictionSimulation whose x() and dx() values pass
   // through the specified start and end position/velocity values.
@@ -71,27 +103,52 @@ class FrictionSimulation extends Simulation {
   }
 
   @override
-  double x(double time) => _x + _v * math.pow(_drag, time) / _dragLog - _v / _dragLog;
+  double x(double time) {
+    if (time > _finalTime) {
+      return finalX;
+    }
+    return _x + _v * math.pow(_drag, time) / _dragLog - _v / _dragLog - ((_constantDeceleration / 2) * time * time);
+  }
 
   @override
-  double dx(double time) => _v * math.pow(_drag, time);
+  double dx(double time) {
+    if (time > _finalTime) {
+      return 0;
+    }
+    return _v * math.pow(_drag, time) - _constantDeceleration * time;
+  }
 
   /// The value of [x] at `double.infinity`.
-  double get finalX => _x - _v / _dragLog;
+  double get finalX {
+    if (_constantDeceleration == 0) {
+      return _x - _v / _dragLog;
+    }
+    return x(_finalTime);
+  }
 
   /// The time at which the value of `x(time)` will equal [x].
   ///
   /// Returns `double.infinity` if the simulation will never reach [x].
   double timeAtX(double x) {
-    if (x == _x)
+    if (x == _x) {
       return 0.0;
-    if (_v == 0.0 || (_v > 0 ? (x < _x || x > finalX) : (x > _x || x < finalX)))
+    }
+    if (_v == 0.0 || (_v > 0 ? (x < _x || x > finalX) : (x > _x || x < finalX))) {
       return double.infinity;
-    return math.log(_dragLog * (x - _x) / _v + 1.0) / _dragLog;
+    }
+    return _newtonsMethod(
+      target: x,
+      initialGuess: 0,
+      f: this.x,
+      df: dx,
+      iterations: 10
+    );
   }
 
   @override
-  bool isDone(double time) => dx(time).abs() < tolerance.velocity;
+  bool isDone(double time) {
+    return dx(time).abs() < tolerance.velocity;
+  }
 
   @override
   String toString() => '${objectRuntimeType(this, 'FrictionSimulation')}(cₓ: ${_drag.toStringAsFixed(1)}, x₀: ${_x.toStringAsFixed(1)}, dx₀: ${_v.toStringAsFixed(1)})';
@@ -111,20 +168,19 @@ class BoundedFrictionSimulation extends FrictionSimulation {
   /// in the same units as the initial position, and the initial position must
   /// be within the given range.
   BoundedFrictionSimulation(
-    double drag,
-    double position,
-    double velocity,
+    super.drag,
+    super.position,
+    super.velocity,
     this._minX,
     this._maxX,
-  ) : assert(position.clamp(_minX, _maxX) == position),
-      super(drag, position, velocity);
+  ) : assert(clampDouble(position, _minX, _maxX) == position);
 
   final double _minX;
   final double _maxX;
 
   @override
   double x(double time) {
-    return super.x(time).clamp(_minX, _maxX);
+    return clampDouble(super.x(time), _minX, _maxX);
   }
 
   @override

@@ -20,25 +20,22 @@ import 'theme_data.dart';
 /// Creates a button based on [Semantics], [Material], and [InkWell]
 /// widgets.
 ///
-/// ### This class is obsolete.
-///
-/// Custom button classes can be created by configuring the
-/// [ButtonStyle] of a [TextButton], [ElevatedButton] or an
-/// [OutlinedButton].
-///
-/// FlatButton, RaisedButton, and OutlineButton have been replaced by
-/// TextButton, ElevatedButton, and OutlinedButton respectively.
-/// ButtonTheme has been replaced by TextButtonTheme,
-/// ElevatedButtonTheme, and OutlinedButtonTheme. The original classes
-/// have been deprecated, please migrate code that uses them.
-/// There's a detailed migration guide for the new button and button
-/// theme classes in
-/// [flutter.dev/go/material-button-migration-guide](https://flutter.dev/go/material-button-migration-guide).
-///
 /// This class does not use the current [Theme] or [ButtonTheme] to
 /// compute default values for unspecified parameters. It's intended to
 /// be used for custom Material buttons that optionally incorporate defaults
 /// from the themes or from app-specific sources.
+///
+/// This class is planned to be deprecated in a future release, see
+/// [ButtonStyleButton], the base class of [ElevatedButton], [FilledButton],
+/// [OutlinedButton] and [TextButton].
+///
+/// See also:
+///
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
+///  * [FilledButton], a filled button that doesn't elevate when pressed.
+///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [OutlinedButton], a button with an outlined border and no fill color.
+///  * [TextButton], a button with no outline or fill color.
 @Category(<String>['Material', 'Button'])
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
@@ -49,7 +46,7 @@ class RawMaterialButton extends StatefulWidget {
   /// [elevation], [focusElevation], [hoverElevation], [highlightElevation], and
   /// [disabledElevation] must be non-negative.
   const RawMaterialButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.onLongPress,
     this.onHighlightChanged,
@@ -77,18 +74,11 @@ class RawMaterialButton extends StatefulWidget {
     this.child,
     this.enableFeedback = true,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
-       assert(shape != null),
-       assert(elevation != null && elevation >= 0.0),
-       assert(focusElevation != null && focusElevation >= 0.0),
-       assert(hoverElevation != null && hoverElevation >= 0.0),
-       assert(highlightElevation != null && highlightElevation >= 0.0),
-       assert(disabledElevation != null && disabledElevation >= 0.0),
-       assert(padding != null),
-       assert(constraints != null),
-       assert(animationDuration != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       super(key: key);
+       assert(elevation >= 0.0),
+       assert(focusElevation >= 0.0),
+       assert(hoverElevation >= 0.0),
+       assert(highlightElevation >= 0.0),
+       assert(disabledElevation >= 0.0);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -127,9 +117,9 @@ class RawMaterialButton extends StatefulWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  /// {@endtemplate}
   ///
   /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
-  /// {@endtemplate}
   final MouseCursor? mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the
@@ -371,7 +361,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         right: densityAdjustment.dx,
         bottom: densityAdjustment.dy,
       ),
-    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
 
 
     final Widget result = ConstrainedBox(
@@ -381,6 +371,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
         shape: effectiveShape,
         color: widget.fillColor,
+        // For compatibility during the M3 migration the default shadow needs to be passed.
+        shadowColor: Theme.of(context).useMaterial3 ? Theme.of(context).shadowColor : null,
         type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: widget.animationDuration,
         clipBehavior: widget.clipBehavior,
@@ -423,10 +415,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         );
         assert(minSize.width >= 0.0);
         assert(minSize.height >= 0.0);
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         minSize = Size.zero;
-        break;
     }
 
     return Semantics(
@@ -448,10 +438,9 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
 /// "tap target", but not its material or its ink splashes.
 class _InputPadding extends SingleChildRenderObjectWidget {
   const _InputPadding({
-    Key? key,
-    Widget? child,
+    super.child,
     required this.minSize,
-  }) : super(key: key, child: child);
+  });
 
   final Size minSize;
 
@@ -472,37 +461,42 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size get minSize => _minSize;
   Size _minSize;
   set minSize(Size value) {
-    if (_minSize == value)
+    if (_minSize == value) {
       return;
+    }
     _minSize = value;
     markNeedsLayout();
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+    }
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+    }
     return 0.0;
   }
 
@@ -545,7 +539,7 @@ class _RenderInputPadding extends RenderShiftedBox {
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(center),
       position: center,
-      hitTest: (BoxHitTestResult result, Offset? position) {
+      hitTest: (BoxHitTestResult result, Offset position) {
         assert(position == center);
         return child!.hitTest(result, position: center);
       },

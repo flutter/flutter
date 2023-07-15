@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
@@ -24,8 +23,8 @@ void main() {
   Cache.disableLocking();
 
   group('Usage', () {
-    Directory tempDir;
-    TestUsage testUsage;
+    late Directory tempDir;
+    late TestUsage testUsage;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
@@ -87,10 +86,10 @@ void main() {
   });
 
   group('Gradle', () {
-    Directory tempDir;
-    FakeProcessManager processManager;
-    FakeAndroidSdk fakeAndroidSdk;
-    TestUsage testUsage;
+    late Directory tempDir;
+    late FakeProcessManager processManager;
+    late FakeAndroidSdk fakeAndroidSdk;
+    late TestUsage testUsage;
 
     setUp(() {
       testUsage = TestUsage();
@@ -213,9 +212,9 @@ void main() {
 
 Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   String target, {
-  List<String> arguments,
+  List<String>? arguments,
 }) async {
-  final BuildAppBundleCommand command = BuildAppBundleCommand();
+  final BuildAppBundleCommand command = BuildAppBundleCommand(logger: BufferLogger.test());
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'appbundle',

@@ -22,8 +22,12 @@ String readDataFile(String fileName) {
   return File(path.join(dataRoot, fileName)).readAsStringSync();
 }
 
-final String testPhysicalData = path.join(dataRoot, 'physical_key_data.json');
-final String testLogicalData = path.join(dataRoot,'logical_key_data.json');
+final PhysicalKeyData physicalData = PhysicalKeyData.fromJson(
+    json.decode(readDataFile('physical_key_data.g.json')) as Map<String, dynamic>);
+final LogicalKeyData logicalData = LogicalKeyData.fromJson(
+    json.decode(readDataFile('logical_key_data.g.json')) as Map<String, dynamic>);
+final Map<String, bool> keyGoals = parseMapOfBool(
+    readDataFile('layout_goals.json'));
 
 void main() {
   setUp(() {
@@ -45,14 +49,6 @@ void main() {
   }
 
   test('Generate Keycodes for Android', () {
-    PhysicalKeyData physicalData;
-    LogicalKeyData logicalData;
-
-    physicalData = PhysicalKeyData.fromJson(
-        json.decode(File(testPhysicalData).readAsStringSync()) as Map<String, dynamic>);
-    logicalData = LogicalKeyData.fromJson(
-        json.decode(File(testLogicalData).readAsStringSync()) as Map<String, dynamic>);
-
     const String platform = 'android';
     final PlatformCodeGenerator codeGenerator = AndroidCodeGenerator(
       physicalData,
@@ -67,22 +63,15 @@ void main() {
     checkCommonOutput(output);
   });
   test('Generate Keycodes for macOS', () {
-    PhysicalKeyData physicalData;
-    LogicalKeyData logicalData;
-
-    physicalData = PhysicalKeyData.fromJson(
-        json.decode(File(testPhysicalData).readAsStringSync()) as Map<String, dynamic>);
-    logicalData = LogicalKeyData.fromJson(
-        json.decode(File(testLogicalData).readAsStringSync()) as Map<String, dynamic>);
-
     const String platform = 'macos';
     final PlatformCodeGenerator codeGenerator = MacOSCodeGenerator(
       physicalData,
       logicalData,
+      keyGoals,
     );
     final String output = codeGenerator.generate();
 
-    expect(codeGenerator.outputPath(platform), endsWith('KeyCodeMap.mm'));
+    expect(codeGenerator.outputPath(platform), endsWith('KeyCodeMap.g.mm'));
     expect(output, contains('kValueMask'));
     expect(output, contains('keyCodeToPhysicalKey'));
     expect(output, contains('keyCodeToLogicalKey'));
@@ -93,14 +82,6 @@ void main() {
     checkCommonOutput(output);
   });
   test('Generate Keycodes for iOS', () {
-    PhysicalKeyData physicalData;
-    LogicalKeyData logicalData;
-
-    physicalData = PhysicalKeyData.fromJson(
-        json.decode(File(testPhysicalData).readAsStringSync()) as Map<String, dynamic>);
-    logicalData = LogicalKeyData.fromJson(
-        json.decode(File(testLogicalData).readAsStringSync()) as Map<String, dynamic>);
-
     const String platform = 'ios';
     final PlatformCodeGenerator codeGenerator = IOSCodeGenerator(
       physicalData,
@@ -108,7 +89,7 @@ void main() {
     );
     final String output = codeGenerator.generate();
 
-    expect(codeGenerator.outputPath(platform), endsWith('KeyCodeMap.mm'));
+    expect(codeGenerator.outputPath(platform), endsWith('KeyCodeMap.g.mm'));
     expect(output, contains('kValueMask'));
     expect(output, contains('keyCodeToPhysicalKey'));
     expect(output, contains('keyCodeToLogicalKey'));
@@ -120,14 +101,6 @@ void main() {
     checkCommonOutput(output);
   });
   test('Generate Keycodes for Windows', () {
-    PhysicalKeyData physicalData;
-    LogicalKeyData logicalData;
-
-    physicalData = PhysicalKeyData.fromJson(
-        json.decode(File(testPhysicalData).readAsStringSync()) as Map<String, dynamic>);
-    logicalData = LogicalKeyData.fromJson(
-        json.decode(File(testLogicalData).readAsStringSync()) as Map<String, dynamic>);
-
     const String platform = 'windows';
     final PlatformCodeGenerator codeGenerator = WindowsCodeGenerator(
       physicalData,
@@ -136,44 +109,29 @@ void main() {
     );
     final String output = codeGenerator.generate();
 
-    expect(codeGenerator.outputPath(platform), endsWith('flutter_key_map.cc'));
+    expect(codeGenerator.outputPath(platform), endsWith('flutter_key_map.g.cc'));
     expect(output, contains('KeyboardKeyEmbedderHandler::windowsToPhysicalMap_'));
     expect(output, contains('KeyboardKeyEmbedderHandler::windowsToLogicalMap_'));
     expect(output, contains('KeyboardKeyEmbedderHandler::scanCodeToLogicalMap_'));
     checkCommonOutput(output);
   });
   test('Generate Keycodes for Linux', () {
-    PhysicalKeyData physicalData;
-    LogicalKeyData logicalData;
-
-    physicalData = PhysicalKeyData.fromJson(
-        json.decode(File(testPhysicalData).readAsStringSync()) as Map<String, dynamic>);
-    logicalData = LogicalKeyData.fromJson(
-        json.decode(File(testLogicalData).readAsStringSync()) as Map<String, dynamic>);
-
     const String platform = 'gtk';
     final PlatformCodeGenerator codeGenerator = GtkCodeGenerator(
       physicalData,
       logicalData,
       readDataFile(path.join(dataRoot, 'gtk_modifier_bit_mapping.json')),
       readDataFile(path.join(dataRoot, 'gtk_lock_bit_mapping.json')),
+      keyGoals,
     );
     final String output = codeGenerator.generate();
 
-    expect(codeGenerator.outputPath(platform), endsWith('key_mapping.cc'));
+    expect(codeGenerator.outputPath(platform), endsWith('key_mapping.g.cc'));
     expect(output, contains('initialize_modifier_bit_to_checked_keys'));
     expect(output, contains('initialize_lock_bit_to_checked_keys'));
     checkCommonOutput(output);
   });
   test('Generate Keycodes for Web', () {
-    PhysicalKeyData physicalData;
-    LogicalKeyData logicalData;
-
-    physicalData = PhysicalKeyData.fromJson(
-        json.decode(File(testPhysicalData).readAsStringSync()) as Map<String, dynamic>);
-    logicalData = LogicalKeyData.fromJson(
-        json.decode(File(testLogicalData).readAsStringSync()) as Map<String, dynamic>);
-
     const String platform = 'web';
     final PlatformCodeGenerator codeGenerator = WebCodeGenerator(
       physicalData,
@@ -182,10 +140,31 @@ void main() {
     );
     final String output = codeGenerator.generate();
 
-    expect(codeGenerator.outputPath(platform), endsWith('key_map.dart'));
+    expect(codeGenerator.outputPath(platform), endsWith('key_map.g.dart'));
     expect(output, contains('kWebToLogicalKey'));
     expect(output, contains('kWebToPhysicalKey'));
     expect(output, contains('kWebLogicalLocationMap'));
     checkCommonOutput(output);
+  });
+  test('LogicalKeyData', () async {
+    final List<LogicalKeyEntry> entries = logicalData.entries.toList();
+
+    // Regression tests for https://github.com/flutter/flutter/pull/87098
+
+    expect(
+      entries.indexWhere((LogicalKeyEntry entry) => entry.name == 'ShiftLeft'),
+      isNot(-1));
+    expect(
+      entries.indexWhere((LogicalKeyEntry entry) => entry.webNames.contains('ShiftLeft')),
+      -1);
+    // 'Shift' maps to both 'ShiftLeft' and 'ShiftRight', and should be resolved
+    // by other ways.
+    expect(
+      entries.indexWhere((LogicalKeyEntry entry) => entry.webNames.contains('Shift')),
+      -1);
+    // Printable keys must not be added with Web key of their names.
+    expect(
+      entries.indexWhere((LogicalKeyEntry entry) => entry.webNames.contains('Slash')),
+      -1);
   });
 }

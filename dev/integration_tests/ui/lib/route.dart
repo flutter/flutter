@@ -10,6 +10,6 @@ import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
   enableFlutterDriverExtension(handler: (String? message) async {
-    return ui.window.defaultRouteName;
+    return ui.PlatformDispatcher.instance.defaultRouteName;
   });
 }

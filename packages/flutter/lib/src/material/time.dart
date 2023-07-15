@@ -108,7 +108,7 @@ class TimeOfDay {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return localizations.formatTimeOfDay(
       this,
-      alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
     );
   }
 
@@ -120,18 +120,19 @@ class TimeOfDay {
   }
 
   @override
-  int get hashCode => hashValues(hour, minute);
+  int get hashCode => Object.hash(hour, minute);
 
   @override
   String toString() {
-    String _addLeadingZeroIfNeeded(int value) {
-      if (value < 10)
+    String addLeadingZeroIfNeeded(int value) {
+      if (value < 10) {
         return '0$value';
+      }
       return value.toString();
     }
 
-    final String hourLabel = _addLeadingZeroIfNeeded(hour);
-    final String minuteLabel = _addLeadingZeroIfNeeded(minute);
+    final String hourLabel = addLeadingZeroIfNeeded(hour);
+    final String minuteLabel = addLeadingZeroIfNeeded(minute);
 
     return '$TimeOfDay($hourLabel:$minuteLabel)';
   }

@@ -15,7 +15,8 @@ Future<void> main() async {
     try {
       await runProjectTest((FlutterProject flutterProject) async {
         section('APK contains plugin classes');
-        flutterProject.addPlugin('google_maps_flutter', value: '^1.0.10');
+        await flutterProject.setMinSdkVersion(20);
+        flutterProject.addPlugin('google_maps_flutter', value: '^2.2.1');
 
         await inDirectory(flutterProject.rootPath, () async {
           await flutter('build', options: <String>[

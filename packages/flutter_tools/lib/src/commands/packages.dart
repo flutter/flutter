@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/args.dart';
 
 import '../base/common.dart';
@@ -14,32 +12,41 @@ import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
+/// The function signature of the [print] function.
+typedef PrintFn = void Function(Object?);
+
 class PackagesCommand extends FlutterCommand {
-  PackagesCommand() {
-    addSubcommand(PackagesGetCommand('get', false));
-    addSubcommand(PackagesInteractiveGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions."));
-    addSubcommand(PackagesInteractiveGetCommand('add', 'Add a dependency to pubspec.yaml.'));
-    addSubcommand(PackagesInteractiveGetCommand('remove', 'Removes a dependency from the current package.'));
+  PackagesCommand({
+    PrintFn usagePrintFn = print,
+  }) : _usagePrintFn = usagePrintFn
+  {
+    addSubcommand(PackagesGetCommand('get', "Get the current package's dependencies.", PubContext.pubGet));
+    addSubcommand(PackagesGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions.", PubContext.pubUpgrade));
+    addSubcommand(PackagesGetCommand('add', 'Add a dependency to pubspec.yaml.', PubContext.pubAdd));
+    addSubcommand(PackagesGetCommand('remove', 'Removes a dependency from the current package.', PubContext.pubRemove));
     addSubcommand(PackagesTestCommand());
-    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache'));
-    addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
-    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev'));
+    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org.', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project.', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies.')); // path to package can be specified with --directory argument
+    addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package.', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache.'));
+    addSubcommand(PackagesForwardCommand('version', 'Print Pub version.'));
+    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev.'));
     addSubcommand(PackagesForwardCommand('login', 'Log into pub.dev.'));
     addSubcommand(PackagesForwardCommand('logout', 'Log out of pub.dev.'));
-    addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
-    addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages.'));
+    addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded.', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('token', 'Manage authentication tokens for hosted pub repositories.'));
     addSubcommand(PackagesPassthroughCommand());
   }
+
+  final PrintFn _usagePrintFn;
 
   @override
   final String name = 'pub';
@@ -51,136 +58,13 @@ class PackagesCommand extends FlutterCommand {
   final String description = 'Commands for managing Flutter packages.';
 
   @override
-  Future<FlutterCommandResult> runCommand() async => null;
-}
-
-class PackagesGetCommand extends FlutterCommand {
-  PackagesGetCommand(this.name, this.upgrade) {
-    requiresPubspecYaml();
-    argParser.addFlag('offline',
-      negatable: false,
-      help: 'Use cached packages instead of accessing the network.',
-    );
-  }
+  String get category => FlutterCommandCategory.project;
 
   @override
-  final String name;
-
-  final bool upgrade;
+  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
 
   @override
-  String get description {
-    return '${ upgrade ? "Upgrade" : "Get" } packages in a Flutter project.';
-  }
-
-  @override
-  String get invocation {
-    return '${runner.executableName} pub $name [<target directory>]';
-  }
-
-  /// The pub packages usage values are incorrect since these are calculated/sent
-  /// before pub get completes. This needs to be performed after dependency resolution.
-  @override
-  Future<CustomDimensions> get usageValues async {
-    final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
-    final String target = findProjectRoot(globals.fs, workingDirectory);
-    if (target == null) {
-      return const CustomDimensions();
-    }
-
-    int numberPlugins;
-
-    final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
-    // Do not send plugin analytics if pub has not run before.
-    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
-      && rootProject.packagesFile.existsSync()
-      && rootProject.packageConfigFile.existsSync();
-    if (hasPlugins) {
-      // Do not fail pub get if package config files are invalid before pub has
-      // had a chance to run.
-      final List<Plugin> plugins = await findPlugins(rootProject, throwOnError: false);
-      numberPlugins = plugins.length;
-    } else {
-      numberPlugins = 0;
-    }
-
-    return CustomDimensions(
-      commandPackagesNumberPlugins: numberPlugins,
-      commandPackagesProjectModule: rootProject.isModule,
-      commandPackagesAndroidEmbeddingVersion: rootProject.android.getEmbeddingVersion().toString().split('.').last,
-    );
-  }
-
-  Future<void> _runPubGet(String directory, FlutterProject flutterProject) async {
-    if (flutterProject.manifest.generateSyntheticPackage) {
-      final Environment environment = Environment(
-        artifacts: globals.artifacts,
-        logger: globals.logger,
-        cacheDir: globals.cache.getRoot(),
-        engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
-        processManager: globals.processManager,
-        platform: globals.platform,
-        projectDir: flutterProject.directory,
-        generateDartPluginRegistry: true,
-      );
-
-      await generateLocalizationsSyntheticPackage(
-        environment: environment,
-        buildSystem: globals.buildSystem,
-      );
-    }
-
-    final Stopwatch pubGetTimer = Stopwatch()..start();
-    try {
-      await pub.get(
-        context: PubContext.pubGet,
-        directory: directory,
-        upgrade: upgrade,
-        shouldSkipThirdPartyGenerator: false,
-        offline: boolArg('offline'),
-        generateSyntheticPackage: flutterProject.manifest.generateSyntheticPackage,
-      );
-      pubGetTimer.stop();
-      globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
-    // Not limiting to catching Exception because the exception is rethrown.
-    } catch (_) { // ignore: avoid_catches_without_on_clauses
-      pubGetTimer.stop();
-      globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'failure');
-      rethrow;
-    }
-  }
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    if (argResults.rest.length > 1) {
-      throwToolExit('Too many arguments.\n$usage');
-    }
-
-    final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
-    final String target = findProjectRoot(globals.fs, workingDirectory);
-    if (target == null) {
-      throwToolExit(
-        'Expected to find project root in '
-        '${ workingDirectory ?? "current working directory" }.'
-      );
-    }
-    final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
-
-    await _runPubGet(target, rootProject);
-    await rootProject.regeneratePlatformSpecificTooling();
-
-    // Get/upgrade packages in example app as well
-    if (rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
-      final FlutterProject exampleProject = rootProject.example;
-      await _runPubGet(exampleProject.directory.path, exampleProject);
-      await exampleProject.regeneratePlatformSpecificTooling();
-    }
-
-    return FlutterCommandResult.success();
-  }
+  void printUsage() => _usagePrintFn(usage);
 }
 
 class PackagesTestCommand extends FlutterCommand {
@@ -203,12 +87,12 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   String get invocation {
-    return '${runner.executableName} pub test [<tests...>]';
+    return '${runner!.executableName} pub test [<tests...>]';
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub.batch(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
+    await pub.batch(<String>['run', 'test', ...argResults!.rest], context: PubContext.runTest);
     return FlutterCommandResult.success();
   }
 }
@@ -219,6 +103,8 @@ class PackagesForwardCommand extends FlutterCommand {
       requiresPubspecYaml();
     }
   }
+
+  PubContext context = PubContext.pubForward;
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
@@ -231,20 +117,24 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   String get description {
-    return '$_description.\n'
+    return '$_description\n'
            'This runs the "pub" tool in a Flutter context.';
   }
 
   @override
   String get invocation {
-    return '${runner.executableName} pub $_commandName [<arguments...>]';
+    return '${runner!.executableName} pub $_commandName [<arguments...>]';
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final List<String> subArgs = argResults.rest.toList()
+    final List<String> subArgs = argResults!.rest.toList()
       ..removeWhere((String arg) => arg == '--');
-    await pub.interactively(<String>[_commandName, ...subArgs], stdio: globals.stdio);
+    await pub.interactively(
+      <String>[ _commandName, ...subArgs],
+      context: context,
+      command: _commandName,
+    );
     return FlutterCommandResult.success();
   }
 }
@@ -264,63 +154,139 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
   @override
   String get invocation {
-    return '${runner.executableName} packages pub [<arguments...>]';
+    return '${runner!.executableName} packages pub [<arguments...>]';
   }
+
+  static final PubContext _context = PubContext.pubPassThrough;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub.interactively(argResults.rest, stdio: globals.stdio);
+    await pub.interactively(
+      command: 'pub',
+      argResults!.rest,
+      context: _context,
+    );
     return FlutterCommandResult.success();
   }
 }
 
-class PackagesInteractiveGetCommand extends FlutterCommand {
-  PackagesInteractiveGetCommand(this._commandName, this._description);
+/// Represents the pub sub-commands that makes package-resolutions.
+class PackagesGetCommand extends FlutterCommand {
+  PackagesGetCommand(this._commandName, this._description, this._context);
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
 
   final String _commandName;
   final String _description;
+  final PubContext _context;
+
+  FlutterProject? _rootProject;
 
   @override
   String get name => _commandName;
 
   @override
   String get description {
-    return '$_description.\n'
+    return '$_description\n'
            'This runs the "pub" tool in a Flutter context.';
   }
 
   @override
   String get invocation {
-    return '${runner.executableName} pub $_commandName [<arguments...>]';
+    return '${runner!.executableName} pub $_commandName [<arguments...>]';
+  }
+
+  /// An [ArgParser] that accepts all options and flags that the
+  ///
+  /// `pub get`
+  /// `pub upgrade`
+  /// `pub downgrade`
+  /// `pub add`
+  /// `pub remove`
+  ///
+  /// commands accept.
+  ArgParser get _permissiveArgParser {
+    final ArgParser argParser = ArgParser();
+    argParser.addOption('directory', abbr: 'C');
+    argParser.addFlag('offline');
+    argParser.addFlag('dry-run', abbr: 'n');
+    argParser.addFlag('help', abbr: 'h');
+    argParser.addFlag('enforce-lockfile');
+    argParser.addFlag('precompile');
+    argParser.addFlag('major-versions');
+    argParser.addFlag('null-safety');
+    argParser.addFlag('example', defaultsTo: true);
+    argParser.addOption('sdk');
+    argParser.addOption('path');
+    argParser.addOption('hosted-url');
+    argParser.addOption('git-url');
+    argParser.addOption('git-ref');
+    argParser.addOption('git-path');
+    argParser.addFlag('dev');
+    argParser.addFlag('verbose', abbr: 'v');
+    return argParser;
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    List<String> rest = argResults.rest;
-    final bool isHelp = rest.contains('-h') || rest.contains('--help');
-    String target;
-    if (rest.length == 1 && (rest[0].contains('/') || rest[0].contains(r'\'))) {
-      // HACK: Supporting flutter specific behavior where you can pass a
-      //       folder to the command.
-      target = findProjectRoot(globals.fs, rest[0]);
-      rest = <String>[];
-    } else {
-      target = findProjectRoot(globals.fs);
+    List<String> rest = argResults!.rest;
+    bool isHelp = false;
+    bool example = true;
+    bool exampleWasParsed = false;
+    String? directoryOption;
+    bool dryRun = false;
+    try {
+      final ArgResults results = _permissiveArgParser.parse(rest);
+      isHelp = results['help'] as bool;
+      directoryOption = results['directory'] as String?;
+      example = results['example'] as bool;
+      exampleWasParsed = results.wasParsed('example');
+      dryRun = results['dry-run'] as bool;
+    } on ArgParserException {
+      // Let pub give the error message.
     }
+    String? target;
+    FlutterProject? rootProject;
 
-    FlutterProject flutterProject;
     if (!isHelp) {
-      if (target == null) {
-        throwToolExit('Expected to find project root in current working directory.');
-      }
-      flutterProject = FlutterProject.fromDirectory(globals.fs.directory(target));
+      if (directoryOption == null &&
+          rest.length == 1 &&
+          // Anything that looks like an argument should not be interpreted as
+          // a directory.
+          !rest.single.startsWith('-') &&
+          ((rest.single.contains('/') || rest.single.contains(r'\')) ||
+            name == 'get')) {
+        // For historical reasons, if there is one argument to the command and it contains
+        // a multiple-component path (i.e. contains a slash) then we use that to determine
+        // to which project we're applying the command.
+        target = findProjectRoot(globals.fs, rest.single);
 
-      if (flutterProject.manifest.generateSyntheticPackage) {
+        globals.printWarning('''
+  Using a naked argument for directory is deprecated and will stop working in a future Flutter release.
+
+  Use --directory instead.''');
+        if (target == null) {
+          throwToolExit('Expected to find project root in ${rest.single}.');
+        }
+        rest = <String>[];
+      } else {
+        target = findProjectRoot(globals.fs, directoryOption);
+        if (target == null) {
+          if (directoryOption == null) {
+            throwToolExit('Expected to find project root in current working directory.');
+          } else {
+            throwToolExit('Expected to find project root in $directoryOption.');
+          }
+        }
+      }
+
+      rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
+      _rootProject = rootProject;
+
+      if (rootProject.manifest.generateSyntheticPackage) {
         final Environment environment = Environment(
-          artifacts: globals.artifacts,
+          artifacts: globals.artifacts!,
           logger: globals.logger,
           cacheDir: globals.cache.getRoot(),
           engineVersion: globals.flutterVersion.engineRevision,
@@ -329,7 +295,8 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
           outputDir: globals.fs.directory(getBuildDirectory()),
           processManager: globals.processManager,
           platform: globals.platform,
-          projectDir: flutterProject.directory,
+          usage: globals.flutterUsage,
+          projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
         );
 
@@ -339,17 +306,70 @@ class PackagesInteractiveGetCommand extends FlutterCommand {
         );
       }
     }
+    final String? relativeTarget = target == null ? null : globals.fs.path.relative(target);
 
     final List<String> subArgs = rest.toList()..removeWhere((String arg) => arg == '--');
-    await pub.interactively(
-      <String>[name, ...subArgs],
-      directory: target,
-      stdio: globals.stdio,
-      touchesPackageConfig: !isHelp,
-      generateSyntheticPackage: flutterProject?.manifest?.generateSyntheticPackage ?? false,
-    );
+    final Stopwatch timer = Stopwatch()..start();
+    try {
+      await pub.interactively(
+        <String>[
+          name,
+          ...subArgs,
+          // `dart pub get` and friends defaults to `--no-example`.
+          if (!exampleWasParsed && target != null) '--example',
+          if (directoryOption == null && relativeTarget != null) ...<String>['--directory', relativeTarget],
+        ],
+        project: rootProject,
+        context: _context,
+        command: name,
+        touchesPackageConfig: !(isHelp || dryRun),
+      );
+      globals.flutterUsage.sendTiming('pub', 'get', timer.elapsed, label: 'success');
+    // Not limiting to catching Exception because the exception is rethrown.
+    } catch (_) { // ignore: avoid_catches_without_on_clauses
+      globals.flutterUsage.sendTiming('pub', 'get', timer.elapsed, label: 'failure');
+      rethrow;
+    }
 
-    await flutterProject?.regeneratePlatformSpecificTooling();
+    if (rootProject != null) {
+      // We need to regenerate the platform specific tooling for both the project
+      // itself and example(if present).
+      await rootProject.regeneratePlatformSpecificTooling();
+      if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
+        final FlutterProject exampleProject = rootProject.example;
+        await exampleProject.regeneratePlatformSpecificTooling();
+      }
+    }
+
     return FlutterCommandResult.success();
+  }
+
+  /// The pub packages usage values are incorrect since these are calculated/sent
+  /// before pub get completes. This needs to be performed after dependency resolution.
+  @override
+  Future<CustomDimensions> get usageValues async {
+    final FlutterProject? rootProject = _rootProject;
+    if (rootProject == null) {
+      return const CustomDimensions();
+    }
+
+    int numberPlugins;
+    // Do not send plugin analytics if pub has not run before.
+    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
+      && rootProject.packageConfigFile.existsSync();
+    if (hasPlugins) {
+      // Do not fail pub get if package config files are invalid before pub has
+      // had a chance to run.
+      final List<Plugin> plugins = await findPlugins(rootProject, throwOnError: false);
+      numberPlugins = plugins.length;
+    } else {
+      numberPlugins = 0;
+    }
+
+    return CustomDimensions(
+      commandPackagesNumberPlugins: numberPlugins,
+      commandPackagesProjectModule: rootProject.isModule,
+      commandPackagesAndroidEmbeddingVersion: rootProject.android.getEmbeddingVersion().toString().split('.').last,
+    );
   }
 }

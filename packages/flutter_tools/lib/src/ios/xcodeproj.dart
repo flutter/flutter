@@ -47,6 +47,7 @@ class XcodeProjectInterpreter {
     required FileSystem fileSystem,
     required Usage usage,
     Version? version,
+    String? build,
   }) : _platform = platform,
         _fileSystem = fileSystem,
         _logger = logger,
@@ -58,6 +59,8 @@ class XcodeProjectInterpreter {
           processManager: processManager,
         ),
         _version = version,
+        _build = build,
+        _versionText = version?.toString(),
         _usage = usage;
 
   /// Create an [XcodeProjectInterpreter] for testing.
@@ -69,6 +72,7 @@ class XcodeProjectInterpreter {
   factory XcodeProjectInterpreter.test({
     required ProcessManager processManager,
     Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
+    String? build = '13C100',
   }) {
     final Platform platform = FakePlatform(
       operatingSystem: 'macos',
@@ -81,6 +85,7 @@ class XcodeProjectInterpreter {
       usage: TestUsage(),
       logger: BufferLogger.test(),
       version: version,
+      build: build,
     );
   }
 
@@ -90,8 +95,7 @@ class XcodeProjectInterpreter {
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
   final Usage _usage;
-
-  static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
+  static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+).*Build version (\w+)');
 
   void _updateVersion() {
     if (!_platform.isMacOS || !_fileSystem.file('/usr/bin/xcodebuild').existsSync()) {
@@ -117,6 +121,7 @@ class XcodeProjectInterpreter {
       final int minorVersion = components.length < 2 ? 0 : int.parse(components[1]);
       final int patchVersion = components.length < 3 ? 0 : int.parse(components[2]);
       _version = Version(majorVersion, minorVersion, patchVersion);
+      _build = match.group(2);
     } on ProcessException {
       // Ignored, leave values null.
     }
@@ -133,11 +138,19 @@ class XcodeProjectInterpreter {
   }
 
   Version? _version;
+  String? _build;
   Version? get version {
     if (_version == null) {
       _updateVersion();
     }
     return _version;
+  }
+
+  String? get build {
+    if (_build == null) {
+      _updateVersion();
+    }
+    return _build;
   }
 
   /// The `xcrun` Xcode command to run or locate development
@@ -148,7 +161,7 @@ class XcodeProjectInterpreter {
   /// to run outside the x86 Rosetta translation, which may cause crashes.
   List<String> xcrunCommand() {
     final List<String> xcrunCommand = <String>[];
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       // Force Xcode commands to run outside Rosetta.
       xcrunCommand.addAll(<String>[
         '/usr/bin/arch',
@@ -172,6 +185,8 @@ class XcodeProjectInterpreter {
     final Status status = _logger.startSpinner();
     final String? scheme = buildContext.scheme;
     final String? configuration = buildContext.configuration;
+    final String? target = buildContext.target;
+    final String? deviceId = buildContext.deviceId;
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
@@ -181,11 +196,24 @@ class XcodeProjectInterpreter {
         ...<String>['-scheme', scheme],
       if (configuration != null)
         ...<String>['-configuration', configuration],
+      if (target != null)
+        ...<String>['-target', target],
       if (buildContext.environmentType == EnvironmentType.simulator)
         ...<String>['-sdk', 'iphonesimulator'],
+      '-destination',
+      if (buildContext.isWatch && buildContext.environmentType == EnvironmentType.physical)
+        'generic/platform=watchOS'
+      else if (buildContext.isWatch)
+        'generic/platform=watchOS Simulator'
+      else if (deviceId != null)
+        'id=$deviceId'
+      else if (buildContext.environmentType == EnvironmentType.physical)
+        'generic/platform=iOS'
+      else
+        'generic/platform=iOS Simulator',
       '-showBuildSettings',
       'BUILD_DIR=${_fileSystem.path.absolute(getIosBuildDirectory())}',
-      ...environmentVariablesAsXcodeBuildSettings(_platform)
+      ...environmentVariablesAsXcodeBuildSettings(_platform),
     ];
     try {
       // showBuildSettings is reported to occasionally timeout. Here, we give it
@@ -215,6 +243,61 @@ class XcodeProjectInterpreter {
     }
   }
 
+  /// Asynchronously retrieve xcode build settings for the generated Pods.xcodeproj plugins project.
+  ///
+  /// Returns the stdout of the Xcode command.
+  Future<String?> pluginsBuildSettingsOutput(
+      Directory podXcodeProject, {
+        Duration timeout = const Duration(minutes: 1),
+      }) async {
+    if (!podXcodeProject.existsSync()) {
+      // No plugins.
+      return null;
+    }
+    final Status status = _logger.startSpinner();
+    final String buildDirectory = _fileSystem.path.absolute(getIosBuildDirectory());
+    final List<String> showBuildSettingsCommand = <String>[
+      ...xcrunCommand(),
+      'xcodebuild',
+      '-alltargets',
+      '-sdk',
+      'iphonesimulator',
+      '-project',
+      podXcodeProject.path,
+      '-showBuildSettings',
+      'BUILD_DIR=$buildDirectory',
+      'OBJROOT=$buildDirectory',
+    ];
+    try {
+      // showBuildSettings is reported to occasionally timeout. Here, we give it
+      // a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
+      // When there is a timeout, we retry once.
+      final RunResult result = await _processUtils.run(
+        showBuildSettingsCommand,
+        throwOnError: true,
+        workingDirectory: podXcodeProject.path,
+        timeout: timeout,
+        timeoutRetries: 1,
+      );
+
+      // Return the stdout only. Do not parse with parseXcodeBuildSettings, `-alltargets` prints the build settings
+      // for all targets (one per plugin), so it would require a Map of Maps.
+      return result.stdout.trim();
+    } on Exception catch (error) {
+      if (error is ProcessException && error.toString().contains('timed out')) {
+        BuildEvent('xcode-show-build-settings-timeout',
+          type: 'ios',
+          command: showBuildSettingsCommand.join(' '),
+          flutterUsage: _usage,
+        ).send();
+      }
+      _logger.printTrace('Unexpected failure to get Pod Xcode project build settings: $error.');
+      return null;
+    } finally {
+      status.stop();
+    }
+  }
+
   Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async {
     await _processUtils.run(<String>[
       ...xcrunCommand(),
@@ -226,18 +309,18 @@ class XcodeProjectInterpreter {
       if (!verbose)
         '-quiet',
       'clean',
-      ...environmentVariablesAsXcodeBuildSettings(_platform)
+      ...environmentVariablesAsXcodeBuildSettings(_platform),
     ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
     const int missingProjectExitCode = 66;
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
     const int corruptedProjectExitCode = 74;
-    bool _allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
+    bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final RunResult result = await _processUtils.run(
       <String>[
         ...xcrunCommand(),
@@ -246,10 +329,10 @@ class XcodeProjectInterpreter {
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],
       throwOnError: true,
-      allowedFailures: _allowedFailures,
+      allowedFailures: allowedFailures,
       workingDirectory: projectPath,
     );
-    if (_allowedFailures(result.exitCode)) {
+    if (allowedFailures(result.exitCode)) {
       // User configuration error, tool exit instead of crashing.
       throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
     }
@@ -295,14 +378,24 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
 
 @immutable
 class XcodeProjectBuildContext {
-  const XcodeProjectBuildContext({this.scheme, this.configuration, this.environmentType = EnvironmentType.physical});
+  const XcodeProjectBuildContext({
+    this.scheme,
+    this.configuration,
+    this.environmentType = EnvironmentType.physical,
+    this.deviceId,
+    this.target,
+    this.isWatch = false,
+  });
 
   final String? scheme;
   final String? configuration;
   final EnvironmentType environmentType;
+  final String? deviceId;
+  final String? target;
+  final bool isWatch;
 
   @override
-  int get hashCode => Object.hash(scheme, configuration, environmentType);
+  int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId, target);
 
   @override
   bool operator ==(Object other) {
@@ -312,15 +405,33 @@ class XcodeProjectBuildContext {
     return other is XcodeProjectBuildContext &&
         other.scheme == scheme &&
         other.configuration == configuration &&
-        other.environmentType == environmentType;
+        other.deviceId == deviceId &&
+        other.environmentType == environmentType &&
+        other.isWatch == isWatch &&
+        other.target == target;
   }
 }
+
+/// The settings that are relevant for setting up universal links
+@immutable
+class XcodeUniversalLinkSettings {
+  const XcodeUniversalLinkSettings({
+    this.bundleIdentifier,
+    this.teamIdentifier,
+    this.associatedDomains = const <String>[],
+  });
+
+  final String? bundleIdentifier;
+  final String? teamIdentifier;
+  final List<String> associatedDomains;
+}
+
 
 /// Information about an Xcode project.
 ///
 /// Represents the output of `xcodebuild -list`.
 class XcodeProjectInfo {
-  XcodeProjectInfo(
+  const XcodeProjectInfo(
     this.targets,
     this.buildConfigurations,
     this.schemes,
@@ -364,7 +475,7 @@ class XcodeProjectInfo {
   /// The expected scheme for [buildInfo].
   @visibleForTesting
   static String expectedSchemeFor(BuildInfo? buildInfo) {
-    return toTitleCase(buildInfo?.flavor ?? 'runner');
+    return sentenceCase(buildInfo?.flavor ?? 'runner');
   }
 
   /// The expected build configuration for [buildInfo] and [scheme].
@@ -387,6 +498,7 @@ class XcodeProjectInfo {
     }
     return false;
   }
+
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
   String? schemeFor(BuildInfo? buildInfo) {

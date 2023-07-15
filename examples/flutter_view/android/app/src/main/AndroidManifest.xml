@@ -2,8 +2,7 @@
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file. -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.view">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- The INTERNET permission is required for development. Specifically, flutter needs it to communicate with the running application
          to allow setting breakpoints, to provide hot reload, etc.
@@ -12,6 +11,7 @@ found in the LICENSE file. -->
 
     <application android:label="flutter_view" android:icon="@mipmap/ic_launcher">
         <activity android:name=".MainActivity"
+                  android:exported="true"
                   android:launchMode="singleTop"
                   android:theme="@style/Theme.AppCompat"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -22,5 +22,8 @@ found in the LICENSE file. -->
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
     </application>
 </manifest>

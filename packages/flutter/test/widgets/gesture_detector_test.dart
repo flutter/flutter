@@ -515,10 +515,8 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: Offset.zero,
       pressure: 0.3,
       pressureMin: 0,
-      pressureMax: 1,
     ));
 
     expect(forcePressStart, 0);
@@ -528,10 +526,8 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
-      pressureMax: 1,
     ));
 
     expect(forcePressStart, 1);
@@ -541,31 +537,23 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: Offset.zero,
       pressure: 0.6,
       pressureMin: 0,
-      pressureMax: 1,
     ));
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: Offset.zero,
       pressure: 0.7,
       pressureMin: 0,
-      pressureMax: 1,
     ));
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: Offset.zero,
       pressure: 0.2,
       pressureMin: 0,
-      pressureMax: 1,
     ));
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: Offset.zero,
       pressure: 0.3,
       pressureMin: 0,
-      pressureMax: 1,
     ));
 
     expect(forcePressStart, 1);
@@ -575,10 +563,8 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: Offset.zero,
       pressure: 0.9,
       pressureMin: 0,
-      pressureMax: 1,
     ));
 
     expect(forcePressStart, 1);
@@ -695,10 +681,8 @@ void main() {
 
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: Offset.zero,
       pressure: 0.3,
       pressureMin: 0,
-      pressureMax: 1,
     ));
 
     expect(forcePressStart, 0);
@@ -713,10 +697,8 @@ void main() {
     // Failed attempt to trigger the force press.
     await gesture.updateWithCustomEvent(PointerMoveEvent(
       pointer: pointerValue,
-      position: Offset.zero,
       pressure: 0.5,
       pressureMin: 0,
-      pressureMax: 1,
     ));
 
     expect(horizontalDragStart, 1);
@@ -784,7 +766,6 @@ void main() {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(RawGestureDetector(
         key: key,
-        gestures: const <Type, GestureRecognizerFactory>{},
         semantics: _EmptySemanticsGestureDelegate(),
         excludeFromSemantics: true,
         child: Container(),
@@ -892,6 +873,171 @@ void main() {
           );
         }
       });
+    });
+  });
+
+  testWidgets('supportedDevices update test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/111716
+    bool didStartPan = false;
+    Offset? panDelta;
+    bool didEndPan = false;
+    Widget buildFrame(Set<PointerDeviceKind>? supportedDevices) {
+      return GestureDetector(
+        onPanStart: (DragStartDetails details) {
+          didStartPan = true;
+        },
+        onPanUpdate: (DragUpdateDetails details) {
+          panDelta = (panDelta ?? Offset.zero) + details.delta;
+        },
+        onPanEnd: (DragEndDetails details) {
+          didEndPan = true;
+        },
+        supportedDevices: supportedDevices,
+        child: Container(
+          color: const Color(0xFF00FF00),
+        )
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(<PointerDeviceKind>{PointerDeviceKind.mouse}));
+
+    expect(didStartPan, isFalse);
+    expect(panDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.mouse);
+
+    // Matching device should allow gesture.
+    expect(didStartPan, isTrue);
+    expect(panDelta!.dx, 20.0);
+    expect(panDelta!.dy, 30.0);
+    expect(didEndPan, isTrue);
+
+    didStartPan = false;
+    panDelta = null;
+    didEndPan = false;
+
+    await tester.pumpWidget(buildFrame(<PointerDeviceKind>{PointerDeviceKind.stylus}));
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.mouse);
+    // Non-matching device should not lead to any callbacks.
+    expect(didStartPan, isFalse);
+    expect(panDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.stylus);
+    // Matching device should allow gesture.
+    expect(didStartPan, isTrue);
+    expect(panDelta!.dx, 20.0);
+    expect(panDelta!.dy, 30.0);
+    expect(didEndPan, isTrue);
+
+    didStartPan = false;
+    panDelta = null;
+    didEndPan = false;
+
+    // If set to null, events from all device types will be recognized
+    await tester.pumpWidget(buildFrame(null));
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.unknown);
+    expect(didStartPan, isTrue);
+    expect(panDelta!.dx, 20.0);
+    expect(panDelta!.dy, 30.0);
+    expect(didEndPan, isTrue);
+  });
+
+  testWidgets('supportedDevices is respected', (WidgetTester tester) async {
+    bool didStartPan = false;
+    Offset? panDelta;
+    bool didEndPan = false;
+
+    await tester.pumpWidget(
+      GestureDetector(
+        onPanStart: (DragStartDetails details) {
+          didStartPan = true;
+        },
+        onPanUpdate: (DragUpdateDetails details) {
+          panDelta = (panDelta ?? Offset.zero) + details.delta;
+        },
+        onPanEnd: (DragEndDetails details) {
+          didEndPan = true;
+        },
+        supportedDevices: const <PointerDeviceKind>{PointerDeviceKind.mouse},
+        child: Container(
+          color: const Color(0xFF00FF00),
+        )
+      ),
+    );
+
+    expect(didStartPan, isFalse);
+    expect(panDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.mouse);
+
+    // Matching device should allow gesture.
+    expect(didStartPan, isTrue);
+    expect(panDelta!.dx, 20.0);
+    expect(panDelta!.dy, 30.0);
+    expect(didEndPan, isTrue);
+
+    didStartPan = false;
+    panDelta = null;
+    didEndPan = false;
+
+    await tester.dragFrom(const Offset(10.0, 10.0), const Offset(20.0, 30.0), kind: PointerDeviceKind.stylus);
+
+    // Non-matching device should not lead to any callbacks.
+    expect(didStartPan, isFalse);
+    expect(panDelta, isNull);
+    expect(didEndPan, isFalse);
+  });
+
+  group('DoubleTap', () {
+    testWidgets('onDoubleTap is called even if onDoubleTapDown has not been not provided', (WidgetTester tester) async {
+      final List<String> log = <String>[];
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: GestureDetector(
+            onDoubleTap: () => log.add('double-tap'),
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+              color: const Color(0xFF00FF00),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(Container));
+      await tester.pump(kDoubleTapMinTime);
+      await tester.tap(find.byType(Container));
+      await tester.pumpAndSettle();
+      expect(log, <String>['double-tap']);
+    });
+
+    testWidgets('onDoubleTapDown is called even if onDoubleTap has not been not provided', (WidgetTester tester) async {
+      final List<String> log = <String>[];
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: GestureDetector(
+            onDoubleTapDown: (_) => log.add('double-tap-down'),
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+              color: const Color(0xFF00FF00),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(Container));
+      await tester.pump(kDoubleTapMinTime);
+      await tester.tap(find.byType(Container));
+      await tester.pumpAndSettle();
+      expect(log, <String>['double-tap-down']);
     });
   });
 }

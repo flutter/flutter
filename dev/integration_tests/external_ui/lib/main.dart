@@ -15,7 +15,7 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State createState() => MyAppState();
@@ -50,14 +50,12 @@ Widget builds: $_widgetBuilds''';
         _state = FrameState.slow;
         _icon = Icons.stop;
         channel.invokeMethod<void>('start', _flutterFrameRate ~/ 2);
-        break;
       case FrameState.slow:
         debugPrint('Stopping .5x speed test...');
         await channel.invokeMethod<void>('stop');
         await _summarizeStats();
         _icon = Icons.fast_forward;
         _state = FrameState.afterSlow;
-        break;
       case FrameState.afterSlow:
         debugPrint('Starting 2x speed test...');
         _widgetBuilds = 0;
@@ -65,20 +63,17 @@ Widget builds: $_widgetBuilds''';
         _state = FrameState.fast;
         _icon = Icons.stop;
         channel.invokeMethod<void>('start', (_flutterFrameRate * 2).toInt());
-        break;
       case FrameState.fast:
         debugPrint('Stopping 2x speed test...');
         await channel.invokeMethod<void>('stop');
         await _summarizeStats();
         _state = FrameState.afterFast;
         _icon = Icons.replay;
-        break;
       case FrameState.afterFast:
         debugPrint('Test complete.');
         _summary = 'Press play to start again';
         _state = FrameState.initial;
         _icon = Icons.play_arrow;
-        break;
     }
     setState(() {});
   }
@@ -115,8 +110,9 @@ Press play to produce texture frames.''';
           _state = FrameState.initial;
         });
       } else {
-        if ((tickCount % (calibrationTickCount ~/ 20)) == 0)
+        if ((tickCount % (calibrationTickCount ~/ 20)) == 0) {
           debugPrint('Calibrating... ${(100.0 * tickCount / calibrationTickCount).floor()}%');
+        }
       }
     });
     ticker.start();

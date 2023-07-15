@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -42,9 +40,9 @@ const FakeCommand kShaCommand = FakeCommand(
 );
 
 void main() {
-  FileSystem fileSystem;
-  FakeProcessManager processManager;
-  AndroidSdk androidSdk;
+  late FileSystem fileSystem;
+  late FakeProcessManager processManager;
+  late AndroidSdk androidSdk;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -58,19 +56,18 @@ void main() {
     TargetPlatform.android_x64,
   ]) {
     testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
-      final String arch = getNameForAndroidArch(
-        getAndroidArchForName(getNameForTargetPlatform(targetPlatform)));
+      final String arch = getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
       final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
         fileSystem: fileSystem,
         processManager: processManager,
         logger: BufferLogger.test(),
-        platform: FakePlatform(operatingSystem: 'linux'),
+        platform: FakePlatform(),
         androidSdk: androidSdk,
       );
-      final File apkFile = fileSystem.file('app.apk')..createSync();
+      final File apkFile = fileSystem.file('app-debug.apk')..createSync();
       final AndroidApk apk = AndroidApk(
         id: 'FlutterApp',
-        file: apkFile,
+        applicationPackage: apkFile,
         launchActivity: 'FlutterActivity',
         versionCode: 1,
       );
@@ -90,7 +87,7 @@ void main() {
         command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', 'FlutterApp'],
       ));
       processManager.addCommand(const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app.apk'],
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-debug.apk'],
       ));
       processManager.addCommand(kShaCommand);
       processManager.addCommand(const FakeCommand(
@@ -102,10 +99,11 @@ void main() {
           'am',
           'start',
           '-a',
-          'android.intent.action.RUN',
+          'android.intent.action.MAIN',
+          '-c',
+          'android.intent.category.LAUNCHER',
           '-f',
           '0x20000000',
-          '--ez', 'enable-background-compilation', 'true',
           '--ez', 'enable-dart-profiling', 'true',
           'FlutterActivity',
         ],
@@ -130,13 +128,13 @@ void main() {
       fileSystem: fileSystem,
       processManager: processManager,
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       androidSdk: androidSdk,
     );
-    final File apkFile = fileSystem.file('app.apk')..createSync();
+    final File apkFile = fileSystem.file('app-debug.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
-      file: apkFile,
+      applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
@@ -168,13 +166,13 @@ void main() {
       fileSystem: fileSystem,
       processManager: processManager,
       logger: BufferLogger.test(),
-      platform: FakePlatform(operatingSystem: 'linux'),
+      platform: FakePlatform(),
       androidSdk: androidSdk,
     );
-    final File apkFile = fileSystem.file('app.apk')..createSync();
+    final File apkFile = fileSystem.file('app-debug.apk')..createSync();
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
-      file: apkFile,
+      applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
@@ -191,8 +189,6 @@ void main() {
     processManager.addCommand(const FakeCommand(
       command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'FlutterApp'],
     ));
-    // TODO(jonahwilliams): investigate why this doesn't work.
-    // This doesn't work with the current Android log reader implementation.
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'adb',
@@ -203,9 +199,9 @@ void main() {
         '-r',
         '--user',
         '10',
-        'app.apk'
+        'app-debug.apk',
       ],
-      stdout: '\n\nObservatory listening on http://127.0.0.1:456\n\n',
+      stdout: '\n\nThe Dart VM service is listening on http://127.0.0.1:456\n\n',
     ));
     processManager.addCommand(kShaCommand);
     processManager.addCommand(const FakeCommand(
@@ -231,11 +227,12 @@ void main() {
         'am',
         'start',
         '-a',
-        'android.intent.action.RUN',
+        'android.intent.action.MAIN',
+        '-c',
+        'android.intent.category.LAUNCHER',
         '-f',
         '0x20000000',
         // The DebuggingOptions arguments go here.
-        '--ez', 'enable-background-compilation', 'true',
         '--ez', 'enable-dart-profiling', 'true',
         '--ez', 'enable-software-rendering', 'true',
         '--ez', 'skia-deterministic-rendering', 'true',
@@ -247,6 +244,7 @@ void main() {
         '--ez', 'dump-skp-on-shader-compilation', 'true',
         '--ez', 'cache-sksl', 'true',
         '--ez', 'purge-persistent-cache', 'true',
+        '--ez', 'enable-impeller', 'true',
         '--ez', 'enable-checked-mode', 'true',
         '--ez', 'verify-entry-points', 'true',
         '--ez', 'start-paused', 'true',
@@ -279,13 +277,14 @@ void main() {
         purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
+        enableImpeller: ImpellerStatus.enabled,
         nullAssertions: true,
       ),
       platformArgs: <String, dynamic>{},
       userIdentifier: '10',
     );
 
-    // This fails to start due to observatory discovery issues.
+    // This fails to start due to VM Service discovery issues.
     expect(launchResult.started, false);
     expect(processManager, hasNoRemainingExpectations);
   });

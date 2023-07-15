@@ -6,7 +6,10 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+
+export 'dart:ui' show Offset;
 
 /// An abstract class providing an interface for evaluating a parametric curve.
 ///
@@ -33,7 +36,6 @@ abstract class ParametricCurve<T> {
   /// implementation of [transform], which delegates the remaining logic to
   /// [transformInternal].
   T transform(double t) {
-    assert(t != null);
     assert(t >= 0.0 && t <= 1.0, 'parametric value $t is outside of [0, 1] range.');
     return transformInternal(t);
   }
@@ -127,7 +129,7 @@ class SawTooth extends Curve {
   /// Creates a sawtooth curve.
   ///
   /// The [count] argument must not be null.
-  const SawTooth(this.count) : assert(count != null);
+  const SawTooth(this.count);
 
   /// The number of repetitions of the sawtooth pattern in the unit interval.
   final int count;
@@ -157,19 +159,16 @@ class Interval extends Curve {
   /// Creates an interval curve.
   ///
   /// The arguments must not be null.
-  const Interval(this.begin, this.end, { this.curve = Curves.linear })
-    : assert(begin != null),
-      assert(end != null),
-      assert(curve != null);
+  const Interval(this.begin, this.end, { this.curve = Curves.linear });
 
   /// The largest value for which this interval is 0.0.
   ///
-  /// From t=0.0 to t=`begin`, the interval's value is 0.0.
+  /// From t=0.0 to t=[begin], the interval's value is 0.0.
   final double begin;
 
   /// The smallest value for which this interval is 1.0.
   ///
-  /// From t=`end` to t=1.0, the interval's value is 1.0.
+  /// From t=[end] to t=1.0, the interval's value is 1.0.
   final double end;
 
   /// The curve to apply between [begin] and [end].
@@ -182,16 +181,18 @@ class Interval extends Curve {
     assert(end >= 0.0);
     assert(end <= 1.0);
     assert(end >= begin);
-    t = ((t - begin) / (end - begin)).clamp(0.0, 1.0);
-    if (t == 0.0 || t == 1.0)
+    t = clampDouble((t - begin) / (end - begin), 0.0, 1.0);
+    if (t == 0.0 || t == 1.0) {
       return t;
+    }
     return curve.transform(t);
   }
 
   @override
   String toString() {
-    if (curve is! _Linear)
+    if (curve is! _Linear) {
       return '${objectRuntimeType(this, 'Interval')}($begin\u22EF$end)\u27A9$curve';
+    }
     return '${objectRuntimeType(this, 'Interval')}($begin\u22EF$end)';
   }
 }
@@ -203,7 +204,7 @@ class Threshold extends Curve {
   /// Creates a threshold curve.
   ///
   /// The [threshold] argument must not be null.
-  const Threshold(this.threshold) : assert(threshold != null);
+  const Threshold(this.threshold);
 
   /// The value before which the curve is 0.0 and after which the curve is 1.0.
   ///
@@ -222,15 +223,73 @@ class Threshold extends Curve {
 ///
 /// The [Curves] class contains some commonly used cubic curves:
 ///
+///  * [Curves.fastLinearToSlowEaseIn]
 ///  * [Curves.ease]
 ///  * [Curves.easeIn]
+///  * [Curves.easeInToLinear]
+///  * [Curves.easeInSine]
+///  * [Curves.easeInQuad]
+///  * [Curves.easeInCubic]
+///  * [Curves.easeInQuart]
+///  * [Curves.easeInQuint]
+///  * [Curves.easeInExpo]
+///  * [Curves.easeInCirc]
+///  * [Curves.easeInBack]
 ///  * [Curves.easeOut]
+///  * [Curves.linearToEaseOut]
+///  * [Curves.easeOutSine]
+///  * [Curves.easeOutQuad]
+///  * [Curves.easeOutCubic]
+///  * [Curves.easeOutQuart]
+///  * [Curves.easeOutQuint]
+///  * [Curves.easeOutExpo]
+///  * [Curves.easeOutCirc]
+///  * [Curves.easeOutBack]
 ///  * [Curves.easeInOut]
+///  * [Curves.easeInOutSine]
+///  * [Curves.easeInOutQuad]
+///  * [Curves.easeInOutCubic]
+///  * [Curves.easeInOutQuart]
+///  * [Curves.easeInOutQuint]
+///  * [Curves.easeInOutExpo]
+///  * [Curves.easeInOutCirc]
+///  * [Curves.easeInOutBack]
+///  * [Curves.fastOutSlowIn]
+///  * [Curves.slowMiddle]
 ///
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_linear_to_slow_ease_in.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_to_linear.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_sine.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_quad.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_cubic.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_quart.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_quint.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_expo.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_circ.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_back.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_linear_to_ease_out.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_sine.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_quad.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_cubic.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_quart.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_quint.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_expo.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_circ.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_back.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_sine.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quad.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_cubic.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quart.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quint.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_expo.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_circ.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_back.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_out_slow_in.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_slow_middle.mp4}
 ///
 /// The [Cubic] class implements third-order Bézier curves.
 ///
@@ -244,12 +303,8 @@ class Cubic extends Curve {
   /// Rather than creating a new instance, consider using one of the common
   /// cubic curves in [Curves].
   ///
-  /// The [a] (x1), [b](x2), [c](y1), and [d](y2) arguments must not be null.
-  const Cubic(this.a, this.b, this.c, this.d)
-    : assert(a != null),
-      assert(b != null),
-      assert(c != null),
-      assert(d != null);
+  /// The [a] (x1), [b] (y1), [c] (x2) and [d] (y2) arguments must not be null.
+  const Cubic(this.a, this.b, this.c, this.d);
 
   /// The x coordinate of the first control point.
   ///
@@ -290,12 +345,14 @@ class Cubic extends Curve {
     while (true) {
       final double midpoint = (start + end) / 2;
       final double estimate = _evaluateCubic(a, c, midpoint);
-      if ((t - estimate).abs() < _cubicErrorBound)
+      if ((t - estimate).abs() < _cubicErrorBound) {
         return _evaluateCubic(b, d, midpoint);
-      if (estimate < t)
+      }
+      if (estimate < t) {
         start = midpoint;
-      else
+      } else {
         end = midpoint;
+      }
     }
   }
 
@@ -408,105 +465,11 @@ class ThreePointCubic extends Curve {
 /// part of the curve, or hardly at all in another part of the curve, depending
 /// on the definition of the curve.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad}
 /// This example shows how to use a [Curve2D] to modify the position of a widget
 /// so that it can follow an arbitrary path.
 ///
-/// ```dart preamble
-/// // This is the path that the child will follow. It's a CatmullRomSpline so
-/// // that the coordinates can be specified that it must pass through. If the
-/// // tension is set to 1.0, it will linearly interpolate between those points,
-/// // instead of interpolating smoothly.
-/// final CatmullRomSpline path = CatmullRomSpline(
-///   const <Offset>[
-///     Offset(0.05, 0.75),
-///     Offset(0.18, 0.23),
-///     Offset(0.32, 0.04),
-///     Offset(0.73, 0.5),
-///     Offset(0.42, 0.74),
-///     Offset(0.73, 0.01),
-///     Offset(0.93, 0.93),
-///     Offset(0.05, 0.75),
-///   ],
-///   startHandle: const Offset(0.93, 0.93),
-///   endHandle: const Offset(0.18, 0.23),
-///   tension: 0.0,
-/// );
-///
-/// class FollowCurve2D extends StatefulWidget {
-///   const FollowCurve2D({
-///     Key? key,
-///     required this.path,
-///     this.curve = Curves.easeInOut,
-///     required this.child,
-///     this.duration = const Duration(seconds: 1),
-///   }) : super(key: key);
-///
-///   final Curve2D path;
-///   final Curve curve;
-///   final Duration duration;
-///   final Widget child;
-///
-///   @override
-///   State<FollowCurve2D> createState() => _FollowCurve2DState();
-/// }
-///
-/// class _FollowCurve2DState extends State<FollowCurve2D> with TickerProviderStateMixin {
-///   // The animation controller for this animation.
-///   late AnimationController controller;
-///   // The animation that will be used to apply the widget's animation curve.
-///   late Animation<double> animation;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     controller = AnimationController(duration: widget.duration, vsync: this);
-///     animation = CurvedAnimation(parent: controller, curve: widget.curve);
-///     // Have the controller repeat indefinitely.  If you want it to "bounce" back
-///     // and forth, set the reverse parameter to true.
-///     controller.repeat(reverse: false);
-///     controller.addListener(() => setState(() {}));
-///   }
-///
-///   @override
-///   void dispose() {
-///     super.dispose();
-///     // Always have to dispose of animation controllers when done.
-///     controller.dispose();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     // Scale the path values to match the -1.0 to 1.0 domain of the Alignment widget.
-///     final Offset position = widget.path.transform(animation.value) * 2.0 - const Offset(1.0, 1.0);
-///     return Align(
-///       alignment: Alignment(position.dx, position.dy),
-///       child: widget.child,
-///     );
-///   }
-/// }
-/// ```
-///
-/// ```dart
-///   Widget build(BuildContext context) {
-///     return Container(
-///       color: Colors.white,
-///       alignment: Alignment.center,
-///       child: FollowCurve2D(
-///         path: path,
-///         curve: Curves.easeInOut,
-///         duration: const Duration(seconds: 3),
-///         child: CircleAvatar(
-///           backgroundColor: Colors.yellow,
-///           child: DefaultTextStyle(
-///             style: Theme.of(context).textTheme.headline6!,
-///             child: const Text('B'), // Buzz, buzz!
-///           ),
-///         ),
-///       ),
-///     );
-///   }
-/// ```
+/// ** See code in examples/api/lib/animation/curves/curve2_d.0.dart **
 /// {@end-tool}
 ///
 abstract class Curve2D extends ParametricCurve<Offset> {
@@ -538,7 +501,7 @@ abstract class Curve2D extends ParametricCurve<Offset> {
     double end = 1.0,
     double tolerance = 1e-10,
   }) {
-    // The sampling  algorithm is:
+    // The sampling algorithm is:
     // 1. Evaluate the area of the triangle (a proxy for the "flatness" of the
     //    curve) formed by two points and a test point.
     // 2. If the area of the triangle is small enough (below tolerance), then
@@ -548,9 +511,6 @@ abstract class Curve2D extends ParametricCurve<Offset> {
     // 4. Recursively sample the two parts.
     //
     // This algorithm concentrates samples in areas of high curvature.
-    assert(tolerance != null);
-    assert(start != null);
-    assert(end != null);
     assert(end > start);
     // We want to pick a random seed that will keep the result stable if
     // evaluated again, so we use the first non-generated control point.
@@ -607,7 +567,6 @@ abstract class Curve2D extends ParametricCurve<Offset> {
   /// single-valued, it will return the parameter for only one of the values at
   /// the given `x` location.
   double findInverse(double x) {
-    assert(x != null);
     double start = 0.0;
     double end = 1.0;
     late double mid;
@@ -642,7 +601,7 @@ class Curve2DSample {
   /// Creates an object that holds a sample; used with [Curve2D] subclasses.
   ///
   /// All arguments must not be null.
-  const Curve2DSample(this.t, this.value) : assert(t != null), assert(value != null);
+  const Curve2DSample(this.t, this.value);
 
   /// The parametric location of this sample point along the curve.
   final double t;
@@ -705,16 +664,14 @@ class CatmullRomSpline extends Curve2D {
   /// interpolate.
   ///
   /// The internal curve data structures are lazily computed the first time
-  /// [transform] is called.  If you would rather pre-compute the structures,
+  /// [transform] is called. If you would rather pre-compute the structures,
   /// use [CatmullRomSpline.precompute] instead.
   CatmullRomSpline(
       List<Offset> controlPoints, {
         double tension = 0.0,
         Offset? startHandle,
         Offset? endHandle,
-      }) : assert(controlPoints != null),
-           assert(tension != null),
-           assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
+      }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
            assert(tension >= 0.0, 'tension $tension must not be negative.'),
            assert(controlPoints.length > 3, 'There must be at least four control points to create a CatmullRomSpline.'),
            _controlPoints = controlPoints,
@@ -725,16 +682,14 @@ class CatmullRomSpline extends Curve2D {
 
   /// Constructs a centripetal Catmull-Rom spline curve.
   ///
-  /// The same as [new CatmullRomSpline], except that the internal data
+  /// The same as [CatmullRomSpline.new], except that the internal data
   /// structures are precomputed instead of being computed lazily.
   CatmullRomSpline.precompute(
       List<Offset> controlPoints, {
         double tension = 0.0,
         Offset? startHandle,
         Offset? endHandle,
-      }) : assert(controlPoints != null),
-           assert(tension != null),
-           assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
+      }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
            assert(tension >= 0.0, 'tension $tension must not be negative.'),
            assert(controlPoints.length > 3, 'There must be at least four control points to create a CatmullRomSpline.'),
            _controlPoints = null,
@@ -862,7 +817,7 @@ class CatmullRomSpline extends Curve2D {
 ///
 ///  * [CatmullRomSpline], the 2D spline that this curve uses to generate its values.
 ///  * A Wikipedia article on [centripetal Catmull-Rom splines](https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline).
-///  * [new CatmullRomCurve] for a description of the constraints put on the
+///  * [CatmullRomCurve.new] for a description of the constraints put on the
 ///    input control points.
 ///  * This [paper on using Catmull-Rom splines](http://faculty.cs.tamu.edu/schaefer/research/cr_cad.pdf).
 class CatmullRomCurve extends Curve {
@@ -881,7 +836,7 @@ class CatmullRomCurve extends Curve {
   /// is equivalent to a linear interpolation between points.
   ///
   /// The internal curve data structures are lazily computed the first time
-  /// [transform] is called.  If you would rather pre-compute the curve, use
+  /// [transform] is called. If you would rather pre-compute the curve, use
   /// [CatmullRomCurve.precompute] instead.
   ///
   /// All of the arguments must not be null.
@@ -890,8 +845,7 @@ class CatmullRomCurve extends Curve {
   ///
   ///  * This [paper on using Catmull-Rom splines](http://faculty.cs.tamu.edu/schaefer/research/cr_cad.pdf).
   CatmullRomCurve(this.controlPoints, {this.tension = 0.0})
-      : assert(tension != null),
-        assert(() {
+      : assert(() {
           return validateControlPoints(
             controlPoints,
             tension: tension,
@@ -904,11 +858,10 @@ class CatmullRomCurve extends Curve {
 
   /// Constructs a centripetal [CatmullRomCurve].
   ///
-  /// Same as [new CatmullRomCurve], but it precomputes the internal curve data
+  /// Same as [CatmullRomCurve.new], but it precomputes the internal curve data
   /// structures for a more predictable computation load.
   CatmullRomCurve.precompute(this.controlPoints, {this.tension = 0.0})
-      : assert(tension != null),
-        assert(() {
+      : assert(() {
           return validateControlPoints(
             controlPoints,
             tension: tension,
@@ -925,7 +878,7 @@ class CatmullRomCurve extends Curve {
       // and (1, 1), respectively.
       <Offset>[Offset.zero, ...controlPoints, const Offset(1.0, 1.0)],
       tension: tension,
-    ).generateSamples(start: 0.0, end: 1.0, tolerance: 1e-12).toList();
+    ).generateSamples(tolerance: 1e-12).toList();
   }
 
   /// A static accumulator for assertion failures. Not used in release mode.
@@ -968,7 +921,7 @@ class CatmullRomCurve extends Curve {
 
   /// The "tension" of the curve.
   ///
-  /// The `tension` attribute controls how tightly the curve approaches the
+  /// The [tension] attribute controls how tightly the curve approaches the
   /// given [controlPoints]. It must be in the range 0.0 to 1.0, inclusive. It
   /// is optional, and defaults to 0.0, which provides the smoothest curve. A
   /// value of 1.0 is equivalent to a linear interpolation between control
@@ -979,7 +932,7 @@ class CatmullRomCurve extends Curve {
   /// well-formed and will not produce a spline that self-intersects.
   ///
   /// This method is also used in debug mode to validate a curve to make sure
-  /// that it won't violate the contract for the [new CatmullRomCurve]
+  /// that it won't violate the contract for the [CatmullRomCurve.new]
   /// constructor.
   ///
   /// If in debug mode, and `reasons` is non-null, this function will fill in
@@ -993,7 +946,6 @@ class CatmullRomCurve extends Curve {
     double tension = 0.0,
     List<String>? reasons,
   }) {
-    assert(tension != null);
     if (controlPoints == null) {
       assert(() {
         reasons?.add('Supplied control points cannot be null');
@@ -1173,7 +1125,7 @@ class FlippedCurve extends Curve {
   /// Creates a flipped curve.
   ///
   /// The [curve] argument must not be null.
-  const FlippedCurve(this.curve) : assert(curve != null);
+  const FlippedCurve(this.curve);
 
   /// The curve that is being flipped.
   final Curve curve;
@@ -1255,10 +1207,11 @@ class _BounceInOutCurve extends Curve {
 
   @override
   double transformInternal(double t) {
-    if (t < 0.5)
+    if (t < 0.5) {
       return (1.0 - _bounce(1.0 - t * 2.0)) * 0.5;
-    else
+    } else {
       return _bounce(t * 2.0 - 1.0) * 0.5 + 0.5;
+    }
   }
 }
 
@@ -1340,10 +1293,11 @@ class ElasticInOutCurve extends Curve {
   double transformInternal(double t) {
     final double s = period / 4.0;
     t = 2.0 * t - 1.0;
-    if (t < 0.0)
+    if (t < 0.0) {
       return -0.5 * math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
-    else
+    } else {
       return math.pow(2.0, -10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period) * 0.5 + 1.0;
+    }
   }
 
   @override
@@ -1400,11 +1354,7 @@ class ElasticInOutCurve extends Curve {
 ///
 ///  * [Curve], the interface implemented by the constants available from the
 ///    [Curves] class.
-class Curves {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  Curves._();
-
+abstract final class Curves {
   /// A linear animation curve.
   ///
   /// This is the identity map over the unit interval: its [Curve.transform]
@@ -1431,6 +1381,26 @@ class Curves {
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_linear_to_slow_ease_in.mp4}
   static const Cubic fastLinearToSlowEaseIn = Cubic(0.18, 1.0, 0.04, 1.0);
+
+  /// A curve that starts slowly, speeds up very quickly, and then ends slowly.
+  ///
+  /// This curve is used by default to animate page transitions used by
+  /// [CupertinoPageRoute].
+  ///
+  /// It has been derived from plots of native iOS 16.3
+  /// animation frames on iPhone 14 Pro Max.
+  /// Specifically, transition animation positions were measured
+  /// every frame and plotted against time. Then, a cubic curve was
+  /// strictly fit to the measured data points.
+  ///
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_ease_in_to_slow_ease_out.mp4}
+  static const ThreePointCubic fastEaseInToSlowEaseOut = ThreePointCubic(
+    Offset(0.056, 0.024),
+    Offset(0.108, 0.3085),
+    Offset(0.198, 0.541),
+    Offset(0.3655, 1.0),
+    Offset(0.5465, 0.989),
+  );
 
   /// A cubic animation curve that speeds up quickly and ends slowly.
   ///

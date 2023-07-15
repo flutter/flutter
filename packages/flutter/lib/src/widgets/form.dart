@@ -2,11 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+
+import 'basic.dart';
 import 'framework.dart';
 import 'navigator.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'will_pop_scope.dart';
+
+// Duration for delay before announcement in IOS so that the announcement won't be interrupted.
+const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
+
+// Examples can assume:
+// late BuildContext context;
 
 /// An optional container for grouping together multiple form field widgets
 /// (e.g. [TextField] widgets).
@@ -18,52 +30,14 @@ import 'will_pop_scope.dart';
 /// with a context whose ancestor is the [Form], or pass a [GlobalKey] to the
 /// [Form] constructor and call [GlobalKey.currentState].
 ///
-/// {@tool dartpad --template=stateful_widget_scaffold}
+/// {@tool dartpad}
 /// This example shows a [Form] with one [TextFormField] to enter an email
 /// address and an [ElevatedButton] to submit the form. A [GlobalKey] is used here
 /// to identify the [Form] and validate input.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/form.png)
 ///
-/// ```dart
-/// final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Form(
-///     key: _formKey,
-///     child: Column(
-///       crossAxisAlignment: CrossAxisAlignment.start,
-///       children: <Widget>[
-///         TextFormField(
-///           decoration: const InputDecoration(
-///             hintText: 'Enter your email',
-///           ),
-///           validator: (String? value) {
-///             if (value == null || value.isEmpty) {
-///               return 'Please enter some text';
-///             }
-///             return null;
-///           },
-///         ),
-///         Padding(
-///           padding: const EdgeInsets.symmetric(vertical: 16.0),
-///           child: ElevatedButton(
-///             onPressed: () {
-///               // Validate will return true if the form is valid, or false if
-///               // the form is invalid.
-///               if (_formKey.currentState!.validate()) {
-///                 // Process data.
-///               }
-///             },
-///             child: const Text('Submit'),
-///           ),
-///         ),
-///       ],
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/form/form.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -76,29 +50,37 @@ class Form extends StatefulWidget {
   ///
   /// The [child] argument must not be null.
   const Form({
-    Key? key,
+    super.key,
     required this.child,
-    @Deprecated(
-      'Use autovalidateMode parameter which provides more specific '
-      'behavior related to auto validation. '
-      'This feature was deprecated after v1.19.0.',
-    )
-    this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
-  }) : assert(child != null),
-       assert(autovalidate != null),
-       assert(
-         autovalidate == false ||
-         autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.',
-       ),
-       autovalidateMode = autovalidateMode ??
-         (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
-       super(key: key);
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
-  /// Returns the closest [FormState] which encloses the given context.
+  /// Returns the [FormState] of the closest [Form] widget which encloses the
+  /// given context, or null if none is found.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// FormState? form = Form.maybeOf(context);
+  /// form?.save();
+  /// ```
+  ///
+  /// Calling this method will create a dependency on the closest [Form] in the
+  /// [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [Form.of], which is similar to this method, but asserts if no [Form]
+  ///   ancestor is found.
+  static FormState? maybeOf(BuildContext context) {
+    final _FormScope? scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
+    return scope?._formState;
+  }
+
+  /// Returns the [FormState] of the closest [Form] widget which encloses the
+  /// given context.
   ///
   /// Typical usage is as follows:
   ///
@@ -106,9 +88,33 @@ class Form extends StatefulWidget {
   /// FormState form = Form.of(context);
   /// form.save();
   /// ```
-  static FormState? of(BuildContext context) {
-    final _FormScope? scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
-    return scope?._formState;
+  ///
+  /// If no [Form] ancestor is found, this will assert in debug mode, and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest [Form] in the
+  /// [context].
+  ///
+  /// See also:
+  ///
+  /// * [Form.maybeOf], which is similar to this method, but returns null if no
+  ///   [Form] ancestor is found.
+  static FormState of(BuildContext context) {
+    final FormState? formState = maybeOf(context);
+    assert(() {
+      if (formState == null) {
+        throw FlutterError(
+          'Form.of() was called with a context that does not contain a Form widget.\n'
+          'No Form widget ancestor could be found starting from the context that '
+          'was passed to Form.of(). This can happen because you are using a widget '
+          'that looks for a Form ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return formState!;
   }
 
   /// The widget below this widget in the tree.
@@ -141,15 +147,6 @@ class Form extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.FormField.autovalidateMode}
   final AutovalidateMode autovalidateMode;
-
-  /// Used to enable/disable form fields auto validation and update their error
-  /// text.
-  @Deprecated(
-    'Use autovalidateMode parameter which provides more specific '
-    'behavior related to auto validation. '
-    'This feature was deprecated after v1.19.0.',
-  )
-  final bool autovalidate;
 
   @override
   FormState createState() => FormState();
@@ -195,12 +192,10 @@ class FormState extends State<Form> {
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
         _validate();
-        break;
       case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
           _validate();
         }
-        break;
       case AutovalidateMode.disabled:
         break;
     }
@@ -217,8 +212,9 @@ class FormState extends State<Form> {
 
   /// Saves every [FormField] that is a descendant of this [Form].
   void save() {
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields) {
       field.save();
+    }
   }
 
   /// Resets every [FormField] that is a descendant of this [Form] back to its
@@ -229,8 +225,9 @@ class FormState extends State<Form> {
   /// If the form's [Form.autovalidateMode] property is [AutovalidateMode.always],
   /// the fields will all be revalidated after being reset.
   void reset() {
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields) {
       field.reset();
+    }
     _hasInteractedByUser = false;
     _fieldDidChange();
   }
@@ -247,21 +244,34 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
-    for (final FormFieldState<dynamic> field in _fields)
+    String errorMessage = '';
+    for (final FormFieldState<dynamic> field in _fields) {
       hasError = !field.validate() || hasError;
+      errorMessage += field.errorText ?? '';
+    }
+
+    if (errorMessage.isNotEmpty) {
+      final TextDirection directionality = Directionality.of(context);
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        unawaited(Future<void>(() async {
+          await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
+          SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+        }));
+      } else {
+        SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+      }
+    }
     return !hasError;
   }
 }
 
 class _FormScope extends InheritedWidget {
   const _FormScope({
-    Key? key,
-    required Widget child,
+    required super.child,
     required FormState formState,
     required int generation,
   }) : _formState = formState,
-       _generation = generation,
-       super(key: key, child: child);
+       _generation = generation;
 
   final FormState _formState;
 
@@ -306,7 +316,7 @@ typedef FormFieldBuilder<T> = Widget Function(FormFieldState<T> field);
 /// Use a [GlobalKey] with [FormField] if you want to retrieve its current
 /// state, for example if you want one form field to depend on another.
 ///
-/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// A [Form] ancestor is not required. The [Form] allows one to
 /// save, reset, or validate multiple fields at once. To use without a [Form],
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
@@ -320,29 +330,15 @@ class FormField<T> extends StatefulWidget {
   ///
   /// The [builder] argument must not be null.
   const FormField({
-    Key? key,
+    super.key,
     required this.builder,
     this.onSaved,
     this.validator,
     this.initialValue,
-    @Deprecated(
-      'Use autovalidateMode parameter which provides more specific '
-      'behavior related to auto validation. '
-      'This feature was deprecated after v1.19.0.',
-    )
-    this.autovalidate = false,
     this.enabled = true,
     AutovalidateMode? autovalidateMode,
     this.restorationId,
-  }) : assert(builder != null),
-       assert(
-         autovalidate == false ||
-         autovalidate == true && autovalidateMode == null,
-         'autovalidate and autovalidateMode should not be used together.',
-       ),
-       autovalidateMode = autovalidateMode ??
-         (autovalidate ? AutovalidateMode.always : AutovalidateMode.disabled),
-       super(key: key);
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].
@@ -382,25 +378,14 @@ class FormField<T> extends StatefulWidget {
   /// error text.
   ///
   /// {@template flutter.widgets.FormField.autovalidateMode}
-  /// If [AutovalidateMode.onUserInteraction] this form field will only
-  /// auto-validate after its content changes, if [AutovalidateMode.always] it
-  /// will auto validate even without user interaction and
-  /// if [AutovalidateMode.disabled] the auto validation will be disabled.
+  /// If [AutovalidateMode.onUserInteraction], this FormField will only
+  /// auto-validate after its content changes. If [AutovalidateMode.always], it
+  /// will auto-validate even without user interaction. If
+  /// [AutovalidateMode.disabled], auto-validation will be disabled.
   ///
-  /// Defaults to [AutovalidateMode.disabled] if `autovalidate` is false which
-  /// means no auto validation will occur. If `autovalidate` is true then this
-  /// is set to [AutovalidateMode.always] for backward compatibility.
+  /// Defaults to [AutovalidateMode.disabled], cannot be null.
   /// {@endtemplate}
   final AutovalidateMode autovalidateMode;
-
-  /// Used to enable/disable auto validation and update their error
-  /// text.
-  @Deprecated(
-    'Use autovalidateMode parameter which provides more specific '
-    'behavior related to auto validation. '
-    'This feature was deprecated after v1.19.0.',
-  )
-  final bool autovalidate;
 
   /// Restoration ID to save and restore the state of the form field.
   ///
@@ -460,7 +445,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _hasInteractedByUser.value = false;
       _errorText.value = null;
     });
-    Form.of(context)?._fieldDidChange();
+    Form.maybeOf(context)?._fieldDidChange();
   }
 
   /// Calls [FormField.validator] to set the [errorText]. Returns true if there
@@ -478,8 +463,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   void _validate() {
-    if (widget.validator != null)
+    if (widget.validator != null) {
       _errorText.value = widget.validator!(_value);
+    }
   }
 
   /// Updates this field's state to the new value. Useful for responding to
@@ -493,7 +479,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _value = value;
       _hasInteractedByUser.value = true;
     });
-    Form.of(context)?._fieldDidChange();
+    Form.maybeOf(context)?._fieldDidChange();
   }
 
   /// Sets the value associated with this form field.
@@ -504,6 +490,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// the value should be set by a call to [didChange], which ensures that
   /// `setState` is called.
   @protected
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setValue(T? value) {
     _value = value;
   }
@@ -519,7 +506,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   @override
   void deactivate() {
-    Form.of(context)?._unregister(this);
+    Form.maybeOf(context)?._unregister(this);
     super.deactivate();
   }
 
@@ -529,17 +516,15 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       switch (widget.autovalidateMode) {
         case AutovalidateMode.always:
           _validate();
-          break;
         case AutovalidateMode.onUserInteraction:
           if (_hasInteractedByUser.value) {
             _validate();
           }
-          break;
         case AutovalidateMode.disabled:
           break;
       }
     }
-    Form.of(context)?._register(this);
+    Form.maybeOf(context)?._register(this);
     return widget.builder(this);
   }
 }

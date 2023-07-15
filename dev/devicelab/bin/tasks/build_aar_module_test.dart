@@ -12,10 +12,6 @@ import 'package:path/path.dart' as path;
 
 final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
 
-
-final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
-
 /// Tests that AARs can be built on module projects.
 Future<void> main() async {
   await task(() async {
@@ -23,8 +19,9 @@ Future<void> main() async {
     section('Find Java');
 
     final String? javaHome = await findJavaHome();
-    if (javaHome == null)
+    if (javaHome == null) {
       return TaskResult.failure('Could not find Java');
+    }
     print('\nUsing JAVA_HOME=$javaHome');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
@@ -67,7 +64,8 @@ Future<void> main() async {
           '  plugin_with_android:$platformLineSep'
           '    path: ../plugin_with_android$platformLineSep'
           '  plugin_without_android:$platformLineSep'
-          '    path: ../plugin_without_android$platformLineSep',
+          '    path: ../plugin_without_android$platformLineSep'
+          '  webcrypto: 0.5.2$platformLineSep', // Plugin that uses NDK.
       );
       modulePubspec.writeAsStringSync(content, flush: true);
 
@@ -262,7 +260,7 @@ Future<void> main() async {
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      // rmTree(tempDir);
+      rmTree(tempDir);
     }
   });
 }

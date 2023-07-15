@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
+
+import '../services/dom.dart';
 
 import 'platform.dart' as platform;
 
-/// The dart:html implementation of [platform.defaultTargetPlatform].
+export 'platform.dart' show TargetPlatform;
+
+/// The web implementation of [platform.defaultTargetPlatform].
 platform.TargetPlatform get defaultTargetPlatform {
   // To get a better guess at the targetPlatform we need to be able to reference
   // the window, but that won't be available until we fix the platforms
@@ -20,9 +23,7 @@ platform.TargetPlatform get defaultTargetPlatform {
 final platform.TargetPlatform? _testPlatform = () {
   platform.TargetPlatform? result;
   assert(() {
-    // This member is only available in the web's dart:ui implementation.
-    // ignore: undefined_prefixed_name
-    if (ui.debugEmulateFlutterTesterEnvironment as bool) {
+    if (ui_web.debugEmulateFlutterTesterEnvironment) {
       result = platform.TargetPlatform.android;
     }
     return true;
@@ -37,7 +38,7 @@ final platform.TargetPlatform? _testPlatform = () {
 // 0.20ms. As `defaultTargetPlatform` is routinely called dozens of times per
 // frame this value should be cached.
 final platform.TargetPlatform _browserPlatform = () {
-  final String navigatorPlatform = html.window.navigator.platform?.toLowerCase() ?? '';
+  final String navigatorPlatform = domWindow.navigator.platform?.toLowerCase() ?? '';
   if (navigatorPlatform.startsWith('mac')) {
     return platform.TargetPlatform.macOS;
   }
@@ -57,7 +58,7 @@ final platform.TargetPlatform _browserPlatform = () {
   // indicates that a device has a "fine pointer" (mouse) as the primary
   // pointing device, then we'll assume desktop linux, and otherwise we'll
   // assume Android.
-  if (html.window.matchMedia('only screen and (pointer: fine)').matches) {
+  if (domWindow.matchMedia('only screen and (pointer: fine)').matches) {
     return platform.TargetPlatform.linux;
   }
   return platform.TargetPlatform.android;

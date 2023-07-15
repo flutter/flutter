@@ -9,77 +9,12 @@ import 'routes.dart';
 /// Registers a callback to veto attempts by the user to dismiss the enclosing
 /// [ModalRoute].
 ///
-/// {@tool snippet --template=stateful_widget}
-///
+/// {@tool dartpad}
 /// Whenever the back button is pressed, you will get a callback at [onWillPop],
 /// which returns a [Future]. If the [Future] returns true, the screen is
 /// popped.
 ///
-/// ```dart
-/// bool shouldPop = true;
-/// @override
-/// Widget build(BuildContext context) {
-///   return WillPopScope (
-///     onWillPop: () async {
-///       return shouldPop;
-///     },
-///     child: const Text('WillPopScope sample'),
-///   );
-/// }
-/// ```
-/// {@end-tool}
-///
-/// {@tool dartpad --template=stateful_widget_material}
-/// ```dart
-/// bool shouldPop = true;
-/// @override
-/// Widget build(BuildContext context) {
-///   return WillPopScope(
-///     onWillPop: () async {
-///       return shouldPop;
-///     },
-///     child: Scaffold(
-///       appBar: AppBar(
-///         title: const Text('Flutter WillPopScope demo'),
-///       ),
-///       body: Center(
-///         child: Column(
-///           mainAxisAlignment: MainAxisAlignment.center,
-///           children: <Widget>[
-///             OutlinedButton(
-///               child: const Text('Push'),
-///               onPressed: () {
-///                 Navigator.of(context).push<void>(
-///                   MaterialPageRoute<void>(
-///                     builder: (BuildContext context) {
-///                       return const MyStatefulWidget();
-///                     },
-///                   ),
-///                 );
-///               },
-///             ),
-///             OutlinedButton(
-///               child: Text('shouldPop: $shouldPop'),
-///               onPressed: () {
-///                 setState(
-///                   () {
-///                     shouldPop = !shouldPop;
-///                   },
-///                 );
-///               },
-///             ),
-///             const Text('Push to a new screen, then tap on shouldPop '
-///                 'button to toggle its value. Press the back '
-///                 'button in the appBar to check its behaviour '
-///                 'for different values of shouldPop'),
-///           ],
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
-///
+/// ** See code in examples/api/lib/widgets/will_pop_scope/will_pop_scope.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -95,11 +30,10 @@ class WillPopScope extends StatefulWidget {
   ///
   /// The [child] argument must not be null.
   const WillPopScope({
-    Key? key,
+    super.key,
     required this.child,
     required this.onWillPop,
-  }) : assert(child != null),
-       super(key: key);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -122,29 +56,33 @@ class _WillPopScopeState extends State<WillPopScope> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (widget.onWillPop != null)
+    if (widget.onWillPop != null) {
       _route?.removeScopedWillPopCallback(widget.onWillPop!);
+    }
     _route = ModalRoute.of(context);
-    if (widget.onWillPop != null)
+    if (widget.onWillPop != null) {
       _route?.addScopedWillPopCallback(widget.onWillPop!);
+    }
   }
 
   @override
   void didUpdateWidget(WillPopScope oldWidget) {
     super.didUpdateWidget(oldWidget);
-    assert(_route == ModalRoute.of(context));
     if (widget.onWillPop != oldWidget.onWillPop && _route != null) {
-      if (oldWidget.onWillPop != null)
+      if (oldWidget.onWillPop != null) {
         _route!.removeScopedWillPopCallback(oldWidget.onWillPop!);
-      if (widget.onWillPop != null)
+      }
+      if (widget.onWillPop != null) {
         _route!.addScopedWillPopCallback(widget.onWillPop!);
+      }
     }
   }
 
   @override
   void dispose() {
-    if (widget.onWillPop != null)
+    if (widget.onWillPop != null) {
       _route?.removeScopedWillPopCallback(widget.onWillPop!);
+    }
     super.dispose();
   }
 

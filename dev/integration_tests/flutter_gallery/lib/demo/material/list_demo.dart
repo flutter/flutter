@@ -21,7 +21,7 @@ enum _MaterialListType {
 }
 
 class ListDemo extends StatefulWidget {
-  const ListDemo({ Key? key }) : super(key: key);
+  const ListDemo({ super.key });
 
   static const String routeName = '/material/list';
 
@@ -212,20 +212,18 @@ class _ListDemoState extends State<ListDemo> {
       case _MaterialListType.oneLine:
       case _MaterialListType.oneLineWithAvatar:
         itemTypeText = 'Single-line';
-        break;
       case _MaterialListType.twoLine:
         itemTypeText = 'Two-line';
-        break;
       case _MaterialListType.threeLine:
         itemTypeText = 'Three-line';
-        break;
-      default:
+      case null:
         break;
     }
 
     Iterable<Widget> listTiles = items.map<Widget>((String item) => buildListTile(context, item));
-    if (_showDividers != null)
+    if (_showDividers != null) {
       listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
+    }
 
     return Scaffold(
       key: scaffoldKey,
@@ -256,6 +254,7 @@ class _ListDemoState extends State<ListDemo> {
       ),
       body: Scrollbar(
         child: ListView(
+          primary: true,
           padding: EdgeInsets.symmetric(vertical: _dense != null ? 4.0 : 8.0),
           children: listTiles.toList(),
         ),

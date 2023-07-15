@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:test_api/scaffolding.dart' show Timeout;
 import 'package:test_api/src/backend/declarer.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/group.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/group_entry.dart'; // ignore: implementation_imports
@@ -16,8 +17,6 @@ import 'package:test_api/src/backend/state.dart'; // ignore: implementation_impo
 import 'package:test_api/src/backend/suite.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/test.dart'; // ignore: implementation_imports
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart';
 
 // ignore: deprecated_member_use
 export 'package:test_api/fake.dart' show Fake;
@@ -34,6 +33,7 @@ Declarer get _declarer {
     Future<void>(() {
       Invoker.guard<Future<void>>(() async {
         final _Reporter reporter = _Reporter(color: false); // disable color when run directly.
+        // ignore: recursive_getters, this self-call is safe since it will just fetch the declarer instance
         final Group group = _declarer.build();
         final Suite suite = Suite(group, SuitePlatform(Runtime.vm));
         await _runGroup(suite, group, <Group>[], reporter);
@@ -96,7 +96,7 @@ Future<void> _runLiveTest(Suite suiteConfig, LiveTest liveTest, _Reporter report
 Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, _Reporter reporter) async {
   final LocalTest skipped = LocalTest(test.name, test.metadata, () { }, trace: test.trace);
   if (skipped.metadata.skipReason != null) {
-    print('Skip: ${skipped.metadata.skipReason}');
+    reporter.log('Skip: ${skipped.metadata.skipReason}');
   }
   final LiveTest liveTest = skipped.load(suiteConfig);
   reporter._onTestStarted(liveTest);
@@ -185,8 +185,8 @@ void test(
 /// should explain why the group is skipped; this reason will be printed instead
 /// of running the group's tests.
 @isTestGroup
-void group(Object description, void Function() body, { dynamic skip }) {
-  _declarer.group(description.toString(), body, skip: skip);
+void group(Object description, void Function() body, { dynamic skip, int? retry }) {
+  _declarer.group(description.toString(), body, skip: skip, retry: retry);
 }
 
 /// Registers a function to be run before tests.
@@ -334,7 +334,7 @@ class _Reporter {
       if (message.type == MessageType.skip) {
         text = '  $_yellow$text$_noColor';
       }
-      print(text);
+      log(text);
     }));
   }
 
@@ -351,8 +351,8 @@ class _Reporter {
       return;
     }
     _progressLine(_description(liveTest), suffix: ' $_bold$_red[E]$_noColor');
-    print(_indent(error.toString()));
-    print(_indent('$stackTrace'));
+    log(_indent(error.toString()));
+    log(_indent('$stackTrace'));
   }
 
   /// A callback called when the engine is finished running tests.
@@ -421,7 +421,7 @@ class _Reporter {
     buffer.write(message);
     buffer.write(_noColor);
 
-    print(buffer.toString());
+    log(buffer.toString());
   }
 
   /// Returns a representation of [duration] as `MM:SS`.
@@ -441,6 +441,13 @@ class _Reporter {
       name = '${liveTest.suite.path}: $name';
     }
     return name;
+  }
+
+  /// Print the message to the console.
+  void log(String message) {
+    // We centralize all the prints in this file through this one method so that
+    // in principle we can reroute the output easily should we need to.
+    print(message); // ignore: avoid_print
   }
 }
 

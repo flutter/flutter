@@ -37,28 +37,23 @@ class InkHighlight extends InteractiveInkFeature {
   ///
   /// When the highlight is removed, `onRemoved` will be called.
   InkHighlight({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
-    required Color color,
+    required super.controller,
+    required super.referenceBox,
+    required super.color,
     required TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     double? radius,
     BorderRadius? borderRadius,
-    ShapeBorder? customBorder,
+    super.customBorder,
     RectCallback? rectCallback,
-    VoidCallback? onRemoved,
+    super.onRemoved,
     Duration fadeDuration = _kDefaultHighlightFadeDuration,
-  }) : assert(color != null),
-       assert(shape != null),
-       assert(textDirection != null),
-       assert(fadeDuration != null),
-       _shape = shape,
+  }) : _shape = shape,
        _radius = radius,
        _borderRadius = borderRadius ?? BorderRadius.zero,
-       _customBorder = customBorder,
+
        _textDirection = textDirection,
-       _rectCallback = rectCallback,
-       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
+       _rectCallback = rectCallback {
     _alphaController = AnimationController(duration: fadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged)
@@ -74,7 +69,6 @@ class InkHighlight extends InteractiveInkFeature {
   final BoxShape _shape;
   final double? _radius;
   final BorderRadius _borderRadius;
-  final ShapeBorder? _customBorder;
   final RectCallback? _rectCallback;
   final TextDirection _textDirection;
 
@@ -98,8 +92,9 @@ class InkHighlight extends InteractiveInkFeature {
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed && !_active)
+    if (status == AnimationStatus.dismissed && !_active) {
       dispose();
+    }
   }
 
   @override
@@ -109,15 +104,13 @@ class InkHighlight extends InteractiveInkFeature {
   }
 
   void _paintHighlight(Canvas canvas, Rect rect, Paint paint) {
-    assert(_shape != null);
     canvas.save();
-    if (_customBorder != null) {
-      canvas.clipPath(_customBorder!.getOuterPath(rect, textDirection: _textDirection));
+    if (customBorder != null) {
+      canvas.clipPath(customBorder!.getOuterPath(rect, textDirection: _textDirection));
     }
     switch (_shape) {
       case BoxShape.circle:
         canvas.drawCircle(rect.center, _radius ?? Material.defaultSplashRadius, paint);
-        break;
       case BoxShape.rectangle:
         if (_borderRadius != BorderRadius.zero) {
           final RRect clipRRect = RRect.fromRectAndCorners(
@@ -129,7 +122,6 @@ class InkHighlight extends InteractiveInkFeature {
         } else {
           canvas.drawRect(rect, paint);
         }
-        break;
     }
     canvas.restore();
   }

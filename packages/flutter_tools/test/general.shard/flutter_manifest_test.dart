@@ -65,7 +65,7 @@ dependencies:
     expect(flutterManifest.assets, isEmpty);
   });
 
-  testWithoutContext('FlutterManifest knows if material design is used', () async {
+  testWithoutContext('FlutterManifest knows if Material Design is used', () async {
     const String manifest = '''
 name: test
 dependencies:
@@ -630,8 +630,8 @@ flutter:
     expect(flutterManifest, matchesManifest(
       appVersion: '1.0.0+2',
       buildName: '1.0.0',
-      buildNumber: '2'),
-    );
+      buildNumber: '2',
+    ));
   });
 
   testWithoutContext('FlutterManifest parses major.minor.patch with no build version', () {
@@ -652,8 +652,7 @@ flutter:
     expect(flutterManifest, matchesManifest(
       appVersion:  '0.0.1',
       buildName: '0.0.1',
-      buildNumber: null),
-    );
+    ));
   });
 
   testWithoutContext('FlutterManifest parses major.minor.patch+build version clause 2', () {
@@ -674,14 +673,14 @@ flutter:
     expect(flutterManifest, matchesManifest(
       appVersion: '1.0.0-beta+exp.sha.5114f85',
       buildName: '1.0.0-beta',
-      buildNumber: 'exp.sha.5114f85'),
-    );
+      buildNumber: 'exp.sha.5114f85',
+    ));
   });
 
   testWithoutContext('FlutterManifest parses major.minor+build version clause', () {
     const String manifest = '''
 name: test
-version: 1.0+2
+version: 1.0.0+2
 dependencies:
   flutter:
     sdk: flutter
@@ -694,10 +693,10 @@ flutter:
     );
 
     expect(flutterManifest, matchesManifest(
-      appVersion: '1.0+2',
-      buildName: '1.0',
-      buildNumber: '2'),
-    );
+      appVersion: '1.0.0+2',
+      buildName: '1.0.0',
+      buildNumber: '2',
+    ));
   });
 
   testWithoutContext('FlutterManifest parses empty version clause', () {
@@ -715,11 +714,7 @@ flutter:
       logger: logger,
     );
 
-    expect(flutterManifest, matchesManifest(
-      appVersion: null,
-      buildName: null,
-      buildNumber: null),
-    );
+    expect(flutterManifest, matchesManifest());
   });
 
   testWithoutContext('FlutterManifest parses no version clause', () {
@@ -736,11 +731,7 @@ flutter:
       logger: logger,
     );
 
-    expect(flutterManifest, matchesManifest(
-      appVersion: null,
-      buildName: null,
-      buildNumber: null),
-    );
+    expect(flutterManifest, matchesManifest());
   });
 
     // Regression test for https://github.com/flutter/flutter/issues/31764
@@ -1075,11 +1066,11 @@ flutter:
 
     expect(flutterManifest.isPlugin, true);
     final Map<String, dynamic> validSupportedPlatforms = flutterManifest.validSupportedPlatforms!;
-    expect(validSupportedPlatforms['ios'],
-                              <String, dynamic>{'pluginClass': 'SomeClass'});
-    expect(validSupportedPlatforms['android'],
-                              <String, dynamic>{'pluginClass': 'SomeClass',
-                                                'package': 'com.example'});
+    expect(validSupportedPlatforms['ios'], <String, dynamic>{'pluginClass': 'SomeClass'});
+    expect(validSupportedPlatforms['android'], <String, dynamic>{
+      'pluginClass': 'SomeClass',
+      'package': 'com.example',
+    });
   });
 
   testWithoutContext('FlutterManifest validates a platform section that is a list '

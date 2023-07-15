@@ -14,81 +14,8 @@ import 'framework.dart';
 /// [NotificationListener] is useful when listening scroll events
 /// in [ListView],[NestedScrollView],[GridView] or any Scrolling widgets.
 /// Used by [NotificationListener.onNotification].
-
 typedef NotificationListenerCallback<T extends Notification> = bool Function(T notification);
 
-/// {@tool dartpad --template=stateless_widget_material}
-///
-/// This example shows a [NotificationListener] widget
-/// that listens for [ScrollNotification] notifications. When a scroll
-/// event occurs in the [NestedScrollView],
-/// this widget is notified. The events could be either a
-/// [ScrollStartNotification]or[ScrollEndNotification].
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-/// const List<String> _tabs = <String>['Months', 'Days'];
-/// const List<String> _months = <String>[ 'January','February','March', ];
-/// const List<String> _days = <String>[ 'Sunday', 'Monday','Tuesday', ];
-///   return DefaultTabController(
-///     length: _tabs.length,
-///     child: Scaffold(
-///       // Listens to the scroll events and returns the current position.
-///       body: NotificationListener<ScrollNotification>(
-///         onNotification: (ScrollNotification scrollNotification) {
-///           if (scrollNotification is ScrollStartNotification) {
-///             print('Scrolling has started');
-///           } else if (scrollNotification is ScrollEndNotification) {
-///             print('Scrolling has ended');
-///           }
-///           // Return true to cancel the notification bubbling.
-///           return true;
-///         },
-///         child: NestedScrollView(
-///           headerSliverBuilder:
-///               (BuildContext context, bool innerBoxIsScrolled) {
-///             return <Widget>[
-///               SliverAppBar(
-///                 title: const Text('Flutter Code Sample'),
-///                 pinned: true,
-///                 floating: true,
-///                 bottom: TabBar(
-///                   tabs: _tabs.map((String name) => Tab(text: name)).toList(),
-///                 ),
-///               ),
-///             ];
-///           },
-///           body: TabBarView(
-///             children: <Widget>[
-///               ListView.builder(
-///                 itemCount: _months.length,
-///                 itemBuilder: (BuildContext context, int index) {
-///                   return ListTile(title: Text(_months[index]));
-///                 },
-///               ),
-///               ListView.builder(
-///                 itemCount: _days.length,
-///                 itemBuilder: (BuildContext context, int index) {
-///                   return ListTile(title: Text(_days[index]));
-///                 },
-///               ),
-///            ],
-///           ),
-///         ),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
-/// {@end-tool}
-///
-/// See also:
-///
-///  * [ScrollNotification] which describes the notification lifecycle.
-///  * [ScrollStartNotification] which returns the start position of scrolling.
-///  * [ScrollEndNotification] which returns the end position of scrolling.
-///  * [NestedScrollView] which creates a nested scroll view.
-///
 /// A notification that can bubble up the widget tree.
 ///
 /// You can determine the type of a notification using the `is` operator to
@@ -100,31 +27,28 @@ typedef NotificationListenerCallback<T extends Notification> = bool Function(T n
 /// send. The notification will be delivered to any [NotificationListener]
 /// widgets with the appropriate type parameters that are ancestors of the given
 /// [BuildContext].
+///
+/// {@tool dartpad}
+/// This example shows a [NotificationListener] widget
+/// that listens for [ScrollNotification] notifications. When a scroll
+/// event occurs in the [NestedScrollView],
+/// this widget is notified. The events could be either a
+/// [ScrollStartNotification]or[ScrollEndNotification].
+///
+/// ** See code in examples/api/lib/widgets/notification_listener/notification.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [ScrollNotification] which describes the notification lifecycle.
+///  * [ScrollStartNotification] which returns the start position of scrolling.
+///  * [ScrollEndNotification] which returns the end position of scrolling.
+///  * [NestedScrollView] which creates a nested scroll view.
+///
 abstract class Notification {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const Notification();
-
-  /// Applied to each ancestor of the [dispatch] target.
-  ///
-  /// The [Notification] class implementation of this method dispatches the
-  /// given [Notification] to each ancestor [NotificationListener] widget.
-  ///
-  /// Subclasses can override this to apply additional filtering or to update
-  /// the notification as it is bubbled (for example, increasing a `depth` field
-  /// for each ancestor of a particular type).
-  @protected
-  @mustCallSuper
-  bool visitAncestor(Element element) {
-    if (element is StatelessElement) {
-      final StatelessWidget widget = element.widget;
-      if (widget is NotificationListener<Notification>) {
-        if (widget._dispatch(this, element)) // that function checks the type dynamically
-          return false;
-      }
-    }
-    return true;
-  }
 
   /// Start bubbling this notification at the given build context.
   ///
@@ -133,9 +57,7 @@ abstract class Notification {
   /// [BuildContext]. If the [BuildContext] is null, the notification is not
   /// dispatched.
   void dispatch(BuildContext? target) {
-    // The `target` may be null if the subtree the notification is supposed to be
-    // dispatched in is in the process of being disposed.
-    target?.visitAncestorElements(visitAncestor);
+    target?.dispatchNotification(this);
   }
 
   @override
@@ -167,29 +89,19 @@ abstract class Notification {
 /// [runtimeType] is a subtype of `T`.
 ///
 /// To dispatch notifications, use the [Notification.dispatch] method.
-class NotificationListener<T extends Notification> extends StatelessWidget {
+class NotificationListener<T extends Notification> extends ProxyWidget {
   /// Creates a widget that listens for notifications.
   const NotificationListener({
-    Key? key,
-    required this.child,
+    super.key,
+    required super.child,
     this.onNotification,
-  }) : super(key: key);
-
-  /// The widget directly below this widget in the tree.
-  ///
-  /// This is not necessarily the widget that dispatched the notification.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
+  });
 
   /// Called when a notification of the appropriate type arrives at this
   /// location in the tree.
   ///
-  /// Return true to cancel the notification bubbling. Return false (or null) to
+  /// Return true to cancel the notification bubbling. Return false to
   /// allow the notification to continue to be dispatched to further ancestors.
-  ///
-  /// The notification's [Notification.visitAncestor] method is called for each
-  /// ancestor, and invokes this callback as appropriate.
   ///
   /// Notifications vary in terms of when they are dispatched. There are two
   /// main possibilities: dispatch between frames, and dispatch during layout.
@@ -201,16 +113,29 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   /// widgets that depend on layout, consider a [LayoutBuilder] instead.
   final NotificationListenerCallback<T>? onNotification;
 
-  bool _dispatch(Notification notification, Element element) {
-    if (onNotification != null && notification is T) {
-      final bool result = onNotification!(notification);
-      return result == true; // so that null and false have the same effect
+  @override
+  Element createElement() {
+    return _NotificationElement<T>(this);
+  }
+}
+
+/// An element used to host [NotificationListener] elements.
+class _NotificationElement<T extends Notification> extends ProxyElement with NotifiableElementMixin {
+  _NotificationElement(NotificationListener<T> super.widget);
+
+  @override
+  bool onNotification(Notification notification) {
+    final NotificationListener<T> listener = widget as NotificationListener<T>;
+    if (listener.onNotification != null && notification is T) {
+      return listener.onNotification!(notification);
     }
     return false;
   }
 
   @override
-  Widget build(BuildContext context) => child;
+  void notifyClients(covariant ProxyWidget oldWidget) {
+    // Notification tree does not need to notify clients.
+  }
 }
 
 /// Indicates that the layout of one of the descendants of the object receiving
@@ -241,4 +166,7 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
 /// useful for paint effects that depend on the layout. If you were to use this
 /// notification to change the build, for instance, you would always be one
 /// frame behind, which would look really ugly and laggy.
-class LayoutChangedNotification extends Notification { }
+class LayoutChangedNotification extends Notification {
+  /// Create a new [LayoutChangedNotification].
+  const LayoutChangedNotification();
+}

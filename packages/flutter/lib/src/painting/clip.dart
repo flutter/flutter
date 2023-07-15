@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-import 'dart:ui' show Canvas, Clip, Path, Paint, Rect, RRect, VoidCallback;
+import 'dart:ui' show Canvas, Clip, Paint, Path, RRect, Rect, VoidCallback;
 
 /// Clip utilities used by [PaintingContext].
 abstract class ClipContext {
@@ -11,21 +10,17 @@ abstract class ClipContext {
   Canvas get canvas;
 
   void _clipAndPaint(void Function(bool doAntiAlias) canvasClipCall, Clip clipBehavior, Rect bounds, VoidCallback painter) {
-    assert(canvasClipCall != null);
     canvas.save();
     switch (clipBehavior) {
       case Clip.none:
         break;
       case Clip.hardEdge:
         canvasClipCall(false);
-        break;
       case Clip.antiAlias:
         canvasClipCall(true);
-        break;
       case Clip.antiAliasWithSaveLayer:
         canvasClipCall(true);
         canvas.saveLayer(bounds, Paint());
-        break;
     }
     painter();
     if (clipBehavior == Clip.antiAliasWithSaveLayer) {

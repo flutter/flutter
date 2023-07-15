@@ -2,10 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -116,6 +124,23 @@ void main() {
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
     expect(widget.style.color!.withAlpha(255), CupertinoColors.systemRed.color);
+  });
+
+  testWidgets('Dialog default action style', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoTheme(
+      data: const CupertinoThemeData(
+        primaryColor: CupertinoColors.systemGreen,
+      ),
+      child: boilerplate(const CupertinoDialogAction(
+        child: Text('Ok'),
+      )),
+      ),
+    );
+
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+
+    expect(widget.style.color!.withAlpha(255), CupertinoColors.systemGreen.color);
   });
 
   testWidgets('Dialog dark theme', (WidgetTester tester) async {
@@ -319,7 +344,12 @@ void main() {
     // Visually the "Cancel" button and "OK" button are the same height when using the
     // regular font. However, when using the test font, "Cancel" becomes 2 lines which
     // is why the height we're verifying for "Cancel" is larger than "OK".
-    expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, 132.0)));
+
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/99933
+    //                A bug in the HTML renderer and/or Chrome 96+ causes a
+    //                discrepancy in the paragraph height.
+    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+    expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, hasIssue99933 ? 133 : 132.0)));
     expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(265.0, 80.0 + 24.0)));
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Cancel')), equals(const Size(310.0, 148.0)));
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'OK')), equals(const Size(310.0, 98.0)));
@@ -559,7 +589,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
+          dividerWidth = 1.0 / MediaQuery.devicePixelRatioOf(context);
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -604,7 +634,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerThickness = 1.0 / MediaQuery.of(context).devicePixelRatio;
+          dividerThickness = 1.0 / MediaQuery.devicePixelRatioOf(context);
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -812,7 +842,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerThickness = 1.0 / MediaQuery.of(context).devicePixelRatio;
+          dividerThickness = 1.0 / MediaQuery.devicePixelRatioOf(context);
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -915,9 +945,9 @@ void main() {
     );
 
     // We must explicitly cause an "up" gesture to avoid a crash.
-    // todo(mattcarroll) remove this call, https://github.com/flutter/flutter/issues/19540
+    // TODO(mattcarroll): remove this call, https://github.com/flutter/flutter/issues/19540
     await gesture.up();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/52960
+  });
 
   testWidgets('ScaleTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1039,53 +1069,54 @@ void main() {
 
     // Enter animation.
     await tester.pump();
-    FadeTransition transition = tester.firstWidget(find.byType(FadeTransition));
+    final Finder fadeTransitionFinder = find.ancestor(of: find.byType(CupertinoAlertDialog), matching: find.byType(FadeTransition));
+    FadeTransition transition = tester.firstWidget(fadeTransitionFinder);
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.40, epsilon: 0.001));
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.081, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.437, epsilon: 0.001));
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.332, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.55, epsilon: 0.001));
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.667, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
-    expect(transition.opacity.value, moreOrLessEquals(0.737, epsilon: 0.001));
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.918, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.firstWidget(find.byType(FadeTransition));
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
     expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
 
     await tester.tap(find.text('Delete'));
 
     // Exit animation, look at reverse FadeTransition.
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
-    expect(transition.opacity.value, moreOrLessEquals(0.500, epsilon: 0.001));
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.918, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.667, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
     expect(transition.opacity.value, moreOrLessEquals(0.332, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
-    expect(transition.opacity.value, moreOrLessEquals(0.188, epsilon: 0.001));
-
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
     expect(transition.opacity.value, moreOrLessEquals(0.081, epsilon: 0.001));
 
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
-    expect(transition.opacity.value, moreOrLessEquals(0.019, epsilon: 0.001));
-
-    await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
     expect(transition.opacity.value, moreOrLessEquals(0.0, epsilon: 0.001));
   });
 
@@ -1123,7 +1154,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
-          data: MediaQueryData(viewInsets: EdgeInsets.zero),
+          data: MediaQueryData(),
           child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
         ),
       ),
@@ -1149,9 +1180,10 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets.translate(10, 10));
   });
 
-  testWidgets('Default cupertino dialog golden', (WidgetTester tester) async {
+  testWidgets('Material2 - Default cupertino dialog golden', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
+        useMaterial3: false,
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
@@ -1175,7 +1207,38 @@ void main() {
 
     await expectLater(
       find.byType(CupertinoAlertDialog),
-      matchesGoldenFile('dialog_test.cupertino.default.png'),
+      matchesGoldenFile('m2_dialog_test.cupertino.default.png'),
+    );
+  });
+
+  testWidgets('Material3 - Default cupertino dialog golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        useMaterial3: true,
+        dialogBuilder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: const RepaintBoundary(
+              child: CupertinoAlertDialog(
+                title: Text('Title'),
+                content: Text('text'),
+                actions: <Widget>[
+                  CupertinoDialogAction(child: Text('No')),
+                  CupertinoDialogAction(child: Text('OK')),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('m3_dialog_test.cupertino.default.png'),
     );
   });
 
@@ -1216,11 +1279,12 @@ void main() {
       label: 'Custom label',
       flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
+    semantics.dispose();
   });
 
   testWidgets('CupertinoDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         restorationScopeId: 'app',
         home: _RestorableDialogTestWidget(),
       ),
@@ -1292,7 +1356,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
-          data: MediaQueryData(viewInsets: EdgeInsets.zero),
+          data: MediaQueryData(),
           child: CupertinoAlertDialog(
             actions: <Widget>[
               CupertinoDialogAction(child: Text('OK')),
@@ -1312,6 +1376,167 @@ void main() {
     expect(scrollbars.length, 2);
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
   });
+
+  group('showCupertinoDialog avoids overlapping display features', () {
+    testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showCupertinoDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+        anchorPoint: const Offset(1000, 0),
+      );
+      await tester.pumpAndSettle();
+
+      // Should take the right side of the screen
+      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('positioning using Directionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: child!,
+              ),
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showCupertinoDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // Should take the right side of the screen
+      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+    });
+
+    testWidgets('default positioning', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              // Display has a vertical hinge down the middle
+              data: const MediaQueryData(
+                size: Size(800, 600),
+                displayFeatures: <DisplayFeature>[
+                  DisplayFeature(
+                    bounds: Rect.fromLTRB(390, 0, 410, 600),
+                    type: DisplayFeatureType.hinge,
+                    state: DisplayFeatureState.unknown,
+                  ),
+                ],
+              ),
+              child: child!,
+            );
+          },
+          home: const Center(child: Text('Test')),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Test'));
+      showCupertinoDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return const Placeholder();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      // By default it should place the dialog on the left screen
+      expect(tester.getTopLeft(find.byType(Placeholder)), Offset.zero);
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(390.0, 600.0));
+    });
+  });
+
+  testWidgets('Hovering over Cupertino alert dialog action updates cursor to clickable on Web', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: RepaintBoundary(
+              child: CupertinoAlertDialog(
+                title: const Text('Title'),
+                content: const Text('text'),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    onPressed: () {},
+                    child: const Text('NO'),
+                  ),
+                  CupertinoDialogAction(
+                    onPressed: () {},
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    final Offset dialogAction = tester.getCenter(find.text('OK'));
+    await gesture.moveTo(dialogAction);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
@@ -1330,8 +1555,10 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
 
 Widget createAppWithButtonThatLaunchesDialog({
   required WidgetBuilder dialogBuilder,
+  bool? useMaterial3,
 }) {
   return MaterialApp(
+    theme: ThemeData(useMaterial3: useMaterial3),
     home: Material(
       child: Center(
         child: Builder(builder: (BuildContext context) {
@@ -1372,6 +1599,9 @@ Widget createAppWithCenteredButton(Widget child) {
 
 
 class _RestorableDialogTestWidget extends StatelessWidget {
+  const _RestorableDialogTestWidget();
+
+  @pragma('vm:entry-point')
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return CupertinoDialogRoute<void>(
       context: context,

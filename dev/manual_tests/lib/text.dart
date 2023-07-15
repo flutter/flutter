@@ -26,7 +26,7 @@ void main() {
 }
 
 class Home extends StatefulWidget {
-  const Home({ Key? key }) : super(key: key);
+  const Home({ super.key });
 
   @override
   State<Home> createState() => _HomeState();
@@ -44,7 +44,7 @@ class _HomeState extends State<Home> {
               children: <Widget>[
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.white,
+                    foregroundColor: Colors.white,
                     backgroundColor: Colors.red.shade800,
                   ),
                   onPressed: () { Navigator.pushNamed(context, 'underlines'); },
@@ -52,7 +52,7 @@ class _HomeState extends State<Home> {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.white,
+                    foregroundColor: Colors.white,
                     backgroundColor: Colors.orange.shade700,
                   ),
                   onPressed: () { Navigator.pushNamed(context, 'fallback'); },
@@ -60,7 +60,7 @@ class _HomeState extends State<Home> {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.black,
+                    foregroundColor: Colors.black,
                     backgroundColor: Colors.yellow.shade700,
                   ),
                   onPressed: () { Navigator.pushNamed(context, 'bidi'); },
@@ -68,7 +68,7 @@ class _HomeState extends State<Home> {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.black,
+                    foregroundColor: Colors.black,
                     backgroundColor: Colors.green.shade400,
                   ),
                   onPressed: () { Navigator.pushNamed(context, 'fuzzer'); },
@@ -76,7 +76,7 @@ class _HomeState extends State<Home> {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.white,
+                    foregroundColor: Colors.white,
                     backgroundColor: Colors.blue.shade400,
                   ),
                   onPressed: () { Navigator.pushNamed(context, 'zalgo'); },
@@ -84,7 +84,7 @@ class _HomeState extends State<Home> {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.black,
+                    foregroundColor: Colors.black,
                     backgroundColor: Colors.purple.shade200,
                   ),
                   onPressed: () { Navigator.pushNamed(context, 'painting'); },
@@ -96,7 +96,6 @@ class _HomeState extends State<Home> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Slider(
-              min: 0.0,
               max: 1024.0,
               value: seed.toDouble(),
               label: '$seed',
@@ -119,7 +118,7 @@ class _HomeState extends State<Home> {
 }
 
 class Fuzzer extends StatefulWidget {
-  const Fuzzer({ Key? key, required this.seed }) : super(key: key);
+  const Fuzzer({ super.key, required this.seed });
 
   final int seed;
 
@@ -159,8 +158,9 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   }
 
   String? _fiddleWithText(String? text) {
-    if (_random.nextInt(10) > 0)
+    if (_random.nextInt(10) > 0) {
       return text;
+    }
     return _createRandomText();
   }
 
@@ -170,14 +170,14 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
         case 0:
           return const TextStyle();
         case 1:
-          style = const TextStyle();
-          break; // and mutate it below
+          style = const TextStyle(); // is mutated below
         default:
           return null;
       }
     }
-    if (_random.nextInt(200) == 0)
+    if (_random.nextInt(200) == 0) {
       return null;
+    }
     return TextStyle(
       color: _fiddleWithColor(style.color),
       decoration: _fiddleWithDecoration(style.decoration),
@@ -197,8 +197,9 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   Color? _fiddleWithColor(Color? value) {
     switch (_random.nextInt(10)) {
       case 0:
-        if (value == null)
+        if (value == null) {
           return pickFromList<MaterialColor>(_random, Colors.primaries)[(_random.nextInt(9) + 1) * 100];
+        }
         switch (_random.nextInt(4)) {
           case 0:
             return value.withAlpha(value.alpha + _random.nextInt(10) - 5);
@@ -209,7 +210,6 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
           case 3:
             return value.withBlue(value.blue + _random.nextInt(10) - 5);
         }
-        break;
       case 1:
         return null;
     }
@@ -217,8 +217,9 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   }
 
   TextDecoration? _fiddleWithDecoration(TextDecoration? value) {
-    if (_random.nextInt(10) > 0)
+    if (_random.nextInt(10) > 0) {
       return value;
+    }
     switch (_random.nextInt(100)) {
       case 10:
         return TextDecoration.underline;
@@ -301,8 +302,9 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   double? _fiddleWithDouble(double? value, double defaultValue, double max) {
     switch (_random.nextInt(10)) {
       case 0:
-        if (value == null)
+        if (value == null) {
           return math.min(defaultValue * (0.95 + _random.nextDouble() * 0.1), max);
+        }
         return math.min(value * (0.51 + _random.nextDouble()), max);
       case 1:
         return null;
@@ -318,31 +320,34 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 3:
       case 4:
         children.insert(_random.nextInt(children.length + 1), _createRandomTextSpan());
-        break;
       case 10:
         children = children.reversed.toList();
-        break;
       case 20:
-        if (children.isEmpty)
+        if (children.isEmpty) {
           break;
-        if (_random.nextInt(10) > 0)
+        }
+        if (_random.nextInt(10) > 0) {
           break;
+        }
         final int index = _random.nextInt(children.length);
-        if (depthOf(children[index]) < 3)
+        if (depthOf(children[index]) < 3) {
           children.removeAt(index);
-        break;
+        }
     }
-    if (children.isEmpty && _random.nextBool())
+    if (children.isEmpty && _random.nextBool()) {
       return null;
+    }
     return children;
   }
 
   int depthOf(TextSpan node) {
-    if (node.children == null || node.children?.isEmpty == true)
+    if (node.children == null || (node.children?.isEmpty ?? false)) {
       return 0;
+    }
     int result = 0;
-    for (final TextSpan child in node.children!.cast<TextSpan>())
+    for (final TextSpan child in node.children!.cast<TextSpan>()) {
       result = math.max(result, depthOf(child));
+    }
     return result;
   }
 
@@ -498,7 +503,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         children: <Widget>[
@@ -535,7 +540,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
 }
 
 class Underlines extends StatefulWidget {
-  const Underlines({ Key? key }) : super(key: key);
+  const Underlines({ super.key });
 
   @override
   State<Underlines> createState() => _UnderlinesState();
@@ -567,7 +572,7 @@ class _UnderlinesState extends State<Underlines> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -619,7 +624,7 @@ class _UnderlinesState extends State<Underlines> {
                   ),
                   TextButton(
                     style: TextButton.styleFrom(
-                      primary: Colors.white,
+                      foregroundColor: Colors.white,
                       backgroundColor: Colors.red,
                     ),
                     onPressed: _text == '' ? null : () {
@@ -640,7 +645,7 @@ class _UnderlinesState extends State<Underlines> {
 }
 
 class Fallback extends StatefulWidget {
-  const Fallback({ Key? key }) : super(key: key);
+  const Fallback({ super.key });
 
   @override
   State<Fallback> createState() => _FallbackState();
@@ -670,7 +675,7 @@ class _FallbackState extends State<Fallback> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         children: <Widget>[
@@ -735,7 +740,7 @@ class _FallbackState extends State<Fallback> {
 }
 
 class Bidi extends StatefulWidget {
-  const Bidi({ Key? key }) : super(key: key);
+  const Bidi({ super.key });
 
   @override
   State<Bidi> createState() => _BidiState();
@@ -744,7 +749,7 @@ class Bidi extends StatefulWidget {
 class _BidiState extends State<Bidi> {
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: ListView(
         padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 20.0),
@@ -810,7 +815,7 @@ class _BidiState extends State<Bidi> {
 }
 
 class Zalgo extends StatefulWidget {
-  const Zalgo({ Key? key, required this.seed }) : super(key: key);
+  const Zalgo({ super.key, required this.seed });
 
   final int seed;
 
@@ -852,7 +857,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         children: <Widget>[
@@ -916,7 +921,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
 }
 
 class Painting extends StatefulWidget {
-  const Painting({ Key? key, required this.seed }) : super(key: key);
+  const Painting({ super.key, required this.seed });
 
   final int seed;
 
@@ -960,7 +965,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
       }
       _text = buffer.toString();
     });
-    SchedulerBinding.instance?.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       if (mounted && intrinsicKey.currentContext?.size?.height != controlKey.currentContext?.size?.height) {
         debugPrint('Found some text that unexpectedly renders at different heights.');
         debugPrint('Text: $_text');
@@ -978,7 +983,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1058,8 +1063,9 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                     setState(() {
                       _ellipsize = value;
                       _random = math.Random(widget.seed); // reset for reproducibility
-                      if (!_ticker.isActive)
+                      if (!_ticker.isActive) {
                         _update(null);
+                      }
                     });
                   },
                 ),
@@ -1420,8 +1426,9 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
   ];
   final Set<int> these = <int>{};
   int combiningCount = enclosingCombiningMarks.length + nonspacingCombiningMarks.length;
-  if (includeSpacingCombiningMarks)
+  if (includeSpacingCombiningMarks) {
     combiningCount += spacingCombiningMarks.length;
+  }
   for (int count = 0; count < targetLength; count += 1) {
     int characterCode = random.nextInt(combiningCount);
     if (characterCode < enclosingCombiningMarks.length) {
@@ -2145,7 +2152,8 @@ int randomCharacter(math.Random random) {
     Range(0x2f800, 0x2fa1d),
   ];
   final Range range = pickFromList<Range>(random, characterRanges);
-  if (range.start == range.end)
+  if (range.start == range.end) {
     return range.start;
+  }
   return range.start + random.nextInt(range.end - range.start);
 }

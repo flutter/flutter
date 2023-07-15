@@ -107,7 +107,6 @@ class _CardDataItem extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Align(
               alignment: page!.id == 'H'
@@ -127,7 +126,7 @@ class _CardDataItem extends StatelessWidget {
             Center(
               child: Text(
                 data!.title!,
-                style: Theme.of(context).textTheme.headline6,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
           ],
@@ -138,7 +137,7 @@ class _CardDataItem extends StatelessWidget {
 }
 
 class TabsDemo extends StatelessWidget {
-  const TabsDemo({Key? key}) : super(key: key);
+  const TabsDemo({super.key});
 
   static const String routeName = '/material/tabs';
 

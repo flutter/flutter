@@ -91,18 +91,18 @@
             ]
           },
           "runDebug": {
-            "description": "The command to be invoked to run the app in debug mode. The name of the app to be started is available via the ${appName} string interpolation. Make sure the flutter cmdline output is available via this commands stdout/stderr since the SDK needs the \"Observatory is now listening on ...\" message to function. If the forwardPort command is not specified, the observatory URL will be connected to as-is, without any port forwarding. In that case you need to make sure it is reachable from your host device, possibly via the \"--observatory-host=<ip>\" engine flag.",
+            "description": "The command to be invoked to run the app in debug mode. The name of the app to be started is available via the ${appName} string interpolation. Make sure the flutter cmdline output is available via this commands stdout/stderr since the SDK needs the \"VM Service is now listening on ...\" message to function. If the forwardPort command is not specified, the VM Service URL will be connected to as-is, without any port forwarding. In that case you need to make sure it is reachable from your host device, possibly via the \"--vm-service-host=<ip>\" engine flag.",
             "type": "array",
             "items": {
               "type": "string"
             },
             "minItems": 1,
             "default": [
-              "ssh", "pi@raspberrypi", "flutter-pi /tmp/${appName} --observatory-host=192.168.178.123"
+              "ssh", "pi@raspberrypi", "flutter-pi /tmp/${appName} --vm-service-host=192.168.178.123"
             ]
           },
           "forwardPort": {
-            "description": "The command to be invoked to forward a specific device port to a port on the host device. The host port is available via ${hostPort} and the device port via ${devicePort}. On success, the command should stay running for the duration of the forwarding. The command will be terminated using SIGTERM when the forwarding should be stopped. When using ssh, make sure ssh quits when the forwarding fails since thats not the default behaviour.",
+            "description": "The command to be invoked to forward a specific device port to a port on the host device. The host port is available via ${hostPort} and the device port via ${devicePort}. On success, the command should stay running for the duration of the forwarding. The command will be terminated using SIGTERM when the forwarding should be stopped. When using ssh, make sure ssh quits when the forwarding fails since that's not the default behaviour.",
             "type": ["array", "null"],
             "items": {
               "type": "string"

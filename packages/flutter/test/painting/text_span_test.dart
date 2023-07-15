@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -13,8 +15,8 @@ void main() {
     const TextSpan a2 = TextSpan(text: 'a');
     const TextSpan b1 = TextSpan(children: <TextSpan>[ a1 ]);
     const TextSpan b2 = TextSpan(children: <TextSpan>[ a2 ]);
-    const TextSpan c1 = TextSpan(text: null);
-    const TextSpan c2 = TextSpan(text: null);
+    const TextSpan c1 = TextSpan();
+    const TextSpan c2 = TextSpan();
 
     expect(a1 == a2, isTrue);
     expect(b1 == b2, isTrue);
@@ -280,6 +282,51 @@ void main() {
     expect(collector[0].semanticsLabel, 'bbb');
   });
 
+  test('TextSpan visitDirectChildren', () {
+    List<InlineSpan> directChildrenOf(InlineSpan root) {
+      final List<InlineSpan> visitOrder = <InlineSpan>[];
+      root.visitDirectChildren((InlineSpan span) {
+        visitOrder.add(span);
+        return true;
+      });
+      return visitOrder;
+    }
+
+    const TextSpan leaf1 = TextSpan(text: 'leaf1');
+    const TextSpan leaf2 = TextSpan(text: 'leaf2');
+
+    const TextSpan branch1 = TextSpan(children: <InlineSpan>[leaf1, leaf2]);
+    const TextSpan branch2 = TextSpan(text: 'branch2');
+
+    const TextSpan root = TextSpan(children: <InlineSpan>[branch1, branch2]);
+
+    expect(directChildrenOf(root), <TextSpan>[branch1, branch2]);
+    expect(directChildrenOf(branch1), <TextSpan>[leaf1, leaf2]);
+    expect(directChildrenOf(branch2), isEmpty);
+    expect(directChildrenOf(leaf1), isEmpty);
+    expect(directChildrenOf(leaf2), isEmpty);
+
+    int? indexInTree(InlineSpan target) {
+      int index = 0;
+      bool findInSubtree(InlineSpan subtreeRoot) {
+        if (identical(target, subtreeRoot)) {
+          // return false to stop traversal.
+          return false;
+        }
+        index += 1;
+        return subtreeRoot.visitDirectChildren(findInSubtree);
+      }
+      return findInSubtree(root) ? null : index;
+    }
+
+    expect(indexInTree(root), 0);
+    expect(indexInTree(branch1), 1);
+    expect(indexInTree(leaf1), 2);
+    expect(indexInTree(leaf2), 3);
+    expect(indexInTree(branch2), 4);
+    expect(indexInTree(const TextSpan(text: 'foobar')), null);
+  });
+
   testWidgets('handles mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -306,16 +353,15 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)) - const Offset(40, 0));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)) + const Offset(40, 0));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('handles onEnter and onExit', (WidgetTester tester) async {
@@ -350,7 +396,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)) - const Offset(40, 0));
     expect(logEvents, isEmpty);
@@ -364,4 +409,53 @@ void main() {
     expect(logEvents[1], isA<PointerExitEvent>());
   });
 
+  testWidgets('TextSpan can compute StringAttributes', (WidgetTester tester) async {
+    const TextSpan span = TextSpan(
+      text: 'aaaaa',
+      spellOut: true,
+      children: <InlineSpan>[
+        TextSpan(text: 'yyyyy', locale: Locale('es', 'MX')),
+        TextSpan(
+          text: 'xxxxx',
+          spellOut: false,
+          children: <InlineSpan>[
+            TextSpan(text: 'zzzzz'),
+            TextSpan(text: 'bbbbb', spellOut: true),
+          ]
+        ),
+      ],
+    );
+    final List<InlineSpanSemanticsInformation> collector = <InlineSpanSemanticsInformation>[];
+    span.computeSemanticsInformation(collector);
+    expect(collector.length, 5);
+    expect(collector[0].stringAttributes.length, 1);
+    expect(collector[0].stringAttributes[0], isA<SpellOutStringAttribute>());
+    expect(collector[0].stringAttributes[0].range, const TextRange(start: 0, end: 5));
+    expect(collector[1].stringAttributes.length, 2);
+    expect(collector[1].stringAttributes[0], isA<SpellOutStringAttribute>());
+    expect(collector[1].stringAttributes[0].range, const TextRange(start: 0, end: 5));
+    expect(collector[1].stringAttributes[1], isA<LocaleStringAttribute>());
+    expect(collector[1].stringAttributes[1].range, const TextRange(start: 0, end: 5));
+    final LocaleStringAttribute localeStringAttribute = collector[1].stringAttributes[1] as LocaleStringAttribute;
+    expect(localeStringAttribute.locale, const Locale('es', 'MX'));
+    expect(collector[2].stringAttributes.length, 0);
+    expect(collector[3].stringAttributes.length, 0);
+    expect(collector[4].stringAttributes.length, 1);
+    expect(collector[4].stringAttributes[0], isA<SpellOutStringAttribute>());
+    expect(collector[4].stringAttributes[0].range, const TextRange(start: 0, end: 5));
+
+    final List<InlineSpanSemanticsInformation> combined = combineSemanticsInfo(collector);
+    expect(combined.length, 1);
+    expect(combined[0].stringAttributes.length, 4);
+    expect(combined[0].stringAttributes[0], isA<SpellOutStringAttribute>());
+    expect(combined[0].stringAttributes[0].range, const TextRange(start: 0, end: 5));
+    expect(combined[0].stringAttributes[1], isA<SpellOutStringAttribute>());
+    expect(combined[0].stringAttributes[1].range, const TextRange(start: 5, end: 10));
+    expect(combined[0].stringAttributes[2], isA<LocaleStringAttribute>());
+    expect(combined[0].stringAttributes[2].range, const TextRange(start: 5, end: 10));
+    final LocaleStringAttribute combinedLocaleStringAttribute = combined[0].stringAttributes[2] as LocaleStringAttribute;
+    expect(combinedLocaleStringAttribute.locale, const Locale('es', 'MX'));
+    expect(combined[0].stringAttributes[3], isA<SpellOutStringAttribute>());
+    expect(combined[0].stringAttributes[3].range, const TextRange(start: 20, end: 25));
+  });
 }

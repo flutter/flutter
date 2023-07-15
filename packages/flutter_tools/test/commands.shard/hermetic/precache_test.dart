@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -16,7 +14,7 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FakeCache cache;
+  late FakeCache cache;
 
   setUp(() {
     cache = FakeCache();
@@ -74,7 +72,7 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      featureFlags: TestFeatureFlags(isWebEnabled: false),
+      featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
@@ -103,7 +101,7 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      featureFlags: TestFeatureFlags(isMacOSEnabled: false),
+      featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
@@ -132,7 +130,7 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      featureFlags: TestFeatureFlags(isWindowsEnabled: false),
+      featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
@@ -161,7 +159,7 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      featureFlags: TestFeatureFlags(isLinuxEnabled: false),
+      featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
@@ -175,7 +173,7 @@ void main() {
     final PrecacheCommand command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
-      featureFlags: TestFeatureFlags(isWebEnabled: false),
+      featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
 
@@ -429,7 +427,7 @@ class FakeCache extends Fake implements Cache {
   bool isUpToDateValue = false;
   bool clearedStampFiles = false;
   bool locked = false;
-  Set<DevelopmentArtifact> artifacts;
+  Set<DevelopmentArtifact>? artifacts;
 
   @override
   Future<void> lock() async {
@@ -445,7 +443,7 @@ class FakeCache extends Fake implements Cache {
   Future<bool> isUpToDate() async => isUpToDateValue;
 
   @override
-  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
     artifacts = requiredArtifacts;
   }
 
@@ -455,7 +453,7 @@ class FakeCache extends Fake implements Cache {
   }
 
   @override
-  Set<String> platformOverrideArtifacts;
+  Set<String>? platformOverrideArtifacts;
 
   @override
   bool includeAllPlatforms = false;

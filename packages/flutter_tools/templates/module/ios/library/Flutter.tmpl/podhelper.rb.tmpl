@@ -15,8 +15,23 @@ require 'json'
 #                                          Optional, defaults to two levels up from the directory of this script.
 #                                          MyApp/my_flutter/.ios/Flutter/../..
 def install_all_flutter_pods(flutter_application_path = nil)
+  # defined_in_file is a Pathname to the Podfile set by CocoaPods.
+  pod_contents = File.read(defined_in_file)
+  unless pod_contents.include? 'flutter_post_install'
+    puts  <<~POSTINSTALL
+Add `flutter_post_install(installer)` to your Podfile `post_install` block to build Flutter plugins:
+
+post_install do |installer|
+  flutter_post_install(installer)
+end
+POSTINSTALL
+    raise 'Missing `flutter_post_install(installer)` in Podfile `post_install` block'
+  end
+
+  require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
   flutter_application_path ||= File.join('..', '..')
-  install_flutter_engine_pod
+  install_flutter_engine_pod(flutter_application_path)
   install_flutter_plugin_pods(flutter_application_path)
   install_flutter_application_pod(flutter_application_path)
 end
@@ -27,30 +42,12 @@ end
 #   target 'MyApp' do
 #     install_flutter_engine_pod
 #   end
-def install_flutter_engine_pod
-  current_directory = File.expand_path('..', __FILE__)
-  engine_dir = File.expand_path('engine', current_directory)
-  framework_name = 'Flutter.xcframework'
-  copied_engine = File.expand_path(framework_name, engine_dir)
-  if !File.exist?(copied_engine)
-    # Copy the debug engine to have something to link against if the xcode backend script has not run yet.
-    # CocoaPods will not embed the framework on pod install (before any build phases can generate) if the dylib does not exist.
-    release_framework_dir = File.join(flutter_root, 'bin', 'cache', 'artifacts', 'engine', 'ios-release')
-    unless Dir.exist?(release_framework_dir)
-      # iOS artifacts have not been downloaded.
-      raise "#{release_framework_dir} must exist. Make sure \"flutter precache --ios\" has been run at least once"
-    end
-    FileUtils.cp_r(File.join(release_framework_dir, framework_name), engine_dir)
-  end
+def install_flutter_engine_pod(flutter_application_path = nil)
+  flutter_application_path ||= File.join('..', '..')
+  ios_application_path = File.join(flutter_application_path, '.ios')
 
-  # Keep pod path relative so it can be checked into Podfile.lock.
-  # Process will be run from project directory.
-  engine_pathname = Pathname.new engine_dir
-  # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
-  project_directory_pathname = defined_in_file.dirname
-  relative = engine_pathname.relative_path_from project_directory_pathname
-
-  pod 'Flutter', :path => relative.to_s, :inhibit_warnings => true
+  # flutter_install_ios_engine_pod is in Flutter root podhelper.rb
+  flutter_install_ios_engine_pod(ios_application_path)
 end
 
 # Install Flutter plugin pods.
@@ -64,30 +61,13 @@ end
 #                                          MyApp/my_flutter/.ios/Flutter/../..
 def install_flutter_plugin_pods(flutter_application_path)
   flutter_application_path ||= File.join('..', '..')
+  ios_application_path = File.join(flutter_application_path, '.ios')
+  # flutter_install_plugin_pods is in Flutter root podhelper.rb
+  flutter_install_plugin_pods(ios_application_path, '.symlinks', 'ios')
 
   # Keep pod path relative so it can be checked into Podfile.lock.
-  # Process will be run from project directory.
-  ios_project_directory_pathname = Pathname.new File.expand_path(File.join('..', '..'), __FILE__)
-  # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
-  project_directory_pathname = defined_in_file.dirname
-  relative = ios_project_directory_pathname.relative_path_from project_directory_pathname
-  pod 'FlutterPluginRegistrant', :path => File.join(relative, 'Flutter', 'FlutterPluginRegistrant'), :inhibit_warnings => true
-
-  symlinks_dir = File.join(relative, '.symlinks', 'plugins')
-  FileUtils.mkdir_p(symlinks_dir)
-
-  plugins_file = File.expand_path('.flutter-plugins-dependencies', flutter_application_path)
-  plugin_pods = flutter_parse_dependencies_file_for_ios_plugin(plugins_file)
-  plugin_pods.each do |plugin_hash|
-    plugin_name = plugin_hash['name']
-    plugin_path = plugin_hash['path']
-    if (plugin_name && plugin_path)
-      symlink = File.join(symlinks_dir, plugin_name)
-      FileUtils.rm_f(symlink)
-      File.symlink(plugin_path, symlink)
-      pod plugin_name, :path => File.join(symlink, 'ios'), :inhibit_warnings => true
-    end
-  end
+  relative = flutter_relative_path_from_podfile(ios_application_path)
+  pod 'FlutterPluginRegistrant', path: File.join(relative, 'Flutter', 'FlutterPluginRegistrant'), inhibit_warnings: true
 end
 
 # Install Flutter application pod.
@@ -100,56 +80,54 @@ end
 #                                          Optional, defaults to two levels up from the directory of this script.
 #                                          MyApp/my_flutter/.ios/Flutter/../..
 def install_flutter_application_pod(flutter_application_path)
-  current_directory_pathname = Pathname.new File.expand_path('..', __FILE__)
-  app_framework_dir = File.expand_path('App.framework', current_directory_pathname.to_path)
-  app_framework_dylib = File.join(app_framework_dir, 'App')
-  if !File.exist?(app_framework_dylib)
-    # Fake an App.framework to have something to link against if the xcode backend script has not run yet.
-    # CocoaPods will not embed the framework on pod install (before any build phases can run) if the dylib does not exist.
-    # Create a dummy dylib.
-    FileUtils.mkdir_p(app_framework_dir)
-    `echo "static const int Moo = 88;" | xcrun clang -x c -dynamiclib -o "#{app_framework_dylib}" -`
-  end
+  flutter_application_path ||= File.join('..', '..')
 
-  # Keep pod and script phase paths relative so they can be checked into source control.
-  # Process will be run from project directory.
+  export_script_directory = File.join(flutter_application_path, '.ios', 'Flutter')
 
-  # defined_in_file is set by CocoaPods and is a Pathname to the Podfile.
-  project_directory_pathname = defined_in_file.dirname
-  relative = current_directory_pathname.relative_path_from project_directory_pathname
-  pod '{{projectName}}', :path => relative.to_s, :inhibit_warnings => true
+  # Keep script phase paths relative so they can be checked into source control.
+  relative = flutter_relative_path_from_podfile(export_script_directory)
 
-  flutter_export_environment_path = File.join('${SRCROOT}', relative, 'flutter_export_environment.sh');
-  script_phase :name => 'Run Flutter Build {{projectName}} Script',
-    :script => "set -e\nset -u\nsource \"#{flutter_export_environment_path}\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build",
-    :execution_position => :before_compile
-end
+  flutter_export_environment_path = File.join('${SRCROOT}', relative, 'flutter_export_environment.sh')
 
-# .flutter-plugins-dependencies format documented at
-# https://flutter.dev/go/plugins-list-migration
-def flutter_parse_dependencies_file_for_ios_plugin(file)
-  file_path = File.expand_path(file)
-  return [] unless File.exists? file_path
+  # Compile App.framework and move it and Flutter.framework to "BUILT_PRODUCTS_DIR"
+  script_phase name: 'Run Flutter Build {{projectName}} Script',
+    script: "set -e\nset -u\nsource \"#{flutter_export_environment_path}\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build",
+    execution_position: :before_compile
 
-  dependencies_file = File.read(file)
-  dependencies_hash = JSON.parse(dependencies_file)
-
-  # dependencies_hash.dig('plugins', 'ios') not available until Ruby 2.3
-  return [] unless dependencies_hash.has_key?('plugins')
-  return [] unless dependencies_hash['plugins'].has_key?('ios')
-  dependencies_hash['plugins']['ios'] || []
+  # Embed App.framework AND Flutter.framework.
+  script_phase name: 'Embed Flutter Build {{projectName}} Script',
+    script: "set -e\nset -u\nsource \"#{flutter_export_environment_path}\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh embed_and_thin",
+    execution_position: :after_compile
 end
 
 def flutter_root
   generated_xcode_build_settings_path = File.expand_path(File.join('..', '..', 'Flutter', 'Generated.xcconfig'), __FILE__)
-  unless File.exist?(generated_xcode_build_settings_path)
-    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
-  end
+  raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first" unless File.exist?(generated_xcode_build_settings_path)
 
   File.foreach(generated_xcode_build_settings_path) do |line|
-    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    matches = line.match(/FLUTTER_ROOT=(.*)/)
     return matches[1].strip if matches
   end
   # This should never happen...
   raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+end
+
+# Run the post-install script to set build settings on Flutter plugins.
+#
+# @example
+#   post_install do |installer|
+#     flutter_post_install(installer)
+#   end
+# @param [Pod::Installer] installer Passed to the `post_install` block.
+# @param [boolean] skip Do not change any build configurations. Set to suppress
+#                       "Missing `flutter_post_install" exception.
+def flutter_post_install(installer, skip: false)
+  return if skip
+
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |_build_configuration|
+      # flutter_additional_ios_build_settings is in Flutter root podhelper.rb
+      flutter_additional_ios_build_settings(target)
+    end
+  end
 end

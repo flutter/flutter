@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,7 +14,7 @@ List<Widget> children(int n) {
 }
 
 void main() {
-  testWidgets('Scrolling with list view changes', (WidgetTester tester) async {
+  testWidgets('Scrolling with list view changes, leaving the overscroll', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
     final double thirty = controller.position.maxScrollExtent;
@@ -22,8 +23,22 @@ void main() {
     controller.jumpTo(thirty + 100.0); // past the end
     await tester.pump();
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(31))));
-    expect(controller.position.pixels, thirty + 200.0); // same distance past the end
-    expect(await tester.pumpAndSettle(), 7); // now it goes ballistic...
+    expect(controller.position.pixels, thirty + 100.0); // has the same position, but no longer overscrolled
+    expect(await tester.pumpAndSettle(), 1); // doesn't have ballistic animation...
+    expect(controller.position.pixels, thirty + 100.0); // and ends up at the end
+  });
+
+  testWidgets('Scrolling with list view changes, remaining overscrolled', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
+    final double thirty = controller.position.maxScrollExtent;
+    controller.jumpTo(thirty);
+    await tester.pump();
+    controller.jumpTo(thirty + 200.0); // past the end
+    await tester.pump();
+    await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(31))));
+    expect(controller.position.pixels, thirty + 200.0); // has the same position, still overscrolled
+    expect(await tester.pumpAndSettle(), 8); // now it goes ballistic...
     expect(controller.position.pixels, thirty + 100.0); // and ends up at the end
   });
 
@@ -113,10 +128,90 @@ void main() {
     await tester.pump();
     expect(find.text('Page 9'), findsOneWidget);
   });
+
+  testWidgets('Pointer is not ignored during trackpad scrolling.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    int? lastTapped;
+    int? lastHovered;
+    await tester.pumpWidget(MaterialApp(
+      home: ListView(
+        controller: controller,
+        children: List<Widget>.generate(30, (int i) {
+          return SizedBox(height: 100.0, child: MouseRegion(
+            onHover: (PointerHoverEvent event) {
+              lastHovered = i;
+            },
+            child: GestureDetector(
+              onTap: () {
+                lastTapped = i;
+              },
+              child: Text('$i')
+            )
+          ));
+        })
+      )
+    ));
+    final TestGesture touchGesture = await tester.createGesture(kind: PointerDeviceKind.touch); // ignore: avoid_redundant_argument_values
+    // Try mouse hovering while scrolling by touch
+    await touchGesture.down(tester.getCenter(find.byType(ListView)));
+    await tester.pump();
+    await touchGesture.moveBy(const Offset(0, 200));
+    await tester.pump();
+    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await hoverGesture.addPointer(
+      location: tester.getCenter(find.text('3'))
+    );
+    await hoverGesture.moveBy(const Offset(1, 1));
+    await hoverGesture.removePointer(
+      location: tester.getCenter(find.text('3'))
+    );
+    await tester.pumpAndSettle();
+    expect(controller.position.activity?.shouldIgnorePointer, isTrue); // Pointer is ignored for touch scrolling.
+    expect(lastHovered, isNull);
+    await touchGesture.up();
+    await tester.pump();
+    // Try mouse clicking during inertia after scrolling by touch
+    await tester.fling(find.byType(ListView), const Offset(0, -200), 1000);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(controller.position.activity?.shouldIgnorePointer, isTrue); // Pointer is ignored following touch scrolling.
+    await tester.tap(find.text('3'), warnIfMissed: false);
+    expect(lastTapped, isNull);
+    await tester.pumpAndSettle();
+
+    controller.jumpTo(0);
+    await tester.pump();
+    final TestGesture trackpadGesture = await tester.createGesture(kind: PointerDeviceKind.trackpad);
+    // Try mouse hovering while scrolling with a trackpad
+    await trackpadGesture.panZoomStart(tester.getCenter(find.byType(ListView)));
+    await tester.pump();
+    await trackpadGesture.panZoomUpdate(tester.getCenter(find.byType(ListView)), pan: const Offset(0, 200));
+    await tester.pump();
+    await hoverGesture.addPointer(
+      location: tester.getCenter(find.text('3'))
+    );
+    await hoverGesture.moveBy(const Offset(1, 1));
+    await hoverGesture.removePointer(
+      location: tester.getCenter(find.text('3'))
+    );
+    await tester.pumpAndSettle();
+    expect(controller.position.activity?.shouldIgnorePointer, isFalse); // Pointer is not ignored for trackpad scrolling.
+    expect(lastHovered, equals(3));
+    await trackpadGesture.panZoomEnd();
+    await tester.pump();
+    // Try mouse clicking during inertia after scrolling with a trackpad
+    await tester.trackpadFling(find.byType(ListView), const Offset(0, -200), 1000);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(controller.position.activity?.shouldIgnorePointer, isFalse); // Pointer is not ignored following trackpad scrolling.
+    await tester.tap(find.text('3'));
+    expect(lastTapped, equals(3));
+    await tester.pumpAndSettle();
+  });
 }
 
 class PageView62209 extends StatefulWidget {
-  const PageView62209({Key? key}) : super(key: key);
+  const PageView62209({super.key});
 
   @override
   State<PageView62209> createState() => _PageView62209State();
@@ -165,7 +260,7 @@ class _PageView62209State extends State<PageView62209> {
 }
 
 class Carousel62209Page extends StatelessWidget {
-  const Carousel62209Page({required this.number, Key? key}) : super(key: key);
+  const Carousel62209Page({required this.number, super.key});
 
   final int number;
 
@@ -176,7 +271,7 @@ class Carousel62209Page extends StatelessWidget {
 }
 
 class Carousel62209 extends StatefulWidget {
-  const Carousel62209({Key? key, required this.pages}) : super(key: key);
+  const Carousel62209({super.key, required this.pages});
 
   final List<Carousel62209Page> pages;
 
@@ -197,7 +292,7 @@ class _Carousel62209State extends State<Carousel62209> {
   void initState() {
     super.initState();
     _pages = widget.pages.toList();
-    _pageController = PageController(initialPage: 0, keepPage: false);
+    _pageController = PageController(keepPage: false);
   }
 
   @override
@@ -214,13 +309,13 @@ class _Carousel62209State extends State<Carousel62209> {
         _pages = widget.pages.toList();
       } else {
         _jumpingToPage = true;
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             setState(() {
               _pages = widget.pages.toList();
               _currentPage = newPage;
               _pageController.jumpToPage(_currentPage);
-              SchedulerBinding.instance!.addPostFrameCallback((_) {
+              SchedulerBinding.instance.addPostFrameCallback((_) {
                 _jumpingToPage = false;
               });
             });

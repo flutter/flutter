@@ -2,22 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-VoidCallback? originalSemanticsListener;
-
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
   // Disconnects semantics listener for testing purposes.
-  originalSemanticsListener = ui.window.onSemanticsEnabledChanged;
-  ui.window.onSemanticsEnabledChanged = null;
-  RendererBinding.instance?.setSemanticsEnabled(false);
   // If the test passes, LifeCycleSpy will rewire the semantics listener back.
+  SwitchableSemanticsBinding.ensureInitialized();
+  assert(!SwitchableSemanticsBinding.instance.semanticsEnabled);
+
   runApp(const LifeCycleSpy());
 }
 
@@ -29,7 +24,7 @@ void main() {
 ///
 /// Rewiring semantics is a signal to native IOS test that the test has passed.
 class LifeCycleSpy extends StatefulWidget {
-  const LifeCycleSpy({Key? key}) : super(key: key);
+  const LifeCycleSpy({super.key});
 
   @override
   State<LifeCycleSpy> createState() => _LifeCycleSpyState();
@@ -46,15 +41,15 @@ class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     _actualLifeCycleSequence =  <AppLifecycleState?>[
-      ServicesBinding.instance?.lifecycleState
+      ServicesBinding.instance.lifecycleState,
     ];
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -70,12 +65,60 @@ class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver
   Widget build(BuildContext context) {
     if (const ListEquality<AppLifecycleState?>().equals(_actualLifeCycleSequence, _expectedLifeCycleSequence)) {
       // Rewires the semantics harness if test passes.
-      RendererBinding.instance?.setSemanticsEnabled(true);
-      ui.window.onSemanticsEnabledChanged = originalSemanticsListener;
+      SwitchableSemanticsBinding.instance.semanticsEnabled = true;
     }
     return const MaterialApp(
       title: 'Flutter View',
       home: Text('test'),
     );
+  }
+}
+
+class SwitchableSemanticsBinding extends WidgetsFlutterBinding {
+  static SwitchableSemanticsBinding get instance => BindingBase.checkInstance(_instance);
+  static SwitchableSemanticsBinding? _instance;
+
+  static SwitchableSemanticsBinding ensureInitialized() {
+    if (_instance == null) {
+      SwitchableSemanticsBinding();
+    }
+    return SwitchableSemanticsBinding.instance;
+  }
+
+  VoidCallback? _originalSemanticsListener;
+
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+    _updateHandler();
+  }
+
+  @override
+  bool get semanticsEnabled => _semanticsEnabled.value;
+  final ValueNotifier<bool> _semanticsEnabled = ValueNotifier<bool>(false);
+  set semanticsEnabled(bool value) {
+    _semanticsEnabled.value = value;
+    _updateHandler();
+  }
+
+  void _updateHandler() {
+    if (_semanticsEnabled.value) {
+      platformDispatcher.onSemanticsEnabledChanged = _originalSemanticsListener;
+      _originalSemanticsListener = null;
+    } else {
+      _originalSemanticsListener = platformDispatcher.onSemanticsEnabledChanged;
+      platformDispatcher.onSemanticsEnabledChanged = null;
+    }
+  }
+
+  @override
+  void addSemanticsEnabledListener(VoidCallback listener) {
+    _semanticsEnabled.addListener(listener);
+  }
+
+  @override
+  void removeSemanticsEnabledListener(VoidCallback listener) {
+    _semanticsEnabled.removeListener(listener);
   }
 }

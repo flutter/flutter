@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 
@@ -21,16 +19,15 @@ void main() {
   // we timeout on a port
   testWithoutContext('IOSDevicePortForwarder.forward will kill iproxy processes before invoking a second', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      // iproxy does not exit with 0 when it cannot forward;
+      // the FakeCommands below expect an exitCode of 0.
       const FakeCommand(
         command: <String>['iproxy', '12345:456', '--udid', '1234'],
-        // iproxy does not exit with 0 when it cannot forward.
-        exitCode: 0,
-        stdout: null, // no stdout indicates failure.
         environment: kDyLdLibEntry,
+        // Empty stdout indicates failure.
       ),
       const FakeCommand(
         command: <String>['iproxy', '12346:456', '--udid', '1234'],
-        exitCode: 0,
         stdout: 'not empty',
         environment: kDyLdLibEntry,
       ),

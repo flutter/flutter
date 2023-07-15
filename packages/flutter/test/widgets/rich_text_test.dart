@@ -26,49 +26,138 @@ void main() {
       children: <Matcher>[
         matchesSemantics(
           label: 'root',
-          hasTapAction: false,
-          hasLongPressAction: false,
         ),
         matchesSemantics(
           label: 'one',
-          hasTapAction: false,
-          hasLongPressAction: false,
         ),
         matchesSemantics(
           label: 'two',
-          hasTapAction: false,
-          hasLongPressAction: false,
         ),
         matchesSemantics(
           label: 'three',
-          hasTapAction: false,
-          hasLongPressAction: false,
+        ),
+      ],
+    ));
+  });
+
+  testWidgets('TextSpan Locale works', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          text: TextSpan(
+            text: 'root',
+            locale: const Locale('es', 'MX'),
+            children: <InlineSpan>[
+              TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
+              const WidgetSpan(
+                child: SizedBox(),
+              ),
+              TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+            ]
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(RichText)), matchesSemantics(
+      children: <Matcher>[
+        matchesSemantics(
+          attributedLabel: AttributedString(
+            'root',
+            attributes: <StringAttribute>[
+              LocaleStringAttribute(range: const TextRange(start: 0, end: 4), locale: const Locale('es', 'MX')),
+            ]
+          ),
+        ),
+        matchesSemantics(
+          attributedLabel: AttributedString(
+            'one',
+            attributes: <StringAttribute>[
+              LocaleStringAttribute(range: const TextRange(start: 0, end: 3), locale: const Locale('es', 'MX')),
+            ]
+          ),
+        ),
+        matchesSemantics(
+          attributedLabel: AttributedString(
+            'three',
+            attributes: <StringAttribute>[
+              LocaleStringAttribute(range: const TextRange(start: 0, end: 5), locale: const Locale('es', 'MX')),
+            ]
+          ),
+        ),
+      ],
+    ));
+  });
+
+  testWidgets('TextSpan spellOut works', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RichText(
+          text: TextSpan(
+              text: 'root',
+              spellOut: true,
+              children: <InlineSpan>[
+                TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
+                const WidgetSpan(
+                  child: SizedBox(),
+                ),
+                TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+              ]
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(RichText)), matchesSemantics(
+      children: <Matcher>[
+        matchesSemantics(
+          attributedLabel: AttributedString(
+              'root',
+              attributes: <StringAttribute>[
+                SpellOutStringAttribute(range: const TextRange(start: 0, end: 4)),
+              ]
+          ),
+        ),
+        matchesSemantics(
+          attributedLabel: AttributedString(
+              'one',
+              attributes: <StringAttribute>[
+                SpellOutStringAttribute(range: const TextRange(start: 0, end: 3)),
+              ]
+          ),
+        ),
+        matchesSemantics(
+          attributedLabel: AttributedString(
+              'three',
+              attributes: <StringAttribute>[
+                SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
+              ]
+          ),
         ),
       ],
     ));
   });
 
   testWidgets('WidgetSpan calculate correct intrinsic heights', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/48679.
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: ColoredBox(
             color: Colors.green,
             child: IntrinsicHeight(
               child: RichText(
-                text: TextSpan(
+                text: const TextSpan(
                   children: <InlineSpan>[
-                    const TextSpan(text: 'Start\n', style: TextStyle(height: 1.0, fontSize: 16)),
+                    TextSpan(text: 'Start\n', style: TextStyle(height: 1.0, fontSize: 16)),
                     WidgetSpan(
                       child: Row(
-                        children: const <Widget>[
+                        children: <Widget>[
                           SizedBox(height: 16, width: 16),
                         ],
                       ),
                     ),
-                    const TextSpan(text: 'End', style: TextStyle(height: 1.0, fontSize: 16)),
+                    TextSpan(text: 'End', style: TextStyle(height: 1.0, fontSize: 16)),
                   ],
                 ),
               ),

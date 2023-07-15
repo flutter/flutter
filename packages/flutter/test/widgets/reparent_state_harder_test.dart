@@ -9,10 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 class OrderSwitcher extends StatefulWidget {
   const OrderSwitcher({
-    Key? key,
+    super.key,
     required this.a,
     required this.b,
-  }) : super(key: key);
+  });
 
   final Widget a;
   final Widget b;
@@ -62,11 +62,9 @@ class DummyStatefulWidgetState extends State<DummyStatefulWidget> {
 
 class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {
   const RekeyableDummyStatefulWidgetWrapper({
-    Key? key,
-    this.child,
+    super.key,
     required this.initialKey,
-  }) : super(key: key);
-  final Widget? child;
+  });
   final GlobalKey initialKey;
   @override
   RekeyableDummyStatefulWidgetWrapperState createState() => RekeyableDummyStatefulWidgetWrapperState();

@@ -13,8 +13,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: Container(key: containerOne, color: const Color(0x00000000)),
       ),
     );
@@ -26,8 +24,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: Container(key: containerTwo, color: const Color(0xff000000)),
       ),
     );
@@ -40,8 +36,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: Container(key: containerThree, color: const Color(0xffff0000)),
       ),
     );
@@ -63,8 +57,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: Container(key: container1),
       ),
     );
@@ -75,8 +67,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: Container(key: container2),
       ),
     );
@@ -87,8 +77,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: Container(key: container3),
       ),
     );
@@ -101,8 +89,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: Container(color: const Color(0x00000000)),
       ),
     );
@@ -114,8 +100,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: Container(color: const Color(0xff000000)),
       ),
     );
@@ -131,9 +115,6 @@ void main() {
     await tester.pumpWidget(
       const AnimatedSwitcher(
         duration: Duration(milliseconds: 100),
-        child: null,
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
       ),
     );
 
@@ -142,8 +123,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: Container(color: const Color(0xff000000)),
       ),
     );
@@ -156,8 +135,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: Container(color: const Color(0x00000000)),
       ),
     );
@@ -169,9 +146,6 @@ void main() {
     await tester.pumpWidget(
       const AnimatedSwitcher(
         duration: Duration(milliseconds: 100),
-        child: null,
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
       ),
     );
 
@@ -182,9 +156,6 @@ void main() {
     await tester.pumpWidget(
       const AnimatedSwitcher(
         duration: Duration(milliseconds: 100),
-        child: null,
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
       ),
     );
 
@@ -198,14 +169,13 @@ void main() {
   testWidgets("AnimatedSwitcher doesn't start any animations after dispose.", (WidgetTester tester) async {
     await tester.pumpWidget(AnimatedSwitcher(
       duration: const Duration(milliseconds: 100),
-      switchInCurve: Curves.linear,
       child: Container(color: const Color(0xff000000)),
     ));
     await tester.pump(const Duration(milliseconds: 50));
 
     // Change the widget tree in the middle of the animation.
     await tester.pumpWidget(Container(color: const Color(0xffff0000)));
-    expect(await tester.pumpAndSettle(const Duration(milliseconds: 100)), equals(1));
+    expect(await tester.pumpAndSettle(), equals(1));
   });
 
   testWidgets('AnimatedSwitcher uses custom layout.', (WidgetTester tester) async {
@@ -221,7 +191,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
         layoutBuilder: newLayoutBuilder,
         child: Container(color: const Color(0x00000000)),
       ),
@@ -252,7 +221,6 @@ void main() {
         textDirection: TextDirection.rtl,
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 100),
-          switchInCurve: Curves.linear,
           layoutBuilder: newLayoutBuilder,
           transitionBuilder: newTransitionBuilder,
           child: Container(color: const Color(0x00000000)),
@@ -270,8 +238,6 @@ void main() {
         textDirection: TextDirection.rtl,
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 100),
-          child: null,
-          switchInCurve: Curves.linear,
           layoutBuilder: newLayoutBuilder,
           transitionBuilder: newTransitionBuilder,
         ),
@@ -298,8 +264,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: StatefulTest(key: statefulOne),
       ),
     );
@@ -312,8 +276,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: StatefulTest(key: statefulTwo),
       ),
     );
@@ -327,8 +289,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         child: StatefulTest(key: statefulThree),
       ),
     );
@@ -352,8 +312,6 @@ void main() {
           textDirection: TextDirection.rtl,
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 100),
-            switchInCurve: Curves.linear,
-            switchOutCurve: Curves.linear,
             child: child,
           ),
         ),
@@ -392,8 +350,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         layoutBuilder: newLayoutBuilder,
         child: Container(key: containerOne, color: const Color(0xFFFF0000)),
       ),
@@ -404,8 +360,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         layoutBuilder: newLayoutBuilder,
         child: Container(key: containerTwo, color: const Color(0xFF00FF00)),
       ),
@@ -416,8 +370,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
-        switchOutCurve: Curves.linear,
         layoutBuilder: newLayoutBuilder,
         child: Container(key: containerThree, color: const Color(0xFF0000FF)),
       ),
@@ -446,7 +398,6 @@ void main() {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
-        switchInCurve: Curves.linear,
         layoutBuilder: newLayoutBuilder,
         transitionBuilder: newTransitionBuilder,
         child: Container(color: const Color(0x00000000)),
@@ -464,10 +415,29 @@ void main() {
       );
     }
   });
+
+  testWidgets('AnimatedSwitcher does not duplicate animations if the same child is entered twice.', (WidgetTester tester) async {
+    Future<void> pumpChild(Widget child) async {
+      return tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 1000),
+            child: child,
+          ),
+        ),
+      );
+    }
+    await pumpChild(const Text('1', key: Key('1')));
+    await pumpChild(const Text('2', key: Key('2')));
+    await pumpChild(const Text('1', key: Key('1')));
+    await tester.pump(const Duration(milliseconds: 1000));
+    expect(find.text('1'), findsOneWidget);
+  });
 }
 
 class StatefulTest extends StatefulWidget {
-  const StatefulTest({Key? key}) : super(key: key);
+  const StatefulTest({super.key});
 
   @override
   StatefulTestState createState() => StatefulTestState();

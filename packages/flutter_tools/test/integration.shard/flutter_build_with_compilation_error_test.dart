@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
@@ -11,9 +9,9 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  Directory tempDir;
-  Directory projectRoot;
-  String flutterBin;
+  late Directory tempDir;
+  late Directory projectRoot;
+  late String flutterBin;
   final List<String> targetPlatforms = <String>[
     'apk',
     'web',
@@ -66,11 +64,13 @@ int x = 'String';
       ], workingDirectory: projectRoot.path);
 
       expect(
-        // iOS shows this as stdout.
-        targetPlatform == 'ios' ? result.stdout : result.stderr,
-        contains("A value of type 'String' can't be assigned to a variable of type 'int'."),
+        result,
+        const ProcessResultMatcher(
+          exitCode: 1,
+          stderrPattern: "A value of type 'String' can't be assigned to a variable of type 'int'.",
+        ),
       );
-      expect(result.exitCode, 1);
-    }, timeout: const Timeout(Duration(minutes: 3)));
+      expect(result.stderr, isNot(contains("Warning: The 'dart2js' entrypoint script is deprecated")));
+    });
   }
 }

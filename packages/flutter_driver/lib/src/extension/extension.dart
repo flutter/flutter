@@ -39,6 +39,11 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
   final List<FinderExtension>? finders;
   final List<CommandExtension>? commands;
 
+  // Because you can't really control which zone a driver test uses,
+  // we override the test for zones here.
+  @override
+  bool debugCheckZone(String entryPoint) { return true; }
+
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
@@ -97,7 +102,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// driver.sendCommand(SomeCommand(ByValueKey('Button'), 7));
 /// ```
 ///
-/// Note: SomeFinder and SomeFinderExtension must be placed in different files
+/// `SomeFinder` and `SomeFinderExtension` must be placed in different files
 /// to avoid `dart:ui` import issue. Imports relative to `dart:ui` can't be
 /// accessed from host runner, where flutter runtime is not accessible.
 ///
@@ -140,7 +145,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// }
 /// ```
 ///
-/// Note: SomeCommand, SomeResult and SomeCommandExtension must be placed in
+/// `SomeCommand`, `SomeResult` and `SomeCommandExtension` must be placed in
 /// different files to avoid `dart:ui` import issue. Imports relative to `dart:ui`
 /// can't be accessed from host runner, where flutter runtime is not accessible.
 ///
@@ -163,7 +168,7 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 ///
 ///   final int times;
 /// }
-///```
+/// ```
 ///
 /// ```dart
 /// class SomeCommandResult extends Result {
@@ -219,7 +224,6 @@ class _DriverBinding extends BindingBase with SchedulerBinding, ServicesBinding,
 /// ```
 ///
 void enableFlutterDriverExtension({ DataHandler? handler, bool silenceErrors = false, bool enableTextEntryEmulation = true, List<FinderExtension>? finders, List<CommandExtension>? commands}) {
-  assert(WidgetsBinding.instance == null);
   _DriverBinding(handler, silenceErrors, enableTextEntryEmulation, finders ?? <FinderExtension>[], commands ?? <CommandExtension>[]);
   assert(WidgetsBinding.instance is _DriverBinding);
 }
@@ -256,7 +260,6 @@ abstract class FinderExtension {
 /// See also:
 ///   * [CommandWithTarget], a base class for [Command]s with [Finder]s.
 abstract class CommandExtension {
-
   /// Identifies the type of command to be used by the driver extension.
   String get commandKind;
 
@@ -320,7 +323,7 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
     this._enableTextEntryEmulation, {
     List<FinderExtension> finders = const <FinderExtension>[],
     List<CommandExtension> commands = const <CommandExtension>[],
-  }) : assert(finders != null) {
+  }) {
     if (_enableTextEntryEmulation) {
       registerTextInput();
     }
@@ -334,7 +337,7 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
     }
   }
 
-  final WidgetController _prober = LiveWidgetController(WidgetsBinding.instance!);
+  final WidgetController _prober = LiveWidgetController(WidgetsBinding.instance);
 
   final DataHandler? _requestDataHandler;
 
@@ -364,21 +367,23 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
     final String commandKind = params['command']!;
     try {
       final Command command = deserializeCommand(params, this);
-      assert(WidgetsBinding.instance!.isRootWidgetAttached || !command.requiresRootWidgetAttached,
+      assert(WidgetsBinding.instance.isRootWidgetAttached || !command.requiresRootWidgetAttached,
           'No root widget is attached; have you remembered to call runApp()?');
-      Future<Result?> responseFuture = handleCommand(command, _prober, this);
-      if (command.timeout != null)
-        responseFuture = responseFuture.timeout(command.timeout ?? Duration.zero);
-      final Result? response = await responseFuture;
-      return _makeResponse(response?.toJson());
+      Future<Result> responseFuture = handleCommand(command, _prober, this);
+      if (command.timeout != null) {
+        responseFuture = responseFuture.timeout(command.timeout!);
+      }
+      final Result response = await responseFuture;
+      return _makeResponse(response.toJson());
     } on TimeoutException catch (error, stackTrace) {
       final String message = 'Timeout while executing $commandKind: $error\n$stackTrace';
       _log(message);
       return _makeResponse(message, isError: true);
     } catch (error, stackTrace) {
       final String message = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
-      if (!_silenceErrors)
+      if (!_silenceErrors) {
         _log(message);
+      }
       return _makeResponse(message, isError: true);
     }
   }

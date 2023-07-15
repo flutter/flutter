@@ -7,12 +7,10 @@ import 'dart:ui';
 import 'message_codecs.dart';
 import 'platform_channel.dart';
 
-/// Platform channels used by the Flutter system.
-class SystemChannels {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SystemChannels._();
+export 'platform_channel.dart' show BasicMessageChannel, MethodChannel;
 
+/// Platform channels used by the Flutter system.
+abstract final class SystemChannels {
   /// A JSON [MethodChannel] for navigation.
   ///
   /// The following incoming methods are defined for this channel (registered
@@ -118,6 +116,11 @@ class SystemChannels {
   ///  * `SystemNavigator.pop`: Tells the operating system to close the
   ///    application, or the closest equivalent. See [SystemNavigator.pop].
   ///
+  ///  * `System.exitApplication`: Tells the engine to send a request back to
+  ///    the application to request an application exit (using
+  ///    `System.requestAppExit` below), and if it is not canceled, to terminate
+  ///    the application using the platform UI toolkit's termination API.
+  ///
   /// The following incoming methods are defined for this channel (registered
   /// using [MethodChannel.setMethodCallHandler]):
   ///
@@ -126,6 +129,13 @@ class SystemChannels {
   ///    through [SystemChrome.setEnabledSystemUIMode]. See
   ///    [SystemChrome.setSystemUIChangeCallback] to respond to this change in
   ///    application state.
+  ///
+  ///  * `System.requestAppExit`: The application has requested that it be
+  ///    terminated. See [ServicesBinding.exitApplication].
+  ///
+  ///  * `System.initializationComplete`: Indicate to the engine the
+  ///    initialization of a binding that may, among other tasks, register a
+  ///    handler for application exit attempts.
   ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
@@ -220,6 +230,34 @@ class SystemChannels {
       JSONMethodCodec(),
   );
 
+  /// A [MethodChannel] for handling spell check for text input.
+  ///
+  /// This channel exposes the spell check framework for supported platforms.
+  /// Currently supported on Android and iOS only.
+  ///
+  /// Spell check requests are initiated by `SpellCheck.initiateSpellCheck`.
+  /// These requests may either be completed or canceled. If the request is
+  /// completed, the shell side will respond with the results of the request.
+  /// Otherwise, the shell side will respond with null.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked by
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `SpellCheck.initiateSpellCheck`: Sends request for specified text to be
+  ///     spell checked and returns the result, either a [List<SuggestionSpan>]
+  ///     representing the spell check results of the text or null if the request
+  ///     was canceled. The arguments are the [String] to be spell checked
+  ///     and the [Locale] for the text to be spell checked with.
+  static const MethodChannel spellCheck = OptionalMethodChannel(
+      'flutter/spellcheck',
+  );
+
+  /// A JSON [MethodChannel] for handling undo events.
+  static const MethodChannel undoManager = OptionalMethodChannel(
+    'flutter/undomanager',
+    JSONMethodCodec(),
+  );
+
   /// A JSON [BasicMessageChannel] for keyboard events.
   ///
   /// Each incoming message received on this channel (registered using
@@ -238,9 +276,9 @@ class SystemChannels {
   /// See also:
   ///
   ///  * [RawKeyboard], which uses this channel to expose key data.
-  ///  * [new RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
+  ///  * [RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
   ///    subclasses mentioned above.
-  static const BasicMessageChannel<dynamic> keyEvent = BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<Object?> keyEvent = BasicMessageChannel<Object?>(
       'flutter/keyevent',
       JSONMessageCodec(),
   );
@@ -271,7 +309,7 @@ class SystemChannels {
   ///    applications to release caches to free up more memory. See
   ///    [WidgetsBindingObserver.didHaveMemoryPressure], which triggers whenever
   ///    a message is received on this channel.
-  static const BasicMessageChannel<dynamic> system = BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<Object?> system = BasicMessageChannel<Object?>(
       'flutter/system',
       JSONMessageCodec(),
   );
@@ -283,7 +321,7 @@ class SystemChannels {
   ///  * [SemanticsEvent] and its subclasses for a list of valid accessibility
   ///    events that can be sent over this channel.
   ///  * [SemanticsNode.sendEvent], which uses this channel to dispatch events.
-  static const BasicMessageChannel<dynamic> accessibility = BasicMessageChannel<dynamic>(
+  static const BasicMessageChannel<Object?> accessibility = BasicMessageChannel<Object?>(
     'flutter/accessibility',
     StandardMessageCodec(),
   );
@@ -295,7 +333,6 @@ class SystemChannels {
   ///  * [PlatformViewsService] for the available operations on this channel.
   static const MethodChannel platform_views = MethodChannel(
     'flutter/platform_views',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for configuring the Skia graphics library.
@@ -312,7 +349,7 @@ class SystemChannels {
 
   /// A [MethodChannel] for configuring mouse cursors.
   ///
-  /// All outgoing methods defined for this channel uses a `Map<String, dynamic>`
+  /// All outgoing methods defined for this channel uses a `Map<String, Object?>`
   /// to contain multiple parameters, including the following methods (invoked
   /// using [OptionalMethodChannel.invokeMethod]):
   ///
@@ -321,7 +358,6 @@ class SystemChannels {
   ///    integer `device`, and string `kind`.
   static const MethodChannel mouseCursor = OptionalMethodChannel(
     'flutter/mousecursor',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for synchronizing restoration data with the engine.
@@ -352,7 +388,6 @@ class SystemChannels {
   ///    restoration data is used in Flutter.
   static const MethodChannel restoration = OptionalMethodChannel(
     'flutter/restoration',
-    StandardMethodCodec(),
   );
 
   /// A [MethodChannel] for installing and managing deferred components.
@@ -378,7 +413,6 @@ class SystemChannels {
   ///    `installDeferredComponent` or `loadLibrary` is called again.
   static const MethodChannel deferredComponent = OptionalMethodChannel(
     'flutter/deferredcomponent',
-    StandardMethodCodec(),
   );
 
   /// A JSON [MethodChannel] for localization.
@@ -395,5 +429,85 @@ class SystemChannels {
   static const MethodChannel localization = OptionalMethodChannel(
     'flutter/localization',
     JSONMethodCodec(),
+  );
+
+  /// A [MethodChannel] for platform menu specification and control.
+  ///
+  /// The following outgoing method is defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `Menu.setMenus`: sends the configuration of the platform menu, including
+  ///    labels, enable/disable information, and unique integer identifiers for
+  ///    each menu item. The configuration is sent as a `Map<String, Object?>`
+  ///    encoding the list of top level menu items in window "0", which each
+  ///    have a hierarchy of `Map<String, Object?>` containing the required
+  ///    data, sent via a [StandardMessageCodec]. It is typically generated from
+  ///    a list of [PlatformMenuItem]s, and ends up looking like this example:
+  ///
+  /// ```dart
+  /// Map<String, Object?> menu = <String, Object?>{
+  ///   '0': <Map<String, Object?>>[
+  ///     <String, Object?>{
+  ///       'id': 1,
+  ///       'label': 'First Menu Label',
+  ///       'enabled': true,
+  ///       'children': <Map<String, Object?>>[
+  ///         <String, Object?>{
+  ///           'id': 2,
+  ///           'label': 'Sub Menu Label',
+  ///           'enabled': true,
+  ///         },
+  ///       ],
+  ///     },
+  ///   ],
+  /// };
+  /// ```
+  ///
+  /// The following incoming methods are defined for this channel (registered
+  /// using [MethodChannel.setMethodCallHandler]).
+  ///
+  ///  * `Menu.selectedCallback`: Called when a menu item is selected, along
+  ///    with the unique ID of the menu item selected.
+  ///
+  ///  * `Menu.opened`: Called when a submenu is opened, along with the unique
+  ///    ID of the submenu.
+  ///
+  ///  * `Menu.closed`: Called when a submenu is closed, along with the unique
+  ///    ID of the submenu.
+  ///
+  /// See also:
+  ///
+  ///  * [DefaultPlatformMenuDelegate], which uses this channel.
+  static const MethodChannel menu = OptionalMethodChannel('flutter/menu');
+
+  /// A [MethodChannel] for configuring the browser's context menu on web.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `enableContextMenu`: enables the browser's context menu. When a Flutter
+  ///    app starts, the browser's context menu is already enabled.
+  ///  * `disableContextMenu`: disables the browser's context menu.
+  static const MethodChannel contextMenu = OptionalMethodChannel(
+    'flutter/contextmenu',
+    JSONMethodCodec(),
+  );
+
+  /// A [MethodChannel] for retrieving keyboard pressed keys from the engine.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `getKeyboardState`: Obtains keyboard pressed keys from the engine.
+  ///    The keyboard state is sent as a `Map<int, int>?` where each entry
+  ///    represents a pressed keyboard key. The entry key is the physical
+  ///    key ID and the entry value is the logical key ID.
+  ///
+  /// See also:
+  ///
+  ///  * [HardwareKeyboard.syncKeyboardState], which uses this channel to synchronize
+  ///    the `HardwareKeyboard` pressed state.
+  static const MethodChannel keyboard = OptionalMethodChannel(
+    'flutter/keyboard',
   );
 }

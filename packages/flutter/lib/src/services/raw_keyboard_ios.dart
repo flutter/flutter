@@ -4,36 +4,14 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
 
-/// Maps iOS specific string values of nonvisible keys to logical keys
-///
-/// See: https://developer.apple.com/documentation/uikit/uikeycommand/input_strings_for_special_keys?language=objc
-const Map<String, LogicalKeyboardKey> _kIosToLogicalMap = <String, LogicalKeyboardKey>{
-  'UIKeyInputEscape': LogicalKeyboardKey.escape,
-  'UIKeyInputF1': LogicalKeyboardKey.f1,
-  'UIKeyInputF2': LogicalKeyboardKey.f2,
-  'UIKeyInputF3': LogicalKeyboardKey.f3,
-  'UIKeyInputF4': LogicalKeyboardKey.f4,
-  'UIKeyInputF5': LogicalKeyboardKey.f5,
-  'UIKeyInputF6': LogicalKeyboardKey.f6,
-  'UIKeyInputF7': LogicalKeyboardKey.f7,
-  'UIKeyInputF8': LogicalKeyboardKey.f8,
-  'UIKeyInputF9': LogicalKeyboardKey.f9,
-  'UIKeyInputF10': LogicalKeyboardKey.f10,
-  'UIKeyInputF11': LogicalKeyboardKey.f11,
-  'UIKeyInputF12': LogicalKeyboardKey.f12,
-  'UIKeyInputUpArrow': LogicalKeyboardKey.arrowUp,
-  'UIKeyInputDownArrow': LogicalKeyboardKey.arrowDown,
-  'UIKeyInputLeftArrow': LogicalKeyboardKey.arrowLeft,
-  'UIKeyInputRightArrow': LogicalKeyboardKey.arrowRight,
-  'UIKeyInputHome': LogicalKeyboardKey.home,
-  'UIKeyInputEnd': LogicalKeyboardKey.enter,
-  'UIKeyInputPageUp': LogicalKeyboardKey.pageUp,
-  'UIKeyInputPageDown': LogicalKeyboardKey.pageDown,
-};
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
+
 /// Platform-specific key event data for iOS.
 ///
 /// This object contains information about key events obtained from iOS'
@@ -52,10 +30,7 @@ class RawKeyEventDataIos extends RawKeyEventData {
     this.charactersIgnoringModifiers = '',
     this.keyCode = 0,
     this.modifiers = 0,
-  }) : assert(characters != null),
-       assert(charactersIgnoringModifiers != null),
-       assert(keyCode != null),
-       assert(modifiers != null);
+  });
 
   /// The Unicode characters associated with a key-up or key-down event.
   ///
@@ -103,9 +78,9 @@ class RawKeyEventDataIos extends RawKeyEventData {
     }
 
     // Look to see if the [keyLabel] is one we know about and have a mapping for.
-    final LogicalKeyboardKey? newKey = _kIosToLogicalMap[keyLabel];
-    if (newKey != null) {
-      return newKey;
+    final LogicalKeyboardKey? specialKey = kIosSpecialLogicalMap[keyLabel];
+    if (specialKey != null) {
+      return specialKey;
     }
 
     // Keys that can't be derived with characterIgnoringModifiers will be
@@ -187,19 +162,14 @@ class RawKeyEventDataIos extends RawKeyEventData {
     switch (key) {
       case ModifierKey.controlModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierControl, modifierLeftControl, modifierRightControl);
-        break;
       case ModifierKey.shiftModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierShift, modifierLeftShift, modifierRightShift);
-        break;
       case ModifierKey.altModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierOption, modifierLeftOption, modifierRightOption);
-        break;
       case ModifierKey.metaModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierCommand, modifierLeftCommand, modifierRightCommand);
-        break;
       case ModifierKey.capsLockModifier:
         result = independentModifier & modifierCapsLock != 0;
-        break;
     // On iOS, the function modifier bit is set for any function key, like F1,
     // F2, etc., but the meaning of ModifierKey.modifierFunction in Flutter is
     // that of the Fn modifier key, so there's no good way to emulate that on
@@ -210,7 +180,6 @@ class RawKeyEventDataIos extends RawKeyEventData {
       case ModifierKey.scrollLockModifier:
         // These modifier masks are not used in iOS keyboards.
         result = false;
-        break;
     }
     assert(!result || getModifierSide(key) != null, "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
     return result;
@@ -252,6 +221,38 @@ class RawKeyEventDataIos extends RawKeyEventData {
         return KeyboardSide.all;
     }
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+        properties.add(DiagnosticsProperty<String>('characters', characters));
+        properties.add(DiagnosticsProperty<String>('charactersIgnoringModifiers', charactersIgnoringModifiers));
+        properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+        properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is RawKeyEventDataIos
+        && other.characters == characters
+        && other.charactersIgnoringModifiers == charactersIgnoringModifiers
+        && other.keyCode == keyCode
+        && other.modifiers == modifiers;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    characters,
+    charactersIgnoringModifiers,
+    keyCode,
+    modifiers,
+  );
 
   // Modifier key masks. See Apple's UIKey documentation
   // https://developer.apple.com/documentation/uikit/uikeymodifierflags?language=objc
@@ -361,11 +362,4 @@ class RawKeyEventDataIos extends RawKeyEventData {
   /// applications to mask off the device-dependent modifier flags, including
   /// event coalescing information.
   static const int deviceIndependentMask = 0xffff0000;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataIos')}(keyLabel: $keyLabel, keyCode: $keyCode, characters: $characters,'
-        ' unmodifiedCharacters: $charactersIgnoringModifiers, modifiers: $modifiers, '
-        'modifiers down: $modifiersPressed)';
-  }
 }

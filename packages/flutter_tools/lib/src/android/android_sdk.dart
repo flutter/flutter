@@ -4,13 +4,11 @@
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
-import 'android_studio.dart';
+import '../globals.dart' as globals;
+import 'java.dart';
 
 // ANDROID_HOME is deprecated.
 // See https://developer.android.com/studio/command-line/variables.html#envar
@@ -34,15 +32,16 @@ final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 // $ANDROID_SDK_ROOT/platforms/android-23/android.jar
 // $ANDROID_SDK_ROOT/platforms/android-N/android.jar
 class AndroidSdk {
-  AndroidSdk(this.directory) {
+  AndroidSdk(this.directory, {
+    Java? java,
+  }): _java = java {
     reinitialize();
   }
 
-  static const String _javaHomeEnvironmentVariable = 'JAVA_HOME';
-  static const String _javaExecutable = 'java';
-
   /// The Android SDK root directory.
   final Directory directory;
+
+  final Java? _java;
 
   List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
   AndroidSdkVersion? _latestVersion;
@@ -169,8 +168,7 @@ class AndroidSdk {
 
   AndroidSdkVersion? get latestVersion => _latestVersion;
 
-  String? get adbPath => _adbPath ??= getPlatformToolsPath(globals.platform.isWindows ? 'adb.exe' : 'adb');
-  String? _adbPath;
+  late final String? adbPath = getPlatformToolsPath(globals.platform.isWindows ? 'adb.exe' : 'adb');
 
   String? get emulatorPath => getEmulatorPath();
 
@@ -199,7 +197,7 @@ class AndroidSdk {
       }
     }
 
-    for (final String searchPath in searchPaths.whereType<String>()) {
+    for (final String searchPath in searchPaths) {
       if (globals.fs.directory(searchPath).existsSync()) {
         return searchPath;
       }
@@ -355,12 +353,16 @@ class AndroidSdk {
           platformVersion = int.parse(numberedVersion.group(1)!);
         } else {
           final String buildProps = platformDir.childFile('build.prop').readAsStringSync();
-          final String? versionString = const LineSplitter()
+          final Iterable<Match> versionMatches = const LineSplitter()
               .convert(buildProps)
               .map<RegExpMatch?>(_sdkVersionRe.firstMatch)
-              .whereType<Match>()
-              .first
-              .group(1);
+              .whereType<Match>();
+
+          if (versionMatches.isEmpty) {
+            return null;
+          }
+
+          final String? versionString = versionMatches.first.group(1);
           if (versionString == null) {
             return null;
           }
@@ -406,67 +408,6 @@ class AndroidSdk {
     return null;
   }
 
-  /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
-  static String? findJavaBinary({
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-  }) {
-    if (androidStudio?.javaPath != null) {
-      return fileSystem.path.join(androidStudio!.javaPath!, 'bin', 'java');
-    }
-
-    final String? javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
-    if (javaHomeEnv != null) {
-      // Trust JAVA_HOME.
-      return fileSystem.path.join(javaHomeEnv, 'bin', 'java');
-    }
-
-    // MacOS specific logic to avoid popping up a dialog window.
-    // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
-    if (platform.isMacOS) {
-      try {
-        final String javaHomeOutput = globals.processUtils.runSync(
-          <String>['/usr/libexec/java_home', '-v', '1.8'],
-          throwOnError: true,
-          hideStdout: true,
-        ).stdout.trim();
-        if (javaHomeOutput != null) {
-          if ((javaHomeOutput != null) && (javaHomeOutput.isNotEmpty)) {
-            final String javaHome = javaHomeOutput.split('\n').last.trim();
-            return fileSystem.path.join(javaHome, 'bin', 'java');
-          }
-        }
-      } on Exception { /* ignore */ }
-    }
-
-    // Fallback to PATH based lookup.
-    return operatingSystemUtils.which(_javaExecutable)?.path;
-  }
-
-  Map<String, String>? _sdkManagerEnv;
-  /// Returns an environment with the Java folder added to PATH for use in calling
-  /// Java-based Android SDK commands such as sdkmanager and avdmanager.
-  Map<String, String> get sdkManagerEnv {
-    if (_sdkManagerEnv == null) {
-      // If we can locate Java, then add it to the path used to run the Android SDK manager.
-      _sdkManagerEnv = <String, String>{};
-      final String? javaBinary = findJavaBinary(
-        androidStudio: globals.androidStudio,
-        fileSystem: globals.fs,
-        operatingSystemUtils: globals.os,
-        platform: globals.platform,
-      );
-      if (javaBinary != null && globals.platform.environment['PATH'] != null) {
-        _sdkManagerEnv!['PATH'] = globals.fs.path.dirname(javaBinary) +
-                                 globals.os.pathVarSeparator +
-                                 globals.platform.environment['PATH']!;
-      }
-    }
-    return _sdkManagerEnv!;
-  }
-
   /// Returns the version of the Android SDK manager tool or null if not found.
   String? get sdkManagerVersion {
     if (sdkManagerPath == null || !globals.processManager.canRun(sdkManagerPath)) {
@@ -477,7 +418,7 @@ class AndroidSdk {
     }
     final RunResult result = globals.processUtils.runSync(
       <String>[sdkManagerPath!, '--version'],
-      environment: sdkManagerEnv,
+      environment: _java?.environment,
     );
     if (result.exitCode != 0) {
       globals.printTrace('sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');
@@ -497,10 +438,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
     required this.platformName,
     required this.buildToolsVersion,
     required FileSystem fileSystem,
-  }) : assert(sdkLevel != null),
-       assert(platformName != null),
-       assert(buildToolsVersion != null),
-       _fileSystem = fileSystem;
+  }) : _fileSystem = fileSystem;
 
   final AndroidSdk sdk;
   final int sdkLevel;

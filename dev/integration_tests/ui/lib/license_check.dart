@@ -14,7 +14,7 @@ void main() {
 }
 
 class ShowLicenses extends StatelessWidget {
-  const ShowLicenses({Key? key}) : super(key: key);
+  const ShowLicenses({super.key});
 
   Widget _buildTestResultWidget(
     BuildContext context,

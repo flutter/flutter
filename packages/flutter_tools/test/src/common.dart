@@ -4,30 +4,34 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
-import 'package:test_api/test_api.dart' as test_package show test; // ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
+import 'package:test/test.dart' as test_package show test;
+import 'package:test/test.dart' hide test;
 
-export 'package:test_api/test_api.dart' hide test, isInstanceOf; // ignore: deprecated_member_use
+export 'package:test/test.dart' hide isInstanceOf, test;
 
-void tryToDelete(Directory directory) {
+void tryToDelete(FileSystemEntity fileEntity) {
   // This should not be necessary, but it turns out that
   // on Windows it's common for deletions to fail due to
   // bogus (we think) "access denied" errors.
   try {
-    if (directory.existsSync()) {
-      directory.deleteSync(recursive: true);
+    if (fileEntity.existsSync()) {
+      fileEntity.deleteSync(recursive: true);
     }
   } on FileSystemException catch (error) {
-    print('Failed to delete ${directory.path}: $error');
+    // We print this so that it's visible in the logs, to get an idea of how
+    // common this problem is, and if any patterns are ever noticed by anyone.
+    // ignore: avoid_print
+    print('Failed to delete ${fileEntity.path}: $error');
   }
 }
 
@@ -48,7 +52,6 @@ String getFlutterRoot() {
   switch (platform.script.scheme) {
     case 'file':
       scriptUri = platform.script;
-      break;
     case 'data':
       final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
       final Match? match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
@@ -56,7 +59,6 @@ String getFlutterRoot() {
         throw invalidScript();
       }
       scriptUri = Uri.parse(match.group(1)!);
-      break;
     default:
       throw invalidScript();
   }
@@ -100,6 +102,18 @@ Matcher throwsToolExit({ int? exitCode, Pattern? message }) {
 /// Matcher for [ToolExit]s.
 final TypeMatcher<ToolExit> _isToolExit = isA<ToolExit>();
 
+/// Matcher for functions that throw [UsageException].
+Matcher throwsUsageException({Pattern? message }) {
+  Matcher matcher = _isUsageException;
+  if (message != null) {
+    matcher = allOf(matcher, (UsageException e) => e.message.contains(message));
+  }
+  return throwsA(matcher);
+}
+
+/// Matcher for [UsageException]s.
+final TypeMatcher<UsageException> _isUsageException = isA<UsageException>();
+
 /// Matcher for functions that throw [ProcessException].
 Matcher throwsProcessException({ Pattern? message }) {
   Matcher matcher = _isProcessException;
@@ -116,11 +130,20 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   try {
     await future;
     fail('ToolExit expected, but nothing thrown');
-  } on ToolExit catch(e) {
+  } on ToolExit catch (e) {
     expect(e.message, messageMatcher);
   // Catch all exceptions to give a better test failure message.
   } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
     fail('ToolExit expected, got $e\n$trace');
+  }
+}
+
+Future<void> expectReturnsNormallyLater(Future<dynamic> future) async {
+  try {
+    await future;
+  // Catch all exceptions to give a better test failure message.
+  } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
+    fail('Expected to run with no exceptions, got $e\n$trace');
   }
 }
 
@@ -139,7 +162,6 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 @isTest
 void test(String description, FutureOr<void> Function() body, {
   String? testOn,
-  Timeout? timeout,
   dynamic skip,
   List<String>? tags,
   Map<String, dynamic>? onPlatform,
@@ -151,14 +173,17 @@ void test(String description, FutureOr<void> Function() body, {
       addTearDown(() async {
         await globals.localFileSystem.dispose();
       });
+
       return body();
     },
-    timeout: timeout,
     skip: skip,
     tags: tags,
     onPlatform: onPlatform,
     retry: retry,
     testOn: testOn,
+    // We don't support "timeout"; see ../../dart_test.yaml which
+    // configures all tests to have a 15 minute timeout which should
+    // definitely be enough.
   );
 }
 
@@ -173,24 +198,25 @@ void test(String description, FutureOr<void> Function() body, {
 @isTest
 void testWithoutContext(String description, FutureOr<void> Function() body, {
   String? testOn,
-  Timeout? timeout,
   dynamic skip,
   List<String>? tags,
   Map<String, dynamic>? onPlatform,
   int? retry,
-  }) {
+}) {
   return test(
     description, () async {
       return runZoned(body, zoneValues: <Object, Object>{
         contextKey: const _NoContext(),
       });
     },
-    timeout: timeout,
     skip: skip,
     tags: tags,
     onPlatform: onPlatform,
     retry: retry,
     testOn: testOn,
+    // We don't support "timeout"; see ../../dart_test.yaml which
+    // configures all tests to have a 15 minute timeout which should
+    // definitely be enough.
   );
 }
 

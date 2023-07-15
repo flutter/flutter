@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -123,8 +124,8 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
 
   @override
   void didUpdateWidget(_Segment<T> oldWidget) {
-    assert(oldWidget.key == widget.key);
     super.didUpdateWidget(oldWidget);
+    assert(oldWidget.key == widget.key);
 
     if (oldWidget.shouldScaleContent != widget.shouldScaleContent) {
       highlightPressScaleAnimation = highlightPressScaleController.drive(
@@ -149,7 +150,6 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
       // Expand the hitTest area of this widget.
       behavior: HitTestBehavior.opaque,
       child: IndexedStack(
-        index: 0,
         alignment: Alignment.center,
         children: <Widget>[
           AnimatedOpacity(
@@ -214,8 +214,8 @@ class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProvide
 
   @override
   void didUpdateWidget(_SegmentSeparator oldWidget) {
-    assert(oldWidget.key == widget.key);
     super.didUpdateWidget(oldWidget);
+    assert(oldWidget.key == widget.key);
 
     if (oldWidget.highlighted != widget.highlighted) {
       separatorOpacityController.animateTo(
@@ -284,6 +284,15 @@ class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProvide
 /// [thumbColor], [backgroundColor] arguments can be used to override the
 /// segmented control's colors from its defaults.
 ///
+/// {@tool dartpad}
+/// This example shows a [CupertinoSlidingSegmentedControl] with an enum type.
+///
+/// The callback provided to [onValueChanged] should update the state of
+/// the parent [StatefulWidget] using the [State.setState] method, so that
+/// the parent gets rebuilt; for example:
+///
+/// ** See code in examples/api/lib/cupertino/segmented_control/cupertino_sliding_segmented_control.0.dart **
+/// {@end-tool}
 /// See also:
 ///
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
@@ -304,22 +313,18 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// appear as selected. The [groupValue] must be either null or one of the keys
   /// in the [children] map.
   CupertinoSlidingSegmentedControl({
-    Key? key,
+    super.key,
     required this.children,
     required this.onValueChanged,
     this.groupValue,
     this.thumbColor = _kThumbColor,
     this.padding = _kHorizontalItemPadding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
-  }) : assert(children != null),
-       assert(children.length >= 2),
-       assert(padding != null),
-       assert(onValueChanged != null),
+  }) : assert(children.length >= 2),
        assert(
          groupValue == null || children.keys.contains(groupValue),
          'The groupValue must be either null or one of the keys in the children map.',
-       ),
-       super(key: key);
+       );
 
   /// The identifying keys and corresponding widget values in the
   /// segmented control.
@@ -352,7 +357,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {
-  ///   const SegmentedControlExample({Key? key}) : super(key: key);
+  ///   const SegmentedControlExample({super.key});
   ///
   ///   @override
   ///   State createState() => SegmentedControlExampleState();
@@ -486,14 +491,13 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     final int numOfChildren = widget.children.length;
     assert(renderBox.hasSize);
     assert(numOfChildren >= 2);
-    int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1);
+    int index = (dx ~/ (renderBox.size.width / numOfChildren)).clamp(0, numOfChildren - 1); // ignore_clamp_double_lint
 
     switch (Directionality.of(context)) {
       case TextDirection.ltr:
         break;
       case TextDirection.rtl:
         index = numOfChildren - 1 - index;
-        break;
     }
 
     return widget.children.keys.elementAt(index);
@@ -515,7 +519,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   // _Segment widget) to make the overall animation look natural when the thumb
   // is not sliding.
   void _playThumbScaleAnimation({ required bool isExpanding }) {
-    assert(isExpanding != null);
     thumbScaleAnimation = thumbScaleController.drive(
       Tween<double>(
         begin: thumbScaleAnimation.value,
@@ -526,8 +529,9 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   }
 
   void onHighlightChangedByGesture(T newValue) {
-    if (highlighted == newValue)
+    if (highlighted == newValue) {
       return;
+    }
     setState(() { highlighted = newValue; });
     // Additionally, start the thumb animation if the highlighted segment
     // changes. If the thumbController is already running, the render object's
@@ -540,14 +544,16 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
   }
 
   void onPressedChangedByGesture(T? newValue) {
-    if (pressed != newValue)
+    if (pressed != newValue) {
       setState(() { pressed = newValue; });
+    }
   }
 
   void onTapUp(TapUpDetails details) {
     // No gesture should interfere with an ongoing thumb drag.
-    if (isThumbDragging)
+    if (isThumbDragging) {
       return;
+    }
     final T segment = segmentForXPosition(details.localPosition.dx);
     onPressedChangedByGesture(null);
     if (segment != widget.groupValue) {
@@ -648,12 +654,15 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
           onTap: () { widget.onValueChanged(entry.key); },
           inMutuallyExclusiveGroup: true,
           selected: widget.groupValue == entry.key,
-          child: _Segment<T>(
-            key: ValueKey<T>(entry.key),
-            highlighted: isHighlighted,
-            pressed: pressed == entry.key,
-            isDragging: isThumbDragging,
-            child: entry.value,
+          child: MouseRegion(
+            cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+            child: _Segment<T>(
+              key: ValueKey<T>(entry.key),
+              highlighted: isHighlighted,
+              pressed: pressed == entry.key,
+              isDragging: isThumbDragging,
+              child: entry.value,
+            ),
           ),
         ),
       );
@@ -672,7 +681,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
         if (highlightedIndex != null) {
           highlightedIndex = index - 1 - highlightedIndex;
         }
-        break;
     }
 
     return UnconstrainedBox(
@@ -701,14 +709,14 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
 }
 
 class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
-  _SegmentedControlRenderWidget({
-    Key? key,
-    List<Widget> children = const <Widget>[],
+  const _SegmentedControlRenderWidget({
+    super.key,
+    super.children,
     required this.highlightedIndex,
     required this.thumbColor,
     required this.thumbScale,
     required this.state,
-  }) : super(key: key, children: children);
+  });
 
   final int? highlightedIndex;
   final Color thumbColor;
@@ -779,8 +787,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     required this.state,
   }) : _highlightedIndex = highlightedIndex,
        _thumbColor = thumbColor,
-       _thumbScale = thumbScale,
-       assert(state != null);
+       _thumbScale = thumbScale;
 
   final _SegmentedControlState<T> state;
 
@@ -807,8 +814,9 @@ class _RenderSegmentedControl<T> extends RenderBox
     }
 
     _thumbScale = value;
-    if (state.highlighted != null)
+    if (state.highlighted != null) {
       markNeedsPaint();
+    }
   }
 
   int? get highlightedIndex => _highlightedIndex;
@@ -984,8 +992,9 @@ class _RenderSegmentedControl<T> extends RenderBox
   Rect? moveThumbRectInBound(Rect? thumbRect, List<RenderBox> children) {
     assert(hasSize);
     assert(children.length >= 2);
-    if (thumbRect == null)
+    if (thumbRect == null) {
       return null;
+    }
 
     final Offset firstChildOffset = (children.first.parentData! as _SegmentedControlContainerBoxParentData).offset;
     final double leftMost = firstChildOffset.dx;
@@ -1058,13 +1067,11 @@ class _RenderSegmentedControl<T> extends RenderBox
   // Paint the separator to the right of the given child.
   final Paint separatorPaint = Paint();
   void _paintSeparator(PaintingContext context, Offset offset, RenderBox child) {
-    assert(child != null);
     final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
     context.paintChild(child, offset + childParentData.offset);
   }
 
   void _paintChild(PaintingContext context, Offset offset, RenderBox child) {
-    assert(child != null);
     final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
@@ -1103,7 +1110,6 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    assert(position != null);
     RenderBox? child = lastChild;
     while (child != null) {
       final _SegmentedControlContainerBoxParentData childParentData =

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'gesture_tester.dart';
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('Should recognize pan', (GestureTester tester) {
     final PanGestureRecognizer pan = PanGestureRecognizer();
@@ -569,6 +569,86 @@ void main() {
     expect(primaryVelocity, velocity.pixelsPerSecond.dx);
   });
 
+  /// Drag the pointer at the given velocity, and return the details
+  /// the recognizer passes to onEnd.
+  ///
+  /// This method will mutate `recognizer.onEnd`.
+  DragEndDetails performDragToEnd(GestureTester tester, DragGestureRecognizer recognizer, Offset pointerVelocity) {
+    late DragEndDetails actual;
+    recognizer.onEnd = (DragEndDetails details) {
+      actual = details;
+    };
+    final TestPointer pointer = TestPointer();
+    final PointerDownEvent down = pointer.down(Offset.zero);
+    recognizer.addPointer(down);
+    tester.closeArena(pointer.pointer);
+    tester.route(down);
+    tester.route(pointer.move(pointerVelocity * 0.025, timeStamp: const Duration(milliseconds: 25)));
+    tester.route(pointer.move(pointerVelocity * 0.050, timeStamp: const Duration(milliseconds: 50)));
+    tester.route(pointer.up(timeStamp: const Duration(milliseconds: 50)));
+    return actual;
+  }
+
+  testGesture('Clamp max pan velocity in 2D, isotropically', (GestureTester tester) {
+    final PanGestureRecognizer recognizer = PanGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
+    void checkDrag(Offset pointerVelocity, Offset expectedVelocity) {
+      final DragEndDetails actual = performDragToEnd(tester, recognizer, pointerVelocity);
+      expect(actual.velocity.pixelsPerSecond, offsetMoreOrLessEquals(expectedVelocity, epsilon: 0.1));
+      expect(actual.primaryVelocity, isNull);
+    }
+
+    checkDrag(const Offset(  400.0,   400.0), const Offset(  400.0,   400.0));
+    checkDrag(const Offset( 2000.0, -2000.0), const Offset( 2000.0, -2000.0));
+    checkDrag(const Offset(-8000.0, -8000.0), const Offset(-5656.9, -5656.9));
+    checkDrag(const Offset(-8000.0,  6000.0), const Offset(-6400.0,  4800.0));
+    checkDrag(const Offset(-9000.0,     0.0), const Offset(-8000.0,     0.0));
+    checkDrag(const Offset(-9000.0, -1000.0), const Offset(-7951.1, - 883.5));
+    checkDrag(const Offset(-1000.0,  9000.0), const Offset(- 883.5,  7951.1));
+    checkDrag(const Offset(    0.0,  9000.0), const Offset(    0.0,  8000.0));
+  });
+
+  testGesture('Clamp max vertical-drag velocity vertically', (GestureTester tester) {
+    final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
+    void checkDrag(Offset pointerVelocity, double expectedVelocity) {
+      final DragEndDetails actual = performDragToEnd(tester, recognizer, pointerVelocity);
+      expect(actual.primaryVelocity, moreOrLessEquals(expectedVelocity, epsilon: 0.1));
+      expect(actual.velocity.pixelsPerSecond.dx, 0.0);
+      expect(actual.velocity.pixelsPerSecond.dy, actual.primaryVelocity);
+    }
+
+    checkDrag(const Offset(  500.0,   400.0),   400.0);
+    checkDrag(const Offset( 3000.0, -2000.0), -2000.0);
+    checkDrag(const Offset(-9000.0, -9000.0), -8000.0);
+    checkDrag(const Offset(-9000.0,     0.0),     0.0);
+    checkDrag(const Offset(-9000.0,  1000.0),  1000.0);
+    checkDrag(const Offset(-1000.0, -9000.0), -8000.0);
+    checkDrag(const Offset(    0.0, -9000.0), -8000.0);
+  });
+
+  testGesture('Clamp max horizontal-drag velocity horizontally', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer recognizer = HorizontalDragGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
+    void checkDrag(Offset pointerVelocity, double expectedVelocity) {
+      final DragEndDetails actual = performDragToEnd(tester, recognizer, pointerVelocity);
+      expect(actual.primaryVelocity, moreOrLessEquals(expectedVelocity, epsilon: 0.1));
+      expect(actual.velocity.pixelsPerSecond.dx, actual.primaryVelocity);
+      expect(actual.velocity.pixelsPerSecond.dy, 0.0);
+    }
+
+    checkDrag(const Offset(  500.0,   400.0),   500.0);
+    checkDrag(const Offset( 3000.0, -2000.0),  3000.0);
+    checkDrag(const Offset(-9000.0, -9000.0), -8000.0);
+    checkDrag(const Offset(-9000.0,     0.0), -8000.0);
+    checkDrag(const Offset(-9000.0,  1000.0), -8000.0);
+    checkDrag(const Offset(-1000.0, -9000.0), -1000.0);
+    checkDrag(const Offset(    0.0, -9000.0),     0.0);
+  });
+
   testGesture('Synthesized pointer events are ignored for velocity tracking', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
@@ -578,7 +658,7 @@ void main() {
       velocity = details.velocity;
     };
 
-    final TestPointer pointer = TestPointer(1);
+    final TestPointer pointer = TestPointer();
     final PointerDownEvent down = pointer.down(const Offset(10.0, 25.0), timeStamp: const Duration(milliseconds: 10));
     drag.addPointer(down);
     tester.closeArena(1);
@@ -611,7 +691,7 @@ void main() {
       velocity = details.velocity;
     };
 
-    final TestPointer pointer = TestPointer(1);
+    final TestPointer pointer = TestPointer();
     final PointerDownEvent down = pointer.down(const Offset(10.0, 25.0), timeStamp: const Duration(milliseconds: 10));
     drag.addPointer(down);
     tester.closeArena(1);
@@ -730,7 +810,7 @@ void main() {
   testGesture('Can filter drags based on device kind', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag =
         HorizontalDragGestureRecognizer(
-            kind: PointerDeviceKind.mouse,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse },
         )
         ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
@@ -751,7 +831,7 @@ void main() {
     };
 
     // Using a touch pointer to drag shouldn't be recognized.
-    final TestPointer touchPointer = TestPointer(5, PointerDeviceKind.touch);
+    final TestPointer touchPointer = TestPointer(5);
     final PointerDownEvent touchDown = touchPointer.down(const Offset(10.0, 10.0));
     drag.addPointer(touchDown);
     tester.closeArena(5);
@@ -1114,8 +1194,8 @@ void main() {
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
 
-      final TestPointer pointer1 = TestPointer(4, PointerDeviceKind.touch);
-      final TestPointer pointer2 = TestPointer(5, PointerDeviceKind.touch);
+      final TestPointer pointer1 = TestPointer(4);
+      final TestPointer pointer2 = TestPointer(5);
 
       final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
       final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
@@ -1135,12 +1215,12 @@ void main() {
       logs.clear();
 
       tester.route(pointer1.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer1.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
       expect(logs, <String>['downT', 'upT']);
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>['cancelH']);
       logs.clear();
     },
@@ -1167,8 +1247,8 @@ void main() {
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
 
-      final TestPointer pointer1 = TestPointer(4, PointerDeviceKind.touch);
-      final TestPointer pointer2 = TestPointer(5, PointerDeviceKind.touch);
+      final TestPointer pointer1 = TestPointer(4);
+      final TestPointer pointer2 = TestPointer(5);
 
       final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
       final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
@@ -1188,13 +1268,13 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
       // Tap is not triggered because pointer2 is not its primary pointer
       expect(logs, <String>[]);
       logs.clear();
 
       tester.route(pointer1.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer1.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
       expect(logs, <String>['cancelH', 'downT', 'upT']);
       logs.clear();
     },
@@ -1221,8 +1301,8 @@ void main() {
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
 
-      final TestPointer pointer1 = TestPointer(4, PointerDeviceKind.touch);
-      final TestPointer pointer2 = TestPointer(5, PointerDeviceKind.touch);
+      final TestPointer pointer1 = TestPointer(4);
+      final TestPointer pointer2 = TestPointer(5);
 
       final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
       final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
@@ -1246,12 +1326,12 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>[]);
       logs.clear();
 
       tester.route(pointer1.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer1.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
       expect(logs, <String>['endH']);
       logs.clear();
     },
@@ -1278,8 +1358,8 @@ void main() {
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
 
-      final TestPointer pointer1 = TestPointer(4, PointerDeviceKind.touch);
-      final TestPointer pointer2 = TestPointer(5, PointerDeviceKind.touch);
+      final TestPointer pointer1 = TestPointer(4);
+      final TestPointer pointer2 = TestPointer(5);
 
       final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
       final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
@@ -1299,7 +1379,7 @@ void main() {
       logs.clear();
 
       tester.route(pointer1.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer1.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
       expect(logs, <String>['downT', 'upT']);
       logs.clear();
 
@@ -1308,7 +1388,7 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>['endH']);
       logs.clear();
     },
@@ -1335,8 +1415,8 @@ void main() {
       addTearDown(hori.dispose);
       addTearDown(vert.dispose);
 
-      final TestPointer pointer1 = TestPointer(1, PointerDeviceKind.touch);
-      final TestPointer pointer2 = TestPointer(2, PointerDeviceKind.touch);
+      final TestPointer pointer1 = TestPointer();
+      final TestPointer pointer2 = TestPointer(2);
 
       final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
       final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
@@ -1364,7 +1444,7 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>['endH']);
       logs.clear();
     },
@@ -1390,10 +1470,10 @@ void main() {
       addTearDown(tap.dispose);
       addTearDown(drag.dispose);
 
-      final TestPointer pointer1 = TestPointer(1, PointerDeviceKind.touch);
-      final TestPointer pointer2 = TestPointer(2, PointerDeviceKind.touch);
-      final TestPointer pointer3 = TestPointer(3, PointerDeviceKind.touch);
-      final TestPointer pointer4 = TestPointer(4, PointerDeviceKind.touch);
+      final TestPointer pointer1 = TestPointer();
+      final TestPointer pointer2 = TestPointer(2);
+      final TestPointer pointer3 = TestPointer(3);
+      final TestPointer pointer4 = TestPointer(4);
 
       final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
       final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 11.0));
@@ -1426,7 +1506,7 @@ void main() {
       logs.clear();
 
       tester.route(pointer2.up());
-      GestureBinding.instance!.gestureArena.sweep(pointer2.pointer);
+      GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
       expect(logs, <String>[]);
 
       tester.route(pointer4.cancel());
@@ -1483,5 +1563,220 @@ void main() {
     // Passes if no crashes here.
 
     tap2.dispose();
+  });
+
+  testGesture('Should recognize pan gestures from platform', (GestureTester tester) {
+    final PanGestureRecognizer pan = PanGestureRecognizer();
+    // We need a competing gesture recognizer so that the gesture is not immediately claimed.
+    final PanGestureRecognizer competingPan = PanGestureRecognizer();
+    addTearDown(pan.dispose);
+    addTearDown(competingPan.dispose);
+
+    bool didStartPan = false;
+    pan.onStart = (_) {
+      didStartPan = true;
+    };
+
+    Offset? updatedScrollDelta;
+    pan.onUpdate = (DragUpdateDetails details) {
+      updatedScrollDelta = details.delta;
+    };
+
+    bool didEndPan = false;
+    pan.onEnd = (DragEndDetails details) {
+      didEndPan = true;
+    };
+
+    final TestPointer pointer = TestPointer(2, PointerDeviceKind.trackpad);
+    final PointerPanZoomStartEvent start = pointer.panZoomStart(const Offset(10.0, 10.0));
+    pan.addPointerPanZoom(start);
+    competingPan.addPointerPanZoom(start);
+    tester.closeArena(2);
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    tester.route(start);
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    // Gesture will be claimed when distance reaches kPanSlop, which was 36.0 when this test was last updated.
+    tester.route(pointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(20.0, 20.0))); // moved 20 horizontally and 20 vertically which is 28 total
+    expect(didStartPan, isFalse); // 28 < 36
+    tester.route(pointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(30.0, 30.0))); // moved 30 horizontally and 30 vertically which is 42 total
+    expect(didStartPan, isTrue); // 42 > 36
+    didStartPan = false;
+    expect(didEndPan, isFalse);
+
+    tester.route(pointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(30.0, 25.0)));
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, const Offset(0.0, -5.0));
+    updatedScrollDelta = null;
+    expect(didEndPan, isFalse);
+
+    tester.route(pointer.panZoomEnd());
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isTrue);
+    didEndPan = false;
+  });
+
+  testGesture('Pointer pan/zooms drags should allow touches to join them', (GestureTester tester) {
+    final PanGestureRecognizer pan = PanGestureRecognizer();
+    // We need a competing gesture recognizer so that the gesture is not immediately claimed.
+    final PanGestureRecognizer competingPan = PanGestureRecognizer();
+    addTearDown(pan.dispose);
+    addTearDown(competingPan.dispose);
+
+    bool didStartPan = false;
+    pan.onStart = (_) {
+      didStartPan = true;
+    };
+
+    Offset? updatedScrollDelta;
+    pan.onUpdate = (DragUpdateDetails details) {
+      updatedScrollDelta = details.delta;
+    };
+
+    bool didEndPan = false;
+    pan.onEnd = (DragEndDetails details) {
+      didEndPan = true;
+    };
+
+    final TestPointer panZoomPointer = TestPointer(2, PointerDeviceKind.trackpad);
+    final TestPointer touchPointer = TestPointer(3);
+    final PointerPanZoomStartEvent start = panZoomPointer.panZoomStart(const Offset(10.0, 10.0));
+    pan.addPointerPanZoom(start);
+    competingPan.addPointerPanZoom(start);
+    tester.closeArena(2);
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    tester.route(start);
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    // Gesture will be claimed when distance reaches kPanSlop, which was 36.0 when this test was last updated.
+    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(20.0, 20.0))); // moved 20 horizontally and 20 vertically which is 28 total
+    expect(didStartPan, isFalse); // 28 < 36
+    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(30.0, 30.0))); // moved 30 horizontally and 30 vertically which is 42 total
+    expect(didStartPan, isTrue); // 42 > 36
+    didStartPan = false;
+    expect(didEndPan, isFalse);
+
+    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(30.0, 25.0)));
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, const Offset(0.0, -5.0));
+    updatedScrollDelta = null;
+    expect(didEndPan, isFalse);
+
+    final PointerDownEvent touchDown = touchPointer.down(const Offset(20.0, 20.0));
+    pan.addPointer(touchDown);
+    competingPan.addPointer(touchDown);
+    tester.closeArena(3);
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    tester.route(touchPointer.move(const Offset(25.0, 25.0)));
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, const Offset(5.0, 5.0));
+    updatedScrollDelta = null;
+    expect(didEndPan, isFalse);
+
+    tester.route(touchPointer.up());
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    tester.route(panZoomPointer.panZoomEnd());
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isTrue);
+    didEndPan = false;
+  });
+
+testGesture('Touch drags should allow pointer pan/zooms to join them', (GestureTester tester) {
+    final PanGestureRecognizer pan = PanGestureRecognizer();
+    // We need a competing gesture recognizer so that the gesture is not immediately claimed.
+    final PanGestureRecognizer competingPan = PanGestureRecognizer();
+    addTearDown(pan.dispose);
+    addTearDown(competingPan.dispose);
+
+    bool didStartPan = false;
+    pan.onStart = (_) {
+      didStartPan = true;
+    };
+
+    Offset? updatedScrollDelta;
+    pan.onUpdate = (DragUpdateDetails details) {
+      updatedScrollDelta = details.delta;
+    };
+
+    bool didEndPan = false;
+    pan.onEnd = (DragEndDetails details) {
+      didEndPan = true;
+    };
+
+    final TestPointer panZoomPointer = TestPointer(2, PointerDeviceKind.trackpad);
+    final TestPointer touchPointer = TestPointer(3);
+    final PointerDownEvent touchDown = touchPointer.down(const Offset(20.0, 20.0));
+    pan.addPointer(touchDown);
+    competingPan.addPointer(touchDown);
+    tester.closeArena(3);
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    tester.route(touchPointer.move(const Offset(60.0, 60.0)));
+    expect(didStartPan, isTrue);
+    didStartPan = false;
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    tester.route(touchPointer.move(const Offset(70.0, 70.0)));
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, const Offset(10.0, 10.0));
+    updatedScrollDelta = null;
+    expect(didEndPan, isFalse);
+
+    final PointerPanZoomStartEvent start = panZoomPointer.panZoomStart(const Offset(10.0, 10.0));
+    pan.addPointerPanZoom(start);
+    competingPan.addPointerPanZoom(start);
+    tester.closeArena(2);
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    tester.route(start);
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    // Gesture will be claimed when distance reaches kPanSlop, which was 36.0 when this test was last updated.
+    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(20.0, 20.0))); // moved 20 horizontally and 20 vertically which is 28 total
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, const Offset(20.0, 20.0));
+    updatedScrollDelta = null;
+    expect(didEndPan, isFalse);
+    tester.route(panZoomPointer.panZoomUpdate(const Offset(10.0, 10.0), pan: const Offset(30.0, 30.0))); // moved 30 horizontally and 30 vertically which is 42 total
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, const Offset(10.0, 10.0));
+    updatedScrollDelta = null;
+    expect(didEndPan, isFalse);
+
+    tester.route(panZoomPointer.panZoomEnd());
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isFalse);
+
+    tester.route(touchPointer.up());
+    expect(didStartPan, isFalse);
+    expect(updatedScrollDelta, isNull);
+    expect(didEndPan, isTrue);
+    didEndPan = false;
   });
 }

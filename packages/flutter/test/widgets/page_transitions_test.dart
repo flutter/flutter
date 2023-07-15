@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestOverlayRoute extends OverlayRoute<void> {
-  TestOverlayRoute({ RouteSettings? settings }) : super(settings: settings);
+  TestOverlayRoute({ super.settings });
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
     yield OverlayEntry(builder: _build);
@@ -16,7 +15,7 @@ class TestOverlayRoute extends OverlayRoute<void> {
 }
 
 class PersistentBottomSheetTest extends StatefulWidget {
-  const PersistentBottomSheetTest({ Key? key }) : super(key: key);
+  const PersistentBottomSheetTest({ super.key });
 
   @override
   PersistentBottomSheetTestState createState() => PersistentBottomSheetTestState();
@@ -137,9 +136,9 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => Scaffold(
         key: containerKey1,
-        body: Container(
-          color: const Color(0xff00ffff),
-          child: const Hero(
+        body: const ColoredBox(
+          color: Color(0xff00ffff),
+          child: Hero(
             tag: kHeroTag,
             child: Text('Home'),
           ),
@@ -197,7 +196,7 @@ void main() {
     settingsOffset = tester.getTopLeft(find.text('Settings'));
     expect(settingsOffset.dx, greaterThan(100.0));
     expect(settingsOffset.dy, 100.0);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets("Check back gesture doesn't start during transitions", (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
@@ -240,7 +239,7 @@ void main() {
 
     expect(find.text('Home'), isOnstage);
     expect(find.text('Settings'), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Tests bug https://github.com/flutter/flutter/issues/6451
   testWidgets('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
@@ -294,7 +293,7 @@ void main() {
 
     // Sheet did not call setState (since the gesture did nothing).
     expect(sheet.setStateCalled, isFalse);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS), skip: kIsWeb);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Test completed future', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{

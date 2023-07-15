@@ -4,7 +4,6 @@
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'box.dart';
 import 'layer.dart';
@@ -79,24 +78,20 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     required Duration duration,
     Duration? reverseDuration,
     Curve curve = Curves.linear,
-    AlignmentGeometry alignment = Alignment.center,
-    TextDirection? textDirection,
-    RenderBox? child,
+    super.alignment,
+    super.textDirection,
+    super.child,
     Clip clipBehavior = Clip.hardEdge,
-  }) : assert(vsync != null),
-       assert(duration != null),
-       assert(curve != null),
-       assert(clipBehavior != null),
-       _vsync = vsync,
-       _clipBehavior = clipBehavior,
-       super(child: child, alignment: alignment, textDirection: textDirection) {
+  }) : _vsync = vsync,
+       _clipBehavior = clipBehavior {
     _controller = AnimationController(
       vsync: vsync,
       duration: duration,
       reverseDuration: reverseDuration,
     )..addListener(() {
-      if (_controller.value != _lastValue)
+      if (_controller.value != _lastValue) {
         markNeedsLayout();
+      }
     });
     _animation = CurvedAnimation(
       parent: _controller,
@@ -120,26 +115,27 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// The duration of the animation.
   Duration get duration => _controller.duration!;
   set duration(Duration value) {
-    assert(value != null);
-    if (value == _controller.duration)
+    if (value == _controller.duration) {
       return;
+    }
     _controller.duration = value;
   }
 
   /// The duration of the animation when running in reverse.
   Duration? get reverseDuration => _controller.reverseDuration;
   set reverseDuration(Duration? value) {
-    if (value == _controller.reverseDuration)
+    if (value == _controller.reverseDuration) {
       return;
+    }
     _controller.reverseDuration = value;
   }
 
   /// The curve of the animation.
   Curve get curve => _animation.curve;
   set curve(Curve value) {
-    assert(value != null);
-    if (value == _animation.curve)
+    if (value == _animation.curve) {
       return;
+    }
     _animation.curve = value;
   }
 
@@ -149,7 +145,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -167,11 +162,26 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   TickerProvider get vsync => _vsync;
   TickerProvider _vsync;
   set vsync(TickerProvider value) {
-    assert(value != null);
-    if (value == _vsync)
+    if (value == _vsync) {
       return;
+    }
     _vsync = value;
     _controller.resync(vsync);
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    switch (state) {
+      case RenderAnimatedSizeState.start:
+      case RenderAnimatedSizeState.stable:
+        break;
+      case RenderAnimatedSizeState.changed:
+      case RenderAnimatedSizeState.unstable:
+        // Call markNeedsLayout in case the RenderObject isn't marked dirty
+        // already, to resume interrupted resizing animation.
+        markNeedsLayout();
+    }
   }
 
   @override
@@ -199,28 +209,24 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
     child!.layout(constraints, parentUsesSize: true);
 
-    assert(_state != null);
     switch (_state) {
       case RenderAnimatedSizeState.start:
         _layoutStart();
-        break;
       case RenderAnimatedSizeState.stable:
         _layoutStable();
-        break;
       case RenderAnimatedSizeState.changed:
         _layoutChanged();
-        break;
       case RenderAnimatedSizeState.unstable:
         _layoutUnstable();
-        break;
     }
 
     size = constraints.constrain(_animatedSize!);
     alignChild();
 
     if (size.width < _sizeTween.end!.width ||
-        size.height < _sizeTween.end!.height)
+        size.height < _sizeTween.end!.height) {
       _hasVisualOverflow = true;
+    }
   }
 
   @override
@@ -233,7 +239,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     // size without modifying global state. See performLayout for comments
     // explaining the rational behind the implementation.
     final Size childSize = child!.getDryLayout(constraints);
-    assert(_state != null);
     switch (_state) {
       case RenderAnimatedSizeState.start:
         return constraints.constrain(childSize);
@@ -243,13 +248,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         } else if (_controller.value == _controller.upperBound) {
           return constraints.constrain(childSize);
         }
-        break;
       case RenderAnimatedSizeState.unstable:
       case RenderAnimatedSizeState.changed:
         if (_sizeTween.end != childSize) {
           return constraints.constrain(childSize);
         }
-        break;
     }
 
     return constraints.constrain(_animatedSize!);
@@ -303,8 +306,10 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     } else {
       // Child size stabilized.
       _state = RenderAnimatedSizeState.stable;
-      if (!_controller.isAnimating)
-        _controller.forward(); // resume the animation after being detached
+      if (!_controller.isAnimating) {
+        // Resume the animation after being detached.
+        _controller.forward();
+      }
     }
   }
 

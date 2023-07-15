@@ -5,7 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show clampDouble;
 
 import 'debug.dart';
 import 'material_localizations.dart';
@@ -58,7 +59,11 @@ enum RefreshIndicatorTriggerMode {
   onEdge,
 }
 
+enum _IndicatorType { material, adaptive }
+
 /// A widget that supports the Material "swipe to refresh" idiom.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ORApMlzwMdM}
 ///
 /// When the child's [Scrollable] descendant overscrolls, an animated circular
 /// progress indicator is faded into view. When the scroll ends, if the
@@ -68,6 +73,19 @@ enum RefreshIndicatorTriggerMode {
 /// indicator disappears after the callback's [Future] has completed.
 ///
 /// The trigger mode is configured by [RefreshIndicator.triggerMode].
+///
+/// {@tool dartpad}
+/// This example shows how [RefreshIndicator] can be triggered in different ways.
+///
+/// ** See code in examples/api/lib/material/refresh_indicator/refresh_indicator.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to trigger [RefreshIndicator] in a nested scroll view using
+/// the [notificationPredicate] property.
+///
+/// ** See code in examples/api/lib/material/refresh_indicator/refresh_indicator.1.dart **
+/// {@end-tool}
 ///
 /// ## Troubleshooting
 ///
@@ -82,7 +100,7 @@ enum RefreshIndicatorTriggerMode {
 /// ```dart
 /// ListView(
 ///   physics: const AlwaysScrollableScrollPhysics(),
-///   children: ...
+///   // ...
 /// )
 /// ```
 ///
@@ -110,7 +128,7 @@ class RefreshIndicator extends StatefulWidget {
   /// An empty string may be passed to avoid having anything read by screen reading software.
   /// The [semanticsValue] may be used to specify progress on the widget.
   const RefreshIndicator({
-    Key? key,
+    super.key,
     required this.child,
     this.displacement = 40.0,
     this.edgeOffset = 0.0,
@@ -120,14 +138,40 @@ class RefreshIndicator extends StatefulWidget {
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsLabel,
     this.semanticsValue,
-    this.strokeWidth = 2.0,
+    this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
-  }) : assert(child != null),
-       assert(onRefresh != null),
-       assert(notificationPredicate != null),
-       assert(strokeWidth != null),
-       assert(triggerMode != null),
-       super(key: key);
+  }) : _indicatorType = _IndicatorType.material;
+
+  /// Creates an adaptive [RefreshIndicator] based on whether the target
+  /// platform is iOS or macOS, following Material design's
+  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
+  ///
+  /// When the descendant overscrolls, a different spinning progress indicator
+  /// is shown depending on platform. On iOS and macOS,
+  /// [CupertinoActivityIndicator] is shown, but on all other platforms,
+  /// [CircularProgressIndicator] appears.
+  ///
+  /// If a [CupertinoActivityIndicator] is shown, the following parameters are ignored:
+  /// [backgroundColor], [semanticsLabel], [semanticsValue], [strokeWidth].
+  ///
+  /// The target platform is based on the current [Theme]: [ThemeData.platform].
+  ///
+  /// Noteably the scrollable widget itself will have slightly different behavior
+  /// from [CupertinoSliverRefreshControl], due to a difference in structure.
+  const RefreshIndicator.adaptive({
+    super.key,
+    required this.child,
+    this.displacement = 40.0,
+    this.edgeOffset = 0.0,
+    required this.onRefresh,
+    this.color,
+    this.backgroundColor,
+    this.notificationPredicate = defaultScrollNotificationPredicate,
+    this.semanticsLabel,
+    this.semanticsValue,
+    this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
+    this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
+  }) : _indicatorType = _IndicatorType.adaptive;
 
   /// The widget below this widget in the tree.
   ///
@@ -191,10 +235,12 @@ class RefreshIndicator extends StatefulWidget {
   /// {@macro flutter.progress_indicator.ProgressIndicator.semanticsValue}
   final String? semanticsValue;
 
-  /// Defines `strokeWidth` for `RefreshIndicator`.
+  /// Defines [strokeWidth] for `RefreshIndicator`.
   ///
-  /// By default, the value of `strokeWidth` is 2.0 pixels.
+  /// By default, the value of [strokeWidth] is 2.0 pixels.
   final double strokeWidth;
+
+  final _IndicatorType _indicatorType;
 
   /// Defines how this [RefreshIndicator] can be triggered when users overscroll.
   ///
@@ -288,14 +334,16 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     // In this case, we don't want to trigger the refresh indicator.
     return ((notification is ScrollStartNotification && notification.dragDetails != null)
             || (notification is ScrollUpdateNotification && notification.dragDetails != null && widget.triggerMode == RefreshIndicatorTriggerMode.anywhere))
-      && notification.metrics.extentBefore == 0.0
+      && (( notification.metrics.axisDirection == AxisDirection.up && notification.metrics.extentAfter == 0.0)
+            || (notification.metrics.axisDirection == AxisDirection.down && notification.metrics.extentBefore == 0.0))
       && _mode == null
       && _start(notification.metrics.axisDirection);
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (!widget.notificationPredicate(notification))
+    if (!widget.notificationPredicate(notification)) {
       return false;
+    }
     if (_shouldStart(notification)) {
       setState(() {
         _mode = _RefreshIndicatorMode.drag;
@@ -305,25 +353,27 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     bool? indicatorAtTopNow;
     switch (notification.metrics.axisDirection) {
       case AxisDirection.down:
-        indicatorAtTopNow = true;
-        break;
       case AxisDirection.up:
-        indicatorAtTopNow = false;
-        break;
+        indicatorAtTopNow = true;
       case AxisDirection.left:
       case AxisDirection.right:
         indicatorAtTopNow = null;
-        break;
     }
     if (indicatorAtTopNow != _isIndicatorAtTop) {
-      if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed)
+      if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
         _dismiss(_RefreshIndicatorMode.canceled);
+      }
     } else if (notification is ScrollUpdateNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        if (notification.metrics.extentBefore > 0.0) {
+        if ((notification.metrics.axisDirection  == AxisDirection.down && notification.metrics.extentBefore > 0.0)
+            || (notification.metrics.axisDirection  == AxisDirection.up && notification.metrics.extentAfter > 0.0)) {
           _dismiss(_RefreshIndicatorMode.canceled);
         } else {
-          _dragOffset = _dragOffset! - notification.scrollDelta!;
+          if (notification.metrics.axisDirection == AxisDirection.down) {
+            _dragOffset = _dragOffset! - notification.scrollDelta!;
+          } else if (notification.metrics.axisDirection == AxisDirection.up) {
+            _dragOffset = _dragOffset! + notification.scrollDelta!;
+          }
           _checkDragOffset(notification.metrics.viewportDimension);
         }
       }
@@ -335,18 +385,24 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        _dragOffset = _dragOffset! - notification.overscroll;
+        if (notification.metrics.axisDirection == AxisDirection.down) {
+          _dragOffset = _dragOffset! - notification.overscroll;
+        } else if (notification.metrics.axisDirection == AxisDirection.up) {
+          _dragOffset = _dragOffset! + notification.overscroll;
+        }
         _checkDragOffset(notification.metrics.viewportDimension);
       }
     } else if (notification is ScrollEndNotification) {
       switch (_mode) {
         case _RefreshIndicatorMode.armed:
           _show();
-          break;
         case _RefreshIndicatorMode.drag:
           _dismiss(_RefreshIndicatorMode.canceled);
-          break;
-        default:
+        case _RefreshIndicatorMode.canceled:
+        case _RefreshIndicatorMode.done:
+        case _RefreshIndicatorMode.refresh:
+        case _RefreshIndicatorMode.snap:
+        case null:
           // do nothing
           break;
       }
@@ -354,11 +410,12 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return false;
   }
 
-  bool _handleGlowNotification(OverscrollIndicatorNotification notification) {
-    if (notification.depth != 0 || !notification.leading)
+  bool _handleIndicatorNotification(OverscrollIndicatorNotification notification) {
+    if (notification.depth != 0 || !notification.leading) {
       return false;
+    }
     if (_mode == _RefreshIndicatorMode.drag) {
-      notification.disallowGlow();
+      notification.disallowIndicator();
       return true;
     }
     return false;
@@ -370,11 +427,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     assert(_dragOffset == null);
     switch (direction) {
       case AxisDirection.down:
-        _isIndicatorAtTop = true;
-        break;
       case AxisDirection.up:
-        _isIndicatorAtTop = false;
-        break;
+        _isIndicatorAtTop = true;
       case AxisDirection.left:
       case AxisDirection.right:
         _isIndicatorAtTop = null;
@@ -390,11 +444,13 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   void _checkDragOffset(double containerExtent) {
     assert(_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed);
     double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
-    if (_mode == _RefreshIndicatorMode.armed)
+    if (_mode == _RefreshIndicatorMode.armed) {
       newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
-    _positionController.value = newValue.clamp(0.0, 1.0); // this triggers various rebuilds
-    if (_mode == _RefreshIndicatorMode.drag && _valueColor.value!.alpha == 0xFF)
+    }
+    _positionController.value = clampDouble(newValue, 0.0, 1.0); // this triggers various rebuilds
+    if (_mode == _RefreshIndicatorMode.drag && _valueColor.value!.alpha == 0xFF) {
       _mode = _RefreshIndicatorMode.armed;
+    }
   }
 
   // Stop showing the refresh indicator.
@@ -407,14 +463,15 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     setState(() {
       _mode = newMode;
     });
-    switch (_mode) {
+    switch (_mode!) {
       case _RefreshIndicatorMode.done:
         await _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
-        break;
       case _RefreshIndicatorMode.canceled:
         await _positionController.animateTo(0.0, duration: _kIndicatorScaleDuration);
-        break;
-      default:
+      case _RefreshIndicatorMode.armed:
+      case _RefreshIndicatorMode.drag:
+      case _RefreshIndicatorMode.refresh:
+      case _RefreshIndicatorMode.snap:
         assert(false);
     }
     if (mounted && _mode == newMode) {
@@ -436,27 +493,12 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
       .then<void>((void value) {
         if (mounted && _mode == _RefreshIndicatorMode.snap) {
-          assert(widget.onRefresh != null);
           setState(() {
             // Show the indeterminate progress indicator.
             _mode = _RefreshIndicatorMode.refresh;
           });
 
           final Future<void> refreshResult = widget.onRefresh();
-          assert(() {
-            if (refreshResult == null)
-              FlutterError.reportError(FlutterErrorDetails(
-                exception: FlutterError(
-                  'The onRefresh callback returned null.\n'
-                  'The RefreshIndicator onRefresh callback must return a Future.',
-                ),
-                context: ErrorDescription('when calling onRefresh'),
-                library: 'material library',
-              ));
-            return true;
-          }());
-          if (refreshResult == null)
-            return;
           refreshResult.whenComplete(() {
             if (mounted && _mode == _RefreshIndicatorMode.refresh) {
               completer.complete();
@@ -486,8 +528,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   Future<void> show({ bool atTop = true }) {
     if (_mode != _RefreshIndicatorMode.refresh &&
         _mode != _RefreshIndicatorMode.snap) {
-      if (_mode == null)
+      if (_mode == null) {
         _start(atTop ? AxisDirection.down : AxisDirection.up);
+      }
       _show();
     }
     return _pendingRefreshFuture;
@@ -499,7 +542,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     final Widget child = NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: _handleGlowNotification,
+        onNotification: _handleIndicatorNotification,
         child: widget.child,
       ),
     );
@@ -540,7 +583,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                 child: AnimatedBuilder(
                   animation: _positionController,
                   builder: (BuildContext context, Widget? child) {
-                    return RefreshProgressIndicator(
+                    final Widget materialIndicator = RefreshProgressIndicator(
                       semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
                       semanticsValue: widget.semanticsValue,
                       value: showIndeterminateIndicator ? null : _value.value,
@@ -548,6 +591,29 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                       backgroundColor: widget.backgroundColor,
                       strokeWidth: widget.strokeWidth,
                     );
+
+                    final Widget cupertinoIndicator = CupertinoActivityIndicator(
+                      color: widget.color,
+                    );
+
+                    switch (widget._indicatorType) {
+                      case _IndicatorType.material:
+                        return materialIndicator;
+
+                      case _IndicatorType.adaptive: {
+                        final ThemeData theme = Theme.of(context);
+                        switch (theme.platform) {
+                          case TargetPlatform.android:
+                          case TargetPlatform.fuchsia:
+                          case TargetPlatform.linux:
+                          case TargetPlatform.windows:
+                            return materialIndicator;
+                          case TargetPlatform.iOS:
+                          case TargetPlatform.macOS:
+                            return cupertinoIndicator;
+                        }
+                      }
+                    }
                   },
                 ),
               ),

@@ -41,7 +41,7 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
   void frameDidDraw() {
     if (!started) {
       started = true;
-      SchedulerBinding.instance!.addPostFrameCallback((Duration timeStamp) async {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
         _tester.start();
         registerDidStop(_tester.stop);
       });
@@ -88,16 +88,14 @@ class BenchMouseRegionGridScroll extends WidgetRecorder {
   }
 }
 
-class _UntilNextFrame {
-  _UntilNextFrame._();
-
+abstract final class _UntilNextFrame {
   static Completer<void>? _completer;
 
   static Future<void> wait() {
     if (_UntilNextFrame._completer == null) {
       _UntilNextFrame._completer = Completer<void>();
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
-        _UntilNextFrame._completer!.complete(null);
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _UntilNextFrame._completer!.complete();
         _UntilNextFrame._completer = null;
       });
     }
@@ -117,7 +115,7 @@ class _Tester {
   TestGesture get gesture {
     return _gesture ??= TestGesture(
       dispatcher: (PointerEvent event) async {
-        RendererBinding.instance!.handlePointerEvent(event);
+        RendererBinding.instance.handlePointerEvent(event);
       },
       kind: PointerDeviceKind.mouse,
     );
@@ -132,10 +130,10 @@ class _Tester {
     final int frameDurationMs = fullFrameDuration.inMilliseconds;
 
     final int fullFrames = duration.inMilliseconds ~/ frameDurationMs;
-    final Offset fullFrameOffset = offset * ((frameDurationMs as double) / durationMs);
+    final Offset fullFrameOffset = offset * (frameDurationMs.toDouble() / durationMs);
 
     final Duration finalFrameDuration = duration - fullFrameDuration * fullFrames;
-    final Offset finalFrameOffset = offset - fullFrameOffset * (fullFrames as double);
+    final Offset finalFrameOffset = offset - fullFrameOffset * fullFrames.toDouble();
 
     await gesture.down(start, timeStamp: currentTime);
 

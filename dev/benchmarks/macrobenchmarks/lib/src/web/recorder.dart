@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
-import 'dart:js_util' as js_util;
+import 'dart:js_interop';
+// The analyzer currently thinks `js_interop_unsafe` is unused, but it is used
+// for `JSObject.[]=`.
+// ignore: unused_import
+import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -15,17 +18,24 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
+import 'package:web/web.dart' as web;
 
-/// The number of samples from warm-up iterations.
+/// The default number of samples from warm-up iterations.
 ///
-/// We warm-up the benchmark prior to measuring to allow JIT and caches to settle.
-const int _kWarmUpSampleCount = 200;
+/// This value is used when [Profile.useCustomWarmUp] is set to false.
+///
+/// The benchmark is warmed up prior to measuring to allow JIT and caches to settle.
+const int _kDefaultWarmUpSampleCount = 200;
 
-/// The number of samples we use to collect statistics from.
-const int _kMeasuredSampleCount = 100;
+/// The default number of samples collected to compute benchmark statistics.
+///
+/// This value is used when [Profile.useCustomWarmUp] is set to false.
+const int _kDefaultMeasuredSampleCount = 100;
 
-/// The total number of samples collected by a benchmark.
-const int kTotalSampleCount = _kWarmUpSampleCount + _kMeasuredSampleCount;
+/// The default total number of samples collected by a benchmark.
+///
+/// This value is used when [Profile.useCustomWarmUp] is set to false.
+const int kDefaultTotalSampleCount = _kDefaultWarmUpSampleCount + _kDefaultMeasuredSampleCount;
 
 /// A benchmark metric that includes frame-related computations prior to
 /// submitting layer and picture operations to the underlying renderer, such as
@@ -38,9 +48,25 @@ const String kProfilePrerollFrame = 'preroll_frame';
 const String kProfileApplyFrame = 'apply_frame';
 
 /// Measures the amount of time [action] takes.
+///
+/// See also:
+///
+///  * [timeAsyncAction], which measures the time of asynchronous work.
 Duration timeAction(VoidCallback action) {
   final Stopwatch stopwatch = Stopwatch()..start();
   action();
+  stopwatch.stop();
+  return stopwatch.elapsed;
+}
+
+/// Measures the amount of time the future returned by [action] takes to complete.
+///
+/// See also:
+///
+///  * [timeAction], which measures the time of synchronous work.
+Future<Duration> timeAsyncAction(AsyncCallback action) async {
+  final Stopwatch stopwatch = Stopwatch()..start();
+  await action();
   stopwatch.stop();
   return stopwatch.elapsed;
 }
@@ -161,12 +187,16 @@ abstract class Recorder {
 /// }
 /// ```
 abstract class RawRecorder extends Recorder {
-  RawRecorder({required String name}) : super._(name, false);
+  RawRecorder({required String name, bool useCustomWarmUp = false})
+    : _useCustomWarmUp = useCustomWarmUp, super._(name, false);
+
+  /// Whether to delimit warm-up frames in a custom way.
+  final bool _useCustomWarmUp;
 
   /// The body of the benchmark.
   ///
   /// This is the part that records measurements of the benchmark.
-  void body(Profile profile);
+  FutureOr<void> body(Profile profile);
 
   @override
   Profile? get profile => _profile;
@@ -175,10 +205,13 @@ abstract class RawRecorder extends Recorder {
   @override
   @nonVirtual
   Future<Profile> run() async {
-    _profile = Profile(name: name);
+    _profile = Profile(name: name, useCustomWarmUp: _useCustomWarmUp);
     do {
       await Future<void>.delayed(Duration.zero);
-      body(_profile!);
+      final FutureOr<void> result = body(_profile!);
+      if (result is Future) {
+        await result;
+      }
     } while (shouldContinue());
     return _profile!;
   }
@@ -233,7 +266,7 @@ abstract class SceneBuilderRecorder extends Recorder {
     final Completer<Profile> profileCompleter = Completer<Profile>();
     _profile = Profile(name: name);
 
-    window.onBeginFrame = (_) {
+    PlatformDispatcher.instance.onBeginFrame = (_) {
       try {
         startMeasureFrame(profile!);
         onBeginFrame();
@@ -242,7 +275,7 @@ abstract class SceneBuilderRecorder extends Recorder {
         rethrow;
       }
     };
-    window.onDrawFrame = () {
+    PlatformDispatcher.instance.onDrawFrame = () {
       try {
         _profile!.record('drawFrameDuration', () {
           final SceneBuilder sceneBuilder = SceneBuilder();
@@ -250,14 +283,14 @@ abstract class SceneBuilderRecorder extends Recorder {
           _profile!.record('sceneBuildDuration', () {
             final Scene scene = sceneBuilder.build();
             _profile!.record('windowRenderDuration', () {
-              window.render(scene);
+              view.render(scene);
             }, reported: false);
           }, reported: false);
         }, reported: true);
         endMeasureFrame();
 
         if (shouldContinue()) {
-          window.scheduleFrame();
+          PlatformDispatcher.instance.scheduleFrame();
         } else {
           profileCompleter.complete(_profile);
         }
@@ -266,8 +299,13 @@ abstract class SceneBuilderRecorder extends Recorder {
         rethrow;
       }
     };
-    window.scheduleFrame();
+    PlatformDispatcher.instance.scheduleFrame();
     return profileCompleter.future;
+  }
+
+  FlutterView get view {
+    assert(PlatformDispatcher.instance.implicitView != null, 'This benchmark requires the embedder to provide an implicit view.');
+    return PlatformDispatcher.instance.implicitView!;
   }
 }
 
@@ -347,8 +385,8 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
 
   final List<VoidCallback> _didStopCallbacks = <VoidCallback>[];
   @override
-  void registerDidStop(VoidCallback fn) {
-    _didStopCallbacks.add(fn);
+  void registerDidStop(VoidCallback cb) {
+    _didStopCallbacks.add(cb);
   }
 
   @override
@@ -374,10 +412,11 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     profile!.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed, reported: true);
 
     if (shouldContinue()) {
-      window.scheduleFrame();
+      PlatformDispatcher.instance.scheduleFrame();
     } else {
-      for (final VoidCallback fn in _didStopCallbacks)
+      for (final VoidCallback fn in _didStopCallbacks) {
         fn();
+      }
       _runCompleter!.complete();
     }
   }
@@ -387,12 +426,18 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     _runCompleter!.completeError(error, stackTrace);
   }
 
+  late final _RecordingWidgetsBinding _binding;
+
+  @override
+  @mustCallSuper
+  Future<void> setUpAll() async {
+    _binding = _RecordingWidgetsBinding.ensureInitialized();
+  }
+
   @override
   Future<Profile> run() async {
     _runCompleter = Completer<void>();
     final Profile localProfile = profile = Profile(name: name, useCustomWarmUp: useCustomWarmUp);
-    final _RecordingWidgetsBinding binding =
-        _RecordingWidgetsBinding.ensureInitialized();
     final Widget widget = createWidget();
 
     registerEngineBenchmarkValueListener(kProfilePrerollFrame, (num value) {
@@ -410,7 +455,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
       );
     });
 
-    binding._beginRecording(this, widget);
+    _binding._beginRecording(this, widget);
 
     try {
       await _runCompleter!.future;
@@ -443,8 +488,8 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
 
   final List<VoidCallback> _didStopCallbacks = <VoidCallback>[];
   @override
-  void registerDidStop(VoidCallback fn) {
-    _didStopCallbacks.add(fn);
+  void registerDidStop(VoidCallback cb) {
+    _didStopCallbacks.add(cb);
   }
 
   @override
@@ -469,6 +514,14 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
     }
   }
 
+  late final _RecordingWidgetsBinding _binding;
+
+  @override
+  @mustCallSuper
+  Future<void> setUpAll() async {
+    _binding = _RecordingWidgetsBinding.ensureInitialized();
+  }
+
   @override
   @mustCallSuper
   void frameWillDraw() {
@@ -491,8 +544,9 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
       showWidget = !showWidget;
       _hostState._setStateTrampoline();
     } else {
-      for (final VoidCallback fn in _didStopCallbacks)
+      for (final VoidCallback fn in _didStopCallbacks) {
         fn();
+      }
       _runCompleter!.complete();
     }
   }
@@ -506,9 +560,7 @@ abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
   Future<Profile> run() async {
     _runCompleter = Completer<void>();
     final Profile localProfile = profile = Profile(name: name);
-    final _RecordingWidgetsBinding binding =
-        _RecordingWidgetsBinding.ensureInitialized();
-    binding._beginRecording(this, _WidgetBuildRecorderHost(this));
+    _binding._beginRecording(this, _WidgetBuildRecorderHost(this));
 
     try {
       await _runCompleter!.future;
@@ -552,13 +604,15 @@ class _WidgetBuildRecorderHostState extends State<_WidgetBuildRecorderHost> {
 
 /// Series of time recordings indexed in time order.
 ///
-/// It can calculate [average], [standardDeviation] and [noise]. If the amount
-/// of data collected is higher than [_kMeasuredSampleCount], then these
-/// calculations will only apply to the latest [_kMeasuredSampleCount] data
-/// points.
+/// A timeseries is expected to contain at least one warm-up frame added by
+/// calling [add] with `isWarmUpValue` set to true, followed by at least one
+/// measured value added by calling [add] with `isWarmUpValue` set to false.
 class Timeseries {
-  Timeseries(this.name, this.isReported, {this.useCustomWarmUp = false})
-      : _warmUpFrameCount = useCustomWarmUp ? 0 : null;
+  /// Creates an empty timeseries.
+  ///
+  /// The [name] is a unique name of this timeseries. If [isReported] is true
+  /// this timeseries is reported to the benchmark dashboard.
+  Timeseries(this.name, this.isReported);
 
   /// The label of this timeseries used for debugging and result inspection.
   final String name;
@@ -573,17 +627,8 @@ class Timeseries {
   /// but that are too fine-grained to be useful for tracking on the dashboard.
   final bool isReported;
 
-  /// Whether to delimit warm-up frames in a custom way.
-  final bool useCustomWarmUp;
-
-  /// The number of frames ignored as warm-up frames, used only
-  /// when [useCustomWarmUp] is true.
-  int? _warmUpFrameCount;
-
-  /// The number of frames ignored as warm-up frames.
-  int get warmUpFrameCount => useCustomWarmUp
-      ? _warmUpFrameCount!
-      : count - _kMeasuredSampleCount;
+  /// The number of samples ignored as warm-up frames.
+  int _warmUpSampleCount = 0;
 
   /// List of all the values that have been recorded.
   ///
@@ -598,15 +643,26 @@ class Timeseries {
   ///
   /// See [TimeseriesStats] for more details.
   TimeseriesStats computeStats() {
-    final int finalWarmUpFrameCount = warmUpFrameCount;
-
-    assert(finalWarmUpFrameCount >= 0 && finalWarmUpFrameCount < count);
+    // Assertions do not use the `assert` keyword because benchmarks run in
+    // profile mode, where asserts are tree-shaken out.
+    if (_warmUpSampleCount == 0) {
+      throw StateError(
+        'The benchmark did not warm-up. Use at least one sample to warm-up '
+        'the benchmark to reduce noise.');
+    }
+    if (_warmUpSampleCount >= count) {
+      throw StateError(
+        'The benchmark did not report any measured samples. Add at least one '
+        'sample after warm-up is done. There were $_warmUpSampleCount warm-up '
+        'samples, and no measured samples in this timeseries.'
+      );
+    }
 
     // The first few values we simply discard and never look at. They're from the warm-up phase.
-    final List<double> warmUpValues = _allValues.sublist(0, finalWarmUpFrameCount);
+    final List<double> warmUpValues = _allValues.sublist(0, _warmUpSampleCount);
 
     // Values we analyze.
-    final List<double> candidateValues = _allValues.sublist(finalWarmUpFrameCount);
+    final List<double> candidateValues = _allValues.sublist(_warmUpSampleCount);
 
     // The average that includes outliers.
     final double dirtyAverage = _computeAverage(name, candidateValues);
@@ -615,7 +671,8 @@ class Timeseries {
     final double dirtyStandardDeviation = _computeStandardDeviationForPopulation(name, candidateValues);
 
     // Any value that's higher than this is considered an outlier.
-    final double outlierCutOff = dirtyAverage + dirtyStandardDeviation;
+    // Two standard deviations captures 95% of a normal distribution.
+    final double outlierCutOff = dirtyAverage + dirtyStandardDeviation * 2;
 
     // Candidates with outliers removed.
     final Iterable<double> cleanValues = candidateValues.where((double value) => value <= outlierCutOff);
@@ -663,6 +720,9 @@ class Timeseries {
     );
   }
 
+  // Whether the timeseries is in the warm-up phase.
+  bool _isWarmingUp = true;
+
   /// Adds a value to this timeseries.
   void add(double value, {required bool isWarmUpValue}) {
     if (value < 0.0) {
@@ -670,10 +730,17 @@ class Timeseries {
         'Timeseries $name: negative metric values are not supported. Got: $value',
       );
     }
-    _allValues.add(value);
-    if (useCustomWarmUp && isWarmUpValue) {
-      _warmUpFrameCount = (_warmUpFrameCount ?? 0) + 1;
+    if (isWarmUpValue) {
+      if (!_isWarmingUp) {
+        throw StateError(
+          'A warm-up value was added to the timeseries after the warm-up phase finished.'
+        );
+      }
+      _warmUpSampleCount += 1;
+    } else if (_isWarmingUp) {
+      _isWarmingUp = false;
     }
+    _allValues.add(value);
   }
 }
 
@@ -787,9 +854,16 @@ class AnnotatedSample {
 
 /// Base class for a profile collected from running a benchmark.
 class Profile {
-  Profile({required this.name, this.useCustomWarmUp = false})
-      : assert(name != null),
-        _isWarmingUp = useCustomWarmUp;
+  /// Creates an empty profile that can be populated with benchmark samples
+  /// using [record], [recordAsync], and [addDataPoint] methods.
+  ///
+  /// The [name] is the unique name of this profile that distinguishes is from
+  /// other profiles. Typically, the name will describe the benchmark.
+  ///
+  /// If [useCustomWarmUp] is true the benchmark will continue running until
+  /// [stopBenchmark] is called. Otherwise, the benchmark collects the
+  /// [kDefaultTotalSampleCount] samples and stops automatically.
+  Profile({required this.name, this.useCustomWarmUp = false});
 
   /// The name of the benchmark that produced this profile.
   final String name;
@@ -797,23 +871,45 @@ class Profile {
   /// Whether to delimit warm-up frames in a custom way.
   final bool useCustomWarmUp;
 
-  /// Whether we are measuring warm-up frames currently.
+  /// True if the benchmark is currently measuring warm-up frames.
   bool get isWarmingUp => _isWarmingUp;
+  bool _isWarmingUp = true;
 
-  bool _isWarmingUp;
+  /// True if the benchmark is currently running.
+  bool get isRunning => _isRunning;
+  bool _isRunning = true;
 
-  /// Stop the warm-up phase.
+  /// Stops the warm-up phase.
   ///
-  /// Call this method only when [useCustomWarmUp] and [isWarmingUp] are both
-  /// true.
-  /// Call this method only once for each profile.
+  /// After calling this method, subsequent calls to [record], [recordAsync],
+  /// and [addDataPoint] will record measured data samples.
+  ///
+  /// Call this method only once for each profile and only when [isWarmingUp]
+  /// is true.
   void stopWarmingUp() {
-    if (!useCustomWarmUp) {
-      throw Exception('`stopWarmingUp` should be used only when `useCustomWarmUp` is true.');
-    } else if (!_isWarmingUp) {
-      throw Exception('Warm-up already stopped.');
+    if (!_isWarmingUp) {
+      throw StateError('Warm-up already stopped.');
     } else {
       _isWarmingUp = false;
+    }
+  }
+
+  /// Stops the benchmark.
+  ///
+  /// Call this method only once for each profile and only when [isWarmingUp]
+  /// is false (i.e. after calling [stopWarmingUp]).
+  void stopBenchmark() {
+    if (_isWarmingUp) {
+      throw StateError(
+        'Warm-up has not finished yet. Benchmark should only be stopped after '
+        'it recorded at least one sample after the warm-up.'
+      );
+    } else if (scoreData.isEmpty) {
+      throw StateError(
+        'The benchmark did not collect any data.'
+      );
+    } else {
+      _isRunning = false;
     }
   }
 
@@ -824,8 +920,23 @@ class Profile {
   final Map<String, dynamic> extraData = <String, dynamic>{};
 
   /// Invokes [callback] and records the duration of its execution under [key].
+  ///
+  /// See also:
+  ///
+  ///  * [recordAsync], which records asynchronous work.
   Duration record(String key, VoidCallback callback, { required bool reported }) {
     final Duration duration = timeAction(callback);
+    addDataPoint(key, duration, reported: reported);
+    return duration;
+  }
+
+  /// Invokes [callback] and records the amount of time the returned future takes.
+  ///
+  /// See also:
+  ///
+  ///  * [record], which records synchronous work.
+  Future<Duration> recordAsync(String key, AsyncCallback callback, { required bool reported }) async {
+    final Duration duration = await timeAsyncAction(callback);
     addDataPoint(key, duration, reported: reported);
     return duration;
   }
@@ -839,8 +950,52 @@ class Profile {
   void addDataPoint(String key, Duration duration, { required bool reported }) {
     scoreData.putIfAbsent(
         key,
-        () => Timeseries(key, reported, useCustomWarmUp: useCustomWarmUp),
+        () => Timeseries(key, reported),
     ).add(duration.inMicroseconds.toDouble(), isWarmUpValue: isWarmingUp);
+
+    if (!useCustomWarmUp) {
+      // The stopWarmingUp and stopBenchmark will not be called. Use the
+      // auto-stopping logic.
+      _autoUpdateBenchmarkPhase();
+    }
+  }
+
+  /// A convenience wrapper over [addDataPoint] for adding [AggregatedTimedBlock]
+  /// to the profile.
+  ///
+  /// Uses [AggregatedTimedBlock.name] as the name of the data point, and
+  /// [AggregatedTimedBlock.duration] as the duration.
+  void addTimedBlock(AggregatedTimedBlock timedBlock, { required bool reported }) {
+    addDataPoint(timedBlock.name, Duration(microseconds: timedBlock.duration.toInt()), reported: reported);
+  }
+
+  /// Checks the samples collected so far and sets the appropriate benchmark phase.
+  ///
+  /// If enough warm-up samples have been collected, stops the warm-up phase and
+  /// begins the measuring phase.
+  ///
+  /// If enough total samples have been collected, stops the benchmark.
+  void _autoUpdateBenchmarkPhase() {
+    if (useCustomWarmUp) {
+      StateError(
+        'Must not call _autoUpdateBenchmarkPhase if custom warm-up is used. '
+        'Call `stopWarmingUp` and `stopBenchmark` instead.'
+      );
+    }
+
+    if (_isWarmingUp) {
+      final bool doesHaveEnoughWarmUpSamples = scoreData.keys
+        .every((String key) => scoreData[key]!.count >= _kDefaultWarmUpSampleCount);
+      if (doesHaveEnoughWarmUpSamples) {
+        stopWarmingUp();
+      }
+    } else if (_isRunning) {
+      final bool doesHaveEnoughTotalSamples = scoreData.keys
+        .every((String key) => scoreData[key]!.count >= kDefaultTotalSampleCount);
+      if (doesHaveEnoughTotalSamples) {
+        stopBenchmark();
+      }
+    }
   }
 
   /// Decides whether the data collected so far is sufficient to stop, or
@@ -858,9 +1013,7 @@ class Profile {
       return true;
     }
 
-    // We have recorded something, but do we have enough samples? If every
-    // timeseries has collected enough samples, stop the benchmark.
-    return !scoreData.keys.every((String key) => scoreData[key]!.count >= kTotalSampleCount);
+    return isRunning;
   }
 
   /// Returns a JSON representation of the profile that will be sent to the
@@ -935,7 +1088,7 @@ double _computeAverage(String label, Iterable<double> values) {
 ///
 /// See also:
 ///
-/// * https://en.wikipedia.org/wiki/Standard_deviation
+///  * <https://en.wikipedia.org/wiki/Standard_deviation>
 double _computeStandardDeviationForPopulation(String label, Iterable<double> population) {
   if (population.isEmpty) {
     throw StateError('$label: attempted to compute the standard deviation of empty population.');
@@ -987,12 +1140,32 @@ class _RecordingWidgetsBinding extends BindingBase
         SemanticsBinding,
         RendererBinding,
         WidgetsBinding {
-  /// Makes an instance of [_RecordingWidgetsBinding] the current binding.
+
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  /// The singleton instance of this object.
+  ///
+  /// Provides access to the features exposed by this class. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [_RecordingWidgetsBinding.ensureInitialized].
+  static _RecordingWidgetsBinding get instance => BindingBase.checkInstance(_instance);
+  static _RecordingWidgetsBinding? _instance;
+
+  /// Returns an instance of the [_RecordingWidgetsBinding], creating and
+  /// initializing it if necessary.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
   static _RecordingWidgetsBinding ensureInitialized() {
-    if (WidgetsBinding.instance == null) {
+    if (_instance == null) {
       _RecordingWidgetsBinding();
     }
-    return WidgetsBinding.instance! as _RecordingWidgetsBinding;
+    return instance;
   }
 
   FrameRecorder? _recorder;
@@ -1106,8 +1279,7 @@ void startMeasureFrame(Profile profile) {
 
   if (!profile.isWarmingUp) {
     // Tell the browser to mark the beginning of the frame.
-    html.window.performance.mark('measured_frame_start#$_currentFrameNumber');
-
+    web.window.performance.mark('measured_frame_start#$_currentFrameNumber');
     _isMeasuringFrame = true;
   }
 }
@@ -1129,10 +1301,10 @@ void endMeasureFrame() {
 
   if (_isMeasuringFrame) {
     // Tell the browser to mark the end of the frame, and measure the duration.
-    html.window.performance.mark('measured_frame_end#$_currentFrameNumber');
-    html.window.performance.measure(
+    web.window.performance.mark('measured_frame_end#$_currentFrameNumber');
+    web.window.performance.measure(
       'measured_frame',
-      'measured_frame_start#$_currentFrameNumber',
+      'measured_frame_start#$_currentFrameNumber'.toJS,
       'measured_frame_end#$_currentFrameNumber',
     );
 
@@ -1153,13 +1325,6 @@ final Map<String, EngineBenchmarkValueListener> _engineBenchmarkListeners = <Str
 ///
 /// If another listener is already registered, overrides it.
 void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListener listener) {
-  if (listener == null) {
-    throw ArgumentError(
-      'Listener must not be null. To stop listening to engine benchmark values '
-      'under label "$name", call stopListeningToEngineBenchmarkValues(\'$name\').',
-    );
-  }
-
   if (_engineBenchmarkListeners.containsKey(name)) {
     throw StateError(
       'A listener for "$name" is already registered.\n'
@@ -1170,9 +1335,9 @@ void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListe
 
   if (_engineBenchmarkListeners.isEmpty) {
     // The first listener is being registered. Register the global listener.
-    js_util.setProperty(html.window, '_flutter_internal_on_benchmark', _dispatchEngineBenchmarkValue);
+    web.window['_flutter_internal_on_benchmark'.toJS] =
+        _dispatchEngineBenchmarkValue.toJS;
   }
-
   _engineBenchmarkListeners[name] = listener;
 }
 
@@ -1180,8 +1345,9 @@ void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListe
 void stopListeningToEngineBenchmarkValues(String name) {
   _engineBenchmarkListeners.remove(name);
   if (_engineBenchmarkListeners.isEmpty) {
+
     // The last listener unregistered. Remove the global listener.
-    js_util.setProperty(html.window, '_flutter_internal_on_benchmark', null);
+    web.window['_flutter_internal_on_benchmark'.toJS] = null;
   }
 }
 

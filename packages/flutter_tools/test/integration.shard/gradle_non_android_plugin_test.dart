@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  Directory tempDir;
+  late Directory tempDir;
 
   setUp(() {
     tempDir = createResolvedTempDirectorySync('flutter_plugin_test.');
@@ -21,7 +20,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('flutter app that depends on a non-Android plugin can still build for Android', () {
+  testWithoutContext('Flutter app that depends on a non-Android plugin can still build for Android', () {
     final String flutterRoot = getFlutterRoot();
     final String flutterBin = fileSystem.path.join(
       flutterRoot,
@@ -70,7 +69,7 @@ void main() {
     // Build example APK
     final Directory exampleDir = projectRoot.childDirectory('example');
 
-    processManager.runSync(<String>[
+    final ProcessResult result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'build',
@@ -79,6 +78,8 @@ void main() {
       'android-arm',
       '--verbose',
     ], workingDirectory: exampleDir.path);
+
+    expect(result, const ProcessResultMatcher());
 
     final String exampleAppApk = fileSystem.path.join(
       exampleDir.path,
@@ -90,5 +91,5 @@ void main() {
       'app-release.apk',
     );
     expect(fileSystem.file(exampleAppApk), exists);
-  }, timeout: const Timeout(Duration(minutes: 5)));
+  });
 }

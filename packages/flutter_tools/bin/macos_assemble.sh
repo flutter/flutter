@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# TODO(jonahwilliams): refactor this and xcode_backend.sh into one script
+# TODO(zanderso): refactor this and xcode_backend.sh into one script
 # once iOS is using 'assemble'.
 RunCommand() {
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
@@ -17,6 +17,32 @@ EchoError() {
   echo "$@" 1>&2
 }
 
+ParseFlutterBuildMode() {
+  # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
+  # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
+  # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
+  local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
+
+  case "$build_mode" in
+    *release*) build_mode="release";;
+    *profile*) build_mode="profile";;
+    *debug*) build_mode="debug";;
+    *)
+      EchoError "========================================================================"
+      EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
+      EchoError "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive)."
+      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment variable."
+      EchoError "If that is not set, the CONFIGURATION environment variable is used."
+      EchoError ""
+      EchoError "You can fix this by either adding an appropriately named build"
+      EchoError "configuration, or adding an appropriate value for FLUTTER_BUILD_MODE to the"
+      EchoError ".xcconfig file for the current build configuration (${CONFIGURATION})."
+      EchoError "========================================================================"
+      exit -1;;
+  esac
+  echo "${build_mode}"
+}
+
 BuildApp() {
   # Set the working directory to the project root
   local project_path="${SOURCE_ROOT}/.."
@@ -28,8 +54,10 @@ BuildApp() {
       target_path="${FLUTTER_TARGET}"
   fi
 
-  # Set the build mode
-  local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
+  # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
+  # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
+  # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
+  local build_mode="$(ParseFlutterBuildMode)"
 
   if [[ -n "$LOCAL_ENGINE" ]]; then
     if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
@@ -70,13 +98,14 @@ BuildApp() {
     "assemble"
     "--no-version-check"
     "-dTargetPlatform=darwin"
-    "-dDarwinArchs=x86_64"
+    "-dDarwinArchs=${ARCHS}"
     "-dTargetFile=${target_path}"
     "-dBuildMode=${build_mode}"
     "-dTreeShakeIcons=${TREE_SHAKE_ICONS}"
     "-dDartObfuscation=${DART_OBFUSCATION}"
     "-dSplitDebugInfo=${SPLIT_DEBUG_INFO}"
     "-dTrackWidgetCreation=${TRACK_WIDGET_CREATION}"
+    "-dAction=${ACTION}"
     "--DartDefines=${DART_DEFINES}"
     "--ExtraGenSnapshotOptions=${EXTRA_GEN_SNAPSHOT_OPTIONS}"
     "--ExtraFrontEndOptions=${EXTRA_FRONT_END_OPTIONS}"

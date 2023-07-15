@@ -24,7 +24,7 @@ void main() {
 
     testWithoutContext('can turn off wrapping', () async {
       final BufferLogger bufferLogger = BufferLogger(
-        outputPreferences: OutputPreferences.test(wrapText: false),
+        outputPreferences: OutputPreferences.test(),
         terminal: TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
       );
       final String testString = '0123456789' * 20;
@@ -34,7 +34,7 @@ void main() {
     });
   });
 
-  group('ANSI coloring and bold', () {
+  group('ANSI coloring, bold, and clearing', () {
     late AnsiTerminal terminal;
 
     setUp(() {
@@ -101,6 +101,39 @@ void main() {
       expect(
         terminal.bolden('bold ${terminal.bolden('output')} still bold'),
         equals('${AnsiTerminal.bold}bold output still bold${AnsiTerminal.resetBold}'),
+      );
+    });
+
+    testWithoutContext('clearing lines works', () {
+      expect(
+        terminal.clearLines(3),
+        equals(
+            '${AnsiTerminal.cursorBeginningOfLineCode}'
+            '${AnsiTerminal.clearEntireLineCode}'
+            '${AnsiTerminal.cursorUpLineCode}'
+            '${AnsiTerminal.clearEntireLineCode}'
+            '${AnsiTerminal.cursorUpLineCode}'
+            '${AnsiTerminal.clearEntireLineCode}'
+        ),
+      );
+
+      expect(
+        terminal.clearLines(1),
+        equals(
+            '${AnsiTerminal.cursorBeginningOfLineCode}'
+            '${AnsiTerminal.clearEntireLineCode}'
+        ),
+      );
+    });
+
+    testWithoutContext('clearing lines when color is not supported does not work', () {
+      terminal = AnsiTerminal(
+        stdio: Stdio(), // Danger, using real stdio.
+        platform: FakePlatform()..stdoutSupportsAnsi = false,
+      );
+      expect(
+        terminal.clearLines(3),
+        equals(''),
       );
     });
   });
@@ -184,7 +217,7 @@ void main() {
     final Stdio stdio = FakeStdio();
     expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform()).preferredStyle, 0); // Defaults to 0 for backwards compatibility.
 
-    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  1)).preferredStyle, 0);
+    expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018)).preferredStyle, 0);
     expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  2)).preferredStyle, 1);
     expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  3)).preferredStyle, 2);
     expect(AnsiTerminal(stdio: stdio, platform: const LocalPlatform(), now: DateTime(2018, 1,  4)).preferredStyle, 3);
@@ -227,15 +260,16 @@ late Stream<String> mockStdInStream;
 class TestTerminal extends AnsiTerminal {
   TestTerminal({
     Stdio? stdio,
-    Platform platform = const LocalPlatform(),
+    super.platform = const LocalPlatform(),
     DateTime? now,
-  }) : super(stdio: stdio ?? Stdio(), platform: platform, now: now ?? DateTime(2018));
+  }) : super(stdio: stdio ?? Stdio(), now: now ?? DateTime(2018));
 
   @override
   Stream<String> get keystrokes {
     return mockStdInStream;
   }
 
+  @override
   bool singleCharMode = false;
 
   @override

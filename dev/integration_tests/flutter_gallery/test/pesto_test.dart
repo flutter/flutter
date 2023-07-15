@@ -7,9 +7,10 @@ import 'package:flutter_gallery/gallery/app.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-  if (binding is LiveTestWidgetsFlutterBinding)
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  if (binding is LiveTestWidgetsFlutterBinding) {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+  }
 
   // Regression test for https://github.com/flutter/flutter/pull/5168
   testWidgets('Pesto appbar heroics', (WidgetTester tester) async {

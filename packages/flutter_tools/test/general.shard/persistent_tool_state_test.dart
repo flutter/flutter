@@ -21,10 +21,10 @@ void main() {
       logger: BufferLogger.test(),
     );
     expect(state1.shouldRedisplayWelcomeMessage, null);
-    state1.redisplayWelcomeMessage = true;
+    state1.setShouldRedisplayWelcomeMessage(true);
     expect(stateFile.existsSync(), true);
     expect(state1.shouldRedisplayWelcomeMessage, true);
-    state1.redisplayWelcomeMessage = false;
+    state1.setShouldRedisplayWelcomeMessage(false);
     expect(state1.shouldRedisplayWelcomeMessage, false);
 
     final PersistentToolState state2 = PersistentToolState.test(
@@ -43,7 +43,6 @@ void main() {
     );
 
     state1.updateLastActiveVersion('abc', Channel.master);
-    state1.updateLastActiveVersion('def', Channel.dev);
     state1.updateLastActiveVersion('ghi', Channel.beta);
     state1.updateLastActiveVersion('jkl', Channel.stable);
 
@@ -53,27 +52,7 @@ void main() {
     );
 
     expect(state2.lastActiveVersion(Channel.master), 'abc');
-    expect(state2.lastActiveVersion(Channel.dev), 'def');
     expect(state2.lastActiveVersion(Channel.beta), 'ghi');
     expect(state2.lastActiveVersion(Channel.stable), 'jkl');
-  });
-
-  testWithoutContext('lastDevToolsActivationTime can be cached and stored', () {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory directory = fileSystem.directory('state_dir')..createSync();
-    final PersistentToolState state1 = PersistentToolState.test(
-      directory: directory,
-      logger: BufferLogger.test(),
-    );
-
-    final DateTime time = DateTime.now();
-    state1.lastDevToolsActivation = time;
-
-    final PersistentToolState state2 = PersistentToolState.test(
-      directory: directory,
-      logger: BufferLogger.test(),
-    );
-
-    expect(state2.lastDevToolsActivationTime, equals(time));
   });
 }

@@ -7,24 +7,41 @@ import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/convert.dart';
+import 'android/android_app_link_settings.dart';
+import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
+import 'base/version.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'platform_plugins.dart';
+import 'project_validator_result.dart';
+import 'reporting/reporting.dart';
 import 'template.dart';
 import 'xcode_project.dart';
 
 export 'cmake_project.dart';
 export 'xcode_project.dart';
+
+/// Enum for each officially supported platform.
+enum SupportedPlatform {
+  android,
+  ios,
+  linux,
+  macos,
+  web,
+  windows,
+  fuchsia,
+  root, // Special platform to represent the root project directory
+}
 
 class FlutterProjectFactory {
   FlutterProjectFactory({
@@ -43,7 +60,6 @@ class FlutterProjectFactory {
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
-    assert(directory != null);
     return projects.putIfAbsent(directory.path, () {
       final FlutterManifest manifest = FlutterProject._readManifest(
         directory.childFile(bundle.defaultManifestPath).path,
@@ -73,10 +89,7 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, this.manifest, this._exampleManifest)
-    : assert(directory != null),
-      assert(manifest != null),
-      assert(_exampleManifest != null);
+  FlutterProject(this.directory, this.manifest, this._exampleManifest);
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -125,9 +138,16 @@ class FlutterProject {
       // Don't require iOS build info, this method is only
       // used during create as best-effort, use the
       // default target bundle identifier.
-      final String? bundleIdentifier = await ios.productBundleIdentifier(null);
-      if (bundleIdentifier != null) {
-        candidates.add(bundleIdentifier);
+      try {
+        final String? bundleIdentifier = await ios.productBundleIdentifier(null);
+        if (bundleIdentifier != null) {
+          candidates.add(bundleIdentifier);
+        }
+      } on ToolExit {
+        // It's possible that while parsing the build info for the ios project
+        // that the bundleIdentifier can't be resolve. However, we would like
+        // skip parsing that id in favor of searching in other place. We can
+        // consider a tool exit in this case to be non fatal for the program.
       }
     }
     if (android.existsSync()) {
@@ -156,43 +176,32 @@ class FlutterProject {
   }
 
   String? _organizationNameFromPackageName(String packageName) {
-    if (packageName != null && 0 <= packageName.lastIndexOf('.')) {
+    if (0 <= packageName.lastIndexOf('.')) {
       return packageName.substring(0, packageName.lastIndexOf('.'));
     }
     return null;
   }
 
   /// The iOS sub project of this project.
-  IosProject? _ios;
-  IosProject get ios => _ios ??= IosProject.fromFlutter(this);
+  late final IosProject ios = IosProject.fromFlutter(this);
 
   /// The Android sub project of this project.
-  AndroidProject? _android;
-  AndroidProject get android => _android ??= AndroidProject._(this);
+  late final AndroidProject android = AndroidProject._(this);
 
   /// The web sub project of this project.
-  WebProject? _web;
-  WebProject get web => _web ??= WebProject._(this);
+  late final WebProject web = WebProject._(this);
 
   /// The MacOS sub project of this project.
-  MacOSProject? _macos;
-  MacOSProject get macos => _macos ??= MacOSProject.fromFlutter(this);
+  late final MacOSProject macos = MacOSProject.fromFlutter(this);
 
   /// The Linux sub project of this project.
-  LinuxProject? _linux;
-  LinuxProject get linux => _linux ??= LinuxProject.fromFlutter(this);
+  late final LinuxProject linux = LinuxProject.fromFlutter(this);
 
   /// The Windows sub project of this project.
-  WindowsProject? _windows;
-  WindowsProject get windows => _windows ??= WindowsProject.fromFlutter(this);
-
-  /// The Windows UWP sub project of this project.
-  WindowsUwpProject? _windowUwp;
-  WindowsUwpProject get windowsUwp => _windowUwp ??= WindowsUwpProject.fromFlutter(this);
+  late final WindowsProject windows = WindowsProject.fromFlutter(this);
 
   /// The Fuchsia sub project of this project.
-  FuchsiaProject? _fuchsia;
-  FuchsiaProject get fuchsia => _fuchsia ??= FuchsiaProject._(this);
+  late final FuchsiaProject fuchsia = FuchsiaProject._(this);
 
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
@@ -227,6 +236,11 @@ class FlutterProject {
     .childDirectory('generated')
     .childDirectory(manifest.appName);
 
+  /// The generated Dart plugin registrant for non-web platforms.
+  File get dartPluginRegistrant => dartTool
+    .childDirectory('flutter_build')
+    .childFile('dart_plugin_registrant.dart');
+
   /// The example sub-project of this project.
   FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),
@@ -245,6 +259,33 @@ class FlutterProject {
 
   /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
+
+  /// Returns a list of platform names that are supported by the project.
+  List<SupportedPlatform> getSupportedPlatforms({bool includeRoot = false}) {
+    final List<SupportedPlatform> platforms = includeRoot ? <SupportedPlatform>[SupportedPlatform.root] : <SupportedPlatform>[];
+    if (android.existsSync()) {
+      platforms.add(SupportedPlatform.android);
+    }
+    if (ios.exists) {
+      platforms.add(SupportedPlatform.ios);
+    }
+    if (web.existsSync()) {
+      platforms.add(SupportedPlatform.web);
+    }
+    if (macos.existsSync()) {
+      platforms.add(SupportedPlatform.macos);
+    }
+    if (linux.existsSync()) {
+      platforms.add(SupportedPlatform.linux);
+    }
+    if (windows.existsSync()) {
+      platforms.add(SupportedPlatform.windows);
+    }
+    if (fuchsia.existsSync()) {
+      platforms.add(SupportedPlatform.fuchsia);
+    }
+    return platforms;
+  }
 
   /// The directory that will contain the example if an example exists.
   static Directory _exampleDirectory(Directory directory) => directory.childDirectory('example');
@@ -285,7 +326,7 @@ class FlutterProject {
   /// registrants for app and module projects only.
   ///
   /// Will not create project platform directories if they do not already exist.
-  Future<void> regeneratePlatformSpecificTooling() async {
+  Future<void> regeneratePlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
       iosPlatform: ios.existsSync(),
@@ -295,7 +336,7 @@ class FlutterProject {
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
-      winUwpPlatform: featureFlags.isWindowsUwpEnabled && windowsUwp.existsSync(),
+      deprecationBehavior: deprecationBehavior,
     );
   }
 
@@ -308,14 +349,14 @@ class FlutterProject {
     bool macOSPlatform = false,
     bool windowsPlatform = false,
     bool webPlatform = false,
-    bool winUwpPlatform = false,
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
-    if (!directory.existsSync() || hasExampleApp || isPlugin) {
+    if (!directory.existsSync() || isPlugin) {
       return;
     }
     await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
     if (androidPlatform) {
-      await android.ensureReadyForPlatformSpecificTooling();
+      await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
     if (iosPlatform) {
       await ios.ensureReadyForPlatformSpecificTooling();
@@ -332,9 +373,6 @@ class FlutterProject {
     if (webPlatform) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
-    if (winUwpPlatform) {
-      await windowsUwp.ensureReadyForPlatformSpecificTooling();
-    }
     await injectPlugins(
       this,
       androidPlatform: androidPlatform,
@@ -342,9 +380,13 @@ class FlutterProject {
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
-      webPlatform: webPlatform,
-      winUwpPlatform: winUwpPlatform,
     );
+  }
+
+  void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
+    if (android.existsSync() && pubspecFile.existsSync()) {
+      android.checkForDeprecation(deprecationBehavior: deprecationBehavior);
+    }
   }
 
   /// Returns a json encoded string containing the [appName], [version], and [buildNumber] that is used to generate version.json
@@ -357,6 +399,7 @@ class FlutterProject {
         'version': buildName,
       if (buildNumber != null)
         'build_number': buildNumber,
+      'package_name': manifest.appName,
     };
     return jsonEncode(versionFileJson);
   }
@@ -379,14 +422,30 @@ abstract class FlutterProjectPlatform {
 class AndroidProject extends FlutterProjectPlatform {
   AndroidProject._(this.parent);
 
+  // User facing string when java/gradle/agp versions are compatible.
+  @visibleForTesting
+  static const String validJavaGradleAgpString = 'compatible java/gradle/agp';
+
+  // User facing link that describes compatibility between gradle and
+  // android gradle plugin.
+  static const String gradleAgpCompatUrl =
+    'https://developer.android.com/studio/releases/gradle-plugin#updating-gradle';
+
+  // User facing link that describes compatibility between java and the first
+  // version of gradle to support it.
+  static const String javaGradleCompatUrl =
+    'https://docs.gradle.org/current/userguide/compatibility.html#java';
+
   /// The parent of this project.
   final FlutterProject parent;
 
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
+  static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace[\\s]+[\'"](.+)[\'"]');
   static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'"](.*)[\'"]\\s*\$');
-  static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
+  static final RegExp _imperativeKotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
+  static final RegExp _declarativeKotlinPluginPattern = RegExp('^\\s*id\\s+[\'"]kotlin-android[\'"]\\s*\$');
   static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
@@ -410,12 +469,38 @@ class AndroidProject extends FlutterProjectPlatform {
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
+  /// True if the parent Flutter project is a plugin.
+  bool get isPlugin => parent.isPlugin;
+
   /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => parent.usesAndroidX;
 
   /// Returns true if the current version of the Gradle plugin is supported.
-  bool get isSupportedVersion => _isSupportedVersion ??= _computeSupportedVersion();
-  bool? _isSupportedVersion;
+  late final bool isSupportedVersion = _computeSupportedVersion();
+
+  /// Gets all build variants of this project.
+  Future<List<String>> getBuildVariants() async {
+    if (!existsSync() || androidBuilder == null) {
+      return const <String>[];
+    }
+    return androidBuilder!.getBuildVariants(project: parent);
+  }
+
+  /// Returns app link related project settings for a given build variant.
+  ///
+  /// Use [getBuildVariants] to get all of the available build variants.
+  Future<AndroidAppLinkSettings> getAppLinksSettings({required String variant}) async {
+    if (!existsSync() || androidBuilder == null) {
+      return const AndroidAppLinkSettings(
+        applicationId: '',
+        domains: <String>[],
+      );
+    }
+    return AndroidAppLinkSettings(
+      applicationId: await androidBuilder!.getApplicationIdForVariant(variant, project: parent),
+      domains: await androidBuilder!.getAppLinkDomainsForVariant(variant, project: parent),
+    );
+  }
 
   bool _computeSupportedVersion() {
     final FileSystem fileSystem = hostAppGradleRoot.fileSystem;
@@ -424,30 +509,55 @@ class AndroidProject extends FlutterProjectPlatform {
     if (plugin.existsSync()) {
       return false;
     }
-    final File appGradle = hostAppGradleRoot.childFile(
-        fileSystem.path.join('app', 'build.gradle'));
-    if (!appGradle.existsSync()) {
-      return false;
-    }
-    for (final String line in appGradle.readAsLinesSync()) {
-      if (line.contains(RegExp(r'apply from: .*/flutter.gradle')) ||
-          line.contains("def flutterPluginVersion = 'managed'")) {
-        return true;
+    try {
+      for (final String line in appGradleFile.readAsLinesSync()) {
+        // This syntax corresponds to applying the Flutter Gradle Plugin with a
+        // script.
+        // See https://docs.gradle.org/current/userguide/plugins.html#sec:script_plugins.
+        final bool fileBasedApply = line.contains(RegExp(r'apply from: .*/flutter.gradle'));
+
+        // This syntax corresponds to applying the Flutter Gradle Plugin using
+        // the declarative "plugins {}" block after including it in the
+        // pluginManagement block of the settings.gradle file.
+        // See https://docs.gradle.org/current/userguide/composite_builds.html#included_plugin_builds,
+        // as well as the settings.gradle and build.gradle templates.
+        final bool declarativeApply = line.contains('dev.flutter.flutter-gradle-plugin');
+
+        // This case allows for flutter run/build to work for modules. It does
+        // not guarantee the Flutter Gradle Plugin is applied.
+        final bool managed = line.contains("def flutterPluginVersion = 'managed'");
+        if (fileBasedApply || declarativeApply || managed) {
+          return true;
+        }
       }
+    } on FileSystemException {
+      return false;
     }
     return false;
   }
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _kotlinPluginPattern) != null;
+    final bool imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
+    final bool declarativeMatch = firstMatchInFile(appGradleFile, _declarativeKotlinPluginPattern) != null;
+    return imperativeMatch || declarativeMatch;
   }
 
+  /// Gets the module-level build.gradle file.
+  /// See https://developer.android.com/build#module-level.
+  File get appGradleFile => hostAppGradleRoot.childDirectory('app')
+      .childFile('build.gradle');
+
   File get appManifestFile {
-    return isUsingGradle
-        ? globals.fs.file(globals.fs.path.join(hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
-        : hostAppGradleRoot.childFile('AndroidManifest.xml');
+    if (isUsingGradle) {
+      return hostAppGradleRoot
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childFile('AndroidManifest.xml');
+    }
+
+    return hostAppGradleRoot.childFile('AndroidManifest.xml');
   }
 
   File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');
@@ -462,13 +572,88 @@ class AndroidProject extends FlutterProjectPlatform {
     return parent.isModule || _editableHostAppDirectory.existsSync();
   }
 
+  /// Check if the versions of Java, Gradle and AGP are compatible.
+  ///
+  /// This is expected to be called from
+  /// flutter_tools/lib/src/project_validator.dart.
+  Future<ProjectValidatorResult> validateJavaGradleAgpVersions() async {
+    // Constructing ProjectValidatorResult happens here and not in
+    // flutter_tools/lib/src/project_validator.dart because of the additional
+    // Complexity of variable status values and error string formatting.
+    const String visibleName = 'Java/Gradle/Android Gradle Plugin';
+    final CompatibilityResult validJavaGradleAgpVersions =
+        await hasValidJavaGradleAgpVersions();
+
+
+    return ProjectValidatorResult(
+      name: visibleName,
+      value: validJavaGradleAgpVersions.description,
+      status: validJavaGradleAgpVersions.success
+          ? StatusProjectValidator.success
+          : StatusProjectValidator.error,
+    );
+  }
+
+  /// Ensures Java SDK is compatible with the project's Gradle version and
+  /// the project's Gradle version is compatible with the AGP version used
+  /// in build.gradle.
+  Future<CompatibilityResult> hasValidJavaGradleAgpVersions() async {
+    final String? gradleVersion = await gradle.getGradleVersion(
+        hostAppGradleRoot, globals.logger, globals.processManager);
+    final String? agpVersion =
+        gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
+    final String? javaVersion = _versionToParsableString(globals.java?.version);
+
+    // Assume valid configuration.
+    String description = validJavaGradleAgpString;
+
+    final bool compatibleGradleAgp = gradle.validateGradleAndAgp(globals.logger,
+        gradleV: gradleVersion, agpV: agpVersion);
+
+    final bool compatibleJavaGradle = gradle.validateJavaGradle(globals.logger,
+        javaV: javaVersion, gradleV: gradleVersion);
+
+    // Begin description formatting.
+    if (!compatibleGradleAgp) {
+      description = '''
+Incompatible Gradle/AGP versions. \n
+Gradle Version: $gradleVersion, AGP Version: $agpVersion
+Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion!)}".\n
+See the link below for more information:
+$gradleAgpCompatUrl
+''';
+    }
+    if (!compatibleJavaGradle) {
+      // Should contain the agp error (if present) but not the valid String.
+      description = '''
+${compatibleGradleAgp ? '' : description}
+Incompatible Java/Gradle versions.
+Java Version: $javaVersion, Gradle Version: $gradleVersion\n
+See the link below for more information:
+$javaGradleCompatUrl
+''';
+    }
+    return CompatibilityResult(
+        compatibleJavaGradle && compatibleGradleAgp, description);
+  }
+
   bool get isUsingGradle {
     return hostAppGradleRoot.childFile('build.gradle').existsSync();
   }
 
   String? get applicationId {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _applicationIdPattern)?.group(1);
+    return firstMatchInFile(appGradleFile, _applicationIdPattern)?.group(1);
+  }
+
+  /// Get the namespace for newer Android projects,
+  /// which replaces the `package` attribute in the Manifest.xml.
+  String? get namespace {
+    try {
+      // firstMatchInFile() reads per line but `_androidNamespacePattern` matches a multiline pattern.
+      return _androidNamespacePattern.firstMatch(appGradleFile.readAsStringSync())?.group(1);
+    } on FileSystemException {
+      return null;
+    }
   }
 
   String? get group {
@@ -481,24 +666,7 @@ class AndroidProject extends FlutterProjectPlatform {
     return parent.directory.childDirectory('build');
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
-    if (getEmbeddingVersion() == AndroidEmbeddingVersion.v1) {
-      globals.printStatus(
-"""
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Warning
-──────────────────────────────────────────────────────────────────────────────
-Your Flutter application is created using an older version of the Android
-embedding. It's being deprecated in favor of Android embedding v2. Follow the
-steps at
-
-https://flutter.dev/go/android-project-migration
-
-to migrate your project.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-"""
-      );
-    }
+  Future<void> ensureReadyForPlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
     if (isModule && _shouldRegenerateFromTemplate()) {
       await _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
@@ -526,12 +694,17 @@ to migrate your project.
 
   Future<void> _regenerateLibrary() async {
     ErrorHandlingFileSystem.deleteIfExists(ephemeralDirectory, recursive: true);
+    await _overwriteFromTemplate(
+        globals.fs.path.join(
+          'module',
+          'android',
+          'library_new_embedding',
+        ),
+        ephemeralDirectory);
     await _overwriteFromTemplate(globals.fs.path.join(
       'module',
       'android',
-      'library_new_embedding',
-    ), ephemeralDirectory);
-    await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
+      'gradle'), ephemeralDirectory);
     globals.gradleUtils?.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
@@ -551,44 +724,104 @@ to migrate your project.
         'projectName': parent.manifest.appName,
         'androidIdentifier': androidIdentifier,
         'androidX': usesAndroidX,
+        'agpVersion': gradle.templateAndroidGradlePluginVersion,
+        'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
+        'gradleVersion': gradle.templateDefaultGradleVersion,
+        'gradleVersionForModule': gradle.templateDefaultGradleVersionForModule,
+        'compileSdkVersion': gradle.compileSdkVersion,
+        'minSdkVersion': gradle.minSdkVersion,
+        'ndkVersion': gradle.ndkVersion,
+        'targetSdkVersion': gradle.targetSdkVersion,
       },
       printStatusWhenWriting: false,
-      overwriteExisting: true,
     );
   }
 
+  void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
+    if (deprecationBehavior == DeprecationBehavior.none) {
+      return;
+    }
+    final AndroidEmbeddingVersionResult result = computeEmbeddingVersion();
+    if (result.version != AndroidEmbeddingVersion.v1) {
+      return;
+    }
+    globals.printStatus(
+'''
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Warning
+──────────────────────────────────────────────────────────────────────────────
+Your Flutter application is created using an older version of the Android
+embedding. It is being deprecated in favor of Android embedding v2. To migrate
+your project, follow the steps at:
+
+https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The detected reason was:
+
+  ${result.reason}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+''');
+    if (deprecationBehavior == DeprecationBehavior.ignore) {
+      BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+    } else { // DeprecationBehavior.exit
+      BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
+      throwToolExit(
+        'Build failed due to use of deprecated Android v1 embedding.',
+        exitCode: 1,
+      );
+    }
+  }
+
   AndroidEmbeddingVersion getEmbeddingVersion() {
+    return computeEmbeddingVersion().version;
+  }
+
+  AndroidEmbeddingVersionResult computeEmbeddingVersion() {
     if (isModule) {
       // A module type's Android project is used in add-to-app scenarios and
       // only supports the V2 embedding.
-      return AndroidEmbeddingVersion.v2;
+      return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, 'Is add-to-app module');
     }
-    if (appManifestFile == null || !appManifestFile.existsSync()) {
-      return AndroidEmbeddingVersion.v1;
+    if (isPlugin) {
+      // Plugins do not use an appManifest, so we stop here.
+      //
+      // TODO(garyq): This method does not currently check for code references to
+      // the v1 embedding, we should check for this once removal is further along.
+      return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, 'Is plugin');
+    }
+    if (!appManifestFile.existsSync()) {
+      return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `${appManifestFile.absolute.path}` file');
     }
     XmlDocument document;
     try {
       document = XmlDocument.parse(appManifestFile.readAsStringSync());
-    } on XmlParserException {
+    } on XmlException {
       throwToolExit('Error parsing $appManifestFile '
                     'Please ensure that the android manifest is a valid XML document and try again.');
     } on FileSystemException {
       throwToolExit('Error reading $appManifestFile even though it exists. '
                     'Please ensure that you have read permission to this file and try again.');
     }
+    for (final XmlElement application in document.findAllElements('application')) {
+      final String? applicationName = application.getAttribute('android:name');
+      if (applicationName == 'io.flutter.app.FlutterApplication') {
+        return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, '${appManifestFile.absolute.path} uses `android:name="io.flutter.app.FlutterApplication"`');
+      }
+    }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
       if (name == 'flutterEmbedding') {
         final String? embeddingVersionString = metaData.getAttribute('android:value');
         if (embeddingVersionString == '1') {
-          return AndroidEmbeddingVersion.v1;
+          return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, '${appManifestFile.absolute.path} `<meta-data android:name="flutterEmbedding"` has value 1');
         }
         if (embeddingVersionString == '2') {
-          return AndroidEmbeddingVersion.v2;
+          return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v2, '${appManifestFile.absolute.path} `<meta-data android:name="flutterEmbedding"` has value 2');
         }
       }
     }
-    return AndroidEmbeddingVersion.v1;
+    return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ${appManifestFile.absolute.path}');
   }
 }
 
@@ -598,6 +831,29 @@ enum AndroidEmbeddingVersion {
   v1,
   /// V2 APIs based on io.flutter.embedding.android.FlutterActivity.
   v2,
+}
+
+/// Data class that holds the results of checking for embedding version.
+///
+/// This class includes the reason why a particular embedding was selected.
+class AndroidEmbeddingVersionResult {
+  AndroidEmbeddingVersionResult(this.version, this.reason);
+
+  /// The embedding version.
+  AndroidEmbeddingVersion version;
+
+  /// The reason why the embedding version was selected.
+  String reason;
+}
+
+// What the tool should do when encountering deprecated API in applications.
+enum DeprecationBehavior {
+  // The command being run does not care about deprecation status.
+  none,
+  // The command should continue and ignore the deprecation warning.
+  ignore,
+  // The command should exit the tool.
+  exit,
 }
 
 /// Represents the web sub-project of a Flutter project.
@@ -627,7 +883,20 @@ class WebProject extends FlutterProjectPlatform {
       .childDirectory('web')
       .childFile('index.html');
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {}
+  /// The .dart_tool/dartpad directory
+  Directory get dartpadToolDirectory => parent.directory
+      .childDirectory('.dart_tool')
+      .childDirectory('dartpad');
+
+  Future<void> ensureReadyForPlatformSpecificTooling() async {
+    /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
+    /// See: https://github.com/dart-lang/dart-services/pull/874
+    await injectBuildTimePluginFiles(
+      parent,
+      destination: dartpadToolDirectory,
+      webPlatform: true,
+    );
+  }
 }
 
 /// The Fuchsia sub project.
@@ -645,4 +914,22 @@ class FuchsiaProject {
   Directory? _meta;
   Directory get meta =>
       _meta ??= editableHostAppDirectory.childDirectory('meta');
+}
+
+// Combines success and a description into one object that can be returned
+// together.
+@visibleForTesting
+class CompatibilityResult {
+  CompatibilityResult(this.success, this.description);
+  final bool success;
+  final String description;
+}
+
+/// Converts a [Version] to a string that can be parsed by [Version.parse].
+String? _versionToParsableString(Version? version) {
+  if (version == null) {
+    return null;
+  }
+
+  return '${version.major}.${version.minor}.${version.patch}';
 }

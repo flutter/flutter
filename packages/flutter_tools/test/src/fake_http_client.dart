@@ -40,40 +40,14 @@ HttpMethod _fromMethodString(String value) {
 }
 
 String _toMethodString(HttpMethod method) {
-  switch (method) {
-    case HttpMethod.get:
-      return 'GET';
-    case HttpMethod.put:
-      return 'PUT';
-    case HttpMethod.delete:
-      return 'DELETE';
-    case HttpMethod.post:
-      return 'POST';
-    case HttpMethod.patch:
-      return 'PATCH';
-    case HttpMethod.head:
-      return 'HEAD';
-  }
-}
-
-/// Override the creation of all [HttpClient] objects with a zone injection.
-///
-/// This should only be used when the http client cannot be set directly, such as
-/// when testing `package:http` code.
-Future<void> overrideHttpClients(Future<void> Function() callback,  FakeHttpClient httpClient) async {
-  final HttpOverrides overrides = _FakeHttpClientOverrides(httpClient);
-  await HttpOverrides.runWithHttpOverrides(callback, overrides);
-}
-
-class _FakeHttpClientOverrides extends HttpOverrides {
-  _FakeHttpClientOverrides(this.httpClient);
-
-  final FakeHttpClient httpClient;
-
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return httpClient;
-  }
+  return switch (method) {
+    HttpMethod.get => 'GET',
+    HttpMethod.put => 'PUT',
+    HttpMethod.delete => 'DELETE',
+    HttpMethod.post => 'POST',
+    HttpMethod.patch => 'PATCH',
+    HttpMethod.head => 'HEAD'
+  };
 }
 
 /// Create a fake request that configures the [FakeHttpClient] to respond
@@ -161,19 +135,19 @@ class FakeHttpClient implements HttpClient {
   }
 
   @override
-  set authenticate(Future<bool> Function(Uri url, String scheme, String realm)? f) {
-    throw UnimplementedError();
-  }
+  Future<ConnectionTask<Socket>> Function(Uri url, String? proxyHost, int? proxyPort)? connectionFactory;
 
   @override
-  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String realm)? f) {
-    throw UnimplementedError();
-  }
+  Future<bool> Function(Uri url, String scheme, String realm)? authenticate;
 
   @override
-  set badCertificateCallback(bool Function(X509Certificate cert, String host, int port)? callback) {
-    throw UnimplementedError();
-  }
+  Future<bool> Function(String host, int port, String scheme, String realm)? authenticateProxy;
+
+  @override
+  bool Function(X509Certificate cert, String host, int port)? badCertificateCallback;
+
+  @override
+  Function(String line)? keyLog;
 
   @override
   void close({bool force = false}) { }
@@ -190,7 +164,7 @@ class FakeHttpClient implements HttpClient {
   }
 
   @override
-  set findProxy(String Function(Uri url)? f) { }
+  String Function(Uri url)? findProxy;
 
   @override
   Future<HttpClientRequest> get(String host, int port, String path) {
@@ -477,7 +451,7 @@ class _FakeHttpClientResponse extends Stream<List<int>> implements HttpClientRes
   int get statusCode => _response.statusCode;
 }
 
-class _FakeHttpHeaders extends HttpHeaders {
+class _FakeHttpHeaders implements HttpHeaders {
   _FakeHttpHeaders(this._backingData);
 
   final Map<String, List<String>> _backingData;
@@ -492,12 +466,30 @@ class _FakeHttpHeaders extends HttpHeaders {
   }
 
   @override
+  late bool chunkedTransferEncoding;
+
+  @override
   void clear() {
     _backingData.clear();
   }
 
   @override
+  int contentLength = -1;
+
+  @override
+  ContentType? contentType;
+
+  @override
+  DateTime? date;
+
+  @override
+  DateTime? expires;
+
+  @override
   void forEach(void Function(String name, List<String> values) action) { }
+
+  @override
+  String? host;
 
   @override
   void noFolding(String name) {  }
@@ -521,4 +513,13 @@ class _FakeHttpHeaders extends HttpHeaders {
   String? value(String name) {
     return _backingData[name]?.join('; ');
   }
+
+  @override
+  DateTime? ifModifiedSince;
+
+  @override
+  late bool persistentConnection;
+
+  @override
+  int? port;
 }

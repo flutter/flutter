@@ -15,8 +15,8 @@ set -ex
 # largely not needed to run the flutter/tests tests.
 #
 # However, we do need to update this directory and the tools directory.
-pub get
-(cd ../tools; pub get) # used for find_commit.dart below
+dart pub get
+(cd ../tools; dart pub get) # used for find_commit.dart below
 
 # Next we need to update the flutter/tests checkout.
 #
@@ -34,4 +34,4 @@ git clone https://github.com/flutter/tests.git ../../bin/cache/pkg/tests
 git -C ../../bin/cache/pkg/tests checkout `dart --enable-asserts ../tools/bin/find_commit.dart ../../bin/cache/pkg/tests`
 
 # Finally, run the tests.
-dart --enable-asserts run_tests.dart --skip-on-fetch-failure --skip-template ../../bin/cache/pkg/tests/registry/*.test
+dart --enable-asserts run_tests.dart --verbose --skip-on-fetch-failure --skip-template ../../bin/cache/pkg/tests/registry/*.test

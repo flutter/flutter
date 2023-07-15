@@ -13,7 +13,15 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 const FileSystem _fs = LocalFileSystem();
 
-const List<String> kSkippedDemos = <String>[];
+/// The demos we don't run as part of the integration test.
+///
+/// Demo names are formatted as 'DEMO_NAME@DEMO_CATEGORY' (see
+/// `demo_lists.dart` for more examples).
+const List<String> kSkippedDemos = <String>[
+  // This demo is flaky on CI due to hitting the network.
+  // See: https://github.com/flutter/flutter/issues/100497
+  'Video@Media',
+];
 
 // All of the gallery demos, identified as "title@category".
 //
@@ -37,11 +45,11 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     } else if (startEvent != null && eventName == 'Frame') {
       final String phase = event['ph'] as String;
       final int timestamp = event['ts'] as int;
-      if (phase == 'B') {
+      if (phase == 'B' || phase == 'b') {
         assert(frameStart == null);
         frameStart = timestamp;
       } else {
-        assert(phase == 'E');
+        assert(phase == 'E' || phase == 'e');
         final String routeName = (startEvent['args'] as Map<String, dynamic>)['to'] as String;
         durations[routeName] ??= <int>[];
         durations[routeName]!.add(timestamp - frameStart!);
@@ -52,8 +60,9 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   }
 
   // Verify that the durations data is valid.
-  if (durations.keys.isEmpty)
+  if (durations.keys.isEmpty) {
     throw 'no "Start Transition" timeline events found';
+  }
   final Map<String, int> unexpectedValueCounts = <String, int>{};
   durations.forEach((String routeName, List<int> values) {
     if (values.length != 2) {
@@ -75,8 +84,9 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     while (eventIter.moveNext()) {
       final String eventName = eventIter.current['name'] as String;
 
-      if (!<String>['Start Transition', 'Frame'].contains(eventName))
+      if (!<String>['Start Transition', 'Frame'].contains(eventName)) {
         continue;
+      }
 
       final String routeName = eventName == 'Start Transition'
         ? (eventIter.current['args'] as Map<String, dynamic>)['to'] as String
@@ -106,8 +116,9 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   String? currentDemoCategory;
 
   for (final String demo in demos) {
-    if (kSkippedDemos.contains(demo))
+    if (kSkippedDemos.contains(demo)) {
       continue;
+    }
 
     final String demoName = demo.substring(0, demo.indexOf('@'));
     final String demoCategory = demo.substring(demo.indexOf('@') + 1);
@@ -168,8 +179,9 @@ void main([List<String> args = const <String>[]]) {
 
       // See _handleMessages() in transitions_perf.dart.
       _allDemos = List<String>.from(json.decode(await driver.requestData('demoNames')) as List<dynamic>);
-      if (_allDemos.isEmpty)
+      if (_allDemos.isEmpty) {
         throw 'no demo names found';
+      }
     });
 
     tearDownAll(() async {
@@ -180,7 +192,10 @@ void main([List<String> args = const <String>[]]) {
       // Assert that we can use semantics related finders in profile mode.
       final int id = await driver.getSemanticsId(find.bySemanticsLabel('Material'));
       expect(id, greaterThan(-1));
-    }, skip: !withSemantics, timeout: Timeout.none);
+    },
+        skip: !withSemantics, // [intended] test only makes sense when semantics are turned on.
+        timeout: Timeout.none,
+    );
 
     test('all demos', () async {
       // Collect timeline data for just a limited set of demos to avoid OOMs.

@@ -33,8 +33,8 @@ void main() {
             ),
             SizedBox(
               height: 10.0,
-              child: IgnorePointer(
-                ignoring: false,
+              child: ExcludeSemantics(
+                excluding: false,
                 child: Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
@@ -87,8 +87,7 @@ void main() {
             ),
             SizedBox(
               height: 10.0,
-              child: IgnorePointer(
-                ignoring: true,
+              child: ExcludeSemantics(
                 child: Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
@@ -129,8 +128,8 @@ void main() {
             ),
             SizedBox(
               height: 10.0,
-              child: IgnorePointer(
-                ignoring: false,
+              child: ExcludeSemantics(
+                excluding: false,
                 child: Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,

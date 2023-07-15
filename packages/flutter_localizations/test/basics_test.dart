@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Nested Localizations', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp( // Creates the outer Localizations widget.
+      theme: ThemeData(useMaterial3: true),
       home: ListView(
         children: <Widget>[
           const LocalizationTracker(key: ValueKey<String>('outer')),
@@ -20,11 +21,12 @@ void main() {
         ],
       ),
     ));
-
+    // Most localized aspects of the TextTheme text styles are the same for the default US local and
+    // for Chinese for Material3. The baselines for all text styles differ.
     final LocalizationTrackerState outerTracker = tester.state(find.byKey(const ValueKey<String>('outer'), skipOffstage: false));
-    expect(outerTracker.captionFontSize, 12.0);
+    expect(outerTracker.textBaseline, TextBaseline.alphabetic);
     final LocalizationTrackerState innerTracker = tester.state(find.byKey(const ValueKey<String>('inner'), skipOffstage: false));
-    expect(innerTracker.captionFontSize, 13.0);
+    expect(innerTracker.textBaseline, TextBaseline.ideographic);
   });
 
   testWidgets('Localizations is compatible with ChangeNotifier.dispose() called during didChangeDependencies', (WidgetTester tester) async {
@@ -37,7 +39,7 @@ void main() {
         ],
         localizationsDelegates: <LocalizationsDelegate<dynamic>>[
           _DummyLocalizationsDelegate(),
-          GlobalMaterialLocalizations.delegate,
+          ...GlobalMaterialLocalizations.delegates,
         ],
         home: PageView(),
       )
@@ -52,9 +54,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/pull/16782
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          GlobalMaterialLocalizations.delegate,
-        ],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         supportedLocales: const <Locale>[
           Locale('es', 'ES'),
           Locale('zh'),
@@ -87,18 +87,18 @@ class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizatio
 class DummyLocalizations { }
 
 class LocalizationTracker extends StatefulWidget {
-  const LocalizationTracker({Key? key}) : super(key: key);
+  const LocalizationTracker({super.key});
 
   @override
   State<StatefulWidget> createState() => LocalizationTrackerState();
 }
 
 class LocalizationTrackerState extends State<LocalizationTracker> {
-  late double captionFontSize;
+  late TextBaseline textBaseline;
 
   @override
   Widget build(BuildContext context) {
-    captionFontSize = Theme.of(context).textTheme.caption!.fontSize!;
+    textBaseline = Theme.of(context).textTheme.bodySmall!.textBaseline!;
     return Container();
   }
 }

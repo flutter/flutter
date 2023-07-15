@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Platform-specific key event data for Linux.
 ///
@@ -29,12 +32,8 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     this.keyCode = 0,
     this.modifiers = 0,
     required this.isDown,
-  }) : assert(scanCode != null),
-       assert(unicodeScalarValues != null),
-       assert((unicodeScalarValues & ~LogicalKeyboardKey.valueMask) == 0),
-       assert(keyCode != null),
-       assert(modifiers != null),
-       assert(keyHelper != null);
+    this.specifiedLogicalKey,
+  }) : assert((unicodeScalarValues & ~LogicalKeyboardKey.valueMask) == 0);
 
   /// A helper class that abstracts the fetching of the toolkit-specific mappings.
   ///
@@ -69,6 +68,15 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// Whether or not this key event is a key down (true) or key up (false).
   final bool isDown;
 
+  /// A logical key specified by the embedding that should be used instead of
+  /// deriving from raw data.
+  ///
+  /// The GTK embedding detects the keyboard layout and maps some keys to
+  /// logical keys in a way that can not be derived from per-key information.
+  ///
+  /// This is not part of the native GTK key event.
+  final int? specifiedLogicalKey;
+
   @override
   String get keyLabel => unicodeScalarValues == 0 ? '' : String.fromCharCode(unicodeScalarValues);
 
@@ -77,6 +85,10 @@ class RawKeyEventDataLinux extends RawKeyEventData {
 
   @override
   LogicalKeyboardKey get logicalKey {
+    if (specifiedLogicalKey != null) {
+      final int key = specifiedLogicalKey!;
+      return LogicalKeyboardKey.findKeyByKeyId(key) ?? LogicalKeyboardKey(key);
+    }
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. "=") and the number pad version
     // (e.g. the "=" on the number pad) can be determined.
@@ -117,11 +129,43 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   }
 
   @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataLinux')}(keyLabel: $keyLabel, keyCode: $keyCode, scanCode: $scanCode,'
-        ' unicodeScalarValues: $unicodeScalarValues, modifiers: $modifiers, '
-        'modifiers down: $modifiersPressed)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('toolkit', keyHelper.debugToolkit));
+    properties.add(DiagnosticsProperty<int>('unicodeScalarValues', unicodeScalarValues));
+    properties.add(DiagnosticsProperty<int>('scanCode', scanCode));
+    properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+    properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+    properties.add(DiagnosticsProperty<bool>('isDown', isDown));
+    properties.add(DiagnosticsProperty<int?>('specifiedLogicalKey', specifiedLogicalKey, defaultValue: null));
   }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is RawKeyEventDataLinux
+        && other.keyHelper.runtimeType == keyHelper.runtimeType
+        && other.unicodeScalarValues == unicodeScalarValues
+        && other.scanCode == scanCode
+        && other.keyCode == keyCode
+        && other.modifiers == modifiers
+        && other.isDown == isDown;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    keyHelper.runtimeType,
+    unicodeScalarValues,
+    scanCode,
+    keyCode,
+    modifiers,
+    isDown,
+  );
 }
 
 /// Abstract class for window-specific key mappings.
@@ -140,6 +184,11 @@ abstract class KeyHelper {
       throw FlutterError('Window toolkit not recognized: $toolkit');
     }
   }
+
+  /// Returns the name for the toolkit.
+  ///
+  /// This is used in debug mode to generate readable string.
+  String get debugToolkit;
 
   /// Returns a [KeyboardSide] enum value that describes which side or sides of
   /// the given keyboard modifier key were pressed at the time of this event.
@@ -204,6 +253,9 @@ class GLFWKeyHelper implements KeyHelper {
   /// {@macro flutter.services.GLFWKeyHelper.modifierCapsLock}
   static const int modifierNumericPad = 0x0020;
 
+  @override
+  String get debugToolkit => 'GLFW';
+
   int _mergeModifiers({required int modifiers, required int keyCode, required bool isDown}) {
     // GLFW Key codes for modifier keys.
     const int shiftLeftKeyCode = 340;
@@ -227,25 +279,19 @@ class GLFWKeyHelper implements KeyHelper {
       case shiftLeftKeyCode:
       case shiftRightKeyCode:
         modifierChange = modifierShift;
-        break;
       case controlLeftKeyCode:
       case controlRightKeyCode:
         modifierChange = modifierControl;
-        break;
       case altLeftKeyCode:
       case altRightKeyCode:
         modifierChange = modifierAlt;
-        break;
       case metaLeftKeyCode:
       case metaRightKeyCode:
         modifierChange = modifierMeta;
-        break;
       case capsLockKeyCode:
         modifierChange = modifierCapsLock;
-        break;
       case numLockKeyCode:
         modifierChange = modifierNumericPad;
-        break;
       default:
         break;
     }
@@ -343,6 +389,9 @@ class GtkKeyHelper implements KeyHelper {
   /// {@macro flutter.services.GtkKeyHelper.modifierShift}
   static const int modifierMeta = 1 << 26;
 
+  @override
+  String get debugToolkit => 'GTK';
+
   int _mergeModifiers({required int modifiers, required int keyCode, required bool isDown}) {
     // GTK Key codes for modifier keys.
     const int shiftLeftKeyCode = 0xffe1;
@@ -367,26 +416,20 @@ class GtkKeyHelper implements KeyHelper {
       case shiftLeftKeyCode:
       case shiftRightKeyCode:
         modifierChange = modifierShift;
-        break;
       case controlLeftKeyCode:
       case controlRightKeyCode:
         modifierChange = modifierControl;
-        break;
       case altLeftKeyCode:
       case altRightKeyCode:
         modifierChange = modifierMod1;
-        break;
       case metaLeftKeyCode:
       case metaRightKeyCode:
         modifierChange = modifierMeta;
-        break;
       case capsLockKeyCode:
       case shiftLockKeyCode:
         modifierChange = modifierCapsLock;
-        break;
       case numLockKeyCode:
         modifierChange = modifierMod2;
-        break;
       default:
         break;
     }

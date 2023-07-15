@@ -18,7 +18,7 @@ class Pair<T> {
   }
 
   @override
-  int get hashCode => hashValues(first, second);
+  int get hashCode => Object.hash(first, second);
 
   @override
   String toString() => '($first,$second)';
@@ -28,7 +28,7 @@ class Pair<T> {
 /// and the other child in the bottom half. It will swap which child is on top
 /// and which is on bottom every time the widget is rendered.
 abstract class Swapper extends RenderObjectWidget {
-  const Swapper({ Key? key, this.stable, this.swapper }) : super(key: key);
+  const Swapper({ super.key, this.stable, this.swapper });
 
   final Widget? stable;
   final Widget? swapper;
@@ -42,39 +42,17 @@ abstract class Swapper extends RenderObjectWidget {
 
 class SwapperWithProperOverrides extends Swapper {
   const SwapperWithProperOverrides({
-    Key? key,
-    Widget? stable,
-    Widget? swapper,
-  }) : super(key: key, stable: stable, swapper: swapper);
+    super.key,
+    super.stable,
+    super.swapper,
+  });
 
   @override
   SwapperElement createElement() => SwapperElementWithProperOverrides(this);
 }
 
-class SwapperWithNoOverrides extends Swapper {
-  const SwapperWithNoOverrides({
-    Key? key,
-    Widget? stable,
-    Widget? swapper,
-  }) : super(key: key, stable: stable, swapper: swapper);
-
-  @override
-  SwapperElement createElement() => SwapperElementWithNoOverrides(this);
-}
-
-class SwapperWithDeprecatedOverrides extends Swapper {
-  const SwapperWithDeprecatedOverrides({
-    Key? key,
-    Widget? stable,
-    Widget? swapper,
-  }) : super(key: key, stable: stable, swapper: swapper);
-
-  @override
-  SwapperElement createElement() => SwapperElementWithDeprecatedOverrides(this);
-}
-
 abstract class SwapperElement extends RenderObjectElement {
-  SwapperElement(Swapper widget) : super(widget);
+  SwapperElement(Swapper super.widget);
 
   Element? stable;
   Element? swapper;
@@ -91,10 +69,12 @@ abstract class SwapperElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (stable != null)
+    if (stable != null) {
       visitor(stable!);
-    if (swapper != null)
+    }
+    if (swapper != null) {
       visitor(swapper!);
+    }
   }
 
   @override
@@ -114,19 +94,28 @@ abstract class SwapperElement extends RenderObjectElement {
     swapper = updateChild(swapper, widget.swapper, swapperIsOnTop);
     swapperIsOnTop = !swapperIsOnTop;
   }
+
+  @override
+  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+
+  @override
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) { }
+
+  @override
+  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
 }
 
 class SwapperElementWithProperOverrides extends SwapperElement {
-  SwapperElementWithProperOverrides(Swapper widget) : super(widget);
+  SwapperElementWithProperOverrides(super.widget);
 
   @override
   void insertRenderObjectChild(RenderBox child, Object? slot) {
     insertSlots.add(slot);
-    assert(child != null);
-    if (slot == 'stable')
+    if (slot == 'stable') {
       renderObject.stable = child;
-    else
+    } else {
       renderObject.setSwapper(child, slot! as bool);
+    }
   }
 
   @override
@@ -139,85 +128,58 @@ class SwapperElementWithProperOverrides extends SwapperElement {
   @override
   void removeRenderObjectChild(RenderBox child, Object? slot) {
     removeSlots.add(slot);
-    if (slot == 'stable')
+    if (slot == 'stable') {
       renderObject.stable = null;
-    else
+    } else {
       renderObject.setSwapper(null, slot! as bool);
-  }
-}
-
-class SwapperElementWithNoOverrides extends SwapperElement {
-  SwapperElementWithNoOverrides(Swapper widget) : super(widget);
-}
-
-class SwapperElementWithDeprecatedOverrides extends SwapperElement {
-  SwapperElementWithDeprecatedOverrides(Swapper widget) : super(widget);
-
-  @override
-  // ignore: must_call_super
-  void insertChildRenderObject(RenderBox child, Object? slot) {
-    insertSlots.add(slot);
-    assert(child != null);
-    if (slot == 'stable')
-      renderObject.stable = child;
-    else
-      renderObject.setSwapper(child, slot! as bool);
-  }
-
-  @override
-  // ignore: must_call_super
-  void moveChildRenderObject(RenderBox child, bool isOnTop) {
-    moveSlots.add(Pair<bool>(null, isOnTop));
-    renderObject.setSwapper(child, isOnTop);
-  }
-
-  @override
-  // ignore: must_call_super
-  void removeChildRenderObject(RenderBox child) {
-    removeSlots.add(null);
-    if (child == renderObject._stable)
-      renderObject.stable = null;
-    else
-      renderObject.setSwapper(null, swapperIsOnTop);
+    }
   }
 }
 
 class RenderSwapper extends RenderBox {
-  RenderBox? _stable;
   RenderBox? get stable => _stable;
+  RenderBox? _stable;
   set stable(RenderBox? child) {
-    if (child == _stable)
+    if (child == _stable) {
       return;
-    if (_stable != null)
+    }
+    if (_stable != null) {
       dropChild(_stable!);
+    }
     _stable = child;
-    if (child != null)
+    if (child != null) {
       adoptChild(child);
+    }
   }
 
   bool? _swapperIsOnTop;
-  RenderBox? _swapper;
   RenderBox? get swapper => _swapper;
+  RenderBox? _swapper;
   void setSwapper(RenderBox? child, bool isOnTop) {
     if (isOnTop != _swapperIsOnTop) {
       _swapperIsOnTop = isOnTop;
       markNeedsLayout();
     }
-    if (child == _swapper)
+    if (child == _swapper) {
       return;
-    if (_swapper != null)
+    }
+    if (_swapper != null) {
       dropChild(_swapper!);
+    }
     _swapper = child;
-    if (child != null)
+    if (child != null) {
       adoptChild(child);
+    }
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    if (_stable != null)
-      visitor(_stable!);
-    if (_swapper != null)
-      visitor(_swapper!);
+    if (stable != null) {
+      visitor(stable!);
+    }
+    if (swapper != null) {
+      visitor(swapper!);
+    }
   }
 
   @override
@@ -248,14 +210,14 @@ class RenderSwapper extends RenderBox {
       minHeight: constraints.minHeight / 2,
       maxHeight: constraints.maxHeight / 2,
     );
-    if (_stable != null) {
-      final BoxParentData stableParentData = _stable!.parentData! as BoxParentData;
-      _stable!.layout(childConstraints);
+    if (stable != null) {
+      final BoxParentData stableParentData = stable!.parentData! as BoxParentData;
+      stable!.layout(childConstraints);
       stableParentData.offset = _swapperIsOnTop! ? bottomOffset : topOffset;
     }
-    if (_swapper != null) {
-      final BoxParentData swapperParentData = _swapper!.parentData! as BoxParentData;
-      _swapper!.layout(childConstraints);
+    if (swapper != null) {
+      final BoxParentData swapperParentData = swapper!.parentData! as BoxParentData;
+      swapper!.layout(childConstraints);
       swapperParentData.offset = _swapperIsOnTop! ? topOffset : bottomOffset;
     }
   }
@@ -319,70 +281,5 @@ void main() {
     expect(swapper.removeSlots.length, 2);
     expect(swapper.removeSlots, contains('stable'));
     expect(swapper.removeSlots, contains(false));
-  });
-
-  testWidgets('RenderObjectElement *RenderObjectChild methods delegate to deprecated methods', (WidgetTester tester) async {
-    const Key redKey = ValueKey<String>('red');
-    const Key blueKey = ValueKey<String>('blue');
-    Widget widget() {
-      return SwapperWithDeprecatedOverrides(
-        stable: ColoredBox(
-          key: redKey,
-          color: Color(nonconst(0xffff0000)),
-        ),
-        swapper: ColoredBox(
-          key: blueKey,
-          color: Color(nonconst(0xff0000ff)),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(widget());
-    final SwapperElement swapper = tester.element<SwapperElement>(find.byType(SwapperWithDeprecatedOverrides));
-    final RenderBox redBox = tester.renderObject<RenderBox>(find.byKey(redKey));
-    final RenderBox blueBox = tester.renderObject<RenderBox>(find.byKey(blueKey));
-    expect(swapper.insertSlots.length, 2);
-    expect(swapper.insertSlots, contains('stable'));
-    expect(swapper.insertSlots, contains(true));
-    expect(swapper.moveSlots, isEmpty);
-    expect(swapper.removeSlots, isEmpty);
-    expect(parentDataFor(redBox).offset, const Offset(0, 300));
-    expect(parentDataFor(blueBox).offset, Offset.zero);
-    await tester.pumpWidget(widget());
-    expect(swapper.insertSlots.length, 2);
-    expect(swapper.moveSlots.length, 1);
-    expect(swapper.moveSlots, contains(const Pair<bool>(null, false)));
-    expect(swapper.removeSlots, isEmpty);
-    expect(parentDataFor(redBox).offset, Offset.zero);
-    expect(parentDataFor(blueBox).offset, const Offset(0, 300));
-    await tester.pumpWidget(const SwapperWithDeprecatedOverrides());
-    expect(redBox.attached, false);
-    expect(blueBox.attached, false);
-    expect(swapper.insertSlots.length, 2);
-    expect(swapper.moveSlots.length, 1);
-    expect(swapper.removeSlots.length, 2);
-    expect(swapper.removeSlots, <bool?>[null,null]);
-  });
-
-  testWidgets('RenderObjectElement *ChildRenderObject methods fail with deprecation message', (WidgetTester tester) async {
-    const Key redKey = ValueKey<String>('red');
-    const Key blueKey = ValueKey<String>('blue');
-    Widget widget() {
-      return SwapperWithNoOverrides(
-        stable: ColoredBox(
-          key: redKey,
-          color: Color(nonconst(0xffff0000)),
-        ),
-        swapper: ColoredBox(
-          key: blueKey,
-          color: Color(nonconst(0xff0000ff)),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(widget());
-    final FlutterError error = tester.takeException() as FlutterError;
-    final ErrorSummary summary = error.diagnostics.first as ErrorSummary;
-    expect(summary.toString(), contains('deprecated'));
   });
 }

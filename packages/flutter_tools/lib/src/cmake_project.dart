@@ -2,13 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-import 'package:xml/xml.dart';
-
-import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
-import 'cmake.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
 
@@ -66,6 +61,16 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   @override
   File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
 
+  /// The native entrypoint's CMake specification.
+  File get runnerCmakeFile => runnerDirectory.childFile('CMakeLists.txt');
+
+  /// The native entrypoint's file that adds Flutter to the window.
+  File get runnerFlutterWindowFile => runnerDirectory.childFile('flutter_window.cpp');
+
+  /// The native entrypoint's resource file. Used to configure things
+  /// like the application icon, name, and version.
+  File get runnerResourceFile => runnerDirectory.childFile('Runner.rc');
+
   @override
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
@@ -81,48 +86,12 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
+  /// The directory in the project that is owned by the app. As much as
+  /// possible, Flutter tooling should not edit files in this directory after
+  /// initial project creation.
+  Directory get runnerDirectory => _editableDirectory.childDirectory('runner');
+
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
-}
-
-/// The Windows UWP version of the Windows project.
-class WindowsUwpProject extends WindowsProject {
-  WindowsUwpProject.fromFlutter(FlutterProject parent) : super.fromFlutter(parent);
-
-  @override
-  String get _childDirectory => 'winuwp';
-
-  File get runnerCmakeFile => _editableDirectory.childDirectory('runner_uwp').childFile('CMakeLists.txt');
-
-  /// Eventually this will be used to check if the user's unstable project needs to be regenerated.
-  int? get projectVersion => int.tryParse(_editableDirectory.childFile('project_version').readAsStringSync());
-
-  /// Retrieve the GUID of the UWP package.
-  String? get packageGuid => _packageGuid ??= getCmakePackageGuid(runnerCmakeFile);
-  String? _packageGuid;
-
-  File get appManifest => _editableDirectory.childDirectory('runner_uwp').childFile('appxmanifest.in');
-
-  String? get packageVersion => _packageVersion ??= parseAppVersion(this);
-  String? _packageVersion;
-}
-
-@visibleForTesting
-String? parseAppVersion(WindowsUwpProject project) {
-  final File appManifestFile = project.appManifest;
-  if (!appManifestFile.existsSync()) {
-    return null;
-  }
-
-  XmlDocument document;
-  try {
-    document = XmlDocument.parse(appManifestFile.readAsStringSync());
-  } on XmlParserException {
-    throwToolExit('Error parsing $appManifestFile. Please ensure that the appx manifest is a valid XML document and try again.');
-  }
-  for (final XmlElement metaData in document.findAllElements('Identity')) {
-    return metaData.getAttribute('Version');
-  }
-  return null;
 }
 
 /// The Linux sub project.

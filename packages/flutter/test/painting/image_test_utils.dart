@@ -30,6 +30,16 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   @override
   ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+    throw UnsupportedError('Use ImageProvider.loadImage instead.');
+  }
+
+  @override
+  ImageStreamCompleter loadBuffer(TestImageProvider key, DecoderBufferCallback decode) {
+    throw UnsupportedError('Use ImageProvider.loadImage instead.');
+  }
+
+  @override
+  ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
     loadCallCount += 1;
     return OneFrameImageStreamCompleter(_completer.future);
   }
@@ -42,9 +52,4 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   @override
   String toString() => '${describeIdentity(this)}()';
-}
-
-class FakeImageConfiguration implements ImageConfiguration {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'project.dart';
 
 class TestProject extends Project {
@@ -12,7 +10,7 @@ class TestProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.12.0-0 <3.0.0"
+    sdk: '>=3.0.0-0 <4.0.0'
 
   dependencies:
     flutter:

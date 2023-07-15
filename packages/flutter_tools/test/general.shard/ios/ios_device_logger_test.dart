@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -23,11 +22,11 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fake_vm_services.dart';
 
 void main() {
-  FakeProcessManager processManager;
-  Artifacts artifacts;
-  Cache fakeCache;
-  BufferLogger logger;
-  String ideviceSyslogPath;
+  late FakeProcessManager processManager;
+  late Artifacts artifacts;
+  late Cache fakeCache;
+  late BufferLogger logger;
+  late String ideviceSyslogPath;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -230,7 +229,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       iosDeployDebugger.debuggerAttached = true;
 
       final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
-        'Message from debugger'
+        'Message from debugger',
       ]);
       iosDeployDebugger.logLines = debuggingLogs;
       logReader.debuggerStream = iosDeployDebugger;
@@ -308,6 +307,204 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
       logReader.dispose();
       expect(iosDeployDebugger.detached, true);
+    });
+
+    testWithoutContext('Does not throw if debuggerStream set after logReader closed', () async {
+      final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+        '2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.',
+        '2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching from logging category.',
+        'stderr from dart',
+        '',
+      ]);
+
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        useSyslog: false,
+      );
+      Object? exception;
+      StackTrace? trace;
+      await asyncGuard(
+          () async {
+            await logReader.linesController.close();
+            final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+            iosDeployDebugger.logLines = debuggingLogs;
+            logReader.debuggerStream = iosDeployDebugger;
+            await logReader.logLines.drain<void>();
+          },
+          onError: (Object err, StackTrace stackTrace) {
+            exception = err;
+            trace = stackTrace;
+          }
+      );
+      expect(
+        exception,
+        isNull,
+        reason: trace.toString(),
+      );
+    });
+  });
+
+  group('both syslog and debugger stream', () {
+
+    testWithoutContext('useBothLogDeviceReaders is true when CI option is true and sdk is at least 16', () {
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        usingCISystem: true,
+        majorSdkVersion: 16,
+      );
+
+      expect(logReader.useBothLogDeviceReaders, isTrue);
+    });
+
+    testWithoutContext('useBothLogDeviceReaders is false when sdk is less than 16', () {
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        usingCISystem: true,
+        majorSdkVersion: 15,
+      );
+
+      expect(logReader.useBothLogDeviceReaders, isFalse);
+    });
+
+    testWithoutContext('useBothLogDeviceReaders is false when CI option is false', () {
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        majorSdkVersion: 16,
+      );
+
+      expect(logReader.useBothLogDeviceReaders, isFalse);
+    });
+
+    testWithoutContext('syslog only sends flutter messages to stream when useBothLogDeviceReaders is true', () async {
+      processManager.addCommand(
+        FakeCommand(
+            command: <String>[
+              ideviceSyslogPath, '-u', '1234',
+            ],
+            stdout: '''
+Runner(Flutter)[297] <Notice>: A is for ari
+Runner(Flutter)[297] <Notice>: I is for ichigo
+May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/
+May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: This is a test
+May 30 13:56:28 Runner(Flutter)[2037] <Notice>: [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.
+'''
+        ),
+      );
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        usingCISystem: true,
+        majorSdkVersion: 16,
+      );
+      final List<String> lines = await logReader.logLines.toList();
+
+      expect(logReader.useBothLogDeviceReaders, isTrue);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(lines, <String>[
+        'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/',
+        'flutter: This is a test'
+      ]);
+    });
+
+    testWithoutContext('IOSDeviceLogReader uses both syslog and ios-deploy debugger', () async {
+      processManager.addCommand(
+        FakeCommand(
+            command: <String>[
+              ideviceSyslogPath, '-u', '1234',
+            ],
+            stdout: '''
+May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/
+May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: Check for duplicate
+May 30 13:56:28 Runner(Flutter)[2037] <Notice>: [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.
+'''
+        ),
+      );
+
+      final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+        '2023-06-01 12:49:01.445093-0500 Runner[2225:533240] flutter: Check for duplicate',
+        '(lldb) 2023-05-30 13:48:52.461894-0500 Runner[2019:1101495] [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.',
+      ]);
+
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        usingCISystem: true,
+        majorSdkVersion: 16,
+      );
+      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      iosDeployDebugger.logLines = debuggingLogs;
+      logReader.debuggerStream = iosDeployDebugger;
+      final Future<List<String>> logLines = logReader.logLines.toList();
+      final List<String> lines = await logLines;
+
+      expect(logReader.useBothLogDeviceReaders, isTrue);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(lines.length, 3);
+      expect(lines, containsAll(<String>[
+        '(lldb) 2023-05-30 13:48:52.461894-0500 Runner[2019:1101495] [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.',
+        'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/',
+        'flutter: Check for duplicate',
+      ]));
+
+    });
+
+    testWithoutContext('IOSDeviceLogReader only uses ios-deploy debugger when useBothLogDeviceReaders is false', () async {
+      final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+        '(lldb) 2023-05-30 13:48:52.461894-0500 Runner[2019:1101495] [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.',
+        '',
+      ]);
+
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        majorSdkVersion: 16,
+      );
+      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      iosDeployDebugger.logLines = debuggingLogs;
+      logReader.debuggerStream = iosDeployDebugger;
+      final Future<List<String>> logLines = logReader.logLines.toList();
+      final List<String> lines = await logLines;
+
+      expect(logReader.useBothLogDeviceReaders, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(
+        lines.contains(
+          '(lldb) 2023-05-30 13:48:52.461894-0500 Runner[2019:1101495] [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.',
+        ),
+        isTrue,
+      );
     });
   });
 }

@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class AnimatedIconsTestApp extends StatelessWidget {
-  const AnimatedIconsTestApp({Key? key}) : super(key: key);
+  const AnimatedIconsTestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class AnimatedIconsTestApp extends StatelessWidget {
 }
 
 class IconsList extends StatelessWidget {
-  const IconsList({Key? key}) : super(key: key);
+  const IconsList({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class IconsList extends StatelessWidget {
 }
 
 class IconSampleRow extends StatefulWidget {
-  const IconSampleRow(this.sample, {Key? key}) : super(key: key);
+  const IconSampleRow(this.sample, {super.key});
 
   final IconSample sample;
 

@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -353,7 +356,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
-          screenHeight = MediaQuery.of(context).size.height;
+          screenHeight = MediaQuery.sizeOf(context).height;
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
             child: CupertinoActionSheet(
@@ -943,7 +946,7 @@ void main() {
     );
 
     await tester.tap(find.text('Go'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(
       semantics,
@@ -1064,6 +1067,38 @@ void main() {
     // one for the content.
     expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Hovering over Cupertino action sheet action updates cursor to clickable on Web', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+            title: const Text('The title'),
+            message: const Text('Message'),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                child: const Text('One'),
+                onPressed: () { },
+              ),
+            ],
+          )
+        ),
+    );
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    final Offset actionSheetAction = tester.getCenter(find.text('One'));
+    await gesture.moveTo(actionSheetAction);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {

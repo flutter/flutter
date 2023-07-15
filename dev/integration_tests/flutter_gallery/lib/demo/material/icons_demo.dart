@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class IconsDemo extends StatefulWidget {
-  const IconsDemo({Key? key}) : super(key: key);
+  const IconsDemo({super.key});
 
   static const String routeName = '/material/icons';
 
@@ -62,6 +62,7 @@ class IconsDemoState extends State<IconsDemo> {
           bottom: false,
           child: Scrollbar(
             child: ListView(
+              primary: true,
               padding: const EdgeInsets.all(24.0),
               children: <Widget>[
                 _IconsDemoCard(handleIconButtonPress, Icons.face), // direction-agnostic icon
@@ -101,7 +102,7 @@ class _IconsDemoCard extends StatelessWidget {
   TableRow _buildIconRow(double size) {
     return TableRow(
       children: <Widget> [
-        _centeredText('${size.floor().toString()} ${icon.toString()}'),
+        _centeredText('${size.floor()} $icon'),
         _buildIconButton(size, icon, true),
         _buildIconButton(size, icon, false),
       ],
@@ -111,7 +112,7 @@ class _IconsDemoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle textStyle = theme.textTheme.subtitle1!.copyWith(color: theme.textTheme.caption!.color);
+    final TextStyle textStyle = theme.textTheme.titleMedium!.copyWith(color: theme.textTheme.bodySmall!.color);
     return Card(
       child: DefaultTextStyle(
         style: textStyle,
@@ -122,9 +123,9 @@ class _IconsDemoCard extends StatelessWidget {
             children: <TableRow> [
               TableRow(
                 children: <Widget> [
-                  _centeredText('Size ${icon.toString()}'),
-                  _centeredText('Enabled ${icon.toString()}'),
-                  _centeredText('Disabled ${icon.toString()}'),
+                  _centeredText('Size $icon'),
+                  _centeredText('Enabled $icon'),
+                  _centeredText('Disabled $icon'),
                 ]
               ),
               _buildIconRow(18.0),

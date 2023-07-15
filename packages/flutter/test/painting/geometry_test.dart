@@ -15,7 +15,6 @@ void main() {
         childSize: const Size(20.0, 10.0),
         target: const Offset(50.0, 50.0),
         preferBelow: false,
-        verticalOffset: 0.0,
         margin: 0.0,
       ),
       const Offset(40.0, 40.0),
@@ -26,7 +25,6 @@ void main() {
         childSize: const Size(200.0, 10.0),
         target: const Offset(50.0, 50.0),
         preferBelow: false,
-        verticalOffset: 0.0,
         margin: 0.0,
       ),
       const Offset(-50.0, 40.0),
@@ -37,7 +35,6 @@ void main() {
         childSize: const Size(200.0, 10.0),
         target: const Offset(0.0, 50.0),
         preferBelow: false,
-        verticalOffset: 0.0,
         margin: 0.0,
       ),
       const Offset(-50.0, 40.0),
@@ -48,7 +45,6 @@ void main() {
         childSize: const Size(200.0, 10.0),
         target: const Offset(100.0, 50.0),
         preferBelow: false,
-        verticalOffset: 0.0,
         margin: 0.0,
       ),
       const Offset(-50.0, 40.0),
@@ -59,7 +55,6 @@ void main() {
         childSize: const Size(50.0, 10.0),
         target: const Offset(50.0, 50.0),
         preferBelow: false,
-        verticalOffset: 0.0,
         margin: 20.0, // 60.0 left
       ),
       const Offset(25.0, 40.0),
@@ -70,7 +65,6 @@ void main() {
         childSize: const Size(50.0, 10.0),
         target: const Offset(50.0, 50.0),
         preferBelow: false,
-        verticalOffset: 0.0,
         margin: 30.0, // 40.0 left
       ),
       const Offset(25.0, 40.0),
@@ -81,7 +75,6 @@ void main() {
         childSize: const Size(50.0, 10.0),
         target: const Offset(0.0, 50.0),
         preferBelow: false,
-        verticalOffset: 0.0,
         margin: 20.0, // 60.0 left
       ),
       const Offset(20.0, 40.0),
@@ -92,7 +85,6 @@ void main() {
         childSize: const Size(50.0, 10.0),
         target: const Offset(0.0, 50.0),
         preferBelow: false,
-        verticalOffset: 0.0,
         margin: 30.0, // 40.0 left
       ),
       const Offset(25.0, 40.0),
@@ -103,7 +95,6 @@ void main() {
         childSize: const Size(50.0, 10.0),
         target: const Offset(100.0, 50.0),
         preferBelow: false,
-        verticalOffset: 0.0,
         margin: 20.0, // 60.0 left
       ),
       const Offset(30.0, 40.0),
@@ -114,7 +105,6 @@ void main() {
         childSize: const Size(50.0, 10.0),
         target: const Offset(100.0, 50.0),
         preferBelow: false,
-        verticalOffset: 0.0,
         margin: 30.0, // 40.0 left
       ),
       const Offset(25.0, 40.0),

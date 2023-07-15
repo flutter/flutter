@@ -7,10 +7,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-import '../rendering/rendering_tester.dart';
+import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
 class TestSliverChildListDelegate extends SliverChildListDelegate {
-  TestSliverChildListDelegate(List<Widget> children) : super(children);
+  TestSliverChildListDelegate(super.children);
 
   final List<String> log = <String>[];
 
@@ -21,7 +21,7 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
 }
 
 class Alive extends StatefulWidget {
-  const Alive(this.alive, this.index, { Key? key }) : super(key: key);
+  const Alive(this.alive, this.index, { super.key });
   final bool alive;
   final int index;
 
@@ -76,6 +76,79 @@ class _StatefulListViewState extends State<_StatefulListView> {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/100451
+  testWidgets('ListView.builder respects findChildIndexCallback', (WidgetTester tester) async {
+    bool finderCalled = false;
+    int itemCount = 7;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return ListView.builder(
+              itemCount: itemCount,
+              itemBuilder: (BuildContext _, int index) => Container(
+                key: Key('$index'),
+                height: 2000.0,
+              ),
+              findChildIndexCallback: (Key key) {
+                finderCalled = true;
+                return null;
+              },
+            );
+          },
+        ),
+      )
+    );
+    expect(finderCalled, false);
+
+    // Trigger update.
+    stateSetter(() => itemCount = 77);
+    await tester.pump();
+
+    expect(finderCalled, true);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/100451
+  testWidgets('ListView.separator respects findChildIndexCallback', (WidgetTester tester) async {
+    bool finderCalled = false;
+    int itemCount = 7;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return ListView.separated(
+              itemCount: itemCount,
+              itemBuilder: (BuildContext _, int index) => Container(
+                key: Key('$index'),
+                height: 2000.0,
+              ),
+              findChildIndexCallback: (Key key) {
+                finderCalled = true;
+                return null;
+              },
+              separatorBuilder: (BuildContext _, int __) => const Divider(),
+            );
+          },
+        ),
+      )
+    );
+    expect(finderCalled, false);
+
+    // Trigger update.
+    stateSetter(() => itemCount = 77);
+    await tester.pump();
+
+    expect(finderCalled, true);
+  });
+
   testWidgets('ListView default control', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -94,7 +167,7 @@ void main() {
         child: ListView(
           itemExtent: 200.0,
           children: List<Widget>.generate(20, (int i) {
-            return Container(
+            return ColoredBox(
               color: Colors.green,
               child: Text('$i'),
             );
@@ -103,7 +176,7 @@ void main() {
       ),
     );
 
-    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).first);
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(ColoredBox).first);
     expect(box.size.height, equals(200.0));
 
     expect(find.text('0'), findsOneWidget);
@@ -274,9 +347,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 0.0,
+          child: SizedBox.shrink(
             child: ListView(
               padding: const EdgeInsets.all(8.0),
               children: const <Widget>[
@@ -308,6 +379,65 @@ void main() {
 
     expect(find.text('0'), findsOneWidget);
     expect(find.text('19'), findsOneWidget);
+  });
+
+  testWidgets('ListView with shrink wrap in bounded context correctly uses cache extent', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          height: 400,
+          child: ListView(
+            itemExtent: 100.0,
+            shrinkWrap: true,
+            children: List<Widget>.generate(20, (int i) {
+              return Text('Text $i');
+            }),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.text('Text 5')), matchesSemantics());
+    expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 7', skipOffstage: false)), matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 8', skipOffstage: false)), matchesSemantics(isHidden: true));
+    handle.dispose();
+  });
+
+  testWidgets('ListView hidden items should stay hidden if their semantics are updated', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          height: 400,
+          child: ListView(
+            itemExtent: 100.0,
+            shrinkWrap: true,
+            children: List<Widget>.generate(20, (int i) {
+              return Text('Text $i');
+            }),
+          ),
+        ),
+      ),
+    );
+    // Scrollable maybe be marked dirty after layout.
+    await tester.pumpAndSettle();
+    expect(tester.getSemantics(find.text('Text 5')), matchesSemantics());
+    expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 7', skipOffstage: false)), matchesSemantics(isHidden: true));
+    expect(tester.getSemantics(find.text('Text 8', skipOffstage: false)), matchesSemantics(isHidden: true));
+
+    // Marks Text 6 semantics as dirty.
+    final RenderObject text6 = tester.renderObject(find.text('Text 6', skipOffstage: false));
+    text6.markNeedsSemanticsUpdate();
+
+    // Verify the semantics is still hidden.
+    await tester.pump();
+    expect(tester.getSemantics(find.text('Text 6', skipOffstage: false)), matchesSemantics(isHidden: true));
+
+    handle.dispose();
   });
 
   testWidgets('didFinishLayout has correct indices', (WidgetTester tester) async {
@@ -370,7 +500,7 @@ void main() {
             children: <Widget>[
               const Text('top', textDirection: TextDirection.ltr),
               Builder(builder: (BuildContext context) {
-                innerMediaQueryPadding = MediaQuery.of(context).padding;
+                innerMediaQueryPadding = MediaQuery.paddingOf(context);
                 return Container();
               }),
             ],
@@ -532,7 +662,6 @@ void main() {
     final ScrollController controller = ScrollController();
 
     Widget buildListView({ required Axis scrollDirection }) {
-      assert(scrollDirection != null);
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(

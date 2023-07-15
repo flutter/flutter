@@ -28,13 +28,14 @@ void main() {
     TextDirection textDirection = TextDirection.ltr,
   }) {
     return MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Material(
         child: Directionality(
           textDirection: textDirection,
           child: CalendarDatePicker(
             key: key,
             initialDate: initialDate ?? DateTime(2016, DateTime.january, 15),
-            firstDate: firstDate ?? DateTime(2001, DateTime.january, 1),
+            firstDate: firstDate ?? DateTime(2001),
             lastDate: lastDate ?? DateTime(2031, DateTime.december, 31),
             currentDate: currentDate ?? DateTime(2016, DateTime.january, 3),
             onDateChanged: onDateChanged ?? (DateTime date) {},
@@ -65,7 +66,7 @@ void main() {
             key: key,
             selectedDate: selectedDate ?? DateTime(2016, DateTime.january, 15),
             initialDate: initialDate ?? DateTime(2016, DateTime.january, 15),
-            firstDate: firstDate ?? DateTime(2001, DateTime.january, 1),
+            firstDate: firstDate ?? DateTime(2001),
             lastDate: lastDate ?? DateTime(2031, DateTime.december, 31),
             currentDate: currentDate ?? DateTime(2016, DateTime.january, 3),
             onChanged: onChanged ?? (DateTime date) {},
@@ -96,17 +97,17 @@ void main() {
       await tester.tap(previousMonthIcon);
       await tester.pumpAndSettle();
       expect(find.text('December 2015'), findsOneWidget);
-      expect(displayedMonth, equals(DateTime(2015, DateTime.december, 1)));
+      expect(displayedMonth, equals(DateTime(2015, DateTime.december)));
       await tester.tap(previousMonthIcon);
       await tester.pumpAndSettle();
       expect(find.text('November 2015'), findsOneWidget);
-      expect(displayedMonth, equals(DateTime(2015, DateTime.november, 1)));
+      expect(displayedMonth, equals(DateTime(2015, DateTime.november)));
 
       // Go forward a month
       await tester.tap(nextMonthIcon);
       await tester.pumpAndSettle();
       expect(find.text('December 2015'), findsOneWidget);
-      expect(displayedMonth, equals(DateTime(2015, DateTime.december, 1)));
+      expect(displayedMonth, equals(DateTime(2015, DateTime.december)));
     });
 
     testWidgets('Can select a year', (WidgetTester tester) async {
@@ -120,7 +121,7 @@ void main() {
       await tester.tap(find.text('2018'));
       await tester.pumpAndSettle();
       expect(find.text('January 2018'), findsOneWidget);
-      expect(displayedMonth, equals(DateTime(2018, DateTime.january, 1)));
+      expect(displayedMonth, equals(DateTime(2018)));
     });
 
     testWidgets('Selecting date does not change displayed month', (WidgetTester tester) async {
@@ -135,12 +136,12 @@ void main() {
       await tester.tap(nextMonthIcon);
       await tester.pumpAndSettle();
       expect(find.text('April 2020'), findsOneWidget);
-      expect(displayedMonth, equals(DateTime(2020, DateTime.april, 1)));
+      expect(displayedMonth, equals(DateTime(2020, DateTime.april)));
 
       await tester.tap(find.text('25'));
       await tester.pumpAndSettle();
       expect(find.text('April 2020'), findsOneWidget);
-      expect(displayedMonth, equals(DateTime(2020, DateTime.april, 1)));
+      expect(displayedMonth, equals(DateTime(2020, DateTime.april)));
       expect(selectedDate, equals(DateTime(2020, DateTime.april, 25)));
       // There isn't a 31 in April so there shouldn't be one if it is showing April.
       expect(find.text('31'), findsNothing);
@@ -174,7 +175,7 @@ void main() {
       await tester.tap(find.text('2018'));
       await tester.pumpAndSettle();
       expect(find.text('March 2018'), findsOneWidget);
-      expect(displayedMonth, equals(DateTime(2018, DateTime.march, 1)));
+      expect(displayedMonth, equals(DateTime(2018, DateTime.march)));
     });
 
     testWidgets('Can select a year and then a day', (WidgetTester tester) async {
@@ -224,7 +225,7 @@ void main() {
 
       await tester.tap(nextMonthIcon);
       await tester.pumpAndSettle();
-      expect(displayedMonth, equals(DateTime(2017, DateTime.february, 1)));
+      expect(displayedMonth, equals(DateTime(2017, DateTime.february)));
       // Shouldn't be possible to keep going forward into March.
       expect(nextMonthIcon, findsNothing);
 
@@ -232,7 +233,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(previousMonthIcon);
       await tester.pumpAndSettle();
-      expect(displayedMonth, equals(DateTime(2016, DateTime.december, 1)));
+      expect(displayedMonth, equals(DateTime(2016, DateTime.december)));
       // Shouldn't be possible to keep going backward into November.
       expect(previousMonthIcon, findsNothing);
     });
@@ -272,7 +273,7 @@ void main() {
       await tester.pumpAndSettle();
       // Month should be clamped to June as the range starts at June 2016.
       expect(find.text('June 2016'), findsOneWidget);
-      expect(displayedMonth, DateTime(2016, DateTime.june, 1));
+      expect(displayedMonth, DateTime(2016, DateTime.june));
     });
 
     testWidgets('Selecting lastDate year respects lastDate', (WidgetTester tester) async {
@@ -289,7 +290,7 @@ void main() {
       await tester.pumpAndSettle();
       // Month should be clamped to January as the range ends at January 2019.
       expect(find.text('January 2019'), findsOneWidget);
-      expect(displayedMonth, DateTime(2019, DateTime.january, 1));
+      expect(displayedMonth, DateTime(2019));
     });
 
     testWidgets('Only predicate days are selectable', (WidgetTester tester) async {
@@ -337,6 +338,26 @@ void main() {
       );
     });
 
+    testWidgets('currentDate is highlighted even if it is disabled', (WidgetTester tester) async {
+      await tester.pumpWidget(calendarDatePicker(
+        firstDate: DateTime(2016, 1, 3),
+        lastDate: DateTime(2016, 1, 31),
+        currentDate: DateTime(2016, 1, 2), // not between first and last
+        initialDate: DateTime(2016, 1, 5),
+      ));
+      const Color disabledColor = Color(0x61000000); // default disabled color
+      expect(
+        Material.of(tester.element(find.text('2'))),
+        // The current day should be painted with a circle outline.
+        paints
+          ..circle(
+            color: disabledColor,
+            style: PaintingStyle.stroke,
+            strokeWidth: 1.0,
+          ),
+      );
+    });
+
     testWidgets('Selecting date does not switch picker to year selection', (WidgetTester tester) async {
       await tester.pumpWidget(calendarDatePicker(
         initialDate: DateTime(2020, DateTime.may, 10),
@@ -355,7 +376,7 @@ void main() {
       final Key pickerKey = UniqueKey();
       final DateTime initialDate = DateTime(2020, 1, 21);
       final DateTime updatedDate = DateTime(1976, 2, 23);
-      final DateTime firstDate = DateTime(1970, 1, 1);
+      final DateTime firstDate = DateTime(1970);
       final DateTime lastDate = DateTime(2099, 31, 12);
       const Color selectedColor = Color(0xff2196f3); // default primary color
 
@@ -413,7 +434,6 @@ void main() {
 
       await tester.pumpWidget(calendarDatePicker(
         key: pickerKey,
-        initialCalendarMode: DatePickerMode.day,
       ));
       await tester.pumpAndSettle();
 
@@ -578,17 +598,7 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.space);
         await tester.pumpAndSettle();
 
-        // Navigate out of the grid and to the OK button.
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.pumpAndSettle();
-
-        // Activate OK.
-        await tester.sendKeyEvent(LogicalKeyboardKey.space);
-        await tester.pumpAndSettle();
-
-        // Should have selected Jan 18.
+        // Should have selected Jan 19.
         expect(selectedDate, DateTime(2016, DateTime.january, 19));
       });
     });
@@ -648,7 +658,6 @@ void main() {
     group('Semantics', () {
       testWidgets('day mode', (WidgetTester tester) async {
         final SemanticsHandle semantics = tester.ensureSemantics();
-        addTearDown(semantics.dispose);
 
         await tester.pumpWidget(calendarDatePicker());
 
@@ -660,7 +669,7 @@ void main() {
 
         // Prev/Next month buttons.
         expect(tester.getSemantics(previousMonthIcon), matchesSemantics(
-          label: 'Previous month December 2015',
+          tooltip: 'Previous month',
           isButton: true,
           hasTapAction: true,
           isEnabled: true,
@@ -668,7 +677,7 @@ void main() {
           isFocusable: true,
         ));
         expect(tester.getSemantics(nextMonthIcon), matchesSemantics(
-          label: 'Next month February 2016',
+          tooltip: 'Next month',
           isButton: true,
           hasTapAction: true,
           isEnabled: true,
@@ -679,160 +688,190 @@ void main() {
         // Day grid.
         expect(tester.getSemantics(find.text('1')), matchesSemantics(
           label: '1, Friday, January 1, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('2')), matchesSemantics(
           label: '2, Saturday, January 2, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('3')), matchesSemantics(
-          label: '3, Sunday, January 3, 2016',
+          label: '3, Sunday, January 3, 2016, Today',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('4')), matchesSemantics(
           label: '4, Monday, January 4, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('5')), matchesSemantics(
           label: '5, Tuesday, January 5, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('6')), matchesSemantics(
           label: '6, Wednesday, January 6, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('7')), matchesSemantics(
           label: '7, Thursday, January 7, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('8')), matchesSemantics(
           label: '8, Friday, January 8, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('9')), matchesSemantics(
           label: '9, Saturday, January 9, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('10')), matchesSemantics(
           label: '10, Sunday, January 10, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('11')), matchesSemantics(
           label: '11, Monday, January 11, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('12')), matchesSemantics(
           label: '12, Tuesday, January 12, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('13')), matchesSemantics(
           label: '13, Wednesday, January 13, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('14')), matchesSemantics(
           label: '14, Thursday, January 14, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('15')), matchesSemantics(
           label: '15, Friday, January 15, 2016',
+          isButton: true,
           hasTapAction: true,
           isSelected: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('16')), matchesSemantics(
           label: '16, Saturday, January 16, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('17')), matchesSemantics(
           label: '17, Sunday, January 17, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('18')), matchesSemantics(
           label: '18, Monday, January 18, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('19')), matchesSemantics(
           label: '19, Tuesday, January 19, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('20')), matchesSemantics(
           label: '20, Wednesday, January 20, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('21')), matchesSemantics(
           label: '21, Thursday, January 21, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('22')), matchesSemantics(
           label: '22, Friday, January 22, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('23')), matchesSemantics(
           label: '23, Saturday, January 23, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('24')), matchesSemantics(
           label: '24, Sunday, January 24, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('25')), matchesSemantics(
           label: '25, Monday, January 25, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('26')), matchesSemantics(
           label: '26, Tuesday, January 26, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('27')), matchesSemantics(
           label: '27, Wednesday, January 27, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('28')), matchesSemantics(
           label: '28, Thursday, January 28, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('29')), matchesSemantics(
           label: '29, Friday, January 29, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('30')), matchesSemantics(
           label: '30, Saturday, January 30, 2016',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
+        semantics.dispose();
       });
 
       testWidgets('calendar year mode', (WidgetTester tester) async {
         final SemanticsHandle semantics = tester.ensureSemantics();
-        addTearDown(semantics.dispose);
 
         await tester.pumpWidget(calendarDatePicker(
           initialCalendarMode: DatePickerMode.year,
@@ -851,10 +890,11 @@ void main() {
             hasTapAction: true,
             isSelected: year == 2016,
             isFocusable: true,
+            isButton: true,
           ));
         }
+        semantics.dispose();
       });
-
     });
   });
 
@@ -872,7 +912,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('2018'));
       await tester.pumpAndSettle();
-      expect(selectedDate, equals(DateTime(2018, DateTime.january, 1)));
+      expect(selectedDate, equals(DateTime(2018)));
     });
 
     testWidgets('Cannot select disabled year', (WidgetTester tester) async {
@@ -891,7 +931,7 @@ void main() {
       expect(selectedYear, isNull);
       await tester.tap(find.text('2018'));
       await tester.pumpAndSettle();
-      expect(selectedYear, equals(DateTime(2018, DateTime.july, 1)));
+      expect(selectedYear, equals(DateTime(2018, DateTime.july)));
     });
   });
 }

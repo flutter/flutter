@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Platform-specific key event data for Fuchsia.
 ///
@@ -25,9 +28,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
     this.hidUsage = 0,
     this.codePoint = 0,
     this.modifiers = 0,
-  }) : assert(hidUsage != null),
-       assert(codePoint != null),
-       assert(modifiers != null);
+  });
 
   /// The USB HID usage.
   ///
@@ -104,7 +105,6 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   @override
   bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
-    assert(side != null);
     switch (key) {
       case ModifierKey.controlModifier:
         return _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
@@ -158,6 +158,35 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
         return null;
     }
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<int>('hidUsage', hidUsage));
+    properties.add(DiagnosticsProperty<int>('codePoint', codePoint));
+    properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is RawKeyEventDataFuchsia
+        && other.hidUsage == hidUsage
+        && other.codePoint == codePoint
+        && other.modifiers == modifiers;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    hidUsage,
+    codePoint,
+    modifiers,
+  );
 
   // Keyboard modifier masks for Fuchsia modifiers.
 
@@ -272,10 +301,4 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
   static const int modifierMeta = modifierLeftMeta | modifierRightMeta;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataFuchsia')}(hidUsage: $hidUsage, codePoint: $codePoint, modifiers: $modifiers, '
-        'modifiers down: $modifiersPressed)';
-  }
 }

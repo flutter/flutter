@@ -30,7 +30,7 @@ import 'widgets_localizations.dart';
 /// app supports with [MaterialApp.supportedLocales]:
 ///
 /// ```dart
-/// new MaterialApp(
+/// MaterialApp(
 ///   localizationsDelegates: GlobalMaterialLocalizations.delegates,
 ///   supportedLocales: [
 ///     const Locale('en', 'US'), // American English
@@ -97,25 +97,15 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     required intl.DateFormat shortMonthDayFormat,
     required intl.NumberFormat decimalFormat,
     required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : assert(localeName != null),
-       _localeName = localeName,
-       assert(fullYearFormat != null),
+  }) : _localeName = localeName,
        _fullYearFormat = fullYearFormat,
-       assert(compactDateFormat != null),
        _compactDateFormat = compactDateFormat,
-       assert(shortDateFormat != null),
        _shortDateFormat = shortDateFormat,
-       assert(mediumDateFormat != null),
        _mediumDateFormat = mediumDateFormat,
-       assert(longDateFormat != null),
        _longDateFormat = longDateFormat,
-       assert(yearMonthFormat != null),
        _yearMonthFormat = yearMonthFormat,
-       assert(shortMonthDayFormat != null),
        _shortMonthDayFormat = shortMonthDayFormat,
-       assert(decimalFormat != null),
        _decimalFormat = decimalFormat,
-       assert(twoDigitZeroPaddedFormat != null),
        _twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
 
   final String _localeName;
@@ -246,8 +236,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeStartDateSemanticLabelRaw;
 
   @override
-  String dateRangeStartDateSemanticLabel(String fullDate) {
-    return dateRangeStartDateSemanticLabelRaw.replaceFirst(r'$fullDate', fullDate);
+  String dateRangeStartDateSemanticLabel(String formattedDate) {
+    return dateRangeStartDateSemanticLabelRaw.replaceFirst(r'$fullDate', formattedDate);
   }
 
   /// The raw version of [dateRangeEndDateSemanticLabel], with `$fullDate` verbatim
@@ -256,8 +246,19 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeEndDateSemanticLabelRaw;
 
   @override
-  String dateRangeEndDateSemanticLabel(String fullDate) {
-    return dateRangeEndDateSemanticLabelRaw.replaceFirst(r'$fullDate', fullDate);
+  String dateRangeEndDateSemanticLabel(String formattedDate) {
+    return dateRangeEndDateSemanticLabelRaw.replaceFirst(r'$fullDate', formattedDate);
+  }
+
+  /// The raw version of [scrimOnTapHint], with `$modalRouteContentName` verbatim
+  /// in the string.
+  @protected
+  String get scrimOnTapHintRaw;
+
+  @override
+  String scrimOnTapHint(String modalRouteContentName) {
+    final String text = scrimOnTapHintRaw;
+    return text.replaceFirst(r'$modalRouteContentName', modalRouteContentName);
   }
 
   /// The raw version of [aboutListTileTitle], with `$applicationName` verbatim
@@ -287,7 +288,6 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
     String? text = rowCountIsApproximate ? pageRowsInfoTitleApproximateRaw : null;
     text ??= pageRowsInfoTitleRaw;
-    assert(text != null, 'A $_localeName localization was not found for pageRowsInfoTitle or pageRowsInfoTitleApproximate');
     return text
       .replaceFirst(r'$firstRow', formatDecimal(firstRow))
       .replaceFirst(r'$lastRow', formatDecimal(lastRow))
@@ -435,9 +435,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///    the short time pattern used in the `en_US` locale.
   @override
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
-    assert(alwaysUse24HourFormat != null);
-    if (alwaysUse24HourFormat)
+    if (alwaysUse24HourFormat) {
       return _get24HourVersionOf(timeOfDayFormatRaw);
+    }
     return timeOfDayFormatRaw;
   }
 
@@ -646,9 +646,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get remainingTextFieldCharacterCountOther;
 
   @override
-  String remainingTextFieldCharacterCount(int remainingCount) {
+  String remainingTextFieldCharacterCount(int remaining) {
     return intl.Intl.pluralLogic(
-      remainingCount,
+      remaining,
       zero: remainingTextFieldCharacterCountZero,
       one: remainingTextFieldCharacterCountOne,
       two: remainingTextFieldCharacterCountTwo,
@@ -656,7 +656,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
       few: remainingTextFieldCharacterCountFew,
       other: remainingTextFieldCharacterCountOther,
       locale: _localeName,
-    ).replaceFirst(r'$remainingCount', formatDecimal(remainingCount));
+    ).replaceFirst(r'$remainingCount', formatDecimal(remaining));
   }
 
   @override
@@ -681,7 +681,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// app supports with [MaterialApp.supportedLocales]:
   ///
   /// ```dart
-  /// new MaterialApp(
+  /// MaterialApp(
   ///   localizationsDelegates: GlobalMaterialLocalizations.delegates,
   ///   supportedLocales: [
   ///     const Locale('en', 'US'), // English

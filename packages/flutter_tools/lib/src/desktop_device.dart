@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'application_package.dart';
-import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -25,22 +21,19 @@ import 'protocol_discovery.dart';
 /// A partial implementation of Device for desktop-class devices to inherit
 /// from, containing implementations that are common to all desktop devices.
 abstract class DesktopDevice extends Device {
-  DesktopDevice(String identifier, {
-      @required PlatformType platformType,
-      @required bool ephemeral,
-      @required Logger logger,
-      @required ProcessManager processManager,
-      @required FileSystem fileSystem,
-      @required OperatingSystemUtils operatingSystemUtils,
+  DesktopDevice(super.id, {
+      required PlatformType super.platformType,
+      required super.ephemeral,
+      required Logger logger,
+      required ProcessManager processManager,
+      required FileSystem fileSystem,
+      required OperatingSystemUtils operatingSystemUtils,
     }) : _logger = logger,
          _processManager = processManager,
          _fileSystem = fileSystem,
          _operatingSystemUtils = operatingSystemUtils,
          super(
-          identifier,
           category: Category.desktop,
-          platformType: platformType,
-          ephemeral: ephemeral,
         );
 
   final Logger _logger;
@@ -51,7 +44,7 @@ abstract class DesktopDevice extends Device {
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage app, String userIdentifier) {
+  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: _fileSystem);
   }
 
@@ -60,7 +53,7 @@ abstract class DesktopDevice extends Device {
   @override
   Future<bool> isAppInstalled(
     ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
@@ -73,7 +66,7 @@ abstract class DesktopDevice extends Device {
   @override
   Future<bool> installApp(
     ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
@@ -81,14 +74,14 @@ abstract class DesktopDevice extends Device {
   @override
   Future<bool> uninstallApp(
     ApplicationPackage app, {
-    String userIdentifier,
+    String? userIdentifier,
   }) async => true;
 
   @override
   Future<bool> get isLocalEmulator async => false;
 
   @override
-  Future<String> get emulatorId async => null;
+  Future<String?> get emulatorId async => null;
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
@@ -101,7 +94,7 @@ abstract class DesktopDevice extends Device {
 
   @override
   DeviceLogReader getLogReader({
-    ApplicationPackage app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) {
     assert(!includePastLogs, 'Past log reading not supported on desktop.');
@@ -114,73 +107,79 @@ abstract class DesktopDevice extends Device {
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
-    String mainPath,
-    String route,
-    @required DebuggingOptions debuggingOptions,
+    String? mainPath,
+    String? route,
+    required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs = const <String, dynamic>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     if (!prebuiltApplication) {
       await buildForDevice(
-        package,
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
       );
     }
 
     // Ensure that the executable is locatable.
-    final BuildMode buildMode = debuggingOptions?.buildInfo?.mode;
-    final bool traceStartup = platformArgs['trace-startup'] as bool ?? false;
-    final String executable = executablePathForDevice(package, buildMode);
+    final BuildInfo buildInfo = debuggingOptions.buildInfo;
+    final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
+    final String? executable = executablePathForDevice(package, buildInfo);
     if (executable == null) {
       _logger.printError('Unable to find executable to run');
       return LaunchResult.failed();
     }
 
-    final Process process = await _processManager.start(
-      <String>[
-        executable,
-        ...?debuggingOptions?.dartEntrypointArgs,
-      ],
-      environment: _computeEnvironment(debuggingOptions, traceStartup, route),
-    );
+    Process process;
+    final List<String> command = <String>[
+      executable,
+      ...debuggingOptions.dartEntrypointArgs,
+    ];
+    try {
+      process = await _processManager.start(
+        command,
+        environment: _computeEnvironment(debuggingOptions, traceStartup, route),
+      );
+    } on ProcessException catch (e) {
+      _logger.printError('Unable to start executable "${command.join(' ')}": $e');
+      rethrow;
+    }
     _runningProcesses.add(process);
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
 
     _deviceLogReader.initializeProcess(process);
-    if (debuggingOptions?.buildInfo?.isRelease == true) {
+    if (debuggingOptions.buildInfo.isRelease) {
       return LaunchResult.succeeded();
     }
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
-      devicePort: debuggingOptions?.deviceVmServicePort,
-      hostPort: debuggingOptions?.hostVmServicePort,
+    final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_deviceLogReader,
+      devicePort: debuggingOptions.deviceVmServicePort,
+      hostPort: debuggingOptions.hostVmServicePort,
       ipv6: ipv6,
       logger: _logger,
     );
     try {
-      final Uri observatoryUri = await observatoryDiscovery.uri;
-      if (observatoryUri != null) {
-        onAttached(package, buildMode, process);
-        return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      final Uri? vmServiceUri = await vmServiceDiscovery.uri;
+      if (vmServiceUri != null) {
+        onAttached(package, buildInfo, process);
+        return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
       _logger.printError(
         'Error waiting for a debug connection: '
-        'The log reader stopped unexpectedly.',
+        'The log reader stopped unexpectedly, or never started.',
       );
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
     } finally {
-      await observatoryDiscovery.cancel();
+      await vmServiceDiscovery.cancel();
     }
     return LaunchResult.failed();
   }
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
-    String userIdentifier,
+    ApplicationPackage? app, {
+    String? userIdentifier,
   }) async {
     bool succeeded = true;
     // Walk a copy of _runningProcesses, since the exit handler removes from the
@@ -193,23 +192,22 @@ abstract class DesktopDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    await portForwarder?.dispose();
+    await portForwarder.dispose();
   }
 
   /// Builds the current project for this device, with the given options.
-  Future<void> buildForDevice(
-    ApplicationPackage package, {
-    String mainPath,
-    BuildInfo buildInfo,
+  Future<void> buildForDevice({
+    required BuildInfo buildInfo,
+    String? mainPath,
   });
 
   /// Returns the path to the executable to run for [package] on this device for
   /// the given [buildMode].
-  String executablePathForDevice(ApplicationPackage package, BuildMode buildMode);
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo);
 
   /// Called after a process is attached, allowing any device-specific extra
   /// steps to be run.
-  void onAttached(ApplicationPackage package, BuildMode buildMode, Process process) {}
+  void onAttached(ApplicationPackage package, BuildInfo buildInfo, Process process) {}
 
   /// Computes a set of environment variables used to pass debugging information
   /// to the engine without interfering with application level command line
@@ -218,7 +216,7 @@ abstract class DesktopDevice extends Device {
   /// The format of the environment variables is:
   ///   * FLUTTER_ENGINE_SWITCHES to the number of switches.
   ///   * FLUTTER_ENGINE_SWITCH_<N> (indexing from 1) to the individual switches.
-  Map<String, String> _computeEnvironment(DebuggingOptions debuggingOptions, bool traceStartup, String route) {
+  Map<String, String> _computeEnvironment(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
     int flags = 0;
     final Map<String, String> environment = <String, String>{};
 
@@ -231,7 +229,6 @@ abstract class DesktopDevice extends Device {
     }
 
     addFlag('enable-dart-profiling=true');
-    addFlag('enable-background-compilation=true');
 
     if (traceStartup) {
       addFlag('trace-startup=true');
@@ -269,11 +266,18 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.purgePersistentCache) {
       addFlag('purge-persistent-cache=true');
     }
+    switch (debuggingOptions.enableImpeller) {
+      case ImpellerStatus.enabled:
+        addFlag('enable-impeller=true');
+      case ImpellerStatus.disabled:
+      case ImpellerStatus.platformDefault:
+        addFlag('enable-impeller=false');
+    }
     // Options only supported when there is a VM Service connection between the
     // tool and the device, usually in debug or profile mode.
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.deviceVmServicePort != null) {
-        addFlag('observatory-port=${debuggingOptions.deviceVmServicePort}');
+        addFlag('vm-service-port=${debuggingOptions.deviceVmServicePort}');
       }
       if (debuggingOptions.buildInfo.isDebug) {
         addFlag('enable-checked-mode=true');
@@ -308,9 +312,25 @@ class DesktopLogReader extends DeviceLogReader {
 
   /// Begin listening to the stdout and stderr streams of the provided [process].
   void initializeProcess(Process process) {
-    process.stdout.listen(_inputController.add);
-    process.stderr.listen(_inputController.add);
-    process.exitCode.whenComplete(_inputController.close);
+    final StreamSubscription<List<int>> stdoutSub = process.stdout.listen(
+      _inputController.add,
+    );
+    final StreamSubscription<List<int>> stderrSub = process.stderr.listen(
+      _inputController.add,
+    );
+    final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
+      stdoutSub.asFuture<void>(),
+      stderrSub.asFuture<void>(),
+    ]);
+    process.exitCode.whenComplete(() async {
+      // Wait for output to be fully processed.
+      await stdioFuture;
+      // The streams have already completed, so waiting for the stream
+      // cancellation to complete is not needed.
+      unawaited(stdoutSub.cancel());
+      unawaited(stderrSub.cancel());
+      await _inputController.close();
+    });
   }
 
   @override

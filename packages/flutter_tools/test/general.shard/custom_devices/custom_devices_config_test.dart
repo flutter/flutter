@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -25,8 +23,7 @@ void main() {
     final Directory directory = fileSystem.directory('custom_devices_config');
 
     writeCustomDevicesConfigFile(
-      directory,
-      json: null
+      directory
     );
 
     final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
@@ -47,7 +44,7 @@ void main() {
     writeCustomDevicesConfigFile(
       directory,
       json: <String, dynamic>{
-        'test': 'testvalue'
+        'test': 'testvalue',
       }
     );
 
@@ -81,7 +78,7 @@ void main() {
     writeCustomDevicesConfigFile(
       directory,
       json: <dynamic>[
-        testConfigJson
+        testConfigJson,
       ],
     );
 
@@ -108,7 +105,7 @@ void main() {
         copyJsonObjectWith(
           testConfigJson,
           <String, dynamic>{
-            'id': null
+            'id': null,
           },
         ),
       ],
@@ -117,7 +114,7 @@ void main() {
     final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
       fileSystem: fileSystem,
       directory: directory,
-      logger: logger
+      logger: logger,
     );
 
     const String msg = 'Could not load custom device from config index 0: Expected id to be a string.';
@@ -136,7 +133,7 @@ void main() {
         copyJsonObjectWith(
           testConfigJson,
           <String, dynamic>{
-            'id': 1
+            'id': 1,
           },
         ),
       ],
@@ -145,7 +142,7 @@ void main() {
     final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
       fileSystem: fileSystem,
       directory: directory,
-      logger: logger
+      logger: logger,
     );
 
     const String msg = 'Could not load custom device from config index 0: Expected id to be a string.';
@@ -164,7 +161,7 @@ void main() {
         copyJsonObjectWith(
           testConfigJson,
           <String, dynamic>{
-            'label': 1
+            'label': 1,
           },
         ),
       ],
@@ -173,7 +170,7 @@ void main() {
     final CustomDevicesConfig customDevicesConfig = CustomDevicesConfig.test(
       fileSystem: fileSystem,
       directory: directory,
-      logger: logger
+      logger: logger,
     );
 
     const String msg = 'Could not load custom device from config index 0: Expected label to be a string.';
@@ -192,7 +189,7 @@ void main() {
         copyJsonObjectWith(
           testConfigJson,
           <String, dynamic>{
-            'postBuild': null
+            'postBuild': null,
           },
         ),
       ],
@@ -219,7 +216,7 @@ void main() {
           testConfigJson,
           <String, dynamic>{
             'forwardPort': null,
-            'forwardPortSuccessRegex': null
+            'forwardPortSuccessRegex': null,
           },
         ),
       ],
@@ -248,7 +245,7 @@ void main() {
         copyJsonObjectWith(
           testConfigJson,
           <String, dynamic>{
-            'forwardPortSuccessRegex': null
+            'forwardPortSuccessRegex': null,
           },
         ),
       ],

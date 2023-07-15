@@ -46,10 +46,10 @@ class SynonymKeyInfo {
   String get constantName => upperCamelToLowerCamel(name);
 }
 
-/// Generates the keyboard_key.dart based on the information in the key data
+/// Generates the keyboard_key.g.dart based on the information in the key data
 /// structure given to it.
 class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
-  KeyboardKeysCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData) : super(keyData, logicalData);
+  KeyboardKeysCodeGenerator(super.keyData, super.logicalData);
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _physicalDefinitions {
@@ -61,7 +61,7 @@ class KeyboardKeysCodeGenerator extends BaseCodeGenerator {
         '[RawKeyEvent.physicalKey] for more information.');
       lines.add(entry.usbHidCode, '''
 $firstComment  ///
-$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode, digits: 8)});
+$otherComments  static const PhysicalKeyboardKey ${entry.constantName} = PhysicalKeyboardKey(${toHex(entry.usbHidCode)});
 ''');
     }
     return lines.sortedJoin().trimRight();
@@ -71,14 +71,14 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
     final OutputLines<int> lines = OutputLines<int>('Physical debug names');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       lines.add(entry.usbHidCode, '''
-      ${toHex(entry.usbHidCode, digits: 8)}: '${entry.commentName}',''');
+      ${toHex(entry.usbHidCode)}: '${entry.commentName}',''');
     }
     return lines.sortedJoin().trimRight();
   }
 
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
-    final OutputLines<int> lines = OutputLines<int>('Logical debug names');
+    final OutputLines<int> lines = OutputLines<int>('Logical debug names', behavior: DeduplicateBehavior.kSkip);
     void printKey(int flutterId, String constantName, String commentName, {String? otherComments}) {
       final String firstComment = _wrapString('Represents the logical "$commentName" key on the keyboard.');
       otherComments ??= _wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
@@ -114,15 +114,15 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     final StringBuffer result = StringBuffer();
     for (final SynonymKeyInfo synonymInfo in synonyms.values) {
       for (final LogicalKeyEntry key in synonymInfo.keys) {
-        final LogicalKeyEntry synonnym = logicalData.entryByName(synonymInfo.name);
-        result.writeln('    ${key.constantName}: ${synonnym.constantName},');
+        final LogicalKeyEntry synonym = logicalData.entryByName(synonymInfo.name);
+        result.writeln('    ${key.constantName}: ${synonym.constantName},');
       }
     }
     return result.toString();
   }
 
   String get _logicalKeyLabels {
-    final OutputLines<int> lines = OutputLines<int>('Logical key labels');
+    final OutputLines<int> lines = OutputLines<int>('Logical key labels', behavior: DeduplicateBehavior.kSkip);
     for (final LogicalKeyEntry entry in logicalData.entries) {
       lines.add(entry.value, '''
     ${toHex(entry.value, digits: 11)}: '${entry.commentName}',''');
@@ -141,7 +141,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   /// This generates the map of Flutter key codes to logical keys.
   String get _predefinedKeyCodeMap {
-    final OutputLines<int> lines = OutputLines<int>('Logical key map');
+    final OutputLines<int> lines = OutputLines<int>('Logical key map', behavior: DeduplicateBehavior.kSkip);
     for (final LogicalKeyEntry entry in logicalData.entries) {
       lines.add(entry.value, '    ${toHex(entry.value, digits: 11)}: ${entry.constantName},');
     }
@@ -149,7 +149,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   }
 
   String get _maskConstantVariables {
-    final OutputLines<int> lines = OutputLines<int>('Mask constants', checkDuplicate: false);
+    final OutputLines<int> lines = OutputLines<int>('Mask constants', behavior: DeduplicateBehavior.kKeep);
     for (final MaskConstant constant in _maskConstants) {
       lines.add(constant.value, '''
 ${_wrapString(constant.description)}  ///

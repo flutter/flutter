@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
@@ -15,12 +13,13 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
 import 'build_system/targets/common.dart';
+import 'build_system/targets/scene_importer.dart';
+import 'build_system/targets/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'devfs.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 import 'project.dart';
-
 
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
@@ -29,15 +28,15 @@ class BundleBuilder {
   /// The default `mainPath` is `lib/main.dart`.
   /// The default  `manifestPath` is `pubspec.yaml`
   Future<void> build({
-    @required TargetPlatform platform,
-    @required BuildInfo buildInfo,
-    FlutterProject project,
-    String mainPath,
+    required TargetPlatform platform,
+    required BuildInfo buildInfo,
+    FlutterProject? project,
+    String? mainPath,
     String manifestPath = defaultManifestPath,
-    String applicationKernelFilePath,
-    String depfilePath,
-    String assetDirPath,
-    @visibleForTesting BuildSystem buildSystem
+    String? applicationKernelFilePath,
+    String? depfilePath,
+    String? assetDirPath,
+    @visibleForTesting BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath;
@@ -52,7 +51,7 @@ class BundleBuilder {
       buildDir: project.dartTool.childDirectory('flutter_build'),
       cacheDir: globals.cache.getRoot(),
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      engineVersion: globals.artifacts.isLocalEngine
+      engineVersion: globals.artifacts!.isLocalEngine
           ? null
           : globals.flutterVersion.engineRevision,
       defines: <String, String>{
@@ -62,10 +61,11 @@ class BundleBuilder {
         kDeferredComponents: 'false',
         ...buildInfo.toBuildSystemEnvironment(),
       },
-      artifacts: globals.artifacts,
+      artifacts: globals.artifacts!,
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      usage: globals.flutterUsage,
       platform: globals.platform,
       generateDartPluginRegistry: true,
     );
@@ -84,18 +84,12 @@ class BundleBuilder {
       }
       throwToolExit('Failed to build bundle.');
     }
-    if (depfilePath != null) {
-      final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
-      final File outputDepfile = globals.fs.file(depfilePath);
-      if (!outputDepfile.parent.existsSync()) {
-        outputDepfile.parent.createSync(recursive: true);
-      }
-      final DepfileService depfileService = DepfileService(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-      );
-      depfileService.writeToFile(depfile, outputDepfile);
+    final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+    final File outputDepfile = globals.fs.file(depfilePath);
+    if (!outputDepfile.parent.existsSync()) {
+      outputDepfile.parent.createSync(recursive: true);
     }
+    environment.depFileService.writeToFile(depfile, outputDepfile);
 
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
@@ -108,20 +102,19 @@ class BundleBuilder {
   }
 }
 
-Future<AssetBundle> buildAssets({
-  String manifestPath,
-  String assetDirPath,
-  @required String packagesPath,
-  TargetPlatform targetPlatform,
+Future<AssetBundle?> buildAssets({
+  required String manifestPath,
+  String? assetDirPath,
+  String? packagesPath,
+  TargetPlatform? targetPlatform,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= globals.fs.path.absolute(packagesPath);
+  packagesPath ??= globals.fs.path.absolute('.packages');
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
     manifestPath: manifestPath,
-    assetDirPath: assetDirPath,
     packagesPath: packagesPath,
     targetPlatform: targetPlatform,
   );
@@ -135,20 +128,36 @@ Future<AssetBundle> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
-  { Logger loggerOverride }
-) async {
+  Map<String, AssetKind> entryKinds, {
+  Logger? loggerOverride,
+  required TargetPlatform targetPlatform,
+}) async {
   loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
     try {
       bundleDir.deleteSync(recursive: true);
     } on FileSystemException catch (err) {
-      loggerOverride.printError(
+      loggerOverride.printWarning(
         'Failed to clean up asset directory ${bundleDir.path}: $err\n'
         'To clean build artifacts, use the command "flutter clean".'
       );
     }
   }
   bundleDir.createSync(recursive: true);
+
+  final ShaderCompiler shaderCompiler = ShaderCompiler(
+    processManager: globals.processManager,
+    logger: globals.logger,
+    fileSystem: globals.fs,
+    artifacts: globals.artifacts!,
+  );
+
+  final SceneImporter sceneImporter = SceneImporter(
+    processManager: globals.processManager,
+    logger: globals.logger,
+    fileSystem: globals.fs,
+    artifacts: globals.artifacts!,
+  );
 
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
@@ -158,12 +167,40 @@ Future<void> writeBundle(
       try {
         // This will result in strange looking files, for example files with `/`
         // on Windows or files that end up getting URI encoded such as `#.ext`
-        // to `%23.ext`.  However, we have to keep it this way since the
+        // to `%23.ext`. However, we have to keep it this way since the
         // platform channels in the framework will URI encode these values,
         // and the native APIs will look for files this way.
         final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));
+        final AssetKind assetKind = entryKinds[entry.key] ?? AssetKind.regular;
         file.parent.createSync(recursive: true);
-        await file.writeAsBytes(await entry.value.contentsAsBytes());
+        final DevFSContent devFSContent = entry.value;
+        if (devFSContent is DevFSFileContent) {
+          final File input = devFSContent.file as File;
+          bool doCopy = true;
+          switch (assetKind) {
+            case AssetKind.regular:
+              break;
+            case AssetKind.font:
+              break;
+            case AssetKind.shader:
+              doCopy = !await shaderCompiler.compileShader(
+                input: input,
+                outputPath: file.path,
+                target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
+                json: targetPlatform == TargetPlatform.web_javascript,
+              );
+            case AssetKind.model:
+              doCopy = !await sceneImporter.importScene(
+                input: input,
+                outputPath: file.path,
+              );
+          }
+          if (doCopy) {
+            input.copySync(file.path);
+          }
+        } else {
+          await file.writeAsBytes(await entry.value.contentsAsBytes());
+        }
       } finally {
         resource.release();
       }

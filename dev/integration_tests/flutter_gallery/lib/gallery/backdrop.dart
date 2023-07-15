@@ -25,10 +25,9 @@ final Animatable<BorderRadius?> _kFrontHeadingBevelRadius = BorderRadiusTween(
 class _TappableWhileStatusIs extends StatefulWidget {
   const _TappableWhileStatusIs(
     this.status, {
-    Key? key,
     this.controller,
     this.child,
-  }) : super(key: key);
+  });
 
   final AnimationController? controller;
   final AnimationStatus status;
@@ -83,12 +82,11 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
 
 class _CrossFadeTransition extends AnimatedWidget {
   const _CrossFadeTransition({
-    Key? key,
     this.alignment = Alignment.center,
     required Animation<double> progress,
     this.child0,
     this.child1,
-  }) : super(key: key, listenable: progress);
+  }) : super(listenable: progress);
 
   final AlignmentGeometry alignment;
   final Widget? child0;
@@ -134,11 +132,10 @@ class _CrossFadeTransition extends AnimatedWidget {
 
 class _BackAppBar extends StatelessWidget {
   const _BackAppBar({
-    Key? key,
     this.leading = const SizedBox(width: 56.0),
     required this.title,
     this.trailing,
-  }) : super(key: key);
+  });
 
   final Widget leading;
   final Widget title;
@@ -150,7 +147,7 @@ class _BackAppBar extends StatelessWidget {
     return IconTheme.merge(
       data: theme.primaryIconTheme,
       child: DefaultTextStyle(
-        style: theme.primaryTextTheme.headline6!,
+        style: theme.primaryTextTheme.titleLarge!,
         child: SizedBox(
           height: _kBackAppBarHeight,
           child: Row(
@@ -179,14 +176,14 @@ class _BackAppBar extends StatelessWidget {
 
 class Backdrop extends StatefulWidget {
   const Backdrop({
-    Key? key,
+    super.key,
     this.frontAction,
     this.frontTitle,
     this.frontHeading,
     this.frontLayer,
     this.backTitle,
     this.backLayer,
-  }) : super(key: key);
+  });
 
   final Widget? frontAction;
   final Widget? frontTitle;
@@ -244,16 +241,18 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (_controller!.isAnimating || _controller!.status == AnimationStatus.completed)
+    if (_controller!.isAnimating || _controller!.status == AnimationStatus.completed) {
       return;
+    }
 
     final double flingVelocity = details.velocity.pixelsPerSecond.dy / _backdropHeight;
-    if (flingVelocity < 0.0)
+    if (flingVelocity < 0.0) {
       _controller!.fling(velocity: math.max(2.0, -flingVelocity));
-    else if (flingVelocity > 0.0)
+    } else if (flingVelocity > 0.0) {
       _controller!.fling(velocity: math.min(-2.0, -flingVelocity));
-    else
+    } else {
       _controller!.fling(velocity: _controller!.value < 0.5 ? -2.0 : 2.0);
+    }
   }
 
   void _toggleFrontLayer() {

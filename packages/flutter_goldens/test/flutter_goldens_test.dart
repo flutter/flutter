@@ -2,18 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+// See also dev/automated_tests/flutter_test/flutter_gold_test.dart
+
 import 'dart:convert';
-import 'dart:core';
 import 'dart:io' hide Directory;
-import 'dart:typed_data';
-import 'dart:ui' show hashValues, hashList;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -22,29 +20,12 @@ import 'json_templates.dart';
 const String _kFlutterRoot = '/flutter';
 
 // 1x1 transparent pixel
-const List<int> _kTestPngBytes =
-<int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+const List<int> _kTestPngBytes = <int>[
+  137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
   1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 11, 73, 68, 65, 84,
   120, 1, 99, 97, 0, 2, 0, 0, 25, 0, 5, 144, 240, 54, 245, 0, 0, 0, 0, 73, 69,
-  78, 68, 174, 66, 96, 130];
-
-// 1x1 colored pixel
-const List<int> _kFailPngBytes =
-<int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
-  1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 13, 73, 68, 65, 84,
-  120, 1, 99, 249, 207, 240, 255, 63, 0, 7, 18, 3, 2, 164, 147, 160, 197, 0,
-  0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
-
-Future<void> testWithOutput(String name, Future<void> Function() body, String expectedOutput) async {
-  test(name, () async {
-    final StringBuffer output = StringBuffer();
-    void _recordPrint(Zone self, ZoneDelegate parent, Zone zone, String line) {
-      output.write(line);
-    }
-    await runZoned<Future<void>>(body, zoneSpecification: ZoneSpecification(print: _recordPrint));
-    expect(output.toString(), expectedOutput);
-  });
-}
+  78, 68, 174, 66, 96, 130,
+];
 
 void main() {
   late MemoryFileSystem fs;
@@ -76,6 +57,89 @@ void main() {
         process: process,
         platform: platform,
         httpClient: fakeHttpClient,
+      );
+    });
+
+    test('web HTML test', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'GOLDCTL': 'goldctl',
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'FLUTTER_TEST_BROWSER': 'Chrome',
+          'FLUTTER_WEB_RENDERER': 'html',
+        },
+        operatingSystem: 'macos'
+      );
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+        ..createSync(recursive: true);
+
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'add',
+          '--work-dir', '/workDirectory/temp',
+          '--test-name', 'golden_file_test',
+          '--png-file', '/workDirectory/temp/golden_file_test.png',
+          '--passfail',
+          '--add-test-optional-key', 'image_matching_algorithm:fuzzy',
+          '--add-test-optional-key', 'fuzzy_max_different_pixels:20',
+          '--add-test-optional-key', 'fuzzy_pixel_delta_threshold:4',
+        ],
+        null,
+      );
+      process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
+
+      expect(
+        await skiaClient.imgtestAdd('golden_file_test.png', goldenFile),
+        isTrue,
+      );
+    });
+
+    test('web CanvasKit test', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'GOLDCTL': 'goldctl',
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'FLUTTER_TEST_BROWSER': 'Chrome',
+          'FLUTTER_WEB_RENDERER': 'canvaskit',
+        },
+        operatingSystem: 'macos'
+      );
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+        ..createSync(recursive: true);
+
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'add',
+          '--work-dir', '/workDirectory/temp',
+          '--test-name', 'golden_file_test',
+          '--png-file', '/workDirectory/temp/golden_file_test.png',
+          '--passfail',
+        ],
+        null,
+      );
+      process.processResults[goldctlInvocation] = ProcessResult(123, 0, '', '');
+
+      expect(
+        await skiaClient.imgtestAdd('golden_file_test.png', goldenFile),
+        isTrue,
       );
     });
 
@@ -117,7 +181,7 @@ void main() {
         httpClient: fakeHttpClient,
       );
 
-      process.fallbackProcessResult = ProcessResult(123, 1, 'fail', 'fail');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
 
       expect(
         skiaClient.auth(),
@@ -142,8 +206,6 @@ void main() {
         httpClient: fakeHttpClient,
       );
 
-      process.fallbackProcessResult = ProcessResult(123, 1, 'fail', 'fail');
-
       const RunInvocation gitInvocation = RunInvocation(
         <String>['git', 'rev-parse', 'HEAD'],
         '/flutter',
@@ -162,10 +224,156 @@ void main() {
         null,
       );
       process.processResults[gitInvocation] = ProcessResult(12345678, 0, '12345678', '');
-      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'fail', 'fail');
+      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
 
       expect(
         skiaClient.imgtestInit(),
+        throwsException,
+      );
+    });
+
+    test('Only calls init once', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLDCTL' : 'goldctl',
+        },
+        operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      const RunInvocation gitInvocation = RunInvocation(
+        <String>['git', 'rev-parse', 'HEAD'],
+        '/flutter',
+      );
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'init',
+          '--instance', 'flutter',
+          '--work-dir', '/workDirectory/temp',
+          '--commit', '1234',
+          '--keys-file', '/workDirectory/keys.json',
+          '--failure-file', '/workDirectory/failures.json',
+          '--passfail',
+        ],
+        null,
+      );
+      process.processResults[gitInvocation] = ProcessResult(1234, 0, '1234', '');
+      process.processResults[goldctlInvocation] = ProcessResult(5678, 0, '5678', '');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
+
+      // First call
+      await skiaClient.imgtestInit();
+
+      // Remove fake process result.
+      // If the init call is executed again, the fallback process will throw.
+      process.processResults.remove(goldctlInvocation);
+
+      // Second call
+      await skiaClient.imgtestInit();
+    });
+
+    test('Only calls tryjob init once', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLDCTL' : 'goldctl',
+          'SWARMING_TASK_ID' : '4ae997b50dfd4d11',
+          'LOGDOG_STREAM_PREFIX' : 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
+          'GOLD_TRYJOB' : 'refs/pull/49815/head',
+        },
+        operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      const RunInvocation gitInvocation = RunInvocation(
+        <String>['git', 'rev-parse', 'HEAD'],
+        '/flutter',
+      );
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'init',
+          '--instance', 'flutter',
+          '--work-dir', '/workDirectory/temp',
+          '--commit', '1234',
+          '--keys-file', '/workDirectory/keys.json',
+          '--failure-file', '/workDirectory/failures.json',
+          '--passfail',
+          '--crs', 'github',
+          '--patchset_id', '1234',
+          '--changelist', '49815',
+          '--cis', 'buildbucket',
+          '--jobid', '8885996262141582672',
+        ],
+        null,
+      );
+      process.processResults[gitInvocation] = ProcessResult(1234, 0, '1234', '');
+      process.processResults[goldctlInvocation] = ProcessResult(5678, 0, '5678', '');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
+
+      // First call
+      await skiaClient.tryjobInit();
+
+      // Remove fake process result.
+      // If the init call is executed again, the fallback process will throw.
+      process.processResults.remove(goldctlInvocation);
+
+      // Second call
+      await skiaClient.tryjobInit();
+    });
+
+    test('throws for error state from imgtestAdd', () {
+      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+        ..createSync(recursive: true);
+      platform = FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ROOT': _kFlutterRoot,
+            'GOLDCTL' : 'goldctl',
+          },
+          operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'add',
+          '--work-dir', '/workDirectory/temp',
+          '--test-name', 'golden_file_test',
+          '--png-file', '/workDirectory/temp/golden_file_test.png',
+          '--passfail',
+        ],
+        null,
+      );
+      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
+
+      expect(
+        skiaClient.imgtestAdd('golden_file_test', goldenFile),
         throwsException,
       );
     });
@@ -204,7 +412,7 @@ void main() {
       );
     });
 
-    test('Creates traceID correctly', () {
+    test('Creates traceID correctly', () async {
       String traceID;
       platform = FakePlatform(
         environment: <String, String>{
@@ -226,10 +434,9 @@ void main() {
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
-
       expect(
         traceID,
-        equals(',CI=luci,Platform=linux,name=flutter.golden.1,source_type=flutter,'),
+        equals('ae18c7a6aa48e0685525dfe8fdf79003'),
       );
 
       // Browser
@@ -254,10 +461,9 @@ void main() {
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
-
       expect(
         traceID,
-        equals(',Browser=chrome,CI=luci,Platform=linux,name=flutter.golden.1,source_type=flutter,'),
+        equals('e9d5c296c48e7126808520e9cc191243'),
       );
 
       // Locally - should defer to luci traceID
@@ -277,10 +483,97 @@ void main() {
       );
 
       traceID = skiaClient.getTraceID('flutter.golden.1');
-
       expect(
         traceID,
-        equals(',CI=luci,Platform=macos,name=flutter.golden.1,source_type=flutter,'),
+        equals('9968695b9ae78cdb77cbb2be621ca2d6'),
+      );
+    });
+
+    test('throws for error state from imgtestAdd', () {
+      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+        ..createSync(recursive: true);
+      platform = FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ROOT': _kFlutterRoot,
+            'GOLDCTL' : 'goldctl',
+          },
+          operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'add',
+          '--work-dir', '/workDirectory/temp',
+          '--test-name', 'golden_file_test',
+          '--png-file', '/workDirectory/temp/golden_file_test.png',
+          '--passfail',
+        ],
+        null,
+      );
+      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
+
+      expect(
+          skiaClient.imgtestAdd('golden_file_test', goldenFile),
+        throwsA(
+          isA<SkiaException>().having((SkiaException error) => error.message,
+            'message',
+            contains('result-state.json'),
+          ),
+        ),
+      );
+    });
+
+    test('throws for error state from tryjobAdd', () {
+      final File goldenFile = fs.file('/workDirectory/temp/golden_file_test.png')
+        ..createSync(recursive: true);
+      platform = FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ROOT': _kFlutterRoot,
+            'GOLDCTL' : 'goldctl',
+          },
+          operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: fakeHttpClient,
+      );
+
+      const RunInvocation goldctlInvocation = RunInvocation(
+        <String>[
+          'goldctl',
+          'imgtest', 'add',
+          '--work-dir', '/workDirectory/temp',
+          '--test-name', 'golden_file_test',
+          '--png-file', '/workDirectory/temp/golden_file_test.png',
+          '--passfail',
+        ],
+        null,
+      );
+      process.processResults[goldctlInvocation] = ProcessResult(123, 1, 'Expected failure', 'Expected failure');
+      process.fallbackProcessResult = ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
+
+      expect(
+        skiaClient.tryjobAdd('golden_file_test', goldenFile),
+        throwsA(
+          isA<SkiaException>().having((SkiaException error) => error.message,
+            'message',
+            contains('result-state.json'),
+          ),
+        ),
       );
     });
 
@@ -308,7 +601,7 @@ void main() {
   });
 
   group('FlutterGoldenFileComparator', () {
-    late FlutterPostSubmitFileComparator comparator;
+    late FlutterGoldenFileComparator comparator;
 
     setUp(() {
       final Directory basedir = fs.directory('flutter/test/library/')
@@ -342,10 +635,32 @@ void main() {
       expect(key, Uri.parse('foo.png'));
     });
 
-    group('Post-Submit', () {
+    test('adds namePrefix', () async {
+      const String libraryName = 'sidedishes';
+      const String namePrefix = 'tomatosalad';
+      const String fileName = 'lettuce.png';
       final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
+      final Directory basedir = fs.directory('flutter/test/$libraryName/')
+        ..createSync(recursive: true);
+      final FlutterGoldenFileComparator comparator = FlutterPostSubmitFileComparator(
+        basedir.uri,
+        fakeSkiaClient,
+        fs: fs,
+        platform: platform,
+        namePrefix: namePrefix,
+      );
+      await comparator.compare(
+        Uint8List.fromList(_kTestPngBytes),
+        Uri.parse(fileName),
+      );
+      expect(fakeSkiaClient.testNames.single, '$namePrefix.$libraryName.$fileName');
+    });
+
+    group('Post-Submit', () {
+      late FakeSkiaGoldClient fakeSkiaClient;
 
       setUp(() {
+        fakeSkiaClient = FakeSkiaGoldClient();
         final Directory basedir = fs.directory('flutter/test/library/')
           ..createSync(recursive: true);
         comparator = FlutterPostSubmitFileComparator(
@@ -356,6 +671,44 @@ void main() {
         );
       });
 
+      test('asserts .png format', () async {
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
+            ),
+          ),
+        );
+      });
+
+      test('calls init during compare', () {
+        expect(fakeSkiaClient.initCalls, 0);
+        comparator.compare(
+          Uint8List.fromList(_kTestPngBytes),
+          Uri.parse('flutter.golden_test.1.png'),
+        );
+        expect(fakeSkiaClient.initCalls, 1);
+      });
+
+      test('does not call init in during construction', () {
+        expect(fakeSkiaClient.initCalls, 0);
+        FlutterPostSubmitFileComparator.fromDefaultComparator(
+          platform,
+          goldens: fakeSkiaClient,
+        );
+        expect(fakeSkiaClient.initCalls, 0);
+      });
+
       group('correctly determines testing environment', () {
         test('returns true for configured Luci', () {
           platform = FakePlatform(
@@ -364,7 +717,7 @@ void main() {
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -378,7 +731,7 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -392,9 +745,9 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
-              'GOLD_TRYJOB' : 'git/ref/12345/head'
+              'GOLD_TRYJOB' : 'git/ref/12345/head',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -409,9 +762,9 @@ void main() {
               'CIRRUS_CI': 'true',
               'CIRRUS_PR': '',
               'CIRRUS_BRANCH': 'master',
-              'GOLD_SERVICE_ACCOUNT': 'service account...'
+              'GOLD_SERVICE_ACCOUNT': 'service account...',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -422,6 +775,58 @@ void main() {
     });
 
     group('Pre-Submit', () {
+      late FakeSkiaGoldClient fakeSkiaClient;
+
+      setUp(() {
+        fakeSkiaClient = FakeSkiaGoldClient();
+        final Directory basedir = fs.directory('flutter/test/library/')
+          ..createSync(recursive: true);
+        comparator = FlutterPreSubmitFileComparator(
+          basedir.uri,
+          fakeSkiaClient,
+          fs: fs,
+          platform: platform,
+        );
+      });
+
+      test('asserts .png format', () async {
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
+            ),
+          ),
+        );
+      });
+
+      test('calls init during compare', () {
+        expect(fakeSkiaClient.tryInitCalls, 0);
+        comparator.compare(
+          Uint8List.fromList(_kTestPngBytes),
+          Uri.parse('flutter.golden_test.1.png'),
+        );
+        expect(fakeSkiaClient.tryInitCalls, 1);
+      });
+
+      test('does not call init in during construction', () {
+        expect(fakeSkiaClient.tryInitCalls, 0);
+        FlutterPostSubmitFileComparator.fromDefaultComparator(
+          platform,
+          goldens: fakeSkiaClient,
+        );
+        expect(fakeSkiaClient.tryInitCalls, 0);
+      });
+
       group('correctly determines testing environment', () {
         test('returns true for Luci', () {
           platform = FakePlatform(
@@ -429,9 +834,9 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
-              'GOLD_TRYJOB' : 'git/ref/12345/head'
+              'GOLD_TRYJOB' : 'git/ref/12345/head',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -444,7 +849,7 @@ void main() {
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -457,9 +862,9 @@ void main() {
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
-              'GOLD_TRYJOB' : 'git/ref/12345/head'
+              'GOLD_TRYJOB' : 'git/ref/12345/head',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -474,7 +879,7 @@ void main() {
               'SWARMING_TASK_ID' : '12345678990',
               'GOLDCTL' : 'goldctl',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -489,9 +894,9 @@ void main() {
               'CIRRUS_CI': 'true',
               'CIRRUS_PR': '',
               'CIRRUS_BRANCH': 'master',
-              'GOLD_SERVICE_ACCOUNT': 'service account...'
+              'GOLD_SERVICE_ACCOUNT': 'service account...',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
@@ -509,7 +914,7 @@ void main() {
               'FLUTTER_ROOT': _kFlutterRoot,
               'CIRRUS_CI' : 'yep',
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
@@ -536,7 +941,7 @@ void main() {
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
             },
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           );
           expect(
             FlutterSkippingFileComparator.isAvailableForEnvironment(
@@ -560,15 +965,34 @@ void main() {
           fs: fs,
           platform: FakePlatform(
             environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
-            operatingSystem: 'macos'
+            operatingSystem: 'macos',
           ),
         );
 
         const String hash = '55109a4bed52acc780530f7a9aeff6c0';
         fakeSkiaClient.expectationForTestValues['flutter.golden_test.1'] = hash;
-        fakeSkiaClient.expectationForTestValues['flutter.new_golden_test.1'] = '';
         fakeSkiaClient.imageBytesValues[hash] =_kTestPngBytes;
         fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] = 'flutter.golden_test.1';
+      });
+
+      test('asserts .png format', () async {
+        await expectLater(
+          () async {
+            return comparator.compare(
+              Uint8List.fromList(_kTestPngBytes),
+              Uri.parse('flutter.golden_test.1'),
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description',
+              contains(
+                'Golden files in the Flutter framework must end with the file '
+                'extension .png.'
+              ),
+            ),
+          ),
+        );
       });
 
       test('passes when bytes match', () async {
@@ -579,48 +1003,6 @@ void main() {
           ),
           isTrue,
         );
-      });
-
-      testWithOutput('passes non-existent baseline for new test, null expectation', () async {
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.new_golden_test.1'),
-          ),
-          isTrue,
-        );
-      }, 'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.1. '
-         'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
-         'Validate image output found at flutter/test/library/'
-      );
-
-      testWithOutput('passes non-existent baseline for new test, empty expectation', () async {
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.new_golden_test.2'),
-          ),
-          isTrue,
-        );
-      }, 'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.2. '
-        'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
-        'Validate image output found at flutter/test/library/'
-      );
-
-      test('compare properly awaits validation & output before failing.', () async {
-        final Completer<bool> completer = Completer<bool>();
-        final Future<bool> result = comparator.compare(
-          Uint8List.fromList(_kFailPngBytes),
-          Uri.parse('flutter.golden_test.1.png'),
-        );
-        bool shouldThrow = true;
-        result.then((_) {
-          if (shouldThrow)
-            fail('Compare completed before validation completed!');
-        });
-        await Future<void>.value();
-        shouldThrow = false;
-        completer.complete(Future<bool>.value(false));
       });
 
       test('returns FlutterSkippingGoldenFileComparator when network connection is unavailable', () async {
@@ -645,6 +1027,8 @@ void main() {
           baseDirectory: fakeDirectory,
         );
         expect(comparator.runtimeType, FlutterSkippingFileComparator);
+        // reset property or it will carry on to other tests
+        fakeSkiaClient.getExpectationForTestThrowable = null;
       });
     });
   });
@@ -658,7 +1042,7 @@ class RunInvocation {
   final String? workingDirectory;
 
   @override
-  int get hashCode => hashValues(hashList(command), workingDirectory);
+  int get hashCode => Object.hash(Object.hashAll(command), workingDirectory);
 
   bool _commandEquals(List<String> other) {
     if (other == command) {
@@ -704,23 +1088,23 @@ class FakeProcessManager extends Fake implements ProcessManager {
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
-    Encoding stdoutEncoding = systemEncoding,
-    Encoding stderrEncoding = systemEncoding,
+    Encoding? stdoutEncoding = systemEncoding,
+    Encoding? stderrEncoding = systemEncoding,
   }) async {
     workingDirectories.add(workingDirectory);
     final ProcessResult? result = processResults[RunInvocation(command.cast<String>(), workingDirectory)];
     if (result == null && fallbackProcessResult == null) {
-      // Throwing here might gobble up the exception message if a test fails.
-      print('ProcessManager.run was called with $command ($workingDirectory) unexpectedly - $processResults.');
+      printOnFailure('ProcessManager.run was called with $command ($workingDirectory) unexpectedly - $processResults.');
       fail('See above.');
     }
     return result ?? fallbackProcessResult!;
   }
 }
 
+// See also dev/automated_tests/flutter_test/flutter_gold_test.dart
 class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   Map<String, String> expectationForTestValues = <String, String>{};
-  Object? getExpectationForTestThrowable;
+  Exception? getExpectationForTestThrowable;
   @override
   Future<String> getExpectationForTest(String testName) async {
     if (getExpectationForTestThrowable != null) {
@@ -728,6 +1112,26 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
     }
     return expectationForTestValues[testName] ?? '';
   }
+
+  @override
+  Future<void> auth() async {}
+
+  final List<String> testNames = <String>[];
+
+  int initCalls = 0;
+  @override
+  Future<void> imgtestInit() async => initCalls += 1;
+  @override
+  Future<bool> imgtestAdd(String testName, File goldenFile) async {
+    testNames.add(testName);
+    return true;
+  }
+
+  int tryInitCalls = 0;
+  @override
+  Future<void> tryjobInit() async => tryInitCalls += 1;
+  @override
+  Future<bool> tryjobAdd(String testName, File goldenFile) async => true;
 
   Map<String, List<int>> imageBytesValues = <String, List<int>>{};
   @override
@@ -769,23 +1173,6 @@ class FakeHttpClientRequest extends Fake implements HttpClientRequest {
   @override
   Future<HttpClientResponse> close() async {
     return response;
-  }
-}
-
-class FakeHttpClientResponse extends Fake implements HttpClientResponse {
-  FakeHttpClientResponse(this.response);
-
-  final List<int> response;
-
-  @override
-  StreamSubscription<List<int>> listen(
-    void Function(List<int> event)? onData, {
-      Function? onError,
-      void Function()? onDone,
-      bool? cancelOnError,
-    }) {
-    return Stream<List<int>>.fromFuture(Future<List<int>>.value(response))
-      .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 }
 

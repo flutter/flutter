@@ -62,8 +62,9 @@ class _DepthFirstChildIterator implements Iterator<Element> {
 
   @override
   bool moveNext() {
-    if (_stack.isEmpty)
+    if (_stack.isEmpty) {
       return false;
+    }
 
     _current = _stack.removeLast();
     _fillChildren(_current);
@@ -72,7 +73,6 @@ class _DepthFirstChildIterator implements Iterator<Element> {
   }
 
   void _fillChildren(Element element) {
-    assert(element != null);
     // If we did not have to follow LTR order and could instead use RTL,
     // we could avoid reversing this and the operation would be measurably
     // faster. Unfortunately, a lot of tests depend on LTR order.

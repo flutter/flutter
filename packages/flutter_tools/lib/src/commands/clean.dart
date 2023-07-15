@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:meta/meta.dart';
 
+import '../../src/macos/xcode.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -19,6 +19,10 @@ class CleanCommand extends FlutterCommand {
     bool verbose = false,
   }) : _verbose = verbose {
     requiresPubspecYaml();
+    argParser.addOption(
+      'scheme',
+      help: 'When cleaning Xcode schemes, clean only the specified scheme.',
+    );
   }
 
   final bool _verbose;
@@ -30,6 +34,9 @@ class CleanCommand extends FlutterCommand {
   final String description = 'Delete the build/ and .dart_tool/ directories.';
 
   @override
+  String get category => FlutterCommandCategory.project;
+
+  @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   @override
@@ -37,7 +44,8 @@ class CleanCommand extends FlutterCommand {
     // Clean Xcode to remove intermediate DerivedData artifacts.
     // Do this before removing ephemeral directory, which would delete the xcworkspace.
     final FlutterProject flutterProject = FlutterProject.current();
-    if (globals.xcode.isInstalledAndMeetsVersionCheck) {
+    final Xcode? xcode = globals.xcode;
+    if (xcode != null && xcode.isInstalledAndMeetsVersionCheck) {
       await _cleanXcode(flutterProject.ios);
       await _cleanXcode(flutterProject.macos);
     }
@@ -68,22 +76,39 @@ class CleanCommand extends FlutterCommand {
   }
 
   Future<void> _cleanXcode(XcodeBasedProject xcodeProject) async {
-    if (!xcodeProject.existsSync()) {
+    final Directory? xcodeWorkspace = xcodeProject.xcodeWorkspace;
+    if (xcodeWorkspace == null) {
       return;
     }
     final Status xcodeStatus = globals.logger.startProgress(
       'Cleaning Xcode workspace...',
     );
     try {
-      final Directory xcodeWorkspace = xcodeProject.xcodeWorkspace;
-      final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
-      for (final String scheme in projectInfo.schemes) {
-        await globals.xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme, verbose: _verbose);
+      final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter!;
+      final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path))!;
+      if (argResults?.wasParsed('scheme') ?? false) {
+        final String scheme = argResults!['scheme'] as String;
+        if (scheme.isEmpty) {
+          throwToolExit('No scheme was specified for --scheme');
+        }
+        if (!projectInfo.schemes.contains(scheme)) {
+          throwToolExit('Scheme "$scheme" not found in ${projectInfo.schemes}');
+        }
+        await xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme, verbose: _verbose);
+      } else {
+        for (final String scheme in projectInfo.schemes) {
+          await xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme, verbose: _verbose);
+        }
       }
     } on Exception catch (error) {
-      globals.printTrace('Could not clean Xcode workspace: $error');
+      final String message = 'Could not clean Xcode workspace: $error';
+      if (argResults?.wasParsed('scheme') ?? false) {
+        throwToolExit(message);
+      } else {
+        globals.printTrace(message);
+      }
     } finally {
-      xcodeStatus?.stop();
+      xcodeStatus.stop();
     }
   }
 
@@ -106,8 +131,7 @@ class CleanCommand extends FlutterCommand {
     } on FileSystemException catch (error) {
       final String path = file.path;
       if (globals.platform.isWindows) {
-        globals.printError(
-          'Failed to remove $path. '
+        globals.printError('Failed to remove $path. '
             'A program may still be using a file in the directory or the directory itself. '
             'To find and stop such a program, see: '
             'https://superuser.com/questions/1333118/cant-delete-empty-folder-because-it-is-used');

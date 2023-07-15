@@ -39,7 +39,6 @@ void main() {
   );
   // Finally, we center the spinning green square...
   final RenderBox root = RenderPositionedBox(
-    alignment: Alignment.center,
     child: spin,
   );
   // and attach it to the window.

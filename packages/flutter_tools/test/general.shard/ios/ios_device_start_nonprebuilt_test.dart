@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -23,7 +21,6 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -54,8 +51,12 @@ const List<String> kRunReleaseArgs = <String>[
   'BUILD_DIR=/build/ios',
   '-sdk',
   'iphoneos',
+  '-destination',
+  'id=123',
   'ONLY_ACTIVE_ARCH=YES',
   'ARCHS=arm64',
+  '-resultBundlePath', '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle',
+  '-resultBundleVersion', '3',
   'FLUTTER_SUPPRESS_ANALYTICS=true',
   'COMPILER_INDEX_STORE_ENABLE=NO',
 ];
@@ -72,8 +73,8 @@ final FakePlatform macPlatform = FakePlatform(
 );
 
 void main() {
-  Artifacts artifacts;
-  String iosDeployPath;
+  late Artifacts artifacts;
+  late String iosDeployPath;
 
   setUp(() {
     artifacts = Artifacts.test();
@@ -81,21 +82,91 @@ void main() {
   });
 
   group('IOSDevice.startApp succeeds in release mode', () {
-    FileSystem fileSystem;
-    FakeProcessManager processManager;
-    BufferLogger logger;
-    Xcode xcode;
-    FakeXcodeProjectInterpreter fakeXcodeProjectInterpreter;
+    late FileSystem fileSystem;
+    late FakeProcessManager processManager;
+    late BufferLogger logger;
+    late Xcode xcode;
+    late FakeXcodeProjectInterpreter fakeXcodeProjectInterpreter;
+    late XcodeProjectInfo projectInfo;
 
     setUp(() {
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
       processManager = FakeProcessManager.empty();
-      fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
+      projectInfo = XcodeProjectInfo(
+        <String>['Runner'],
+        <String>['Debug', 'Release'],
+        <String>['Runner'],
+        logger,
+      );
+      fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(projectInfo: projectInfo);
       xcode = Xcode.test(processManager: FakeProcessManager.any(), xcodeProjectInterpreter: fakeXcodeProjectInterpreter);
       fileSystem.file('foo/.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
+    });
+
+    testUsingContext('missing TARGET_BUILD_DIR', () async {
+      final IOSDevice iosDevice = setUpIOSDevice(
+        fileSystem: fileSystem,
+        processManager: processManager,
+        logger: logger,
+        artifacts: artifacts,
+      );
+      setUpIOSProject(fileSystem);
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
+      final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App.app');
+
+      processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+      processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
+
+      final LaunchResult launchResult = await iosDevice.startApp(
+        buildableIOSApp,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        platformArgs: <String, Object>{},
+      );
+
+      expect(launchResult.started, false);
+      expect(logger.errorText, contains('Xcode build is missing expected TARGET_BUILD_DIR build setting'));
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      Platform: () => macPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(buildSettings: const <String, String>{
+        'WRAPPER_NAME': 'My Super Awesome App.app',
+        'DEVELOPMENT_TEAM': '3333CCCC33',
+      }, projectInfo: projectInfo),
+      Xcode: () => xcode,
+    });
+
+    testUsingContext('missing project info', () async {
+      final IOSDevice iosDevice = setUpIOSDevice(
+        fileSystem: fileSystem,
+        processManager: FakeProcessManager.any(),
+        logger: logger,
+        artifacts: artifacts,
+      );
+      setUpIOSProject(fileSystem);
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
+      final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App.app');
+
+      final LaunchResult launchResult = await iosDevice.startApp(
+        buildableIOSApp,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        platformArgs: <String, Object>{},
+      );
+
+      expect(launchResult.started, false);
+      expect(logger.errorText, contains('Xcode project not found'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      Platform: () => macPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
+      Xcode: () => xcode,
     });
 
     testUsingContext('with buildable app', () async {
@@ -114,6 +185,7 @@ void main() {
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
       processManager.addCommand(const FakeCommand(command: <String>[
         'rsync',
+        '-8',
         '-av',
         '--delete',
         'build/ios/Release-iphoneos/My Super Awesome App.app',
@@ -133,8 +205,7 @@ void main() {
           '--args',
           const <String>[
             '--enable-dart-profiling',
-            '--disable-service-auth-codes',
-          ].join(' ')
+          ].join(' '),
         ])
       );
 
@@ -190,7 +261,7 @@ void main() {
           const <String>[
             '--enable-dart-profiling',
             '--disable-service-auth-codes',
-          ].join(' ')
+          ].join(' '),
         ])
       );
 
@@ -214,7 +285,7 @@ void main() {
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
       Xcode: () => xcode,
-    }, skip: true); // TODO(jonahwilliams): clean up with https://github.com/flutter/flutter/issues/60675
+    }, skip: true); // TODO(zanderso): clean up with https://github.com/flutter/flutter/issues/60675
   });
 }
 
@@ -230,10 +301,10 @@ void setUpIOSProject(FileSystem fileSystem) {
 
 IOSDevice setUpIOSDevice({
   String sdkVersion = '13.0.1',
-  FileSystem fileSystem,
-  Logger logger,
-  ProcessManager processManager,
-  Artifacts artifacts,
+  FileSystem? fileSystem,
+  Logger? logger,
+  ProcessManager? processManager,
+  Artifacts? artifacts,
 }) {
   artifacts ??= Artifacts.test();
   final Cache cache = Cache.test(
@@ -244,7 +315,8 @@ IOSDevice setUpIOSDevice({
   );
 
   logger ??= BufferLogger.test();
-  return IOSDevice('123',
+  return IOSDevice(
+    '123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
@@ -265,11 +337,25 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     cpuArchitecture: DarwinArch.arm64,
-    interfaceType: IOSDeviceInterface.usb,
+    connectionInterface: DeviceConnectionInterface.attached,
+    isConnected: true,
+    devModeEnabled: true,
   );
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+  FakeXcodeProjectInterpreter({
+    this.projectInfo,
+    this.buildSettings = const <String, String>{
+      'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
+      'WRAPPER_NAME': 'My Super Awesome App.app',
+      'DEVELOPMENT_TEAM': '3333CCCC33',
+    },
+  });
+
+  final Map<String, String> buildSettings;
+  final XcodeProjectInfo? projectInfo;
+
   @override
   final bool isInstalled = true;
 
@@ -277,29 +363,21 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   final Version version = Version(1000, 0, 0);
 
   @override
+  String get versionText => version.toString();
+
+  @override
   List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Future<XcodeProjectInfo> getInfo(
+  Future<XcodeProjectInfo?> getInfo(
     String projectPath, {
-    String projectFilename,
-  }) async =>
-      XcodeProjectInfo(
-        <String>['Runner'],
-        <String>['Debug', 'Release'],
-        <String>['Runner'],
-        BufferLogger.test(),
-      );
+    String? projectFilename,
+  }) async => projectInfo;
 
   @override
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
-    @required XcodeProjectBuildContext buildContext,
+    required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
-  }) async =>
-      <String, String>{
-        'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
-        'WRAPPER_NAME': 'My Super Awesome App.app',
-        'DEVELOPMENT_TEAM': '3333CCCC33',
-      };
+  }) async => buildSettings;
 }

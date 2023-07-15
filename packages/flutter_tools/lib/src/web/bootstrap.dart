@@ -28,6 +28,7 @@ var styles = `
     position: absolute;
     top: 0px;
     left: 0px;
+    overflow: hidden;
   }
 
   .indeterminate {
@@ -93,18 +94,45 @@ document.addEventListener('dart-app-ready', function (e) {
    styleSheet.parentNode.removeChild(styleSheet);
 });
 
+// A map containing the URLs for the bootstrap scripts in debug.
+let _scriptUrls = {
+  "mapper": "$mapperUrl",
+  "requireJs": "$requireUrl"
+};
+
+// Create a TrustedTypes policy so we can attach Scripts...
+let _ttPolicy;
+if (window.trustedTypes) {
+  _ttPolicy = trustedTypes.createPolicy("flutter-tools-bootstrap", {
+    createScriptURL: (url) => {
+      let scriptUrl = _scriptUrls[url];
+      if (!scriptUrl) {
+        console.error("Unknown Flutter Web bootstrap resource!", url);
+      }
+      return scriptUrl;
+    }
+  });
+}
+
+// Creates a TrustedScriptURL for a given `scriptName`.
+// See `_scriptUrls` and `_ttPolicy` above.
+function getTTScriptUrl(scriptName) {
+  let defaultUrl = _scriptUrls[scriptName];
+  return _ttPolicy ? _ttPolicy.createScriptURL(scriptName) : defaultUrl;
+}
+
 // Attach source mapping.
 var mapperEl = document.createElement("script");
 mapperEl.defer = true;
 mapperEl.async = false;
-mapperEl.src = "$mapperUrl";
+mapperEl.src = getTTScriptUrl("mapper");
 document.head.appendChild(mapperEl);
 
 // Attach require JS.
 var requireEl = document.createElement("script");
 requireEl.defer = true;
 requireEl.async = false;
-requireEl.src = "$requireUrl";
+requireEl.src = getTTScriptUrl("requireJs");
 // This attribute tells require JS what to load as main (defined below).
 requireEl.setAttribute("data-main", "main_module.bootstrap");
 document.head.appendChild(requireEl);
@@ -129,9 +157,13 @@ String generateMainModule({
   required bool nativeNullAssertions,
   String bootstrapModule = 'main_module.bootstrap',
 }) {
-  // TODO(jonahwilliams): fix typo in dwds and update.
+  // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
   return '''
 /* ENTRYPOINT_EXTENTION_MARKER */
+// Disable require module timeout
+require.config({
+  waitSeconds: 0
+});
 // Create the main module loaded below.
 define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
@@ -164,6 +196,12 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
       return dart.getSourceMap(url);
     });
   }
+  // Prevent DDC's requireJS to interfere with modern bundling.
+  if (typeof define === 'function' && define.amd) {
+    // Preserve a copy just in case...
+    define._amd = define.amd;
+    delete define.amd;
+  }
 });
 ''';
 }
@@ -181,19 +219,18 @@ String generateTestEntrypoint({
   // @dart = ${languageVersion.major}.${languageVersion.minor}
   import 'org-dartlang-app:///$relativeTestPath' as test;
   import 'dart:ui' as ui;
+  import 'dart:ui_web' as ui_web;
   import 'dart:html';
   import 'dart:js';
   ${testConfigPath != null ? "import '${Uri.file(testConfigPath)}' as test_config;" : ""}
   import 'package:stream_channel/stream_channel.dart';
   import 'package:flutter_test/flutter_test.dart';
-  import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
-  import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
-  import 'package:test_api/src/backend/suite_channel_manager.dart'; // ignore: implementation_imports
+  import 'package:test_api/backend.dart';
 
   Future<void> main() async {
-    ui.debugEmulateFlutterTesterEnvironment = true;
+    ui_web.debugEmulateFlutterTesterEnvironment = true;
     await ui.webOnlyInitializePlatform();
-    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('$absolutePath'));
+    webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('${Uri.file(absolutePath)}'));
     (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
     (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
 

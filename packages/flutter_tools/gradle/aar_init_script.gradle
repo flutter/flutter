@@ -6,9 +6,7 @@
 import java.nio.file.Paths
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.maven.MavenDeployer
-import org.gradle.api.plugins.MavenPlugin
-import org.gradle.api.tasks.Upload
+import org.gradle.api.publish.maven.MavenPublication
 
 void configureProject(Project project, String outputDir) {
     if (!project.hasProperty("android")) {
@@ -17,8 +15,6 @@ void configureProject(Project project, String outputDir) {
     if (!project.android.hasProperty("libraryVariants")) {
         throw new GradleException("Can't generate AAR on a non Android library project.");
     }
-
-    project.apply plugin: "maven"
 
     // Snapshot versions include the timestamp in the artifact name.
     // Therefore, remove the snapshot part, so new runs of `flutter build aar` overrides existing artifacts.
@@ -30,27 +26,22 @@ void configureProject(Project project, String outputDir) {
         project.version = project.property("buildNumber")
     }
 
-    project.android.libraryVariants.all { variant ->
-        addAarTask(project, variant)
+    project.components.forEach { component ->
+        if (component.name != "all") {
+            addAarTask(project, component)
+        }
     }
 
-    project.uploadArchives {
+    project.publishing {
         repositories {
-            mavenDeployer {
-                repository(url: "file://${outputDir}/outputs/repo")
+            maven {
+                url = uri("file://${outputDir}/outputs/repo")
             }
         }
     }
+
     if (!project.property("is-plugin").toBoolean()) {
         return
-    }
-
-    if (project.hasProperty('localEngineOut')) {
-        // TODO(egarciad): Support local engine.
-        // This most likely requires refactoring `flutter.gradle`, so the logic can be reused.
-        throw new GradleException(
-            "Local engine isn't supported when building the plugins as AAR. " +
-            "See: https://github.com/flutter/flutter/issues/40866")
     }
 
     String storageUrl = System.getenv('FLUTTER_STORAGE_BASE_URL') ?: "https://storage.googleapis.com"
@@ -88,59 +79,34 @@ String getFlutterRoot(Project project) {
     return project.property("flutter-root")
 }
 
-void addAarTask(Project project, variant) {
-    String variantName = variant.name.capitalize()
+void addAarTask(Project project, component) {
+    String variantName = component.name.capitalize()
     String taskName = "assembleAar$variantName"
     project.tasks.create(name: taskName) {
-        // This check is required to be able to configure the archives before `uploadArchives` runs.
+        // This check is required to be able to configure the archives before `publish` runs.
         if (!project.gradle.startParameter.taskNames.contains(taskName)) {
             return
         }
-        project.uploadArchives.repositories.mavenDeployer {
-            pom {
-                artifactId = "${project.name}_${variant.name.toLowerCase()}"
-            }
+
+        // Create a default MavenPublication for the variant (except "all" since that is used to publish artifacts in the new way)
+        project.publishing.publications.create(component.name, MavenPublication) { pub ->
+            groupId = "${pub.groupId}"
+            artifactId = "${pub.artifactId}_${pub.name}"
+            version = "${pub.version}"
+            from component
         }
-        overrideDefaultPublishConfig(project, variant)
+
         // Generate the Maven artifacts.
-        finalizedBy "uploadArchives"
+        finalizedBy "publish"
     }
 }
 
-// This method mimics the logic in AGP when `android.defaultPublishConfig` is set in `build.gradle`:
-// https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/variant/VariantHelper.java
-//
-// Unfortunately, `android.defaultPublishConfig` cannot be overridden at this point since
-// AGP already run this code.
-void overrideDefaultPublishConfig(Project project, variant) {
-    String variantName = variant.name.capitalize()
-    Task bundle = project.tasks.findByName("bundle${variantName}Aar") // gradle:3.2.0
-    if (bundle == null) {
-        bundle = project.tasks.findByName("bundle${variantName}") // gradle:3.1.0
-    }
-    if (bundle == null) {
-        throw new GradleException("Can't generate AAR for variant ${variantName}.");
-    }
-    // Clear the current archive artifacts since the artifacts are based on `android.defaultPublishConfig`.
-    project.configurations["archives"].artifacts.clear()
-    // Add the artifact that will be published.
-    project.artifacts.add("archives", bundle)
+// maven-publish has to be applied _before_ the project gets evaluated, but some of the code in
+// `configureProject` requires the project to be evaluated. Apply the maven plugin to all projects, but
+// only configure it if it matches the conditions in `projectsEvaluated`
 
-    def scopeMappings = project.uploadArchives.repositories.mavenDeployer.pom.scopeMappings
-    // Clear the scope mappings added by AGP since they are based on the current `android.defaultPublishConfig`.
-    scopeMappings.mappings.clear()
-    // Add the new mappings.
-    for (Configuration configuration : flattenConfiguration(variant.runtimeConfiguration)) {
-        scopeMappings.addMapping(/* priority = */ 300, configuration, "compile")
-    }
-}
-
-Set<Configuration> flattenConfiguration(Configuration configuration) {
-    Set<Configuration> configs = [configuration]
-    for (Configuration extend : configuration.extendsFrom) {
-        configs.addAll(flattenConfiguration(extend))
-    }
-    return configs
+allprojects {
+   apply plugin: "maven-publish"
 }
 
 projectsEvaluated {

@@ -8,12 +8,15 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A [ButtonStyle] that overrides the default appearance of
 /// [ElevatedButton]s when it's used with [ElevatedButtonTheme] or with the
 /// overall [Theme]'s [ThemeData.elevatedButtonTheme].
 ///
 /// The [style]'s properties override [ElevatedButton]'s default style,
-/// i.e.  the [ButtonStyle] returned by [ElevatedButton.defaultStyleOf]. Only
+/// i.e. the [ButtonStyle] returned by [ElevatedButton.defaultStyleOf]. Only
 /// the style's non-null property values or resolved non-null
 /// [MaterialStateProperty] values are used.
 ///
@@ -46,25 +49,25 @@ class ElevatedButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two elevated button themes.
   static ElevatedButtonThemeData? lerp(ElevatedButtonThemeData? a, ElevatedButtonThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null)
-      return null;
+    if (identical(a, b)) {
+      return a;
+    }
     return ElevatedButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
     );
   }
 
   @override
-  int get hashCode {
-    return style.hashCode;
-  }
+  int get hashCode => style.hashCode;
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ElevatedButtonThemeData && other.style == style;
   }
 
@@ -91,10 +94,10 @@ class ElevatedButtonTheme extends InheritedTheme {
   ///
   /// The [data] parameter must not be null.
   const ElevatedButtonTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  });
 
   /// The configuration of this theme.
   final ElevatedButtonThemeData data;
@@ -107,7 +110,7 @@ class ElevatedButtonTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ElevatedButtonTheme theme = ElevatedButtonTheme.of(context);
+  /// ElevatedButtonThemeData theme = ElevatedButtonTheme.of(context);
   /// ```
   static ElevatedButtonThemeData of(BuildContext context) {
     final ElevatedButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<ElevatedButtonTheme>();

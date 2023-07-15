@@ -12,7 +12,7 @@ void main() {
   testWidgets('GlobalKey children of one node', (WidgetTester tester) async {
     // This is actually a test of the regular duplicate key logic, which
     // happens before the duplicate GlobalKey logic.
-    await tester.pumpWidget(Stack(children: const <Widget>[
+    await tester.pumpWidget(const Stack(children: <Widget>[
       DummyWidget(key: GlobalObjectKey(0)),
       DummyWidget(key: GlobalObjectKey(0)),
     ]));
@@ -24,9 +24,9 @@ void main() {
   });
 
   testWidgets('GlobalKey children of two nodes - A', (WidgetTester tester) async {
-    await tester.pumpWidget(Stack(
+    await tester.pumpWidget(const Stack(
       textDirection: TextDirection.ltr,
-      children: const <Widget>[
+      children: <Widget>[
         DummyWidget(child: DummyWidget(key: GlobalObjectKey(0))),
         DummyWidget(
           child: DummyWidget(key: GlobalObjectKey(0),
@@ -44,9 +44,9 @@ void main() {
   });
 
   testWidgets('GlobalKey children of two different nodes - B', (WidgetTester tester) async {
-    await tester.pumpWidget(Stack(
+    await tester.pumpWidget(const Stack(
       textDirection: TextDirection.ltr,
-      children: const <Widget>[
+      children: <Widget>[
         DummyWidget(child: DummyWidget(key: GlobalObjectKey(0))),
         DummyWidget(key: Key('x'), child: DummyWidget(key:  GlobalObjectKey(0))),
       ],
@@ -72,8 +72,9 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               nestedSetState = setState;
-              if (flag)
+              if (flag) {
                 return const DummyWidget(key: GlobalObjectKey(0));
+              }
               return const DummyWidget();
             },
           ),
@@ -96,7 +97,7 @@ void main() {
 }
 
 class DummyWidget extends StatelessWidget {
-  const DummyWidget({ Key? key, this.child }) : super(key: key);
+  const DummyWidget({ super.key, this.child });
 
   final Widget? child;
 

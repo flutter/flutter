@@ -21,15 +21,13 @@ import 'android_sdk.dart';
 import 'gradle.dart';
 
 /// An application package created from an already built Android APK.
-class AndroidApk extends ApplicationPackage {
+class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackage {
   AndroidApk({
-    required String id,
-    required this.file,
+    required super.id,
+    required this.applicationPackage,
     required this.versionCode,
     required this.launchActivity,
-  }) : assert(file != null),
-       assert(launchActivity != null),
-       super(id: id);
+  });
 
   /// Creates a new AndroidApk from an existing APK.
   ///
@@ -80,14 +78,14 @@ class AndroidApk extends ApplicationPackage {
 
     return AndroidApk(
       id: packageName,
-      file: apk,
+      applicationPackage: apk,
       versionCode: data.versionCode == null ? null : int.tryParse(data.versionCode!),
       launchActivity: '${data.packageName}/${data.launchableActivityName}',
     );
   }
 
-  /// Path to the actual apk file.
-  final File file;
+  @override
+  final FileSystemEntity applicationPackage;
 
   /// The path to the activity that should be launched.
   final String launchActivity;
@@ -98,23 +96,38 @@ class AndroidApk extends ApplicationPackage {
   /// Creates a new AndroidApk based on the information in the Android manifest.
   static Future<AndroidApk?> fromAndroidProject(
     AndroidProject androidProject, {
-    required AndroidSdk androidSdk,
+    required AndroidSdk? androidSdk,
     required ProcessManager processManager,
     required UserMessages userMessages,
     required ProcessUtils processUtils,
     required Logger logger,
     required FileSystem fileSystem,
+    BuildInfo? buildInfo,
   }) async {
-    File apkFile;
+    final File apkFile;
+    final String filename;
+    if (buildInfo == null) {
+      filename = 'app.apk';
+    } else if (buildInfo.flavor == null) {
+      filename = 'app-${buildInfo.mode.cliName}.apk';
+    } else {
+      filename = 'app-${buildInfo.lowerCasedFlavor}-${buildInfo.mode.cliName}.apk';
+    }
 
     if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
-      apkFile = getApkDirectory(androidProject.parent).childFile('app.apk');
+      Directory apkDirectory = getApkDirectory(androidProject.parent);
+      if (androidProject.parent.isModule) {
+        // Module builds output the apk in a subdirectory that corresponds
+        // to the buildmode of the apk.
+        apkDirectory = apkDirectory.childDirectory(buildInfo!.mode.cliName);
+      }
+      apkFile = apkDirectory.childFile(filename);
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
         return AndroidApk.fromApk(
           apkFile,
-          androidSdk: androidSdk,
+          androidSdk: androidSdk!,
           processManager: processManager,
           logger: logger,
           userMessages: userMessages,
@@ -125,7 +138,7 @@ class AndroidApk extends ApplicationPackage {
       // command will grab a new AndroidApk after building, to get the updated
       // IDs.
     } else {
-      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), 'app.apk'));
+      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), filename));
     }
 
     final File manifest = androidProject.appManifestFile;
@@ -140,7 +153,7 @@ class AndroidApk extends ApplicationPackage {
     XmlDocument document;
     try {
       document = XmlDocument.parse(manifestString);
-    } on XmlParserException catch (exception) {
+    } on XmlException catch (exception) {
       String manifestLocation;
       if (androidProject.isUsingGradle) {
         manifestLocation = fileSystem.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
@@ -149,7 +162,7 @@ class AndroidApk extends ApplicationPackage {
       }
       logger.printError('AndroidManifest.xml is not a valid XML document.');
       logger.printError('Please check $manifestLocation for errors.');
-      throwToolExit('XML Parser error message: ${exception.toString()}');
+      throwToolExit('XML Parser error message: $exception');
     }
 
     final Iterable<XmlElement> manifests = document.findElements('manifest');
@@ -158,7 +171,10 @@ class AndroidApk extends ApplicationPackage {
       logger.printError('Please check ${manifest.path} for errors.');
       return null;
     }
-    final String? packageId = manifests.first.getAttribute('package');
+
+    // Starting from AGP version 7.3, the `package` attribute in Manifest.xml
+    // can be replaced with the `namespace` attribute under the `android` section in `android/app/build.gradle`.
+    final String? packageId = manifests.first.getAttribute('package') ?? androidProject.namespace;
 
     String? launchActivity;
     for (final XmlElement activity in document.findAllElements('activity')) {
@@ -197,17 +213,14 @@ class AndroidApk extends ApplicationPackage {
 
     return AndroidApk(
       id: packageId,
-      file: apkFile,
+      applicationPackage: apkFile,
       versionCode: null,
       launchActivity: launchActivity,
     );
   }
 
   @override
-  File get packagesFile => file;
-
-  @override
-  String get name => file.basename;
+  String get name => applicationPackage.basename;
 }
 
 abstract class _Entry {
@@ -235,7 +248,7 @@ class _Element extends _Entry {
 
   _Attribute? firstAttribute(String name) {
     for (final _Attribute child in children.whereType<_Attribute>()) {
-      if (child.key?.startsWith(name) == true) {
+      if (child.key?.startsWith(name) ?? false) {
         return child;
       }
     }
@@ -244,7 +257,7 @@ class _Element extends _Entry {
 
   _Element? firstElement(String name) {
     for (final _Element child in children.whereType<_Element>()) {
-      if (child.name?.startsWith(name) == true) {
+      if (child.name?.startsWith(name) ?? false) {
         return child;
       }
     }
@@ -252,7 +265,7 @@ class _Element extends _Entry {
   }
 
   Iterable<_Element> allElements(String name) {
-    return children.whereType<_Element>().where((_Element e) => e.name?.startsWith(name) == true);
+    return children.whereType<_Element>().where((_Element e) => e.name?.startsWith(name) ?? false);
   }
 }
 
@@ -289,7 +302,7 @@ class ApkManifestData {
   }
 
   static ApkManifestData? parseFromXmlDump(String data, Logger logger) {
-    if (data == null || data.trim().isEmpty) {
+    if (data.trim().isEmpty) {
       return null;
     }
 
@@ -314,7 +327,6 @@ class ApkManifestData {
           case 'A':
             currentElement
                 .addChild(_Attribute.fromLine(line, currentElement));
-            break;
           case 'E':
             final _Element element = _Element.fromLine(line, currentElement);
             currentElement.addChild(element);
@@ -335,7 +347,7 @@ class ApkManifestData {
       final _Attribute? enabled = activity.firstAttribute('android:enabled');
       final Iterable<_Element> intentFilters = activity.allElements('intent-filter');
       final bool isEnabledByDefault = enabled == null;
-      final bool isExplicitlyEnabled = enabled != null && enabled.value?.contains('0xffffffff') == true;
+      final bool isExplicitlyEnabled = enabled != null && (enabled.value?.contains('0xffffffff') ?? false);
       if (!(isEnabledByDefault || isExplicitlyEnabled)) {
         continue;
       }

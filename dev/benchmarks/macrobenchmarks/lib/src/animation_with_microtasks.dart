@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class AnimationWithMicrotasks extends StatefulWidget {
-  const AnimationWithMicrotasks({Key? key}) : super(key: key);
+  const AnimationWithMicrotasks({super.key});
 
   @override
   State<AnimationWithMicrotasks> createState() => _AnimationWithMicrotasksState();

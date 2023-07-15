@@ -12,13 +12,13 @@ environment:
   # dependency on precisely how Cirrus is detected by our tools.
   BOT: "true"
 
-gcp_credentials: ENCRYPTED[!0e63b52bd7e4fda1cd7b7bf2b4fe515a27fadbeaced01f5ad8b699b81d3611ed64c5d3271bcd8426dd914ef41cba48a0!]
+gcp_credentials: ENCRYPTED[!9c8e92e8da192ce2a51b7d4ed9948c4250d0bae3660193d9b901196c9692abbebe784d4a32e9f38b328571d65f6e7aed!]
 
 # LINUX SHARDS
 task:
   gke_container:
     dockerfile: "dev/ci/docker_linux/Dockerfile"
-    builder_image_name: docker-builder # gce vm image
+    builder_image_name: docker-builder-linux # gce vm image
     builder_image_project: flutter-cirrus
     cluster_name: test-cluster
     zone: us-central1-a
@@ -68,7 +68,7 @@ task:
       - which flutter
   matrix:
     - name: analyze-linux # linux-only
-      only_if: "$CIRRUS_PR != ''"
+      only_if: "$CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # Empirically, the analyze-linux shard runs surprisingly fast (under 15 minutes) with just 1
         # CPU.  We noticed OOM failures with 6GB 4/2020, so we increased the memory.
@@ -78,7 +78,7 @@ task:
         - dart --enable-asserts ./dev/bots/analyze.dart
 
     - name: framework_tests-widgets-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # We use 3 CPUs because that's the minimum required to get framework_tests-widgets-linux
         # running fast enough that it is not the long pole, as of October 2019.
@@ -87,7 +87,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: framework_tests-libraries-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # We use 3 CPUs because that's the minimum required to get the
         # framework_tests-libraries-linux shard running fast enough that it is not the long pole, as
@@ -98,7 +98,7 @@ task:
 
     - name: framework_tests-misc-linux
       # this includes the tests for directories in dev/
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # We use 3 CPUs because that's the minimum required to get framework_tests-misc-linux
         # running fast enough that it is not the long pole, as of October 2019.
@@ -107,7 +107,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-general-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') && $CIRRUS_PR != ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') && $CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # As of November 2019, the tool_tests-general-linux shard got faster with more CPUs up to 4
         # CPUs, and needed at least 10G of RAM to not run out of memory.
@@ -115,14 +115,14 @@ task:
         MEMORY: 10G
         SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - (cd packages/flutter_tools; pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/main; pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/font; pub get)
-        - (cd dev/bots; pub get)
+        - (cd packages/flutter_tools; dart pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/main; dart pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/font; dart pub get)
+        - (cd dev/bots; dart pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') && $CIRRUS_PR != ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') && $CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # As of October 2019, the tool_tests-commands-linux shard got faster with more CPUs up to 6
         # CPUs, and needed at least 8G of RAM to not run out of memory.
@@ -131,20 +131,20 @@ task:
         MEMORY: 10G
         SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - (cd packages/flutter_tools; pub get)
-        - (cd dev/bots; pub get)
+        - (cd packages/flutter_tools; dart pub get)
+        - (cd dev/bots; dart pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: docs-linux # linux-only
       environment:
         CPU: 4
-        MEMORY: 8G
-      only_if: "$CIRRUS_PR != ''"
+        MEMORY: 12G
+      only_if: "$CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       script:
         - ./dev/bots/docs.sh
 
     - name: customer_testing-linux
-      only_if: "$CIRRUS_PR != ''"
+      only_if: "$CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # Empirically, this shard runs fine at 1 CPU and 4G RAM as of October 2019. We will probably
         # want to grow this container when we invite people to add their tests in large numbers.
@@ -156,21 +156,3 @@ task:
         - git fetch origin master:master
         # The actual logic is in a shell script so that it can be shared between CIs.
         - (cd dev/customer_testing/; ./ci.sh)
-
-    - name: web_smoke_test
-      only_if: "changesInclude('.cirrus.yml', 'examples/hello_world/**' ,'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/**') && $CIRRUS_PR != ''"
-      environment:
-        # Tests Hello World with Flutter Web Engine using Flutter Driver. Should not need more resources.
-        CPU: 2
-        MEMORY: 2G
-        CHROME_NO_SANDBOX: true
-      script:
-        - flutter config --enable-web
-        - git clone https://github.com/flutter/web_installers.git
-        - cd web_installers/packages/web_drivers/
-        - pub get
-        - dart lib/web_driver_installer.dart chromedriver --install-only
-        - chromedriver/chromedriver --port=4444 &
-        - sleep 1
-        - cd ../../../examples/hello_world/
-        - flutter drive --target=test_driver/smoke_web_engine.dart -d web-server --profile --browser-name=chrome

@@ -151,6 +151,18 @@ void main() {
     expect(SemanticsUpdateBuilderSpy.observations[1]!.hintAttributes![0] is SpellOutStringAttribute, isTrue);
     expect(SemanticsUpdateBuilderSpy.observations[1]!.hintAttributes![0].range, const TextRange(start: 1, end: 2));
 
+    expect(
+      tester.widget(find.byType(Semantics)).toString(),
+      'Semantics('
+        'container: false, '
+        'properties: SemanticsProperties, '
+        'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
+        'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
+        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))], '
+        'tooltip: null'// ignore: missing_whitespace_between_adjacent_strings
+      ')',
+    );
+
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   });
@@ -163,7 +175,9 @@ class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
   }
 }
 
-class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
+class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilder {
+  final SemanticsUpdateBuilder _builder = ui.SemanticsUpdateBuilder();
+
   static Map<int, SemanticsNodeUpdateObservation> observations = <int, SemanticsNodeUpdateObservation>{};
 
   @override
@@ -185,15 +199,16 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
     required double thickness,
     required Rect rect,
     required String label,
-    List<ui.StringAttribute>? labelAttributes,
+    List<StringAttribute>? labelAttributes,
     required String value,
-    List<ui.StringAttribute>? valueAttributes,
+    List<StringAttribute>? valueAttributes,
     required String increasedValue,
-    List<ui.StringAttribute>? increasedValueAttributes,
+    List<StringAttribute>? increasedValueAttributes,
     required String decreasedValue,
-    List<ui.StringAttribute>? decreasedValueAttributes,
+    List<StringAttribute>? decreasedValueAttributes,
     required String hint,
-    List<ui.StringAttribute>? hintAttributes,
+    List<StringAttribute>? hintAttributes,
+    String? tooltip,
     TextDirection? textDirection,
     required Float64List transform,
     required Int32List childrenInTraversalOrder,
@@ -203,105 +218,40 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
     observations[id] = SemanticsNodeUpdateObservation(
-      id: id,
-      flags: flags,
-      actions: actions,
-      maxValueLength: maxValueLength,
-      currentValueLength: currentValueLength,
-      textSelectionBase: textSelectionBase,
-      textSelectionExtent: textSelectionExtent,
-      platformViewId: platformViewId,
-      scrollChildren: scrollChildren,
-      scrollIndex: scrollIndex,
-      scrollPosition: scrollPosition,
-      scrollExtentMax: scrollExtentMax,
-      scrollExtentMin: scrollExtentMin,
-      elevation: elevation,
-      thickness: thickness,
-      rect: rect,
       label: label,
       labelAttributes: labelAttributes,
       hint: hint,
       hintAttributes: hintAttributes,
       value: value,
       valueAttributes: valueAttributes,
-      increasedValue: increasedValue,
-      increasedValueAttributes: increasedValueAttributes,
-      decreasedValue: decreasedValue,
-      decreasedValueAttributes: decreasedValueAttributes,
-      textDirection: textDirection,
-      transform: transform,
       childrenInTraversalOrder: childrenInTraversalOrder,
-      childrenInHitTestOrder: childrenInHitTestOrder,
-      additionalActions: additionalActions,
     );
   }
+
+  @override
+  void updateCustomAction({required int id, String? label, String? hint, int overrideId = -1}) =>
+    _builder.updateCustomAction(id: id, label: label, hint: hint, overrideId: overrideId);
+
+  @override
+  ui.SemanticsUpdate build() => _builder.build();
 }
 
 class SemanticsNodeUpdateObservation {
   const SemanticsNodeUpdateObservation({
-    required this.id,
-    required this.flags,
-    required this.actions,
-    required this.maxValueLength,
-    required this.currentValueLength,
-    required this.textSelectionBase,
-    required this.textSelectionExtent,
-    required this.platformViewId,
-    required this.scrollChildren,
-    required this.scrollIndex,
-    required this.scrollPosition,
-    required this.scrollExtentMax,
-    required this.scrollExtentMin,
-    required this.elevation,
-    required this.thickness,
-    required this.rect,
     required this.label,
     this.labelAttributes,
     required this.value,
     this.valueAttributes,
-    required this.increasedValue,
-    this.increasedValueAttributes,
-    required this.decreasedValue,
-    this.decreasedValueAttributes,
     required this.hint,
     this.hintAttributes,
-    this.textDirection,
-    required this.transform,
     required this.childrenInTraversalOrder,
-    required this.childrenInHitTestOrder,
-    required this.additionalActions,
   });
 
-  final int id;
-  final int flags;
-  final int actions;
-  final int maxValueLength;
-  final int currentValueLength;
-  final int textSelectionBase;
-  final int textSelectionExtent;
-  final int platformViewId;
-  final int scrollChildren;
-  final int scrollIndex;
-  final double scrollPosition;
-  final double scrollExtentMax;
-  final double scrollExtentMin;
-  final double elevation;
-  final double thickness;
-  final Rect rect;
   final String label;
-  final List<ui.StringAttribute>? labelAttributes;
+  final List<StringAttribute>? labelAttributes;
   final String value;
-  final List<ui.StringAttribute>? valueAttributes;
-  final String increasedValue;
-  final List<ui.StringAttribute>? increasedValueAttributes;
-  final String decreasedValue;
-  final List<ui.StringAttribute>? decreasedValueAttributes;
+  final List<StringAttribute>? valueAttributes;
   final String hint;
-  final List<ui.StringAttribute>? hintAttributes;
-  final TextDirection? textDirection;
-  final Float64List transform;
+  final List<StringAttribute>? hintAttributes;
   final Int32List childrenInTraversalOrder;
-  final Int32List childrenInHitTestOrder;
-  final Int32List additionalActions;
 }

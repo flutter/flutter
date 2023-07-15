@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -14,7 +12,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -137,13 +135,13 @@ void main() {
   testUsingContext('flutter assemble does not log stack traces during build failure', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-        'hello': ExceptionMeasurement('hello', 'bar', stackTrace),
+        'hello': ExceptionMeasurement('hello', 'bar', stackTrace, fatal: true),
       }))
     ));
 
     await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
       throwsToolExit());
-    expect(testLogger.errorText, isNot(contains('bar')));
+    expect(testLogger.errorText, contains('Target hello failed: bar'));
     expect(testLogger.errorText, isNot(contains(stackTrace.toString())));
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -271,7 +269,7 @@ void main() {
         skipped: false,
         succeeded: true,
         elapsedMilliseconds: 123,
-      )
+      ),
     ];
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File outFile = fileSystem.currentDirectory
@@ -291,5 +289,50 @@ void main() {
         },
       ],
     });
+  });
+
+  testUsingContext('test --dart-define-from-file option with err file format', () {
+    globals.fs.directory('config').createSync();
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    ));
+
+    expect(commandRunner.run(<String>['assemble',
+      '-o Output',
+      'debug_macos_bundle_flutter_assets',
+      '--dart-define=k=v',
+      '--dart-define-from-file=config']),
+        throwsToolExit(message: 'Json config define file "--dart-define-from-file=config" is not a file, please fix first!'));
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('test --dart-define-from-file option with err json format', () async {
+    await globals.fs.file('config.json').writeAsString(
+        '''
+          {
+            "kInt": 1,
+            "kDouble": 1.1,
+            "name": "err json format,
+            "title": "this is title from config json file"
+          }
+        '''
+    );
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    ));
+
+    expect(commandRunner.run(<String>['assemble',
+      '-o Output',
+      'debug_macos_bundle_flutter_assets',
+      '--dart-define=k=v',
+      '--dart-define-from-file=config.json']),
+        throwsToolExit(message: 'Json config define file "--dart-define-from-file=config.json" format err, please fix first! format err:'));
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }

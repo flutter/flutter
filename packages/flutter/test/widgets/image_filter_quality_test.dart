@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -68,8 +72,6 @@ Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) as
 }
 
 class _TestImageStreamCompleter extends ImageStreamCompleter {
-  _TestImageStreamCompleter([this._currentImage]);
-
   ImageInfo? _currentImage;
   final Set<ImageStreamListener> listeners = <ImageStreamListener>{};
 

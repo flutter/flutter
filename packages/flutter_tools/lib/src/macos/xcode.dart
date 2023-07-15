@@ -18,7 +18,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../ios/xcodeproj.dart';
 
-Version get xcodeRequiredVersion => Version(12, 0, 1, text: '12.0.1');
+Version get xcodeRequiredVersion => Version(14, null, null);
 
 /// Diverging this number from the minimum required version will provide a doctor
 /// warning, not error, that users should upgrade Xcode.
@@ -101,6 +101,8 @@ class Xcode {
 
   Version? get currentVersion => _xcodeProjectInterpreter.version;
 
+  String? get buildVersion => _xcodeProjectInterpreter.build;
+
   String? get versionText => _xcodeProjectInterpreter.versionText;
 
   bool? _eulaSigned;
@@ -111,9 +113,9 @@ class Xcode {
         final RunResult result = _processUtils.runSync(
           <String>[...xcrunCommand(), 'clang'],
         );
-        if (result.stdout != null && result.stdout.contains('license')) {
+        if (result.stdout.contains('license')) {
           _eulaSigned = false;
-        } else if (result.stderr != null && result.stderr.contains('license')) {
+        } else if (result.stderr.contains('license')) {
           _eulaSigned = false;
         } else {
           _eulaSigned = true;
@@ -134,7 +136,7 @@ class Xcode {
         // This command will error if additional components need to be installed in
         // xcode 9.2 and above.
         final RunResult result = _processUtils.runSync(
-          <String>[...xcrunCommand(), 'simctl', 'list'],
+          <String>[...xcrunCommand(), 'simctl', 'list', 'devices', 'booted'],
         );
         _isSimctlInstalled = result.exitCode == 0;
       } on ProcessException {
@@ -163,22 +165,22 @@ class Xcode {
   /// See [XcodeProjectInterpreter.xcrunCommand].
   List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
-  Future<RunResult> cc(List<String> args) {
-    return _processUtils.run(
-      <String>[...xcrunCommand(), 'cc', ...args],
-      throwOnError: true,
-    );
-  }
+  Future<RunResult> cc(List<String> args) => _run('cc', args);
 
-  Future<RunResult> clang(List<String> args) {
+  Future<RunResult> clang(List<String> args) => _run('clang', args);
+
+  Future<RunResult> dsymutil(List<String> args) => _run('dsymutil', args);
+
+  Future<RunResult> strip(List<String> args) => _run('strip', args);
+
+  Future<RunResult> _run(String command, List<String> args) {
     return _processUtils.run(
-      <String>[...xcrunCommand(), 'clang', ...args],
+      <String>[...xcrunCommand(), command, ...args],
       throwOnError: true,
     );
   }
 
   Future<String> sdkLocation(EnvironmentType environmentType) async {
-    assert(environmentType != null);
     final RunResult runResult = await _processUtils.run(
       <String>[...xcrunCommand(), '--sdk', getSDKNameForIOSEnvironmentType(environmentType), '--show-sdk-path'],
     );
@@ -199,7 +201,6 @@ class Xcode {
 }
 
 EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
-  assert(sdkroot != null);
   // iPhoneSimulator.sdk or iPhoneOS.sdk
   final String sdkName = fileSystem.path.basename(sdkroot).toLowerCase();
   if (sdkName.contains('iphone')) {

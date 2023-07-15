@@ -7,6 +7,11 @@ import 'package:flutter/gestures.dart';
 
 import 'mouse_cursor.dart';
 
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+export 'package:flutter/gestures.dart' show PointerEnterEvent, PointerExitEvent, PointerHoverEvent;
+
+export 'mouse_cursor.dart' show MouseCursor;
+
 /// Signature for listening to [PointerEnterEvent] events.
 ///
 /// Used by [MouseTrackerAnnotation], [MouseRegion] and [RenderMouseRegion].
@@ -46,7 +51,7 @@ class MouseTrackerAnnotation with Diagnosticable {
     this.onExit,
     this.cursor = MouseCursor.defer,
     this.validForMouseTracker = true,
-  }) : assert(cursor != null);
+  });
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
   /// entered the region and [validForMouseTracker] is true.

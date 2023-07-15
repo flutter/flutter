@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/code_signing.dart';
 
 import '../../src/common.dart';
@@ -25,21 +24,24 @@ const String kCertificates = '''
 
 void main() {
   group('Auto signing', () {
-    Config testConfig;
-    AnsiTerminal testTerminal;
-    BufferLogger logger;
+    late Config testConfig;
+    late AnsiTerminal testTerminal;
+    late BufferLogger logger;
+    late Platform macosPlatform;
 
     setUp(() async {
       logger = BufferLogger.test();
       testConfig = Config.test();
       testTerminal = TestTerminal();
       testTerminal.usesTerminalUi = true;
+      macosPlatform = FakePlatform(operatingSystem: 'macos');
     });
 
     testWithoutContext('No auto-sign if Xcode project settings are not available', () async {
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        buildSettings: null,
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeamBuildSetting(
+        buildSettings: <String, String>{},
         processManager: FakeProcessManager.empty(),
+        platform: macosPlatform,
         logger: logger,
         config: testConfig,
         terminal: testTerminal,
@@ -48,10 +50,11 @@ void main() {
     });
 
     testWithoutContext('No discovery if development team specified in Xcode project', () async {
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeamBuildSetting(
         buildSettings: <String, String>{
           'DEVELOPMENT_TEAM': 'abc',
         },
+        platform: macosPlatform,
         processManager: FakeProcessManager.empty(),
         logger: logger,
         config: testConfig,
@@ -71,16 +74,40 @@ void main() {
         ),
       ]);
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        buildSettings: <String, String>{
-          'bogus': 'bogus',
-        },
+      final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
         processManager: processManager,
+        platform: macosPlatform,
         logger: logger,
         config: testConfig,
         terminal: testTerminal,
       );
-      expect(signingConfigs, isNull);
+      expect(developmentTeam, isNull);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('No valid code signing certificates', () async {
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['which', 'security'],
+        ),
+        const FakeCommand(
+          command: <String>['which', 'openssl'],
+        ),
+        const FakeCommand(
+          command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+        ),
+      ]);
+
+      final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
+        processManager: processManager,
+        platform: macosPlatform,
+        logger: logger,
+        config: testConfig,
+        terminal: testTerminal,
+      );
+
+      expect(developmentTeam, isNull);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('No valid code signing certificates shows instructions', () async {
@@ -96,8 +123,9 @@ void main() {
         ),
       ]);
 
-      await expectLater(() => getCodeSigningIdentityDevelopmentTeam(
+      await expectLater(() => getCodeSigningIdentityDevelopmentTeamBuildSetting(
         buildSettings: <String, String>{},
+        platform: macosPlatform,
         processManager: processManager,
         logger: logger,
         config: testConfig,
@@ -105,7 +133,22 @@ void main() {
       ), throwsToolExit(message: 'No development certificates available to code sign app for device deployment'));
     });
 
-    testWithoutContext('Test single identity and certificate organization works', () async {
+    testWithoutContext('No valid code signing certificates on non-macOS platform', () async {
+      final FakeProcessManager processManager = FakeProcessManager.empty();
+
+      final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
+        processManager: processManager,
+        platform: FakePlatform(),
+        logger: logger,
+        config: testConfig,
+        terminal: testTerminal,
+      );
+
+      expect(developmentTeam, isNull);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('Test single identity and certificate organization development team build setting', () async {
       final Completer<void> completer = Completer<void>();
       final StreamController<List<int>> controller = StreamController<List<int>>();
       const String certificates = '''
@@ -131,20 +174,21 @@ void main() {
           stdin: IOSink(controller.sink),
           stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
           completer: completer,
-        )
+        ),
       ]);
 
-      // Verify that certifacte value is passed into openssl command.
-      String stdin;
+      // Verify that certificate value is passed into openssl command.
+      String? stdin;
       controller.stream.listen((List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      final Map<String, String>? signingConfigs = await getCodeSigningIdentityDevelopmentTeamBuildSetting(
         buildSettings: <String, String>{
           'bogus': 'bogus',
         },
+        platform: macosPlatform,
         processManager: processManager,
         logger: logger,
         config: testConfig,
@@ -155,6 +199,58 @@ void main() {
       expect(logger.errorText, isEmpty);
       expect(stdin, 'This is a fake certificate');
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '3333CCCC33'});
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('Test single identity and certificate organization development team', () async {
+      final Completer<void> completer = Completer<void>();
+      final StreamController<List<int>> controller = StreamController<List<int>>();
+      const String certificates = '''
+1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
+    1 valid identities found''';
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['which', 'security'],
+        ),
+        const FakeCommand(
+          command: <String>['which', 'openssl'],
+        ),
+        const FakeCommand(
+          command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+          stdout: certificates,
+        ),
+        const FakeCommand(
+          command: <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
+          stdout: 'This is a fake certificate',
+        ),
+        FakeCommand(
+          command: const <String>['openssl', 'x509', '-subject'],
+          stdin: IOSink(controller.sink),
+          stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
+          completer: completer,
+        ),
+      ]);
+
+      // Verify that certificate value is passed into openssl command.
+      String? stdin;
+      controller.stream.listen((List<int> chunk) {
+        stdin = utf8.decode(chunk);
+        completer.complete();
+      });
+
+      final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
+        processManager: processManager,
+        platform: macosPlatform,
+        logger: logger,
+        config: testConfig,
+        terminal: testTerminal,
+      );
+
+      expect(logger.statusText, contains('iPhone Developer: Profile 1 (1111AAAA11)'));
+      expect(logger.errorText, isEmpty);
+      expect(stdin, 'This is a fake certificate');
+      expect(developmentTeam, '3333CCCC33');
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('Test single identity (Catalina format) and certificate organization works', () async {
@@ -183,21 +279,19 @@ void main() {
           stdin: IOSink(controller.sink),
           stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
           completer: completer,
-        )
+        ),
       ]);
 
-      // Verify that certifacte value is passed into openssl command.
-      String stdin;
+      // Verify that certificate value is passed into openssl command.
+      String? stdin;
       controller.stream.listen((List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        buildSettings: <String, String>{
-          'bogus': 'bogus',
-        },
+      final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
         processManager: processManager,
+        platform: macosPlatform,
         logger: logger,
         config: testConfig,
         terminal: testTerminal,
@@ -206,7 +300,8 @@ void main() {
       expect(logger.statusText, contains('Apple Development: Profile 1 (1111AAAA11)'));
       expect(logger.errorText, isEmpty);
       expect(stdin, 'This is a fake certificate');
-      expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '3333CCCC33'});
+      expect(developmentTeam, '3333CCCC33');
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('Test multiple identity and certificate organization works', () async {
@@ -233,21 +328,19 @@ void main() {
           stdin: IOSink(controller.sink),
           stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
           completer: completer,
-        )
+        ),
       ]);
 
-      // Verify that certifacte value is passed into openssl command.
-      String stdin;
+      // Verify that certificate value is passed into openssl command.
+      String? stdin;
       controller.stream.listen((List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        buildSettings: <String, String>{
-          'bogus': 'bogus',
-        },
+      final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
         processManager: processManager,
+        platform: macosPlatform,
         logger: logger,
         config: testConfig,
         terminal: testTerminal,
@@ -263,8 +356,9 @@ void main() {
       );
       expect(logger.errorText, isEmpty);
       expect(stdin, 'This is a fake certificate');
-      expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
+      expect(developmentTeam, '4444DDDD44');
       expect(testConfig.getValue('ios-signing-cert'), 'iPhone Developer: Profile 3 (3333CCCC33)');
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('Test multiple identity in machine mode works', () async {
@@ -291,21 +385,19 @@ void main() {
           stdin: IOSink(controller.sink),
           stdout: 'subject= /CN=iPhone Developer: Profile 3 (1111AAAA11)/OU=5555EEEE55/O=My Team/C=US',
           completer: completer,
-        )
+        ),
       ]);
 
-      // Verify that certifacte value is passed into openssl command.
-      String stdin;
+      // Verify that certificate value is passed into openssl command.
+      String? stdin;
       controller.stream.listen((List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        buildSettings: <String, String>{
-          'bogus': 'bogus',
-        },
+      final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
         processManager: processManager,
+        platform: macosPlatform,
         logger: logger,
         config: testConfig,
         terminal: testTerminal,
@@ -317,7 +409,8 @@ void main() {
       );
       expect(logger.errorText, isEmpty);
       expect(stdin, 'This is a fake certificate');
-      expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '5555EEEE55'});
+      expect(developmentTeam, '5555EEEE55');
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('Test saved certificate used', () async {
@@ -344,21 +437,19 @@ void main() {
           stdin: IOSink(controller.sink),
           stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
           completer: completer,
-        )
+        ),
       ]);
 
-      // Verify that certifacte value is passed into openssl command.
-      String stdin;
+      // Verify that certificate value is passed into openssl command.
+      String? stdin;
       controller.stream.listen((List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        buildSettings: <String, String>{
-          'bogus': 'bogus',
-        },
+      final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
         processManager: processManager,
+        platform: macosPlatform,
         logger: logger,
         config: testConfig,
         terminal: testTerminal,
@@ -374,7 +465,8 @@ void main() {
       );
       expect(logger.errorText, isEmpty);
       expect(stdin, 'This is a fake certificate');
-      expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
+      expect(developmentTeam, '4444DDDD44');
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('Test invalid saved certificate shows error and prompts again', () async {
@@ -402,21 +494,19 @@ void main() {
           stdin: IOSink(controller.sink),
           stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
           completer: completer,
-        )
+        ),
       ]);
 
-      // Verify that certifacte value is passed into openssl command.
-      String stdin;
+      // Verify that certificate value is passed into openssl command.
+      String? stdin;
       controller.stream.listen((List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        buildSettings: <String, String>{
-          'bogus': 'bogus',
-        },
+      final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
         processManager: processManager,
+        platform: macosPlatform,
         logger: logger,
         config: testConfig,
         terminal: testTerminal,
@@ -430,9 +520,10 @@ void main() {
         logger.statusText,
         contains('Certificate choice "iPhone Developer: Profile 3 (3333CCCC33)"'),
       );
-      expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
+      expect(developmentTeam, '4444DDDD44');
       expect(stdin, 'This is a fake certificate');
       expect(testConfig.getValue('ios-signing-cert'), 'iPhone Developer: Profile 3 (3333CCCC33)');
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('find-identity failure', () async {
@@ -449,16 +540,15 @@ void main() {
         ),
       ]);
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        buildSettings: <String, String>{
-          'bogus': 'bogus',
-        },
+      final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
         processManager: processManager,
+        platform: macosPlatform,
         logger: logger,
         config: testConfig,
         terminal: testTerminal,
       );
-      expect(signingConfigs, isNull);
+      expect(developmentTeam, isNull);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext('find-certificate failure', () async {
@@ -481,21 +571,20 @@ void main() {
         ),
       ]);
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-        buildSettings: <String, String>{
-          'bogus': 'bogus',
-        },
+      final String? developmentTeam = await getCodeSigningIdentityDevelopmentTeam(
         processManager: processManager,
+        platform: macosPlatform,
         logger: logger,
         config: testConfig,
         terminal: testTerminal,
       );
-      expect(signingConfigs, isNull);
+      expect(developmentTeam, isNull);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }
 
-Stream<String> mockTerminalStdInStream;
+late Stream<String> mockTerminalStdInStream;
 
 class TestTerminal extends AnsiTerminal {
   TestTerminal() : super(stdio: globals.stdio, platform: globals.platform);

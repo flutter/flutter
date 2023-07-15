@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show window;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -91,7 +90,7 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(window).copyWith(size: widget.mediaSize),
+        data: const MediaQueryData().copyWith(size: widget.mediaSize),
         child: Directionality(
           textDirection: widget.textDirection,
           child: Navigator(
@@ -111,11 +110,11 @@ class _TestAppState extends State<TestApp> {
 
 class TestApp extends StatefulWidget {
   const TestApp({
-    Key? key,
+    super.key,
     required this.textDirection,
     required this.child,
     this.mediaSize,
-  }) : super(key: key);
+  });
 
   final TextDirection textDirection;
   final Widget child;
@@ -149,6 +148,248 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/87102
+  testWidgets('label position test - show hint', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            hint: const Text('Hint'),
+            onChanged: (int? newValue) {
+              value = newValue;
+            },
+            items: const <DropdownMenuItem<int?>>[
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('One'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('Two'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('Three'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null);
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+
+    // Select a item.
+    await tester.tap(find.text('Hint'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('One').last);
+    await tester.pumpAndSettle();
+
+    expect(value, 1);
+    final Offset oneValueLabel = tester.getTopLeft(find.text('labelText'));
+
+    // The position of the label does not change.
+    expect(hintEmptyLabel, oneValueLabel);
+  });
+
+  testWidgets('label position test - show disabledHint: disable', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            onChanged: null, // this disables the menu and shows the disabledHint.
+            disabledHint: const Text('disabledHint'),
+            items: const <DropdownMenuItem<int?>>[
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('One'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('Two'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('Three'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null); // disabledHint shown.
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+  });
+
+  testWidgets('label position test - show disabledHint: enable + null item', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            disabledHint: const Text('disabledHint'),
+            onChanged: (_) {},
+            items: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null); // disabledHint shown.
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+  });
+
+  testWidgets('label position test - show disabledHint: enable + empty item', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            disabledHint: const Text('disabledHint'),
+            onChanged: (_) {},
+            items: const <DropdownMenuItem<int?>>[],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null); // disabledHint shown.
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+  });
+
+  testWidgets('label position test - show hint: enable + empty item', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            hint: const Text('hint'),
+            onChanged: (_) {},
+            items: const <DropdownMenuItem<int?>>[],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null); // hint shown.
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+  });
+
+  testWidgets('label position test - no hint shown: enable + no selected + disabledHint', (WidgetTester tester) async {
+    int? value;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            disabledHint: const Text('disabledHint'),
+            onChanged: (_) {},
+            items: const <DropdownMenuItem<int?>>[
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('One'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('Two'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('Three'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, null);
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 24.0));
+  });
+
+  testWidgets('label position test - show selected item: disabled + hint + disabledHint', (WidgetTester tester) async {
+    const int value = 1;
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<int?>(
+            decoration: const InputDecoration(
+              labelText: 'labelText',
+            ),
+            value: value,
+            hint: const Text('hint'),
+            onChanged: null, // disabled
+            disabledHint: const Text('disabledHint'),
+            items: const <DropdownMenuItem<int?>>[
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('One'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('Two'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('Three'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(value, 1);
+    final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
+    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/82910
   testWidgets('null value test', (WidgetTester tester) async {
     int? value = 1;
@@ -167,7 +408,6 @@ void main() {
             },
             items: const <DropdownMenuItem<int?>>[
               DropdownMenuItem<int?>(
-                value: null,
                 child: Text('None'),
               ),
               DropdownMenuItem<int?>(
@@ -181,7 +421,7 @@ void main() {
               DropdownMenuItem<int?>(
                 value: 3,
                 child: Text('Three'),
-              )
+              ),
             ],
           ),
         ),
@@ -205,7 +445,7 @@ void main() {
 
   testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
     String? value = 'one';
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -230,7 +470,7 @@ void main() {
                   });
                 },
                 validator: (String? currentValue) {
-                  _validateCalled++;
+                  validateCalled++;
                   return currentValue == null ? 'Must select value' : null;
                 },
                 autovalidateMode: AutovalidateMode.always,
@@ -241,13 +481,13 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
+    expect(validateCalled, 1);
     expect(value, equals('one'));
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('three').last);
     await tester.pump();
-    expect(_validateCalled, 2);
+    expect(validateCalled, 2);
     await tester.pumpAndSettle();
     expect(value, equals('three'));
   });
@@ -289,12 +529,10 @@ void main() {
 
   testWidgets('DropdownButtonFormField with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    const String value = 'two';
 
     await tester.pumpWidget(
       buildFormFrame(
         buttonKey: buttonKey,
-        value: value,
         onChanged: onChanged,
       ),
     );
@@ -329,6 +567,45 @@ void main() {
     }
   });
 
+  testWidgets('DropdownButtonFormField with isDense:true does not clip large scale text',
+      (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    const String value = 'two';
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Builder(
+          builder: (BuildContext context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: Material(
+              child: Center(
+                child: DropdownButtonFormField<String>(
+                  key: buttonKey,
+                  value: value,
+                  onChanged: onChanged,
+                  items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                    return DropdownMenuItem<String>(
+                      key: ValueKey<String>(item),
+                      value: item,
+                      child: Text(item,
+                          key: ValueKey<String>('${item}Text'),
+                          style: const TextStyle(fontSize: 20.0)),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box =
+    tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
+    expect(box.size.height, 72.0);
+  });
+
   testWidgets('DropdownButtonFormField.isDense is true by default', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/46844
     final Key buttonKey = UniqueKey();
@@ -338,24 +615,26 @@ void main() {
       TestApp(
         textDirection: TextDirection.ltr,
         child: Material(
-          child: DropdownButtonFormField<String>(
-            key: buttonKey,
-            value: value,
-            onChanged: onChanged,
-            items: menuItems.map<DropdownMenuItem<String>>((String item) {
-              return DropdownMenuItem<String>(
-                key: ValueKey<String>(item),
-                value: item,
-                child: Text(item, key: ValueKey<String>('${item}Text')),
-              );
-            }).toList(),
+          child: Center(
+            child: DropdownButtonFormField<String>(
+              key: buttonKey,
+              value: value,
+              onChanged: onChanged,
+              items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                return DropdownMenuItem<String>(
+                  key: ValueKey<String>(item),
+                  value: item,
+                  child: Text(item, key: ValueKey<String>('${item}Text')),
+                );
+              }).toList(),
+            ),
           ),
         ),
       ),
     );
 
     final RenderBox box = tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
-    expect(box.size.height, 24.0);
+    expect(box.size.height, 48.0);
   });
 
   testWidgets('DropdownButtonFormField - custom text style', (WidgetTester tester) async {
@@ -375,7 +654,6 @@ void main() {
                 child: const Text(value),
               ),
             ],
-            isDense: true,
             onChanged: (_) { },
             style: const TextStyle(
               color: Colors.amber,
@@ -410,7 +688,7 @@ void main() {
       );
     }
     // [disabledHint] should display when [items] is null
-    await tester.pumpWidget(build(items: null));
+    await tester.pumpWidget(build());
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
 
@@ -432,11 +710,10 @@ void main() {
           buttonKey: buttonKey,
           value: null,
           hint: const Text('hint used when disabled'),
-          disabledHint: null,
         );
       }
       // [hint] should display when [items] is null and [disabledHint] is not defined
-      await tester.pumpWidget(build(items: null));
+      await tester.pumpWidget(build());
       expect(find.text('hint used when disabled'), findsOneWidget);
 
       // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
@@ -457,7 +734,7 @@ void main() {
       );
     }
     // [hint] should display when [items] is null and [disabledHint] is not defined
-    await tester.pumpWidget(build(items: null));
+    await tester.pumpWidget(build());
     expect(find.text('hint used when disabled'), findsOneWidget);
 
     // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
@@ -477,7 +754,7 @@ void main() {
       );
     }
     // [hint] should display when [items] is null and [disabledHint] is not defined
-    await tester.pumpWidget(build(items: null));
+    await tester.pumpWidget(build());
     expect(find.text('hint used when disabled'), findsOneWidget);
 
     // [hint] should display when [items] is an empty list and [disabledHint] is not defined.
@@ -498,7 +775,7 @@ void main() {
         disabledHint: const Text('disabled'),
       );
     }
-    await tester.pumpWidget(build(items: menuItems, onChanged: null));
+    await tester.pumpWidget(build(items: menuItems));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
   });
@@ -515,7 +792,7 @@ void main() {
         disabledHint: const Text('disabled'),
       );
     }
-    await tester.pumpWidget(build(items: null));
+    await tester.pumpWidget(build());
     final RenderBox disabledHintBox = tester.renderObject<RenderBox>(
       find.byKey(buttonKey),
     );
@@ -566,7 +843,6 @@ void main() {
     debugDisableShadows = false;
     await tester.pumpWidget(buildFormFrame(
       buttonKey: buttonKey,
-      items: menuItems,
       onChanged: onChanged,
     ));
     await tester.tap(find.byKey(buttonKey));
@@ -589,7 +865,6 @@ void main() {
 
     await tester.pumpWidget(buildFormFrame(
       buttonKey: buttonKeyOne,
-      items: menuItems,
       elevation: 16,
       onChanged: onChanged,
     ));
@@ -605,7 +880,6 @@ void main() {
     await tester.tap(find.text('one').last);
     await tester.pumpWidget(buildFormFrame(
       buttonKey: buttonKeyTwo,
-      items: menuItems,
       elevation: 24,
       onChanged: onChanged,
     ));
@@ -816,7 +1090,7 @@ void main() {
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int _validateCalled = 0;
+    int validateCalled = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -832,7 +1106,7 @@ void main() {
               }).toList(),
               onChanged: onChanged,
               validator: (String? value) {
-                _validateCalled++;
+                validateCalled++;
                 return null;
               },
             ),
@@ -841,30 +1115,7 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 1);
-  });
-
-  testWidgets('autovalidateMode and autovalidate should not be used at the same time', (WidgetTester tester) async {
-    Widget builder() {
-      return MaterialApp(
-        home: Material(
-          child: Center(
-            child: DropdownButtonFormField<String>(
-              autovalidate: true,
-              autovalidateMode: AutovalidateMode.always,
-              items: menuItems.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: onChanged,
-            ),
-          ),
-        ),
-      );
-    }
-    expect(() => builder(), throwsAssertionError);
+    expect(validateCalled, 1);
   });
 
   testWidgets('DropdownButtonFormField - Custom button alignment', (WidgetTester tester) async {

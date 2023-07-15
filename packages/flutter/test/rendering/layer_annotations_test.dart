@@ -434,56 +434,6 @@ void main() {
     );
   });
 
-  test('PhysicalModelLayer.findAllAnnotations respects clipPath', () {
-    // For this triangle, location (1, 1) is inside, while (2, 2) is outside.
-    //         2
-    //    —————
-    //    |  /
-    //    | /
-    // 2  |/
-    final Path originalPath = Path();
-    originalPath.lineTo(2, 0);
-    originalPath.lineTo(0, 2);
-    originalPath.close();
-    // Shift this clip path by (10, 10).
-    final Path path = originalPath.shift(const Offset(10, 10));
-    const Offset insidePosition = Offset(11, 11);
-    const Offset outsidePosition = Offset(12, 12);
-
-    final Layer root = _withBackgroundAnnotation(
-      1000,
-      _Layers(
-        PhysicalModelLayer(
-          clipPath: path,
-          elevation: 10,
-          color: const Color.fromARGB(0, 0, 0, 0),
-          shadowColor: const Color.fromARGB(0, 0, 0, 0),
-        ),
-        children: <Object>[
-          _TestAnnotatedLayer(
-            1,
-            opaque: true,
-            size: const Size(10, 10),
-            offset: const Offset(10, 10),
-          ),
-        ],
-      ).build(),
-    );
-
-    expect(
-      root.findAllAnnotations<int>(insidePosition).entries.toList(),
-      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
-      ]),
-    );
-    expect(
-      root.findAllAnnotations<int>(outsidePosition).entries.toList(),
-      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-        const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
-      ]),
-    );
-  });
-
   test('LeaderLayer.findAllAnnotations respects offset', () {
     const Offset insidePosition = Offset(-5, 5);
     const Offset outsidePosition = Offset(5, 5);
@@ -524,7 +474,7 @@ void main() {
       final Layer root = _withBackgroundAnnotation(
         1000,
         _Layers(
-          AnnotatedRegionLayer<int>(1, opaque: false),
+          AnnotatedRegionLayer<int>(1),
           children: <Object>[
             _TestAnnotatedLayer(2, opaque: false),
           ],
@@ -626,7 +576,7 @@ void main() {
       final Layer root = _withBackgroundAnnotation(
         1000,
         _Layers(
-          AnnotatedRegionLayer<int>(1, opaque: false, size: Size.zero),
+          AnnotatedRegionLayer<int>(1, size: Size.zero),
           children: <Object>[
             _TestAnnotatedLayer(2, opaque: true),
           ],
@@ -651,7 +601,7 @@ void main() {
       final Layer root = _withBackgroundAnnotation(
         1000,
         _Layers(
-          AnnotatedRegionLayer<int>(1, opaque: false),
+          AnnotatedRegionLayer<int>(1),
           children: <Object>[
             _TestAnnotatedLayer(2, opaque: false),
           ],
@@ -845,7 +795,7 @@ class _TestAnnotatedLayer extends Layer {
   final Size? size;
 
   @override
-  EngineLayer? addToScene(SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  EngineLayer? addToScene(SceneBuilder builder) {
     return null;
   }
 
@@ -858,10 +808,12 @@ class _TestAnnotatedLayer extends Layer {
     Offset localPosition, {
     required bool onlyFirst,
   }) {
-    if (S != int)
+    if (S != int) {
       return false;
-    if (size != null && !(offset & size!).contains(localPosition))
+    }
+    if (size != null && !(offset & size!).contains(localPosition)) {
       return false;
+    }
     final Object untypedValue = value;
     final S typedValue = untypedValue as S;
     result.add(AnnotationEntry<S>(annotation: typedValue, localPosition: localPosition));

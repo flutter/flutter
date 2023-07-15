@@ -12,7 +12,7 @@
 - [ ] I signed the [CLA].
 - [ ] I listed at least one issue that this PR fixes in the description above.
 - [ ] I updated/added relevant documentation (doc comments with `///`).
-- [ ] I added new tests to check the change I am making or feature I am adding, or Hixie said the PR is test-exempt.
+- [ ] I added new tests to check the change I am making, or this PR is [test-exempt].
 - [ ] All existing and new tests are passing.
 
 If you need help, consider asking for advice on the #hackers-new channel on [Discord].
@@ -20,6 +20,7 @@ If you need help, consider asking for advice on the #hackers-new channel on [Dis
 <!-- Links -->
 [Contributor Guide]: https://github.com/flutter/flutter/wiki/Tree-hygiene#overview
 [Tree Hygiene]: https://github.com/flutter/flutter/wiki/Tree-hygiene
+[test-exempt]: https://github.com/flutter/flutter/wiki/Tree-hygiene#tests
 [Flutter Style Guide]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
 [Features we expect every widget to implement]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#features-we-expect-every-widget-to-implement
 [CLA]: https://cla.developers.google.com/

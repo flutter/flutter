@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,9 +30,7 @@ void _defineTests() {
     ));
 
     expect(semanticsTester, hasSemantics(
-      TestSemantics.root(
-        children: const <TestSemantics>[],
-      ),
+      TestSemantics.root(),
     ));
 
     semanticsTester.dispose();
@@ -350,7 +346,7 @@ void _defineTests() {
         ),
       ),
     ));
-    final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
+    final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
       ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
 
@@ -381,17 +377,29 @@ void _defineTests() {
         case SemanticsAction.moveCursorBackwardByWord:
         case SemanticsAction.moveCursorForwardByWord:
           semanticsOwner.performAction(expectedId, action, true);
-          break;
         case SemanticsAction.setSelection:
           semanticsOwner.performAction(expectedId, action, <String, int>{
             'base': 4,
             'extent': 5,
           });
-          break;
         case SemanticsAction.setText:
           semanticsOwner.performAction(expectedId, action, 'text');
-          break;
-        default:
+        case SemanticsAction.copy:
+        case SemanticsAction.customAction:
+        case SemanticsAction.cut:
+        case SemanticsAction.decrease:
+        case SemanticsAction.didGainAccessibilityFocus:
+        case SemanticsAction.didLoseAccessibilityFocus:
+        case SemanticsAction.dismiss:
+        case SemanticsAction.increase:
+        case SemanticsAction.longPress:
+        case SemanticsAction.paste:
+        case SemanticsAction.scrollDown:
+        case SemanticsAction.scrollLeft:
+        case SemanticsAction.scrollRight:
+        case SemanticsAction.scrollUp:
+        case SemanticsAction.showOnScreen:
+        case SemanticsAction.tap:
           semanticsOwner.performAction(expectedId, action);
       }
       expect(performedActions.length, expectedLength);
@@ -436,10 +444,12 @@ void _defineTests() {
         ),
       ),
     ));
-    List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
+    List<SemanticsFlag> flags = SemanticsFlag.values.toList();
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
-    flags.remove(SemanticsFlag.hasImplicitScrolling);
+    flags
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isCheckStateMixed);
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
@@ -463,7 +473,8 @@ void _defineTests() {
           rect: Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
           properties: SemanticsProperties(
             enabled: true,
-            checked: true,
+            checked: false,
+            mixed: true,
             toggled: true,
             selected: true,
             hidden: true,
@@ -487,10 +498,12 @@ void _defineTests() {
         ),
       ),
     ));
-    flags = SemanticsFlag.values.values.toList();
+    flags = SemanticsFlag.values.toList();
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
-    flags.remove(SemanticsFlag.hasImplicitScrolling);
+    flags
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isChecked);
     expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
@@ -739,7 +752,7 @@ class _DiffTester {
     ));
     expect(semanticsTester, hasSemantics(createExpectations(from), ignoreId: true));
 
-    SemanticsNode root = RendererBinding.instance!.renderView.debugSemantics!;
+    SemanticsNode root = RendererBinding.instance.renderView.debugSemantics!;
     final Map<Key, int> idAssignments = <Key, int>{};
     root.visitChildren((SemanticsNode firstChild) {
       firstChild.visitChildren((SemanticsNode node) {
@@ -757,7 +770,7 @@ class _DiffTester {
     await tester.pumpAndSettle();
     expect(semanticsTester, hasSemantics(createExpectations(to), ignoreId: true));
 
-    root = RendererBinding.instance!.renderView.debugSemantics!;
+    root = RendererBinding.instance.renderView.debugSemantics!;
     root.visitChildren((SemanticsNode firstChild) {
       firstChild.visitChildren((SemanticsNode node) {
         if (node.key != null && idAssignments[node.key] != null) {

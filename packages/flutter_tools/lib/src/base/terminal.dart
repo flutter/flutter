@@ -111,6 +111,7 @@ abstract class Terminal {
 
   String clearScreen();
 
+  bool get singleCharMode;
   set singleCharMode(bool value);
 
   /// Return keystrokes from the console.
@@ -174,6 +175,15 @@ class AnsiTerminal implements Terminal {
   static const String yellow = '\u001b[33m';
   static const String grey = '\u001b[90m';
 
+  // Moves cursor up 1 line.
+  static const String cursorUpLineCode = '\u001b[1A';
+
+  // Moves cursor to the beginning of the line.
+  static const String cursorBeginningOfLineCode = '\u001b[1G';
+
+  // Clear the entire line, cursor position does not change.
+  static const String clearEntireLineCode = '\u001b[2K';
+
   static const Map<TerminalColor, String> _colorMap = <TerminalColor, String>{
     TerminalColor.red: red,
     TerminalColor.green: green,
@@ -225,7 +235,6 @@ class AnsiTerminal implements Terminal {
 
   @override
   String bolden(String message) {
-    assert(message != null);
     if (!supportsColor || message.isEmpty) {
       return message;
     }
@@ -246,8 +255,7 @@ class AnsiTerminal implements Terminal {
 
   @override
   String color(String message, TerminalColor color) {
-    assert(message != null);
-    if (!supportsColor || color == null || message.isEmpty) {
+    if (!supportsColor || message.isEmpty) {
       return message;
     }
     final StringBuffer buffer = StringBuffer();
@@ -269,6 +277,27 @@ class AnsiTerminal implements Terminal {
   @override
   String clearScreen() => supportsColor ? clear : '\n\n';
 
+  /// Returns ANSI codes to clear [numberOfLines] lines starting with the line
+  /// the cursor is on.
+  ///
+  /// If the terminal does not support ANSI codes, returns an empty string.
+  String clearLines(int numberOfLines) {
+    if (!supportsColor) {
+      return '';
+    }
+    return cursorBeginningOfLineCode +
+        clearEntireLineCode +
+        (cursorUpLineCode + clearEntireLineCode) * (numberOfLines - 1);
+  }
+
+  @override
+  bool get singleCharMode {
+    if (!_stdio.stdinHasTerminal) {
+      return false;
+    }
+    final io.Stdin stdin = _stdio.stdin as io.Stdin;
+    return stdin.lineMode && stdin.echoMode;
+  }
   @override
   set singleCharMode(bool value) {
     if (!_stdio.stdinHasTerminal) {
@@ -365,6 +394,8 @@ class _TestTerminal implements Terminal {
     throw UnsupportedError('promptForCharInput not supported in the test terminal.');
   }
 
+  @override
+  bool get singleCharMode => false;
   @override
   set singleCharMode(bool value) { }
 

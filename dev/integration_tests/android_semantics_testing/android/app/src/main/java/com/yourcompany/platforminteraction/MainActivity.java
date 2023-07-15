@@ -15,14 +15,18 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+import android.content.ClipboardManager;
+import android.content.ClipData;
 import android.content.Context;
+import androidx.annotation.NonNull;
 
-import io.flutter.app.FlutterActivity;
+import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterView;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugins.GeneratedPluginRegistrant;
-import io.flutter.view.FlutterView;
 
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
@@ -30,10 +34,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 public class MainActivity extends FlutterActivity {
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
-      GeneratedPluginRegistrant.registerWith(this);
-      new MethodChannel(getFlutterView(), "semantics").setMethodCallHandler(new SemanticsTesterMethodHandler());
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+      GeneratedPluginRegistrant.registerWith(flutterEngine);
+      new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "semantics")
+              .setMethodCallHandler(new SemanticsTesterMethodHandler());
   }
 
   class SemanticsTesterMethodHandler implements MethodCallHandler {
@@ -41,7 +45,7 @@ public class MainActivity extends FlutterActivity {
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-        FlutterView flutterView = getFlutterView();
+        FlutterView flutterView = findViewById(FLUTTER_VIEW_ID);
         AccessibilityNodeProvider provider = flutterView.getAccessibilityNodeProvider();
         DisplayMetrics displayMetrics = new DisplayMetrics();
         WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
@@ -61,6 +65,16 @@ public class MainActivity extends FlutterActivity {
             }
             AccessibilityNodeInfo node = provider.createAccessibilityNodeInfo(id);
             result.success(convertSemantics(node, id));
+            return;
+        }
+        if (methodCall.method.equals("setClipboard")) {
+            Map<String, Object> data = methodCall.arguments();
+            @SuppressWarnings("unchecked")
+            String message = (String) data.get("message");
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("message", message);
+            clipboard.setPrimaryClip(clip);
+            result.success(null);
             return;
         }
         result.notImplemented();
@@ -108,11 +122,60 @@ public class MainActivity extends FlutterActivity {
         if (actionList.size() > 0) {
             ArrayList<Integer> actions = new ArrayList<>();
             for (AccessibilityNodeInfo.AccessibilityAction action : actionList) {
-                actions.add(action.getId());
+                if (kIdByAction.containsKey(action)) {
+                    actions.add(kIdByAction.get(action).intValue());
+                }
             }
             result.put("actions", actions);
         }
         return result;
     }
   }
+
+  // These indices need to be in sync with android_semantics_testing/lib/src/constants.dart
+  static final int kFocusIndex = 1 << 0;
+  static final int kClearFocusIndex = 1 << 1;
+  static final int kSelectIndex = 1 << 2;
+  static final int kClearSelectionIndex = 1 << 3;
+  static final int kClickIndex = 1 << 4;
+  static final int kLongClickIndex = 1 << 5;
+  static final int kAccessibilityFocusIndex = 1 << 6;
+  static final int kClearAccessibilityFocusIndex = 1 << 7;
+  static final int kNextAtMovementGranularityIndex = 1 << 8;
+  static final int kPreviousAtMovementGranularityIndex = 1 << 9;
+  static final int kNextHtmlElementIndex = 1 << 10;
+  static final int kPreviousHtmlElementIndex = 1 << 11;
+  static final int kScrollForwardIndex = 1 << 12;
+  static final int kScrollBackwardIndex = 1 << 13;
+  static final int kCutIndex = 1 << 14;
+  static final int kCopyIndex = 1 << 15;
+  static final int kPasteIndex = 1 << 16;
+  static final int kSetSelectionIndex = 1 << 17;
+  static final int kExpandIndex = 1 << 18;
+  static final int kCollapseIndex = 1 << 19;
+  static final int kSetText = 1 << 21;
+
+  static final Map<AccessibilityNodeInfo.AccessibilityAction, Integer> kIdByAction = new HashMap<AccessibilityNodeInfo.AccessibilityAction, Integer>() {{
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_FOCUS, kFocusIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLEAR_FOCUS, kClearFocusIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_SELECT, kSelectIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLEAR_SELECTION, kClearSelectionIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK, kClickIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK, kLongClickIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS, kAccessibilityFocusIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS, kClearAccessibilityFocusIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_NEXT_AT_MOVEMENT_GRANULARITY, kNextAtMovementGranularityIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY, kPreviousAtMovementGranularityIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_NEXT_HTML_ELEMENT, kNextHtmlElementIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_PREVIOUS_HTML_ELEMENT, kPreviousHtmlElementIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD, kScrollForwardIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD, kScrollBackwardIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_CUT, kCutIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_COPY, kCopyIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_PASTE, kPasteIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_SELECTION, kSetSelectionIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND, kExpandIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE, kCollapseIndex);
+    put(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_TEXT, kSetText);
+  }};
 }

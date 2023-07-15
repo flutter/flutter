@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -21,7 +20,7 @@ class PaintingBindingSpy extends BindingBase with SchedulerBinding, ServicesBind
   }
 
   @override
-  // ignore: MUST_CALL_SUPER
+  // ignore: must_call_super
   void initLicenses() {
     // Do not include any licenses, because we're a test, and the LICENSE file
     // doesn't get generated for tests.

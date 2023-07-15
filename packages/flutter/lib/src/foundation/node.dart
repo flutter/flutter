@@ -8,6 +8,10 @@ import 'package:meta/meta.dart';
 // during device lab performance tests. When editing this file, check to make sure
 // that it didn't break that test.
 
+/// Deprecated. Unused by the framework and will be removed in a future version
+/// of Flutter. If needed, inline any required functionality of this class
+/// directly in the subclass.
+///
 /// An abstract node in a tree.
 ///
 /// AbstractNode has as notion of depth, attachment, and parent, but does not
@@ -39,6 +43,10 @@ import 'package:meta/meta.dart';
 /// moved to be a child of A, sibling of B, then the numbers won't change. C's
 /// [depth] will still be 2. The [depth] is automatically maintained by the
 /// [adoptChild] and [dropChild] methods.
+@Deprecated(
+  'If needed, inline any required functionality of AbstractNode in your class directly. '
+  'This feature was deprecated after v3.12.0-4.0.pre.',
+)
 class AbstractNode {
   /// The depth of this node in the tree.
   ///
@@ -92,7 +100,6 @@ class AbstractNode {
   /// method, as in `super.attach(owner)`.
   @mustCallSuper
   void attach(covariant Object owner) {
-    assert(owner != null);
     assert(_owner == null);
     _owner = owner;
   }
@@ -124,18 +131,19 @@ class AbstractNode {
   @protected
   @mustCallSuper
   void adoptChild(covariant AbstractNode child) {
-    assert(child != null);
     assert(child._parent == null);
     assert(() {
       AbstractNode node = this;
-      while (node.parent != null)
+      while (node.parent != null) {
         node = node.parent!;
+      }
       assert(node != child); // indicates we are about to create a cycle
       return true;
     }());
     child._parent = this;
-    if (attached)
+    if (attached) {
       child.attach(_owner!);
+    }
     redepthChild(child);
   }
 
@@ -145,11 +153,11 @@ class AbstractNode {
   @protected
   @mustCallSuper
   void dropChild(covariant AbstractNode child) {
-    assert(child != null);
     assert(child._parent == this);
     assert(child.attached == attached);
     child._parent = null;
-    if (attached)
+    if (attached) {
       child.detach();
+    }
   }
 }

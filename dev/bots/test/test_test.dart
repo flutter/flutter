@@ -17,7 +17,17 @@ import 'common.dart';
 /// will include the process result's stdio in the failure message.
 void expectExitCode(ProcessResult result, int expectedExitCode) {
   if (result.exitCode != expectedExitCode) {
-    fail('Failure due to exit code ${result.exitCode}\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}');
+    fail(
+      'Process ${result.pid} exited with the wrong exit code.\n'
+      '\n'
+      'EXPECTED: exit code $expectedExitCode\n'
+      'ACTUAL: exit code ${result.exitCode}\n'
+      '\n'
+      'STDOUT:\n'
+      '${result.stdout}\n'
+      'STDERR:\n'
+      '${result.stderr}'
+    );
   }
 }
 
@@ -72,23 +82,23 @@ void main() {
     });
   });
 
-  group('flutter/plugins version', () {
+  group('flutter/pacakges version', () {
     final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-    final fs.File pluginsVersionFile = memoryFileSystem.file(path.join('bin','internal','flutter_plugins.version'));
+    final fs.File packagesVersionFile = memoryFileSystem.file(path.join('bin','internal','flutter_packages.version'));
     const String kSampleHash = '592b5b27431689336fa4c721a099eedf787aeb56';
     setUpAll(() {
-      pluginsVersionFile.createSync(recursive: true);
+      packagesVersionFile.createSync(recursive: true);
     });
 
     test('commit hash', () async {
-      pluginsVersionFile.writeAsStringSync(kSampleHash);
-      final String actualHash = await getFlutterPluginsVersion(fileSystem: memoryFileSystem, pluginsVersionFile: pluginsVersionFile.path);
+      packagesVersionFile.writeAsStringSync(kSampleHash);
+      final String actualHash = await getFlutterPackagesVersion(fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
       expect(actualHash, kSampleHash);
     });
 
     test('commit hash with newlines', () async {
-      pluginsVersionFile.writeAsStringSync('\n$kSampleHash\n');
-      final String actualHash = await getFlutterPluginsVersion(fileSystem: memoryFileSystem, pluginsVersionFile: pluginsVersionFile.path);
+      packagesVersionFile.writeAsStringSync('\n$kSampleHash\n');
+      final String actualHash = await getFlutterPackagesVersion(fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
       expect(actualHash, kSampleHash);
     });
   });
@@ -96,10 +106,13 @@ void main() {
   group('test.dart script', () {
     const ProcessManager processManager = LocalProcessManager();
 
-    Future<ProcessResult> runScript(
-        [Map<String, String>? environment, List<String> otherArgs = const <String>[]]) async {
+    Future<ProcessResult> runScript([
+        Map<String, String>? environment,
+        List<String> otherArgs = const <String>[],
+    ]) async {
       final String dart = path.absolute(
-          path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
+        path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+      );
       final ProcessResult scriptProcess = processManager.runSync(<String>[
         dart,
         'test.dart',
@@ -109,26 +122,34 @@ void main() {
     }
 
     test('subshards tests correctly', () async {
+      // When updating this test, try to pick shard numbers that ensure we're checking
+      // that unequal test distributions don't miss tests.
       ProcessResult result = await runScript(
-        <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '1_3'},
+        <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': '1_3'},
       );
       expectExitCode(result, 0);
-      // There are currently 6 smoke tests. This shard should contain test 1 and 2.
-      expect(result.stdout, contains('Selecting subshard 1 of 3 (range 1-2 of 6)'));
+      expect(result.stdout, contains('Selecting subshard 1 of 3 (tests 1-3 of 8)'));
 
       result = await runScript(
-        <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '5_6'},
+        <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': '3_3'},
       );
       expectExitCode(result, 0);
-      // This shard should contain only test 5.
-      expect(result.stdout, contains('Selecting subshard 5 of 6 (range 5-5 of 6)'));
+      expect(result.stdout, contains('Selecting subshard 3 of 3 (tests 7-8 of 8)'));
     });
 
     test('exits with code 1 when SUBSHARD index greater than total', () async {
       final ProcessResult result = await runScript(
-        <String, String>{'SHARD': 'smoke_tests', 'SUBSHARD': '100_99'},
+        <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': '100_99'},
       );
       expectExitCode(result, 1);
+      expect(result.stdout, contains('Invalid subshard name'));
+    });
+
+    test('exits with code 255 when invalid SUBSHARD name', () async {
+      final ProcessResult result = await runScript(
+        <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': 'invalid_name'},
+      );
+      expectExitCode(result, 255);
       expect(result.stdout, contains('Invalid subshard name'));
     });
   });

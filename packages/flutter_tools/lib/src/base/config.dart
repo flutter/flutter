@@ -38,12 +38,11 @@ class Config {
       name,
       fileSystem: fileSystem,
       logger: logger,
-      platform: platform,
-      managed: false
+      platform: platform
     );
   }
 
-  /// Similiar to the default config constructor, but with some different
+  /// Similar to the default config constructor, but with some different
   /// behaviours:
   /// - will not delete the config if it's not valid JSON
   /// - will log but also rethrow any exceptions while loading the JSON, so
@@ -117,7 +116,11 @@ class Config {
       if (managed) {
         rethrow;
       } else {
-        _file.deleteSync();
+        try {
+          _file.deleteSync();
+        } on FileSystemException {
+          // ignore
+        }
       }
     } on Exception catch (err) {
       _logger
@@ -186,7 +189,7 @@ class Config {
   //
   // If the searched environment variables are not set, '.' is returned instead.
   //
-  // Note that this is different from FileSystemUtils.homeDirPath.
+  // This is different from [FileSystemUtils.homeDirPath].
   static String _userHomePath(Platform platform) {
     final String envKey = platform.isWindows ? 'APPDATA' : 'HOME';
     return platform.environment[envKey] ?? '.';

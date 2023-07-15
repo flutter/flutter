@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestRoute<T> extends PageRoute<T> {
-  TestRoute({ required this.child, RouteSettings? settings }) : super(settings: settings);
+  TestRoute({ required this.child, super.settings });
 
   final Widget child;
 
@@ -56,9 +56,11 @@ void main() {
     expect(find.byType(Navigator), findsOneWidget);
     expect(find.byType(PerformanceOverlay), findsOneWidget);
     expect(find.byType(CheckedModeBanner), findsOneWidget);
+    WidgetsApp.showPerformanceOverlayOverride = false;
   });
 
   testWidgets('showPerformanceOverlayOverride false', (WidgetTester tester) async {
+    WidgetsApp.showPerformanceOverlayOverride = true;
     expect(WidgetsApp.showPerformanceOverlayOverride, true);
     WidgetsApp.showPerformanceOverlayOverride = false;
     await pumpApp(tester);
@@ -77,9 +79,11 @@ void main() {
     expect(find.byType(Navigator), findsOneWidget);
     expect(find.byType(PerformanceOverlay), findsNothing);
     expect(find.byType(CheckedModeBanner), findsNothing);
+    WidgetsApp.debugAllowBannerOverride = true; // restore to default value
   });
 
   testWidgets('debugAllowBannerOverride true', (WidgetTester tester) async {
+    WidgetsApp.debugAllowBannerOverride = false;
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
     expect(WidgetsApp.debugAllowBannerOverride, false);
     WidgetsApp.debugAllowBannerOverride = true;

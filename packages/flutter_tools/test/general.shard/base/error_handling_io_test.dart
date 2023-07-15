@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
 import 'package:file/file.dart';
@@ -27,7 +25,6 @@ final Platform windowsPlatform = FakePlatform(
 );
 
 final Platform linuxPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{}
 );
 
@@ -49,6 +46,11 @@ void main() {
     final File file = fileSystem.file('file')..createSync();
 
      expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
+  });
+
+  testWithoutContext('create accepts exclusive argument', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    expect(fileSystem.file('file').create(exclusive: true), isNotNull);
   });
 
   testWithoutContext('deleteIfExists handles separate program deleting file', () {
@@ -102,8 +104,9 @@ void main() {
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
     const int kFatalDeviceHardwareError =  483;
+    const int kDeviceDoesNotExist = 433;
 
-    FileExceptionHandler exceptionHandler;
+    late FileExceptionHandler exceptionHandler;
 
     setUp(() {
       exceptionHandler = FileExceptionHandler();
@@ -262,6 +265,44 @@ void main() {
              throwsToolExit(message: expectedMessage));
     });
 
+    testWithoutContext('when the device does not exist', () async {
+      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
+      );
+      final File file = fileSystem.file('file');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.open,
+        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', kDeviceDoesNotExist)),
+      );
+
+      const String expectedMessage = 'The device was not found.';
+      expect(() async => file.writeAsBytes(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() async => file.writeAsString(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsStringSync(''),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(),
+             throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(),
+             throwsToolExit(message: expectedMessage));
+    });
+
     testWithoutContext('when creating a temporary dir on a full device', () async {
       final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
@@ -340,7 +381,7 @@ void main() {
 
     testWithoutContext('When reading from a file or directory without permission', () {
        final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: ThrowsOnCurrentDirectoryFileSystem()..errorCode = kUserPermissionDenied,
+        delegate: ThrowsOnCurrentDirectoryFileSystem(kUserPermissionDenied),
         platform: windowsPlatform,
       );
 
@@ -354,7 +395,7 @@ void main() {
     const int enospc = 28;
     const int eacces = 13;
 
-    FileExceptionHandler exceptionHandler;
+    late FileExceptionHandler exceptionHandler;
 
     setUp(() {
       exceptionHandler = FileExceptionHandler();
@@ -531,7 +572,7 @@ void main() {
 
     testWithoutContext('When the current working directory disappears', () async {
      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: ThrowsOnCurrentDirectoryFileSystem()..errorCode = kSystemCannotFindFile,
+        delegate: ThrowsOnCurrentDirectoryFileSystem(kSystemCannotFindFile),
         platform: linuxPlatform,
       );
 
@@ -560,7 +601,7 @@ void main() {
     const int eperm = 1;
     const int enospc = 28;
     const int eacces = 13;
-    FileExceptionHandler exceptionHandler;
+    late FileExceptionHandler exceptionHandler;
 
     setUp(() {
       exceptionHandler = FileExceptionHandler();
@@ -754,7 +795,7 @@ void main() {
 
     testWithoutContext('When reading from current directory without permission', () {
      final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
-        delegate: ThrowsOnCurrentDirectoryFileSystem()..errorCode = eacces,
+        delegate: ThrowsOnCurrentDirectoryFileSystem(eacces),
         platform: linuxPlatform,
       );
 
@@ -781,11 +822,9 @@ void main() {
     );
 
     final Object firstPath = fs.path;
+    expect(firstPath, isNotNull);
 
     fs.currentDirectory = null;
-    // For fs.path.absolute usage.
-    fileSystem.path = MemoryFileSystem.test().path;
-
     expect(identical(firstPath, fs.path), false);
   });
 
@@ -833,7 +872,7 @@ void main() {
     const int kUserMappedSectionOpened = 1224;
     const int kUserPermissionDenied = 5;
 
-    testWithoutContext('when PackageProcess throws an exception containg non-executable bits', () {
+    testWithoutContext('when PackageProcess throws an exception containing non-executable bits', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
         const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>['not-empty'])),
@@ -854,8 +893,8 @@ void main() {
 
     testWithoutContext('when PackageProcess throws an exception without containing non-executable bits', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>[])),
-        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>[])),
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('')),
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('')),
       ]);
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
@@ -924,7 +963,8 @@ void main() {
         platform: windowsPlatform,
       );
 
-      const String expectedMessage = 'The flutter tool cannot access the file';
+      const String expectedMessage = 'Flutter failed to run "foo". The flutter tool cannot access the file or directory.\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
       expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() async => processManager.run(<String>['foo']),
@@ -982,7 +1022,8 @@ void main() {
         platform: linuxPlatform,
       );
 
-      const String expectedMessage = 'The flutter tool cannot access the file';
+      const String expectedMessage = 'Flutter failed to run "foo".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
 
       expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -1012,6 +1053,7 @@ void main() {
   group('ProcessManager on macOS throws tool exit', () {
     const int enospc = 28;
     const int eacces = 13;
+    const int ebadarch = 86;
 
     testWithoutContext('when writing to a full device', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
@@ -1045,7 +1087,8 @@ void main() {
         platform: macOSPlatform,
       );
 
-      const String expectedMessage = 'The flutter tool cannot access the file';
+      const String expectedMessage = 'Flutter failed to run "foo".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
 
       expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -1070,6 +1113,29 @@ void main() {
 
       expect(() async => processManager.canRun('/path/to/dart'), throwsToolExit(message: expectedMessage));
     });
+
+    testWithoutContext('when bad CPU type', () async {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo', '--bar'], exception: ProcessException('', <String>[], '', ebadarch)),
+        const FakeCommand(command: <String>['foo', '--bar'], exception: ProcessException('', <String>[], '', ebadarch)),
+        const FakeCommand(command: <String>['foo', '--bar'], exception: ProcessException('', <String>[], '', ebadarch)),
+      ]);
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: fakeProcessManager,
+        platform: macOSPlatform,
+      );
+
+      const String expectedMessage = 'Flutter failed to run "foo --bar".\n'
+          'The binary was built with the incorrect architecture to run on this machine.';
+
+      expect(() async => processManager.start(<String>['foo', '--bar']),
+          throwsToolExit(message: expectedMessage));
+      expect(() async => processManager.run(<String>['foo', '--bar']),
+          throwsToolExit(message: expectedMessage));
+      expect(() => processManager.runSync(<String>['foo', '--bar']),
+          throwsToolExit(message: expectedMessage));
+    });
   });
 
   testWithoutContext('ErrorHandlingProcessManager delegates killPid correctly', () async {
@@ -1079,7 +1145,7 @@ void main() {
       platform: linuxPlatform,
     );
 
-    expect(processManager.killPid(1, io.ProcessSignal.sigterm), true);
+    expect(processManager.killPid(1), true);
     expect(processManager.killPid(3, io.ProcessSignal.sigkill), true);
     expect(fakeProcessManager.killedProcesses, <int, io.ProcessSignal>{
       1: io.ProcessSignal.sigterm,
@@ -1089,8 +1155,8 @@ void main() {
 
   group('CopySync' , () {
     const int eaccess = 13;
-    FileExceptionHandler exceptionHandler;
-    ErrorHandlingFileSystem fileSystem;
+    late FileExceptionHandler exceptionHandler;
+    late ErrorHandlingFileSystem fileSystem;
 
     setUp(() {
       exceptionHandler = FileExceptionHandler();
@@ -1128,7 +1194,7 @@ void main() {
       );
 
       const String expectedMessage =
-          'Flutter failed to copy source to dest due to destination location error.\n'
+          'Flutter failed to create file at "dest".\n'
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
       expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit(message: expectedMessage));
     });
@@ -1191,20 +1257,22 @@ class ThrowingFakeProcessManager extends Fake implements ProcessManager {
   final Exception _exception;
 
   @override
-  bool canRun(dynamic executable, {String workingDirectory}) {
+  bool canRun(dynamic executable, {String? workingDirectory}) {
     throw _exception;
   }
 }
 
 class ThrowsOnCurrentDirectoryFileSystem extends Fake implements FileSystem {
-  int errorCode;
+  ThrowsOnCurrentDirectoryFileSystem(this.errorCode);
+
+  final int errorCode;
 
   @override
   Directory get currentDirectory => throw FileSystemException('', '', OSError('', errorCode));
 }
 
 class FakeExistsFile extends Fake implements File {
-  Object error;
+  late Exception error;
   int existsCount = 0;
 
 
@@ -1225,11 +1293,12 @@ class FakeExistsFile extends Fake implements File {
 
 class FakeFileSystem extends Fake implements FileSystem {
   @override
-  p.Context path;
+  p.Context get path => p.Context();
 
   @override
-  Directory get currentDirectory => null;
-
+  Directory get currentDirectory {
+    throw UnimplementedError();
+  }
   @override
   set currentDirectory(dynamic path) { }
 }

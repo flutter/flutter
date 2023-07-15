@@ -4,9 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
-
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/scaffolding.dart' as test_package;
 
 /// Signature for the [reportTestException] callback.
 typedef TestExceptionReporter = void Function(FlutterErrorDetails details, String testDescription);
@@ -24,7 +22,6 @@ typedef TestExceptionReporter = void Function(FlutterErrorDetails details, Strin
 TestExceptionReporter get reportTestException => _reportTestException;
 TestExceptionReporter _reportTestException = _defaultTestExceptionReporter;
 set reportTestException(TestExceptionReporter handler) {
-  assert(handler != null);
   _reportTestException = handler;
 }
 
@@ -36,8 +33,9 @@ void _defaultTestExceptionReporter(FlutterErrorDetails errorDetails, String test
   // get the same effect here by calling that error handler directly or indeed just throwing.
   // However, we call registerException because that's the semantically correct thing...
   String additional = '';
-  if (testDescription.isNotEmpty)
+  if (testDescription.isNotEmpty) {
     additional = '\nThe test description was: $testDescription';
+  }
   test_package.registerException('Test failed. See exception logs above.$additional', _emptyStackTrace);
 }
 

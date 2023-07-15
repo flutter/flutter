@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -16,8 +14,8 @@ import '../../src/fakes.dart';
 
 void main() {
   group('process exceptions', () {
-    FakeProcessManager fakeProcessManager;
-    ProcessUtils processUtils;
+    late FakeProcessManager fakeProcessManager;
+    late ProcessUtils processUtils;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -42,24 +40,24 @@ void main() {
   group('shutdownHooks', () {
     testWithoutContext('runInExpectedOrder', () async {
       int i = 1;
-      int cleanup;
+      int? cleanup;
 
-      final ShutdownHooks shutdownHooks = ShutdownHooks(logger: BufferLogger.test());
+      final ShutdownHooks shutdownHooks = ShutdownHooks();
 
       shutdownHooks.addShutdownHook(() async {
         cleanup = i++;
       });
 
-      await shutdownHooks.runShutdownHooks();
+      await shutdownHooks.runShutdownHooks(BufferLogger.test());
 
       expect(cleanup, 1);
     });
   });
 
   group('output formatting', () {
-    FakeProcessManager processManager;
-    ProcessUtils processUtils;
-    BufferLogger logger;
+    late FakeProcessManager processManager;
+    late ProcessUtils processUtils;
+    late BufferLogger logger;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -74,8 +72,8 @@ void main() {
       final List<String> testString = <String>['0123456789' * 10];
       processManager.addCommand(FakeCommand(
         command: const <String>['command'],
-        stdout: testString.join(''),
-        stderr: testString.join(''),
+        stdout: testString.join(),
+        stderr: testString.join(),
       ));
 
       await processUtils.stream(<String>['command']);
@@ -104,8 +102,8 @@ void main() {
   });
 
   group('run', () {
-    FakeProcessManager fakeProcessManager;
-    ProcessUtils processUtils;
+    late FakeProcessManager fakeProcessManager;
+    late ProcessUtils processUtils;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
@@ -180,16 +178,16 @@ void main() {
   });
 
   group('runSync', () {
-    FakeProcessManager fakeProcessManager;
-    ProcessUtils processUtils;
-    BufferLogger testLogger;
+    late FakeProcessManager fakeProcessManager;
+    late ProcessUtils processUtils;
+    late BufferLogger testLogger;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
       testLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: FakeStdio(),
-          platform: FakePlatform(stdinSupportsAnsi: false),
+          platform: FakePlatform(),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),
       );
@@ -331,8 +329,8 @@ void main() {
   });
 
   group('exitsHappySync', () {
-    FakeProcessManager processManager;
-    ProcessUtils processUtils;
+    late FakeProcessManager processManager;
+    late ProcessUtils processUtils;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -388,8 +386,8 @@ void main() {
   });
 
   group('exitsHappy', () {
-    FakeProcessManager processManager;
-    ProcessUtils processUtils;
+    late FakeProcessManager processManager;
+    late ProcessUtils processUtils;
 
     setUp(() {
       processManager = FakeProcessManager.empty();

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -11,8 +11,6 @@ import '../base/net.dart';
 import '../base/process.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
-
-import 'fuchsia_sdk.dart';
 
 /// This is a basic wrapper class for the Fuchsia SDK's `pm` tool.
 class FuchsiaPM {
@@ -43,7 +41,7 @@ class FuchsiaPM {
   /// which describe the contents of the Fuchsia package. It must also contain
   /// two other entries:
   ///
-  ///     meta/$APPNAME.cmx=/path/to/cmx/on/the/host/$APPNAME.cmx
+  ///     meta/$APPNAME.cm=/path/to/cm/on/the/host/$APPNAME.cm
   ///     meta/package=/path/to/package/file/from/init/package
   ///
   /// where $APPNAME is the same [appName] passed to [init], and meta/package
@@ -89,22 +87,25 @@ class FuchsiaPM {
   ///
   /// The argument [repoPath] should have previously been an argument to
   /// [newrepo]. The [host] should be the host reported by
-  /// [FuchsiaDevFinder.resolve] or [FuchsiaFfx.resolve] and [port] should be an unused port for the
+  /// [FuchsiaFfx.resolve], and [port] should be an unused port for the
   /// http server to bind.
   Future<Process> serve(String repoPath, String host, int port) async {
-    if (globals.fuchsiaArtifacts.pm == null) {
+    final File? pm = globals.fuchsiaArtifacts?.pm;
+    if (pm == null) {
       throwToolExit('Fuchsia pm tool not found');
     }
     if (isIPv6Address(host.split('%').first)) {
       host = '[$host]';
     }
     final List<String> command = <String>[
-      globals.fuchsiaArtifacts.pm.path,
+      pm.path,
       'serve',
       '-repo',
       repoPath,
       '-l',
       '$host:$port',
+      '-c',
+      '2',
     ];
     final Process process = await globals.processUtils.start(command);
     process.stdout
@@ -136,10 +137,11 @@ class FuchsiaPM {
   }
 
   Future<bool> _runPMCommand(List<String> args) async {
-    if (globals.fuchsiaArtifacts.pm == null) {
+    final File? pm = globals.fuchsiaArtifacts?.pm;
+    if (pm == null) {
       throwToolExit('Fuchsia pm tool not found');
     }
-    final List<String> command = <String>[globals.fuchsiaArtifacts.pm.path, ...args];
+    final List<String> command = <String>[pm.path, ...args];
     final RunResult result = await globals.processUtils.run(command);
     return result.exitCode == 0;
   }
@@ -155,7 +157,7 @@ class FuchsiaPM {
 /// var server = FuchsiaPackageServer(
 ///     '/path/to/repo',
 ///     'server_name',
-///     await FuchsiaDevFinder.resolve(deviceName),
+///     await FuchsiaFfx.resolve(deviceName),
 ///     await freshPort());
 /// try {
 ///   await server.start();
@@ -165,20 +167,21 @@ class FuchsiaPM {
 ///   server.stop();
 /// }
 class FuchsiaPackageServer {
-  factory FuchsiaPackageServer(String repo, String name, String host, int port) {
+  factory FuchsiaPackageServer(
+      String repo, String name, String host, int port) {
     return FuchsiaPackageServer._(repo, name, host, port);
   }
 
   FuchsiaPackageServer._(this._repo, this.name, this._host, this._port);
 
   static const String deviceHost = 'fuchsia.com';
-  static const String toolHost = 'flutter_tool';
+  static const String toolHost = 'flutter-tool';
 
   final String _repo;
   final String _host;
   final int _port;
 
-  Process _process;
+  Process? _process;
 
   // The name used to reference the server by fuchsia-pkg:// urls.
   final String name;
@@ -196,13 +199,14 @@ class FuchsiaPackageServer {
       return false;
     }
     // initialize a new repo.
-    if (!await fuchsiaSdk.fuchsiaPM.newrepo(_repo)) {
+    final FuchsiaPM? fuchsiaPM = globals.fuchsiaSdk?.fuchsiaPM;
+    if (fuchsiaPM == null || !await fuchsiaPM.newrepo(_repo)) {
       globals.printError('Failed to create a new package server repo');
       return false;
     }
-    _process = await fuchsiaSdk.fuchsiaPM.serve(_repo, _host, _port);
+    _process = await fuchsiaPM.serve(_repo, _host, _port);
     // Put a completer on _process.exitCode to watch for error.
-    unawaited(_process.exitCode.whenComplete(() {
+    unawaited(_process?.exitCode.whenComplete(() {
       // If _process is null, then the server was stopped deliberately.
       if (_process != null) {
         globals.printError('Error running Fuchsia pm tool "serve" command');
@@ -214,7 +218,7 @@ class FuchsiaPackageServer {
   /// Forcefully stops the package server process by sending it SIGTERM.
   void stop() {
     if (_process != null) {
-      _process.kill();
+      _process?.kill();
       _process = null;
     }
   }
@@ -228,12 +232,14 @@ class FuchsiaPackageServer {
     if (_process == null) {
       return false;
     }
-    return fuchsiaSdk.fuchsiaPM.publish(_repo, package.path);
+    return (await globals.fuchsiaSdk?.fuchsiaPM.publish(_repo, package.path)) ??
+        false;
   }
 
   @override
   String toString() {
-    final String p = (_process == null) ? 'stopped' : 'running ${_process.pid}';
+    final String p =
+        (_process == null) ? 'stopped' : 'running ${_process?.pid}';
     return 'FuchsiaPackageServer at $_host:$_port ($p)';
   }
 }
