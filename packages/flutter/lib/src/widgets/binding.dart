@@ -25,7 +25,7 @@ import 'widget_inspector.dart';
 export 'dart:ui' show AppLifecycleState, Locale;
 
 /// A callback that can be registered with [WidgetsBinding.registerHotRestartCallback].
-typedef PreHotRestartCallback = Object? Function();
+typedef PreHotRestartCallback = FutureOr<void> Function();
 
 /// Interface for classes that register with the Widgets layer binding.
 ///
@@ -527,7 +527,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         }
 
         await Future.wait(<Future<void>>[
-          for (MapEntry<PreHotRestartCallback, String> entry in _hotRestartCallbacks.entries)
+          for (final MapEntry<PreHotRestartCallback, String> entry in _hotRestartCallbacks.entries)
             invokeAndWait(entry.key, entry.value),
         ]);
         return <String, Object>{};
