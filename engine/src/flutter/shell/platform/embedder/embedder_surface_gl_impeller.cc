@@ -57,6 +57,10 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
       !gl_dispatch_table_.gl_proc_resolver) {
     return;
   }
+  // Certain GL backends need to made current before any GL
+  // state can be accessed.
+  gl_dispatch_table_.gl_make_current_callback();
+
   std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
       std::make_shared<fml::NonOwnedMapping>(
           impeller_entity_shaders_gles_data,
