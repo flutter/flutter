@@ -423,7 +423,7 @@ TEST(DisplayListComplexity, DrawAtlas) {
   std::vector<SkRSXform> xforms;
   for (int i = 0; i < 10; i++) {
     rects.push_back(SkRect::MakeXYWH(0, 0, 10, 10));
-    xforms.push_back(SkRSXform::Make(1, 0, 0, 0));
+    xforms.push_back(SkRSXform::Make(0, 0, 0, 0));
   }
 
   DisplayListBuilder builder;
