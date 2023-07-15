@@ -86,7 +86,7 @@ class Display {
 /// that in the [padding], which is always safe to use for such
 /// calculations.
 class FlutterView {
-  FlutterView._(this.viewId, this.platformDispatcher);
+  FlutterView._(this.viewId, this.platformDispatcher, this._viewConfiguration);
 
   /// The opaque ID for this view.
   final int viewId;
@@ -96,10 +96,8 @@ class FlutterView {
   final PlatformDispatcher platformDispatcher;
 
   /// The configuration of this view.
-  _ViewConfiguration get _viewConfiguration {
-    assert(platformDispatcher._viewConfigurations.containsKey(viewId));
-    return platformDispatcher._viewConfigurations[viewId]!;
-  }
+  // TODO(goderbauer): remove ignore when https://github.com/dart-lang/linter/issues/4562 is fixed.
+  _ViewConfiguration _viewConfiguration; // ignore: prefer_final_fields
 
   /// The [Display] this view is drawn in.
   Display get display {
@@ -373,6 +371,9 @@ class FlutterView {
 
   @Native<Void Function(Pointer<Void>)>(symbol: 'PlatformConfigurationNativeApi::UpdateSemantics')
   external static void _updateSemantics(_NativeSemanticsUpdate update);
+
+  @override
+  String toString() => 'FlutterView(id: $viewId)';
 }
 
 /// Deprecated. Will be removed in a future version of Flutter.
@@ -405,8 +406,15 @@ class SingletonFlutterWindow extends FlutterView {
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.7.0-32.0.pre.'
   )
-  SingletonFlutterWindow._(super.windowId, super.platformDispatcher)
-      : super._();
+  SingletonFlutterWindow._() : super._(
+    _kImplicitViewId,
+    PlatformDispatcher.instance,
+    const _ViewConfiguration(),
+  );
+
+  // Gets its configuration from the FlutterView with the same ID if it exists.
+  @override
+  _ViewConfiguration get _viewConfiguration => platformDispatcher._views[viewId]?._viewConfiguration ?? super._viewConfiguration;
 
   /// A callback that is invoked whenever the [devicePixelRatio],
   /// [physicalSize], [padding], [viewInsets], [PlatformDispatcher.views], or
@@ -1016,7 +1024,7 @@ enum Brightness {
   'Deprecated to prepare for the upcoming multi-window support. '
   'This feature was deprecated after v3.7.0-32.0.pre.'
 )
-final SingletonFlutterWindow window = SingletonFlutterWindow._(0, PlatformDispatcher.instance);
+final SingletonFlutterWindow window = SingletonFlutterWindow._();
 
 /// Additional data available on each flutter frame.
 class FrameData {
