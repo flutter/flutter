@@ -70,6 +70,7 @@ TaskFunction createMicrobenchmarkTask({bool? enableImpeller}) {
       ...await runMicrobench('lib/stocks/build_bench_profiled.dart'),
       ...await runMicrobench('lib/stocks/build_bench.dart'),
       ...await runMicrobench('lib/stocks/layout_bench.dart'),
+      ...await runMicrobench('lib/ui/get_transform_bench.dart'),
       ...await runMicrobench('lib/ui/image_bench.dart'),
     };
 

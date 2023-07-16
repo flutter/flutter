@@ -3231,21 +3231,26 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   }
 
   /// {@template flutter.rendering.RenderObject.getTransformTo}
-  /// Applies the paint transform from thie [RenderObject] to the `target`
+  /// Applies the paint transform from this [RenderObject] to the `target`
   /// [RenderObject].
   ///
   /// Returns a matrix that maps the local paint coordinate system to the
-  /// coordinate system of `target`.
+  /// coordinate system of `target`. In other words, given a point on screen,
+  /// its coordinates in this [RenderObject]'s coordinate system (`v_local`) and
+  /// its coordinates in the `target` [RenderObject]'s coordinate system
+  /// (`v_target`) satisfy `v_target = A × v_local`, where `A` is the returned
+  /// matrix.
   ///
-  /// The `skipIfInUnpaintedSubtree` argument determines whether the method
-  /// should return a zero matrix when either this [RenderObject] or `target` is
-  /// in a subtree where the topmost [RenderObject]'s [RenderObject.paintsChild]
-  /// method returns false. In addition to that, this method may also return a
-  /// zero matrix when the paint transform from the common ancestor [RenderObject]
-  /// (of [this] and `target`) to `target` is a singular matrix.
+  /// When `skipIfInUnpaintedSubtree` argument is set to true, this method
+  /// returns a zero matrix if either `this` or `target` is not getting painted
+  /// on screen (as indicated by the [RenderObject.paintsChild] method).
+  /// Moreover, when `target` is not `this` or an ancestor of `this`, it's not
+  /// always possible to find the paint transform using the
+  /// [RenderObject.applyPaintTransform] method, and this method returns a zero
+  /// matrix in this case.
   ///
   /// The method asserts when the `target` is not in the same render tree as
-  /// this [RenderObject] as the behavior is undefined.
+  /// this [RenderObject], as the behavior is undefined.
   ///
   /// If `target` is null, this method returns a matrix that maps from the
   /// local paint coordinate system to the coordinate system of the
@@ -3259,8 +3264,14 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// coordinate.
   Matrix4 getTransformTo(RenderObject? target, { bool skipIfInUnpaintedSubtree = false }) {
     assert(attached);
-    // The paths to fromRenderObject and toRenderObject's common ancestor.
+    // The paths from to fromRenderObject and toRenderObject's common ancestor.
+    // Each list's length is greater than 1 if not null.
+    //
+    // [this, ...., commonAncestorRenderObject], or null if `this` is the common
+    // ancestor.
     List<RenderObject>? fromPath;
+    // [target, ...., commonAncestorRenderObject], or null if `target` is the
+    // common ancestor.
     List<RenderObject>? toPath;
 
     RenderObject from = this;
@@ -3281,13 +3292,22 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }
       if (fromDepth <= toDepth) {
         assert(to.parent != null, '$target and $this are not in the same render tree.');
-        assert(target != null);
         final RenderObject toParent = to.parent!;
         if (skipIfInUnpaintedSubtree && !toParent.paintsChild(to)) {
           return Matrix4.zero();
         }
-        (toPath ??= target == null ? <RenderObject>[] : <RenderObject>[target]).add(toParent);
+        assert(target != null, '$this has a depth that is less than or equal to ${owner?.rootNode}');
+        (toPath ??= <RenderObject>[target!]).add(toParent);
         to = toParent;
+      }
+    }
+
+    if (skipIfInUnpaintedSubtree) {
+      // Keep searching up in case the common ancestor is in a unpainted subtree.
+      for (RenderObject? parent = from.parent; parent != null; from = parent, parent = from.parent) {
+        if (!parent.paintsChild(from)) {
+          return Matrix4.zero();
+        }
       }
     }
 
@@ -3310,6 +3330,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       toPath[index].applyPaintTransform(toPath[index - 1], toTransform);
     }
     if (toTransform.invert() == 0) {
+      // If the matrix is singular then `invert()` doesn't do anything.
       return Matrix4.zero();
     }
     return (fromTransform?..multiply(toTransform)) ?? toTransform;
