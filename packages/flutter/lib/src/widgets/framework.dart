@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -994,7 +993,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// {@endtemplate}
   ///
-  /// You cannot use [BuildContext.dependOnInheritedWidgetOfExactType] from this
+  /// You should not use [BuildContext.dependOnInheritedWidgetOfExactType] from this
   /// method. However, [didChangeDependencies] will be called immediately
   /// following this method, and [BuildContext.dependOnInheritedWidgetOfExactType] can
   /// be used there.
@@ -2241,7 +2240,8 @@ abstract class BuildContext {
   /// again if the inherited value were to change. To ensure that the widget
   /// correctly updates itself when the inherited value changes, only call this
   /// (directly or indirectly) from build methods, layout and paint callbacks,
-  /// or from [State.didChangeDependencies].
+  /// or from [State.didChangeDependencies] (which is called immediately after
+  /// [State.initState]).
   ///
   /// This method should not be called from [State.dispose] because the element
   /// tree is no longer stable at that time. To refer to an ancestor from that
@@ -2700,7 +2700,7 @@ class BuildOwner {
         }
         return true;
       }());
-      Timeline.startSync(
+      FlutterTimeline.startSync(
         'BUILD',
         arguments: debugTimelineArguments
       );
@@ -2771,7 +2771,7 @@ class BuildOwner {
             }
             return true;
           }());
-          Timeline.startSync(
+          FlutterTimeline.startSync(
             '${element.widget.runtimeType}',
             arguments: debugTimelineArguments,
           );
@@ -2794,7 +2794,7 @@ class BuildOwner {
           );
         }
         if (isTimelineTracked) {
-          Timeline.finishSync();
+          FlutterTimeline.finishSync();
         }
         index += 1;
         if (dirtyCount < _dirtyElements.length || _dirtyElementsNeedsResorting!) {
@@ -2832,7 +2832,7 @@ class BuildOwner {
       _scheduledFlushDirtyElements = false;
       _dirtyElementsNeedsResorting = null;
       if (!kReleaseMode) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
       assert(_debugBuilding);
       assert(() {
@@ -3044,7 +3044,7 @@ class BuildOwner {
   @pragma('vm:notify-debugger-on-exception')
   void finalizeTree() {
     if (!kReleaseMode) {
-      Timeline.startSync('FINALIZE TREE');
+      FlutterTimeline.startSync('FINALIZE TREE');
     }
     try {
       lockState(_inactiveElements._unmountAll); // this unregisters the GlobalKeys
@@ -3140,7 +3140,7 @@ class BuildOwner {
       _reportException(ErrorSummary('while finalizing the widget tree'), e, stack);
     } finally {
       if (!kReleaseMode) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
     }
   }
@@ -3153,7 +3153,7 @@ class BuildOwner {
   /// This is expensive and should not be called except during development.
   void reassemble(Element root, DebugReassembleConfig? reassembleConfig) {
     if (!kReleaseMode) {
-      Timeline.startSync('Preparing Hot Reload (widgets)');
+      FlutterTimeline.startSync('Preparing Hot Reload (widgets)');
     }
     try {
       assert(root._parent == null);
@@ -3162,7 +3162,7 @@ class BuildOwner {
       root.reassemble();
     } finally {
       if (!kReleaseMode) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
     }
   }
@@ -3678,14 +3678,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             }
             return true;
           }());
-          Timeline.startSync(
+          FlutterTimeline.startSync(
             '${newWidget.runtimeType}',
             arguments: debugTimelineArguments,
           );
         }
         child.update(newWidget);
         if (isTimelineTracked) {
-          Timeline.finishSync();
+          FlutterTimeline.finishSync();
         }
         assert(child.widget == newWidget);
         assert(() {
@@ -4153,7 +4153,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         }
         return true;
       }());
-      Timeline.startSync(
+      FlutterTimeline.startSync(
         '${newWidget.runtimeType}',
         arguments: debugTimelineArguments,
       );
@@ -4186,7 +4186,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return newChild;
     } finally {
       if (isTimelineTracked) {
-        Timeline.finishSync();
+        FlutterTimeline.finishSync();
       }
     }
   }
@@ -4795,7 +4795,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       final List<DiagnosticsNode> diagnosticsDependencies = sortedDependencies
         .map((InheritedElement element) => element.widget.toDiagnosticsNode(style: DiagnosticsTreeStyle.sparse))
         .toList();
-      properties.add(DiagnosticsProperty<List<DiagnosticsNode>>('dependencies', diagnosticsDependencies));
+      properties.add(DiagnosticsProperty<Set<InheritedElement>>('dependencies', deps, description: diagnosticsDependencies.toString()));
     }
   }
 

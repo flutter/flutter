@@ -205,6 +205,19 @@ void main() {
   });
 
   testWithoutContext(
+      'correctly parse sample result json with action issues.', () async {
+    final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithActionIssues);
+    final XCResultIssueDiscarder discarder = XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
+    final XCResult result = await generator.generate(issueDiscarders: <XCResultIssueDiscarder>[discarder]);
+    expect(result.issues.length, 1);
+    expect(result.issues.first.type, XCResultIssueType.error);
+    expect(result.issues.first.subType, 'Uncategorized');
+    expect(result.issues.first.message, contains('Unable to find a destination matching the provided destination specifier'));
+    expect(result.parseSuccess, isTrue);
+    expect(result.parsingErrorMessage, isNull);
+  });
+
+  testWithoutContext(
       'error: `xcresulttool get` process fail should return an `XCResult` with stderr as `parsingErrorMessage`.',
       () async {
     const String fakeStderr = 'Fake: fail to parse result json.';

@@ -32,9 +32,6 @@
 'd: examples':
   - examples/**/*
 
-documentation:
-  - examples/api/**/*
-
 engine:
   - bin/internal/engine.version
 
@@ -76,27 +73,16 @@ framework:
   - packages/flutter_test/**/*
   - packages/integration_test/**/*
 
-integration_test:
+'f: integration_test':
   - packages/integration_test/**/*
 
 platform-ios:
   - packages/flutter_tools/lib/src/ios/**/*
 
-team:
-  - '**/pubspec.yaml'
-  - '**/fix_data.yaml'
-  - '**/*.expect'
-  - '**/*test_fixes*'
-  - .github/**/*
-  - dev/**/*
-  - examples/**/*
-  - packages/flutter_goldens/**/*
-  - packages/flutter_goldens_client/**/*
-
-'gallery':
+'customer: gallery':
   - examples/flutter_gallery/**/*
 
-tech-debt:
+'c: tech-debt':
   - '**/fix_data.yaml'
   - '**/*.expect'
   - '**/*test_fixes*'

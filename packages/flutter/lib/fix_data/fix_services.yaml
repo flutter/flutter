@@ -18,6 +18,20 @@
 # * Fixes in this file are from the Services library. *
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/122446
+  - title: "Migrate to empty 'text' string"
+    date: 2023-06-26
+    element:
+      uris: [ 'services.dart' ]
+      constructor: ''
+      inClass: 'ClipboardData'
+    changes:
+      - kind: 'changeParameterType'
+        name: 'text'
+        nullability: 'non_null'
+        argumentValue:
+          expression: "''"
+
   # Changes made in https://github.com/flutter/flutter/pull/60320
   - title: "Migrate to 'viewId'"
     date: 2020-07-05
