@@ -993,7 +993,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// {@endtemplate}
   ///
-  /// You cannot use [BuildContext.dependOnInheritedWidgetOfExactType] from this
+  /// You should not use [BuildContext.dependOnInheritedWidgetOfExactType] from this
   /// method. However, [didChangeDependencies] will be called immediately
   /// following this method, and [BuildContext.dependOnInheritedWidgetOfExactType] can
   /// be used there.
@@ -2240,7 +2240,8 @@ abstract class BuildContext {
   /// again if the inherited value were to change. To ensure that the widget
   /// correctly updates itself when the inherited value changes, only call this
   /// (directly or indirectly) from build methods, layout and paint callbacks,
-  /// or from [State.didChangeDependencies].
+  /// or from [State.didChangeDependencies] (which is called immediately after
+  /// [State.initState]).
   ///
   /// This method should not be called from [State.dispose] because the element
   /// tree is no longer stable at that time. To refer to an ancestor from that

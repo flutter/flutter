@@ -119,6 +119,23 @@ typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size si
 /// ```
 /// {@end-tool}
 ///
+/// ## Composition and the sharing of canvases
+///
+/// Widgets (or rather, render objects) are composited together using a minimum
+/// number of [Canvas]es, for performance reasons. As a result, a
+/// [CustomPainter]'s [Canvas] may be the same as that used by other widgets
+/// (including other [CustomPaint] widgets).
+///
+/// This is mostly unnoticeable, except when using unusual [BlendMode]s. For
+/// example, trying to use [BlendMode.dstOut] to "punch a hole" through a
+/// previously-drawn image may erase more than was intended, because previous
+/// widgets will have been painted onto the same canvas.
+///
+/// To avoid this issue, consider using [Canvas.saveLayer] and
+/// [Canvas.restore] when using such blend modes. Creating new layers is
+/// relatively expensive, however, and should be done sparingly to avoid
+/// introducing jank.
+///
 /// See also:
 ///
 ///  * [Canvas], the class that a custom painter uses to paint.

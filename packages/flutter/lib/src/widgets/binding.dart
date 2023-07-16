@@ -26,25 +26,33 @@ export 'dart:ui' show AppLifecycleState, Locale;
 
 /// Interface for classes that register with the Widgets layer binding.
 ///
-/// When used as a mixin, provides no-op method implementations.
+/// This can be used by any class, not just widgets. It provides an interface
+/// which is used by [WidgetsBinding.addObserver] and
+/// [WidgetsBinding.removeObserver] to notify objects of changes in the
+/// environment, such as changes to the device metrics or accessibility
+/// settings. It is used to implement features such as [MediaQuery].
 ///
-/// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
+/// This class can be extended directly, or mixed in, to get default behaviors
+/// for all of the handlers. Alternatively it can can be used with the
+/// `implements` keyword, in which case all the handlers must be implemented
+/// (and the analyzer will list those that have been omitted).
 ///
-/// This class can be extended directly, to get default behaviors for all of the
-/// handlers, or can used with the `implements` keyword, in which case all the
-/// handlers must be implemented (and the analyzer will list those that have
-/// been omitted).
+/// To start receiving notifications, call `WidgetsBinding.instance.addObserver`
+/// with a reference to the object implementing the [WidgetsBindingObserver]
+/// interface. To avoid memory leaks, call
+/// `WidgetsBinding.instance.removeObserver` to unregister the object when it
+/// reaches the end of its lifecycle.
 ///
 /// {@tool dartpad}
 /// This sample shows how to implement parts of the [State] and
 /// [WidgetsBindingObserver] protocols necessary to react to application
 /// lifecycle messages. See [didChangeAppLifecycleState].
 ///
+/// To respond to other notifications, replace the [didChangeAppLifecycleState]
+/// method in this example with other methods from this class.
+///
 /// ** See code in examples/api/lib/widgets/binding/widget_binding_observer.0.dart **
 /// {@end-tool}
-///
-/// To respond to other notifications, replace the [didChangeAppLifecycleState]
-/// method above with other methods from this class.
 abstract mixin class WidgetsBindingObserver {
   /// Called when the system tells the app to pop the current route.
   /// For example, on Android, this is called when the user presses

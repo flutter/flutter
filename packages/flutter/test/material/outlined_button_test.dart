@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show ParagraphBuilder;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -1066,8 +1068,8 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(OutlinedButton)), equals(const Size(88.0, 48.0)));
-    expect(tester.getSize(find.byType(Text)), const Size(
-      bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 52.5 : 53.0,
+    expect(tester.getSize(find.byType(Text)), Size(
+      ui.ParagraphBuilder.shouldDisableRoundingHack ? 52.5 : 53.0,
       18.0,
     ));
 

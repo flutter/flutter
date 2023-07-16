@@ -278,13 +278,10 @@ class _TextLayout {
   // object when it's no logner needed.
   ui.Paragraph _paragraph;
 
-  /// Whether to enable the rounding in _applyFloatingPointHack and SkParagraph.
-  static const bool _shouldApplyFloatingPointHack = !bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK');
-
   // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/31707
   // remove this hack as well as the flooring in `layout`.
   @pragma('vm:prefer-inline')
-  static double _applyFloatingPointHack(double layoutValue) => _shouldApplyFloatingPointHack ? layoutValue.ceilToDouble() : layoutValue;
+  static double _applyFloatingPointHack(double layoutValue) => ui.ParagraphBuilder.shouldDisableRoundingHack ? layoutValue : layoutValue.ceilToDouble();
 
   /// Whether this layout has been invalidated and disposed.
   ///
@@ -362,7 +359,7 @@ class _TextPainterLayoutCacheWithOffset {
   static double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis, _TextLayout layout) {
     // TODO(LongCatIsLooong): remove the rounding when _applyFloatingPointHack
     // is removed.
-    if (_TextLayout._shouldApplyFloatingPointHack) {
+    if (!ui.ParagraphBuilder.shouldDisableRoundingHack) {
       minWidth = minWidth.floorToDouble();
       maxWidth = maxWidth.floorToDouble();
     }
