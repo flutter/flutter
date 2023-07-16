@@ -205,7 +205,10 @@ static void ReportPipelineCreationFeedbackToTrace(
     gPipelineCacheMisses++;
   }
   gPipelines++;
+  static constexpr int64_t kImpellerPipelineTraceID = 1988;
   FML_TRACE_COUNTER("impeller",                                   //
+                    "PipelineCache",                              // series name
+                    kImpellerPipelineTraceID,                     // series ID
                     "PipelineCacheHits", gPipelineCacheHits,      //
                     "PipelineCacheMisses", gPipelineCacheMisses,  //
                     "TotalPipelines", gPipelines                  //
