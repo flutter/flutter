@@ -495,20 +495,22 @@ abstract class Layer with DiagnosticableTreeMixin {
     _needsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
   }
 
-  /// The owner for this node (null if unattached).
+  /// The owner for this layer (null if unattached).
   ///
-  /// The entire subtree that this node belongs to will have the same owner.
+  /// The entire layer tree that this layer belongs to will have the same owner.
+  ///
+  /// Typically the owner is a [RenderView].
   Object? get owner => _owner;
   Object? _owner;
 
-  /// Whether this node is in a tree whose root is attached to something.
+  /// Whether the layer tree containing this layer is attached to an owner.
   ///
   /// This becomes true during the call to [attach].
   ///
   /// This becomes false during the call to [detach].
   bool get attached => _owner != null;
 
-  /// Mark this node as attached to the given owner.
+  /// Mark this layer as attached to the given owner.
   ///
   /// Typically called only from the [parent]'s [attach] method, and by the
   /// [owner] to mark the root of a tree as attached.
@@ -525,7 +527,7 @@ abstract class Layer with DiagnosticableTreeMixin {
     _owner = owner;
   }
 
-  /// Mark this node as detached.
+  /// Mark this layer as detached from its owner.
   ///
   /// Typically called only from the [parent]'s [detach], and by the [owner] to
   /// mark the root of a tree as detached.
@@ -542,10 +544,12 @@ abstract class Layer with DiagnosticableTreeMixin {
     assert(parent == null || attached == parent!.attached);
   }
 
-  /// The depth of this node in the tree.
+  /// The depth of this layer in the layer tree.
   ///
   /// The depth of nodes in a tree monotonically increases as you traverse down
-  /// the tree.
+  /// the tree.  There's no guarantee regarding depth between siblings.
+  ///
+  /// The depth is used to ensure that nodes are processed in depth order.
   int get depth => _depth;
   int _depth = 0;
 
