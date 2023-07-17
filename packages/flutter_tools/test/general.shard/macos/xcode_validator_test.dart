@@ -368,6 +368,7 @@ void main() {
       expect(firstMessage.message, 'Xcode at /Library/Developer/CommandLineTools');
       expect(result.statusInfo, '1000.0.0');
       expect(result.messages[1].message, 'Build 13C100');
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }
