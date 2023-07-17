@@ -275,12 +275,11 @@ class _MenuAnchorState extends State<MenuAnchor> {
   final FocusScopeNode _menuScopeNode = FocusScopeNode(debugLabel: kReleaseMode ? null : 'MenuAnchor sub menu');
   MenuController? _internalMenuController;
   final List<_MenuAnchorState> _anchorChildren = <_MenuAnchorState>[];
-  ScrollPosition? _scrollPosition;
+  ScrollPosition? _position;
   Size? _viewSize;
-  final OverlayPortalController _overlayController = OverlayPortalController();
-  Offset? _menuPosition;
+  OverlayEntry? _overlayEntry;
   Axis get _orientation => Axis.vertical;
-  bool get _isOpen => _overlayController.isShowing;
+  bool get _isOpen => _overlayEntry != null;
   bool get _isRoot => _parent == null;
   bool get _isTopLevel => _parent?._isRoot ?? false;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
@@ -313,9 +312,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _parent?._removeChild(this);
     _parent = _MenuAnchorState._maybeOf(context);
     _parent?._addChild(this);
-    _scrollPosition?.isScrollingNotifier.removeListener(_handleScroll);
-    _scrollPosition = Scrollable.maybeOf(context)?.position;
-    _scrollPosition?.isScrollingNotifier.addListener(_handleScroll);
+    _position?.isScrollingNotifier.removeListener(_handleScroll);
+    _position = Scrollable.maybeOf(context)?.position;
+    _position?.isScrollingNotifier.addListener(_handleScroll);
     final Size newSize = MediaQuery.sizeOf(context);
     if (_viewSize != null && newSize != _viewSize) {
       // Close the menus if the view changes size.
@@ -339,25 +338,18 @@ class _MenuAnchorState extends State<MenuAnchor> {
       }
     }
     assert(_menuController._anchor == this);
+    if (_overlayEntry != null) {
+      // Needs to update the overlay entry on the next frame, since it's in the
+      // overlay.
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        _overlayEntry?.markNeedsBuild();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget child = OverlayPortal(
-      controller: _overlayController,
-      overlayChildBuilder: (BuildContext context) {
-       return _Submenu(
-          anchor: this,
-          menuStyle: widget.style,
-          alignmentOffset: widget.alignmentOffset ?? Offset.zero,
-          menuPosition: _menuPosition,
-          clipBehavior: widget.clipBehavior,
-          menuChildren: widget.menuChildren,
-          crossAxisUnconstrained: widget.crossAxisUnconstrained,
-        );
-      },
-      child: _buildContents(context),
-    );
+    Widget child = _buildContents(context);
 
     if (!widget.anchorTapClosesMenu) {
       child = TapRegion(
@@ -501,12 +493,50 @@ class _MenuAnchorState extends State<MenuAnchor> {
     assert(_debugMenuInfo(
         'Opening $this at ${position ?? Offset.zero} with alignment offset ${widget.alignmentOffset ?? Offset.zero}'));
     _parent?._closeChildren(); // Close all siblings.
-    assert(!_overlayController.isShowing);
+    assert(_overlayEntry == null);
 
+    final BuildContext outerContext = context;
     _parent?._childChangedOpenState();
-    _menuPosition = position;
-    _overlayController.show();
+    setState(() {
+      _overlayEntry = OverlayEntry(
+        builder: (BuildContext context) {
+          final OverlayState overlay = Overlay.of(outerContext);
+          return Positioned.directional(
+            textDirection: Directionality.of(outerContext),
+            top: 0,
+            start: 0,
+            child: Directionality(
+              textDirection: Directionality.of(outerContext),
+              child: InheritedTheme.captureAll(
+                // Copy all the themes from the supplied outer context to the
+                // overlay.
+                outerContext,
+                _MenuAnchorScope(
+                  // Re-advertize the anchor here in the overlay, since
+                  // otherwise a search for the anchor by descendants won't find
+                  // it.
+                  anchorKey: _anchorKey,
+                  anchor: this,
+                  isOpen: _isOpen,
+                  child: _Submenu(
+                    anchor: this,
+                    menuStyle: widget.style,
+                    alignmentOffset: widget.alignmentOffset ?? Offset.zero,
+                    menuPosition: position,
+                    clipBehavior: widget.clipBehavior,
+                    menuChildren: widget.menuChildren,
+                    crossAxisUnconstrained: widget.crossAxisUnconstrained,
+                  ),
+                ),
+                to: overlay.context,
+              ),
+            ),
+          );
+        },
+      );
+    });
 
+    Overlay.of(context).insert(_overlayEntry!);
     widget.onOpen?.call();
   }
 
@@ -520,7 +550,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
       return;
     }
     _closeChildren(inDispose: inDispose);
-    _overlayController.hide();
+    _overlayEntry?.remove();
+    _overlayEntry = null;
     if (!inDispose) {
       // Notify that _childIsOpen changed state, but only if not
       // currently disposing.

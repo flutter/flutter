@@ -1625,7 +1625,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   void applyFocusChangesIfNeeded() {
     assert(
       SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks,
-      'applyFocusChanges() should not be called during the build phase.'
+      'applyFocusChangesIfNeeded() should not be called during the build phase.'
     );
 
     _haveScheduledUpdate = false;
