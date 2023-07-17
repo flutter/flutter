@@ -1905,7 +1905,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
+  testWidgets('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final List<int> dismissedItems = <int>[];
 
@@ -2073,7 +2073,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgetsWithLeakTracking('showDialog safe area', (WidgetTester tester) async {
+  testWidgets('showDialog safe area', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         builder: (BuildContext context, Widget? child) {
@@ -2417,7 +2417,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Dialog with RouteSettings', (WidgetTester tester) async {
+  testWidgets('Dialog with RouteSettings', (WidgetTester tester) async {
     late RouteSettings currentRouteSetting;
 
     await tester.pumpWidget(
