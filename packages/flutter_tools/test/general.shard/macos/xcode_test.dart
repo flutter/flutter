@@ -99,12 +99,15 @@ void main() {
 
       group('macOS', () {
         late Xcode xcode;
+        late BufferLogger logger;
 
         setUp(() {
           xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
+          logger = BufferLogger.test();
           xcode = Xcode.test(
             processManager: fakeProcessManager,
             xcodeProjectInterpreter: xcodeProjectInterpreter,
+            logger: logger,
           );
         });
 
@@ -275,6 +278,31 @@ void main() {
             expect(() async => xcode.sdkLocation(EnvironmentType.physical),
               throwsToolExit(message: 'Could not find SDK location'));
             expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+        });
+
+        group('SDK Platform Version', () {
+          const String platformVersion = '16.4';
+
+          testWithoutContext('--show-sdk-platform-version iphonesimulator', () async {
+            fakeProcessManager.addCommand(const FakeCommand(
+              command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-platform-version'],
+              stdout: platformVersion,
+            ));
+
+            expect(await xcode.sdkPlatformVersion(EnvironmentType.simulator), Version(16, 4, null));
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+
+          testWithoutContext('--show-sdk-platform-version fails', () async {
+            fakeProcessManager.addCommand(const FakeCommand(
+              command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-platform-version'],
+              exitCode: 1,
+              stderr: 'xcrun: error:',
+            ));
+            expect(await xcode.sdkPlatformVersion(EnvironmentType.simulator), null);
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+            expect(logger.errorText, contains('Could not find SDK Platform Version'));
           });
         });
       });
