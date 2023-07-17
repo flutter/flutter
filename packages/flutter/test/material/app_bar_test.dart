@@ -3510,7 +3510,7 @@ void main() {
     });
 
     // This is a regression test for https://github.com/flutter/flutter/issues/130485.
-    testWidgets('Material3 - AppBar.iconTheme is correctly applied in dark mode', (WidgetTester tester) async {
+    testWidgets('Material3 - AppBar.iconTheme is correctly applied in light mode', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.light().copyWith(onSurfaceVariant: Colors.red),
         useMaterial3: true,
