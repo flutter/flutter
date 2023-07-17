@@ -460,7 +460,12 @@ class LocalizationOptions {
 
   /// The `relax-syntax` argument.
   ///
-  /// Whether or not to relax the syntax.
+  /// Whether or not to relax the syntax. When specified, the syntax will be
+  /// relaxed so that the special character "{" is treated as a string if it is
+  /// not followed by a valid placeholder and "}" is treated as a string if it
+  /// does not close any previous "{" that is treated as a special character.
+  /// Note that this was added in for backward compatibility and is not recommended
+  /// as it may mask errors.
   final bool relaxSyntax;
 }
 
