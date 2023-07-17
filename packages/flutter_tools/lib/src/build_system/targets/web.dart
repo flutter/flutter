@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:package_config/package_config.dart';
@@ -364,6 +365,7 @@ class WebReleaseBundle extends Target {
   List<Source> get outputs => <Source>[
     Source.pattern('{OUTPUT_DIR}/$outputFileName'),
     if (isWasm) Source.pattern('{OUTPUT_DIR}/$wasmJSRuntimeFileName'),
+    const Source.pattern('{BUILD_DIR}/AssetManifest.bin'),
   ];
 
   @override
@@ -409,6 +411,8 @@ class WebReleaseBundle extends Target {
       depfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
+    final File assetManifestFile = outputDirectory.childFile('AssetManifest.bin');
+    await assetManifestFile.copy(environment.buildDir.childFile('AssetManifest.bin').path);
 
     final Directory webResources = environment.projectDir
       .childDirectory('web');
@@ -597,6 +601,11 @@ class WebServiceWorker extends Target {
       }
     }
 
+    final String assetManifest = await(() async {
+      final Uint8List bytes = await environment.buildDir.childFile('AssetManifest.bin').readAsBytes();
+      return '[${bytes.join(',')}]';
+    })();
+
     final File serviceWorkerFile = environment.outputDir
       .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
@@ -615,6 +624,7 @@ class WebServiceWorker extends Target {
         if (urlToHash.containsKey('assets/FontManifest.json'))
           'assets/FontManifest.json',
       ],
+      assetManifest,
       serviceWorkerStrategy: serviceWorkerStrategy,
     );
     serviceWorkerFile

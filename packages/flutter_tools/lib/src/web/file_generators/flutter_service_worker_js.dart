@@ -48,7 +48,8 @@ enum ServiceWorkerStrategy implements CliEnum {
 String generateServiceWorker(
   String fileGeneratorsPath,
   Map<String, String> resources,
-  List<String> coreBundle, {
+  List<String> coreBundle,
+  String assetManifest, {
   required ServiceWorkerStrategy serviceWorkerStrategy,
 }) {
   if (serviceWorkerStrategy == ServiceWorkerStrategy.none) {
@@ -70,5 +71,9 @@ String generateServiceWorker(
       .replaceAll(
         r'$$CORE_LIST',
         '[${coreBundle.map((String file) => '"$file"').join(',\n')}]',
+      )
+      .replaceAll(
+        r'$$ASSET_MANIFEST',
+        assetManifest,
       );
 }

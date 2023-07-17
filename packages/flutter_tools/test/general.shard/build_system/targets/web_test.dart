@@ -944,6 +944,7 @@ void main() {
       fileGeneratorsPath,
       <String, String>{'/foo': 'abcd'},
       <String>[],
+      '', // todo fix
       serviceWorkerStrategy: ServiceWorkerStrategy.none,
     );
 
@@ -957,6 +958,7 @@ void main() {
       fileGeneratorsPath,
       <String, String>{'/foo': 'abcd'},
       <String>[],
+      '', // todo fix
       serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
     );
 
@@ -970,6 +972,7 @@ void main() {
       fileGeneratorsPath,
       <String, String>{'/foo': 'abcd'},
       <String>['foo', 'bar'],
+      '', // todo fix
       serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
     );
 
