@@ -819,7 +819,9 @@ void main() {
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
-      ...preHotRestartCallbacks,
+      // Listed to run pre hot restart callbacks, but no VM Service, so only the
+      // list method is called.
+      listViews,
     ]);
     setupMocks();
     flutterDevice.device = webServerDevice;
