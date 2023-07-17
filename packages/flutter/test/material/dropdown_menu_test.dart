@@ -1050,6 +1050,38 @@ void main() {
     expect(controller.text, 'New Item');
   });
 
+  testWidgets('The menu should be closed after text editing is complete', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: DropdownMenu<TestMenu>(
+              requestFocusOnTap: true,
+              enableFilter: true,
+              dropdownMenuEntries: menuChildren,
+              controller: controller,
+            ),
+          );
+        }
+      ),
+    ));
+    // Access the MenuAnchor
+    final MenuAnchor menuAnchor = tester.widget<MenuAnchor>(find.byType(MenuAnchor));
+
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    expect(menuAnchor.controller!.isOpen, true);
+
+    // Simulate `TextInputAction.done` on textfield
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(menuAnchor.controller!.isOpen, false);
+  });
+
   testWidgets('The onSelected gets called only when a selection is made', (WidgetTester tester) async {
     int selectionCount = 0;
 
