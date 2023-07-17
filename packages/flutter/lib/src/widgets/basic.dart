@@ -7745,12 +7745,12 @@ class ColoredBox extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderColoredBox(color: color);
+    return RenderColoredBox(color: color);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    (renderObject as _RenderColoredBox).color = color;
+    (renderObject as RenderColoredBox).color = color;
   }
 
   @override
@@ -7760,8 +7760,10 @@ class ColoredBox extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
-  _RenderColoredBox({ required Color color })
+/// A render object that paints a [color] as its background.
+class RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
+  /// creates a RenderColoredBox with the given [Color].
+  RenderColoredBox({ required Color color })
     : _color = color,
       super(behavior: HitTestBehavior.opaque);
 
