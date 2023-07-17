@@ -11,6 +11,8 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'src/binding.dart';
+
 class NonStopVSync implements TickerProvider {
   const NonStopVSync();
   @override
@@ -42,7 +44,7 @@ void main() {
     child: spin,
   );
   // and attach it to the window.
-  RenderingFlutterBinding(root: root);
+  ViewRenderingFlutterBinding(root: root);
 
   // To make the square spin, we use an animation that repeats every 1800
   // milliseconds.

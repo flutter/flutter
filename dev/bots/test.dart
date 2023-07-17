@@ -1361,7 +1361,7 @@ Future<void> _runWebTreeshakeTest() async {
   final String javaScript = mainDartJs.readAsStringSync();
 
   // Check that we're not looking at minified JS. Otherwise this test would result in false positive.
-  expect(javaScript.contains('RenderObjectToWidgetElement'), true);
+  expect(javaScript.contains('RootElement'), true);
 
   const String word = 'debugFillProperties';
   int count = 0;

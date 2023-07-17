@@ -1142,6 +1142,7 @@ class _TextStyleProxy implements TextStyle {
     TextAlign? textAlign,
     TextDirection? textDirection,
     double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
     String? ellipsis,
     int? maxLines,
     ui.TextHeightBehavior? textHeightBehavior,
@@ -1157,7 +1158,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
+  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0, TextScaler textScaler = TextScaler.noScaling }) {
     throw UnimplementedError();
   }
 
