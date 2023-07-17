@@ -1451,7 +1451,11 @@ class _EngineSrcDirectory extends _RepositoryDirectory {
     // is therefore represented as a separate top-level component.
     final fs.Directory thirdPartyNode = findChildDirectory(ioDirectory, 'third_party')!;
     final fs.Directory skiaNode = findChildDirectory(thirdPartyNode, 'skia')!;
-    return <_RepositoryDirectory>[_RepositorySkiaDirectory(this, skiaNode)];
+    final fs.Directory dartNode = findChildDirectory(thirdPartyNode, 'dart')!;
+    return <_RepositoryDirectory>[
+      _RepositorySkiaDirectory(this, skiaNode),
+      _RepositorySkiaDirectory(this, dartNode),
+    ];
   }
 }
 
@@ -1468,6 +1472,7 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
   @override
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'skia' // handled as a virtual directory of the root
+        && entry.name != 'dart' // handled as a virtual directory of the root
         && super.shouldRecurse(entry);
   }
 
