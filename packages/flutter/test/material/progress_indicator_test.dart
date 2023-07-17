@@ -720,7 +720,7 @@ void main() {
     expect(tester.hasRunningAnimations, isTrue);
   });
 
-  testWidgetsWithLeakTracking('RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
+  testWidgets('RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
 
     await tester.pumpFrames(animationSheet.record(
@@ -1001,7 +1001,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
+  testWidgets('Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
 
     await tester.pumpFrames(animationSheet.record(
