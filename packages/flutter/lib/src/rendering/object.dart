@@ -1727,21 +1727,22 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
   }
 
-  /// The depth of this node in the tree.
+  /// The depth of this render object in the render tree.
   ///
   /// The depth of nodes in a tree monotonically increases as you traverse down
-  /// the tree.
+  /// the tree: a node always has a [depth] greater than its ancestors.
+  /// There's no guarantee regarding depth between siblings.
   ///
-  /// Nodes always have a [depth] greater than their ancestors'. There's no
-  /// guarantee regarding depth between siblings. The depth of a node is used to
-  /// ensure that nodes are processed in depth order. The [depth] of a child can
-  /// be more than one greater than the [depth] of the parent, because the [depth]
-  /// values are never decreased: all that matters is that it's greater than the
-  /// parent. Consider a tree with a root node A, a child B, and a grandchild C.
-  /// Initially, A will have [depth] 0, B [depth] 1, and C [depth] 2. If C is
-  /// moved to be a child of A, sibling of B, then the numbers won't change. C's
-  /// [depth] will still be 2. The [depth] is automatically maintained by the
-  /// [adoptChild] and [dropChild] methods.
+  /// The [depth] of a child can be more than one greater than the [depth] of
+  /// the parent, because the [depth] values are never decreased: all that
+  /// matters is that it's greater than the parent. Consider a tree with a root
+  /// node A, a child B, and a grandchild C. Initially, A will have [depth] 0,
+  /// B [depth] 1, and C [depth] 2. If C is moved to be a child of A,
+  /// sibling of B, then the numbers won't change. C's [depth] will still be 2.
+  ///
+  /// The depth of a node is used to ensure that nodes are processed in
+  /// depth order.  The [depth] is automatically maintained by the [adoptChild]
+  /// and [dropChild] methods.
   int get depth => _depth;
   int _depth = 0;
 
@@ -1765,7 +1766,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @protected
   void redepthChildren() { }
 
-  /// The parent of this node in the tree.
+  /// The parent of this render object in the render tree.
+  ///
+  /// The [parent] of the root node in the render tree is null.
   RenderObject? get parent => _parent;
   RenderObject? _parent;
 
@@ -2052,20 +2055,21 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     return layoutParent;
   }
 
-  /// The owner for this node (null if unattached).
+  /// The owner for this render object (null if unattached).
   ///
-  /// The entire subtree that this node belongs to will have the same owner.
+  /// The entire render tree that this render object belongs to
+  /// will have the same owner.
   PipelineOwner? get owner => _owner;
   PipelineOwner? _owner;
 
-  /// Whether this node is in a tree whose root is attached to something.
+  /// Whether the render tree this render object belongs to is attached to a [PipelineOwner].
   ///
   /// This becomes true during the call to [attach].
   ///
   /// This becomes false during the call to [detach].
   bool get attached => _owner != null;
 
-  /// Mark this node as attached to the given owner.
+  /// Mark this render object as attached to the given owner.
   ///
   /// Typically called only from the [parent]'s [attach] method, and by the
   /// [owner] to mark the root of a tree as attached.
@@ -2107,7 +2111,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
   }
 
-  /// Mark this node as detached.
+  /// Mark this render object as detached from its [PipelineOwner].
   ///
   /// Typically called only from the [parent]'s [detach], and by the [owner] to
   /// mark the root of a tree as detached.
