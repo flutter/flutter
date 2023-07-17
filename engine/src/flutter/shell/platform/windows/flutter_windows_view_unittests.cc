@@ -212,7 +212,7 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdate) {
   // Enable semantics to instantiate accessibility bridge.
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  auto bridge = view.accessibility_bridge().lock();
   ASSERT_TRUE(bridge);
 
   // Add root node.
@@ -311,7 +311,7 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdateWithChildren) {
   // Enable semantics to instantiate accessibility bridge.
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  auto bridge = view.accessibility_bridge().lock();
   ASSERT_TRUE(bridge);
 
   // Add root node.
@@ -509,7 +509,7 @@ TEST(FlutterWindowsViewTest, NonZeroSemanticsRoot) {
   // Enable semantics to instantiate accessibility bridge.
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  auto bridge = view.accessibility_bridge().lock();
   ASSERT_TRUE(bridge);
 
   // Add root node.
@@ -641,7 +641,7 @@ TEST(FlutterWindowsViewTest, AccessibilityHitTesting) {
   // Enable semantics to instantiate accessibility bridge.
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  auto bridge = view.accessibility_bridge().lock();
   ASSERT_TRUE(bridge);
 
   // Add root node at origin. Size 500x500.
@@ -802,7 +802,7 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
   // Enable semantics to instantiate accessibility bridge.
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  auto bridge = view.accessibility_bridge().lock();
   ASSERT_TRUE(bridge);
 
   FlutterSemanticsNode2 root{sizeof(FlutterSemanticsNode2), 0};
@@ -948,7 +948,7 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
   // Enable semantics to instantiate accessibility bridge.
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  auto bridge = view.accessibility_bridge().lock();
   ASSERT_TRUE(bridge);
 
   FlutterSemanticsNode2 root{sizeof(FlutterSemanticsNode2), 0};
@@ -1065,7 +1065,7 @@ TEST(FlutterWindowsViewTest, TooltipNodeData) {
   // Enable semantics to instantiate accessibility bridge.
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  auto bridge = view.accessibility_bridge().lock();
   ASSERT_TRUE(bridge);
 
   FlutterSemanticsNode2 root{sizeof(FlutterSemanticsNode2), 0};

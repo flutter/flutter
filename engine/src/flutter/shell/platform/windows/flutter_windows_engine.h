@@ -141,9 +141,6 @@ class FlutterWindowsEngine {
   // rendering using software instead of OpenGL.
   AngleSurfaceManager* surface_manager() { return surface_manager_.get(); }
 
-  // Return the AccessibilityBridgeWindows for this engine's view.
-  std::weak_ptr<AccessibilityBridgeWindows> accessibility_bridge();
-
   WindowProcDelegateManager* window_proc_delegate_manager() {
     return window_proc_delegate_manager_.get();
   }
@@ -226,10 +223,6 @@ class FlutterWindowsEngine {
 
   // Returns true if the high contrast feature is enabled.
   bool high_contrast_enabled() const { return high_contrast_enabled_; }
-
-  // Returns the native accessibility root node, or nullptr if one does not
-  // exist.
-  gfx::NativeViewAccessible GetNativeViewAccessible();
 
   // Register a root isolate create callback.
   //
