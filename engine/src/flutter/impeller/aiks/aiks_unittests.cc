@@ -2984,6 +2984,27 @@ TEST_P(AiksTest, DrawScaledTextWithPerspectiveSaveLayer) {
 
   ASSERT_TRUE(RenderTextInCanvas(GetContext(), canvas, "Hello world",
                                  "Roboto-Regular.ttf"));
+}
+
+TEST_P(AiksTest, PipelineBlendSingleParameter) {
+  Canvas canvas;
+
+  // Should render a green square in the middle of a blue circle.
+  canvas.SaveLayer({});
+  {
+    canvas.Translate(Point(100, 100));
+    canvas.DrawCircle(Point(200, 200), 200, {.color = Color::Blue()});
+    canvas.ClipRect(Rect(100, 100, 200, 200));
+    canvas.DrawCircle(
+        Point(200, 200), 200,
+        {.color = Color::Green(),
+         .blend_mode = BlendMode::kSourceOver,
+         .image_filter = [](const FilterInput::Ref& input,
+                            const Matrix& effect_transform, bool is_subpass) {
+           return ColorFilterContents::MakeBlend(BlendMode::kSource, {input});
+         }});
+    canvas.Restore();
+  }
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
