@@ -514,10 +514,8 @@ abstract class Layer with DiagnosticableTreeMixin {
   /// [owner] to mark the root of a tree as attached.
   ///
   /// Subclasses with children should override this method to
-  /// [attach] all their children to the same [owner].
-  ///
-  /// Implementations of this method should start with a call to the inherited
-  /// method, as in `super.attach(owner)`.
+  /// [attach] all their children to the same [owner]
+  /// after calling the inherited method, as in `super.attach(owner)`.
   @mustCallSuper
   void attach(covariant Object owner) {
     assert(_owner == null);
@@ -530,10 +528,8 @@ abstract class Layer with DiagnosticableTreeMixin {
   /// mark the root of a tree as detached.
   ///
   /// Subclasses with children should override this method to
-  /// [detach] all their children.
-  ///
-  /// Implementations of this method should start with a call to the inherited
-  /// method, as in `super.detach()`.
+  /// [detach] all their children after calling the inherited method,
+  /// as in `super.detach()`.
   @mustCallSuper
   void detach() {
     assert(_owner != null);
