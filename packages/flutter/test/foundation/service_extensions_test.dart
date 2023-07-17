@@ -117,9 +117,17 @@ Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingR
 
 void main() {
   final List<String?> console = <String?>[];
+  late PipelineOwner owner;
 
   setUpAll(() async {
-    binding = TestServiceExtensionsBinding()..scheduleFrame();
+    binding = TestServiceExtensionsBinding();
+    final RenderView view = RenderView(view: binding.platformDispatcher.views.single);
+    owner = PipelineOwner(onSemanticsUpdate: (ui.SemanticsUpdate _) { })
+      ..rootNode = view;
+    binding.rootPipelineOwner.adoptChild(owner);
+    binding.addRenderView(view);
+    view.prepareInitialFrame();
+    binding.scheduleFrame();
     expect(binding.frameScheduled, isTrue);
 
     // We need to test this service extension here because the result is true
@@ -176,6 +184,10 @@ void main() {
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
+    binding.rootPipelineOwner.dropChild(owner);
+    owner
+      ..rootNode = null
+      ..dispose();
   });
 
   // The following list is alphabetical, one test per extension.
@@ -268,11 +280,13 @@ void main() {
     await binding.doFrame();
     final Map<String, dynamic> result = await binding.testExtension(RenderingServiceExtensions.debugDumpSemanticsTreeInTraversalOrder.name, <String, String>{});
 
-    expect(result, <String, String>{
-      'data': 'Semantics not generated.\n'
-        'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
-        'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
-        'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.'
+    expect(result, <String, Object>{
+      'data': matches(
+        r'Semantics not generated for RenderView#[0-9a-f]{5}\.\n'
+        r'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
+        r'Usually, platforms only ask for semantics when assistive technologies \(like screen readers\) are running.\n'
+        r'To generate semantics, try turning on an assistive technology \(like VoiceOver or TalkBack\) on your device.'
+      )
     });
   });
 
@@ -280,11 +294,13 @@ void main() {
     await binding.doFrame();
     final Map<String, dynamic> result = await binding.testExtension(RenderingServiceExtensions.debugDumpSemanticsTreeInInverseHitTestOrder.name, <String, String>{});
 
-    expect(result, <String, String>{
-      'data': 'Semantics not generated.\n'
-        'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
-        'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
-        'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.'
+    expect(result, <String, Object>{
+      'data': matches(
+        r'Semantics not generated for RenderView#[0-9a-f]{5}\.\n'
+        r'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
+        r'Usually, platforms only ask for semantics when assistive technologies \(like screen readers\) are running.\n'
+        r'To generate semantics, try turning on an assistive technology \(like VoiceOver or TalkBack\) on your device.'
+      )
     });
   });
 

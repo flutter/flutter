@@ -3452,6 +3452,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// If this object is a [RenderObjectElement], the render object is the one at
   /// this location in the tree. Otherwise, this getter will walk down the tree
   /// until it finds a [RenderObjectElement].
+  ///
+  /// Some locations in the tree are not backed by a render object. In those
+  /// cases, this getter returns null. This can happen, if the element is
+  /// located outside of a [View] since only the element subtree rooted in a
+  /// view has a render tree associated with it.
   RenderObject? get renderObject {
     Element? current = this;
     while (current != null) {
@@ -3460,15 +3465,31 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       } else if (current is RenderObjectElement) {
         return current.renderObject;
       } else {
-        Element? next;
-        current.visitChildren((Element child) {
-          assert(next == null);  // This verifies that there's only one child.
-          next = child;
-        });
-        current = next;
+        current = current.renderObjectAttachingChild;
       }
     }
     return null;
+  }
+
+  /// Returns the child of this [Element] that will insert a [RenderObject] into
+  /// an ancestor of this Element to construct the render tree.
+  ///
+  /// Returns null if this Element doesn't have any children who need to attach
+  /// a [RenderObject] to an ancestor of this [Element]. A [RenderObjectElement]
+  /// will therefore return null because its children insert their
+  /// [RenderObject]s into the [RenderObjectElement] itself and not into an
+  /// ancestor of the [RenderObjectElement].
+  ///
+  /// Furthermore, this may return null for [Element]s that hoist their own
+  /// independent render tree and do not extend the ancestor render tree.
+  @protected
+  Element? get renderObjectAttachingChild {
+    Element? next;
+    visitChildren((Element child) {
+      assert(next == null);  // This verifies that there's only one child.
+      next = child;
+    });
+    return next;
   }
 
   @override
@@ -4021,15 +4042,20 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_lifecycleState == _ElementLifecycle.active);
     assert(child._parent == this);
     void visit(Element element) {
-      element._updateSlot(newSlot);
-      if (element is! RenderObjectElement) {
-        element.visitChildren(visit);
+      element.updateSlot(newSlot);
+      final Element? descendant = element.renderObjectAttachingChild;
+      if (descendant != null) {
+        visit(descendant);
       }
     }
     visit(child);
   }
 
-  void _updateSlot(Object? newSlot) {
+  /// Called by [updateSlotForChild] when the framework needs to change the slot
+  /// that this [Element] occupies in its ancestor.
+  @protected
+  @mustCallSuper
+  void updateSlot(Object? newSlot) {
     assert(_lifecycleState == _ElementLifecycle.active);
     assert(_parent != null);
     assert(_parent!._lifecycleState == _ElementLifecycle.active);
@@ -4070,7 +4096,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// The `newSlot` argument specifies the new value for this element's [slot].
   void attachRenderObject(Object? newSlot) {
-    assert(_slot == null);
+    assert(slot == null);
     visitChildren((Element child) {
       child.attachRenderObject(newSlot);
     });
@@ -4143,7 +4169,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @protected
   @pragma('vm:prefer-inline')
   Element inflateWidget(Widget newWidget, Object? newSlot) {
-
     final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(newWidget);
     if (isTimelineTracked) {
       Map<String, String>? debugTimelineArguments;
@@ -4169,7 +4194,17 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             _debugCheckForCycles(newChild);
             return true;
           }());
-          newChild._activateWithParent(this, newSlot);
+          try {
+            newChild._activateWithParent(this, newSlot);
+          } catch (_) {
+            // Attempt to do some clean-up if activation fails to leave tree in a reasonable state.
+            try {
+              deactivateChild(newChild);
+            } catch (_) {
+              // Clean-up failed. Only surface original exception.
+            }
+            rethrow;
+          }
           final Element? updatedChild = updateChild(newChild, newWidget, newSlot);
           assert(newChild == updatedChild);
           return updatedChild!;
@@ -4403,6 +4438,33 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _dependencies = null;
     _lifecycleState = _ElementLifecycle.defunct;
   }
+
+  /// Whether the child in the provided `slot` (or one of its descendants) must
+  /// insert a [RenderObject] into its ancestor [RenderObjectElement] by calling
+  /// [RenderObjectElement.insertRenderObjectChild] on it.
+  ///
+  /// This method is used to define non-rendering zones in the element tree (see
+  /// [WidgetsBinding] for an explanation of rendering and non-rendering zones):
+  ///
+  /// Most branches of the [Element] tree are expected to eventually insert a
+  /// [RenderObject] into their [RenderObjectElement] ancestor to construct the
+  /// render tree. However, there is a notable exception: an [Element] may
+  /// expect that the occupant of a certain child slot creates a new independent
+  /// render tree and therefore is not allowed to insert a render object into
+  /// the existing render tree. Those elements must return false from this
+  /// method for the slot in question to signal to the child in that slot that
+  /// it must not call [RenderObjectElement.insertRenderObjectChild] on its
+  /// ancestor.
+  ///
+  /// As an example, the element backing the [ViewAnchor] returns false from
+  /// this method for the [ViewAnchor.view] slot to enforce that it is occupied
+  /// by e.g. a [View] widget, which will ultimately bootstrap a separate
+  /// render tree for that view. Another example is the [ViewCollection] widget,
+  /// which returns false for all its slots for the same reason.
+  ///
+  /// Overriding this method is not common, as elements behaving in the way
+  /// described above are rare.
+  bool debugExpectsRenderObjectForSlot(Object? slot) => true;
 
   @override
   RenderObject? findRenderObject() {
@@ -5267,6 +5329,9 @@ abstract class ComponentElement extends Element {
   bool get debugDoingBuild => _debugDoingBuild;
 
   @override
+  Element? get renderObjectAttachingChild => _child;
+
+  @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     assert(_child == null);
@@ -6073,6 +6138,9 @@ abstract class RenderObjectElement extends Element {
   }
   RenderObject? _renderObject;
 
+  @override
+  Element? get renderObjectAttachingChild => null;
+
   bool _debugDoingBuild = false;
   @override
   bool get debugDoingBuild => _debugDoingBuild;
@@ -6082,8 +6150,25 @@ abstract class RenderObjectElement extends Element {
   RenderObjectElement? _findAncestorRenderObjectElement() {
     Element? ancestor = _parent;
     while (ancestor != null && ancestor is! RenderObjectElement) {
-      ancestor = ancestor._parent;
+      // In debug mode we check whether the ancestor accepts RenderObjects to
+      // produce a better error message in attachRenderObject. In release mode,
+      // we assume only correct trees are built (i.e.
+      // debugExpectsRenderObjectForSlot always returns true) and don't check
+      // explicitly.
+      assert(() {
+        if (!ancestor!.debugExpectsRenderObjectForSlot(slot)) {
+          ancestor = null;
+        }
+        return true;
+      }());
+      ancestor = ancestor?._parent;
     }
+    assert(() {
+      if (ancestor?.debugExpectsRenderObjectForSlot(slot) == false) {
+        ancestor = null;
+      }
+      return true;
+    }());
     return ancestor as RenderObjectElement?;
   }
 
@@ -6151,7 +6236,7 @@ abstract class RenderObjectElement extends Element {
       _debugUpdateRenderObjectOwner();
       return true;
     }());
-    assert(_slot == newSlot);
+    assert(slot == newSlot);
     attachRenderObject(newSlot);
     super.performRebuild(); // clears the "dirty" flag
   }
@@ -6252,12 +6337,13 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
-  void _updateSlot(Object? newSlot) {
+  void updateSlot(Object? newSlot) {
     final Object? oldSlot = slot;
     assert(oldSlot != newSlot);
-    super._updateSlot(newSlot);
+    super.updateSlot(newSlot);
     assert(slot == newSlot);
-    _ancestorRenderObjectElement!.moveRenderObjectChild(renderObject, oldSlot, slot);
+    assert(_ancestorRenderObjectElement == _findAncestorRenderObjectElement());
+    _ancestorRenderObjectElement?.moveRenderObjectChild(renderObject, oldSlot, slot);
   }
 
   @override
@@ -6265,6 +6351,25 @@ abstract class RenderObjectElement extends Element {
     assert(_ancestorRenderObjectElement == null);
     _slot = newSlot;
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
+    assert(() {
+      if (_ancestorRenderObjectElement == null) {
+        FlutterError.reportError(FlutterErrorDetails(exception: FlutterError.fromParts(
+        <DiagnosticsNode>[
+          ErrorSummary(
+            'The render object for ${toStringShort()} cannot find ancestor render object to attach to.',
+          ),
+          ErrorDescription(
+            'The ownership chain for the RenderObject in question was:\n  ${debugGetCreatorChain(10)}',
+          ),
+          ErrorHint(
+            'Try wrapping your widget in a View widget or any other widget that is backed by '
+            'a $RenderTreeRootElement to serve as the root of the render tree.',
+          ),
+        ]
+        )));
+      }
+      return true;
+    }());
     _ancestorRenderObjectElement?.insertRenderObjectChild(renderObject, newSlot);
     final ParentDataElement<ParentData>? parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null) {
@@ -6594,6 +6699,67 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     assert(!debugChildrenHaveDuplicateKeys(widget, multiChildRenderObjectWidget.children));
     _children = updateChildren(_children, multiChildRenderObjectWidget.children, forgottenChildren: _forgottenChildren);
     _forgottenChildren.clear();
+  }
+}
+
+/// A [RenderObjectElement] used to manage the root of a render tree.
+///
+/// Unlike any other render object element this element does not attempt to
+/// attach its [renderObject] to the closest ancestor [RenderObjectElement].
+/// Instead, subclasses must override [attachRenderObject] and
+/// [detachRenderObject] to attach/detach the [renderObject] to whatever
+/// instance manages the render tree (e.g. by assigning it to
+/// [PipelineOwner.rootNode]).
+abstract class RenderTreeRootElement extends RenderObjectElement {
+  /// Creates an element that uses the given widget as its configuration.
+  RenderTreeRootElement(super.widget);
+
+  @override
+  @mustCallSuper
+  void attachRenderObject(Object? newSlot) {
+    _slot = newSlot;
+    assert(_debugCheckMustNotAttachRenderObjectToAncestor());
+  }
+
+  @override
+  @mustCallSuper
+  void detachRenderObject() {
+    _slot = null;
+  }
+
+  @override
+  void updateSlot(Object? newSlot) {
+    super.updateSlot(newSlot);
+    assert(_debugCheckMustNotAttachRenderObjectToAncestor());
+  }
+
+  bool _debugCheckMustNotAttachRenderObjectToAncestor() {
+    if (!kDebugMode) {
+      return true;
+    }
+    if (_findAncestorRenderObjectElement() != null) {
+      throw FlutterError.fromParts(
+        <DiagnosticsNode>[
+          ErrorSummary(
+            'The RenderObject for ${toStringShort()} cannot maintain an independent render tree at its current location.',
+          ),
+          ErrorDescription(
+            'The ownership chain for the RenderObject in question was:\n  ${debugGetCreatorChain(10)}',
+          ),
+          ErrorDescription(
+            'This RenderObject is the root of an independent render tree and it cannot '
+            'attach itself to an ancestor in an existing tree. The ancestor RenderObject, '
+            'however, expects that a child will be attached.',
+          ),
+          ErrorHint(
+            'Try moving the subtree that contains the ${toStringShort()} widget into the '
+            'view property of a ViewAnchor widget or to the root of the widget tree, where '
+            'it is not expected to attach its RenderObject to a parent.',
+          ),
+        ],
+      );
+    }
+    return true;
   }
 }
 

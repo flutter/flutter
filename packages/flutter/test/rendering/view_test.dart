@@ -122,6 +122,16 @@ void main() {
       isNot(paintsGreenRect),
     );
   });
+
+  test('Config can be set and changed after instantiation without calling prepareInitialFrame first', () {
+    final RenderView view = RenderView(
+      view: RendererBinding.instance.platformDispatcher.views.single,
+    );
+    view.configuration = const ViewConfiguration(size: Size(100, 200), devicePixelRatio: 3.0);
+    view.configuration = const ViewConfiguration(size: Size(200, 300), devicePixelRatio: 2.0);
+    PipelineOwner().rootNode = view;
+    view.prepareInitialFrame();
+  });
 }
 
 const Color orange = Color(0xFFFF9000);

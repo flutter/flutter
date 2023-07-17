@@ -22,9 +22,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 
 void pipelineOwnerTestRun() {
   testWidgets('open SemanticsHandle from PipelineOwner fails test', (WidgetTester tester) async {
-    final int outstandingHandles = tester.binding.pipelineOwner.debugOutstandingSemanticsHandles;
-    tester.binding.pipelineOwner.ensureSemantics();
-    expect(tester.binding.pipelineOwner.debugOutstandingSemanticsHandles, outstandingHandles + 1);
+    final int outstandingHandles = tester.binding.debugOutstandingSemanticsHandles;
+    tester.binding.ensureSemantics();
+    expect(tester.binding.debugOutstandingSemanticsHandles, outstandingHandles + 1);
     // SemanticsHandle is not disposed on purpose to verify in tearDown that
     // the test failed due to an active SemanticsHandle.
   });

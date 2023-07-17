@@ -678,20 +678,43 @@ void main() {
 
     expect(root.semanticsOwner, isNotNull);
     expect(child.semanticsOwner, isNotNull);
-    expect(childOfChild.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNotNull); // Retained in case we get re-attached.
 
     final SemanticsHandle childSemantics = child.ensureSemantics();
     root.dropChild(child);
 
     expect(root.semanticsOwner, isNotNull);
     expect(child.semanticsOwner, isNotNull);
-    expect(childOfChild.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNotNull); // Retained in case we get re-attached.
 
     childSemantics.dispose();
 
     expect(root.semanticsOwner, isNotNull);
     expect(child.semanticsOwner, isNull);
-    expect(childOfChild.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNotNull);
+
+    manifold.semanticsEnabled = false;
+
+    expect(root.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNotNull);
+
+    root.adoptChild(childOfChild);
+    expect(root.semanticsOwner, isNull);
+    expect(childOfChild.semanticsOwner, isNull); // Disposed on re-attachment.
+
+    manifold.semanticsEnabled = true;
+    expect(root.semanticsOwner, isNotNull);
+    expect(childOfChild.semanticsOwner, isNotNull);
+
+    root.dropChild(childOfChild);
+
+    expect(root.semanticsOwner, isNotNull);
+    expect(childOfChild.semanticsOwner, isNotNull);
+
+    childOfChild.dispose();
+
+    expect(root.semanticsOwner, isNotNull);
+    expect(childOfChild.semanticsOwner, isNull); // Disposed on dispose.
   });
 
   test('can adopt/drop children during own layout', () {
@@ -789,6 +812,38 @@ void main() {
     });
     expect(children.single, childOfChild3);
   });
+
+  test('printing pipeline owner tree smoke test', () {
+    final PipelineOwner root = PipelineOwner();
+    final PipelineOwner child1 = PipelineOwner()
+      ..rootNode = FakeRenderView();
+    final PipelineOwner childOfChild1 = PipelineOwner()
+      ..rootNode = FakeRenderView();
+    final PipelineOwner child2 = PipelineOwner()
+      ..rootNode = FakeRenderView();
+    final PipelineOwner childOfChild2 = PipelineOwner()
+      ..rootNode = FakeRenderView();
+
+    root.adoptChild(child1);
+    child1.adoptChild(childOfChild1);
+    root.adoptChild(child2);
+    child2.adoptChild(childOfChild2);
+
+    expect(root.toStringDeep(), equalsIgnoringHashCodes(
+      'PipelineOwner#00000\n'
+      ' ├─PipelineOwner#00000\n'
+      ' │ │ rootNode: FakeRenderView#00000 NEEDS-LAYOUT NEEDS-PAINT\n'
+      ' │ │\n'
+      ' │ └─PipelineOwner#00000\n'
+      ' │     rootNode: FakeRenderView#00000 NEEDS-LAYOUT NEEDS-PAINT\n'
+      ' │\n'
+      ' └─PipelineOwner#00000\n'
+      '   │ rootNode: FakeRenderView#00000 NEEDS-LAYOUT NEEDS-PAINT\n'
+      '   │\n'
+      '   └─PipelineOwner#00000\n'
+      '       rootNode: FakeRenderView#00000 NEEDS-LAYOUT NEEDS-PAINT\n'
+    ));
+  });
 }
 
 class TestPipelineManifold extends ChangeNotifier implements PipelineManifold {
@@ -860,3 +915,5 @@ List<PipelineOwner> _treeWalk(PipelineOwner root) {
   root.visitChildren(visitor);
   return results;
 }
+
+class FakeRenderView extends RenderBox { }
