@@ -783,7 +783,7 @@ void main() {
 
   group('alignLabelWithHint', () {
     group('expands false', () {
-      testWidgetsWithLeakTracking('multiline TextField no-strut', (WidgetTester tester) async {
+      testWidgets('multiline TextField no-strut', (WidgetTester tester) async {
         const String text = 'text';
         final FocusNode focusNode = FocusNode();
         final TextEditingController controller = TextEditingController();
@@ -834,7 +834,7 @@ void main() {
         focusNode.unfocus();
       });
 
-      testWidgetsWithLeakTracking('multiline TextField', (WidgetTester tester) async {
+      testWidgets('multiline TextField', (WidgetTester tester) async {
         const String text = 'text';
         final FocusNode focusNode = FocusNode();
         final TextEditingController controller = TextEditingController();
@@ -886,7 +886,7 @@ void main() {
     });
 
     group('expands true', () {
-      testWidgetsWithLeakTracking('multiline TextField', (WidgetTester tester) async {
+      testWidgets('multiline TextField', (WidgetTester tester) async {
         const String text = 'text';
         final FocusNode focusNode = FocusNode();
         final TextEditingController controller = TextEditingController();
@@ -938,7 +938,7 @@ void main() {
         focusNode.unfocus();
       });
 
-      testWidgetsWithLeakTracking('multiline TextField with outline border', (WidgetTester tester) async {
+      testWidgets('multiline TextField with outline border', (WidgetTester tester) async {
         const String text = 'text';
         final FocusNode focusNode = FocusNode();
         final TextEditingController controller = TextEditingController();

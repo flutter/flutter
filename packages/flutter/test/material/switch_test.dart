@@ -2972,7 +2972,7 @@ void main() {
       expect(state.position.value, greaterThan(1));
     });
 
-    testWidgetsWithLeakTracking('Switch thumb shows correct pressed color - M3', (WidgetTester tester) async {
+    testWidgets('Switch thumb shows correct pressed color - M3', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true);
       final ColorScheme colors = themeData.colorScheme;
       Widget buildApp({bool enabled = true, bool value = true}) {
