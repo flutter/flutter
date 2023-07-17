@@ -219,7 +219,7 @@ Finder findTooltipContainer(String tooltipText) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('M2 Chip defaults', (WidgetTester tester) async {
+  testWidgets('M2 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
 
     Widget buildFrame(Brightness brightness) {
@@ -1841,7 +1841,7 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(80.0, 32.0));
   });
 
-  testWidgetsWithLeakTracking('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
+  testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -2588,7 +2588,7 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgetsWithLeakTracking('selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
+  testWidgets('selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
         useMaterial3: false,
@@ -3465,7 +3465,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('M2 Chip defaults', (WidgetTester tester) async {
+    testWidgets('M2 Chip defaults', (WidgetTester tester) async {
       late TextTheme textTheme;
 
       Widget buildFrame(Brightness brightness) {
@@ -3542,7 +3542,7 @@ void main() {
       expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
     });
 
-    testWidgetsWithLeakTracking('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
+    testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
