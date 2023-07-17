@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'debug.dart';
@@ -38,6 +39,8 @@ enum ScrollViewKeyboardDismissBehavior {
   /// `onDrag` means that the [ScrollView] will dismiss an on-screen keyboard
   /// when a drag begins.
   onDrag,
+
+  interactive,
 }
 
 /// A widget that combines a [Scrollable] and a [Viewport] to create an
@@ -487,8 +490,21 @@ abstract class ScrollView extends StatelessWidget {
           if (notification.dragDetails != null && focusScope.hasFocus) {
             focusScope.unfocus();
           }
+
           return false;
         },
+      );
+    } else if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.interactive) {
+      return Listener(
+        child: scrollableResult,
+        onPointerMove: (PointerMoveEvent details) {
+          double ypos = details.position.dy;
+
+          SystemChannels.textInput.invokeMethod<void>(
+          'TextInput.onMouseMove',
+          <String, dynamic>{'mouseY': ypos});
+          print("On Mouse Move");
+        }
       );
     } else {
       return scrollableResult;

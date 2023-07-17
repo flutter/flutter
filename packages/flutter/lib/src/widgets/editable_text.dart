@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:developer';
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
 
@@ -861,7 +862,9 @@ class EditableText extends StatefulWidget {
                ...inputFormatters ?? const Iterable<TextInputFormatter>.empty(),
              ]
            : inputFormatters,
-       showCursor = showCursor ?? !readOnly;
+       showCursor = showCursor ?? !readOnly{
+       // print("HELLO");
+       }
 
   /// Controls the text being edited.
   final TextEditingController controller;
