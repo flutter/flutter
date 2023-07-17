@@ -138,7 +138,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     final SnackBar snackBar = SnackBar(

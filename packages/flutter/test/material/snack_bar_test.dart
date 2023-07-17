@@ -2012,7 +2012,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('SnackBars hero across transitions when using ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgets('SnackBars hero across transitions when using ScaffoldMessenger', (WidgetTester tester) async {
     const String snackBarText = 'hello snackbar';
     const String firstHeader = 'home';
     const String secondHeader = 'second';
