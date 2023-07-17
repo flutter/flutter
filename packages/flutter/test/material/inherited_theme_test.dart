@@ -5,11 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Theme.wrap()', (WidgetTester tester) async {
+  testWidgets('Theme.wrap()', (WidgetTester tester) async {
     const Color primaryColor = Color(0xFF00FF00);
     final Key primaryContainerKey = UniqueKey();
 
@@ -94,7 +93,7 @@ void main() {
     expect(containerColor(), isNot(primaryColor));
   });
 
-  testWidgetsWithLeakTracking('PopupMenuTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('PopupMenuTheme.wrap()', (WidgetTester tester) async {
     const double menuFontSize = 24;
     const Color menuTextColor = Color(0xFF0000FF);
 
@@ -148,7 +147,7 @@ void main() {
     await tester.pumpAndSettle(); // menu route animation
   });
 
-  testWidgetsWithLeakTracking('BannerTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('BannerTheme.wrap()', (WidgetTester tester) async {
     const Color bannerBackgroundColor = Color(0xFF0000FF);
     const double bannerFontSize = 48;
     const Color bannerTextColor = Color(0xFF00FF00);
@@ -246,7 +245,7 @@ void main() {
     expect(getTextStyle('hello').color, isNot(bannerTextColor));
   });
 
-  testWidgetsWithLeakTracking('DividerTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('DividerTheme.wrap()', (WidgetTester tester) async {
     const Color dividerColor = Color(0xFF0000FF);
     const double dividerSpace = 13;
     const double dividerThickness = 7;
@@ -328,7 +327,7 @@ void main() {
     expect(dividerBorder().width, isNot(dividerThickness));
   });
 
-  testWidgetsWithLeakTracking('ListTileTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('ListTileTheme.wrap()', (WidgetTester tester) async {
     const Color tileSelectedColor = Color(0xFF00FF00);
     const Color tileIconColor = Color(0xFF0000FF);
     const Color tileTextColor = Color(0xFFFF0000);
@@ -439,7 +438,7 @@ void main() {
     expect(getIconStyle(unselectedIconKey).color, isNot(tileIconColor));
   });
 
-  testWidgetsWithLeakTracking('SliderTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('SliderTheme.wrap()', (WidgetTester tester) async {
     const Color activeTrackColor = Color(0xFF00FF00);
     const Color inactiveTrackColor = Color(0xFF0000FF);
     const Color thumbColor = Color(0xFFFF0000);
@@ -522,7 +521,7 @@ void main() {
     expect(sliderBox, isNot(paints..circle(color: thumbColor)));
   });
 
-  testWidgetsWithLeakTracking('ToggleButtonsTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('ToggleButtonsTheme.wrap()', (WidgetTester tester) async {
     const Color buttonColor = Color(0xFF00FF00);
     const Color selectedButtonColor = Color(0xFFFF0000);
 

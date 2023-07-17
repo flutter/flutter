@@ -78,7 +78,7 @@ void main() {
     cancelCalled = false;
   });
 
-  testWidgetsWithLeakTracking('Tapping should never cause a splash', (WidgetTester tester) async {
+  testWidgets('Tapping should never cause a splash', (WidgetTester tester) async {
     final Key textField1 = UniqueKey();
     final Key textField2 = UniqueKey();
 

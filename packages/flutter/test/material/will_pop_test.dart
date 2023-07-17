@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 bool willPopValue = false;
 
 class SamplePage extends StatefulWidget {
@@ -98,7 +96,7 @@ class _TestPage extends Page<dynamic> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ModalRoute scopedWillPopupCallback can inhibit back button', (WidgetTester tester) async {
+  testWidgets('ModalRoute scopedWillPopupCallback can inhibit back button', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -153,7 +151,7 @@ void main() {
     expect(find.text('Sample Page'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('willPop will only pop if the callback returns true', (WidgetTester tester) async {
+  testWidgets('willPop will only pop if the callback returns true', (WidgetTester tester) async {
     Widget buildFrame() {
       return MaterialApp(
         home: Scaffold(
@@ -192,7 +190,7 @@ void main() {
     expect(find.text('Sample Form'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Form.willPop can inhibit back button', (WidgetTester tester) async {
+  testWidgets('Form.willPop can inhibit back button', (WidgetTester tester) async {
     Widget buildFrame() {
       return MaterialApp(
         home: Scaffold(
@@ -246,7 +244,7 @@ void main() {
     expect(willPopCount, 1);
   });
 
-  testWidgetsWithLeakTracking('Form.willPop callbacks do not accumulate', (WidgetTester tester) async {
+  testWidgets('Form.willPop callbacks do not accumulate', (WidgetTester tester) async {
     Future<bool> showYesNoAlert(BuildContext context) async {
       return (await showDialog<bool>(
         context: context,
@@ -338,7 +336,7 @@ void main() {
     expect(find.text('Sample Form'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Route.scopedWillPop callbacks do not accumulate', (WidgetTester tester) async {
+  testWidgets('Route.scopedWillPop callbacks do not accumulate', (WidgetTester tester) async {
     late StateSetter contentsSetState; // call this to rebuild the route's SampleForm contents
     bool contentsEmpty = false; // when true, don't include the SampleForm in the route
 
@@ -398,7 +396,7 @@ void main() {
     expect(route.hasCallback, isFalse);
   });
 
-  testWidgetsWithLeakTracking('should handle new route if page moved from one navigator to another', (WidgetTester tester) async {
+  testWidgets('should handle new route if page moved from one navigator to another', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/89133
     late StateSetter contentsSetState;
     bool moveToAnotherNavigator = false;

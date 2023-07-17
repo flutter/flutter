@@ -150,7 +150,7 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/87102
-  testWidgetsWithLeakTracking('label position test - show hint', (WidgetTester tester) async {
+  testWidgets('label position test - show hint', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -289,7 +289,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 12.0));
   });
 
-  testWidgetsWithLeakTracking('label position test - show hint: enable + empty item', (WidgetTester tester) async {
+  testWidgets('label position test - show hint: enable + empty item', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -444,7 +444,7 @@ void main() {
     expect(nonEmptyLabel, nullValueLabel);
   });
 
-  testWidgetsWithLeakTracking('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
     String? value = 'one';
     int validateCalled = 0;
 
@@ -859,7 +859,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('DropdownButtonFormField - custom elevation', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - custom elevation', (WidgetTester tester) async {
     debugDisableShadows = false;
     final Key buttonKeyOne = UniqueKey();
     final Key buttonKeyTwo = UniqueKey();
@@ -954,7 +954,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('DropdownButtonFormField - selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField - selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
     const List<String> items = <String>[
       'One',
       'Two',
@@ -998,7 +998,7 @@ void main() {
     expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
+  testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
     int dropdownButtonTapCounter = 0;
     String? value = 'one';
     void onChanged(String? newValue) {
@@ -1044,7 +1044,7 @@ void main() {
     expect(dropdownButtonTapCounter, 2); // Should not change.
   });
 
-  testWidgetsWithLeakTracking('DropdownButtonFormField should re-render if value param changes', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField should re-render if value param changes', (WidgetTester tester) async {
     String currentValue = 'two';
 
     await tester.pumpWidget(

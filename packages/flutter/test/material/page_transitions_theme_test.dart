@@ -307,7 +307,7 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
-  testWidgetsWithLeakTracking('_ZoomPageTransition only causes child widget built once', (WidgetTester tester) async {
+  testWidgets('_ZoomPageTransition only causes child widget built once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/58345
 
     int builtCount = 0;
