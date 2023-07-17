@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../foundation/leak_tracking.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('BackButton control test', (WidgetTester tester) async {
+  testWidgets('BackButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: const Material(child: Text('Home')),
