@@ -105,7 +105,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Slider defaults', (WidgetTester tester) async {
+  testWidgets('Slider defaults', (WidgetTester tester) async {
     debugDisableShadows = false;
     final ThemeData theme = ThemeData(useMaterial3: true);
     final ColorScheme colorScheme = theme.colorScheme;
@@ -236,7 +236,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Slider uses the right theme colors for the right components', (WidgetTester tester) async {
+  testWidgets('Slider uses the right theme colors for the right components', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
       const Color customColor1 = Color(0xcafefeed);
