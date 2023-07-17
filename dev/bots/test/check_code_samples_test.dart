@@ -79,8 +79,10 @@ void main() {
   }
 
   setUp(() {
-    fs = MemoryFileSystem();
-    flutterRoot = fs.directory('/flutter sdk')..createSync(recursive: true);
+    fs = MemoryFileSystem(style: Platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
+    // Get the root prefix of the current directory so that on Windows we get a
+    // correct root prefix.
+    flutterRoot = fs.directory(path.join(path.rootPrefix(fs.currentDirectory.absolute.path), 'flutter sdk'))..createSync(recursive: true);
     fs.currentDirectory = flutterRoot;
     examples = flutterRoot.childDirectory('examples').childDirectory('api')..createSync(recursive: true);
     packages = flutterRoot.childDirectory('packages')..createSync(recursive: true);

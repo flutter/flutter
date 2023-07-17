@@ -243,16 +243,18 @@ class SampleChecker {
     final List<File> noLongerMissingTests = <File>[];
     for (final File example in exampleFilenames) {
       final File testFile = filesystem.file(getTestNameForExample(example, examples));
+      final String name = path.relative(testFile.absolute.path, from: flutterRoot.absolute.path);
       if (!testFile.existsSync()) {
         missingTests.add(testFile);
-      } else if (_knownMissingTests.contains(path.relative(testFile.absolute.path, from: flutterRoot.absolute.path))) {
+      } else if (_knownMissingTests.contains(name.replaceAll(r'\', '/'))) {
         noLongerMissingTests.add(testFile);
       }
     }
     // Skip any that we know are missing.
     missingTests.removeWhere(
       (File test) {
-        return _knownMissingTests.contains(path.relative(test.absolute.path, from: flutterRoot.absolute.path));
+        final String name = path.relative(test.absolute.path, from: flutterRoot.absolute.path).replaceAll(r'\', '/');
+        return _knownMissingTests.contains(name);
       },
     );
     return (missingTests, noLongerMissingTests);
