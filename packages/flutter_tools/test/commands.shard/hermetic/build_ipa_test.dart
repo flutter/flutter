@@ -1030,11 +1030,11 @@ void main() {
         testLogger.statusText,
         contains(
             '[✓] App Settings Validation\n'
-                '    • Version Number: 12.34.56\n'
-                '    • Build Number: 666\n'
-                '    • Display Name: Awesome Gallery\n'
-                '    • Deployment Target: 11.0\n'
-                '    • Bundle Identifier: io.flutter.someProject\n'
+            '    • Version Number: 12.34.56\n'
+            '    • Build Number: 666\n'
+            '    • Display Name: Awesome Gallery\n'
+            '    • Deployment Target: 11.0\n'
+            '    • Bundle Identifier: io.flutter.someProject\n'
         )
     );
     expect(
