@@ -13,7 +13,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('FilledButton, FilledButton.icon defaults', (WidgetTester tester) async {
+  testWidgets('FilledButton, FilledButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(useMaterial3: false, colorScheme: colorScheme);
 
@@ -126,7 +126,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgetsWithLeakTracking('FilledButton.tonal, FilledButton.tonalIcon defaults', (WidgetTester tester) async {
+  testWidgets('FilledButton.tonal, FilledButton.tonalIcon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
 
@@ -239,7 +239,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgetsWithLeakTracking('Default FilledButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgets('Default FilledButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(

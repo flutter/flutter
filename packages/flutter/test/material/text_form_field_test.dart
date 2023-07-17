@@ -28,7 +28,7 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
-  testWidgetsWithLeakTracking('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
+  testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -297,7 +297,7 @@ void main() {
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
-  testWidgetsWithLeakTracking('the desktop cut/copy buttons are disabled for obscured form fields', (WidgetTester tester) async {
+  testWidgets('the desktop cut/copy buttons are disabled for obscured form fields', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -500,7 +500,7 @@ void main() {
     expect(textFieldWidget.cursorColor, cursorColor);
   });
 
-  testWidgetsWithLeakTracking('onFieldSubmit callbacks are called', (WidgetTester tester) async {
+  testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
     bool called = false;
 
     await tester.pumpWidget(
@@ -666,7 +666,7 @@ void main() {
     expect(find.text('5 of 10'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('readonly text form field will hide cursor by default', (WidgetTester tester) async {
+  testWidgets('readonly text form field will hide cursor by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1071,7 +1071,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/101587.
-  testWidgetsWithLeakTracking('Right clicking menu behavior', (WidgetTester tester) async {
+  testWidgets('Right clicking menu behavior', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );

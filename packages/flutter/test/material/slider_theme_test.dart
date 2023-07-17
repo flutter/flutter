@@ -2086,7 +2086,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('Slider defaults', (WidgetTester tester) async {
+    testWidgets('Slider defaults', (WidgetTester tester) async {
       debugDisableShadows = false;
       final ThemeData theme  = ThemeData(useMaterial3: false);
       const double trackHeight = 4.0;

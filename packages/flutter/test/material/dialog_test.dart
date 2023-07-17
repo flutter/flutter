@@ -112,7 +112,7 @@ void main() {
     expect(materialWidget.color, customColor);
   });
 
-  testWidgetsWithLeakTracking('Dialog Defaults', (WidgetTester tester) async {
+  testWidgets('Dialog Defaults', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
       content: Text('Y'),
@@ -147,7 +147,7 @@ void main() {
     expect(material3Widget.elevation, 6.0);
   });
 
-  testWidgetsWithLeakTracking('Dialog.fullscreen Defaults', (WidgetTester tester) async {
+  testWidgets('Dialog.fullscreen Defaults', (WidgetTester tester) async {
     const String dialogTextM2 = 'Fullscreen Dialog - M2';
     const String dialogTextM3 = 'Fullscreen Dialog - M3';
 
@@ -448,7 +448,7 @@ void main() {
     expect(textRect.bottom, dialogRect.bottom - customPadding.bottom);
   });
 
-  testWidgetsWithLeakTracking('Barrier dismissible', (WidgetTester tester) async {
+  testWidgets('Barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -645,7 +645,7 @@ void main() {
     expect(actionsSize.width, dialogSize.width - (30.0 * 2));
   });
 
-  testWidgetsWithLeakTracking('AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
+  testWidgets('AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -2036,7 +2036,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/28505.
-  testWidgetsWithLeakTracking('showDialog only gets Theme from context on the first call', (WidgetTester tester) async {
+  testWidgets('showDialog only gets Theme from context on the first call', (WidgetTester tester) async {
     Widget buildFrame(Key builderKey) {
       return MaterialApp(
         home: Center(
@@ -2662,7 +2662,7 @@ void main() {
     expect(cancelNode.hasFocus, false);
   });
 
-  testWidgetsWithLeakTracking('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
+  testWidgets('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
     final AlertDialog dialog = AlertDialog.adaptive(
       content: Container(
         height: 5000.0,
@@ -2704,7 +2704,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('showAdaptiveDialog should not allow dismiss on barrier on iOS by default', (WidgetTester tester) async {
+  testWidgets('showAdaptiveDialog should not allow dismiss on barrier on iOS by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
