@@ -6,8 +6,8 @@
 #include <fuchsia/tracing/provider/cpp/fidl.h>
 #include <fuchsia/ui/app/cpp/fidl.h>
 #include <fuchsia/ui/composition/cpp/fidl.h>
+#include <fuchsia/ui/display/singleton/cpp/fidl.h>
 #include <fuchsia/ui/observation/geometry/cpp/fidl.h>
-#include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <fuchsia/ui/test/input/cpp/fidl.h>
 #include <fuchsia/ui/test/scene/cpp/fidl.h>
 #include <lib/async-loop/testing/cpp/real_loop.h>
@@ -15,7 +15,6 @@
 #include <lib/fidl/cpp/binding_set.h>
 #include <lib/sys/component/cpp/testing/realm_builder.h>
 #include <lib/sys/component/cpp/testing/realm_builder_types.h>
-#include <lib/ui/scenic/cpp/view_ref_pair.h>
 #include <lib/zx/clock.h>
 #include <zircon/status.h>
 #include <zircon/time.h>
@@ -27,7 +26,6 @@
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/check_view.h"
-#include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/color.h"
 #include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/screenshot.h"
 
 namespace flutter_embedder_test {
@@ -66,7 +64,8 @@ constexpr char kChildViewUrl[] =
 constexpr char kParentViewUrl[] =
     "fuchsia-pkg://fuchsia.com/parent-view#meta/parent-view.cm";
 static constexpr auto kTestUiStackUrl =
-    "fuchsia-pkg://fuchsia.com/test-ui-stack#meta/test-ui-stack.cm";
+    "fuchsia-pkg://fuchsia.com/flatland-scene-manager-test-ui-stack#meta/"
+    "test-ui-stack.cm";
 
 constexpr auto kFlutterRunnerEnvironment = "flutter_runner_env";
 constexpr auto kFlutterJitRunner = "flutter_jit_runner";
@@ -84,36 +83,26 @@ constexpr auto kParentViewRef = ChildRef{kParentView};
 constexpr auto kTestUiStack = "ui";
 constexpr auto kTestUiStackRef = ChildRef{kTestUiStack};
 
-constexpr fuchsia_test_utils::Color kParentBackgroundColor = {0x00, 0x00, 0xFF,
-                                                              0xFF};  // Blue
-constexpr fuchsia_test_utils::Color kChildBackgroundColor = {0xFF, 0x00, 0xFF,
-                                                             0xFF};  // Pink
+// Background and foreground color values.
+const fuchsia_test_utils::Pixel kParentBackgroundColor(0xFF,
+                                                       0x00,
+                                                       0x00,
+                                                       0xFF);  // Blue
+const fuchsia_test_utils::Pixel kChildBackgroundColor(0xFF,
+                                                      0x00,
+                                                      0xFF,
+                                                      0xFF);  // Pink
+const fuchsia_test_utils::Pixel kFlatlandOverlayColor(0x00,
+                                                      0xFF,
+                                                      0x00,
+                                                      0xFF);  // Green
 
-// TODO(fxb/64201): Remove forced opacity colors when Flatland is enabled.
-constexpr fuchsia_test_utils::Color kOverlayBackgroundColor1 = {
-    0x00, 0xFF, 0x0E, 0xFF};  // Green, blended with blue (FEMU local)
-constexpr fuchsia_test_utils::Color kOverlayBackgroundColor2 = {
-    0x0E, 0xFF, 0x0E, 0xFF};  // Green, blended with pink (FEMU local)
-constexpr fuchsia_test_utils::Color kOverlayBackgroundColor3 = {
-    0x00, 0xFF, 0x0D, 0xFF};  // Green, blended with blue (AEMU infra)
-constexpr fuchsia_test_utils::Color kOverlayBackgroundColor4 = {
-    0x0D, 0xFF, 0x0D, 0xFF};  // Green, blended with pink (AEMU infra)
-constexpr fuchsia_test_utils::Color kOverlayBackgroundColor5 = {
-    0x00, 0xFE, 0x0D, 0xFF};  // Green, blended with blue (NUC)
-constexpr fuchsia_test_utils::Color kOverlayBackgroundColor6 = {
-    0x0D, 0xFF, 0x00, 0xFF};  // Green, blended with pink (NUC)
-
-static size_t OverlayPixelCount(
-    std::map<fuchsia_test_utils::Color, size_t>& histogram) {
-  return histogram[kOverlayBackgroundColor1] +
-         histogram[kOverlayBackgroundColor2] +
-         histogram[kOverlayBackgroundColor3] +
-         histogram[kOverlayBackgroundColor4] +
-         histogram[kOverlayBackgroundColor5] +
-         histogram[kOverlayBackgroundColor6];
+static uint32_t OverlayPixelCount(
+    std::map<fuchsia_test_utils::Pixel, uint32_t>& histogram) {
+  return histogram[kFlatlandOverlayColor];
 }
 
-// Timeout for Scenic's |TakeScreenshot| FIDL call.
+// Timeout for |TakeScreenshot| FIDL call.
 constexpr zx::duration kScreenshotTimeout = zx::sec(10);
 // Timeout to fail the test if it goes beyond this duration.
 constexpr zx::duration kTestTimeout = zx::min(1);
@@ -151,23 +140,24 @@ class FlutterEmbedderTest : public ::loop_fixture::RealLoop,
   fuchsia_test_utils::Screenshot TakeScreenshot();
 
   bool TakeScreenshotUntil(
-      fuchsia_test_utils::Color color,
-      fit::function<void(std::map<fuchsia_test_utils::Color, size_t>)>
+      fuchsia_test_utils::Pixel color,
+      fit::function<void(std::map<fuchsia_test_utils::Pixel, uint32_t>)>
           callback = nullptr,
       zx::duration timeout = kTestTimeout);
 
  private:
-  fuchsia::ui::scenic::Scenic* scenic() { return scenic_.get(); }
-
   void SetUpRealmBase();
 
-  fuchsia::ui::scenic::ScenicPtr scenic_;
   fuchsia::ui::test::scene::ControllerPtr scene_provider_;
   fuchsia::ui::observation::geometry::ViewTreeWatcherPtr view_tree_watcher_;
+  fuchsia::ui::composition::ScreenshotPtr screenshot_;
 
   // Wrapped in optional since the view is not created until the middle of SetUp
   component_testing::RealmBuilder realm_builder_;
   std::unique_ptr<component_testing::RealmRoot> realm_;
+
+  uint64_t display_width_ = 0;
+  uint64_t display_height_ = 0;
 };
 
 void FlutterEmbedderTest::SetUpRealmBase() {
@@ -261,19 +251,20 @@ void FlutterEmbedderTest::SetUpRealmBase() {
 
   // Route UI capabilities from test UI stack to flutter runners.
   realm_builder_.AddRoute(Route{
-      .capabilities = {Protocol{fuchsia::ui::composition::Flatland::Name_},
-                       Protocol{fuchsia::ui::scenic::Scenic::Name_}},
+      .capabilities = {Protocol{fuchsia::ui::composition::Allocator::Name_},
+                       Protocol{fuchsia::ui::composition::Flatland::Name_}},
       .source = kTestUiStackRef,
       .targets = {kFlutterJitRunnerRef, kFlutterJitProductRunnerRef,
                   kFlutterAotRunnerRef, kFlutterAotProductRunnerRef}});
 
   // Route test capabilities from test UI stack to test driver.
   realm_builder_.AddRoute(Route{
-      .capabilities = {Protocol{fuchsia::ui::test::input::Registry::Name_},
+      .capabilities = {Protocol{fuchsia::ui::composition::Screenshot::Name_},
+                       Protocol{fuchsia::ui::test::input::Registry::Name_},
                        Protocol{fuchsia::ui::test::scene::Controller::Name_},
-                       Protocol{fuchsia::ui::scenic::Scenic::Name_}},
+                       Protocol{fuchsia::ui::display::singleton::Info::Name_}},
       .source = kTestUiStackRef,
-      .targets = {ParentRef{}}});
+      .targets = {ParentRef()}});
 
   // Route ViewProvider from child to parent, and parent to test.
   realm_builder_.AddRoute(
@@ -328,6 +319,21 @@ void FlutterEmbedderTest::LaunchParentViewInRealm(
   }
   realm_ = std::make_unique<RealmRoot>(realm_builder_.Build());
 
+  // Get the display information using the |fuchsia.ui.display.singleton.Info|.
+  std::optional<bool> display_metrics_obtained;
+  fuchsia::ui::display::singleton::InfoPtr display_info =
+      realm_->component().Connect<fuchsia::ui::display::singleton::Info>();
+  display_info->GetMetrics([this, &display_metrics_obtained](auto info) {
+    display_width_ = info.extent_in_px().width;
+    display_height_ = info.extent_in_px().height;
+    display_metrics_obtained = true;
+  });
+  RunLoopUntil([&display_metrics_obtained] {
+    return display_metrics_obtained.has_value();
+  });
+  FML_LOG(INFO) << "Got display_width " << display_width_ << " display_height "
+                << display_height_;
+
   // Instruct Test UI Stack to present parent-view's View.
   std::optional<zx_koid_t> view_ref_koid;
   scene_provider_ =
@@ -357,30 +363,34 @@ void FlutterEmbedderTest::LaunchParentViewInRealm(
   });
   FML_LOG(INFO) << "Client view has rendered";
 
-  scenic_ = realm_->component().Connect<fuchsia::ui::scenic::Scenic>();
+  screenshot_ =
+      realm_->component().Connect<fuchsia::ui::composition::Screenshot>();
   FML_LOG(INFO) << "Launched parent-view";
 }
 
 fuchsia_test_utils::Screenshot FlutterEmbedderTest::TakeScreenshot() {
   FML_LOG(INFO) << "Taking screenshot... ";
-  fuchsia::ui::scenic::ScreenshotData screenshot_out;
-  scenic_->TakeScreenshot(
-      [this, &screenshot_out](fuchsia::ui::scenic::ScreenshotData screenshot,
-                              bool status) {
-        EXPECT_TRUE(status) << "Failed to take screenshot";
-        screenshot_out = std::move(screenshot);
-        QuitLoop();
-      });
+
+  fuchsia::ui::composition::ScreenshotTakeRequest request;
+  request.set_format(fuchsia::ui::composition::ScreenshotFormat::BGRA_RAW);
+
+  std::optional<fuchsia::ui::composition::ScreenshotTakeResponse> response;
+  screenshot_->Take(std::move(request), [this, &response](auto screenshot) {
+    response = std::move(screenshot);
+    QuitLoop();
+  });
+
   EXPECT_FALSE(RunLoopWithTimeout(kScreenshotTimeout))
       << "Timed out waiting for screenshot.";
   FML_LOG(INFO) << "Screenshot captured.";
 
-  return fuchsia_test_utils::Screenshot(screenshot_out);
+  return fuchsia_test_utils::Screenshot(
+      response->vmo(), display_width_, display_height_, /*display_rotation*/ 0);
 }
 
 bool FlutterEmbedderTest::TakeScreenshotUntil(
-    fuchsia_test_utils::Color color,
-    fit::function<void(std::map<fuchsia_test_utils::Color, size_t>)> callback,
+    fuchsia_test_utils::Pixel color,
+    fit::function<void(std::map<fuchsia_test_utils::Pixel, uint32_t>)> callback,
     zx::duration timeout) {
   return RunLoopWithTimeoutOrUntil(
       [this, &callback, &color] {
@@ -402,7 +412,7 @@ TEST_F(FlutterEmbedderTest, Embedding) {
   // Take screenshot until we see the child-view's embedded color.
   ASSERT_TRUE(TakeScreenshotUntil(
       kChildBackgroundColor,
-      [](std::map<fuchsia_test_utils::Color, size_t> histogram) {
+      [](std::map<fuchsia_test_utils::Pixel, uint32_t> histogram) {
         // Expect parent and child background colors, with parent color > child
         // color.
         EXPECT_GT(histogram[kParentBackgroundColor], 0u);
@@ -418,10 +428,10 @@ TEST_F(FlutterEmbedderTest, EmbeddingWithOverlay) {
   // Take screenshot until we see the child-view's embedded color.
   ASSERT_TRUE(TakeScreenshotUntil(
       kChildBackgroundColor,
-      [](std::map<fuchsia_test_utils::Color, size_t> histogram) {
+      [](std::map<fuchsia_test_utils::Pixel, uint32_t> histogram) {
         // Expect parent, overlay and child background colors.
         // With parent color > child color and overlay color > child color.
-        const size_t overlay_pixel_count = OverlayPixelCount(histogram);
+        const uint32_t overlay_pixel_count = OverlayPixelCount(histogram);
         EXPECT_GT(histogram[kParentBackgroundColor], 0u);
         EXPECT_GT(overlay_pixel_count, 0u);
         EXPECT_GT(histogram[kChildBackgroundColor], 0u);

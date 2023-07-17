@@ -19,13 +19,6 @@ source_set("check_view") {
   ]
 }
 
-source_set("color") {
-  sources = [
-    "color.cc",
-    "color.h",
-  ]
-}
-
 source_set("screenshot") {
   sources = [
     "screenshot.cc",
@@ -33,9 +26,7 @@ source_set("screenshot") {
   ]
 
   deps = [
-    ":color",
     "$fuchsia_sdk_root/fidl:fuchsia.logger",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
     "$fuchsia_sdk_root/pkg:zx",
     "//flutter/fml",
   ]
@@ -50,7 +41,9 @@ source_set("portable_ui_test") {
 
   deps = [
     ":check_view",
+    "$fuchsia_sdk_root/fidl:fuchsia.logger",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.display.singleton",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.input",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.observation.geometry",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.policy",

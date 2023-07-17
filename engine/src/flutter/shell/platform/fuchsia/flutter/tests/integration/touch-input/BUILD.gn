@@ -33,6 +33,7 @@ executable("touch-input-test-bin") {
     "$fuchsia_sdk_root/fidl:fuchsia.net.interfaces",
     "$fuchsia_sdk_root/fidl:fuchsia.tracing.provider",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.display.singleton",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.input",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.pointerinjector",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.policy",

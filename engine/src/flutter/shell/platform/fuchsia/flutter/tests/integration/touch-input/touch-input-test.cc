@@ -14,9 +14,9 @@
 #include <fuchsia/sysmem/cpp/fidl.h>
 #include <fuchsia/tracing/provider/cpp/fidl.h>
 #include <fuchsia/ui/app/cpp/fidl.h>
+#include <fuchsia/ui/display/singleton/cpp/fidl.h>
 #include <fuchsia/ui/input/cpp/fidl.h>
 #include <fuchsia/ui/policy/cpp/fidl.h>
-#include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <fuchsia/ui/test/input/cpp/fidl.h>
 #include <fuchsia/ui/test/scene/cpp/fidl.h>
 #include <fuchsia/web/cpp/fidl.h>
@@ -26,9 +26,6 @@
 #include <lib/sys/component/cpp/testing/realm_builder.h>
 #include <lib/sys/component/cpp/testing/realm_builder_types.h>
 #include <lib/sys/cpp/component_context.h>
-#include <lib/ui/scenic/cpp/resources.h>
-#include <lib/ui/scenic/cpp/session.h>
-#include <lib/ui/scenic/cpp/view_token_pair.h>
 #include <lib/zx/clock.h>
 #include <lib/zx/time.h>
 #include <zircon/status.h>
@@ -127,9 +124,6 @@ using RealmBuilder = component_testing::RealmBuilder;
 // Set this as low as you can that still works across all test platforms.
 constexpr zx::duration kTimeout = zx::min(1);
 
-constexpr auto kGfxTestUIStackUrl =
-    "fuchsia-pkg://fuchsia.com/gfx-scene-manager-test-ui-stack#meta/"
-    "test-ui-stack.cm";
 constexpr auto kTestUIStackUrl =
     "fuchsia-pkg://fuchsia.com/flatland-scene-manager-test-ui-stack#meta/"
     "test-ui-stack.cm";
@@ -205,9 +199,7 @@ class TouchInputListenerServer
       events_received_;
 };
 
-class FlutterTapTestBase : public PortableUITest,
-                           public ::testing::Test,
-                           public ::testing::WithParamInterface<std::string> {
+class FlutterTapTestBase : public PortableUITest, public ::testing::Test {
  protected:
   ~FlutterTapTestBase() override {
     FML_CHECK(touch_injection_request_count() > 0)
@@ -226,17 +218,22 @@ class FlutterTapTestBase : public PortableUITest,
         },
         kTimeout);
 
-    // Get the display dimensions.
+    // Get the display information using the
+    // |fuchsia.ui.display.singleton.Info|.
     FML_LOG(INFO) << "Waiting for scenic display info";
-    scenic_ = realm_root()->component().Connect<fuchsia::ui::scenic::Scenic>();
-    scenic_->GetDisplayInfo([this](fuchsia::ui::gfx::DisplayInfo display_info) {
-      display_width_ = display_info.width_in_px;
-      display_height_ = display_info.height_in_px;
-      FML_LOG(INFO) << "Got display_width = " << display_width_
-                    << " and display_height = " << display_height_;
+    std::optional<bool> display_metrics_obtained;
+    fuchsia::ui::display::singleton::InfoPtr display_info =
+        realm_root()
+            ->component()
+            .Connect<fuchsia::ui::display::singleton::Info>();
+    display_info->GetMetrics([this, &display_metrics_obtained](auto info) {
+      display_width_ = info.extent_in_px().width;
+      display_height_ = info.extent_in_px().height;
+      display_metrics_obtained = true;
     });
-    RunLoopUntil(
-        [this] { return display_width_ != 0 && display_height_ != 0; });
+    RunLoopUntil([&display_metrics_obtained] {
+      return display_metrics_obtained.has_value();
+    });
 
     // Register input injection device.
     FML_LOG(INFO) << "Registering input injection device";
@@ -287,7 +284,7 @@ class FlutterTapTestBase : public PortableUITest,
   uint32_t display_width() const { return display_width_; }
   uint32_t display_height() const { return display_height_; }
 
-  ParamType GetTestUIStackUrl() override { return GetParam(); };
+  std::string GetTestUIStackUrl() override { return kTestUIStackUrl; };
 
   TouchInputListenerServer* touch_input_listener_server_;
 };
@@ -345,17 +342,22 @@ class FlutterEmbedTapTest : public FlutterTapTestBase {
   void LaunchClientWithEmbeddedView() {
     BuildRealm();
 
-    // Get the display dimensions.
+    // Get the display information using the
+    // |fuchsia.ui.display.singleton.Info|.
     FML_LOG(INFO) << "Waiting for scenic display info";
-    scenic_ = realm_root()->component().Connect<fuchsia::ui::scenic::Scenic>();
-    scenic_->GetDisplayInfo([this](fuchsia::ui::gfx::DisplayInfo display_info) {
-      display_width_ = display_info.width_in_px;
-      display_height_ = display_info.height_in_px;
-      FML_LOG(INFO) << "Got display_width = " << display_width_
-                    << " and display_height = " << display_height_;
+    std::optional<bool> display_metrics_obtained;
+    fuchsia::ui::display::singleton::InfoPtr display_info =
+        realm_root()
+            ->component()
+            .Connect<fuchsia::ui::display::singleton::Info>();
+    display_info->GetMetrics([this, &display_metrics_obtained](auto info) {
+      display_width_ = info.extent_in_px().width;
+      display_height_ = info.extent_in_px().height;
+      display_metrics_obtained = true;
     });
-    RunLoopUntil(
-        [this] { return display_width_ != 0 && display_height_ != 0; });
+    RunLoopUntil([&display_metrics_obtained] {
+      return display_metrics_obtained.has_value();
+    });
 
     // Register input injection device.
     FML_LOG(INFO) << "Registering input injection device";
@@ -424,16 +426,7 @@ class FlutterEmbedTapTest : public FlutterTapTestBase {
   }
 };
 
-// Makes use of gtest's parameterized testing, allowing us
-// to test different combinations of test-ui-stack + runners. Currently, there
-// are both GFX and Flatland variants. Documentation:
-// http://go/gunitadvanced#value-parameterized-tests
-INSTANTIATE_TEST_SUITE_P(FlutterTapTestParameterized,
-                         FlutterTapTest,
-                         ::testing::Values(kGfxTestUIStackUrl,
-                                           kTestUIStackUrl));
-
-TEST_P(FlutterTapTest, FlutterTap) {
+TEST_F(FlutterTapTest, FlutterTap) {
   // Launch client view, and wait until it's rendering to proceed with the test.
   FML_LOG(INFO) << "Initializing scene";
   LaunchClient();
@@ -457,13 +450,7 @@ TEST_P(FlutterTapTest, FlutterTap) {
   ASSERT_EQ(touch_injection_request_count(), 1);
 }
 
-// TODO(fxbug.dev/125514): Embedded Child View needs to support Flatland.
-// Only test GFX Test UI stack for embedded test cases for now.
-INSTANTIATE_TEST_SUITE_P(FlutterEmbedTapTestParameterized,
-                         FlutterEmbedTapTest,
-                         ::testing::Values(kGfxTestUIStackUrl));
-
-TEST_P(FlutterEmbedTapTest, FlutterEmbedTap) {
+TEST_F(FlutterEmbedTapTest, FlutterEmbedTap) {
   // Launch view
   FML_LOG(INFO) << "Initializing scene";
   LaunchClientWithEmbeddedView();
@@ -497,29 +484,7 @@ TEST_P(FlutterEmbedTapTest, FlutterEmbedTap) {
   ASSERT_EQ(touch_injection_request_count(), 2);
 }
 
-TEST_P(FlutterEmbedTapTest, FlutterEmbedHittestDisabled) {
-  FML_LOG(INFO) << "Initializing scene";
-  AddComponentArgument("--no-hitTestable");
-  LaunchClientWithEmbeddedView();
-  FML_LOG(INFO) << "Client launched";
-
-  // Embedded child view takes up the center of the screen
-  // hitTestable is turned off for the embedded child view
-  // Expect the parent (embedding-flutter-view) to respond if we inject a tap
-  // there
-  InjectTap(0, 0);
-  RunLoopUntil([this] {
-    return LastEventReceivedMatches(
-        /*expected_x=*/static_cast<float>(display_width() / 2.0f),
-        /*expected_y=*/static_cast<float>(display_height() / 2.0f),
-        /*component_name=*/"embedding-flutter-view");
-  });
-
-  // There should be 1 injected tap
-  ASSERT_EQ(touch_injection_request_count(), 1);
-}
-
-TEST_P(FlutterEmbedTapTest, FlutterEmbedOverlayEnabled) {
+TEST_F(FlutterEmbedTapTest, FlutterEmbedOverlayEnabled) {
   FML_LOG(INFO) << "Initializing scene";
   AddComponentArgument("--showOverlay");
   LaunchClientWithEmbeddedView();

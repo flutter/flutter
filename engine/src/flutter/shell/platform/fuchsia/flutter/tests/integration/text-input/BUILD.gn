@@ -44,9 +44,7 @@ executable("text-input-test-bin") {
     "//build/fuchsia/fidl:fuchsia.ui.gfx",
     "//flutter/fml",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:check_view",
-    "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:color",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:portable_ui_test",
-    "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:screenshot",
     "//third_party/googletest:gtest",
     "//third_party/googletest:gtest_main",
   ]
