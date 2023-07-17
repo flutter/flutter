@@ -103,6 +103,56 @@ const List<VmServiceExpectation> kAttachExpectations = <VmServiceExpectation>[
   ...kAttachIsolateExpectations,
 ];
 
+final vm_service.Event fakeUnpausedEvent = vm_service.Event(
+  kind: vm_service.EventKind.kResume,
+  timestamp: 0
+);
+
+
+final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: fakeUnpausedEvent,
+  breakpoints: <vm_service.Breakpoint>[],
+  extensionRPCs: <String>[],
+  libraries: <vm_service.LibraryRef>[
+    vm_service.LibraryRef(
+      id: '1',
+      uri: 'file:///hello_world/main.dart',
+      name: '',
+    ),
+  ],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+  isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
+);
+
+
+final FlutterView fakeFlutterView = FlutterView(
+  id: 'a',
+  uiIsolate: fakeUnpausedIsolate,
+);
+
+final FakeVmServiceRequest listViews = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[
+      fakeFlutterView.toJson(),
+    ],
+  },
+);
+
+final List<FakeVmServiceRequest> preHotRestartCallbacks = <FakeVmServiceRequest>[
+  listViews,
+  FakeVmServiceRequest(method: 'ext.flutter.invokePreHotRestartCallbacks', args: <String, Object>{
+    'isolateId': fakeFlutterView.uiIsolate!.id!,
+  }),
+];
+
 void main() {
   late FakeDebugConnection debugConnection;
   late FakeChromeDevice chromeDevice;
@@ -622,6 +672,7 @@ void main() {
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
+      ...preHotRestartCallbacks,
       const FakeVmServiceRequest(
           method: kHotRestartServiceName,
           jsonResponse: <String, Object>{
@@ -695,6 +746,7 @@ void main() {
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
+      ...preHotRestartCallbacks,
       const FakeVmServiceRequest(
           method: kHotRestartServiceName,
           jsonResponse: <String, Object>{
@@ -765,7 +817,10 @@ void main() {
       logger: logger,
       systemClock: SystemClock.fixed(DateTime(2001)),
     );
-    fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations);
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      ...kAttachExpectations,
+      ...preHotRestartCallbacks,
+    ]);
     setupMocks();
     flutterDevice.device = webServerDevice;
     webDevFS.report = UpdateFSReport(success: true);
@@ -864,8 +919,10 @@ void main() {
 
   testUsingContext('Fails on compilation errors in hot restart', () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
-    fakeVmServiceHost =
-        FakeVmServiceHost(requests: kAttachExpectations.toList());
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      ...kAttachExpectations,
+      ...preHotRestartCallbacks,
+    ]);
     setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter =
         Completer<DebugConnectionInfo>();
@@ -894,6 +951,7 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
+      ...preHotRestartCallbacks,
       const FakeVmServiceRequest(
         method: kHotRestartServiceName,
         jsonResponse: <String, Object>{
@@ -921,6 +979,7 @@ void main() {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
+      ...preHotRestartCallbacks,
       const FakeVmServiceRequest(
         method: kHotRestartServiceName,
         // Failed response,
