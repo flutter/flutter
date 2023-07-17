@@ -52,7 +52,7 @@ void main() {
   });
 
   group('adaptiveMagnifierControllerBuilder', () {
-    testWidgetsWithLeakTracking('should return a TextEditingMagnifier on Android',
+    testWidgets('should return a TextEditingMagnifier on Android',
         (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Placeholder(),
@@ -69,7 +69,7 @@ void main() {
       expect(builtWidget, isA<TextMagnifier>());
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgetsWithLeakTracking('should return a CupertinoMagnifier on iOS',
+    testWidgets('should return a CupertinoMagnifier on iOS',
         (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Placeholder(),
@@ -86,7 +86,7 @@ void main() {
       expect(builtWidget, isA<CupertinoTextMagnifier>());
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-    testWidgetsWithLeakTracking('should return null on all platforms not Android, iOS',
+    testWidgets('should return null on all platforms not Android, iOS',
         (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Placeholder(),
