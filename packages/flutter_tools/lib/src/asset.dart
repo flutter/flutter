@@ -26,11 +26,6 @@ const String defaultManifestPath = 'pubspec.yaml';
 
 const String kFontManifestJson = 'FontManifest.json';
 
-const String kAssetManifestJsonFilename = 'AssetManifest.json';
-const String kAssetManifestBinFilename = 'AssetManifest.bin';
-
-ByteData? generatedAssetManifest;
-
 // Should match '2x', '/1x', '1.5x', etc.
 final RegExp _assetVariantDirectoryRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 
@@ -170,6 +165,10 @@ class ManifestAssetBundle implements AssetBundle {
 
   DateTime? _lastBuildTimestamp;
 
+  // We assume the main asset is designed for a device pixel ratio of 1.0.
+  static const String _kAssetManifestJsonFilename = 'AssetManifest.json';
+  static const String _kAssetManifestBinFilename = 'AssetManifest.bin';
+
   static const String _kNoticeFile = 'NOTICES';
   // Comically, this can't be name with the more common .gz file extension
   // because when it's part of an AAR and brought into another APK via gradle,
@@ -234,13 +233,15 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     if (flutterManifest.isEmpty) {
-      entries[kAssetManifestJsonFilename] = DevFSStringContent('{}');
-      entryKinds[kAssetManifestJsonFilename] = AssetKind.regular;
+      entries[_kAssetManifestJsonFilename] = DevFSStringContent('{}');
+      entryKinds[_kAssetManifestJsonFilename] = AssetKind.regular;
+      entries[_kAssetManifestJsonFilename] = DevFSStringContent('{}');
+      entryKinds[_kAssetManifestJsonFilename] = AssetKind.regular;
       final ByteData emptyAssetManifest =
         const StandardMessageCodec().encodeMessage(<dynamic, dynamic>{})!;
-      entries[kAssetManifestBinFilename] =
+      entries[_kAssetManifestBinFilename] =
         DevFSByteContent(emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes));
-      entryKinds[kAssetManifestBinFilename] = AssetKind.regular;
+      entryKinds[_kAssetManifestBinFilename] = AssetKind.regular;
       return 0;
     }
 
@@ -461,8 +462,8 @@ class ManifestAssetBundle implements AssetBundle {
         _fileSystem.file('DOES_NOT_EXIST_RERUN_FOR_WILDCARD$suffix').absolute);
     }
 
-    _setIfChanged(kAssetManifestJsonFilename, assetManifestJson, AssetKind.regular);
-    _setIfChanged(kAssetManifestBinFilename, assetManifestBinary, AssetKind.regular);
+    _setIfChanged(_kAssetManifestJsonFilename, assetManifestJson, AssetKind.regular);
+    _setIfChanged(_kAssetManifestBinFilename, assetManifestBinary, AssetKind.regular);
     _setIfChanged(kFontManifestJson, fontManifest, AssetKind.regular);
     _setLicenseIfChanged(licenseResult.combinedLicenses, targetPlatform);
     return 0;
@@ -719,7 +720,6 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     final ByteData message = const StandardMessageCodec().encodeMessage(result)!;
-    generatedAssetManifest = message;
     return DevFSByteContent(message.buffer.asUint8List(0, message.lengthInBytes));
   }
 

@@ -2,20 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 
-import '_asset_manifest_contents_io.dart'
-  if (dart.library.js_util) '_asset_manifest_contents_web.dart';
 import 'asset_bundle.dart';
 import 'message_codecs.dart';
 
 // We use .bin as the extension since it is well-known to represent
-// data in some arbitrary binary format.
+// data in some arbitrary binary format. Using a well-known extension here
+// is important for web, because some web servers will not serve files with
+// unrecognized file extensions by default.
+// See https://github.com/flutter/flutter/issues/128456.
 const String _kAssetManifestFilename = 'AssetManifest.bin';
-
-Future<AssetManifest>? _precachedAssetManifest;
 
 /// Contains details about available assets and their variants.
 /// See [Resolution-aware image assets](https://docs.flutter.dev/ui/assets-and-images#resolution-aware)
@@ -24,26 +21,6 @@ abstract class AssetManifest {
   /// Loads asset manifest data from an [AssetBundle] object and creates an
   /// [AssetManifest] object from that data.
   static Future<AssetManifest> loadFromAssetBundle(AssetBundle bundle) {
-    if (kIsWeb) {
-      if (_precachedAssetManifest != null) {
-        return _precachedAssetManifest!;
-      }
-
-      if (assetManifestContents != null) {
-        final String uriEncodedAssetManifestContent = assetManifestContents!;
-        final ByteData assetManifestBytes = ByteData.view(
-          Uint8List.fromList(
-            base64.decode(uriEncodedAssetManifestContent)
-          )
-          .buffer
-        );
-
-        return _precachedAssetManifest = SynchronousFuture<AssetManifest>(
-          _AssetManifestBin.fromStandardMessageCodecMessage(assetManifestBytes),
-        );
-      }
-    }
-
     return bundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
   }
 
