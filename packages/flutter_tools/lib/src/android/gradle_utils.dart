@@ -57,23 +57,28 @@ const String maxKnownAgpVersion = '8.1';
 // Parentheticals are use to group which helps with version extraction.
 // "...build:gradle:(...)" where group(1) should be the version string.
 final RegExp _androidGradlePluginRegExp =
-    RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
+  RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
 // Expected content format (with lines above and below).
 // Version can have 2 or 3 numbers.
 // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
 // '^\s*' protects against commented out lines.
 final RegExp distributionUrlRegex =
-    RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiLine: true);
+  RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiLine: true);
 
 // Modified version of the gradle distribution url match designed to only match
 // gradle.org urls so that we can guarantee any modifications to the url
 // still points to a hosted zip.
 final RegExp gradleOrgVersionMatch =
-RegExp(
+  RegExp(
     r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(.*)\.zip',
     multiLine: true
-);
+  );
+
+// This matches uncommented minSdkVersion lines in the module-level build.gradle
+// file which have minSdkVersion 16,17, or 18 (the Jelly Bean api levels).
+final RegExp jellyBeanMinSdkVersionMatch =
+  RegExp(r'(?<=^\s*)minSdkVersion 1[678](?=\s*(?://|$))', multiLine: true);
 
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
 const String gradleVersionFlag = r'--version';

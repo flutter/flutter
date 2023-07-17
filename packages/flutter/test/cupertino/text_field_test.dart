@@ -21,6 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show OverflowWidgetTextEditingController;
+import '../widgets/live_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 
 // On web, the context menu (aka toolbar) is provided by the browser.
@@ -199,11 +200,55 @@ void main() {
   Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(kIsWeb ? 1 : 0, -2);
 
   setUp(() async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     EditableText.debugDeterministicCursor = false;
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
+
+
+  testWidgets(
+    'Live Text button shows and hides correctly when LiveTextStatus changes',
+    (WidgetTester tester) async {
+      final LiveTextInputTester liveTextInputTester = LiveTextInputTester();
+      addTearDown(liveTextInputTester.dispose);
+
+      final TextEditingController controller = TextEditingController(text: '');
+      const Key key = ValueKey<String>('TextField');
+      final FocusNode focusNode = FocusNode();
+      final Widget app = MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          body: Center(
+            child: CupertinoTextField(
+              key: key,
+              controller: controller,
+              focusNode: focusNode,
+            ),
+          ),
+        ),
+      );
+
+      liveTextInputTester.mockLiveTextInputEnabled = true;
+      await tester.pumpWidget(app);
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(
+        findLiveTextButton(),
+        kIsWeb ? findsNothing : findsOneWidget,
+      );
+
+      liveTextInputTester.mockLiveTextInputEnabled = false;
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(findLiveTextButton(), findsNothing);
+    },
+  );
 
   testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(

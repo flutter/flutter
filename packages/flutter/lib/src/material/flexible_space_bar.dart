@@ -451,4 +451,21 @@ class _RenderFlexibleSpaceHeaderOpacity extends RenderOpacity {
 
   @override
   bool get isRepaintBoundary => false;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null) {
+      return;
+    }
+    if (opacity == 0) {
+      layer = null;
+      return;
+    }
+    assert(needsCompositing);
+    layer = context.pushOpacity(offset, (opacity * 255).round(), super.paint, oldLayer: layer as OpacityLayer?);
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
+  }
 }

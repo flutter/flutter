@@ -600,11 +600,13 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// `setState` or `markNeedsLayout` during the callback (the layout for this
 /// frame has already happened).
 ///
-/// Custom painters normally size themselves to their child. If they do not have
-/// a child, they attempt to size themselves to the [size], which defaults to
-/// [Size.zero]. [size] must not be null.
+/// Custom painters normally size themselves to their [child]. If they do not
+/// have a child, they attempt to size themselves to the specified [size], which
+/// defaults to [Size.zero]. The parent [may enforce constraints on this
+/// size](https://docs.flutter.dev/ui/layout/constraints).
 ///
-/// [isComplex] and [willChange] are hints to the compositor's raster cache.
+/// The [isComplex] and [willChange] properties are hints to the compositor's
+/// raster cache.
 ///
 /// {@tool snippet}
 ///
@@ -3035,6 +3037,12 @@ class LimitedBox extends SingleChildRenderObjectWidget {
 
 /// A widget that imposes different constraints on its child than it gets
 /// from its parent, possibly allowing the child to overflow the parent.
+///
+/// {@tool dartpad}
+/// This example shows how an [OverflowBox] is used, and what its effect is.
+///
+/// ** See code in examples/api/lib/widgets/basic/overflowbox.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -5707,7 +5715,7 @@ class Flow extends MultiChildRenderObjectWidget {
 class RichText extends MultiChildRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
-  /// The [text], [textAlign], [softWrap], [overflow], and [textScaleFactor]
+  /// The [text], [textAlign], [softWrap], [overflow], and [textScaler]
   /// arguments must not be null.
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
@@ -5722,7 +5730,13 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
-    this.textScaleFactor = 1.0,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
+    double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
     this.maxLines,
     this.locale,
     this.strutStyle,
@@ -5732,7 +5746,17 @@ class RichText extends MultiChildRenderObjectWidget {
     this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
-       super(children: WidgetSpan.extractFromInlineSpan(text, textScaleFactor));
+       assert(textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling), 'Use textScaler instead.'),
+       textScaler = _effectiveTextScalerFrom(textScaler, textScaleFactor),
+       super(children: WidgetSpan.extractFromInlineSpan(text, _effectiveTextScalerFrom(textScaler, textScaleFactor)));
+
+  static TextScaler _effectiveTextScalerFrom(TextScaler textScaler, double textScaleFactor) {
+    return switch ((textScaler, textScaleFactor)) {
+      (final TextScaler scaler, 1.0) => scaler,
+      (TextScaler.noScaling, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
+      (final TextScaler scaler, _) => scaler,
+    };
+  }
 
   /// The text to display in this widget.
   final InlineSpan text;
@@ -5764,11 +5788,22 @@ class RichText extends MultiChildRenderObjectWidget {
   /// How visual overflow should be handled.
   final TextOverflow overflow;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [textScaler] instead.
+  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
-  final double textScaleFactor;
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
+  double get textScaleFactor => textScaler.textScaleFactor;
+
+  /// {@macro flutter.painting.textPainter.textScaler}
+  final TextScaler textScaler;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
@@ -5818,7 +5853,7 @@ class RichText extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
       overflow: overflow,
-      textScaleFactor: textScaleFactor,
+      textScaler: textScaler,
       maxLines: maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
@@ -5838,7 +5873,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
       ..overflow = overflow
-      ..textScaleFactor = textScaleFactor
+      ..textScaler = textScaler
       ..maxLines = maxLines
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
@@ -5855,7 +5890,7 @@ class RichText extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
-    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    properties.add(DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: TextScaler.noScaling));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(StringProperty('text', text.toPlainText()));

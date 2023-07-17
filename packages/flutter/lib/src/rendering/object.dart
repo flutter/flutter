@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show PictureRecorder;
-import 'dart:ui';
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -14,7 +13,6 @@ import 'package:flutter/semantics.dart';
 
 import 'debug.dart';
 import 'layer.dart';
-import 'proxy_box.dart';
 
 export 'package:flutter/foundation.dart' show
   DiagnosticPropertiesBuilder,
@@ -872,7 +870,7 @@ class _LocalSemanticsHandle implements SemanticsHandle {
 /// without tying it to a specific binding implementation. All [PipelineOwner]s
 /// in a given tree must be attached to the same [PipelineManifold]. This
 /// happens automatically during [adoptChild].
-class PipelineOwner {
+class PipelineOwner with DiagnosticableTreeMixin {
   /// Creates a pipeline owner.
   ///
   /// Typically created by the binding (e.g., [RendererBinding]), but can be
@@ -986,7 +984,7 @@ class PipelineOwner {
         return true;
       }());
       FlutterTimeline.startSync(
-        'LAYOUT',
+        'LAYOUT$_debugRootSuffixForTimelineEventNames',
         arguments: debugTimelineArguments,
       );
     }
@@ -1073,7 +1071,7 @@ class PipelineOwner {
   /// [flushPaint].
   void flushCompositingBits() {
     if (!kReleaseMode) {
-      FlutterTimeline.startSync('UPDATING COMPOSITING BITS');
+      FlutterTimeline.startSync('UPDATING COMPOSITING BITS$_debugRootSuffixForTimelineEventNames');
     }
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (final RenderObject node in _nodesNeedingCompositingBitsUpdate) {
@@ -1122,7 +1120,7 @@ class PipelineOwner {
         return true;
       }());
       FlutterTimeline.startSync(
-        'PAINT',
+        'PAINT$_debugRootSuffixForTimelineEventNames',
         arguments: debugTimelineArguments,
       );
     }
@@ -1249,7 +1247,7 @@ class PipelineOwner {
       return;
     }
     if (!kReleaseMode) {
-      FlutterTimeline.startSync('SEMANTICS');
+      FlutterTimeline.startSync('SEMANTICS$_debugRootSuffixForTimelineEventNames');
     }
     assert(_semanticsOwner != null);
     assert(() {
@@ -1281,6 +1279,20 @@ class PipelineOwner {
     }
   }
 
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    return <DiagnosticsNode>[
+      for (final PipelineOwner child in _children)
+        child.toDiagnosticsNode(),
+    ];
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<RenderObject>('rootNode', rootNode, defaultValue: null));
+  }
+
   // TREE MANAGEMENT
 
   final Set<PipelineOwner> _children = <PipelineOwner>{};
@@ -1291,6 +1303,8 @@ class PipelineOwner {
     child._debugParent = parent;
     return true;
   }
+
+  String get _debugRootSuffixForTimelineEventNames => _debugParent == null ? ' (root)' : '';
 
   /// Mark this [PipelineOwner] as attached to the given [PipelineManifold].
   ///
@@ -1317,7 +1331,9 @@ class PipelineOwner {
     assert(_manifold != null);
     _manifold!.removeListener(_updateSemanticsOwner);
     _manifold = null;
-    _updateSemanticsOwner();
+    // Not updating the semantics owner here to not disrupt any of its clients
+    // in case we get re-attached. If necessary, semantics owner will be updated
+    // in "attach", or disposed in "dispose", if not reattached.
 
     for (final PipelineOwner child in _children) {
       child.detach();
@@ -1353,7 +1369,9 @@ class PipelineOwner {
     assert(!_children.contains(child));
     assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.add(child);
-    assert(_debugSetParent(child, this));
+    if (!kReleaseMode) {
+      _debugSetParent(child, this);
+    }
     if (_manifold != null) {
       child.attach(_manifold!);
     }
@@ -1371,7 +1389,9 @@ class PipelineOwner {
     assert(_children.contains(child));
     assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.remove(child);
-    assert(_debugSetParent(child, null));
+    if (!kReleaseMode) {
+      _debugSetParent(child, null);
+    }
     if (_manifold != null) {
       child.detach();
     }
@@ -1385,6 +1405,26 @@ class PipelineOwner {
   ///  * [dropChild] to remove a child.
   void visitChildren(PipelineOwnerVisitor visitor) {
     _children.forEach(visitor);
+  }
+
+  /// Release any resources held by this pipeline owner.
+  ///
+  /// Prior to calling this method the pipeline owner must be removed from the
+  /// pipeline owner tree, i.e. it must have neither a parent nor any children
+  /// (see [dropChild]). It also must be [detach]ed from any [PipelineManifold].
+  ///
+  /// The object is no longer usable after calling dispose.
+  void dispose() {
+    assert(_children.isEmpty);
+    assert(rootNode == null);
+    assert(_manifold == null);
+    assert(_debugParent == null);
+    _semanticsOwner?.dispose();
+    _semanticsOwner = null;
+    _nodesNeedingLayout.clear();
+    _nodesNeedingCompositingBitsUpdate.clear();
+    _nodesNeedingPaint.clear();
+    _nodesNeedingSemantics.clear();
   }
 }
 
@@ -3921,7 +3961,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 /// This mixin is typically used to implement render objects created
 /// in a [SingleChildRenderObjectWidget].
 mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject {
-
   /// Checks whether the given render object has the correct [runtimeType] to be
   /// a child of this render object.
   ///
