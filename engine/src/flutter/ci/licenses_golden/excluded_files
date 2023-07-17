@@ -1480,6 +1480,7 @@
 ../../../third_party/colorama/src/requirements.txt
 ../../../third_party/colorama/src/screenshots
 ../../../third_party/colorama/src/setup.py
+../../../third_party/dart
 ../../../third_party/dart/.clang-format
 ../../../third_party/dart/.dart_tool
 ../../../third_party/dart/.git
