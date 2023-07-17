@@ -34,6 +34,31 @@ import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
 
+abstract class DotEnvRegex {
+  // Dot env multi-line block value regex
+  static final RegExp multiLineBlock = RegExp(r'^\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*=\s*"""\s*(.*)$');
+
+  // Dot env full line value regex (eg FOO=bar)
+  // Entire line will be matched including key and value
+  static final RegExp keyValue = RegExp(r'^\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*=\s*(.*)?$');
+
+  // Dot env value wrapped in double quotes regex (eg FOO="bar")
+  // Value between double quotes will be matched (eg only bar in "bar")
+  static final RegExp doubleQuotedValue = RegExp(r'^"(.*)"\s*(\#\s*.*)?$');
+
+  // Dot env value wrapped in single quotes regex (eg FOO='bar')
+  // Value between single quotes will be matched (eg only bar in 'bar')
+  static final RegExp singleQuotedValue = RegExp(r"^'(.*)'\s*(\#\s*.*)?$");
+
+  // Dot env value wrapped in back quotes regex (eg FOO=`bar`)
+  // Value between back quotes will be matched (eg only bar in `bar`)
+  static final RegExp backQuotedValue = RegExp(r'^`(.*)`\s*(\#\s*.*)?$');
+
+  // Dot env value without quotes regex (eg FOO=bar)
+  // Value without quotes will be matched (eg full value after the equals sign)
+  static final RegExp unquotedValue = RegExp(r'^([^#\n\s]*)\s*(?:\s*#\s*(.*))?$');
+}
+
 enum ExitStatus {
   success,
   warning,
@@ -1390,45 +1415,39 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Returns a record of key and value as strings.
   MapEntry<String, String> _parseProperty(String line) {
-    final RegExp blockRegExp = RegExp(r'^\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*=\s*"""\s*(.*)$');
-    if (blockRegExp.hasMatch(line)) {
+    if (DotEnvRegex.multiLineBlock.hasMatch(line)) {
       throwToolExit('Multi-line value is not supported: $line');
     }
 
-    final RegExp propertyRegExp = RegExp(r'^\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*=\s*(.*)?$');
-    final Match? match = propertyRegExp.firstMatch(line);
-    if (match == null) {
+    final Match? keyValueMatch = DotEnvRegex.keyValue.firstMatch(line);
+    if (keyValueMatch == null) {
       throwToolExit('Unable to parse file provided for '
         '--${FlutterOptions.kDartDefineFromFileOption}.\n'
         'Invalid property line: $line');
     }
 
-    final String key = match.group(1)!;
-    final String value = match.group(2) ?? '';
+    final String key = keyValueMatch.group(1)!;
+    final String value = keyValueMatch.group(2) ?? '';
 
     // Remove wrapping quotes and trailing line comment.
-    final RegExp doubleQuoteValueRegExp = RegExp(r'^"(.*)"\s*(\#\s*.*)?$');
-    final Match? doubleQuoteValue = doubleQuoteValueRegExp.firstMatch(value);
-    if (doubleQuoteValue != null) {
-      return MapEntry<String, String>(key, doubleQuoteValue.group(1)!);
+    final Match? doubleQuotedValueMatch = DotEnvRegex.doubleQuotedValue.firstMatch(value);
+    if (doubleQuotedValueMatch != null) {
+      return MapEntry<String, String>(key, doubleQuotedValueMatch.group(1)!);
     }
 
-    final RegExp quoteValueRegExp = RegExp(r"^'(.*)'\s*(\#\s*.*)?$");
-    final Match? quoteValue = quoteValueRegExp.firstMatch(value);
-    if (quoteValue != null) {
-      return MapEntry<String, String>(key, quoteValue.group(1)!);
+    final Match? singleQuotedValueMatch = DotEnvRegex.singleQuotedValue.firstMatch(value);
+    if (singleQuotedValueMatch != null) {
+      return MapEntry<String, String>(key, singleQuotedValueMatch.group(1)!);
     }
 
-    final RegExp backQuoteValueRegExp = RegExp(r'^`(.*)`\s*(\#\s*.*)?$');
-    final Match? backQuoteValue = backQuoteValueRegExp.firstMatch(value);
-    if (backQuoteValue != null) {
-      return MapEntry<String, String>(key, backQuoteValue.group(1)!);
+    final Match? backQuotedValueMatch = DotEnvRegex.backQuotedValue.firstMatch(value);
+    if (backQuotedValueMatch != null) {
+      return MapEntry<String, String>(key, backQuotedValueMatch.group(1)!);
     }
 
-    final RegExp noQuoteValueRegExp = RegExp(r'^([^#\n\s]*)\s*(?:\s*#\s*(.*))?$');
-    final Match? noQuoteValue = noQuoteValueRegExp.firstMatch(value);
-    if (noQuoteValue != null) {
-      return MapEntry<String, String>(key, noQuoteValue.group(1)!);
+    final Match? unquotedValueMatch = DotEnvRegex.unquotedValue.firstMatch(value);
+    if (unquotedValueMatch != null) {
+      return MapEntry<String, String>(key, unquotedValueMatch.group(1)!);
     }
 
     return MapEntry<String, String>(key, value);
