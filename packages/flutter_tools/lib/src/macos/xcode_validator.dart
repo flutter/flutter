@@ -71,7 +71,7 @@ class XcodeValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(_userMessages.xcodeMissingSimct));
       }
 
-      final ValidationMessage? missingSimulatorMessage = await _validateLatestSimulatorInstalled();
+      final ValidationMessage? missingSimulatorMessage = await _validateSimulatorRuntimeInstalled();
       if (missingSimulatorMessage != null) {
         xcodeStatus = ValidationType.partial;
         messages.add(missingSimulatorMessage);
@@ -88,12 +88,13 @@ class XcodeValidator extends DoctorValidator {
     return ValidationResult(xcodeStatus, messages, statusInfo: xcodeVersionInfo);
   }
 
-  /// Validate the latest major iOS simulator is installed.
+  /// Validate the Xcode-installed iOS simulator SDK has a corresponding iOS
+  /// simulator runtime installed.
   ///
-  /// Starting with Xcode 15, the latest iOS simulator is no longer downloaded
+  /// Starting with Xcode 15, the iOS simulator runtime is no longer downloaded
   /// with Xcode and must be downloaded and installed separately.
   /// iOS applications cannot be run without it.
-  Future<ValidationMessage?> _validateLatestSimulatorInstalled() async {
+  Future<ValidationMessage?> _validateSimulatorRuntimeInstalled() async {
     // Skip this validation if Xcode is not installed, Xcode is a version less
     // than 15, simctl is not installed, or if the EULA is not signed.
     if (!_xcode.isInstalled ||
@@ -104,30 +105,30 @@ class XcodeValidator extends DoctorValidator {
       return null;
     }
 
-    final Version? latestSDKVersion = await _xcode.sdkPlatformVersion(EnvironmentType.simulator);
-    if (latestSDKVersion == null) {
-      return const ValidationMessage.error('Unable to find latest iPhone Simulator SDK.');
+    final Version? platformSDKVersion = await _xcode.sdkPlatformVersion(EnvironmentType.simulator);
+    if (platformSDKVersion == null) {
+      return const ValidationMessage.error('Unable to find the iPhone Simulator SDK.');
     }
 
     final List<IOSSimulatorRuntime> runtimes = await _iosSimulatorUtils.getAvailableIOSRuntimes();
     if (runtimes.isEmpty) {
-      return const ValidationMessage.error('Unable to get list of installed simulator runtimes.');
+      return const ValidationMessage.error('Unable to get list of installed Simulator runtimes.');
     }
 
-    // Verify there is a simulator runtime installed matching the latest
+    // Verify there is a simulator runtime installed matching the
     // iphonesimulator SDK major version.
     IOSSimulatorRuntime? matchingRuntime;
     try {
       matchingRuntime = runtimes.firstWhere(
         (IOSSimulatorRuntime runtime) =>
-            runtime.version?.major == latestSDKVersion.major,
+            runtime.version?.major == platformSDKVersion.major,
       );
     } on StateError {
       matchingRuntime = null;
     }
 
     if (matchingRuntime == null) {
-      return ValidationMessage.hint( _iOSSimulatorMissing(latestSDKVersion.toString()));
+      return ValidationMessage.hint( _iOSSimulatorMissing(platformSDKVersion.toString()));
     }
 
     return null;

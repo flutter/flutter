@@ -219,7 +219,7 @@ void main() {
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.error);
-      expect(result.messages.last.message, contains('Unable to find latest iPhone Simulator SDK'));
+      expect(result.messages.last.message, contains('Unable to find the iPhone Simulator SDK'));
       expect(processManager, hasNoRemainingExpectations);
     });
 
@@ -265,7 +265,7 @@ void main() {
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.error);
-      expect(result.messages.last.message, contains('Unable to get list of installed simulator runtimes'));
+      expect(result.messages.last.message, contains('Unable to get list of installed Simulator runtimes'));
       expect(processManager, hasNoRemainingExpectations);
     });
 
