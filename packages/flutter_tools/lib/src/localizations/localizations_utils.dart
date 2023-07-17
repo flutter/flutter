@@ -354,6 +354,7 @@ class LocalizationOptions {
     bool? format,
     bool? useEscaping,
     bool? suppressWarnings,
+    bool? relaxSyntax,
   }) : templateArbFile = templateArbFile ?? 'app_en.arb',
        outputLocalizationFile = outputLocalizationFile ?? 'app_localizations.dart',
        outputClass = outputClass ?? 'AppLocalizations',
@@ -363,7 +364,8 @@ class LocalizationOptions {
        nullableGetter = nullableGetter ?? true,
        format = format ?? false,
        useEscaping = useEscaping ?? false,
-       suppressWarnings = suppressWarnings ?? false;
+       suppressWarnings = suppressWarnings ?? false,
+       relaxSyntax = relaxSyntax ?? false;
 
   /// The `--arb-dir` argument.
   ///
@@ -455,6 +457,11 @@ class LocalizationOptions {
   ///
   /// Whether or not to suppress warnings.
   final bool suppressWarnings;
+
+  /// The `relax-syntax` argument.
+  ///
+  /// Whether or not to relax the syntax.
+  final bool relaxSyntax;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -498,6 +505,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     format: _tryReadBool(yamlNode, 'format', logger),
     useEscaping: _tryReadBool(yamlNode, 'use-escaping', logger),
     suppressWarnings: _tryReadBool(yamlNode, 'suppress-warnings', logger),
+    relaxSyntax: _tryReadBool(yamlNode, 'relax-syntax', logger),
   );
 }
 

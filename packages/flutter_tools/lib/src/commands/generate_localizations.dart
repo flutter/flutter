@@ -200,6 +200,11 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       'suppress-warnings',
       help: 'When specified, all warnings will be suppressed.\n'
     );
+    argParser.addFlag(
+      'relax-syntax',
+      help: 'When specified, some instances of "{" and "}" will be treated as strings '
+            'instead of special characters.'
+    );
   }
 
   final FileSystem _fileSystem;
