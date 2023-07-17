@@ -110,7 +110,7 @@ void main() {
     await callback(range);
   }
 
-  testWidgetsWithLeakTracking('Default layout (calendar mode)', (WidgetTester tester) async {
+  testWidgets('Default layout (calendar mode)', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Finder helpText = find.text('Select range');
       final Finder firstDateHeaderText = find.text('Jan 15');
@@ -173,7 +173,7 @@ void main() {
     }, useMaterial3: true);
   });
 
-  testWidgetsWithLeakTracking('Default Dialog properties (calendar mode)', (WidgetTester tester) async {
+  testWidgets('Default Dialog properties (calendar mode)', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Material dialogMaterial = tester.widget<Material>(
@@ -193,7 +193,7 @@ void main() {
     }, useMaterial3: theme.useMaterial3);
   });
 
-  testWidgetsWithLeakTracking('Default Dialog properties (input mode)', (WidgetTester tester) async {
+  testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Material dialogMaterial = tester.widget<Material>(
@@ -213,7 +213,7 @@ void main() {
     }, useMaterial3: theme.useMaterial3);
   });
 
-  testWidgetsWithLeakTracking('Scaffold and AppBar defaults', (WidgetTester tester) async {
+  testWidgets('Scaffold and AppBar defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
@@ -244,7 +244,7 @@ void main() {
       await preparePicker(tester, (Future<DateTimeRange?> range) async { }, useMaterial3: true);
     }
 
-    testWidgetsWithLeakTracking('portrait', (WidgetTester tester) async {
+    testWidgets('portrait', (WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizePortrait);
       expect(tester.widget<Text>(find.text('Jan 15 – Jan 25, 2016')).style?.fontSize, 32);
       await tester.tap(find.text('Cancel'));
@@ -264,7 +264,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('Save and help text is used', (WidgetTester tester) async {
+  testWidgets('Save and help text is used', (WidgetTester tester) async {
     helpText = 'help';
     saveText = 'make it so';
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
@@ -273,14 +273,14 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Material3 has sentence case labels', (WidgetTester tester) async {
+  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       expect(find.text('Save'), findsOneWidget);
       expect(find.text('Select range'), findsOneWidget);
     }, useMaterial3: true);
   });
 
-  testWidgetsWithLeakTracking('Initial date is the default', (WidgetTester tester) async {
+  testWidgets('Initial date is the default', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       await tester.tap(find.text('SAVE'));
       expect(
@@ -293,7 +293,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Last month header should be visible if last date is selected', (WidgetTester tester) async {
+  testWidgets('Last month header should be visible if last date is selected', (WidgetTester tester) async {
     firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
     initialDateRange = DateTimeRange(
@@ -307,7 +307,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('First month header should be visible if first date is selected', (WidgetTester tester) async {
+  testWidgets('First month header should be visible if first date is selected', (WidgetTester tester) async {
     firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
     initialDateRange = DateTimeRange(
@@ -322,7 +322,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Current month header should be visible if no date is selected', (WidgetTester tester) async {
+  testWidgets('Current month header should be visible if no date is selected', (WidgetTester tester) async {
     firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
     currentDate = DateTime(2016, DateTime.september);
@@ -336,14 +336,14 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Can cancel', (WidgetTester tester) async {
+  testWidgets('Can cancel', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       await tester.tap(find.byIcon(Icons.close));
       expect(await range, isNull);
     });
   });
 
-  testWidgetsWithLeakTracking('Can select a range', (WidgetTester tester) async {
+  testWidgets('Can select a range', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('14').first);
@@ -355,7 +355,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Tapping earlier date resets selected range', (WidgetTester tester) async {
+  testWidgets('Tapping earlier date resets selected range', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('11').first);
@@ -368,7 +368,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Can select single day range', (WidgetTester tester) async {
+  testWidgets('Can select single day range', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('12').first);
@@ -380,7 +380,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Cannot select a day outside bounds', (WidgetTester tester) async {
+  testWidgets('Cannot select a day outside bounds', (WidgetTester tester) async {
     initialDateRange = DateTimeRange(
       start: DateTime(2017, DateTime.january, 13),
       end: DateTime(2017, DateTime.january, 15),
@@ -398,7 +398,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Can switch from calendar to input entry mode', (WidgetTester tester) async {
+  testWidgets('Can switch from calendar to input entry mode', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       expect(find.byType(TextField), findsNothing);
       await tester.tap(find.byIcon(Icons.edit));
@@ -407,7 +407,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Can switch from input to calendar entry mode', (WidgetTester tester) async {
+  testWidgets('Can switch from input to calendar entry mode', (WidgetTester tester) async {
     initialEntryMode = DatePickerEntryMode.input;
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       expect(find.byType(TextField), findsNWidgets(2));
@@ -417,7 +417,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Can not switch out of calendarOnly mode', (WidgetTester tester) async {
+  testWidgets('Can not switch out of calendarOnly mode', (WidgetTester tester) async {
     initialEntryMode = DatePickerEntryMode.calendarOnly;
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       expect(find.byType(TextField), findsNothing);
@@ -425,7 +425,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Can not switch out of inputOnly mode', (WidgetTester tester) async {
+  testWidgets('Can not switch out of inputOnly mode', (WidgetTester tester) async {
     initialEntryMode = DatePickerEntryMode.inputOnly;
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       expect(find.byType(TextField), findsNWidgets(2));
@@ -433,7 +433,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Input only mode should validate date', (WidgetTester tester) async {
+  testWidgets('Input only mode should validate date', (WidgetTester tester) async {
     initialEntryMode = DatePickerEntryMode.inputOnly;
     errorInvalidText = 'oops';
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
@@ -447,7 +447,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Switching to input mode keeps selected date', (WidgetTester tester) async {
+  testWidgets('Switching to input mode keeps selected date', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('14').first);
@@ -466,7 +466,7 @@ void main() {
       initialEntryMode = DatePickerEntryMode.input;
     });
 
-    testWidgetsWithLeakTracking('Invalid start date', (WidgetTester tester) async {
+    testWidgets('Invalid start date', (WidgetTester tester) async {
       // Invalid start date should have neither a start nor end date selected in
       // calendar mode
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
@@ -480,7 +480,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Invalid end date', (WidgetTester tester) async {
+    testWidgets('Invalid end date', (WidgetTester tester) async {
       // Invalid end date should only have a start date selected
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/24/2016');
@@ -493,7 +493,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Invalid range', (WidgetTester tester) async {
+    testWidgets('Invalid range', (WidgetTester tester) async {
       // Start date after end date should just use the start date
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/25/2016');
@@ -507,7 +507,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('OK Cancel button layout', (WidgetTester tester) async {
+  testWidgets('OK Cancel button layout', (WidgetTester tester) async {
      Widget buildFrame(TextDirection textDirection) {
        return MaterialApp(
          theme: ThemeData(useMaterial3: false),
@@ -582,7 +582,7 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgetsWithLeakTracking('Selecting dates vibrates', (WidgetTester tester) async {
+    testWidgets('Selecting dates vibrates', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         await tester.tap(find.text('10').first);
         await tester.pump(hapticFeedbackInterval);
@@ -596,7 +596,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Tapping unselectable date does not vibrate', (WidgetTester tester) async {
+    testWidgets('Tapping unselectable date does not vibrate', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         await tester.tap(find.text('8').first);
         await tester.pump(hapticFeedbackInterval);
@@ -606,7 +606,7 @@ void main() {
   });
 
   group('Keyboard navigation', () {
-    testWidgetsWithLeakTracking('Can toggle to calendar entry mode', (WidgetTester tester) async {
+    testWidgets('Can toggle to calendar entry mode', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         expect(find.byType(TextField), findsNothing);
         // Navigate to the entry toggle button and activate it
@@ -619,7 +619,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Can navigate date grid with arrow keys', (WidgetTester tester) async {
+    testWidgets('Can navigate date grid with arrow keys', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         // Navigate to the grid
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -671,7 +671,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Navigating with arrow keys scrolls as needed', (WidgetTester tester) async {
+    testWidgets('Navigating with arrow keys scrolls as needed', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         // Jan and Feb headers should be showing, but no March
         expect(find.text('January 2016'), findsOneWidget);
@@ -736,7 +736,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('RTL text direction reverses the horizontal arrow key navigation', (WidgetTester tester) async {
+    testWidgets('RTL text direction reverses the horizontal arrow key navigation', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         // Navigate to the grid
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -795,7 +795,7 @@ void main() {
       initialEntryMode = DatePickerEntryMode.input;
     });
 
-    testWidgetsWithLeakTracking('Default Dialog properties (input mode)', (WidgetTester tester) async {
+    testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: true);
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         final Material dialogMaterial = tester.widget<Material>(
@@ -818,7 +818,7 @@ void main() {
       }, useMaterial3: theme.useMaterial3);
     });
 
-    testWidgetsWithLeakTracking('Default InputDecoration', (WidgetTester tester) async {
+    testWidgets('Default InputDecoration', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         final InputDecoration startDateDecoration = tester.widget<TextField>(
           find.byType(TextField).first).decoration!;
@@ -838,13 +838,13 @@ void main() {
       }, useMaterial3: true);
     });
 
-    testWidgetsWithLeakTracking('Initial entry mode is used', (WidgetTester tester) async {
+    testWidgets('Initial entry mode is used', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         expect(find.byType(TextField), findsNWidgets(2));
       });
     });
 
-    testWidgetsWithLeakTracking('All custom strings are used', (WidgetTester tester) async {
+    testWidgets('All custom strings are used', (WidgetTester tester) async {
       initialDateRange = null;
       cancelText = 'nope';
       confirmText = 'yep';
@@ -864,7 +864,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Initial date is the default', (WidgetTester tester) async {
+    testWidgets('Initial date is the default', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         await tester.tap(find.text('OK'));
         expect(await range, DateTimeRange(
@@ -874,7 +874,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Can toggle to calendar entry mode', (WidgetTester tester) async {
+    testWidgets('Can toggle to calendar entry mode', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         expect(find.byType(TextField), findsNWidgets(2));
         await tester.tap(find.byIcon(Icons.calendar_today));
@@ -883,7 +883,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Toggle to calendar mode keeps selected date', (WidgetTester tester) async {
+    testWidgets('Toggle to calendar mode keeps selected date', (WidgetTester tester) async {
       initialDateRange = null;
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/25/2016');
@@ -899,7 +899,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Entered text returns range', (WidgetTester tester) async {
+    testWidgets('Entered text returns range', (WidgetTester tester) async {
       initialDateRange = null;
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/25/2016');
@@ -913,7 +913,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Too short entered text shows error', (WidgetTester tester) async {
+    testWidgets('Too short entered text shows error', (WidgetTester tester) async {
       initialDateRange = null;
       errorFormatText = 'oops';
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
@@ -927,7 +927,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Bad format entered text shows error', (WidgetTester tester) async {
+    testWidgets('Bad format entered text shows error', (WidgetTester tester) async {
       initialDateRange = null;
       errorFormatText = 'oops';
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
@@ -941,7 +941,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Invalid entered text shows error', (WidgetTester tester) async {
+    testWidgets('Invalid entered text shows error', (WidgetTester tester) async {
       initialDateRange = null;
       errorInvalidText = 'oops';
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
@@ -955,7 +955,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('End before start date shows error', (WidgetTester tester) async {
+    testWidgets('End before start date shows error', (WidgetTester tester) async {
       initialDateRange = null;
       errorInvalidRangeText = 'oops';
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
@@ -969,7 +969,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Error text only displayed for invalid date', (WidgetTester tester) async {
+    testWidgets('Error text only displayed for invalid date', (WidgetTester tester) async {
       initialDateRange = null;
       errorInvalidText = 'oops';
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
@@ -983,7 +983,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('End before start date does not get passed to calendar mode', (WidgetTester tester) async {
+    testWidgets('End before start date does not get passed to calendar mode', (WidgetTester tester) async {
       initialDateRange = null;
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/27/2016');
@@ -1001,7 +1001,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('InputDecorationTheme is honored', (WidgetTester tester) async {
+    testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
 
       // Given a custom paint for an input decoration, extract the border and
       // fill color and test them against the expected values.
@@ -1067,7 +1067,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('DatePickerDialog is state restorable', (WidgetTester tester) async {
+  testWidgets('DatePickerDialog is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -1123,7 +1123,7 @@ void main() {
     expect(find.text('12/1/2021 to 14/1/2021'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgetsWithLeakTracking('DateRangePickerDialog state restoration - DatePickerEntryMode', (WidgetTester tester) async {
+  testWidgets('DateRangePickerDialog state restoration - DatePickerEntryMode', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
@@ -1173,7 +1173,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
   group('showDateRangePicker avoids overlapping display features', () {
-    testWidgetsWithLeakTracking('positioning with anchorPoint', (WidgetTester tester) async {
+    testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
@@ -1210,7 +1210,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(800.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking('positioning with Directionality', (WidgetTester tester) async {
+    testWidgets('positioning with Directionality', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
@@ -1250,7 +1250,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(800.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking('positioning with defaults', (WidgetTester tester) async {
+    testWidgets('positioning with defaults', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
@@ -1288,7 +1288,7 @@ void main() {
   });
 
   group('Semantics', () {
-    testWidgetsWithLeakTracking('calendar mode', (WidgetTester tester) async {
+    testWidgets('calendar mode', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
       currentDate = DateTime(2016, DateTime.january, 30);
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
@@ -1306,7 +1306,7 @@ void main() {
   });
 
   for (final TextInputType? keyboardType in <TextInputType?>[null, TextInputType.emailAddress]) {
-    testWidgetsWithLeakTracking('DateRangePicker takes keyboardType $keyboardType', (WidgetTester  tester) async {
+    testWidgets('DateRangePicker takes keyboardType $keyboardType', (WidgetTester  tester) async {
       late BuildContext buttonContext;
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(MaterialApp(
@@ -1359,7 +1359,7 @@ void main() {
     });
   }
 
-  testWidgetsWithLeakTracking('honors switchToInputEntryModeIcon', (WidgetTester tester) async {
+  testWidgets('honors switchToInputEntryModeIcon', (WidgetTester tester) async {
     Widget buildApp({bool? useMaterial3, Icon? switchToInputEntryModeIcon}) {
       return MaterialApp(
         theme: ThemeData(
@@ -1414,7 +1414,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('honors switchToCalendarEntryModeIcon', (WidgetTester tester) async {
+  testWidgets('honors switchToCalendarEntryModeIcon', (WidgetTester tester) async {
     Widget buildApp({bool? useMaterial3, Icon? switchToCalendarEntryModeIcon}) {
       return MaterialApp(
         theme: ThemeData(
@@ -1477,7 +1477,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('Default layout (calendar mode)', (WidgetTester tester) async {
+    testWidgets('Default layout (calendar mode)', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         final Finder helpText = find.text('SELECT RANGE');
         final Finder firstDateHeaderText = find.text('Jan 15');
@@ -1533,7 +1533,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Default Dialog properties (calendar mode)', (WidgetTester tester) async {
+    testWidgets('Default Dialog properties (calendar mode)', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         final Material dialogMaterial = tester.widget<Material>(
@@ -1553,7 +1553,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('Scaffold and AppBar defaults', (WidgetTester tester) async {
+    testWidgets('Scaffold and AppBar defaults', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
@@ -1580,7 +1580,7 @@ void main() {
         initialEntryMode = DatePickerEntryMode.input;
       });
 
-      testWidgetsWithLeakTracking('Default Dialog properties (input mode)', (WidgetTester tester) async {
+      testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
         final ThemeData theme = ThemeData(useMaterial3: false);
         await preparePicker(tester, (Future<DateTimeRange?> range) async {
           final Material dialogMaterial = tester.widget<Material>(
@@ -1603,7 +1603,7 @@ void main() {
         });
       });
 
-      testWidgetsWithLeakTracking('Default InputDecoration', (WidgetTester tester) async {
+      testWidgets('Default InputDecoration', (WidgetTester tester) async {
         await preparePicker(tester, (Future<DateTimeRange?> range) async {
           final InputDecoration startDateDecoration = tester.widget<TextField>(
             find.byType(TextField).first).decoration!;
