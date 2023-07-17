@@ -172,6 +172,9 @@ abstract class Layer with DiagnosticableTreeMixin {
   }
 
   void _fireCompositionCallbacks({required bool includeChildren}) {
+    if (_callbacks.isEmpty) {
+      return;
+    }
     for (final VoidCallback callback in List<VoidCallback>.of(_callbacks.values)) {
       callback();
     }
