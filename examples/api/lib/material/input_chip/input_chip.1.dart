@@ -192,7 +192,6 @@ class MainScreenState extends State<MainScreen> {
   }
 
   void _onChanged(Set<Topping> data) {
-    print('_onChanged: $data');
     setState(() {
       _toppings = data;
     });
@@ -239,7 +238,7 @@ class ChipsInput<T> extends StatefulWidget {
 
 class ChipsInputState<T> extends State<ChipsInput<T>>
     implements TextInputClient {
-  static const int kObjectReplacementChar = 0xFFFD;
+  static const int kObjectReplacementChar = 0xFFFE;
 
   FocusNode? _lastChipFocusNode;
 
@@ -274,10 +273,8 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
 
   @override
   void updateEditingValue(TextEditingValue value) {
-    print("New: '${value.text}' Old: '${_value.text}'");
     final int oldCount = _countReplacements(_value);
     final int newCount = _countReplacements(value);
-    print('New count: $newCount Old count: $oldCount');
 
     setState(() {
       if (newCount < oldCount) {
