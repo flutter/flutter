@@ -345,7 +345,12 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   args.update_semantics_callback2 = [](const FlutterSemanticsUpdate2* update,
                                        void* user_data) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
-    auto accessibility_bridge = host->accessibility_bridge().lock();
+    auto view = host->view();
+    if (!view) {
+      return;
+    }
+
+    auto accessibility_bridge = view->accessibility_bridge().lock();
     if (!accessibility_bridge) {
       return;
     }
@@ -704,15 +709,6 @@ void FlutterWindowsEngine::OnPreEngineRestart() {
   }
 }
 
-gfx::NativeViewAccessible FlutterWindowsEngine::GetNativeViewAccessible() {
-  auto bridge = accessibility_bridge().lock();
-  if (!bridge) {
-    return nullptr;
-  }
-
-  return bridge->GetChildOfAXFragmentRoot();
-}
-
 std::string FlutterWindowsEngine::GetExecutableName() const {
   std::pair<bool, std::string> result = fml::paths::GetExecutablePath();
   if (result.first) {
@@ -790,11 +786,6 @@ void FlutterWindowsEngine::OnQuit(std::optional<HWND> hwnd,
                                   std::optional<LPARAM> lparam,
                                   UINT exit_code) {
   lifecycle_manager_->Quit(hwnd, wparam, lparam, exit_code);
-}
-
-std::weak_ptr<AccessibilityBridgeWindows>
-FlutterWindowsEngine::accessibility_bridge() {
-  return view_->accessibility_bridge();
 }
 
 void FlutterWindowsEngine::OnDwmCompositionChanged() {
