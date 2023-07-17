@@ -6551,7 +6551,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     expect(decoratorRight, lessThanOrEqualTo(prefixRight));
   });
 
-  testWidgets('InputDecotator with counter does not crash when given a 0 size', (WidgetTester tester) async {
+  testWidgets('InputDecorator with counter does not crash when given a 0 size', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/129611
     const InputDecoration decoration = InputDecoration(
       contentPadding: EdgeInsetsDirectional.all(99),
