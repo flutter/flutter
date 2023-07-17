@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -27,7 +26,7 @@ void main() {
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
-  testWidgetsWithLeakTracking('Throw if enable drag without an animation controller', (WidgetTester tester) async {
+  testWidgets('Throw if enable drag without an animation controller', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/89168
     await tester.pumpWidget(
       MaterialApp(
@@ -54,7 +53,7 @@ void main() {
     FlutterError.onError = handler;
   });
 
-  testWidgetsWithLeakTracking('Disposing app while bottom sheet is disappearing does not crash', (WidgetTester tester) async {
+  testWidgets('Disposing app while bottom sheet is disappearing does not crash', (WidgetTester tester) async {
     late BuildContext savedContext;
 
     await tester.pumpWidget(
@@ -91,7 +90,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgetsWithLeakTracking('Swiping down a BottomSheet should dismiss it by default', (WidgetTester tester) async {
+  testWidgets('Swiping down a BottomSheet should dismiss it by default', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
 
@@ -126,7 +125,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Swiping down a BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
+  testWidgets('Swiping down a BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
 
@@ -163,7 +162,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Swiping down a BottomSheet should dismiss it when enableDrag is true', (WidgetTester tester) async {
+  testWidgets('Swiping down a BottomSheet should dismiss it when enableDrag is true', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
 
@@ -200,7 +199,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Tapping on a BottomSheet should not trigger a rebuild when enableDrag is true', (WidgetTester tester) async {
+  testWidgets('Tapping on a BottomSheet should not trigger a rebuild when enableDrag is true', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/126833.
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     int buildCount = 0;
@@ -237,7 +236,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Modal BottomSheet builder should only be called once', (WidgetTester tester) async {
+  testWidgets('Modal BottomSheet builder should only be called once', (WidgetTester tester) async {
     late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
@@ -268,7 +267,7 @@ void main() {
     expect(numBuilderCalls, 1);
   });
 
-  testWidgetsWithLeakTracking('Tapping on a modal BottomSheet should not dismiss it', (WidgetTester tester) async {
+  testWidgets('Tapping on a modal BottomSheet should not dismiss it', (WidgetTester tester) async {
     late BuildContext savedContext;
 
     await tester.pumpWidget(
@@ -304,7 +303,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Tapping outside a modal BottomSheet should dismiss it by default', (WidgetTester tester) async {
+  testWidgets('Tapping outside a modal BottomSheet should dismiss it by default', (WidgetTester tester) async {
     late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
@@ -338,7 +337,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Tapping outside a modal BottomSheet should dismiss it when isDismissible=true', (WidgetTester tester) async {
+  testWidgets('Tapping outside a modal BottomSheet should dismiss it when isDismissible=true', (WidgetTester tester) async {
     late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
@@ -372,7 +371,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Verify that the BottomSheet animates non-linearly', (WidgetTester tester) async {
+  testWidgets('Verify that the BottomSheet animates non-linearly', (WidgetTester tester) async {
     late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
@@ -405,7 +404,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/121098
-  testWidgetsWithLeakTracking('Verify that accessibleNavigation has no impact on the BottomSheet animation', (WidgetTester tester) async {
+  testWidgets('Verify that accessibleNavigation has no impact on the BottomSheet animation', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       builder: (BuildContext context, Widget? child) {
         return MediaQuery(
@@ -430,7 +429,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Tapping outside a modal BottomSheet should not dismiss it when isDismissible=false', (WidgetTester tester) async {
+  testWidgets('Tapping outside a modal BottomSheet should not dismiss it when isDismissible=false', (WidgetTester tester) async {
     late BuildContext savedContext;
 
     await tester.pumpWidget(
@@ -467,7 +466,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Swiping down a modal BottomSheet should dismiss it by default', (WidgetTester tester) async {
+  testWidgets('Swiping down a modal BottomSheet should dismiss it by default', (WidgetTester tester) async {
     late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
@@ -502,7 +501,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Swiping down a modal BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
+  testWidgets('Swiping down a modal BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
     late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
@@ -538,7 +537,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Swiping down a modal BottomSheet should dismiss it when enableDrag is true', (WidgetTester tester) async {
+  testWidgets('Swiping down a modal BottomSheet should dismiss it when enableDrag is true', (WidgetTester tester) async {
     late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
@@ -573,7 +572,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Modal BottomSheet builder should only be called once', (WidgetTester tester) async {
+  testWidgets('Modal BottomSheet builder should only be called once', (WidgetTester tester) async {
     late BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
@@ -604,7 +603,7 @@ void main() {
     expect(numBuilderCalls, 1);
   });
 
-  testWidgetsWithLeakTracking('Verify that a downwards fling dismisses a persistent BottomSheet', (WidgetTester tester) async {
+  testWidgets('Verify that a downwards fling dismisses a persistent BottomSheet', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
 
@@ -661,7 +660,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Verify that dragging past the bottom dismisses a persistent BottomSheet', (WidgetTester tester) async {
+  testWidgets('Verify that dragging past the bottom dismisses a persistent BottomSheet', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/5528
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -691,7 +690,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('modal BottomSheet has no top MediaQuery', (WidgetTester tester) async {
+  testWidgets('modal BottomSheet has no top MediaQuery', (WidgetTester tester) async {
     late BuildContext outerContext;
     late BuildContext innerContext;
 
@@ -742,7 +741,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('modal BottomSheet can insert a SafeArea', (WidgetTester tester) async {
+  testWidgets('modal BottomSheet can insert a SafeArea', (WidgetTester tester) async {
     late BuildContext outerContext;
     late BuildContext innerContext;
 
@@ -814,7 +813,7 @@ void main() {
     expect(MediaQuery.of(innerContext).padding, const EdgeInsets.fromLTRB(0, 0, 0, 50.0));
   });
 
-  testWidgetsWithLeakTracking('modal BottomSheet has semantics', (WidgetTester tester) async {
+  testWidgets('modal BottomSheet has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -871,7 +870,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Verify that visual properties are passed through', (WidgetTester tester) async {
+  testWidgets('Verify that visual properties are passed through', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color color = Colors.pink;
     const double elevation = 9.0;
@@ -911,7 +910,7 @@ void main() {
     expect(modalBarrier.color, barrierColor);
   });
 
-  testWidgetsWithLeakTracking('BottomSheet uses fallback values in material3',
+  testWidgets('BottomSheet uses fallback values in material3',
       (WidgetTester tester) async {
     const Color surfaceColor = Colors.pink;
     const Color surfaceTintColor = Colors.blue;
@@ -951,7 +950,7 @@ void main() {
     expect(tester.getSize(finder).width, 640);
   });
 
-  testWidgetsWithLeakTracking('BottomSheet has transparent shadow in material3', (WidgetTester tester) async {
+  testWidgets('BottomSheet has transparent shadow in material3', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
@@ -975,7 +974,7 @@ void main() {
     expect(material.shadowColor, Colors.transparent);
   });
 
-  testWidgetsWithLeakTracking('modal BottomSheet with scrollController has semantics', (WidgetTester tester) async {
+  testWidgets('modal BottomSheet with scrollController has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -1048,7 +1047,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('modal BottomSheet with drag handle has semantics', (WidgetTester tester) async {
+  testWidgets('modal BottomSheet with drag handle has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -1117,7 +1116,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Drag handle color can take MaterialStateProperty', (WidgetTester tester) async {
+  testWidgets('Drag handle color can take MaterialStateProperty', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color defaultColor=Colors.blue;
     const Color hoveringColor=Colors.green;
@@ -1180,7 +1179,7 @@ void main() {
     expect(boxDecoration.color, hoveringColor);
   });
 
-  testWidgetsWithLeakTracking('showModalBottomSheet does not use root Navigator by default', (WidgetTester tester) async {
+  testWidgets('showModalBottomSheet does not use root Navigator by default', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
       home: Scaffold(
@@ -1210,7 +1209,7 @@ void main() {
     expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 544.0);
   });
 
-  testWidgetsWithLeakTracking('showModalBottomSheet uses root Navigator when specified', (WidgetTester tester) async {
+  testWidgets('showModalBottomSheet uses root Navigator when specified', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Navigator(onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(builder: (_) {
@@ -1239,7 +1238,7 @@ void main() {
     expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 600.0);
   });
 
-  testWidgetsWithLeakTracking('Verify that route settings can be set in the showModalBottomSheet', (WidgetTester tester) async {
+  testWidgets('Verify that route settings can be set in the showModalBottomSheet', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const RouteSettings routeSettings = RouteSettings(name: 'route_name', arguments: 'route_argument');
 
@@ -1267,7 +1266,7 @@ void main() {
     expect(retrievedRouteSettings, routeSettings);
   });
 
-  testWidgetsWithLeakTracking('Verify showModalBottomSheet use AnimationController if provided.', (WidgetTester tester) async {
+  testWidgets('Verify showModalBottomSheet use AnimationController if provided.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -1324,7 +1323,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/87592
-  testWidgetsWithLeakTracking('the framework do not dispose the transitionAnimationController provided by user.', (WidgetTester tester) async {
+  testWidgets('the framework do not dispose the transitionAnimationController provided by user.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
@@ -1386,7 +1385,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('Verify persistence BottomSheet use AnimationController if provided.', (WidgetTester tester) async {
+  testWidgets('Verify persistence BottomSheet use AnimationController if provided.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     const Key tapTargetToClose = Key('tap-target-to-close');
     await tester.pumpWidget(MaterialApp(
@@ -1448,7 +1447,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/87708
-  testWidgetsWithLeakTracking('Each of the internal animation controllers should be disposed by the framework.', (WidgetTester tester) async {
+  testWidgets('Each of the internal animation controllers should be disposed by the framework.', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -1491,7 +1490,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/99627
-  testWidgetsWithLeakTracking('The old route entry should be removed when a new sheet popup', (WidgetTester tester) async {
+  testWidgets('The old route entry should be removed when a new sheet popup', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
     PersistentBottomSheetController<void>? sheetController;
 
@@ -1535,7 +1534,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/87708
-  testWidgetsWithLeakTracking('The framework does not dispose of the transitionAnimationController provided by user.', (WidgetTester tester) async {
+  testWidgets('The framework does not dispose of the transitionAnimationController provided by user.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     const Key tapTargetToClose = Key('tap-target-to-close');
     final AnimationController controller = AnimationController(
@@ -1591,7 +1590,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('Calling PersistentBottomSheetController.close does not crash when it is not the current bottom sheet', (WidgetTester tester) async {
+  testWidgets('Calling PersistentBottomSheetController.close does not crash when it is not the current bottom sheet', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/93717
     PersistentBottomSheetController<void>? sheetController1;
     await tester.pumpWidget(MaterialApp(
@@ -1643,7 +1642,7 @@ void main() {
     expect(find.text('BottomSheet 2'), findsOneWidget);
     });
 
-  testWidgetsWithLeakTracking('ModalBottomSheetRoute shows BottomSheet correctly', (WidgetTester tester) async {
+  testWidgets('ModalBottomSheetRoute shows BottomSheet correctly', (WidgetTester tester) async {
     late BuildContext savedContext;
 
     await tester.pumpWidget(
@@ -1673,7 +1672,7 @@ void main() {
   });
 
   group('Modal BottomSheet avoids overlapping display features', () {
-    testWidgetsWithLeakTracking('positioning using anchorPoint', (WidgetTester tester) async {
+    testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
@@ -1711,7 +1710,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
     });
 
-    testWidgetsWithLeakTracking('positioning using Directionality', (WidgetTester tester) async {
+    testWidgets('positioning using Directionality', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
@@ -1751,7 +1750,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
     });
 
-    testWidgetsWithLeakTracking('default positioning', (WidgetTester tester) async {
+    testWidgets('default positioning', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
@@ -1790,7 +1789,7 @@ void main() {
   });
 
   group('constraints', () {
-      testWidgetsWithLeakTracking('default constraints are max width 640 in material 3', (WidgetTester tester) async {
+      testWidgets('default constraints are max width 640 in material 3', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light(useMaterial3: true),
@@ -1806,7 +1805,7 @@ void main() {
       expect(tester.getSize(find.byType(Placeholder)).width, 640);
     });
 
-    testWidgetsWithLeakTracking('No constraints by default for bottomSheet property', (WidgetTester tester) async {
+    testWidgets('No constraints by default for bottomSheet property', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: const Scaffold(
@@ -1821,7 +1820,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('No constraints by default for showBottomSheet', (WidgetTester tester) async {
+    testWidgets('No constraints by default for showBottomSheet', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
@@ -1849,7 +1848,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('No constraints by default for showModalBottomSheet', (WidgetTester tester) async {
+    testWidgets('No constraints by default for showModalBottomSheet', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
@@ -1878,7 +1877,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Theme constraints used for bottomSheet property', (WidgetTester tester) async {
+    testWidgets('Theme constraints used for bottomSheet property', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
@@ -1906,7 +1905,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Theme constraints used for showBottomSheet', (WidgetTester tester) async {
+    testWidgets('Theme constraints used for showBottomSheet', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
@@ -1940,7 +1939,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Theme constraints used for showModalBottomSheet', (WidgetTester tester) async {
+    testWidgets('Theme constraints used for showModalBottomSheet', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
@@ -1975,7 +1974,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('constraints param overrides theme for showBottomSheet', (WidgetTester tester) async {
+    testWidgets('constraints param overrides theme for showBottomSheet', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
@@ -2010,7 +2009,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('constraints param overrides theme for showModalBottomSheet', (WidgetTester tester) async {
+    testWidgets('constraints param overrides theme for showModalBottomSheet', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
@@ -2049,7 +2048,7 @@ void main() {
   });
 
   group('showModalBottomSheet modalBarrierDismissLabel', () {
-    testWidgetsWithLeakTracking('Verify that modalBarrierDismissLabel is used if provided',
+    testWidgets('Verify that modalBarrierDismissLabel is used if provided',
         (WidgetTester tester) async {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
       const String customLabel = 'custom label';
@@ -2075,7 +2074,7 @@ void main() {
       expect(modalBarrier.semanticsLabel, customLabel);
     });
 
-    testWidgetsWithLeakTracking('Verify that modalBarrierDismissLabel from context is used if barrierLabel is not provided',
+    testWidgets('Verify that modalBarrierDismissLabel from context is used if barrierLabel is not provided',
         (WidgetTester tester) async {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
       await tester.pumpWidget(MaterialApp(
