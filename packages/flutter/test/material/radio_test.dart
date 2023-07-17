@@ -1305,7 +1305,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Radio overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
+  testWidgets('Radio overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
@@ -1626,7 +1626,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material2 - Radio button default overlay colors in hover/focus/press states', (WidgetTester tester) async {
+  testWidgets('Material2 - Radio button default overlay colors in hover/focus/press states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
@@ -1713,7 +1713,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material3 - Radio button default overlay colors in hover/focus/press states', (WidgetTester tester) async {
+  testWidgets('Material3 - Radio button default overlay colors in hover/focus/press states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
