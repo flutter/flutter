@@ -936,14 +936,6 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
   @override
   void redepthChildren() => visitChildren(redepthChild);
 
-  void _adoptDeferredLayoutBoxChild(_RenderDeferredLayoutBox child) {
-    adoptChild(child);
-  }
-
-  void _dropDeferredLayoutBoxChild(_RenderDeferredLayoutBox child) {
-    dropChild(child);
-  }
-
   Alignment? _alignmentCache;
   Alignment get _resolvedAlignment => _alignmentCache ??= AlignmentDirectional.topStart.resolve(textDirection);
 
@@ -1704,13 +1696,13 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
     // This call is allowed even when this location is invalidated.
     // See _OverlayPortalElement.activate.
     assert(_overlayChildRenderBox == null, '$_overlayChildRenderBox');
-    _theater._adoptDeferredLayoutBoxChild(child);
+    _theater._addDeferredChild(child);
     _overlayChildRenderBox = child;
   }
 
   void _deactivate(_RenderDeferredLayoutBox child) {
     // This call is allowed even when this location is invalidated.
-    _theater._dropDeferredLayoutBoxChild(child);
+    _theater._removeDeferredChild(child);
     _overlayChildRenderBox = null;
   }
 
