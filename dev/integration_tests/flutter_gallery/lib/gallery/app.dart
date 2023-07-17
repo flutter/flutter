@@ -104,10 +104,10 @@ class _GalleryAppState extends State<GalleryApp> {
   Widget _applyTextScaleFactor(Widget child) {
     return Builder(
       builder: (BuildContext context) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaleFactor: _options!.textScaleFactor!.scale,
-          ),
+        final double? textScaleFactor = _options!.textScaleFactor!.scale;
+        return MediaQuery.withClampedTextScaling(
+          minScaleFactor: textScaleFactor ?? 0.0,
+          maxScaleFactor: textScaleFactor ?? double.infinity,
           child: child,
         );
       },

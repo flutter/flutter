@@ -15,19 +15,19 @@
 # For documentation about this file format, see
 # https://dart.dev/go/data-driven-fixes.
 
-# * Fixes in this file are from the Painting library. *
+# * Fixes in this file are for MediaQuery and MediaQueryData from the widgets library. *
 version: 1
 transforms:
   # Change made in https://github.com/flutter/flutter/pull/128522
   - title: "Migrate to 'textScaler'"
     date: 2023-06-09
     element:
-      uris: [ 'painting.dart' ]
-      method: 'computeMaxIntrinsicWidth'
-      inClass: 'TextPainter'
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'copyWith'
+      inClass: 'MediaQueryData'
     changes:
       - kind: 'addParameter'
-        index: 4
+        index: 3
         name: 'textScaler'
         style: optional_named
         argumentValue:
@@ -44,34 +44,12 @@ transforms:
   - title: "Migrate to 'textScaler'"
     date: 2023-06-09
     element:
-      uris: [ 'painting.dart' ]
-      method: 'computeWidth'
-      inClass: 'TextPainter'
-    changes:
-      - kind: 'addParameter'
-        index: 4
-        name: 'textScaler'
-        style: optional_named
-        argumentValue:
-          expression: 'TextScaler.linear({% textScaleFactor %})'
-          requiredIf: "textScaleFactor != ''"
-      - kind: 'removeParameter'
-        name: 'textScaleFactor'
-    variables:
-      textScaleFactor:
-        kind: 'fragment'
-        value: 'arguments[textScaleFactor]'
-
-  # Change made in https://github.com/flutter/flutter/pull/128522
-  - title: "Migrate to 'textScaler'"
-    date: 2023-06-09
-    element:
-      uris: [ 'painting.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       constructor: ''
-      inClass: 'TextPainter'
+      inClass: 'MediaQueryData'
     changes:
       - kind: 'addParameter'
-        index: 0
+        index: 3
         name: 'textScaler'
         style: optional_named
         argumentValue:
@@ -83,38 +61,5 @@ transforms:
       textScaleFactor:
         kind: 'fragment'
         value: 'arguments[textScaleFactor]'
-
-  # Change made in https://github.com/flutter/flutter/pull/128522
-  - title: "Migrate to 'textScaler'"
-    date: 2023-06-09
-    element:
-      uris: [ 'painting.dart' ]
-      method: 'getTextStyle'
-      inClass: 'TextStyle'
-    changes:
-      - kind: 'addParameter'
-        index: 0
-        name: 'textScaler'
-        style: optional_named
-        argumentValue:
-          expression: 'TextScaler.linear({% textScaleFactor %})'
-          requiredIf: "textScaleFactor != ''"
-      - kind: 'removeParameter'
-        name: 'textScaleFactor'
-    variables:
-      textScaleFactor:
-        kind: 'fragment'
-        value: 'arguments[textScaleFactor]'
-
-  # Changes made in https://github.com/flutter/flutter/pull/121152
-  - title: "Rename to 'fromViewPadding'"
-    date: 2022-02-21
-    element:
-      uris: [ 'painting.dart' ]
-      constructor: 'fromWindowPadding'
-      inClass: 'EdgeInsets'
-    changes:
-      - kind: 'rename'
-        newName: 'fromViewPadding'
 
 # Before adding a new fix: read instructions at the top of this file.
