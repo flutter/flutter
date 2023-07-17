@@ -178,9 +178,9 @@ ui::AXNode* AXNodeFromID(std::shared_ptr<AccessibilityBridge> bridge,
 }
 
 std::shared_ptr<AccessibilityBridgeWindowsSpy> GetAccessibilityBridgeSpy(
-    FlutterWindowsEngine* engine) {
+    FlutterWindowsView& view) {
   return std::static_pointer_cast<AccessibilityBridgeWindowsSpy>(
-      engine->accessibility_bridge().lock());
+      view.accessibility_bridge().lock());
 }
 
 void ExpectWinEventFromAXEvent(int32_t node_id,
@@ -192,7 +192,7 @@ void ExpectWinEventFromAXEvent(int32_t node_id,
   view.SetEngine(GetTestEngine());
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = GetAccessibilityBridgeSpy(view.GetEngine());
+  auto bridge = GetAccessibilityBridgeSpy(view);
   PopulateAXTree(bridge);
 
   bridge->ResetRecords();
@@ -212,7 +212,7 @@ void ExpectWinEventFromAXEventOnFocusNode(int32_t node_id,
   view.SetEngine(GetTestEngine());
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = GetAccessibilityBridgeSpy(view.GetEngine());
+  auto bridge = GetAccessibilityBridgeSpy(view);
   PopulateAXTree(bridge);
 
   bridge->ResetRecords();
@@ -237,7 +237,7 @@ TEST(AccessibilityBridgeWindows, GetParent) {
   view.SetEngine(GetTestEngine());
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  auto bridge = view.accessibility_bridge().lock();
   PopulateAXTree(bridge);
 
   auto node0_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
@@ -253,7 +253,7 @@ TEST(AccessibilityBridgeWindows, GetParentOnRootRetunsNullptr) {
   view.SetEngine(GetTestEngine());
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  auto bridge = view.accessibility_bridge().lock();
   PopulateAXTree(bridge);
 
   auto node0_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
@@ -267,7 +267,7 @@ TEST(AccessibilityBridgeWindows, DispatchAccessibilityAction) {
   view.SetEngine(GetTestEngine());
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = view.GetEngine()->accessibility_bridge().lock();
+  auto bridge = view.accessibility_bridge().lock();
   PopulateAXTree(bridge);
 
   FlutterSemanticsAction actual_action = kFlutterSemanticsActionTap;
@@ -303,7 +303,7 @@ TEST(AccessibilityBridgeWindows, OnAccessibilityEventFocusChanged) {
   view.SetEngine(GetTestEngine());
   view.OnUpdateSemanticsEnabled(true);
 
-  auto bridge = GetAccessibilityBridgeSpy(view.GetEngine());
+  auto bridge = GetAccessibilityBridgeSpy(view);
   PopulateAXTree(bridge);
 
   bridge->ResetRecords();
