@@ -165,7 +165,7 @@ void main() {
     expect(content!.plainText, 'How');
   });
 
-  testWidgetsWithLeakTracking('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
+  testWidgets('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/119314
     await tester.pumpWidget(
       MaterialApp(
