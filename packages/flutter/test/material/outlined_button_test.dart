@@ -320,7 +320,7 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor));
   });
 
-  testWidgetsWithLeakTracking('Default OutlinedButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgets('Default OutlinedButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -367,7 +367,7 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgetsWithLeakTracking('OutlinedButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgets('OutlinedButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     Color getTextColor(Set<MaterialState> states) {
