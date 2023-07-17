@@ -3454,8 +3454,11 @@ void main() {
     });
 
     // This is a regression test for https://github.com/flutter/flutter/issues/130485.
-    testWidgets('Material3 - AppBar.iconTheme correctly applies custom white color in dark mode', (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData(useMaterial3: true, brightness: Brightness.dark);
+    testWidgets('Material3 - AppBar.iconTheme is correctly applied in dark mode', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        colorScheme: const ColorScheme.dark().copyWith(onSurfaceVariant: Colors.red),
+        useMaterial3: true,
+      );
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -3476,6 +3479,90 @@ void main() {
 
       expect(leadingIconButtonColor(), Colors.white);
       expect(actionIconButtonColor(), Colors.white);
+    });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/130485.
+    testWidgets('Material3 - AppBar.foregroundColor is correctly applied in dark mode', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        colorScheme: const ColorScheme.dark().copyWith(onSurfaceVariant: Colors.red),
+        useMaterial3: true,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              foregroundColor: Colors.white,
+              leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+              actions: <Widget>[
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconButtonColor() => _iconStyle(tester, Icons.menu)?.color;
+      Color? actionIconButtonColor() => _iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconButtonColor(), Colors.white);
+      expect(actionIconButtonColor(), Colors.white);
+    });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/130485.
+    testWidgets('Material3 - AppBar.iconTheme is correctly applied in dark mode', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        colorScheme: const ColorScheme.light().copyWith(onSurfaceVariant: Colors.red),
+        useMaterial3: true,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              iconTheme: const IconThemeData(color: Colors.black87),
+              leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+              actions: <Widget>[
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconButtonColor() => _iconStyle(tester, Icons.menu)?.color;
+      Color? actionIconButtonColor() => _iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconButtonColor(), Colors.black87);
+      expect(actionIconButtonColor(), Colors.black87);
+    });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/130485.
+    testWidgets('Material3 - AppBar.foregroundColor is correctly applied in light mode', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        colorScheme: const ColorScheme.light().copyWith(onSurfaceVariant: Colors.red),
+        useMaterial3: true,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              foregroundColor: Colors.black87,
+              leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+              actions: <Widget>[
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconButtonColor() => _iconStyle(tester, Icons.menu)?.color;
+      Color? actionIconButtonColor() => _iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconButtonColor(), Colors.black87);
+      expect(actionIconButtonColor(), Colors.black87);
     });
   });
 
