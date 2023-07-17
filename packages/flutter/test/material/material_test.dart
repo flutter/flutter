@@ -1001,7 +1001,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('InkFeature skips painting if intermediate node skips', (WidgetTester tester) async {
+  testWidgets('InkFeature skips painting if intermediate node skips', (WidgetTester tester) async {
     final GlobalKey sizedBoxKey = GlobalKey();
     final GlobalKey materialKey = GlobalKey();
     await tester.pumpWidget(Material(
