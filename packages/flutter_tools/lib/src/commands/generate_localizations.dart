@@ -205,7 +205,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       help: 'When specified, the syntax will be relaxed so that the special character '
             '"{" is treated as a string if it is not followed by a valid placeholder '
             'and "}" is treated as a string if it does not close any previous "{" '
-            'that is treated as a special character',
+            'that is treated as a special character.',
     );
   }
 
