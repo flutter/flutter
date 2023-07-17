@@ -19,20 +19,16 @@ void main(List<String> args) async {
   args = args + _GetArgsFromConfigFile();
   final parser = ArgParser()
     ..addFlag('showOverlay', defaultsTo: false)
-    ..addFlag('hitTestable', defaultsTo: true)
-    ..addFlag('focusable', defaultsTo: true)
-    ..addFlag('useFlatland', defaultsTo: false);
+    ..addFlag('focusable', defaultsTo: true);
   final arguments = parser.parse(args);
   for (final option in arguments.options) {
     print('parent-view: $option: ${arguments[option]}');
   }
 
   TestApp app;
-  final useFlatland = arguments['useFlatland'];
   app = TestApp(
-    ChildView(await _launchChildView(useFlatland)),
+    ChildView(await _launchChildView()),
     showOverlay: arguments['showOverlay'],
-    hitTestable: arguments['hitTestable'],
     focusable: arguments['focusable'],
   );
 
@@ -45,18 +41,16 @@ class TestApp {
 
   final ChildView childView;
   final bool showOverlay;
-  final bool hitTestable;
   final bool focusable;
 
   Color _backgroundColor = _blue;
 
   TestApp(this.childView,
       {this.showOverlay = false,
-      this.hitTestable = true,
       this.focusable = true}) {}
 
   void run() {
-    childView.create(hitTestable, focusable, (ByteData reply) {
+    childView.create(focusable, (ByteData reply) {
       // Set up window allbacks.
       window.onPointerDataPacket = (PointerDataPacket packet) {
         for (final data in packet.data) {
@@ -150,7 +144,7 @@ class ChildView {
 
   ChildView(this.viewId);
 
-  void create(bool hitTestable, bool focusable,
+  void create(bool focusable,
       PlatformMessageResponseCallback callback) {
     // Construct the dart:ui platform message to create the view, and when the
     // return callback is invoked, build the scene. At that point, it is safe
@@ -159,7 +153,8 @@ class ChildView {
 
     final Map<String, dynamic> args = <String, dynamic>{
       'viewId': viewId,
-      'hitTestable': hitTestable,
+      // Flatland doesn't support disabling hit testing.
+      'hitTestable': true,
       'focusable': focusable,
       'viewOcclusionHintLTRB': <double>[
         viewOcclusionHint.left,
@@ -182,8 +177,8 @@ class ChildView {
   }
 }
 
-Future<int> _launchChildView(bool useFlatland) async {
-  final message = Int8List.fromList([useFlatland ? 0x31 : 0x30]);
+Future<int> _launchChildView() async {
+  final message = Int8List.fromList([0x31]);
   final completer = new Completer<ByteData>();
   PlatformDispatcher.instance.sendPlatformMessage(
       'fuchsia/child_view', ByteData.sublistView(message), (ByteData reply) {

@@ -93,6 +93,7 @@ void PortableUITest::SetUpRealmBase() {
                        Protocol{fuchsia::ui::scenic::Scenic::Name_},
                        Protocol{fuchsia::ui::test::input::Registry::Name_},
                        Protocol{fuchsia::ui::test::scene::Controller::Name_},
+                       Protocol{fuchsia::ui::display::singleton::Info::Name_},
                        Protocol{kPointerInjectorRegistryName}},
       .source = kTestUIStackRef,
       .targets = {ParentRef(), kFlutterJitRunnerRef}});
