@@ -295,6 +295,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
   final TextPainter _textPainter;
 
+  /// The painter that controls how the text is painted.
+  TextPainter get textPainter => _textPainter;
+
   List<AttributedString>? _cachedAttributedLabels;
 
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
