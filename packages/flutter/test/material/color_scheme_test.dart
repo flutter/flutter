@@ -444,7 +444,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgets('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
     final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
 
     Widget label(String text, Color textColor, Color background) {

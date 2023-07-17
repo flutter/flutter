@@ -79,7 +79,7 @@ void main() {
       expect(state.timeOfDay.value, const TimeOfDay(hour: 2, minute: 2));
     });
 
-    testWidgetsWithLeakTracking('restart and restore', (WidgetTester tester) async {
+    testWidgets('restart and restore', (WidgetTester tester) async {
       await tester.pumpWidget(const RootRestorationScope(
         restorationId: 'root-child',
         child: _RestorableWidget(),

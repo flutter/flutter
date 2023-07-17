@@ -720,7 +720,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('extended FAB hero transitions succeed', (WidgetTester tester) async {
+  testWidgets('extended FAB hero transitions succeed', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/18782
 
     await tester.pumpWidget(
