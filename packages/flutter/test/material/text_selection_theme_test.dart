@@ -107,7 +107,18 @@ void main() {
     await tester.pumpAndSettle();
     final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
     expect(handle, paints..path(color: defaultSelectionHandleColor));
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/130469
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    notDisposedAllowList: <String, int?>{
+      'ValueNotifier<MagnifierInfo>': 1,
+      'ValueNotifier<_OverlayEntryWidgetState?>': 2,
+      'ValueNotifier<bool>': 1,
+    },
+    // TODO(polina-c): investigate notGCed, if it does not disappear after fixing notDisposed.
+    allowAllNotGCed: true,
+  ));
 
   testWidgetsWithLeakTracking('ThemeData.textSelectionTheme will be used if provided', (WidgetTester tester) async {
     const TextSelectionThemeData textSelectionTheme = TextSelectionThemeData(

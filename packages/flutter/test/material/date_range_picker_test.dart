@@ -256,7 +256,12 @@ void main() {
       expect(tester.widget<Text>(find.text('Jan 15 – Jan 25, 2016')).style?.fontSize, 24);
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
-    });
+    },
+    // TODO(polina-c): remove after resolving
+    // https://github.com/flutter/flutter/issues/130354
+    leakTrackingTestConfig: const LeakTrackingTestConfig(
+      allowAllNotGCed: true,
+    ));
   });
 
   testWidgetsWithLeakTracking('Save and help text is used', (WidgetTester tester) async {
