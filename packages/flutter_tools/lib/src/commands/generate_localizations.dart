@@ -202,8 +202,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     );
     argParser.addFlag(
       'relax-syntax',
-      help: 'When specified, some instances of "{" and "}" will be treated as strings '
-            'instead of special characters.'
+      help: 'When specified, the syntax will be relaxed so that the special character '
+            '"{" is treated as a string if it is not followed by a valid placeholder '
+            'and "}" is treated as a string if it does not close any previous "{" '
+            'that is treated as a special character',
     );
   }
 

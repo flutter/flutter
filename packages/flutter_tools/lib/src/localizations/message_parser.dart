@@ -294,7 +294,7 @@ class Parser {
           tokens.add(Node.brace(startIndex, match.group(0)!));
           isString = false;
           startIndex = match.end;
-          depth++;
+          depth += 1;
           continue;
         }
         // Theoretically, we only reach this point because of unmatched single quotes because
