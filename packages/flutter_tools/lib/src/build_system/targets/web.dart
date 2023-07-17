@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
+import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
@@ -40,6 +42,50 @@ const String kBaseHref = 'baseHref';
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
+class WebAssetBundleTarget extends Target {
+  const WebAssetBundleTarget();
+
+  @override
+  Future<void> build(Environment environment) async {
+    // TODO figure out a way to avoid this
+    environment.defines[kIconTreeShakerFlag] = 'false';
+
+    final Directory assetsOutputDir = environment.outputDir.childDirectory('assets');
+    final Depfile depfile = await copyAssets(
+      environment,
+      assetsOutputDir,
+      targetPlatform: TargetPlatform.web_javascript,
+      shaderTarget: ShaderTarget.sksl,
+    );
+    final DepfileService depfileService = environment.depFileService;
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
+
+    final File assetManifestFile = assetsOutputDir.childFile(kAssetManifestBinFilename);
+    await assetManifestFile.copy(environment.buildDir.childFile(kAssetManifestBinFilename).path);
+  }
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  List<Source> get inputs => const <Source>[];
+
+  @override
+  String get name => 'web_asset_bundle';
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/$kAssetManifestBinFilename'),
+  ];
+
+  @override List<String> get depfiles => const <String>[
+    'flutter_assets.d',
+  ];
+}
+
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
 class WebEntrypointTarget extends Target {
@@ -49,7 +95,9 @@ class WebEntrypointTarget extends Target {
   String get name => 'web_entrypoint';
 
   @override
-  List<Target> get dependencies => const <Target>[];
+  List<Target> get dependencies => const <Target>[
+    WebAssetBundleTarget(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[
@@ -95,14 +143,18 @@ class WebEntrypointTarget extends Target {
     // the web_plugin_registrant.dart file alongside the generated main.dart
     const String generatedImport = 'web_plugin_registrant.dart';
 
+    final Uint8List assetManifest = await environment.buildDir.childFile(kAssetManifestBinFilename).readAsBytes();
+
     final String contents = main_dart.generateMainDartFile(importedEntrypoint,
       languageVersion: languageVersion,
+      assetManifest: assetManifest,
       pluginRegistrantEntrypoint: generatedImport,
     );
 
     environment.buildDir.childFile('main.dart').writeAsStringSync(contents);
   }
 }
+
 
 /// Compiles a web entry point with dart2js.
 abstract class Dart2WebTarget extends Target {
@@ -396,19 +448,6 @@ class WebReleaseBundle extends Target {
     }
 
     createVersionFile(environment, environment.defines);
-    final Directory outputDirectory = environment.outputDir.childDirectory('assets');
-    outputDirectory.createSync(recursive: true);
-    final Depfile depfile = await copyAssets(
-      environment,
-      environment.outputDir.childDirectory('assets'),
-      targetPlatform: TargetPlatform.web_javascript,
-      shaderTarget: ShaderTarget.sksl,
-    );
-    final DepfileService depfileService = environment.depFileService;
-    depfileService.writeToFile(
-      depfile,
-      environment.buildDir.childFile('flutter_assets.d'),
-    );
 
     final Directory webResources = environment.projectDir
       .childDirectory('web');
@@ -442,7 +481,7 @@ class WebReleaseBundle extends Target {
       inputFile.copySync(outputFile.path);
     }
     final Depfile resourceFile = Depfile(inputResourceFiles, outputResourcesFiles);
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       resourceFile,
       environment.buildDir.childFile('web_resources.d'),
     );
@@ -522,6 +561,8 @@ class WebBuiltInAssets extends Target {
       final String targetPath = fileSystem.path.join(environment.outputDir.path, 'canvaskit', relativePath);
       file.copySync(targetPath);
     }
+
+    print('andrew iswasm $isWasm');
 
     if (isWasm) {
       final File bootstrapFile = environment.outputDir.childFile('main.dart.js');

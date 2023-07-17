@@ -19,8 +19,10 @@ final String? _base64EncodedAssetManifest = (){
 }();
 
 /// Generates the main.dart file.
+///
 String generateMainDartFile(String appEntrypoint, {
   required String pluginRegistrantEntrypoint,
+  required List<int>? assetManifest,
   LanguageVersion? languageVersion,
 }) {
   return <String>[

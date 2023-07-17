@@ -12,6 +12,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     hide StackTrace;
 
 import '../application_package.dart';
+import '../asset.dart';
 import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -488,6 +489,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
       final String entrypoint = main_dart.generateMainDartFile(importedEntrypoint.toString(),
         languageVersion: languageVersion,
+        assetManifest: await assetBundle.entries[kAssetManifestBinFilename]?.contentsAsBytes(),
         pluginRegistrantEntrypoint: generatedImport,
       );
 
