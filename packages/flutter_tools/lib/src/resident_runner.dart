@@ -1515,13 +1515,53 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
       final List<FlutterView> views = await vmService.getFlutterViews();
       for (final FlutterView view in views) {
+        final String? isolateId = view.uiIsolate?.id;
+        if (isolateId == null) {
+          continue;
+        }
+
+        // Make sure that we are able to run the preHotRestart callbacks,
+        // by unpausing the isolate and removing breakpoints, otherwise we will be
+        // infinitely waiting for the callbacks to run.
+        await unpauseIsolateAndRemoveBreakpoints(vmService, isolateId);
+
         preHotRestartFutures.add(vmService.flutterInvokePreHotRestartCallbacks(
-          isolateId: view.uiIsolate!.id!,
+          isolateId: isolateId,
         ));
       }
     }
     await Future.wait(preHotRestartFutures);
     slowCallbackTimer.cancel();
+  }
+
+  @protected
+  Future<void> unpauseIsolateAndRemoveBreakpoints(FlutterVmService vmService, String isolateId) async {
+    final Future<vm_service.Isolate?> reloadIsolate = vmService
+          .getIsolateOrNull(isolateId);
+    await reloadIsolate.then((vm_service.Isolate? isolate) async {
+      if ((isolate != null) && isPauseEvent(isolate.pauseEvent!.kind!)) {
+        // The embedder requires that the isolate is unpaused, because the
+        // runInView method requires interaction with dart engine APIs that
+        // are not thread-safe, and thus must be run on the same thread that
+        // would be blocked by the pause. Simply un-pausing is not sufficient,
+        // because this does not prevent the isolate from immediately hitting
+        // a breakpoint (for example if the breakpoint was placed in a loop
+        // or in a frequently called method) or an exception. Instead, all
+        // breakpoints are first disabled and exception pause mode set to
+        // None, and then the isolate resumed.
+        // These settings to not need restoring as Hot Restart results in
+        // new isolates, which will be configured by the editor as they are
+        // started.
+        final List<Future<void>> breakpointAndExceptionRemoval = <Future<void>>[
+          vmService.service.setIsolatePauseMode(isolate.id!,
+            exceptionPauseMode: vm_service.ExceptionPauseMode.kNone),
+          for (final vm_service.Breakpoint breakpoint in isolate.breakpoints!)
+            vmService.service.removeBreakpoint(isolate.id!, breakpoint.id!),
+        ];
+        await Future.wait(breakpointAndExceptionRemoval);
+        await vmService.service.resume(isolateId);
+      }
+    });
   }
 
   bool get reportedDebuggers => _reportedDebuggers;

@@ -148,6 +148,14 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
 
 final List<FakeVmServiceRequest> preHotRestartCallbacks = <FakeVmServiceRequest>[
   listViews,
+  // Get isolate to unpause it to allow the pre hot restart callbacks to run.
+  FakeVmServiceRequest(
+    method: 'getIsolate',
+    args: <String, Object?>{
+      'isolateId': fakeUnpausedIsolate.id,
+    },
+    jsonResponse: fakeUnpausedIsolate.toJson(),
+  ),
   FakeVmServiceRequest(method: 'ext.flutter.invokePreHotRestartCallbacks', args: <String, Object>{
     'isolateId': fakeFlutterView.uiIsolate!.id!,
   }),
