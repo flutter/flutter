@@ -135,6 +135,26 @@ void main() {
       expect(data, isA<SynchronousFuture<int>>());
       expect(await data, 1);
     });
+
+    testWidgets('loadStructuredData handles exceptions correctly', (WidgetTester tester) async {
+      final TestAssetBundle bundle = TestAssetBundle();
+      try {
+        await bundle.loadStructuredData('AssetManifest.json', (String value) => Future<String>.error('what do they say?'));
+        fail('expected exception did not happen');
+      } catch (e) {
+        expect(e.toString(), contains('what do they say?'));
+      }
+    });
+
+    testWidgets('loadStructuredBinaryData handles exceptions correctly', (WidgetTester tester) async {
+      final TestAssetBundle bundle = TestAssetBundle();
+      try {
+        await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.error('buy more crystals'));
+        fail('expected exception did not happen');
+      } catch (e) {
+        expect(e.toString(), contains('buy more crystals'));
+      }
+    });
   });
 
   test('AssetImage.obtainKey succeeds with ImageConfiguration.empty', () async {
