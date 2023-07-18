@@ -430,7 +430,7 @@ targets:
         []
 
   - name: Linux firebase_abstract_method_smoke_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/124691
+    bringup: false
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
@@ -1588,7 +1588,6 @@ targets:
         [
           {"dependency": "android_virtual_device", "version": "33"}
         ]
-      use_emulator: "true"
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
