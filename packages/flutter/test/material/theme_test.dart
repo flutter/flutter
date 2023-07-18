@@ -699,11 +699,11 @@ void main() {
 
     testWidgets('Material3 - Can override properties that are independent of material', (WidgetTester tester) async {
       final CupertinoThemeData themeM3 = await testTheme(tester, ThemeData(
-          cupertinoOverrideTheme: const CupertinoThemeData(
-            // The bar colors ignore all things material except brightness.
-            barBackgroundColor: CupertinoColors.black,
-          ),
-          useMaterial3: true
+        cupertinoOverrideTheme: const CupertinoThemeData(
+          // The bar colors ignore all things material except brightness.
+          barBackgroundColor: CupertinoColors.black,
+        ),
+        useMaterial3: true
       ));
 
       expect(themeM3.primaryColor, const Color(0xff6750a4));
@@ -758,8 +758,8 @@ void main() {
         const Color cupertinoIconColor = Colors.black;
 
         await testTheme(tester, ThemeData(
-            iconTheme: const IconThemeData(color: materialIconColor),
-            cupertinoOverrideTheme: const CupertinoThemeData(primaryColor: cupertinoIconColor),
+          iconTheme: const IconThemeData(color: materialIconColor),
+          cupertinoOverrideTheme: const CupertinoThemeData(primaryColor: cupertinoIconColor),
         ));
 
         expect(buildCount, 1);
