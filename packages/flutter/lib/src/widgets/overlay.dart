@@ -135,20 +135,20 @@ class OverlayEntry implements Listenable {
   /// Whether the [OverlayEntry] is currently mounted in the widget tree.
   ///
   /// The [OverlayEntry] notifies its listeners when this value changes.
-  bool get mounted => _overlayEntryStateNotifier.value != null;
+  bool get mounted => _overlayEntryStateNotifier!.value != null;
 
   /// The currently mounted `_OverlayEntryWidgetState` built using this [OverlayEntry].
-  final ValueNotifier<_OverlayEntryWidgetState?> _overlayEntryStateNotifier = ValueNotifier<_OverlayEntryWidgetState?>(null);
+  ValueNotifier<_OverlayEntryWidgetState?>? _overlayEntryStateNotifier = ValueNotifier<_OverlayEntryWidgetState?>(null);
 
   @override
   void addListener(VoidCallback listener) {
     assert(!_disposedByOwner);
-    _overlayEntryStateNotifier.addListener(listener);
+    _overlayEntryStateNotifier!.addListener(listener);
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    _overlayEntryStateNotifier.removeListener(listener);
+    _overlayEntryStateNotifier!.removeListener(listener);
   }
 
   OverlayState? _overlay;
@@ -194,8 +194,8 @@ class OverlayEntry implements Listenable {
   void _didUnmount() {
     assert(!mounted);
     if (_disposedByOwner) {
-      _overlayEntryStateNotifier.dispose();
-      _overlayEntryStateNotifier.value = null;
+      _overlayEntryStateNotifier!.dispose();
+      _overlayEntryStateNotifier = null;
     }
   }
 
@@ -218,9 +218,10 @@ class OverlayEntry implements Listenable {
     assert(_overlay == null, 'An OverlayEntry must first be removed from the Overlay before dispose is called.');
     _disposedByOwner = true;
     if (!mounted) {
-      _overlayEntryStateNotifier.dispose();
-      _overlayEntryStateNotifier.value = null;
+      _overlayEntryStateNotifier!.dispose();
+      _overlayEntryStateNotifier = null;
     }
+    assert(_overlayEntryStateNotifier == null);
   }
 
   @override
@@ -317,7 +318,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   @override
   void initState() {
     super.initState();
-    widget.entry._overlayEntryStateNotifier.value = this;
+    widget.entry._overlayEntryStateNotifier!.value = this;
     _theater = context.findAncestorRenderObjectOfType<_RenderTheater>()!;
     assert(_sortedTheaterSiblings == null);
   }
@@ -337,7 +338,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 
   @override
   void dispose() {
-    widget.entry._overlayEntryStateNotifier.value = null;
+    widget.entry._overlayEntryStateNotifier!.value = null;
     widget.entry._didUnmount();
     _sortedTheaterSiblings = null;
     super.dispose();
@@ -919,9 +920,9 @@ class _TheaterParentData extends StackParentData {
   // _overlayStateMounted is set to null in _OverlayEntryWidgetState's dispose
   // method. This property is only accessed during layout, paint and hit-test so
   // the `value!` should be safe.
-  Iterator<RenderBox>? get paintOrderIterator => overlayEntry?._overlayEntryStateNotifier.value!._paintOrderIterable.iterator;
-  Iterator<RenderBox>? get hitTestOrderIterator => overlayEntry?._overlayEntryStateNotifier.value!._hitTestOrderIterable.iterator;
-  void visitChildrenOfOverlayEntry(RenderObjectVisitor visitor) => overlayEntry?._overlayEntryStateNotifier.value!._paintOrderIterable.forEach(visitor);
+  Iterator<RenderBox>? get paintOrderIterator => overlayEntry?._overlayEntryStateNotifier!.value!._paintOrderIterable.iterator;
+  Iterator<RenderBox>? get hitTestOrderIterator => overlayEntry?._overlayEntryStateNotifier!.value!._hitTestOrderIterable.iterator;
+  void visitChildrenOfOverlayEntry(RenderObjectVisitor visitor) => overlayEntry?._overlayEntryStateNotifier!.value!._paintOrderIterable.forEach(visitor);
 }
 
 class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheaterMixin {

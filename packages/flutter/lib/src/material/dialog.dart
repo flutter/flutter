@@ -1422,7 +1422,7 @@ Future<T?> showDialog<T>({
     ).context,
   );
 
-  final DialogRoute<T> route = DialogRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(DialogRoute<T>(
     context: context,
     builder: builder,
     barrierColor: barrierColor ?? Colors.black54,
@@ -1433,12 +1433,7 @@ Future<T?> showDialog<T>({
     themes: themes,
     anchorPoint: anchorPoint,
     traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
-  );
-
-  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(route).then((T? value) {
-    route.dispose();
-    return value;
-  });
+  ));
 }
 
 /// Displays either a Material or Cupertino dialog depending on platform.
