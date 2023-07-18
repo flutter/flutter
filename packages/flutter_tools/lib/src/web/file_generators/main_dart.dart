@@ -8,7 +8,7 @@ import 'package:package_config/package_config.dart';
 
 import '../../asset.dart';
 
-final String? _base64EncodedAssetManifest = (){
+final String? _assetManifestAsByteList = (){
   if (generatedAssetManifest == null) {
     return null;
   }
@@ -45,8 +45,8 @@ String generateMainDartFile(String appEntrypoint, {
     'Future<void> main() async {',
     '  await ui_web.bootstrapEngine(',
     '    runApp: () {',
-    if (_base64EncodedAssetManifest != null)
-      '      js.context["_flutter_assetManifestAsByteList"] = $_base64EncodedAssetManifest;',
+    if (_assetManifestAsByteList != null)
+      '      js.context["_flutter_assetManifestAsByteList"] = $_assetManifestAsByteList;',
     '      if (entrypoint.main is _UnaryFunction) {',
     '        return (entrypoint.main as _UnaryFunction)(<String>[]);',
     '      }',
