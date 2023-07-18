@@ -5,7 +5,7 @@
 // To run this, from the root of the Flutter repository:
 //   bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/analyze_snippet_code.dart
 
-// In general, please prefer using full inline examples in API docs.
+// In general, please prefer using full linked examples in API docs.
 //
 // For documentation on creating sample code, see ../../examples/api/README.md
 // See also our style guide's discussion on documentation and sample code:
@@ -13,7 +13,7 @@
 //
 // This tool is used to analyze smaller snippets of code in the API docs.
 // Such snippets are wrapped in ```dart ... ``` blocks, which may themselves
-// be wrapped in {@tool snippet} ... {@endtool} blocks to set them apart
+// be wrapped in {@tool snippet} ... {@end-tool} blocks to set them apart
 // in the rendered output.
 //
 // Such snippets:
