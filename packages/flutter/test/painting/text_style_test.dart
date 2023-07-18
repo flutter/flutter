@@ -503,9 +503,9 @@ void main() {
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75)!.background!.color, blue);
   });
 
-  test('TextStyle strut textScaler', () {
+  test('TextStyle strut textScaleFactor', () {
     const TextStyle style0 = TextStyle(fontSize: 10);
-    final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaler: const TextScaler.linear(2.5));
+    final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaleFactor: 2.5);
 
     const TextStyle style1 = TextStyle(fontSize: 25);
     final ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle();

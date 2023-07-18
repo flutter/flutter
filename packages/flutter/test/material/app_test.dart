@@ -465,14 +465,15 @@ void main() {
   });
 
   testWidgets('Can get text scale from media query', (WidgetTester tester) async {
-    TextScaler? textScaler;
+    double? textScaleFactor;
     await tester.pumpWidget(MaterialApp(
       home: Builder(builder:(BuildContext context) {
-        textScaler = MediaQuery.textScalerOf(context);
+        textScaleFactor = MediaQuery.textScaleFactorOf(context);
         return Container();
       }),
     ));
-    expect(textScaler, TextScaler.noScaling);
+    expect(textScaleFactor, isNotNull);
+    expect(textScaleFactor, equals(1.0));
   });
 
   testWidgets('MaterialApp.navigatorKey', (WidgetTester tester) async {

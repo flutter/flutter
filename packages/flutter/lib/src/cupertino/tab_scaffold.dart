@@ -158,9 +158,13 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// If translucent, the main content may slide behind it.
   /// Otherwise, the main content's bottom margin will be offset by its height.
   ///
-  /// By default [tabBar] disables text scaling to match the native iOS behavior.
-  /// To override this behavior, wrap each of the [tabBar]'s items inside a
-  /// [MediaQuery] with the desired [TextScaler].
+  /// By default [tabBar] has its text scale factor set to 1.0 and does not
+  /// respond to text scale factor changes from the operating system, to match
+  /// the native iOS behavior. To override this behavior, wrap each of the [tabBar]'s
+  /// items inside a [MediaQuery] with the desired [MediaQueryData.textScaleFactor]
+  /// value. The text scale factor value from the operating system can be retrieved
+  /// int many ways, such as querying [MediaQuery.textScaleFactorOf] against
+  /// [CupertinoApp]'s [BuildContext].
   ///
   /// Must not be null.
   final CupertinoTabBar tabBar;
@@ -357,7 +361,8 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
         children: <Widget>[
           // The main content being at the bottom is added to the stack first.
           content,
-          MediaQuery.withNoTextScaling(
+          MediaQuery(
+            data: existingMediaQuery.copyWith(textScaleFactor: 1),
             child: Align(
               alignment: Alignment.bottomCenter,
               // Override the tab bar's currentIndex to the current tab and hook in

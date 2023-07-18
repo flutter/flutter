@@ -9,7 +9,6 @@ import 'package:flutter/gestures.dart';
 
 import 'basic_types.dart';
 import 'text_painter.dart';
-import 'text_scaler.dart';
 import 'text_span.dart';
 import 'text_style.dart';
 
@@ -210,7 +209,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Apply the properties of this object to the given [ParagraphBuilder], from
   /// which a [Paragraph] can be obtained.
   ///
-  /// The `textScaler` parameter specifies a [TextScaler] that the text and
+  /// The `textScaleFactor` parameter specifies a scale that the text and
   /// placeholders will be scaled by. The scaling is performed before layout,
   /// so the text will be laid out with the scaled glyphs and placeholders.
   ///
@@ -219,10 +218,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// in the same order as defined in the [InlineSpan] tree.
   ///
   /// [Paragraph] objects can be drawn on [Canvas] objects.
-  void build(ui.ParagraphBuilder builder, {
-    TextScaler textScaler = TextScaler.noScaling,
-    List<PlaceholderDimensions>? dimensions,
-  });
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions });
 
   /// Walks this [InlineSpan] and any descendants in pre-order and calls `visitor`
   /// for each span that has content.

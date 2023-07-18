@@ -1097,7 +1097,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     final double maxPickerWidth = totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
 
-    return MediaQuery.withNoTextScaling(
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: CustomMultiChildLayout(
@@ -1486,7 +1487,8 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
     final double maxPickerWidth = totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
 
-    return MediaQuery.withNoTextScaling(
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: CustomMultiChildLayout(
@@ -1800,7 +1802,8 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
 
     final double maxPickerWidth = totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
 
-    return MediaQuery.withNoTextScaling(
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: CustomMultiChildLayout(
@@ -2499,9 +2502,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             ];
         }
         final CupertinoThemeData themeData = CupertinoTheme.of(context);
-        // The native iOS picker's text scaling is fixed, so we will also fix it
-        // as well in our picker.
-        return MediaQuery.withNoTextScaling(
+        return MediaQuery(
+          // The native iOS picker's text scaling is fixed, so we will also fix it
+          // as well in our picker.
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
           child: CupertinoTheme(
             data: themeData.copyWith(
               textTheme: themeData.textTheme.copyWith(

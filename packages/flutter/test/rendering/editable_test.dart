@@ -230,6 +230,7 @@ void main() {
         ' │ maxLines: 1\n'
         ' │ minLines: null\n'
         ' │ selectionColor: null\n'
+        ' │ textScaleFactor: 1.0\n'
         ' │ locale: ja_JP\n'
         ' │ selection: null\n'
         ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
@@ -330,7 +331,7 @@ void main() {
       ),
     ));
 
-    editable.textScaler = const TextScaler.linear(2.0);
+    editable.textScaleFactor = 2;
     pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
@@ -453,7 +454,7 @@ void main() {
       ),
     ));
 
-    editable.textScaler = const TextScaler.linear(2.0);
+    editable.textScaleFactor = 2;
     pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
@@ -1630,7 +1631,7 @@ void main() {
         selection: const TextSelection.collapsed(offset: 3),
         maxLines: 2,
         minLines: 2,
-        textScaler: const TextScaler.linear(2.0),
+        textScaleFactor: 2.0,
         children: renderBoxes,
       );
       _applyParentData(renderBoxes, editable.text!);

@@ -10,8 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 
-const double _kEngineDefaultFontSize = 14.0;
-
 // Examples can assume:
 // late WidgetSpan myWidgetSpan;
 
@@ -92,28 +90,17 @@ class WidgetSpan extends PlaceholderSpan {
   /// Helper function for extracting [WidgetSpan]s in preorder, from the given
   /// [InlineSpan] as a list of widgets.
   ///
-  /// The `textScaler` is the scaling strategy for scaling the content.
+  /// The `textScaleFactor` is the the number of font pixels for each logical
+  /// pixel.
   ///
   /// This function is used by [EditableText] and [RichText] so calling it
   /// directly is rarely necessary.
-  static List<Widget> extractFromInlineSpan(InlineSpan span, TextScaler textScaler) {
+  static List<Widget> extractFromInlineSpan(InlineSpan span, double textScaleFactor) {
     final List<Widget> widgets = <Widget>[];
-    // _kEngineDefaultFontSize is the default font size to use when none of the
-    // ancestor spans specifies one.
-    final List<double> fontSizeStack = <double>[_kEngineDefaultFontSize];
     int index = 0;
     // This assumes an InlineSpan tree's logical order is equivalent to preorder.
-    bool visitSubtree(InlineSpan span) {
-      final double? fontSizeToPush = switch (span.style?.fontSize) {
-        final double size when size != fontSizeStack.last => size,
-        _ => null,
-      };
-      if (fontSizeToPush != null) {
-        fontSizeStack.add(fontSizeToPush);
-      }
+    span.visitChildren((InlineSpan span) {
       if (span is WidgetSpan) {
-        final double fontSize = fontSizeStack.last;
-        final double textScaleFactor = fontSize == 0 ? 0 : textScaler.scale(fontSize) / fontSize;
         widgets.add(
           _WidgetSpanParentData(
             span: span,
@@ -128,15 +115,8 @@ class WidgetSpan extends PlaceholderSpan {
         span is WidgetSpan || span is! PlaceholderSpan,
         '$span is a PlaceholderSpan but not a WidgetSpan subclass. This is currently not supported.',
       );
-      span.visitDirectChildren(visitSubtree);
-      if (fontSizeToPush != null) {
-        final double poppedFontSize = fontSizeStack.removeLast();
-        assert(fontSizeStack.isNotEmpty);
-        assert(poppedFontSize == fontSizeToPush);
-      }
       return true;
-    }
-    visitSubtree(span);
+    });
     return widgets;
   }
 
@@ -150,17 +130,14 @@ class WidgetSpan extends PlaceholderSpan {
   /// in-order mapping of widget to laid-out dimensions. If no such dimension
   /// is provided, the widget will be skipped.
   ///
-  /// The `textScaler` will be applied to the laid-out size of the widget.
+  /// The `textScaleFactor` will be applied to the laid-out size of the widget.
   @override
-  void build(ui.ParagraphBuilder builder, {
-    TextScaler textScaler = TextScaler.noScaling,
-    List<PlaceholderDimensions>? dimensions,
-  }) {
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
     assert(debugAssertIsValid());
     assert(dimensions != null);
     final bool hasStyle = style != null;
     if (hasStyle) {
-      builder.pushStyle(style!.getTextStyle(textScaler: textScaler));
+      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
     }
     assert(builder.placeholderCount < dimensions!.length);
     final PlaceholderDimensions currentDimensions = dimensions![builder.placeholderCount];

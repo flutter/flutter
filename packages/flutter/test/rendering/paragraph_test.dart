@@ -406,7 +406,7 @@ void main() {
     expect(paragraph.debugNeedsPaint, isFalse);
   });
 
-  test('nested TextSpans in paragraph handle linear textScaler correctly.', () {
+  test('nested TextSpans in paragraph handle textScaleFactor correctly.', () {
     const TextSpan testSpan = TextSpan(
       text: 'a',
       style: TextStyle(
@@ -430,7 +430,7 @@ void main() {
     final RenderParagraph paragraph = RenderParagraph(
         testSpan,
         textDirection: TextDirection.ltr,
-        textScaler: const TextScaler.linear(1.3),
+        textScaleFactor: 1.3,
     );
     paragraph.layout(const BoxConstraints());
     expect(paragraph.size.width, 78.0);

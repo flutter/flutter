@@ -719,7 +719,7 @@ class AlertDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
-    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.textScalerOf(context).textScaleFactor);
+    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.textScaleFactorOf(context));
     final TextDirection? textDirection = Directionality.maybeOf(context);
 
     Widget? iconWidget;
@@ -1216,7 +1216,7 @@ class SimpleDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
-    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.textScalerOf(context).textScaleFactor);
+    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.textScaleFactorOf(context));
     final TextDirection? textDirection = Directionality.maybeOf(context);
 
     Widget? titleWidget;

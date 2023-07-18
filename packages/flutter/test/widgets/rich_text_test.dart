@@ -193,12 +193,12 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description, unorderedMatches(<Matcher>[
+    expect(description, unorderedMatches(<dynamic>[
       contains('textAlign: center'),
       contains('textDirection: rtl'),
       contains('softWrap: no wrapping except at line break characters'),
       contains('overflow: ellipsis'),
-      contains('textScaler: linear (1.3x)'),
+      contains('textScaleFactor: 1.3'),
       contains('maxLines: 1'),
       contains('textWidthBasis: longestLine'),
       contains('text: "rich text"'),

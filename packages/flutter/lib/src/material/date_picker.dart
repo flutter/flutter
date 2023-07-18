@@ -46,7 +46,6 @@ const Size _inputRangeLandscapeDialogSize = Size(496, 164.0);
 const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 const double _inputFormPortraitHeight = 98.0;
 const double _inputFormLandscapeHeight = 108.0;
-const double _kMaxTextScaleFactor = 1.3;
 
 /// Shows a dialog containing a Material Design date picker.
 ///
@@ -437,7 +436,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   }
 
   void _handleOnDatePickerModeChange() {
-    widget.onDatePickerModeChange?.call(_entryMode.value);
+    if (widget.onDatePickerModeChange != null) {
+      widget.onDatePickerModeChange!(_entryMode.value);
+    }
   }
 
   void _handleEntryModeToggle() {
@@ -453,7 +454,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
            _handleOnDatePickerModeChange();
         case DatePickerEntryMode.calendarOnly:
         case DatePickerEntryMode.inputOnly:
-          assert(false, 'Can not change entry mode from ${_entryMode.value}');
+          assert(false, 'Can not change entry mode from _entryMode');
       }
     });
   }
@@ -641,7 +642,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     // Constrain the textScaleFactor to the largest supported value to prevent
     // layout issues.
-    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).textScaleFactor;
+    final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 1.3);
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     final DialogTheme dialogTheme = theme.dialogTheme;
     return Dialog(
@@ -661,10 +662,10 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         height: dialogSize.height,
         duration: _dialogSizeAnimationDuration,
         curve: Curves.easeIn,
-        child: MediaQuery.withClampedTextScaling(
-          // Constrain the textScaleFactor to the largest supported value to prevent
-          // layout issues.
-          maxScaleFactor: _kMaxTextScaleFactor,
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaleFactor: textScaleFactor,
+          ),
           child: Builder(builder: (BuildContext context) {
             switch (orientation) {
               case Orientation.portrait:
@@ -1390,6 +1391,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
     final ThemeData theme = Theme.of(context);
     final bool useMaterial3 = theme.useMaterial3;
     final Orientation orientation = MediaQuery.orientationOf(context);
+    final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 1.3);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
     final DatePickerThemeData defaults =  DatePickerTheme.defaults(context);
@@ -1533,8 +1535,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         height: size.height,
         duration: _dialogSizeAnimationDuration,
         curve: Curves.easeIn,
-        child: MediaQuery.withClampedTextScaling(
-          maxScaleFactor: _kMaxTextScaleFactor,
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaleFactor: textScaleFactor,
+          ),
           child: Builder(builder: (BuildContext context) {
             return contents;
           }),

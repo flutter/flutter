@@ -285,7 +285,7 @@ class FilledButton extends ButtonStyleButton {
   /// each state, and "others" means all other states.
   ///
   /// The `textScaleFactor` is the value of
-  /// `MediaQuery.textScalerOf(context).textScaleFactor` and the names of the
+  /// `MediaQuery.textScaleFactorOf(context)` and the names of the
   /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
   /// abbreviated for readability.
   ///
@@ -411,7 +411,7 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
      EdgeInsets.symmetric(horizontal: padding1x),
      EdgeInsets.symmetric(horizontal: padding1x / 2),
      EdgeInsets.symmetric(horizontal: padding1x / 2 / 2),
-    MediaQuery.textScalerOf(context).textScaleFactor,
+    MediaQuery.textScaleFactorOf(context),
   );
 }
 
@@ -514,12 +514,12 @@ class _FilledButtonWithIcon extends FilledButton {
       const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
       const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
       const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
-      MediaQuery.textScalerOf(context).textScaleFactor,
+      MediaQuery.textScaleFactorOf(context),
     ) : ButtonStyleButton.scaledPadding(
       const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-      MediaQuery.textScalerOf(context).textScaleFactor,
+      MediaQuery.textScaleFactorOf(context),
     );
     return super.defaultStyleOf(context).copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
@@ -535,7 +535,7 @@ class _FilledButtonWithIconChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.textScalerOf(context).textScaleFactor;
+    final double scale = MediaQuery.textScaleFactorOf(context);
     // Adjust the gap based on the text scale factor. Start at 8, and lerp
     // to 4 based on how large the text is.
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;

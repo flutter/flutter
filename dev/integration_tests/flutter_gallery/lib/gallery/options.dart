@@ -100,8 +100,7 @@ class _OptionsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ignore: deprecated_member_use, https://github.com/flutter/flutter/issues/128825
-    final double textScaleFactor = MediaQuery.textScalerOf(context).textScaleFactor;
+    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
 
     return MergeSemantics(
       child: Container(

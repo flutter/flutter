@@ -19,7 +19,6 @@ import 'basic_types.dart';
 import 'colors.dart';
 import 'strut_style.dart';
 import 'text_painter.dart';
-import 'text_scaler.dart';
 
 const String _kDefaultDebugLabel = 'unknown';
 
@@ -1272,24 +1271,7 @@ class TextStyle with Diagnosticable {
   }
 
   /// The style information for text runs, encoded for use by `dart:ui`.
-  ui.TextStyle getTextStyle({
-    @Deprecated(
-      'Use textScaler instead. '
-      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
-      'This feature was deprecated after v3.12.0-2.0.pre.',
-    )
-    double textScaleFactor = 1.0,
-    TextScaler textScaler = TextScaler.noScaling,
-  }) {
-    assert(
-      identical(textScaler, TextScaler.noScaling) || textScaleFactor == 1.0,
-      'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
-    );
-    final double? fontSize = switch (this.fontSize) {
-      null => null,
-      final double size when textScaler == TextScaler.noScaling => size * textScaleFactor,
-      final double size => textScaler.scale(size),
-    };
+  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
     return ui.TextStyle(
       color: color,
       decoration: decoration,
@@ -1302,17 +1284,16 @@ class TextStyle with Diagnosticable {
       leadingDistribution: leadingDistribution,
       fontFamily: fontFamily,
       fontFamilyFallback: fontFamilyFallback,
-      fontSize: fontSize,
+      fontSize: fontSize == null ? null : fontSize! * textScaleFactor,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
       height: height,
       locale: locale,
       foreground: foreground,
-      background: switch ((background, backgroundColor)) {
-        (final Paint paint, _) => paint,
-        (_, final Color color) => Paint()..color = color,
-        _ => null,
-      },
+      background: background ?? (backgroundColor != null
+        ? (Paint()..color = backgroundColor!)
+        : null
+      ),
       shadows: shadows,
       fontFeatures: fontFeatures,
       fontVariations: fontVariations,
@@ -1330,7 +1311,7 @@ class TextStyle with Diagnosticable {
   ui.ParagraphStyle getParagraphStyle({
     TextAlign? textAlign,
     TextDirection? textDirection,
-    TextScaler textScaler = TextScaler.noScaling,
+    double textScaleFactor = 1.0,
     String? ellipsis,
     int? maxLines,
     ui.TextHeightBehavior? textHeightBehavior,
@@ -1346,7 +1327,6 @@ class TextStyle with Diagnosticable {
     final ui.TextLeadingDistribution? leadingDistribution = this.leadingDistribution;
     final ui.TextHeightBehavior? effectiveTextHeightBehavior = textHeightBehavior
       ?? (leadingDistribution == null ? null : ui.TextHeightBehavior(leadingDistribution: leadingDistribution));
-
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
@@ -1355,16 +1335,13 @@ class TextStyle with Diagnosticable {
       fontWeight: fontWeight ?? this.fontWeight,
       fontStyle: fontStyle ?? this.fontStyle,
       fontFamily: fontFamily ?? this.fontFamily,
-      fontSize: textScaler.scale(fontSize ?? this.fontSize ?? _kDefaultFontSize),
+      fontSize: (fontSize ?? this.fontSize ?? _kDefaultFontSize) * textScaleFactor,
       height: height ?? this.height,
       textHeightBehavior: effectiveTextHeightBehavior,
       strutStyle: strutStyle == null ? null : ui.StrutStyle(
         fontFamily: strutStyle.fontFamily,
         fontFamilyFallback: strutStyle.fontFamilyFallback,
-        fontSize: switch (strutStyle.fontSize) {
-          null => null,
-          final double unscaled => textScaler.scale(unscaled),
-        },
+        fontSize: strutStyle.fontSize == null ? null : strutStyle.fontSize! * textScaleFactor,
         height: strutStyle.height,
         leading: strutStyle.leading,
         fontWeight: strutStyle.fontWeight,

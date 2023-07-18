@@ -37,10 +37,13 @@ const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 /// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
 /// default), it will produce a blurring effect to the content behind it.
 ///
-/// When used as [CupertinoTabScaffold.tabBar], by default [CupertinoTabBar]
-/// disables text scaling to match the native iOS behavior. To override
-/// this behavior, wrap each of the `navigationBar`'s components inside a
-/// [MediaQuery] with the desired [TextScaler].
+/// When used as [CupertinoTabScaffold.tabBar], by default [CupertinoTabBar] has
+/// its text scale factor set to 1.0 and does not respond to text scale factor
+/// changes from the operating system, to match the native iOS behavior. To override
+/// this behavior, wrap each of the `navigationBar`'s components inside a [MediaQuery]
+/// with the desired [MediaQueryData.textScaleFactor] value. The text scale factor
+/// value from the operating system can be retrieved in many ways, such as querying
+/// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
 ///
 /// {@tool dartpad}
 /// This example shows a [CupertinoTabBar] placed in a [CupertinoTabScaffold].
