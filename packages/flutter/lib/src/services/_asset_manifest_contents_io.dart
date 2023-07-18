@@ -8,4 +8,4 @@
 // We want to use the same signature as the web counterpart, so we
 // declare this as final rather than const.
 // ignore: prefer_const_declarations
-final String? assetManifestContents = null;
+final List<int>? assetManifestContents = null;

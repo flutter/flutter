@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:package_config/package_config.dart';
 
 import '../../asset.dart';
-import '../../convert.dart';
 
 final String? _base64EncodedAssetManifest = (){
   if (generatedAssetManifest == null) {
@@ -15,7 +14,7 @@ final String? _base64EncodedAssetManifest = (){
   }
   final ByteBuffer buffer = generatedAssetManifest!.buffer;
   final Uint8List list = buffer.asUint8List(generatedAssetManifest!.offsetInBytes, generatedAssetManifest!.lengthInBytes);
-  return base64.encode(list);
+  return '[${list.join(',')}]';
 }();
 
 /// Generates the main.dart file.
@@ -47,7 +46,7 @@ String generateMainDartFile(String appEntrypoint, {
     '  await ui_web.bootstrapEngine(',
     '    runApp: () {',
     if (_base64EncodedAssetManifest != null)
-      '      js.context["_flutter_base64EncodedAssetManifest"] = "$_base64EncodedAssetManifest";',
+      '      js.context["_flutter_assetManifestAsByteList"] = $_base64EncodedAssetManifest;',
     '      if (entrypoint.main is _UnaryFunction) {',
     '        return (entrypoint.main as _UnaryFunction)(<String>[]);',
     '      }',

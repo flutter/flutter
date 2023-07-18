@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '_asset_manifest_contents_io.dart'
   if (dart.library.js_util) '_asset_manifest_contents_web.dart';
@@ -28,16 +27,14 @@ abstract class AssetManifest {
       }
 
       if (assetManifestContents != null) {
-        final String uriEncodedAssetManifestContent = assetManifestContents!;
-        final ByteData assetManifestBytes = ByteData.view(
-          Uint8List.fromList(
-            base64.decode(uriEncodedAssetManifestContent)
-          )
+        final List<int> assetManifestAsByteList = assetManifestContents!;
+        final ByteData assetManifestByteData = ByteData.view(
+          Uint8List.fromList(assetManifestAsByteList)
           .buffer
         );
 
         return _precachedAssetManifest = SynchronousFuture<AssetManifest>(
-          _AssetManifestBin.fromStandardMessageCodecMessage(assetManifestBytes),
+          _AssetManifestBin.fromStandardMessageCodecMessage(assetManifestByteData),
         );
       }
     }

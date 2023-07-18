@@ -5,5 +5,5 @@ import 'dart:js' as js;
 /// For most web apps, the generated entry point code includes code that writes
 /// the asset manifest's contents to a JS global as a base64-encoded string.
 /// This implementation reads that global.
-final String? assetManifestContents =
-  js.context['_flutter_base64EncodedAssetManifest'] as String?;
+final List<int>? assetManifestContents =
+  js.context['_flutter_assetManifestAsByteList'] as List<int>?;
