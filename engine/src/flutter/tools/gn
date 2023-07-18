@@ -402,7 +402,7 @@ def to_gn_args(args):
   if args.dart_optimization_level:
     gn_args['dart_default_optimization_level'] = args.dart_optimization_level
   elif gn_args['target_os'] in ['android', 'ios']:
-    gn_args['dart_default_optimization_level'] = 'z'
+    gn_args['dart_default_optimization_level'] = '2'
 
   gn_args['flutter_use_fontconfig'] = args.enable_fontconfig
   gn_args['dart_component_kind'
