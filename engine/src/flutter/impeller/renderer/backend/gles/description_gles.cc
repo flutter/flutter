@@ -82,27 +82,28 @@ DescriptionGLES::DescriptionGLES(const ProcTableGLES& gl)
       sl_version_string_(GetGLString(gl, GL_SHADING_LANGUAGE_VERSION)) {
   is_es_ = DetermineIfES(gl_version_string_);
 
-  if (is_es_) {
-    const auto extensions = GetGLString(gl, GL_EXTENSIONS);
-    std::stringstream extensions_stream(extensions);
-    std::string extension;
-    while (std::getline(extensions_stream, extension, ' ')) {
-      extensions_.insert(extension);
-    }
-  } else {
-    int extension_count = 0;
-    gl.GetIntegerv(GL_NUM_EXTENSIONS, &extension_count);
-    for (auto i = 0; i < extension_count; i++) {
-      extensions_.insert(GetGLStringi(gl, GL_EXTENSIONS, i));
-    }
-  }
-
   auto gl_version = DetermineVersion(gl_version_string_);
   if (!gl_version.has_value()) {
     VALIDATION_LOG << "Could not determine GL version.";
     return;
   }
   gl_version_ = gl_version.value();
+
+  // GL_NUM_EXTENSIONS is only available in OpenGL 3+ and OpenGL ES 3+
+  if (gl_version_.IsAtLeast(Version(3, 0, 0))) {
+    int extension_count = 0;
+    gl.GetIntegerv(GL_NUM_EXTENSIONS, &extension_count);
+    for (auto i = 0; i < extension_count; i++) {
+      extensions_.insert(GetGLStringi(gl, GL_EXTENSIONS, i));
+    }
+  } else {
+    const auto extensions = GetGLString(gl, GL_EXTENSIONS);
+    std::stringstream extensions_stream(extensions);
+    std::string extension;
+    while (std::getline(extensions_stream, extension, ' ')) {
+      extensions_.insert(extension);
+    }
+  }
 
   auto sl_version = DetermineVersion(sl_version_string_);
   if (!sl_version.has_value()) {
