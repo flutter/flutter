@@ -199,7 +199,7 @@
 
   "lookUpButtonLabel": "Look Up",
   "@lookUpButtonLabel": {
-    "description": "The label for the Look Up button and menu items."
+    "description": "The label for the Look Up button and menu items on iOS."
   },
 
   "okButtonLabel": "OK",

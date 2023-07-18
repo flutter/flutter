@@ -22,5 +22,6 @@
   "tabSemanticsLabel": "Guia $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Dispensar",
   "searchTextFieldPlaceholderLabel": "Pesquisar",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "lookUpButtonLabel": "Look Up"
 }

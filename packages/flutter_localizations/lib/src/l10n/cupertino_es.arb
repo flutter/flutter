@@ -22,5 +22,6 @@
   "tabSemanticsLabel": "Pestaña $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Cerrar",
   "searchTextFieldPlaceholderLabel": "Buscar",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "lookUpButtonLabel": "Look Up"
 }

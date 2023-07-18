@@ -22,5 +22,6 @@
   "tabSemanticsLabel": "Välilehti $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Ohita",
   "searchTextFieldPlaceholderLabel": "Hae",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "lookUpButtonLabel": "Look Up"
 }

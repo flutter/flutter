@@ -34,7 +34,6 @@ typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingVa
 
 // On web, key events in text fields are handled by the browser.
 const bool areKeyEventsHandledByPlatform = isBrowser;
-final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
 
 class CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
   @override
