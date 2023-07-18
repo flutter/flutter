@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
 
@@ -809,65 +807,61 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
-  testWidgets('SliverMainAxisGroup skips painting invisible children', (WidgetTester tester) async {
+  testWidgets('SliverCrossAxisGroup skips painting invisible children', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
 
-    const Key key1 = Key('Box 1');
-    const Key key2 = Key('Box 2');
-    const Key key3 = Key('Box 3');
-    const Key key4 = Key('Box 4');
+    int counter = 0;
+    void incrementCounter() {
+      counter += 1;
+    }
+
     await tester.pumpWidget(
       _buildSliverCrossAxisGroup(
         controller: controller,
         slivers: <Widget>[
-          SliverToBoxAdapter(
-            key: key1,
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
             child: Container(
               height: 1000,
-              decoration: const BoxDecoration(color: Colors.amber)
-            )
+              decoration: const BoxDecoration(color: Colors.amber),
+            ),
           ),
-          SliverToBoxAdapter(
-            key: key2,
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
             child: Container(
               height: 400,
               decoration: const BoxDecoration(color: Colors.amber)
-            )
+            ),
           ),
-          SliverToBoxAdapter(
-            key: key3,
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
             child: Container(
               height: 500,
               decoration: const BoxDecoration(color: Colors.amber)
-            )
+            ),
           ),
-          SliverToBoxAdapter(
-            key: key4,
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
             child: Container(
               height: 300,
               decoration: const BoxDecoration(color: Colors.amber)
-            )
+            ),
           ),
         ],
       ),
     );
+    expect(counter, equals(4));
 
-    expect(find.byKey(key1), paints..rect());
-    expect(find.byKey(key2), paints..rect());
-    expect(find.byKey(key3), paints..rect());
-    expect(find.byKey(key4), paints..rect());
-
+    // Reset paint counter.
+    counter = 0;
     controller.jumpTo(400);
     await tester.pumpAndSettle();
 
     expect(controller.offset, 400);
-
-    expect(find.byKey(key1), paints..rect());
-    expect(find.byKey(key2), paintsNothing);
-    expect(find.byKey(key3), paints..rect());
-    expect(find.byKey(key4), paintsNothing);
+    expect(counter, equals(2));
   });
 }
+
 
 Widget _buildSliverList({
   double itemMainAxisExtent = 100,
@@ -944,4 +938,32 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(TestDelegate oldDelegate) => true;
+}
+
+class RenderMockSliverToBoxAdapter extends RenderSliverToBoxAdapter {
+  RenderMockSliverToBoxAdapter({
+    super.child,
+    required this.incrementCounter,
+  });
+  final void Function() incrementCounter;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    incrementCounter();
+  }
+}
+
+class MockSliverToBoxAdapter extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that contains a single box widget.
+  const MockSliverToBoxAdapter({
+    super.key,
+    super.child,
+    required this.incrementCounter,
+  });
+
+  final void Function() incrementCounter;
+
+  @override
+  RenderMockSliverToBoxAdapter createRenderObject(BuildContext context) =>
+    RenderMockSliverToBoxAdapter(incrementCounter: incrementCounter);
 }
