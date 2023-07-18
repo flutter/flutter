@@ -9,7 +9,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide window;
 
 import '../../common/test_initialization.dart';
-import 'text_scuba.dart';
+import 'text_goldens.dart';
 
 const String threeLines = 'First\nSecond\nThird';
 const String veryLong =
@@ -21,7 +21,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  final EngineScubaTester scuba = await EngineScubaTester.initialize(
+  final EngineGoldenTester goldenTester = await EngineGoldenTester.initialize(
     viewportSize: const Size(800, 800),
   );
 
@@ -55,6 +55,6 @@ Future<void> testMain() async {
     canvas.drawParagraph(p, offset);
     offset = offset.translate(0, p.height + 10);
 
-    return scuba.diffCanvasScreenshot(canvas, 'text_max_lines');
+    return goldenTester.diffCanvasScreenshot(canvas, 'text_max_lines');
   });
 }
