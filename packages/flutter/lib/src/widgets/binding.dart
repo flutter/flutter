@@ -561,6 +561,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// a hot restart, the application will crash after a hot restart.
   ///
   /// ```dart
+  /// // ignore_for_file: always_specify_types
   /// import 'dart:ffi';
   /// import 'package:flutter/widgets.dart';
   ///
@@ -570,9 +571,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// class NativeResourceService {
   ///   NativeResourceService() {
-  ///     if (kDebugMode) {
-  ///       WidgetsBinding.instance!.registerHotRestartCallback(() => _destroyContext(_context), debugLabel: 'NativeResourceService');
-  ///     }
+  ///     WidgetsBinding.instance.registerHotRestartCallback(() => _destroyContext(_context), debugLabel: 'NativeResourceService');
   ///   }
   ///
   ///   /// Acquire native resources that must be released before they can
