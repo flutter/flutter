@@ -95,6 +95,7 @@ void main() {
       bool useEscaping = false,
       bool areResourceAttributeRequired = false,
       bool suppressWarnings = false,
+      bool relaxSyntax = false,
       void Function(Directory)? setup,
     }
   ) {
@@ -126,6 +127,7 @@ void main() {
       useEscaping: useEscaping,
       areResourceAttributesRequired: areResourceAttributeRequired,
       suppressWarnings: suppressWarnings,
+      useRelaxedSyntax: relaxSyntax,
     )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: isFromYaml);
@@ -1474,6 +1476,22 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         });
         expect(getGeneratedFileContent(locale: 'en'), contains('String helloWorld(Object name) {'));
         expect(getGeneratedFileContent(locale: 'es'), contains('String helloWorld(Object name) {'));
+      });
+
+      testWithoutContext('braces are ignored as special characters if placeholder does not exist', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "helloWorld": "Hello {name}",
+  "@@helloWorld": {
+    "placeholders": {
+      "names": {}
+    }
+  }
+}'''
+        }, relaxSyntax: true);
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains("String get helloWorld => 'Hello {name}'"));
       });
     });
 

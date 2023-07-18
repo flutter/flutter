@@ -72,6 +72,7 @@ Future<LocalizationsGenerator> generateLocalizations({
       useEscaping: options.useEscaping,
       logger: logger,
       suppressWarnings: options.suppressWarnings,
+      useRelaxedSyntax: options.relaxSyntax,
     )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: true, useCRLF: useCRLF);
@@ -494,6 +495,7 @@ class LocalizationsGenerator {
     bool useEscaping = false,
     required Logger logger,
     bool suppressWarnings = false,
+    bool useRelaxedSyntax = false,
   }) {
     final Directory? projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(fileSystem, inputPathString, projectDirectory);
@@ -517,6 +519,7 @@ class LocalizationsGenerator {
       useEscaping: useEscaping,
       logger: logger,
       suppressWarnings: suppressWarnings,
+      useRelaxedSyntax: useRelaxedSyntax,
     );
   }
 
@@ -541,6 +544,7 @@ class LocalizationsGenerator {
     required this.logger,
     this.useEscaping = false,
     this.suppressWarnings = false,
+    this.useRelaxedSyntax = false,
   });
 
   final FileSystem _fs;
@@ -616,6 +620,9 @@ class LocalizationsGenerator {
   /// Whether any errors were caught. This is set after encountering any errors
   /// from calling [_generateMethod].
   bool hadErrors = false;
+
+  /// Whether to use relaxed syntax.
+  bool useRelaxedSyntax = false;
 
   /// The list of all arb path strings in [inputDirectory].
   List<String> get arbPathStrings {
@@ -908,7 +915,13 @@ class LocalizationsGenerator {
     }
     // The call to .toList() is absolutely necessary. Otherwise, it is an iterator and will call Message's constructor again.
     _allMessages = _templateBundle.resourceIds.map((String id) => Message(
-       _templateBundle, _allBundles, id, areResourceAttributesRequired, useEscaping: useEscaping, logger: logger,
+      _templateBundle,
+      _allBundles,
+      id,
+      areResourceAttributesRequired,
+      useEscaping: useEscaping,
+      logger: logger,
+      useRelaxedSyntax: useRelaxedSyntax,
     )).toList();
     hadErrors = _allMessages.any((Message message) => message.hadErrors);
     if (inputsAndOutputsListFile != null) {

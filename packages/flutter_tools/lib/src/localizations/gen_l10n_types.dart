@@ -336,6 +336,7 @@ class Message {
     this.resourceId,
     bool isResourceAttributeRequired,
     {
+      this.useRelaxedSyntax = false,
       this.useEscaping = false,
       this.logger,
     }
@@ -352,13 +353,18 @@ class Message {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
+      List<String>? validPlaceholders;
+      if (useRelaxedSyntax) {
+        validPlaceholders = placeholders.entries.map((MapEntry<String, Placeholder> e) => e.key).toList();
+      }
       try {
         parsedMessages[bundle.locale] = translation == null ? null : Parser(
           resourceId,
           bundle.file.basename,
           translation,
           useEscaping: useEscaping,
-          logger: logger
+          placeholders: validPlaceholders,
+          logger: logger,
         ).parse();
       } on L10nParserException catch (error) {
         logger?.printError(error.toString());
@@ -378,6 +384,7 @@ class Message {
   final Map<LocaleInfo, Node?> parsedMessages;
   final Map<String, Placeholder> placeholders;
   final bool useEscaping;
+  final bool useRelaxedSyntax;
   final Logger? logger;
   bool hadErrors = false;
 
