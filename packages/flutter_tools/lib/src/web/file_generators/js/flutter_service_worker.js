@@ -96,13 +96,10 @@ self.addEventListener("fetch", (event) => {
     key = '/';
   }
 
-  if (key.includes('AssetManifest.bin')) {
-    const httpHeaders = {
-      "X-My-Custom-Header": "Andrew was here",
-    };
-    const myHeaders = new Headers(httpHeaders);
+  // TODO write this to cache on initialization instead of having special early check here.
+  if (key == 'assets/AssetManifest.bin') {
     const responseBody = new Blob([new Uint8Array(ASSET_MANIFEST)], {type: 'application/octet-stream'});
-    const response = new Response(responseBody, {headers: myHeaders});
+    const response = new Response(responseBody);
     event.respondWith(response);
     return;
   }

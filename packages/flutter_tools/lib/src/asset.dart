@@ -29,6 +29,8 @@ const String kFontManifestJson = 'FontManifest.json';
 // Should match '2x', '/1x', '1.5x', etc.
 final RegExp _assetVariantDirectoryRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 
+ByteData? generatedAssetManifest;
+
 /// The effect of adding `uses-material-design: true` to the pubspec is to insert
 /// the following snippet into the asset manifest:
 ///
@@ -233,8 +235,6 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     if (flutterManifest.isEmpty) {
-      entries[_kAssetManifestJsonFilename] = DevFSStringContent('{}');
-      entryKinds[_kAssetManifestJsonFilename] = AssetKind.regular;
       entries[_kAssetManifestJsonFilename] = DevFSStringContent('{}');
       entryKinds[_kAssetManifestJsonFilename] = AssetKind.regular;
       final ByteData emptyAssetManifest =
@@ -720,6 +720,7 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     final ByteData message = const StandardMessageCodec().encodeMessage(result)!;
+    generatedAssetManifest = message;
     return DevFSByteContent(message.buffer.asUint8List(0, message.lengthInBytes));
   }
 
