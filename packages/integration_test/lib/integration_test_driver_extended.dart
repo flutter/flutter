@@ -75,7 +75,7 @@ Future<void> writeResponseData(
 /// and it returns `true` if both images are equal.
 ///
 /// As a result, returning `false` from `onScreenshot` will make the test fail.
-/// 
+///
 /// `responseDataCallback` is the handler for processing [Response.data].
 /// The default value is `writeResponseData`.
 Future<void> integrationDriver({
