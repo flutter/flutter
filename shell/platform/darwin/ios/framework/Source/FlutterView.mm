@@ -156,12 +156,13 @@ static BOOL _forceSoftwareRendering;
       32,                                 // size_t bitsPerPixel,
       4 * screenshot.frame_size.width(),  // size_t bytesPerRow
       colorspace,                         // CGColorSpaceRef space
-      static_cast<CGBitmapInfo>(kCGImageAlphaPremultipliedLast |
-                                kCGBitmapByteOrder32Big),  // CGBitmapInfo bitmapInfo
-      image_data_provider,                                 // CGDataProviderRef provider
-      nullptr,                                             // const CGFloat* decode
-      false,                                               // bool shouldInterpolate
-      kCGRenderingIntentDefault                            // CGColorRenderingIntent intent
+      static_cast<CGBitmapInfo>(
+          static_cast<uint32_t>(kCGImageAlphaPremultipliedLast) |
+          static_cast<uint32_t>(kCGBitmapByteOrder32Big)),  // CGBitmapInfo bitmapInfo
+      image_data_provider,                                  // CGDataProviderRef provider
+      nullptr,                                              // const CGFloat* decode
+      false,                                                // bool shouldInterpolate
+      kCGRenderingIntentDefault                             // CGColorRenderingIntent intent
       ));
 
   const CGRect frame_rect =
