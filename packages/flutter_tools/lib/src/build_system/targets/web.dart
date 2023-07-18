@@ -567,7 +567,9 @@ class WebServiceWorker extends Target {
   ];
 
   @override
-  List<Source> get inputs => const <Source>[];
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/AssetManifest.bin'),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[];
