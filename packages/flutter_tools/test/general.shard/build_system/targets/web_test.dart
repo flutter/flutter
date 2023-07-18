@@ -980,9 +980,12 @@ void main() {
   }));
 
   test('WebServiceWorker generates a service_worker for a web resource folder', () => testbed.run(() async {
+    environment.buildDir.childFile('AssetManifest.bin').createSync();
+
     environment.outputDir.childDirectory('a').childFile('a.txt')
       ..createSync(recursive: true)
       ..writeAsStringSync('A');
+
     await WebServiceWorker(globals.fs, WebRendererMode.auto, isWasm: false).build(environment);
 
     expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
@@ -999,6 +1002,8 @@ void main() {
   }));
 
   test('WebServiceWorker contains baseUrl cache', () => testbed.run(() async {
+    environment.buildDir.childFile('AssetManifest.bin').createSync();
+
     environment.outputDir
       .childFile('index.html')
       .createSync(recursive: true);
@@ -1014,6 +1019,8 @@ void main() {
   }));
 
   test('WebServiceWorker does not cache source maps', () => testbed.run(() async {
+    environment.buildDir.childFile('AssetManifest.bin').createSync();
+
     environment.outputDir
       .childFile('main.dart.js')
       .createSync(recursive: true);
