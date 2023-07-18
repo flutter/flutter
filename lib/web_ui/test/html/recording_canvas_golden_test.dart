@@ -35,7 +35,7 @@ Future<void> testMain() async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect,
         RenderStrategy());
 
-    // Draws the estimated bounds so we can spot the bug in Scuba.
+    // Draws the estimated bounds so we can spot the bug in Gold.
     engineCanvas
       ..save()
       ..drawRect(
@@ -63,7 +63,7 @@ Future<void> testMain() async {
       await matchGoldenFile('paint_bounds_for_$fileName.png', region: region);
     } finally {
       // The page is reused across tests, so remove the element after taking the
-      // Scuba screenshot.
+      // screenshot.
       sceneElement.remove();
     }
   }

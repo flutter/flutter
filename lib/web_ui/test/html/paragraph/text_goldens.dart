@@ -13,29 +13,24 @@ import 'package:web_engine_tester/golden_tester.dart';
 import 'helper.dart';
 
 /// Class that controls some details of how screenshotting is made.
-///
-/// (For Googlers: Not really related with internal Scuba anymore)
-class EngineScubaTester {
-  EngineScubaTester(this.viewportSize);
+class EngineGoldenTester {
+  EngineGoldenTester(this.viewportSize);
 
-  /// The size of the browser window used in this scuba test.
+  /// The size of the browser window used in this golden test.
   final ui.Size viewportSize;
 
-  static Future<EngineScubaTester> initialize(
+  static Future<EngineGoldenTester> initialize(
       {ui.Size viewportSize = const ui.Size(2400, 1800)}) async {
     assert(() {
       if (viewportSize.width.ceil() != viewportSize.width ||
           viewportSize.height.ceil() != viewportSize.height) {
         throw Exception(
-            'Scuba only supports integer screen sizes, but found: $viewportSize');
-      }
-      if (viewportSize.width < 472) {
-        throw Exception('Scuba does not support screen width smaller than 472');
+            'Gold only supports integer screen sizes, but found: $viewportSize');
       }
       return true;
     }());
 
-    return EngineScubaTester(viewportSize);
+    return EngineGoldenTester(viewportSize);
   }
 
   ui.Rect get viewportRegion =>
@@ -51,7 +46,7 @@ class EngineScubaTester {
     );
   }
 
-  /// Prepares the DOM and inserts all the necessary nodes, then invokes scuba's
+  /// Prepares the DOM and inserts all the necessary nodes, then invokes Gold's
   /// screenshot diffing.
   ///
   /// It also cleans up the DOM after itself.
@@ -81,7 +76,7 @@ class EngineScubaTester {
       );
     } finally {
       // The page is reused across tests, so remove the element after taking the
-      // Scuba screenshot.
+      // screenshot.
       sceneElement.remove();
     }
   }
