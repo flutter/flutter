@@ -82,26 +82,6 @@ platform_properties:
       os: Windows-10
 
 targets:
-  - name: Linux Android AOT Engine
-    recipe: engine/engine
-    bringup: true
-    properties:
-      build_android_aot: "true"
-      android_sdk_license: \n24333f8a63b6825ea9c5514f83c2829b004d1fee
-      android_sdk_preview_license: \n84831b9409646a918e30573bab4c9c91346d8abd
-    timeout: 60
-
-  - name: Linux Android Debug Engine
-    recipe: engine/engine
-    bringup: true
-    properties:
-      build_android_debug: "true"
-      build_android_jit_release: "true"
-      build_android_vulkan: "true"
-      android_sdk_license: \n24333f8a63b6825ea9c5514f83c2829b004d1fee
-      android_sdk_preview_license: \n84831b9409646a918e30573bab4c9c91346d8abd
-    timeout: 60
-
   - name: Linux linux_android_emulator_tests
     enabled_branches:
       - main
@@ -192,17 +172,6 @@ targets:
         }
     timeout: 60
 
-  - name: Linux Benchmarks
-    bringup: true
-    enabled_branches:
-      - main
-    recipe: engine/engine_metrics
-    presubmit: false
-    properties:
-      build_host: "true"
-      upload_metrics: "false"
-    timeout: 60
-
   - name: Linux linux_benchmarks
     enabled_branches:
       - main
@@ -259,80 +228,6 @@ targets:
     enabled_branches:
       - main
     timeout: 60
-
-  - name: Linux Host Engine
-    recipe: engine/engine
-    bringup: true
-    properties:
-      gclient_variables: >-
-        {"download_emsdk": true}
-      build_host: "true"
-      cores: "32"
-    timeout: 60
-
-  - name: Linux Unopt
-    bringup: true
-    recipe: engine/engine_unopt
-    properties:
-      clobber: "true"
-    timeout: 60
-
-  - name: Linux License
-    bringup: true
-    recipe: engine/engine_license
-    properties:
-      clobber: "true"
-    timeout: 60
-
-  - name: Linux Host clang-tidy
-    bringup: true
-    recipe: engine/engine_lint
-    properties:
-      cores: "32"
-      lint_android: "false"
-      lint_host: "true"
-    timeout: 60
-    runIf:
-      - DEPS
-      - .ci.yaml
-      - .clang-tidy
-      - tools/**
-      - ci/**
-      - "**.h"
-      - "**.c"
-      - "**.cc"
-      - "**.fbs"
-      - "**.frag"
-      - "**.vert"
-
-  - name: Linux Android clang-tidy
-    bringup: true
-    recipe: engine/engine_lint
-    properties:
-      cores: "32"
-      lint_android: "true"
-      lint_host: "false"
-    timeout: 60
-    runIf:
-      - DEPS
-      - .ci.yaml
-      - .clang-tidy
-      - tools/**
-      - ci/**
-      - "**.h"
-      - "**.c"
-      - "**.cc"
-      - "**.fbs"
-      - "**.frag"
-      - "**.vert"
-      - "**.py" # Run pylint on the fastest clang-tidy builder.
-
-  - name: Linux Arm Host Engine
-    bringup: true
-    recipe: engine/engine_arm
-    properties:
-      build_host: "true"
-    timeout: 90
 
   - name: Linux linux_fuchsia
     bringup: true
@@ -454,24 +349,6 @@ targets:
       - ci/**
       - flutter_frontend_server/**
 
-  - name: Mac Android AOT Engine
-    bringup: true
-    recipe: engine/engine
-    properties:
-      android_sdk_license: \n24333f8a63b6825ea9c5514f83c2829b004d1fee
-      android_sdk_preview_license: \n84831b9409646a918e30573bab4c9c91346d8abd
-      build_android_aot: "true"
-    timeout: 60
-
-  - name: Mac Host Engine
-    bringup: true
-    recipe: engine/engine
-    properties:
-      gclient_variables: >-
-        {"download_emsdk": true}
-      build_host: "true"
-    timeout: 75
-
   - name: Linux mac_android_aot_engine
     recipe: engine_v2/engine_v2
     timeout: 60
@@ -527,75 +404,6 @@ targets:
       add_recipes_cq: "true"
     timeout: 60
 
-  - name: Mac Unopt
-    bringup: true
-    recipe: engine/engine_unopt
-    properties:
-      $flutter/osx_sdk : >-
-        {
-          "sdk_version": "14e300c",
-          "runtime_versions":
-            [
-              "ios-16-4_14e300c",
-              "ios-16-2_14c18"
-            ]
-        }
-    timeout: 75
-
-  - name: Mac Host clang-tidy
-    bringup: true
-    recipe: engine/engine_lint
-    properties:
-      cpu: arm64
-      lint_host: "true"
-      lint_ios: "false"
-    timeout: 120
-    runIf:
-      - DEPS
-      - .ci.yaml
-      - .clang-tidy
-      - tools/**
-      - ci/**
-      - "**.h"
-      - "**.c"
-      - "**.cc"
-      - "**.fbs"
-      - "**.frag"
-      - "**.vert"
-      - "**.m"
-      - "**.mm"
-
-  - name: Mac iOS clang-tidy
-    bringup: true
-    recipe: engine/engine_lint
-    properties:
-      cpu: arm64
-      lint_host: "false"
-      lint_ios: "true"
-    timeout: 120
-    runIf:
-      - DEPS
-      - .ci.yaml
-      - .clang-tidy
-      - tools/**
-      - ci/**
-      - "**.h"
-      - "**.c"
-      - "**.cc"
-      - "**.fbs"
-      - "**.frag"
-      - "**.vert"
-      - "**.m"
-      - "**.mm"
-
-  - name: Mac iOS Engine
-    bringup: true
-    recipe: engine/engine
-    properties:
-      build_ios: "true"
-      ios_debug: "true"
-    timeout: 60
-
   - name: Mac mac_ios_engine
     recipe: engine_v2/engine_v2
     timeout: 60
@@ -622,24 +430,6 @@ targets:
     properties:
       cpu: arm64
       config_name: mac_impeller_cmake_example
-
-  - name: Windows Android AOT Engine
-    bringup: true
-    recipe: engine/engine
-    properties:
-      build_android_aot: "true"
-      android_sdk_license: \n24333f8a63b6825ea9c5514f83c2829b004d1fee
-      android_sdk_preview_license: \n84831b9409646a918e30573bab4c9c91346d8abd
-    timeout: 60
-
-  - name: Windows Host Engine
-    bringup: true
-    recipe: engine/engine
-    timeout: 60
-    properties:
-      gclient_variables: >-
-        {"download_emsdk": true}
-      build_host: "true"
 
   - name: Windows windows_android_aot_engine
     recipe: engine_v2/engine_v2
@@ -678,37 +468,6 @@ targets:
     timeout: 60
     properties:
       config_name: windows_unopt
-
-  - name: Windows Unopt
-    bringup: true
-    recipe: engine/engine_unopt
-    properties:
-      add_recipes_cq: "true"
-    timeout: 75
-
-  - name: Mac iOS Engine Profile
-    bringup: true
-    recipe: engine/engine
-    properties:
-      build_ios: "true"
-      ios_profile: "true"
-    timeout: 90
-    runIf:
-      - DEPS
-      - .ci.yaml
-      - ci/**
-
-  - name: Mac iOS Engine Release
-    bringup: true
-    recipe: engine/engine
-    properties:
-      build_ios: "true"
-      ios_release: "true"
-    timeout: 90
-    runIf:
-      - DEPS
-      - .ci.yaml
-      - ci/**
 
   - name: Linux ci_yaml engine roller
     bringup: true
