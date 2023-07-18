@@ -1032,8 +1032,8 @@
 ../../../third_party/angle/src/compiler/generate_parser_tools.py
 ../../../third_party/angle/src/compiler/preprocessor/generate_parser.py
 ../../../third_party/angle/src/compiler/translator/gen_builtin_symbols.py
-../../../third_party/angle/src/compiler/translator/gen_emulated_builtin_function_tables.py
 ../../../third_party/angle/src/compiler/translator/generate_parser.py
+../../../third_party/angle/src/compiler/translator/hlsl/gen_emulated_builtin_function_tables.py
 ../../../third_party/angle/src/compiler/translator/span_unittest.cpp
 ../../../third_party/angle/src/feature_support_util/OWNERS
 ../../../third_party/angle/src/feature_support_util/feature_support_util_unittest.cpp
