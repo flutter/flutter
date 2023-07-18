@@ -41,7 +41,8 @@ class DiffContextTest : public LayerTest {
                        const SkIRect& additional_damage = SkIRect::MakeEmpty(),
                        int horizontal_clip_alignment = 0,
                        int vertical_alignment = 0,
-                       bool use_raster_cache = true);
+                       bool use_raster_cache = true,
+                       bool impeller_enabled = false);
 
   // Create display list consisting of filled rect with given color; Being able
   // to specify different color is useful to test deep comparison of pictures

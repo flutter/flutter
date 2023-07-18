@@ -10,13 +10,15 @@ namespace flutter {
 DiffContext::DiffContext(SkISize frame_size,
                          PaintRegionMap& this_frame_paint_region_map,
                          const PaintRegionMap& last_frame_paint_region_map,
-                         bool has_raster_cache)
+                         bool has_raster_cache,
+                         bool impeller_enabled)
     : clip_tracker_(DisplayListMatrixClipTracker(kGiantRect, SkMatrix::I())),
       rects_(std::make_shared<std::vector<SkRect>>()),
       frame_size_(frame_size),
       this_frame_paint_region_map_(this_frame_paint_region_map),
       last_frame_paint_region_map_(last_frame_paint_region_map),
-      has_raster_cache_(has_raster_cache) {}
+      has_raster_cache_(has_raster_cache),
+      impeller_enabled_(impeller_enabled) {}
 
 void DiffContext::BeginSubtree() {
   state_stack_.push_back(state_);

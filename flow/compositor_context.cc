@@ -13,13 +13,14 @@ namespace flutter {
 
 std::optional<SkRect> FrameDamage::ComputeClipRect(
     flutter::LayerTree& layer_tree,
-    bool has_raster_cache) {
+    bool has_raster_cache,
+    bool impeller_enabled) {
   if (layer_tree.root_layer()) {
     PaintRegionMap empty_paint_region_map;
     DiffContext context(layer_tree.frame_size(), layer_tree.paint_region_map(),
                         prev_layer_tree_ ? prev_layer_tree_->paint_region_map()
                                          : empty_paint_region_map,
-                        has_raster_cache);
+                        has_raster_cache, impeller_enabled);
     context.PushCullRect(SkRect::MakeIWH(layer_tree.frame_size().width(),
                                          layer_tree.frame_size().height()));
     {
@@ -121,7 +122,8 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
 
   std::optional<SkRect> clip_rect;
   if (frame_damage) {
-    clip_rect = frame_damage->ComputeClipRect(layer_tree, !ignore_raster_cache);
+    clip_rect = frame_damage->ComputeClipRect(layer_tree, !ignore_raster_cache,
+                                              !gr_context_);
 
     if (aiks_context_ &&
         !ShouldPerformPartialRepaint(clip_rect, layer_tree.frame_size())) {

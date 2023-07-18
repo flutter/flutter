@@ -17,11 +17,13 @@ Damage DiffContextTest::DiffLayerTree(MockLayerTree& layer_tree,
                                       const SkIRect& additional_damage,
                                       int horizontal_clip_alignment,
                                       int vertical_clip_alignment,
-                                      bool use_raster_cache) {
+                                      bool use_raster_cache,
+                                      bool impeller_enabled) {
   FML_CHECK(layer_tree.size() == old_layer_tree.size());
 
   DiffContext dc(layer_tree.size(), layer_tree.paint_region_map(),
-                 old_layer_tree.paint_region_map(), use_raster_cache);
+                 old_layer_tree.paint_region_map(), use_raster_cache,
+                 impeller_enabled);
   dc.PushCullRect(
       SkRect::MakeIWH(layer_tree.size().width(), layer_tree.size().height()));
   layer_tree.root()->Diff(&dc, old_layer_tree.root());

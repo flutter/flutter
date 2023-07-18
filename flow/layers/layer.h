@@ -71,6 +71,8 @@ struct PrerollContext {
   // presence of a texture layer during Preroll.
   bool has_texture_layer = false;
 
+  bool impeller_enabled = false;
+
   // The list of flags that describe which rendering state attributes
   // (such as opacity, ColorFilter, ImageFilter) a given layer can
   // render itself without requiring the parent to perform a protective
@@ -117,6 +119,7 @@ struct PaintContext {
   // only when leaf layer tracing is enabled.
   LayerSnapshotStore* layer_snapshot_store = nullptr;
   bool enable_leaf_layer_tracing = false;
+  bool impeller_enabled = false;
   impeller::AiksContext* aiks_context;
 };
 
