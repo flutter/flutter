@@ -669,7 +669,6 @@ targets:
       - main
     properties:
       add_recipes_cq: "true"
-      release_build: "true"
       config_name: windows_arm_host_engine
     drone_dimensions:
       - os=Windows
