@@ -1679,12 +1679,8 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     assert(word.isNormalized);
     late TextPosition start;
     late TextPosition end;
-    // if (position.offset >= word.end) {
     if (position.offset > word.end) {
-      // This seems to cause an issue when dragging between words.
       start = end = TextPosition(offset: position.offset);
-      // start = TextPosition(offset: word.start);
-      // end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
     } else {
       start = TextPosition(offset: word.start);
       end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
