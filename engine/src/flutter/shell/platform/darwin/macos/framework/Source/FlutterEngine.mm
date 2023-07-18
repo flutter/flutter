@@ -178,9 +178,11 @@ constexpr char kTextPlainFormat[] = "text/plain";
     // allow tests to override it so that an actual exit doesn't occur.
     [[NSApplication sharedApplication] terminate:sender];
   };
-  FlutterAppDelegate* appDelegate =
-      (FlutterAppDelegate*)[[NSApplication sharedApplication] delegate];
-  appDelegate.terminationHandler = self;
+  id<NSApplicationDelegate> appDelegate = [[NSApplication sharedApplication] delegate];
+  if ([appDelegate respondsToSelector:@selector(setTerminationHandler:)]) {
+    FlutterAppDelegate* flutterAppDelegate = reinterpret_cast<FlutterAppDelegate*>(appDelegate);
+    flutterAppDelegate.terminationHandler = self;
+  }
   return self;
 }
 
@@ -420,10 +422,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _semanticsEnabled = NO;
   _isResponseValid = [[NSMutableArray alloc] initWithCapacity:1];
   [_isResponseValid addObject:@YES];
-  _terminationHandler = [[FlutterEngineTerminationHandler alloc] initWithEngine:self
-                                                                     terminator:nil];
   // kFlutterImplicitViewId is reserved for the implicit view.
-  // All IDs above it are for regular views.
   _nextViewId = kFlutterImplicitViewId + 1;
 
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
@@ -443,9 +442,16 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   [self setUpPlatformViewChannel];
   [self setUpAccessibilityChannel];
   [self setUpNotificationCenterListeners];
-  FlutterAppDelegate* appDelegate =
-      reinterpret_cast<FlutterAppDelegate*>([[NSApplication sharedApplication] delegate]);
-  [appDelegate addApplicationLifecycleDelegate:self];
+  id<NSApplicationDelegate> appDelegate = [[NSApplication sharedApplication] delegate];
+  const SEL selector = @selector(addApplicationLifecycleDelegate:);
+  if ([appDelegate respondsToSelector:selector]) {
+    _terminationHandler = [[FlutterEngineTerminationHandler alloc] initWithEngine:self
+                                                                       terminator:nil];
+    FlutterAppDelegate* flutterAppDelegate = reinterpret_cast<FlutterAppDelegate*>(appDelegate);
+    [flutterAppDelegate addApplicationLifecycleDelegate:self];
+  } else {
+    _terminationHandler = nil;
+  }
 
   return self;
 }
@@ -1097,9 +1103,20 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   } else if ([call.method isEqualToString:@"Clipboard.hasStrings"]) {
     result(@{@"value" : @([self clipboardHasStrings])});
   } else if ([call.method isEqualToString:@"System.exitApplication"]) {
-    [[self terminationHandler] handleRequestAppExitMethodCall:call.arguments result:result];
+    if ([self terminationHandler] == nil) {
+      // If the termination handler isn't set, then either we haven't
+      // initialized it yet, or (more likely) the NSApp delegate isn't a
+      // FlutterAppDelegate, so it can't cancel requests to exit. So, in that
+      // case, just terminate when requested.
+      [NSApp terminate:self];
+      result(nil);
+    } else {
+      [[self terminationHandler] handleRequestAppExitMethodCall:call.arguments result:result];
+    }
   } else if ([call.method isEqualToString:@"System.initializationComplete"]) {
-    [self terminationHandler].acceptingRequests = YES;
+    if ([self terminationHandler] != nil) {
+      [self terminationHandler].acceptingRequests = YES;
+    }
     result(nil);
   } else {
     result(FlutterMethodNotImplemented);
