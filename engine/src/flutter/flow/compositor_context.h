@@ -82,7 +82,8 @@ class FrameDamage {
   // but the paint region of layer_tree will be calculated so that it can be
   // used for diffing of subsequent frames.
   std::optional<SkRect> ComputeClipRect(flutter::LayerTree& layer_tree,
-                                        bool has_raster_cache);
+                                        bool has_raster_cache,
+                                        bool impeller_enabled);
 
   // See Damage::frame_damage.
   std::optional<SkIRect> GetFrameDamage() const {

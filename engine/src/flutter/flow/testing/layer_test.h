@@ -195,6 +195,12 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
     paint_context_.layer_snapshot_store = nullptr;
   }
 
+  void enable_impeller() {
+    preroll_context_.impeller_enabled = true;
+    paint_context_.impeller_enabled = true;
+    display_list_paint_context_.impeller_enabled = true;
+  }
+
  private:
   void set_raster_cache_(std::unique_ptr<RasterCache> raster_cache) {
     raster_cache_ = std::move(raster_cache);
