@@ -262,10 +262,10 @@ abstract class BoxBorder extends ShapeBorder {
     BorderSide? left,
     required Color color,
   }) {
-    final BorderSide t = top ?? BorderSide.none;
-    final BorderSide r = right ?? BorderSide.none;
-    final BorderSide b = bottom ?? BorderSide.none;
-    final BorderSide l = left ?? BorderSide.none;
+    top ??= BorderSide.none;
+    right ??= BorderSide.none;
+    bottom ??= BorderSide.none;
+    left ??= BorderSide.none;
 
     final RRect borderRect;
     switch (shape) {
@@ -281,8 +281,8 @@ abstract class BoxBorder extends ShapeBorder {
         );
     }
     final Paint paint = Paint()..color = color;
-    final RRect inner = _deflateRRect(borderRect, EdgeInsets.fromLTRB(l.strokeInset, t.strokeInset, r.strokeInset, b.strokeInset));
-    final RRect outer = _inflateRRect(borderRect, EdgeInsets.fromLTRB(l.strokeOutset, t.strokeOutset, r.strokeOutset, b.strokeOutset));
+    final RRect inner = _deflateRRect(borderRect, EdgeInsets.fromLTRB(left.strokeInset, top.strokeInset, right.strokeInset, bottom.strokeInset));
+    final RRect outer = _inflateRRect(borderRect, EdgeInsets.fromLTRB(left.strokeOutset, top.strokeOutset, right.strokeOutset, bottom.strokeOutset));
     canvas.drawDRRect(outer, inner, paint);
   }
 
