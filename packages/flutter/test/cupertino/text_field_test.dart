@@ -273,13 +273,14 @@ void main() {
 
       // Double tap on the same location to select the word around the cursor.
       await tester.tapAt(textOffsetToPosition(tester, index));
-      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, index));
       await tester.pumpAndSettle();
 
       expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
       expect(find.text('Look Up'), isTargetPlatformiOS? findsOneWidget : findsNothing);
-    },    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+    },    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+          skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
