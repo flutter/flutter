@@ -187,7 +187,7 @@ void testMain() {
       });
     });
 
-    test('preserve old scuba test behavior', () {
+    test('preserve old golden test behavior', () {
       final RRect outer =
           RRect.fromRectAndCorners(const Rect.fromLTRB(10, 20, 30, 40));
       final RRect inner =

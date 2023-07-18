@@ -382,7 +382,7 @@ Future<void> testMain() async {
           region: region);
     } finally {
       // The page is reused across tests, so remove the element after taking the
-      // Scuba screenshot.
+      // screenshot.
       sceneElement.remove();
     }
   });
@@ -421,7 +421,7 @@ Future<void> testMain() async {
           region: region);
     } finally {
       // The page is reused across tests, so remove the element after taking the
-      // Scuba screenshot.
+      // screenshot.
       sceneElement.remove();
     }
   });

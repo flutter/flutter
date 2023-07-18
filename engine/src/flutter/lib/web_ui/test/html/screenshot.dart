@@ -48,7 +48,7 @@ Future<void> canvasScreenshot(
         region: region);
   } finally {
     // The page is reused across tests, so remove the element after taking the
-    // Scuba screenshot.
+    // screenshot.
     sceneElement.remove();
   }
 }
@@ -65,7 +65,7 @@ Future<void> sceneScreenshot(SurfaceSceneBuilder sceneBuilder, String fileName,
         region: region);
   } finally {
     // The page is reused across tests, so remove the element after taking the
-    // Scuba screenshot.
+    // screenshot.
     sceneElement?.remove();
   }
 }

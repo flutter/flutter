@@ -22,9 +22,9 @@ enum PaintMode {
 
 Future<void> testMain() async {
   const Rect region =
-      Rect.fromLTWH(8, 8, 600, 400); // Compensate for old scuba tester padding
+      Rect.fromLTWH(8, 8, 600, 400); // Compensate for old golden tester padding
 
-  Future<void> testPath(Path path, String scubaFileName,
+  Future<void> testPath(Path path, String goldenFileName,
       {SurfacePaint? paint,
       PaintMode mode = PaintMode.kStrokeAndFill}) async {
     const Rect canvasBounds = Rect.fromLTWH(0, 0, 600, 400);
@@ -72,7 +72,7 @@ Future<void> testMain() async {
     sceneElement.append(bitmapCanvas.rootElement);
     sceneElement.append(svgElement);
 
-    await matchGoldenFile('$scubaFileName.png',
+    await matchGoldenFile('$goldenFileName.png',
         region: region);
 
     bitmapCanvas.rootElement.remove();

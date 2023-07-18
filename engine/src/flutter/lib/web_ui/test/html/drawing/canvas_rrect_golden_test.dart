@@ -17,7 +17,7 @@ Future<void> testMain() async {
   late RecordingCanvas rc;
   const Rect canvasRect = Rect.fromLTWH(0, 0, 500, 100);
 
-  const Rect region = Rect.fromLTWH(8, 8, 500, 100); // Compensate for old scuba tester padding
+  const Rect region = Rect.fromLTWH(8, 8, 500, 100); // Compensate for old golden tester padding
 
   final SurfacePaint niceRRectPaint = SurfacePaint()
     ..color = const Color.fromRGBO(250, 186, 218, 1.0) // #fabada
