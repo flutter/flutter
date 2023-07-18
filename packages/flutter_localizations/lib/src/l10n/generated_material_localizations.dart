@@ -417,6 +417,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Stoor';
 
   @override
+  String get scanTextButtonLabel => 'Skena umbhalo';
+
+  @override
   String get scrimLabel => 'Skerm';
 
   @override
@@ -890,6 +893,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'አስቀምጥ';
+
+  @override
+  String get scanTextButtonLabel => 'ጽሑፍ ይቃኙ';
 
   @override
   String get scrimLabel => 'ገዳቢ';
@@ -1367,6 +1373,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'الحفظ';
 
   @override
+  String get scanTextButtonLabel => 'مسح النص';
+
+  @override
   String get scrimLabel => 'تمويه';
 
   @override
@@ -1840,6 +1849,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'ছেভ কৰক';
+
+  @override
+  String get scanTextButtonLabel => 'স্কেন টেক্সট';
 
   @override
   String get scrimLabel => 'স্ক্ৰিম';
@@ -2317,6 +2329,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Yadda saxlayın';
 
   @override
+  String get scanTextButtonLabel => 'Mətni skan edin';
+
+  @override
   String get scrimLabel => 'Kətan';
 
   @override
@@ -2790,6 +2805,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Захаваць';
+
+  @override
+  String get scanTextButtonLabel => 'Сканаваць тэкст';
 
   @override
   String get scrimLabel => 'Палатно';
@@ -3267,6 +3285,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Запазване';
 
   @override
+  String get scanTextButtonLabel => 'Сканиране на текст';
+
+  @override
   String get scrimLabel => 'Скрим';
 
   @override
@@ -3740,6 +3761,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'সেভ করুন';
+
+  @override
+  String get scanTextButtonLabel => 'পাঠ্য স্ক্যান করুন';
 
   @override
   String get scrimLabel => 'স্ক্রিম';
@@ -4217,6 +4241,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Sačuvaj';
 
   @override
+  String get scanTextButtonLabel => 'Skeniraj tekst';
+
+  @override
   String get scrimLabel => 'Rubno';
 
   @override
@@ -4690,6 +4717,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Desa';
+
+  @override
+  String get scanTextButtonLabel => 'Escaneja el text';
 
   @override
   String get scrimLabel => 'Fons atenuat';
@@ -5167,6 +5197,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Uložit';
 
   @override
+  String get scanTextButtonLabel => 'Naskenujte text';
+
+  @override
   String get scrimLabel => 'Scrim';
 
   @override
@@ -5640,6 +5673,9 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Cadw';
+
+  @override
+  String get scanTextButtonLabel => 'Scan text';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -6117,6 +6153,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Gem';
 
   @override
+  String get scanTextButtonLabel => 'Scan tekst';
+
+  @override
   String get scrimLabel => 'Dæmpeskærm';
 
   @override
@@ -6165,7 +6204,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get tabLabelRaw => r'Fane $tabIndex af $tabCount';
 
   @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
 
   @override
   String get timePickerDialHelpText => 'Vælg tidspunkt';
@@ -6590,6 +6629,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Speichern';
+
+  @override
+  String get scanTextButtonLabel => 'Text scannen';
 
   @override
   String get scrimLabel => 'Gitter';
@@ -7131,6 +7173,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Αποθήκευση';
 
   @override
+  String get scanTextButtonLabel => 'Σάρωση κειμένου';
+
+  @override
   String get scrimLabel => 'Επικάλυψη';
 
   @override
@@ -7604,6 +7649,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Save';
+
+  @override
+  String get scanTextButtonLabel => 'Scan text';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -8813,6 +8861,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Guardar';
+
+  @override
+  String get scanTextButtonLabel => 'Escanear texto';
 
   @override
   String get scrimLabel => 'Sombreado';
@@ -12673,6 +12724,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Salvesta';
 
   @override
+  String get scanTextButtonLabel => 'Skanni teksti';
+
+  @override
   String get scrimLabel => 'Sirm';
 
   @override
@@ -13146,6 +13200,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Gorde';
+
+  @override
+  String get scanTextButtonLabel => 'Eskaneatu testua';
 
   @override
   String get scrimLabel => 'Barrera';
@@ -13623,6 +13680,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ذخیره';
 
   @override
+  String get scanTextButtonLabel => 'اسکن متن';
+
+  @override
   String get scrimLabel => 'رویه';
 
   @override
@@ -14098,6 +14158,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Tallenna';
 
   @override
+  String get scanTextButtonLabel => 'Skannaa tekstiä';
+
+  @override
   String get scrimLabel => 'Sermi';
 
   @override
@@ -14143,7 +14206,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Kirjautunut sisään';
 
   @override
-  String get tabLabelRaw => r'Välilehti $tabIndex/$tabCount';
+  String get tabLabelRaw => r'Välilehti $tabIndex kautta $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
@@ -14571,6 +14634,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'I-save';
+
+  @override
+  String get scanTextButtonLabel => 'I-scan ang text';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -15046,6 +15112,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Enregistrer';
+
+  @override
+  String get scanTextButtonLabel => 'Numériser du texte';
 
   @override
   String get scrimLabel => 'Fond';
@@ -15665,6 +15734,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Gardar';
 
   @override
+  String get scanTextButtonLabel => 'Escanear texto';
+
+  @override
   String get scrimLabel => 'Sombreado';
 
   @override
@@ -16138,6 +16210,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Speichern';
+
+  @override
+  String get scanTextButtonLabel => 'Text scannen';
 
   @override
   String get scrimLabel => 'Gitter';
@@ -16615,6 +16690,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'સાચવો';
 
   @override
+  String get scanTextButtonLabel => 'ટેક્સ્ટ સ્કેન કરો';
+
+  @override
   String get scrimLabel => 'સ્ક્રિમ';
 
   @override
@@ -17088,6 +17166,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'שמירה';
+
+  @override
+  String get scanTextButtonLabel => 'סרוק טקסט';
 
   @override
   String get scrimLabel => 'מיסוך';
@@ -17565,6 +17646,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'सेव करें';
 
   @override
+  String get scanTextButtonLabel => 'पाठ स्कैन करें';
+
+  @override
   String get scrimLabel => 'स्क्रिम';
 
   @override
@@ -18038,6 +18122,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Spremi';
+
+  @override
+  String get scanTextButtonLabel => 'Skeniraj tekst';
 
   @override
   String get scrimLabel => 'Rubno';
@@ -18515,6 +18602,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Mentés';
 
   @override
+  String get scanTextButtonLabel => 'Szöveg beolvasása';
+
+  @override
   String get scrimLabel => 'Borítás';
 
   @override
@@ -18988,6 +19078,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Պահել';
+
+  @override
+  String get scanTextButtonLabel => 'Սկանավորեք տեքստը';
 
   @override
   String get scrimLabel => 'Դիմակ';
@@ -19465,6 +19558,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Simpan';
 
   @override
+  String get scanTextButtonLabel => 'Pindai teks';
+
+  @override
   String get scrimLabel => 'Scrim';
 
   @override
@@ -19938,6 +20034,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Vista';
+
+  @override
+  String get scanTextButtonLabel => 'Skannaðu texta';
 
   @override
   String get scrimLabel => 'Möskvi';
@@ -20415,6 +20514,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Salva';
 
   @override
+  String get scanTextButtonLabel => 'Scansiona il testo';
+
+  @override
   String get scrimLabel => 'Rete';
 
   @override
@@ -20888,6 +20990,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => '保存';
+
+  @override
+  String get scanTextButtonLabel => 'テキストをスキャン';
 
   @override
   String get scrimLabel => 'スクリム';
@@ -21365,6 +21470,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'შენახვა';
 
   @override
+  String get scanTextButtonLabel => 'ტექსტის სკანირება';
+
+  @override
   String get scrimLabel => 'სკრიმი';
 
   @override
@@ -21838,6 +21946,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Сақтау';
+
+  @override
+  String get scanTextButtonLabel => 'Мәтінді сканерлеу';
 
   @override
   String get scrimLabel => 'Кенеп';
@@ -22315,6 +22426,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'រក្សាទុក';
 
   @override
+  String get scanTextButtonLabel => 'ស្កេនអត្ថបទ';
+
+  @override
   String get scrimLabel => 'ផ្ទាំងស្រអាប់';
 
   @override
@@ -22788,6 +22902,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => '\u{c89}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get scanTextButtonLabel => '\u{caa}\u{ca0}\u{ccd}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb8}\u{ccd}\u{c95}\u{ccd}\u{caf}\u{cbe}\u{ca8}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get scrimLabel => '\u{cb8}\u{ccd}\u{c95}\u{ccd}\u{cb0}\u{cbf}\u{cae}\u{ccd}';
@@ -23265,6 +23382,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get saveButtonLabel => '저장';
 
   @override
+  String get scanTextButtonLabel => '스캔 텍스트';
+
+  @override
   String get scrimLabel => '스크림';
 
   @override
@@ -23738,6 +23858,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Сактоо';
+
+  @override
+  String get scanTextButtonLabel => 'Текстти скандоо';
 
   @override
   String get scrimLabel => 'Кенеп';
@@ -24215,6 +24338,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ບັນທຶກ';
 
   @override
+  String get scanTextButtonLabel => 'ສະແກນຂໍ້ຄວາມ';
+
+  @override
   String get scrimLabel => 'Scrim';
 
   @override
@@ -24688,6 +24814,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Išsaugoti';
+
+  @override
+  String get scanTextButtonLabel => 'Nuskaityti tekstą';
 
   @override
   String get scrimLabel => 'Užsklanda';
@@ -25165,6 +25294,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Saglabāt';
 
   @override
+  String get scanTextButtonLabel => 'Skenēt tekstu';
+
+  @override
   String get scrimLabel => 'Pārklājums';
 
   @override
@@ -25638,6 +25770,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Зачувај';
+
+  @override
+  String get scanTextButtonLabel => 'Скенирајте текст';
 
   @override
   String get scrimLabel => 'Скрим';
@@ -26115,6 +26250,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'സംരക്ഷിക്കുക';
 
   @override
+  String get scanTextButtonLabel => 'ടെക്സ്റ്റ് സ്കാൻ ചെയ്യുക';
+
+  @override
   String get scrimLabel => 'സ്ക്രിം';
 
   @override
@@ -26588,6 +26726,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Хадгалах';
+
+  @override
+  String get scanTextButtonLabel => 'Текст сканнердах';
 
   @override
   String get scrimLabel => 'Скрим';
@@ -27065,6 +27206,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'सेव्ह करा';
 
   @override
+  String get scanTextButtonLabel => 'मजकूर स्कॅन करा';
+
+  @override
   String get scrimLabel => 'स्क्रिम';
 
   @override
@@ -27538,6 +27682,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Simpan';
+
+  @override
+  String get scanTextButtonLabel => 'Pindai teks';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -28015,6 +28162,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'သိမ်းရန်';
 
   @override
+  String get scanTextButtonLabel => 'စာသားကို စကင်ဖတ်ပါ။';
+
+  @override
   String get scrimLabel => 'Scrim';
 
   @override
@@ -28488,6 +28638,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Lagre';
+
+  @override
+  String get scanTextButtonLabel => 'Scan tekst';
 
   @override
   String get scrimLabel => 'Vev';
@@ -28965,6 +29118,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'सेभ गर्नुहोस्';
 
   @override
+  String get scanTextButtonLabel => 'पाठ स्क्यान गर्नुहोस्';
+
+  @override
   String get scrimLabel => 'स्क्रिम';
 
   @override
@@ -29438,6 +29594,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Opslaan';
+
+  @override
+  String get scanTextButtonLabel => 'Tekst scannen';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -29915,6 +30074,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Lagre';
 
   @override
+  String get scanTextButtonLabel => 'Skann tekst';
+
+  @override
   String get scrimLabel => 'Vev';
 
   @override
@@ -30388,6 +30550,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'ସେଭ କରନ୍ତୁ';
+
+  @override
+  String get scanTextButtonLabel => 'ପାଠ୍ୟ ସ୍କାନ୍ କରନ୍ତୁ';
 
   @override
   String get scrimLabel => 'ସ୍କ୍ରିମ';
@@ -30865,6 +31030,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ਰੱਖਿਅਤ ਕਰੋ';
 
   @override
+  String get scanTextButtonLabel => 'ਟੈਕਸਟ ਸਕੈਨ ਕਰੋ';
+
+  @override
   String get scrimLabel => 'ਸਕ੍ਰਿਮ';
 
   @override
@@ -31338,6 +31506,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Zapisz';
+
+  @override
+  String get scanTextButtonLabel => 'Zeskanuj tekst';
 
   @override
   String get scrimLabel => 'Siatka';
@@ -31815,6 +31986,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SAVE';
 
   @override
+  String get scanTextButtonLabel => 'متن سکین کړئ';
+
+  @override
   String get scrimLabel => 'Scrim';
 
   @override
@@ -32288,6 +32462,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Salvar';
+
+  @override
+  String get scanTextButtonLabel => 'Digitalizar texto';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -32916,6 +33093,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Salvați';
 
   @override
+  String get scanTextButtonLabel => 'Scanați textul';
+
+  @override
   String get scrimLabel => 'Material';
 
   @override
@@ -33389,6 +33569,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Сохранить';
+
+  @override
+  String get scanTextButtonLabel => 'Сканировать текст';
 
   @override
   String get scrimLabel => 'Маска';
@@ -33866,6 +34049,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'සුරකින්න';
 
   @override
+  String get scanTextButtonLabel => 'පෙළ පරිලෝකනය කරන්න';
+
+  @override
   String get scrimLabel => 'ස්ක්‍රිම්';
 
   @override
@@ -34339,6 +34525,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Uložiť';
+
+  @override
+  String get scanTextButtonLabel => 'Naskenujte text';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -34816,6 +35005,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Shrani';
 
   @override
+  String get scanTextButtonLabel => 'Skeniraj besedilo';
+
+  @override
   String get scrimLabel => 'Scrim';
 
   @override
@@ -35291,6 +35483,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Ruaj';
 
   @override
+  String get scanTextButtonLabel => 'Skanoni tekstin';
+
+  @override
   String get scrimLabel => 'Kanavacë';
 
   @override
@@ -35764,6 +35959,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Сачувај';
+
+  @override
+  String get scanTextButtonLabel => 'Скенирајте текст';
 
   @override
   String get scrimLabel => 'Скрим';
@@ -36555,6 +36753,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Spara';
 
   @override
+  String get scanTextButtonLabel => 'Skanna text';
+
+  @override
   String get scrimLabel => 'Scrim';
 
   @override
@@ -37028,6 +37229,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Hifadhi';
+
+  @override
+  String get scanTextButtonLabel => 'Changanua maandishi';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -37505,6 +37709,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'சேமி';
 
   @override
+  String get scanTextButtonLabel => 'உரையை ஸ்கேன் செய்யவும்';
+
+  @override
   String get scrimLabel => 'ஸ்க்ரிம்';
 
   @override
@@ -37978,6 +38185,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'సేవ్ చేయండి';
+
+  @override
+  String get scanTextButtonLabel => 'వచనాన్ని స్కాన్ చేయండి';
 
   @override
   String get scrimLabel => 'స్క్రిమ్';
@@ -38455,6 +38665,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'บันทึก';
 
   @override
+  String get scanTextButtonLabel => 'สแกนข้อความ';
+
+  @override
   String get scrimLabel => 'Scrim';
 
   @override
@@ -38928,6 +39141,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'I-save';
+
+  @override
+  String get scanTextButtonLabel => 'I-scan ang text';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -39405,6 +39621,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Kaydet';
 
   @override
+  String get scanTextButtonLabel => 'Metni tara';
+
+  @override
   String get scrimLabel => 'opaklık katmanı';
 
   @override
@@ -39878,6 +40097,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Зберегти';
+
+  @override
+  String get scanTextButtonLabel => 'Сканувати текст';
 
   @override
   String get scrimLabel => 'Маскувальний фон';
@@ -40355,6 +40577,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'محفوظ کریں';
 
   @override
+  String get scanTextButtonLabel => 'متن کو اسکین کریں';
+
+  @override
   String get scrimLabel => 'اسکریم';
 
   @override
@@ -40828,6 +41053,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Saqlash';
+
+  @override
+  String get scanTextButtonLabel => 'Matnni skanerlash';
 
   @override
   String get scrimLabel => 'Kanop';
@@ -41305,6 +41533,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Lưu';
 
   @override
+  String get scanTextButtonLabel => 'Quét văn bản';
+
+  @override
   String get scrimLabel => 'Scrim';
 
   @override
@@ -41778,6 +42009,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => '保存';
+
+  @override
+  String get scanTextButtonLabel => '扫描文本';
 
   @override
   String get scrimLabel => '纱罩';
@@ -42746,6 +42980,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Londoloza';
+
+  @override
+  String get scanTextButtonLabel => 'Skena umbhalo';
 
   @override
   String get scrimLabel => 'I-Scrim';

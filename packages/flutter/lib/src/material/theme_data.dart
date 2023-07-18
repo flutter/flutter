@@ -439,7 +439,7 @@ class ThemeData with Diagnosticable {
     pageTransitionsTheme ??= const PageTransitionsTheme();
     scrollbarTheme ??= const ScrollbarThemeData();
     visualDensity ??= VisualDensity.defaultDensityForPlatform(platform);
-    useMaterial3 ??= false;
+    useMaterial3 ??= true;
     final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
     splashFactory ??= useMaterial3
       ? useInkSparkle ? InkSparkle.splashFactory : InkRipple.splashFactory
@@ -543,7 +543,7 @@ class ThemeData with Diagnosticable {
     }
     textTheme = defaultTextTheme.merge(textTheme);
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
-    iconTheme ??= isDark ? const IconThemeData(color: kDefaultIconLightColor) : const IconThemeData(color: kDefaultIconDarkColor);
+    iconTheme ??= isDark ? IconThemeData(color: kDefaultIconLightColor) : IconThemeData(color: kDefaultIconDarkColor);
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
 
     // COMPONENT THEMES
