@@ -1677,7 +1677,6 @@
 ../../../third_party/dart/runtime/vm/heap/become_test.cc
 ../../../third_party/dart/runtime/vm/heap/freelist_test.cc
 ../../../third_party/dart/runtime/vm/heap/heap_test.cc
-../../../third_party/dart/runtime/vm/heap/pages_test.cc
 ../../../third_party/dart/runtime/vm/heap/safepoint_test.cc
 ../../../third_party/dart/runtime/vm/heap/weak_table_test.cc
 ../../../third_party/dart/runtime/vm/instructions_arm64_test.cc
