@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import 'editable_text_utils.dart';
+import 'live_text_utils.dart';
 import 'semantics_tester.dart';
 
 Matcher matchesMethodCall(String method, { dynamic args }) => _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
@@ -117,6 +118,72 @@ void main() {
     expect(tester.testTextInput.editingState!['text'], equals('test'));
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
+
+  testWidgets(
+    'Tapping the Live Text button calls onLiveTextInput',
+    (WidgetTester tester) async {
+      bool invokedLiveTextInputSuccessfully = false;
+      final GlobalKey key = GlobalKey();
+      final TextEditingController controller = TextEditingController(text: '');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 400,
+              child: EditableText(
+                maxLines: 10,
+                controller: controller,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: FocusNode(),
+                style: Typography.material2018().black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.right,
+                selectionControls: materialTextSelectionHandleControls,
+                contextMenuBuilder: (
+                  BuildContext context,
+                  EditableTextState editableTextState,
+                ) {
+                  return CupertinoAdaptiveTextSelectionToolbar.editable(
+                    key: key,
+                    clipboardStatus: ClipboardStatus.pasteable,
+                    onCopy: null,
+                    onCut: null,
+                    onPaste: null,
+                    onSelectAll: null,
+                    onLiveTextInput: () {
+                      invokedLiveTextInputSuccessfully = true;
+                    },
+                    anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump(); // Wait for autofocus to take effect.
+
+      expect(find.byKey(key), findsNothing);
+
+      // Long-press to bring up the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(key), findsOneWidget);
+      expect(findLiveTextButton(), findsOneWidget);
+      await tester.tap(findLiveTextButton());
+      await tester.pump();
+      expect(invokedLiveTextInputSuccessfully, isTrue);
+    },
+    skip: kIsWeb, // [intended]
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/126312.
   testWidgets('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
@@ -9652,7 +9719,7 @@ void main() {
       expect(tester.takeException(), isNull);
 
       await tester.pumpWidget(Container());
-      expect(tester.takeException(), isNotNull);
+      expect(tester.takeException(), isAssertionError);
     });
   });
 

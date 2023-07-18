@@ -1227,34 +1227,10 @@ void main() {
 }
 
 /// A [Stdio] that will throw an exception if any of its methods are called.
-class _UnimplementedStdio implements Stdio {
-  const _UnimplementedStdio();
+class _UnimplementedStdio extends Fake implements Stdio {
+  _UnimplementedStdio();
 
-  static const _UnimplementedStdio _instance = _UnimplementedStdio();
-  static _UnimplementedStdio get instance => _instance;
-
-  Never _throw() => throw Exception('Unimplemented!');
-
-  @override
-  List<String> get logs => _throw();
-
-  @override
-  void printError(String message) => _throw();
-
-  @override
-  void printWarning(String message) => _throw();
-
-  @override
-  void printStatus(String message) => _throw();
-
-  @override
-  void printTrace(String message) => _throw();
-
-  @override
-  void write(String message) => _throw();
-
-  @override
-  String readLineSync() => _throw();
+  static final _UnimplementedStdio instance = _UnimplementedStdio();
 }
 
 class _TestRepository extends Repository {

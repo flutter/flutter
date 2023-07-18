@@ -43,7 +43,7 @@ class _${blockName}DefaultsM3 extends NavigationDrawerThemeData {
       return IconThemeData(
         size: ${getToken("md.comp.navigation-drawer.icon.size")},
         color: states.contains(MaterialState.selected)
-            ? ${componentColor("md.comp.navigation-drawer.active.icon.")}
+            ? ${componentColor("md.comp.navigation-drawer.active.icon")}
             : ${componentColor("md.comp.navigation-drawer.inactive.icon")},
       );
     });

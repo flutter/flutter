@@ -158,7 +158,11 @@ TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
 }
 
 void main() {
-  for (final bool useMaterial3 in  <bool>[true, false]){
+  runAllTests(useMaterial3: true);
+  runAllTests(useMaterial3: false);
+}
+
+void runAllTests({ required bool useMaterial3 }) {
   testWidgets('InputDecorator input/label text layout', (WidgetTester tester) async {
     // The label appears above the input text
     await tester.pumpWidget(
@@ -1643,6 +1647,47 @@ void main() {
     expect(tester.getBottomLeft(find.text(kHelper1)), const Offset(12.0, 76.0));
   });
 
+  testWidgets('InputDecorator shows error text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        decoration: const InputDecoration(
+          errorText: 'errorText',
+        ),
+      ),
+    );
+
+    expect(find.text('errorText'), findsOneWidget);
+  });
+
+  testWidgets('InputDecorator shows error widget', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        decoration: const InputDecoration(
+          error: Text('error', style: TextStyle(fontSize: 20.0)),
+        ),
+      ),
+    );
+
+    expect(find.text('error'), findsOneWidget);
+  });
+
+  testWidgets('InputDecorator throws when error text and error widget are provided', (WidgetTester tester) async {
+    expect(
+      () {
+        buildInputDecorator(
+          useMaterial3: useMaterial3,
+          decoration: InputDecoration(
+            errorText: 'errorText',
+            error: const Text('error', style: TextStyle(fontSize: 20.0)),
+          ),
+        );
+      },
+      throwsAssertionError,
+    );
+  });
+
   testWidgets('InputDecorator prefix/suffix texts', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -1755,7 +1800,7 @@ void main() {
           ),
         );
     await tester.pumpWidget(
-       MaterialApp(
+      MaterialApp(
         theme: theme,
         home: Material(
           child: TextField(
@@ -1970,9 +2015,9 @@ void main() {
 
     // Overall height for this InputDecorator is 48dps because the prefix icon's minimum size
     // is 48x48 and the rest of the elements only require 40dps:
-     //   12 - top padding
-     //   16 - input text (font size 16dps)
-     //   12 - bottom padding
+    //   12 - top padding
+    //   16 - input text (font size 16dps)
+    //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
@@ -2044,10 +2089,10 @@ void main() {
     );
 
     // Overall height for this InputDecorator is 48dps because the prefix icon's minimum size
-     // is 48x48 and the rest of the elements only require 40dps:
-     //   12 - top padding
-     //   16 - input text (font size 16dps)
-     //   12 - bottom padding
+    // is 48x48 and the rest of the elements only require 40dps:
+    //   12 - top padding
+    //   16 - input text (font size 16dps)
+    //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getSize(find.byKey(prefixKey)).height, 16.0);
@@ -2262,9 +2307,9 @@ void main() {
 
     // Overall height for this InputDecorator is 100dps because the prefix icon's size
     // is 100x100 and the rest of the elements only require 40dps:
-     //   12 - top padding
-     //   16 - input text (font size 16dps)
-     //   12 - bottom padding
+    //   12 - top padding
+    //   16 - input text (font size 16dps)
+    //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 100.0));
     expect(tester.getSize(find.byKey(prefixKey)).height, 100.0);
@@ -5217,7 +5262,6 @@ void main() {
         useMaterial3: useMaterial3,
         // isFocused: false (default)
         decoration: const InputDecoration(
-          // errorText: false (default)
           enabled: false,
           errorBorder: errorBorder,
           focusedBorder: focusedBorder,
@@ -5447,7 +5491,7 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
- testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (WidgetTester tester) async {
+testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/78855
     const String labelText = 'Flutter';
 
@@ -5888,10 +5932,10 @@ void main() {
         }
         final Rect clipRect = arguments[0] as Rect;
         // _kFinalLabelScale = 0.75
-        const double width = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+        final double width = ParagraphBuilder.shouldDisableRoundingHack
           ? 100 / 0.75
           : 133.0;
-        expect(clipRect, rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, width, 16.0), epsilon: 1e-5));
+        expect(clipRect, rectMoreOrLessEquals(Rect.fromLTWH(0, 0, width, 16.0), epsilon: 1e-5));
         return true;
       }),
     );
@@ -6476,5 +6520,59 @@ void main() {
     final Text hintTextWidget = tester.widget(hintTextFinder);
     expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
   });
-}
+
+  testWidgets('prefixIcon in RTL with asymmetric padding', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/129591
+    const InputDecoration decoration = InputDecoration(
+      contentPadding: EdgeInsetsDirectional.only(end: 24),
+      prefixIcon: Focus(child: Icon(Icons.search)),
+    );
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: decoration,
+        textDirection: TextDirection.rtl,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(InputDecorator), findsOneWidget);
+    expect(find.byType(Icon), findsOneWidget);
+
+    final Offset(dx: double decoratorRight) =
+        tester.getTopRight(find.byType(InputDecorator));
+    final Offset(dx: double prefixRight) =
+        tester.getTopRight(find.byType(Icon));
+
+    // The prefix is inside the decorator.
+    expect(decoratorRight, lessThanOrEqualTo(prefixRight));
+  });
+
+  testWidgets('InputDecorator with counter does not crash when given a 0 size', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/129611
+    const InputDecoration decoration = InputDecoration(
+      contentPadding: EdgeInsetsDirectional.all(99),
+      prefixIcon: Focus(child: Icon(Icons.search)),
+      counter: Text('COUNTER'),
+    );
+
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox.square(
+          dimension: 0.0,
+          child: buildInputDecorator(
+            useMaterial3: useMaterial3,
+            decoration: decoration,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(InputDecorator), findsOneWidget);
+    expect(tester.renderObject<RenderBox>(find.text('COUNTER')).size, Size.zero);
+  });
 }

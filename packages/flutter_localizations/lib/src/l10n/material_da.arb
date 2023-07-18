@@ -1,6 +1,6 @@
 {
   "scriptCategory": "English-like",
-  "timeOfDayFormat": "HH:mm",
+  "timeOfDayFormat": "HH.mm",
   "openAppDrawerTooltip": "Åbn navigationsmenuen",
   "backButtonTooltip": "Tilbage",
   "closeButtonTooltip": "Luk",
@@ -25,6 +25,7 @@
   "continueButtonLabel": "Fortsæt",
   "copyButtonLabel": "Kopiér",
   "cutButtonLabel": "Klip",
+  "scanTextButtonLabel": "Scan tekst",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Indsæt",
   "selectAllButtonLabel": "Markér alt",

@@ -117,7 +117,7 @@ extension DomXMLHttpRequestExtension on DomXMLHttpRequest {
   external JSNumber? get _status;
 
   /// Gets the status.
-  int? get status => _status?.toDart.toInt();
+  int? get status => _status?.toDartInt;
 
   @JS('responseType')
   external set _responseType(JSString value);
@@ -184,13 +184,13 @@ extension DomProgressEventExtension on DomProgressEvent {
   external JSNumber? get _loaded;
 
   /// Amount of work done.
-  int? get loaded => _loaded?.toDart.toInt();
+  int? get loaded => _loaded?.toDartInt;
 
   @JS('total')
   external JSNumber? get _total;
 
   /// Total amount of work.
-  int? get total => _total?.toDart.toInt();
+  int? get total => _total?.toDartInt;
 }
 
 /// The underlying DOM document.
@@ -291,19 +291,19 @@ extension DomMouseEventExtension on DomMouseEvent {
   external JSNumber get _offsetX;
 
   /// Returns the current x offset.
-  num get offsetX => _offsetX.toDart;
+  num get offsetX => _offsetX.toDartDouble;
 
   @JS('offsetY')
   external JSNumber get _offsetY;
 
   /// Returns the current y offset.
-  num get offsetY => _offsetY.toDart;
+  num get offsetY => _offsetY.toDartDouble;
 
   @JS('button')
   external JSNumber get _button;
 
   /// Returns the current button.
-  int get button => _button.toDart.toInt();
+  int get button => _button.toDartInt;
 }
 
 /// A DOM selection.
@@ -394,9 +394,9 @@ extension DomCSSStyleSheetExtension on DomCSSStyleSheet {
   /// Inserts a rule into this style sheet.
   int insertRule(String rule, [int? index]) {
     if (index == null) {
-      return _insertRule1(rule.toJS).toDart.toInt();
+      return _insertRule1(rule.toJS).toDartInt;
     } else {
-      return _insertRule2(rule.toJS, index.toDouble().toJS).toDart.toInt();
+      return _insertRule2(rule.toJS, index.toJS).toDartInt;
     }
   }
 }

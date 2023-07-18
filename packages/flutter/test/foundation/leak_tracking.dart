@@ -54,13 +54,13 @@ void testWidgetsWithLeakTracking(
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
-  LeakTrackingTestConfig leakTrackingConfig = const LeakTrackingTestConfig(),
+  LeakTrackingTestConfig leakTrackingTestConfig = const LeakTrackingTestConfig(),
 }) {
   Future<void> wrappedCallback(WidgetTester tester) async {
     await _withFlutterLeakTracking(
       () async => callback(tester),
       tester,
-      leakTrackingConfig,
+      leakTrackingTestConfig,
     );
   }
 
@@ -99,7 +99,7 @@ Future<void> _withFlutterLeakTracking(
 ) async {
   // Leak tracker does not work for web platform.
   if (kIsWeb) {
-    final bool shouldPrintWarning = !_webWarningPrinted && LeakTrackingTestConfig.warnForNonSupportedPlatforms;
+    final bool shouldPrintWarning = !_webWarningPrinted && LeakTrackerGlobalSettings.warnForNonSupportedPlatforms;
     if (shouldPrintWarning) {
       _webWarningPrinted = true;
       debugPrint('Leak tracking is not supported on web platform.\nTo turn off this message, set `LeakTrackingTestConfig.warnForNonSupportedPlatforms` to false.');
@@ -169,10 +169,16 @@ class LeakCleaner {
 
   /// Returns true if [leak] should be reported as failure.
   bool _shouldReportLeak(LeakType leakType, LeakReport leak, Map<(String, LeakType), int> countByClassAndType) {
-    // Tracking for non-GCed is temporarily disabled.
-    // TODO(polina-c): turn on tracking for non-GCed after investigating existing leaks.
-    if (leakType != LeakType.notDisposed) {
-      return false;
+    switch (leakType) {
+      case LeakType.notDisposed:
+        if (config.allowAllNotDisposed) {
+          return false;
+        }
+      case LeakType.notGCed:
+      case LeakType.gcedLate:
+        if (config.allowAllNotGCed) {
+          return false;
+        }
     }
 
     final String leakingClass = leak.type;

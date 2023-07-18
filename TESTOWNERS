@@ -81,10 +81,12 @@
 /dev/devicelab/bin/tasks/picture_cache_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_channels_benchmarks.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/platform_views_scroll_perf_impeller__timeline_summary.dart @bdero @flutter/engine
 /dev/devicelab/bin/tasks/plugin_dependencies_test.dart @stuartmorgan @flutter/tool
 /dev/devicelab/bin/tasks/raster_cache_use_memory_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/routing_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/shader_mask_cache_perf__e2e_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/spell_check_test_ios.dart @camsim99 @flutter/android
 /dev/devicelab/bin/tasks/spell_check_test.dart @camsim99 @flutter/android
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
@@ -219,6 +221,7 @@
 /dev/devicelab/bin/tasks/flutter_gallery_macos__start_up.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_win_desktop__compile.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
+/dev/devicelab/bin/tasks/flutter_tool_startup.dart @jensjoha @flutter/tool
 /dev/devicelab/bin/tasks/flutter_tool_startup__linux.dart @jensjoha @flutter/tool
 /dev/devicelab/bin/tasks/flutter_tool_startup__macos.dart @jensjoha @flutter/tool
 /dev/devicelab/bin/tasks/flutter_tool_startup__windows.dart @jensjoha @flutter/tool
@@ -263,6 +266,7 @@
 /dev/devicelab/bin/tasks/technical_debt__cost.dart @HansMuller @flutter/framework
 /dev/devicelab/bin/tasks/web_benchmarks_canvaskit.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_html.dart @yjbanov @flutter/web
+/dev/devicelab/bin/tasks/web_benchmarks_skwasm.dart @jacksongardner @flutter/web
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
 
