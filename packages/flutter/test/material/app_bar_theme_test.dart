@@ -1055,6 +1055,34 @@ void main() {
     // one is used. This results in a difference for doubles in debugFillProperties between
     // the web and the rest of Flutter's target platforms.
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87364
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/130485.
+  testWidgets('Material3 - AppBarTheme.iconTheme correctly applies custom white color in dark mode', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      appBarTheme: const AppBarTheme(iconTheme: IconThemeData(color: Colors.white)),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+            actions: <Widget>[
+              IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    Color? leadingIconButtonColor() => _iconStyle(tester, Icons.menu)?.color;
+    Color? actionIconButtonColor() => _iconStyle(tester, Icons.add)?.color;
+
+    expect(leadingIconButtonColor(), Colors.white);
+    expect(actionIconButtonColor(), Colors.white);
+  });
 }
 
 AppBarTheme _appBarTheme() {
