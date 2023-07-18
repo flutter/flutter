@@ -399,6 +399,11 @@ def to_gn_args(args):
     gn_args['dart_debug'] = True
     gn_args['dart_debug_optimization_level'] = '0'
 
+  if args.dart_optimization_level:
+    gn_args['dart_default_optimization_level'] = args.dart_optimization_level
+  elif gn_args['target_os'] in ['android', 'ios']:
+    gn_args['dart_default_optimization_level'] = 'z'
+
   gn_args['flutter_use_fontconfig'] = args.enable_fontconfig
   gn_args['dart_component_kind'
          ] = 'static_library'  # Always link Dart in statically.
@@ -782,6 +787,12 @@ def parse_args(args):
       action='store_true',
       help='Implies --dart-debug and also disables optimizations in the Dart '
       'VM making it easier to step through VM code in the debugger.'
+  )
+
+  parser.add_argument(
+      '--dart-optimization-level',
+      type=str,
+      help='The default optimization level for the Dart VM runtime.',
   )
 
   parser.add_argument(
