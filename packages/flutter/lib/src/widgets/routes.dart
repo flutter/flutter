@@ -1773,6 +1773,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
+  void dispose() {
+    _modalBarrier.dispose();
+    _modalScope.dispose();
+    super.dispose();
+  }
+
+  @override
   String toString() => '${objectRuntimeType(this, 'ModalRoute')}($settings, animation: $_animation)';
 }
 

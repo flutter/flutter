@@ -195,6 +195,7 @@ class OverlayEntry implements Listenable {
     assert(!mounted);
     if (_disposedByOwner) {
       _overlayEntryStateNotifier.dispose();
+      _overlayEntryStateNotifier.value = null;
     }
   }
 
@@ -218,6 +219,7 @@ class OverlayEntry implements Listenable {
     _disposedByOwner = true;
     if (!mounted) {
       _overlayEntryStateNotifier.dispose();
+      _overlayEntryStateNotifier.value = null;
     }
   }
 
