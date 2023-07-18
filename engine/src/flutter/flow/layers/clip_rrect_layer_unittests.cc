@@ -595,6 +595,51 @@ TEST_F(ClipRRectLayerTest, EmptyClipDoesNotCullPlatformView) {
   EXPECT_EQ(embedder.painted_views(), std::vector<int64_t>({view_id}));
 }
 
+TEST_F(ClipRRectLayerTest, AntiAliasWithSaveLayerIgnoresSaveLayerImpeller) {
+  enable_impeller();
+
+  auto path1 = SkPath().addRect({10, 10, 30, 30});
+  auto mock1 = MockLayer::MakeOpacityCompatible(path1);
+  auto path2 = SkPath().addRect({20, 20, 40, 40});
+  auto mock2 = MockLayer::MakeOpacityCompatible(path2);
+  auto children_bounds = path1.getBounds();
+  children_bounds.join(path2.getBounds());
+  SkRect clip_rect = SkRect::MakeWH(500, 500);
+  SkRRect clip_rrect = SkRRect::MakeRectXY(clip_rect, 20, 20);
+  auto clip_rrect_layer = std::make_shared<ClipRRectLayer>(
+      clip_rrect, Clip::antiAliasWithSaveLayer);
+  clip_rrect_layer->Add(mock1);
+  clip_rrect_layer->Add(mock2);
+
+  // ClipRectLayer will pass through compatibility from multiple
+  // non-overlapping compatible children
+  PrerollContext* context = preroll_context();
+  clip_rrect_layer->Preroll(context);
+  EXPECT_EQ(context->renderable_state_flags, 0);
+
+  DisplayListBuilder expected_builder;
+  /* OpacityLayer::Paint() */ {
+    expected_builder.Save();
+    {
+      /* ClipRectLayer::Paint() */ {
+        expected_builder.Save();
+        expected_builder.ClipRRect(clip_rrect, ClipOp::kIntersect, true);
+        /* child layer1 paint */ {
+          expected_builder.DrawPath(path1, DlPaint());
+        }
+        /* child layer2 paint */ {  //
+          expected_builder.DrawPath(path2, DlPaint());
+        }
+        // expected_builder.Restore();
+      }
+    }
+    expected_builder.Restore();
+  }
+
+  clip_rrect_layer->Paint(display_list_paint_context());
+  EXPECT_TRUE(DisplayListsEQ_Verbose(expected_builder.Build(), display_list()));
+}
+
 }  // namespace testing
 }  // namespace flutter
 
