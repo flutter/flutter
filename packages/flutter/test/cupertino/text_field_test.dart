@@ -280,7 +280,7 @@ void main() {
       expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
       expect(find.text('Look Up'), isTargetPlatformiOS? findsOneWidget : findsNothing);
     },    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
-          skip: isContextMenuProvidedByPlatform,
+          skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
   testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
