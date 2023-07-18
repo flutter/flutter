@@ -486,14 +486,16 @@ void main() {
 
       testWidgets('Material2 - Widgets have correct label capitalization in input mode', (WidgetTester tester) async {
         await startPicker(tester, (TimeOfDay? time) {},
-            entryMode: TimePickerEntryMode.input, materialType: MaterialType.material2);
+          entryMode: TimePickerEntryMode.input, materialType: MaterialType.material2
+        );
         expect(find.text('ENTER TIME'), findsOneWidget);
         expect(find.text('CANCEL'), findsOneWidget);
       });
 
       testWidgets('Material3 - Widgets have correct label capitalization in input mode', (WidgetTester tester) async {
         await startPicker(tester, (TimeOfDay? time) {},
-            entryMode: TimePickerEntryMode.input, materialType: MaterialType.material3);
+          entryMode: TimePickerEntryMode.input, materialType: MaterialType.material3
+        );
         expect(find.text('Enter time'), findsOneWidget);
         expect(find.text('Cancel'), findsOneWidget);
       });
