@@ -47,6 +47,16 @@ constexpr int64_t kImplicitViewId = 0ll;
 
 @end
 
+@interface PlainAppDelegate : NSObject <NSApplicationDelegate>
+@end
+
+@implementation PlainAppDelegate
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication* _Nonnull)sender {
+  // Always cancel, so that the test doesn't exit.
+  return NSTerminateCancel;
+}
+@end
+
 namespace flutter::testing {
 
 TEST_F(FlutterEngineTest, CanLaunch) {
@@ -780,6 +790,22 @@ TEST_F(FlutterEngineTest, HandlesTerminationRequest) {
   [engineMock handleMethodCall:methodExitApplication result:appExitResult];
   EXPECT_STREQ([calledAfterTerminate UTF8String], "");
   EXPECT_TRUE(triedToTerminate);
+}
+
+TEST_F(FlutterEngineTest, IgnoresTerminationRequestIfNotFlutterAppDelegate) {
+  id<NSApplicationDelegate> previousDelegate = [[NSApplication sharedApplication] delegate];
+  id<NSApplicationDelegate> plainDelegate = [[PlainAppDelegate alloc] init];
+  [NSApplication sharedApplication].delegate = plainDelegate;
+
+  // Creating the engine shouldn't fail here, even though the delegate isn't a
+  // FlutterAppDelegate.
+  CreateMockFlutterEngine(nil);
+
+  // Asking to terminate the app should cancel.
+  EXPECT_EQ([[[NSApplication sharedApplication] delegate] applicationShouldTerminate:NSApp],
+            NSTerminateCancel);
+
+  [NSApplication sharedApplication].delegate = previousDelegate;
 }
 
 TEST_F(FlutterEngineTest, HandleAccessibilityEvent) {
