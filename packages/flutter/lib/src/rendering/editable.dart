@@ -2608,6 +2608,7 @@ class _RenderEditableCustomPaint extends RenderBox {
   Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
 }
 
+/// {@template flutter.rendering.RenderEditablePainter}
 /// An interface that paints within a [RenderEditable]'s bounds, above or
 /// beneath its text content.
 ///

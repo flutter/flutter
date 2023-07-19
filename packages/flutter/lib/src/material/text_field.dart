@@ -788,10 +788,10 @@ class TextField extends StatefulWidget {
   /// configuration, then [materialMisspelledTextStyle] is used by default.
   final SpellCheckConfiguration? spellCheckConfiguration;
 
-  /// {@macro flutter.rendering.editable.RenderEditablePainter}
+  /// {@macro flutter.rendering.RenderEditablePainter}
   final RenderEditablePainter? painter;
 
-  /// {@macro flutter.rendering.editable.RenderEditablePainter}
+  /// {@macro flutter.rendering.RenderEditablePainter}
   final RenderEditablePainter? foregroundPainter;
 
   /// The [TextStyle] used to indicate misspelled words in the Material style.

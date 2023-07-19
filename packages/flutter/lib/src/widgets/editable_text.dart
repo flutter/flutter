@@ -1812,10 +1812,10 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
-  /// {@macro flutter.rendering.editable.RenderEditablePainter}
+  /// {@macro flutter.rendering.RenderEditablePainter}
   final RenderEditablePainter? painter;
 
-  /// {@macro flutter.rendering.editable.RenderEditablePainter}
+  /// {@macro flutter.rendering.RenderEditablePainter}
   final RenderEditablePainter? foregroundPainter;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
