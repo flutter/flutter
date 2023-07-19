@@ -562,6 +562,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// ```dart
   /// import 'dart:ffi';
+  /// import 'package:flutter/foundation.dart';
   /// import 'package:flutter/widgets.dart';
   ///
   /// final DynamicLibrary _lib = DynamicLibrary.open('some_native_lib.dll');
@@ -576,9 +577,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// class NativeResourceService {
   ///   NativeResourceService() {
-  ///     WidgetsBinding.instance.debugRegisterHotRestartCallback(
-  ///         () => _destroyContext(_context),
-  ///         debugLabel: 'NativeResourceService');
+  ///     if (kDebugMode) {
+  ///       WidgetsBinding.instance.debugRegisterHotRestartCallback(
+  ///           () => _destroyContext(_context),
+  ///           debugLabel: 'NativeResourceService');
+  ///     }
   ///   }
   ///
   ///   /// Acquire native resources that must be released before they can
@@ -587,6 +590,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// }
   /// ```
   void debugRegisterHotRestartCallback(DebugPreHotRestartCallback callback, {String debugLabel = 'unknown'}) {
+    assert(kDebugMode, '''debugRegisterHotRestartCallback can only be called in debug mode. '''
+                       '''Use kDebugMode or wrap the call in an assert.''');
     if (!kDebugMode) {
       return;
     }
