@@ -34,7 +34,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
-import 'test_utils.dart' show fileSystem;
+import 'test_utils.dart' show ProcessResultMatcher, fileSystem;
 
 const ProcessManager processManager = LocalProcessManager();
 final String flutterRoot = getFlutterRoot();
@@ -352,7 +352,7 @@ void main() {
       );
       expect(existsDuringTest, isNot(isNull));
       expect(existsDuringTest, isTrue);
-      expect(result.exitCode, 0, reason: 'subprocess failed; $result');
+      expect(result, const ProcessResultMatcher());
       expect(fileSystem.file(pidFile).existsSync(), isFalse);
       // This first test ignores the stdout and stderr, so that if the
       // first run outputs "building flutter", or the "there's a new
@@ -417,7 +417,7 @@ void main() {
         'Application finished.',
         'ready',
       ]);
-      expect(result.exitCode, 0);
+      expect(result, const ProcessResultMatcher());
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
@@ -487,7 +487,7 @@ void main() {
         'Application finished.',
         'ready',
       ]);
-      expect(result.exitCode, 0);
+      expect(result, const ProcessResultMatcher());
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
@@ -513,7 +513,7 @@ void main() {
         ],
         logging: false,
       );
-      expect(result.exitCode, 0);
+      expect(result, const ProcessResultMatcher());
       expect(result.stdout, <Object>[
         startsWith('Performing hot reload...'),
         '',
@@ -580,7 +580,7 @@ void main() {
         const Barrier('Application finished.'),
       ],
     );
-    expect(result.exitCode, 0);
+    expect(result, const ProcessResultMatcher());
     expect(result.stderr, isEmpty);
     expect(result.stdout, containsAllInOrder(<Object>[
       startsWith('Launching '),
