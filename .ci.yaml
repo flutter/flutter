@@ -4824,6 +4824,7 @@ targets:
 
   - name: Windows_android channels_integration_test_win
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/130732
     presubmit: false
     timeout: 60
     properties:
