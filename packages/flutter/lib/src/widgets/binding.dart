@@ -561,22 +561,29 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// a hot restart, the application will crash after a hot restart.
   ///
   /// ```dart
-  /// // ignore_for_file: always_specify_types
   /// import 'dart:ffi';
   /// import 'package:flutter/widgets.dart';
   ///
   /// final DynamicLibrary _lib = DynamicLibrary.open('some_native_lib.dll');
-  /// final Pointer Function() _createContext = _lib.lookupFunction<Pointer Function(), Pointer Function()>('Native_create');
-  /// final void Function(Pointer) _destroyContext = _lib.lookupFunction<Void Function(Pointer), void Function(Pointer)>('Native_destroy');
+  ///
+  /// final Pointer<NativeType> Function() _createContext = _lib.lookupFunction<
+  ///     Pointer<NativeType> Function(),
+  ///     Pointer<NativeType> Function()>('Native_create');
+  ///
+  /// final void Function(Pointer<NativeType>) _destroyContext = _lib.lookupFunction<
+  ///     Void Function(Pointer<NativeType>),
+  ///     void Function(Pointer<NativeType>)>('Native_destroy');
   ///
   /// class NativeResourceService {
   ///   NativeResourceService() {
-  ///     WidgetsBinding.instance.registerHotRestartCallback(() => _destroyContext(_context), debugLabel: 'NativeResourceService');
+  ///     WidgetsBinding.instance.registerHotRestartCallback(
+  ///         () => _destroyContext(_context),
+  ///         debugLabel: 'NativeResourceService');
   ///   }
   ///
   ///   /// Acquire native resources that must be released before they can
   ///   /// be re-acquired.
-  ///   late final Pointer _context = _createContext();
+  ///   late final Pointer<NativeType> _context = _createContext();
   /// }
   /// ```
   void registerHotRestartCallback(PreHotRestartCallback callback, {String debugLabel = 'unknown'}) {
