@@ -8,11 +8,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:web/web.dart' as web;
 
 import 'framework.dart';
 import 'platform_view.dart';
 
+// Keep these values in sync with the ones defined in the engine's `PlatformViewManager`.
 const String _kDefaultVisibleViewType = '_default_document_create_element_visible';
 const String _kDefaultInvisibleViewType = '_default_document_create_element_invisible';
 
@@ -26,7 +26,6 @@ extension HtmlElementViewImpl on HtmlElementView {
     bool isVisible = true,
     ElementCreatedCallback? onElementCreated,
   }) {
-    _registerDefaultFactories();
     return HtmlElementView(
       key: key,
       viewType: isVisible ? _kDefaultVisibleViewType : _kDefaultInvisibleViewType,
@@ -139,46 +138,3 @@ class _HtmlElementViewController extends PlatformViewController {
 @visibleForTesting
 ui_web.PlatformViewRegistry? debugOverridePlatformViewRegistry;
 ui_web.PlatformViewRegistry get _platformViewsRegistry => debugOverridePlatformViewRegistry ?? ui_web.platformViewRegistry;
-
-bool _areDefaultFactoriesRegistered = false;
-
-/// Reset default view factories so that they are registered again next time.
-///
-/// There is no way to acually unregister a view factory, so this is only useful
-/// during testing when switching to a new [FakePlatformViewRegistry] to make
-/// sure the default view factories are re-registered.
-@visibleForTesting
-void debugResetDefaultFactories() {
-  _areDefaultFactoriesRegistered = false;
-}
-
-void _registerDefaultFactories() {
-  if (_areDefaultFactoriesRegistered) {
-    return;
-  }
-
-  _platformViewsRegistry.registerViewFactory(
-    _kDefaultVisibleViewType,
-    _defaultFactory,
-  );
-  _platformViewsRegistry.registerViewFactory(
-    _kDefaultInvisibleViewType,
-    _defaultFactory,
-    isVisible: false,
-  );
-}
-
-web.Element _defaultFactory(
-  int viewId, {
-  Object? params,
-}) {
-  params!;
-  params as _DefaultFactoryParams;
-  return web.document.createElement(params.tagName);
-}
-
-typedef _DefaultFactoryParams = Map<Object?, Object?>;
-
-extension on _DefaultFactoryParams {
-  String get tagName => this['tagName']! as String;
-}

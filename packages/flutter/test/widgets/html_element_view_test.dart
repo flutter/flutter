@@ -12,10 +12,13 @@ import 'package:collection/collection.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/_html_element_view_web.dart'
-    show debugOverridePlatformViewRegistry, debugResetDefaultFactories;
+    show debugOverridePlatformViewRegistry;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
+
+const String kDefaultVisibleViewType = '_default_document_create_element_visible';
+const String kDefaultInvisibleViewType = '_default_document_create_element_invisible';
 
 final Object _mockHtmlElement = Object();
 Object _mockViewFactory(int id, {Object? params}) {
@@ -27,6 +30,18 @@ void main() {
 
   setUp(() {
     fakePlatformViewRegistry = FakePlatformViewRegistry();
+
+    // Simulate the engine registering default factores.
+    fakePlatformViewRegistry.registerViewFactory(kDefaultVisibleViewType, (int viewId, {Object? params}) {
+      params!;
+      params as Map<Object?, Object?>;
+      return web.document.createElement(params['tagName']! as String);
+    });
+    fakePlatformViewRegistry.registerViewFactory(kDefaultInvisibleViewType, (int viewId, {Object? params}) {
+      params!;
+      params as Map<Object?, Object?>;
+      return web.document.createElement(params['tagName']! as String);
+    });
   });
 
   group('HtmlElementView', () {
@@ -286,35 +301,15 @@ void main() {
   });
 
   group('HtmlElementView.fromTagName', () {
-    const String kDefaultVisibleViewType = '_default_document_create_element_visible';
-    const String kDefaultInvisibleViewType = '_default_document_create_element_invisible';
-
     setUp(() {
       debugOverridePlatformViewRegistry = fakePlatformViewRegistry;
     });
 
     tearDown(() {
       debugOverridePlatformViewRegistry = null;
-      debugResetDefaultFactories();
     });
 
-    testWidgets('Auto-registers default view factories', (WidgetTester tester) async {
-      HtmlElementView.fromTagName(tagName: 'div');
-
-      expect(fakePlatformViewRegistry.registeredViewTypes, hasLength(2));
-
-      final FakeViewFactory visibleViewFactory = fakePlatformViewRegistry
-          .registeredViewTypes
-          .singleWhere((FakeViewFactory factory) => factory.isVisible);
-      expect(visibleViewFactory.viewType, kDefaultVisibleViewType);
-
-      final FakeViewFactory invisibleViewFactory = fakePlatformViewRegistry
-          .registeredViewTypes
-          .singleWhere((FakeViewFactory factory) => !factory.isVisible);
-      expect(invisibleViewFactory.viewType, kDefaultInvisibleViewType);
-    });
-
-    testWidgets('Create platform view for tagName', (WidgetTester tester) async {
+    testWidgets('Create platform view from tagName', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
       await tester.pumpWidget(
@@ -336,7 +331,7 @@ void main() {
 
       // The HTML element should be a div.
       final web.HTMLElement htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
-      expect(htmlElement.tagName, 'DIV');
+      expect(htmlElement.tagName, equalsIgnoringCase('div'));
     });
 
     testWidgets('Create invisible platform view', (WidgetTester tester) async {
@@ -347,7 +342,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: HtmlElementView.fromTagName(tagName: 'div', isVisible: false),
+            child: HtmlElementView.fromTagName(tagName: 'script', isVisible: false),
           ),
         ),
       );
@@ -358,11 +353,11 @@ void main() {
       expect(fakePlatformView.id, currentViewId + 1);
       // The view should be invisible.
       expect(fakePlatformView.viewType, kDefaultInvisibleViewType);
-      expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'div'});
+      expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'script'});
 
-      // The HTML element should be a div.
+      // The HTML element should be a script.
       final web.HTMLElement htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
-      expect(htmlElement.tagName, 'DIV');
+      expect(htmlElement.tagName, equalsIgnoringCase('script'));
     });
 
     testWidgets('onElementCreated', (WidgetTester tester) async {
@@ -377,7 +372,7 @@ void main() {
             width: 200.0,
             height: 100.0,
             child: HtmlElementView.fromTagName(
-              tagName: 'div',
+              tagName: 'table',
               onElementCreated: onElementCreated,
             ),
           ),
@@ -411,14 +406,12 @@ typedef FakePlatformView = ({
 
 class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
   FakePlatformViewRegistry() {
-    debugResetDefaultFactories();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Set<FakePlatformView> get views => Set<FakePlatformView>.unmodifiable(_views);
   final Set<FakePlatformView> _views = <FakePlatformView>{};
 
-  Set<FakeViewFactory> get registeredViewTypes => Set<FakeViewFactory>.unmodifiable(_registeredViewTypes);
   final Set<FakeViewFactory> _registeredViewTypes = <FakeViewFactory>{};
 
   @override
