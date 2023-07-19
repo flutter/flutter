@@ -253,7 +253,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
-  /// [textScaleFactor] arguments must not be null.
+  /// [textScaler] arguments must not be null.
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
@@ -262,7 +262,13 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     required TextDirection textDirection,
     bool softWrap = true,
     TextOverflow overflow = TextOverflow.clip,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
     int? maxLines,
     Locale? locale,
     StrutStyle? strutStyle,
@@ -273,6 +279,10 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     SelectionRegistrar? registrar,
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
+       assert(
+         identical(textScaler, TextScaler.noScaling) || textScaleFactor == 1.0,
+         'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
+       ),
        _softWrap = softWrap,
        _overflow = overflow,
        _selectionColor = selectionColor,
@@ -280,7 +290,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
          text: text,
          textAlign: textAlign,
          textDirection: textDirection,
-         textScaleFactor: textScaleFactor,
+         textScaler: textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
          locale: locale,
@@ -294,7 +304,10 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
   final TextPainter _textPainter;
-  
+
+  /// The painter that controls how the text is painted.
+  TextPainter get textPainter => _textPainter;
+
   List<AttributedString>? _cachedAttributedLabels;
 
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
@@ -492,16 +505,35 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     markNeedsLayout();
   }
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [textScaler] instead.
+  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   double get textScaleFactor => _textPainter.textScaleFactor;
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   set textScaleFactor(double value) {
-    if (_textPainter.textScaleFactor == value) {
+    textScaler = TextScaler.linear(value);
+  }
+
+  /// {@macro flutter.painting.textPainter.textScaler}
+  TextScaler get textScaler => _textPainter.textScaler;
+  set textScaler(TextScaler value) {
+    if (_textPainter.textScaler == value) {
       return;
     }
-    _textPainter.textScaleFactor = value;
+    _textPainter.textScaler = value;
     _overflowShader = null;
     markNeedsLayout();
   }
@@ -593,11 +625,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return getOffsetForCaret(position, Rect.zero) + Offset(0, getFullHeightForCaret(position) ?? 0.0);
   }
 
-  /// Returns the full list of [LineMetrics] that describe in detail the various
-  /// metrics of each laid out line.
-  ///
-  /// see [TextPainter.computeLineMetrics] for more information.
-  List<ui.LineMetrics> computeLineMetrics() {
+  List<ui.LineMetrics> _computeLineMetrics() {
     return _textPainter.computeLineMetrics();
   }
 
@@ -795,7 +823,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
           final TextPainter fadeSizePainter = TextPainter(
             text: TextSpan(style: _textPainter.text!.style, text: '\u2026'),
             textDirection: textDirection,
-            textScaleFactor: textScaleFactor,
+            textScaler: textScaler,
             locale: locale,
           )..layout();
           if (didOverflowWidth) {
@@ -1267,11 +1295,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     );
     properties.add(EnumProperty<TextOverflow>('overflow', overflow));
     properties.add(
-      DoubleProperty(
-        'textScaleFactor',
-        textScaleFactor,
-        defaultValue: 1.0,
-      ),
+      DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: TextScaler.noScaling),
     );
     properties.add(
       DiagnosticsProperty<Locale>(
@@ -1648,7 +1672,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   MapEntry<TextPosition, SelectionResult> _handleVerticalMovement(TextPosition position, {required double horizontalBaselineInParagraphCoordinates, required bool below}) {
-    final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+    final List<ui.LineMetrics> lines = paragraph._computeLineMetrics();
     final Offset offset = paragraph.getOffsetForCaret(position, Rect.zero);
     int currentLine = lines.length - 1;
     for (final ui.LineMetrics lineMetrics in lines) {
