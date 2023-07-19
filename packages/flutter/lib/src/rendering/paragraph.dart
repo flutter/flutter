@@ -294,10 +294,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
   final TextPainter _textPainter;
-
-  /// The painter that controls how the text is painted.
-  TextPainter get textPainter => _textPainter;
-
+  
   List<AttributedString>? _cachedAttributedLabels;
 
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
@@ -596,7 +593,11 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return getOffsetForCaret(position, Rect.zero) + Offset(0, getFullHeightForCaret(position) ?? 0.0);
   }
 
-  List<ui.LineMetrics> _computeLineMetrics() {
+  /// Returns the full list of [LineMetrics] that describe in detail the various
+  /// metrics of each laid out line.
+  ///
+  /// see [TextPainter.computeLineMetrics] for more information.
+  List<ui.LineMetrics> computeLineMetrics() {
     return _textPainter.computeLineMetrics();
   }
 
@@ -1647,7 +1648,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   MapEntry<TextPosition, SelectionResult> _handleVerticalMovement(TextPosition position, {required double horizontalBaselineInParagraphCoordinates, required bool below}) {
-    final List<ui.LineMetrics> lines = paragraph._computeLineMetrics();
+    final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
     final Offset offset = paragraph.getOffsetForCaret(position, Rect.zero);
     int currentLine = lines.length - 1;
     for (final ui.LineMetrics lineMetrics in lines) {
