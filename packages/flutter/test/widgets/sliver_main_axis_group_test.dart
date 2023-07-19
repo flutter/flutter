@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
+import 'test_widgets.dart';
 
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
@@ -610,60 +610,58 @@ void main() {
   testWidgets('SliverMainAxisGroup skips painting invisible children', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
 
-    const Key key1 = Key('Box 1');
-    const Key key2 = Key('Box 2');
-    const Key key3 = Key('Box 3');
-    const Key key4 = Key('Box 4');
+    int counter = 0;
+    void incrementCounter() {
+      counter += 1;
+    }
+
     await tester.pumpWidget(
       _buildSliverMainAxisGroup(
         controller: controller,
         slivers: <Widget>[
-          SliverToBoxAdapter(
-            key: key1,
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
             child: Container(
-              height: 300,
-              decoration: const BoxDecoration(color: Colors.amber)
-            )
+              height: 1000,
+              decoration: const BoxDecoration(color: Colors.amber),
+            ),
           ),
-          SliverToBoxAdapter(
-            key: key2,
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
             child: Container(
               height: 400,
               decoration: const BoxDecoration(color: Colors.amber)
-            )
+            ),
           ),
-          SliverToBoxAdapter(
-            key: key3,
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
             child: Container(
               height: 500,
               decoration: const BoxDecoration(color: Colors.amber)
-            )
+            ),
           ),
-          SliverToBoxAdapter(
-            key: key4,
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
             child: Container(
               height: 300,
               decoration: const BoxDecoration(color: Colors.amber)
-            )
+            ),
           ),
         ],
       ),
     );
 
-    expect(find.byKey(key1), paints..rect());
-    expect(find.byKey(key2), paints..rect());
-    expect(find.byKey(key3), paintsNothing);
-    expect(find.byKey(key4), paintsNothing);
+    // Can only see top sliver.
+    expect(counter, equals(1));
 
-    controller.jumpTo(400);
+    // Reset paint counter.
+    counter = 0;
+    controller.jumpTo(1000);
     await tester.pumpAndSettle();
 
-    expect(controller.offset, 400);
-
-    expect(find.byKey(key1), paintsNothing);
-    expect(find.byKey(key2), paints..rect());
-    expect(find.byKey(key3), paints..rect());
-    expect(find.byKey(key4), paintsNothing);
+    // Can only see second and third slivers.
+    expect(controller.offset, 1000);
+    expect(counter, equals(2));
   });
 }
 

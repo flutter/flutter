@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'test_widgets.dart';
+
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
 
@@ -938,32 +940,4 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(TestDelegate oldDelegate) => true;
-}
-
-class RenderMockSliverToBoxAdapter extends RenderSliverToBoxAdapter {
-  RenderMockSliverToBoxAdapter({
-    super.child,
-    required this.incrementCounter,
-  });
-  final void Function() incrementCounter;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    incrementCounter();
-  }
-}
-
-class MockSliverToBoxAdapter extends SingleChildRenderObjectWidget {
-  /// Creates a sliver that contains a single box widget.
-  const MockSliverToBoxAdapter({
-    super.key,
-    super.child,
-    required this.incrementCounter,
-  });
-
-  final void Function() incrementCounter;
-
-  @override
-  RenderMockSliverToBoxAdapter createRenderObject(BuildContext context) =>
-    RenderMockSliverToBoxAdapter(incrementCounter: incrementCounter);
 }
