@@ -968,7 +968,7 @@ void main() {
   test('Service extensions - preHotRestartCallback', () async {
     Map<String, dynamic> result;
     int calledCount = 0;
-    binding.registerHotRestartCallback(() {
+    binding.debugRegisterHotRestartCallback(() {
       calledCount += 1;
     });
 
@@ -984,7 +984,7 @@ void main() {
       lastError = error;
     };
     Map<String, dynamic> result;
-    binding.registerHotRestartCallback(() {
+    binding.debugRegisterHotRestartCallback(() {
       throw Exception();
     }, debugLabel: 'foo');
 
@@ -1004,7 +1004,7 @@ void main() {
     };
 
     Map<String, dynamic> result;
-    binding.registerHotRestartCallback(() async {
+    binding.debugRegisterHotRestartCallback(() async {
       await null;
       throw Exception();
     }, debugLabel: 'foo');

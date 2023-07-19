@@ -24,8 +24,8 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
-/// A callback that can be registered with [WidgetsBinding.registerHotRestartCallback].
-typedef PreHotRestartCallback = FutureOr<void> Function();
+/// A callback that can be registered with [WidgetsBinding.debugRegisterHotRestartCallback].
+typedef DebugPreHotRestartCallback = FutureOr<void> Function();
 
 /// Interface for classes that register with the Widgets layer binding.
 ///
@@ -509,7 +509,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       );
 
       registerServiceExtension(name: 'invokePreHotRestartCallbacks', callback: (Map<String, Object> params) async {
-        Future<void> invokeAndWait(PreHotRestartCallback callback, String label) async {
+        Future<void> invokeAndWait(DebugPreHotRestartCallback callback, String label) async {
           developer.postEvent('preHotRestartCallback', <String, Object>{'label': label, 'finished': false});
           try {
             await Future<Object?>.value(callback());
@@ -527,7 +527,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         }
 
         await Future.wait(<Future<void>>[
-          for (final MapEntry<PreHotRestartCallback, String> entry in _hotRestartCallbacks.entries)
+          for (final MapEntry<DebugPreHotRestartCallback, String> entry in _hotRestartCallbacks.entries)
             invokeAndWait(entry.key, entry.value),
         ]);
         return <String, Object>{};
@@ -547,7 +547,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     return Future<void>.value();
   }
 
-  final Map<PreHotRestartCallback, String> _hotRestartCallbacks = <PreHotRestartCallback, String>{};
+  final Map<DebugPreHotRestartCallback, String> _hotRestartCallbacks = <DebugPreHotRestartCallback, String>{};
 
   /// Register a callback that will be invoked before a hot restart is called.
   ///
@@ -555,7 +555,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// resources acquired through platform channels or `dart:ffi`. Future returning
   /// callbacks will be awaited, allowing for async tear downs.
   ///
-  /// The following sample code shows how to use registerHotRestartCallback to handle
+  /// The following sample code shows how to use debugRegisterHotRestartCallback to handle
   /// tearing down a native resource acquired through `dart:ffi`. In this example, if
   /// the `context` pointer is not passed through to the `_destroyContext` function before
   /// a hot restart, the application will crash after a hot restart.
@@ -576,7 +576,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// class NativeResourceService {
   ///   NativeResourceService() {
-  ///     WidgetsBinding.instance.registerHotRestartCallback(
+  ///     WidgetsBinding.instance.debugRegisterHotRestartCallback(
   ///         () => _destroyContext(_context),
   ///         debugLabel: 'NativeResourceService');
   ///   }
@@ -586,7 +586,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///   late final Pointer<NativeType> _context = _createContext();
   /// }
   /// ```
-  void registerHotRestartCallback(PreHotRestartCallback callback, {String debugLabel = 'unknown'}) {
+  void debugRegisterHotRestartCallback(DebugPreHotRestartCallback callback, {String debugLabel = 'unknown'}) {
     if (!kDebugMode) {
       return;
     }
