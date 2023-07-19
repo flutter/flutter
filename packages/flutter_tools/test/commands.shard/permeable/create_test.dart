@@ -738,7 +738,7 @@ void main() {
         <String>['--no-pub', '--template=plugin', '--project-name', 'xyz.xyz', '--platforms', 'android,ios',],
         <String>[],
       ),
-      throwsToolExit(message: '"xyz.xyz" is not a valid Dart package name.'),
+      throwsToolExit(message: '"xyz.xyz" is not a valid Dart package name.\nTry "xyz_xyz" instead.'),
     );
   });
 

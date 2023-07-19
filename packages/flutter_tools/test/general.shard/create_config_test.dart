@@ -20,6 +20,17 @@ void main() {
     expect(isValidPackageName('Foo_bar'), false);
   });
 
+  test('Suggest a valid Pub package name', () {
+    expect(potentialValidPackageName('92'), '_92');
+    expect(potentialValidPackageName('a-b-c'), 'a_b_c');
+
+
+    expect(potentialValidPackageName('foo.bar'), 'foo_bar');
+    expect(potentialValidPackageName('Foo_bar'), 'foo_bar');
+    expect(potentialValidPackageName('foo._bar'), 'foo_bar');
+
+  });
+
   test('kWindowsDrivePattern', () {
     expect(CreateBase.kWindowsDrivePattern.hasMatch(r'D:\'), isFalse);
     expect(CreateBase.kWindowsDrivePattern.hasMatch(r'z:\'), isFalse);
