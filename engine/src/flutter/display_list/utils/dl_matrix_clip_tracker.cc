@@ -103,7 +103,8 @@ bool DisplayListMatrixClipTracker::is_3x3(const SkM44& m) {
 
 DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
     const SkRect& cull_rect,
-    const SkMatrix& matrix) {
+    const SkMatrix& matrix)
+    : original_cull_rect_(cull_rect) {
   // isEmpty protects us against NaN as we normalize any empty cull rects
   SkRect cull = cull_rect.isEmpty() ? SkRect::MakeEmpty() : cull_rect;
   saved_.emplace_back(std::make_unique<Data3x3>(matrix, cull));
@@ -113,7 +114,8 @@ DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
 
 DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
     const SkRect& cull_rect,
-    const SkM44& m44) {
+    const SkM44& m44)
+    : original_cull_rect_(cull_rect) {
   // isEmpty protects us against NaN as we normalize any empty cull rects
   SkRect cull = cull_rect.isEmpty() ? SkRect::MakeEmpty() : cull_rect;
   if (is_3x3(m44)) {
@@ -280,6 +282,18 @@ bool DisplayListMatrixClipTracker::Data::content_culled(
   SkRect mapped;
   mapRect(content_bounds, &mapped);
   return !mapped.intersects(cull_rect_);
+}
+
+void DisplayListMatrixClipTracker::Data::resetBounds(const SkRect& cull_rect) {
+  if (!cull_rect.isEmpty()) {
+    SkRect rect;
+    mapRect(cull_rect, &rect);
+    if (!rect.isEmpty()) {
+      cull_rect_ = rect;
+      return;
+    }
+  }
+  cull_rect_.setEmpty();
 }
 
 void DisplayListMatrixClipTracker::Data::clipBounds(const SkRect& clip,
