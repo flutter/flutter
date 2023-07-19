@@ -209,6 +209,23 @@ TEST(DisplayListImageFilter, BlurBounds) {
   TestBounds(filter, input_bounds, expected_output_bounds);
 }
 
+TEST(DisplayListImageFilter, BlurZeroSigma) {
+  std::shared_ptr<DlImageFilter> filter =
+      DlBlurImageFilter::Make(0, 0, DlTileMode::kMirror);
+  ASSERT_EQ(filter, nullptr);
+  filter = DlBlurImageFilter::Make(3, SK_ScalarNaN, DlTileMode::kMirror);
+  ASSERT_EQ(filter, nullptr);
+  filter = DlBlurImageFilter::Make(SK_ScalarNaN, 3, DlTileMode::kMirror);
+  ASSERT_EQ(filter, nullptr);
+  filter =
+      DlBlurImageFilter::Make(SK_ScalarNaN, SK_ScalarNaN, DlTileMode::kMirror);
+  ASSERT_EQ(filter, nullptr);
+  filter = DlBlurImageFilter::Make(3, 0, DlTileMode::kMirror);
+  ASSERT_NE(filter, nullptr);
+  filter = DlBlurImageFilter::Make(0, 3, DlTileMode::kMirror);
+  ASSERT_NE(filter, nullptr);
+}
+
 TEST(DisplayListImageFilter, DilateConstructor) {
   DlDilateImageFilter filter(5.0, 6.0);
 }
