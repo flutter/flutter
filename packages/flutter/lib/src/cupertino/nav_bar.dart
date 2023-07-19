@@ -229,12 +229,9 @@ bool _isTransitionable(BuildContext context) {
 /// behavior for multiple navigation bars per route.
 ///
 /// When used in a [CupertinoPageScaffold], [CupertinoPageScaffold.navigationBar]
-/// has its text scale factor set to 1.0 and does not respond to text scale factor
-/// changes from the operating system, to match the native iOS behavior. To override
-/// this behavior, wrap each of the `navigationBar`'s components inside a [MediaQuery]
-/// with the desired [MediaQueryData.textScaleFactor] value. The text scale factor
-/// value from the operating system can be retrieved in many ways, such as querying
-/// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
+/// disables text scaling to match the native iOS behavior. To override
+/// this behavior, wrap each of the `navigationBar`'s components inside a
+/// [MediaQuery] with the desired [TextScaler].
 ///
 /// {@tool dartpad}
 /// This example shows a [CupertinoNavigationBar] placed in a [CupertinoPageScaffold].
@@ -555,13 +552,10 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// Use [transitionBetweenRoutes] or [heroTag] to customize the transition
 /// behavior for multiple navigation bars per route.
 ///
-/// [CupertinoSliverNavigationBar] has its text scale factor set to 1.0 by default
-/// and does not respond to text scale factor changes from the operating system,
-/// to match the native iOS behavior. To override this behavior, wrap each of the
+/// [CupertinoSliverNavigationBar] by default disables text scaling to match the
+/// native iOS behavior. To override this behavior, wrap each of the
 /// [CupertinoSliverNavigationBar]'s components inside a [MediaQuery] with the
-/// desired [MediaQueryData.textScaleFactor] value. The text scale factor value
-/// from the operating system can be retrieved in many ways, such as querying
-/// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
+/// desired [TextScaler].
 ///
 /// The [stretch] parameter determines whether the nav bar should stretch to
 /// fill the over-scroll area. The nav bar can still expand and contract as the
@@ -741,8 +735,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       large: true,
     );
 
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+    return MediaQuery.withNoTextScaling(
       child: SliverPersistentHeader(
         pinned: true, // iOS navigation bars are always pinned.
         delegate: _LargeTitleNavigationBarSliverDelegate(
@@ -1765,10 +1758,9 @@ class _NavigationBarTransition extends StatelessWidget {
     // The actual outer box is big enough to contain both the bottom and top
     // navigation bars. It's not a direct Rect lerp because some components
     // can actually be outside the linearly lerp'ed Rect in the middle of
-    // the animation, such as the topLargeTitle. The textScaleFactor is kept
-    // at 1 to avoid odd transitions between pages.
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+    // the animation, such as the topLargeTitle. The text scaling is disabled to
+    // avoid odd transitions between pages.
+    return MediaQuery.withNoTextScaling(
       child: SizedBox(
         height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.paddingOf(context).top,
         width: double.infinity,

@@ -870,7 +870,7 @@ class _LocalSemanticsHandle implements SemanticsHandle {
 /// without tying it to a specific binding implementation. All [PipelineOwner]s
 /// in a given tree must be attached to the same [PipelineManifold]. This
 /// happens automatically during [adoptChild].
-class PipelineOwner {
+class PipelineOwner with DiagnosticableTreeMixin {
   /// Creates a pipeline owner.
   ///
   /// Typically created by the binding (e.g., [RendererBinding]), but can be
@@ -984,7 +984,7 @@ class PipelineOwner {
         return true;
       }());
       FlutterTimeline.startSync(
-        'LAYOUT',
+        'LAYOUT$_debugRootSuffixForTimelineEventNames',
         arguments: debugTimelineArguments,
       );
     }
@@ -1071,7 +1071,7 @@ class PipelineOwner {
   /// [flushPaint].
   void flushCompositingBits() {
     if (!kReleaseMode) {
-      FlutterTimeline.startSync('UPDATING COMPOSITING BITS');
+      FlutterTimeline.startSync('UPDATING COMPOSITING BITS$_debugRootSuffixForTimelineEventNames');
     }
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (final RenderObject node in _nodesNeedingCompositingBitsUpdate) {
@@ -1120,7 +1120,7 @@ class PipelineOwner {
         return true;
       }());
       FlutterTimeline.startSync(
-        'PAINT',
+        'PAINT$_debugRootSuffixForTimelineEventNames',
         arguments: debugTimelineArguments,
       );
     }
@@ -1247,7 +1247,7 @@ class PipelineOwner {
       return;
     }
     if (!kReleaseMode) {
-      FlutterTimeline.startSync('SEMANTICS');
+      FlutterTimeline.startSync('SEMANTICS$_debugRootSuffixForTimelineEventNames');
     }
     assert(_semanticsOwner != null);
     assert(() {
@@ -1279,6 +1279,20 @@ class PipelineOwner {
     }
   }
 
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    return <DiagnosticsNode>[
+      for (final PipelineOwner child in _children)
+        child.toDiagnosticsNode(),
+    ];
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<RenderObject>('rootNode', rootNode, defaultValue: null));
+  }
+
   // TREE MANAGEMENT
 
   final Set<PipelineOwner> _children = <PipelineOwner>{};
@@ -1289,6 +1303,8 @@ class PipelineOwner {
     child._debugParent = parent;
     return true;
   }
+
+  String get _debugRootSuffixForTimelineEventNames => _debugParent == null ? ' (root)' : '';
 
   /// Mark this [PipelineOwner] as attached to the given [PipelineManifold].
   ///
@@ -1315,7 +1331,9 @@ class PipelineOwner {
     assert(_manifold != null);
     _manifold!.removeListener(_updateSemanticsOwner);
     _manifold = null;
-    _updateSemanticsOwner();
+    // Not updating the semantics owner here to not disrupt any of its clients
+    // in case we get re-attached. If necessary, semantics owner will be updated
+    // in "attach", or disposed in "dispose", if not reattached.
 
     for (final PipelineOwner child in _children) {
       child.detach();
@@ -1351,7 +1369,9 @@ class PipelineOwner {
     assert(!_children.contains(child));
     assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.add(child);
-    assert(_debugSetParent(child, this));
+    if (!kReleaseMode) {
+      _debugSetParent(child, this);
+    }
     if (_manifold != null) {
       child.attach(_manifold!);
     }
@@ -1369,7 +1389,9 @@ class PipelineOwner {
     assert(_children.contains(child));
     assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.remove(child);
-    assert(_debugSetParent(child, null));
+    if (!kReleaseMode) {
+      _debugSetParent(child, null);
+    }
     if (_manifold != null) {
       child.detach();
     }
@@ -1383,6 +1405,26 @@ class PipelineOwner {
   ///  * [dropChild] to remove a child.
   void visitChildren(PipelineOwnerVisitor visitor) {
     _children.forEach(visitor);
+  }
+
+  /// Release any resources held by this pipeline owner.
+  ///
+  /// Prior to calling this method the pipeline owner must be removed from the
+  /// pipeline owner tree, i.e. it must have neither a parent nor any children
+  /// (see [dropChild]). It also must be [detach]ed from any [PipelineManifold].
+  ///
+  /// The object is no longer usable after calling dispose.
+  void dispose() {
+    assert(_children.isEmpty);
+    assert(rootNode == null);
+    assert(_manifold == null);
+    assert(_debugParent == null);
+    _semanticsOwner?.dispose();
+    _semanticsOwner = null;
+    _nodesNeedingLayout.clear();
+    _nodesNeedingCompositingBitsUpdate.clear();
+    _nodesNeedingPaint.clear();
+    _nodesNeedingSemantics.clear();
   }
 }
 
@@ -1685,21 +1727,22 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
   }
 
-  /// The depth of this node in the tree.
+  /// The depth of this render object in the render tree.
   ///
   /// The depth of nodes in a tree monotonically increases as you traverse down
-  /// the tree.
+  /// the tree: a node always has a [depth] greater than its ancestors.
+  /// There's no guarantee regarding depth between siblings.
   ///
-  /// Nodes always have a [depth] greater than their ancestors'. There's no
-  /// guarantee regarding depth between siblings. The depth of a node is used to
-  /// ensure that nodes are processed in depth order. The [depth] of a child can
-  /// be more than one greater than the [depth] of the parent, because the [depth]
-  /// values are never decreased: all that matters is that it's greater than the
-  /// parent. Consider a tree with a root node A, a child B, and a grandchild C.
-  /// Initially, A will have [depth] 0, B [depth] 1, and C [depth] 2. If C is
-  /// moved to be a child of A, sibling of B, then the numbers won't change. C's
-  /// [depth] will still be 2. The [depth] is automatically maintained by the
-  /// [adoptChild] and [dropChild] methods.
+  /// The [depth] of a child can be more than one greater than the [depth] of
+  /// the parent, because the [depth] values are never decreased: all that
+  /// matters is that it's greater than the parent. Consider a tree with a root
+  /// node A, a child B, and a grandchild C. Initially, A will have [depth] 0,
+  /// B [depth] 1, and C [depth] 2. If C is moved to be a child of A,
+  /// sibling of B, then the numbers won't change. C's [depth] will still be 2.
+  ///
+  /// The depth of a node is used to ensure that nodes are processed in
+  /// depth order.  The [depth] is automatically maintained by the [adoptChild]
+  /// and [dropChild] methods.
   int get depth => _depth;
   int _depth = 0;
 
@@ -1723,7 +1766,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @protected
   void redepthChildren() { }
 
-  /// The parent of this node in the tree.
+  /// The parent of this render object in the render tree.
+  ///
+  /// The [parent] of the root node in the render tree is null.
   RenderObject? get parent => _parent;
   RenderObject? _parent;
 
@@ -2010,20 +2055,21 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     return layoutParent;
   }
 
-  /// The owner for this node (null if unattached).
+  /// The owner for this render object (null if unattached).
   ///
-  /// The entire subtree that this node belongs to will have the same owner.
+  /// The entire render tree that this render object belongs to
+  /// will have the same owner.
   PipelineOwner? get owner => _owner;
   PipelineOwner? _owner;
 
-  /// Whether this node is in a tree whose root is attached to something.
+  /// Whether the render tree this render object belongs to is attached to a [PipelineOwner].
   ///
   /// This becomes true during the call to [attach].
   ///
   /// This becomes false during the call to [detach].
   bool get attached => _owner != null;
 
-  /// Mark this node as attached to the given owner.
+  /// Mark this render object as attached to the given owner.
   ///
   /// Typically called only from the [parent]'s [attach] method, and by the
   /// [owner] to mark the root of a tree as attached.
@@ -2062,7 +2108,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
   }
 
-  /// Mark this node as detached.
+  /// Mark this render object as detached from its [PipelineOwner].
   ///
   /// Typically called only from the [parent]'s [detach], and by the [owner] to
   /// mark the root of a tree as detached.
@@ -3914,7 +3960,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 /// This mixin is typically used to implement render objects created
 /// in a [SingleChildRenderObjectWidget].
 mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject {
-
   /// Checks whether the given render object has the correct [runtimeType] to be
   /// a child of this render object.
   ///
