@@ -543,7 +543,7 @@ class ThemeData with Diagnosticable {
     }
     textTheme = defaultTextTheme.merge(textTheme);
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
-    iconTheme ??= isDark ? const IconThemeData(color: kDefaultIconLightColor) : const IconThemeData(color: kDefaultIconDarkColor);
+    iconTheme ??= isDark ? IconThemeData(color: kDefaultIconLightColor) : IconThemeData(color: kDefaultIconDarkColor);
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
 
     // COMPONENT THEMES
@@ -1083,21 +1083,16 @@ class ThemeData with Diagnosticable {
   ///    splash with sparkle effects.
   final InteractiveInkFeatureFactory splashFactory;
 
-  /// A temporary flag used to opt-in to Material 3 features.
+  /// A temporary flag that can be used to opt-out of Material 3 features.
   ///
-  /// If true, then widgets that have been migrated to Material 3 will
-  /// use new colors, typography and other features of Material 3. If false,
-  /// they will use the Material 2 look and feel.
+  /// This flag is _true_ by default. If false, then components will
+  /// continue to use the colors, typography and other features of
+  /// Material 2.
   ///
-  /// During the migration to Material 3, turning this on may yield
-  /// inconsistent look and feel in your app as some widgets are migrated
-  /// while others have yet to be.
-  ///
-  /// Defaults to false. When the Material 3 specification is complete
-  /// and all widgets are migrated on stable, we will change this flag to be
-  /// true by default. After that change has landed on stable, we will deprecate
-  /// this flag and remove all uses of it. At that point, the `material` library
-  /// will aim to only support Material 3.
+  /// In the long run this flag will be deprecated and eventually
+  /// only Material 3 will be supported. We recommend that applications
+  /// migrate to Material 3 as soon as that's practical. Until that migration
+  /// is complete, this flag can be set to false.
   ///
   /// ## Defaults
   ///
@@ -1131,14 +1126,13 @@ class ThemeData with Diagnosticable {
   ///   * Typography: [Typography] (see table above)
   ///
   /// ### Components
-  /// \* *new* means the new widgets/methods created since the last stable release.
   ///   * Badges: [Badge]
   ///   * Bottom app bar: [BottomAppBar]
   ///   * Bottom sheets: [BottomSheet]
   ///   * Buttons
   ///     - Common buttons: [ElevatedButton], [FilledButton], [FilledButton.tonal], [OutlinedButton], [TextButton]
   ///     - FAB: [FloatingActionButton], [FloatingActionButton.extended]
-  ///     - Icon buttons: [IconButton], [IconButton.filled] (*new*), [IconButton.filledTonal] (*new*), [IconButton.outlined] (*new*)
+  ///     - Icon buttons: [IconButton], [IconButton.filled] (*new*), [IconButton.filledTonal], [IconButton.outlined]
   ///     - Segmented buttons: [SegmentedButton] (replacing [ToggleButtons])
   ///   * Cards: [Card]
   ///   * Checkbox: [Checkbox], [CheckboxListTile]
@@ -1156,11 +1150,11 @@ class ThemeData with Diagnosticable {
   ///   * Navigation rail: [NavigationRail]
   ///   * Progress indicators: [CircularProgressIndicator], [LinearProgressIndicator]
   ///   * Radio button: [Radio], [RadioListTile]
-  ///   * Search: [SearchBar] (*new*), [SearchAnchor] (*new*),
+  ///   * Search: [SearchBar], [SearchAnchor],
   ///   * Snack bar: [SnackBar]
   ///   * Slider: [Slider], [RangeSlider]
   ///   * Switch: [Switch], [SwitchListTile]
-  ///   * Tabs: [TabBar], [TabBar.secondary] (*new*)
+  ///   * Tabs: [TabBar], [TabBar.secondary]
   ///   * TextFields: [TextField] together with its [InputDecoration]
   ///   * Time pickers: [showTimePicker], [TimePickerDialog]
   ///   * Top app bar: [AppBar], [SliverAppBar], [SliverAppBar.medium], [SliverAppBar.large]

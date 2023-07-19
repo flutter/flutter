@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -33,7 +32,7 @@ const double _kIndicatorWidth = 64;
 ///
 /// This widget does not adjust its size with the [ThemeData.visualDensity].
 ///
-/// The [MediaQueryData.textScaleFactor] does not adjust the size of this widget but
+/// The [MediaQueryData.textScaler] does not adjust the size of this widget but
 /// rather the size of the [Tooltip]s displayed on long presses of the
 /// destinations.
 ///
@@ -183,7 +182,7 @@ class NavigationBar extends StatelessWidget {
   /// automatically.
   ///
   /// The height does not adjust with [ThemeData.visualDensity] or
-  /// [MediaQueryData.textScaleFactor] as this component loses usability at
+  /// [MediaQueryData.textScaler] as this component loses usability at
   /// larger and smaller sizes due to the truncating of labels or smaller tap
   /// targets.
   ///
@@ -383,18 +382,14 @@ class NavigationDestination extends StatelessWidget {
           ?? defaults.labelTextStyle!.resolve(selectedState);
         final TextStyle? effectiveUnselectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(unselectedState)
           ?? defaults.labelTextStyle!.resolve(unselectedState);
+        final TextStyle? textStyle = _isForwardOrCompleted(animation) ? effectiveSelectedLabelTextStyle : effectiveUnselectedLabelTextStyle;
         return Padding(
           padding: const EdgeInsets.only(top: 4),
-          child: _ClampTextScaleFactor(
+          child: MediaQuery.withClampedTextScaling(
             // Don't scale labels of destinations, instead, tooltip text will
             // upscale.
-            upperLimit: 1,
-            child: Text(
-              label,
-              style: _isForwardOrCompleted(animation)
-                  ? effectiveSelectedLabelTextStyle
-                  : effectiveUnselectedLabelTextStyle,
-            ),
+            maxScaleFactor: 1.0,
+            child: Text(label, style: textStyle),
           ),
         );
       },
@@ -1015,53 +1010,6 @@ class _NavigationDestinationLayoutDelegate extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(_NavigationDestinationLayoutDelegate oldDelegate) {
     return oldDelegate.animation != animation;
-  }
-}
-
-/// Utility Widgets
-
-// Clamps [MediaQueryData.textScaleFactor] so that if it is greater than
-// [upperLimit] or less than [lowerLimit], [upperLimit] or [lowerLimit] will be
-// used instead for the [child] widget.
-//
-// Example:
-//
-// ```dart
-// _ClampTextScaleFactor(
-//   upperLimit: 2.0,
-//   child: const Text('Foo'), // If textScaleFactor is 3.0, this will only scale 2x.
-// )
-// ```
-class _ClampTextScaleFactor extends StatelessWidget {
-  /// Clamps the text scale factor of descendants by modifying the [MediaQuery]
-  /// surrounding [child].
-  const _ClampTextScaleFactor({
-    this.upperLimit = double.infinity,
-    required this.child,
-  });
-
-  /// The maximum amount that the text scale factor should be for the [child]
-  /// widget.
-  ///
-  /// If this is `1.5`, the textScaleFactor for child widgets will never be
-  /// greater than `1.5`.
-  final double upperLimit;
-
-  /// The [Widget] that should have its (and its descendants) text scale factor
-  /// clamped.
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaleFactor: clampDouble(MediaQuery.textScaleFactorOf(context),
-          0.0,
-          upperLimit,
-        ),
-      ),
-      child: child,
-    );
   }
 }
 
