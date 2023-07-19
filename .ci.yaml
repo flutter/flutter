@@ -411,8 +411,9 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux firebase_oriol33_abstract_method_smoke_test
+  - name: Linux firebase_panther33_abstract_method_smoke_test
     bringup: true
+    presubmit: false
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
@@ -425,7 +426,7 @@ targets:
         ["firebaselab"]
       task_name: abstract_method_smoke_test
       physical_devices: >-
-        ["--device", "model=oriole,version=33"]
+        ["--device", "model=panther,version=33"]
       virtual_devices: >-
         []
 
