@@ -83,6 +83,7 @@ class DlPaint {
     color_.argb = alpha << 24 | (color_.argb & 0x00FFFFFF);
     return *this;
   }
+  SkScalar getOpacity() const { return color_.getAlphaF(); }
   DlPaint& setOpacity(SkScalar opacity) {
     setAlpha(SkScalarRoundToInt(opacity * 0xff));
     return *this;

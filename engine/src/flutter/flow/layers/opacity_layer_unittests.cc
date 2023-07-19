@@ -659,7 +659,7 @@ using OpacityLayerDiffTest = DiffContextTest;
 
 TEST_F(OpacityLayerDiffTest, FractionalTranslation) {
   auto picture = CreateDisplayListLayer(
-      CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), 1));
+      CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60)));
   auto layer = CreateOpacityLater({picture}, 128, SkPoint::Make(0.5, 0.5));
 
   MockLayerTree tree1;
@@ -672,7 +672,7 @@ TEST_F(OpacityLayerDiffTest, FractionalTranslation) {
 
 TEST_F(OpacityLayerDiffTest, FractionalTranslationWithRasterCache) {
   auto picture = CreateDisplayListLayer(
-      CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), 1));
+      CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60)));
   auto layer = CreateOpacityLater({picture}, 128, SkPoint::Make(0.5, 0.5));
 
   MockLayerTree tree1;
