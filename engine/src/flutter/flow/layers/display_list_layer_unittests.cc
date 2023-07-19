@@ -355,7 +355,7 @@ TEST_F(DisplayListLayerTest, RasterCachePreservesRTree) {
 using DisplayListLayerDiffTest = DiffContextTest;
 
 TEST_F(DisplayListLayerDiffTest, SimpleDisplayList) {
-  auto display_list = CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), 1);
+  auto display_list = CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60));
 
   MockLayerTree tree1;
   tree1.root()->Add(CreateDisplayListLayer(display_list));
@@ -375,7 +375,7 @@ TEST_F(DisplayListLayerDiffTest, SimpleDisplayList) {
 }
 
 TEST_F(DisplayListLayerDiffTest, FractionalTranslation) {
-  auto display_list = CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), 1);
+  auto display_list = CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60));
 
   MockLayerTree tree1;
   tree1.root()->Add(
@@ -388,7 +388,7 @@ TEST_F(DisplayListLayerDiffTest, FractionalTranslation) {
 }
 
 TEST_F(DisplayListLayerDiffTest, FractionalTranslationWithRasterCache) {
-  auto display_list = CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), 1);
+  auto display_list = CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60));
 
   MockLayerTree tree1;
   tree1.root()->Add(
@@ -402,21 +402,25 @@ TEST_F(DisplayListLayerDiffTest, FractionalTranslationWithRasterCache) {
 
 TEST_F(DisplayListLayerDiffTest, DisplayListCompare) {
   MockLayerTree tree1;
-  auto display_list1 = CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), 1);
+  auto display_list1 =
+      CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), DlColor::kGreen());
   tree1.root()->Add(CreateDisplayListLayer(display_list1));
 
   auto damage = DiffLayerTree(tree1, MockLayerTree());
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(10, 10, 60, 60));
 
   MockLayerTree tree2;
-  auto display_list2 = CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), 1);
+  // same DL, same offset
+  auto display_list2 =
+      CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), DlColor::kGreen());
   tree2.root()->Add(CreateDisplayListLayer(display_list2));
 
   damage = DiffLayerTree(tree2, tree1);
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeEmpty());
 
   MockLayerTree tree3;
-  auto display_list3 = CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), 1);
+  auto display_list3 =
+      CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), DlColor::kGreen());
   // add offset
   tree3.root()->Add(
       CreateDisplayListLayer(display_list3, SkPoint::Make(10, 10)));
@@ -426,7 +430,8 @@ TEST_F(DisplayListLayerDiffTest, DisplayListCompare) {
 
   MockLayerTree tree4;
   // different color
-  auto display_list4 = CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), 2);
+  auto display_list4 =
+      CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60), DlColor::kRed());
   tree4.root()->Add(
       CreateDisplayListLayer(display_list4, SkPoint::Make(10, 10)));
 
