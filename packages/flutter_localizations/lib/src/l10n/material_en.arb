@@ -242,6 +242,11 @@
     "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
   },
 
+  "menuDismissLabel": "Dismiss menu",
+  "@menuDismissLabel": {
+    "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for the area around a menu to indicate that a tap dismisses the menu."
+  },
+
   "dateSeparator": "/",
   "@dateSeparator": {
     "description": "The character string used to separate the parts of a compact date format. For example 'mm/dd/yyyy' has a separator of '/'."
