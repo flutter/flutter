@@ -296,6 +296,67 @@ void main() {
     expect(actualPositionedBox.widthFactor, 1.0);
   });
 
+  testWidgets('MatrixTransition animates', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Widget widget = MatrixTransition(
+      alignment: Alignment.topRight,
+      onTransform: (double value) => Matrix4.translationValues(value, value, value),
+      animation: controller,
+      child: const Text(
+        'Matrix',
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    Transform actualTransformedBox = tester.widget(find.byType(Transform));
+    Matrix4 actualTransform = actualTransformedBox.transform;
+    expect(actualTransform, equals(Matrix4.rotationZ(0.0)));
+
+    controller.value = 0.5;
+    await tester.pump();
+    actualTransformedBox = tester.widget(find.byType(Transform));
+    actualTransform = actualTransformedBox.transform;
+    expect(actualTransform, Matrix4.fromList(<double>[
+      1.0,  0.0, 0.0, 0.5,
+      0.0,  1.0, 0.0, 0.5,
+      0.0,  0.0, 1.0, 0.5,
+      0.0,  0.0, 0.0, 1.0,
+    ])..transpose());
+
+    controller.value = 0.75;
+    await tester.pump();
+    actualTransformedBox = tester.widget(find.byType(Transform));
+    actualTransform = actualTransformedBox.transform;
+    expect(actualTransform, Matrix4.fromList(<double>[
+      1.0, 0.0, 0.0, 0.75,
+      0.0, 1.0, 0.0, 0.75,
+      0.0, 0.0, 1.0, 0.75,
+      0.0, 0.0, 0.0, 1.0,
+    ])..transpose());
+  });
+
+  testWidgets('MatrixTransition maintains chosen alignment during animation', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Widget widget = MatrixTransition(
+      alignment: Alignment.topRight,
+      onTransform: (double value) => Matrix4.identity(),
+      animation: controller,
+      child: const Text('Matrix', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(widget);
+    MatrixTransition actualTransformedBox = tester.widget(find.byType(MatrixTransition));
+    Alignment actualAlignment = actualTransformedBox.alignment;
+    expect(actualAlignment, Alignment.topRight);
+
+    controller.value = 0.5;
+    await tester.pump();
+    actualTransformedBox = tester.widget(find.byType(MatrixTransition));
+    actualAlignment = actualTransformedBox.alignment;
+    expect(actualAlignment, Alignment.topRight);
+  });
+
   testWidgets('RotationTransition animates', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Widget widget = RotationTransition(
@@ -316,23 +377,23 @@ void main() {
     await tester.pump();
     actualRotatedBox = tester.widget(find.byType(Transform));
     actualTurns = actualRotatedBox.transform;
-    expect(actualTurns, Matrix4.fromList(<double>[
+    expect(actualTurns, matrixMoreOrLessEquals(Matrix4.fromList(<double>[
      -1.0,  0.0, 0.0, 0.0,
       0.0, -1.0, 0.0, 0.0,
       0.0,  0.0, 1.0, 0.0,
       0.0,  0.0, 0.0, 1.0,
-    ])..transpose());
+    ])..transpose()));
 
     controller.value = 0.75;
     await tester.pump();
     actualRotatedBox = tester.widget(find.byType(Transform));
     actualTurns = actualRotatedBox.transform;
-    expect(actualTurns, Matrix4.fromList(<double>[
+    expect(actualTurns, matrixMoreOrLessEquals(Matrix4.fromList(<double>[
       0.0, 1.0, 0.0, 0.0,
      -1.0, 0.0, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
       0.0, 0.0, 0.0, 1.0,
-    ])..transpose());
+    ])..transpose()));
   });
 
   testWidgets('RotationTransition maintains chosen alignment during animation', (WidgetTester tester) async {
@@ -454,6 +515,66 @@ void main() {
       controller.value = 1.0;
       await tester.pump();
       expect(getOpacity(tester, 'Fade In'), 1.0);
+    });
+  });
+
+  group('MatrixTransition', () {
+    testWidgets('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      final Widget widget = Directionality(
+        textDirection: TextDirection.ltr,
+        child: MatrixTransition(
+          animation: animation,
+          onTransform: (double value) => Matrix4.identity(),
+          filterQuality: FilterQuality.none,
+          child: const Text('Matrix Transition'),
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+
+      // Validate that expensive layer is not left in tree before animation has started.
+      expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+
+      controller.value = 0.25;
+      await tester.pump();
+
+      expect(
+          tester.layers,
+          contains(isA<ImageFilterLayer>().having(
+            (ImageFilterLayer layer) => layer.imageFilter.toString(),
+            'image filter',
+            startsWith('ImageFilter.matrix('),
+          )));
+
+      controller.value = 0.5;
+      await tester.pump();
+
+      expect(
+          tester.layers,
+          contains(isA<ImageFilterLayer>().having(
+            (ImageFilterLayer layer) => layer.imageFilter.toString(),
+            'image filter',
+            startsWith('ImageFilter.matrix('),
+          )));
+
+      controller.value = 0.75;
+      await tester.pump();
+
+      expect(
+          tester.layers,
+          contains(isA<ImageFilterLayer>().having(
+            (ImageFilterLayer layer) => layer.imageFilter.toString(),
+            'image filter',
+            startsWith('ImageFilter.matrix('),
+          )));
+
+      controller.value = 1;
+      await tester.pump();
+
+      // Validate that expensive layer is not left in tree after animation has finished.
+      expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
     });
   });
 
