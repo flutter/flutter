@@ -1,5 +1,5 @@
 name: main
-description: A test project that has a package with a font and dummy certificates as a dependencies.
+description: A test project that has font and dummy certificates packages as dependencies.
 
 environment:
   sdk: '>=3.0.0-0 <4.0.0'

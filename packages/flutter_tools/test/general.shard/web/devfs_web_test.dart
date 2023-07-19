@@ -1182,20 +1182,7 @@ void main() {
     Artifacts: () => Artifacts.test(),
   }));
 
-  test('Can start web with tls connection ', () => testbed.run(() async {
-    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
-      ..createSync(recursive: true);
-    const String htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
-    globals.fs.currentDirectory
-      .childDirectory('web')
-      .childFile('index.html')
-      ..createSync(recursive: true)
-      ..writeAsStringSync(htmlContent);
-    outputFile.parent.childFile('a.sources').writeAsStringSync('');
-    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
-    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-    outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
-
+  test('DevFS starts with scheme https', () => testbed.run(() async {
     final String dataPath = globals.fs.path.join(
       getFlutterRoot(),
       'packages',
@@ -1244,7 +1231,7 @@ void main() {
 
     final Uri uri = await webDevFS.create();
 
-    // Ensure the connection established is in secure
+    // Ensure the connection established is secure
     expect(uri.scheme, 'https');
 
     await webDevFS.destroy();
