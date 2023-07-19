@@ -8,14 +8,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '_html_element_view_io.dart' if (dart.library.js_util) '_html_element_view_web.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
-
-export '_html_element_view_io.dart'
-    if (dart.library.js_util) '_html_element_view_web.dart';
 
 // Examples can assume:
 // PlatformViewController createFooWebView(PlatformViewCreationParams params) { return (null as dynamic) as PlatformViewController; }
@@ -305,6 +303,121 @@ class UiKitView extends StatefulWidget {
 
   @override
   State<UiKitView> createState() => _UiKitViewState();
+}
+
+/// Callback signature for when the platform view's DOM element was created.
+///
+/// [element] is the DOM element that was created.
+///
+/// Also see [HtmlElementView.fromTagName] that uses this callback
+/// signature.
+typedef ElementCreatedCallback = void Function(Object element);
+
+/// Embeds an HTML element in the Widget hierarchy in Flutter Web.
+///
+/// *NOTE*: This only works in Flutter Web. To embed web content on other
+/// platforms, consider using the `flutter_webview` plugin.
+///
+/// Embedding HTML is an expensive operation and should be avoided when a
+/// Flutter equivalent is possible.
+///
+/// The embedded HTML is painted just like any other Flutter widget and
+/// transformations apply to it as well. This widget should only be used in
+/// Flutter Web.
+///
+/// {@macro flutter.widgets.AndroidView.layout}
+///
+/// Due to security restrictions with cross-origin `<iframe>` elements, Flutter
+/// cannot dispatch pointer events to an HTML view. If an `<iframe>` is the
+/// target of an event, the window containing the `<iframe>` is not notified
+/// of the event. In particular, this means that any pointer events which land
+/// on an `<iframe>` will not be seen by Flutter, and so the HTML view cannot
+/// participate in gesture detection with other widgets.
+///
+/// The way we enable accessibility on Flutter for web is to have a full-page
+/// button which waits for a double tap. Placing this full-page button in front
+/// of the scene would cause platform views not to receive pointer events. The
+/// tradeoff is that by placing the scene in front of the semantics placeholder
+/// will cause platform views to block pointer events from reaching the
+/// placeholder. This means that in order to enable accessibility, you must
+/// double tap the app *outside of a platform view*. As a consequence, a
+/// full-screen platform view will make it impossible to enable accessibility.
+/// Make sure that your HTML views are sized no larger than necessary, or you
+/// may cause difficulty for users trying to enable accessibility.
+///
+/// {@macro flutter.widgets.AndroidView.lifetime}
+class HtmlElementView extends StatelessWidget {
+  /// Creates a platform view for Flutter Web.
+  ///
+  /// `viewType` identifies the type of platform view to create.
+  const HtmlElementView({
+    super.key,
+    required this.viewType,
+    this.onPlatformViewCreated,
+    this.creationParams,
+  });
+
+  /// Creates a platform view that creates a DOM element specified by [tagName].
+  ///
+  /// [isVisible] indicates whether the view is visible to the user or not.
+  /// Setting this to false allows the rendering pipeline to perform extra
+  /// optimizations knowing that the view will not result in any pixels painted
+  /// on the screen.
+  ///
+  /// [onElementCreated] is called when the DOM element is created. It can be
+  /// used by the app to customize the element by adding attributes and styles.
+  ///
+  /// ```dart
+  /// import 'package:flutter/widgets.dart';
+  /// import 'package:web/web.dart' as web;
+  ///
+  /// // ...
+  ///
+  /// class MyWidget extends StatelessWidget {
+  ///   const MyWidget({super.key});
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return HtmlElementView.fromTagName(
+  ///       tagName: 'div',
+  ///       onElementCreated: (Object element) {
+  ///         element as web.HTMLElement;
+  ///         element.style
+  ///             ..backgroundColor = 'blue'
+  ///             ..border = '1px solid red';
+  ///       },
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  factory HtmlElementView.fromTagName({
+    Key? key,
+    required String tagName,
+    bool isVisible = true,
+    ElementCreatedCallback? onElementCreated,
+  }) =>
+      HtmlElementViewImpl.createFromTagName(
+        key: key,
+        tagName: tagName,
+        isVisible: isVisible,
+        onElementCreated: onElementCreated,
+      );
+
+  /// The unique identifier for the HTML view type to be embedded by this widget.
+  ///
+  /// A PlatformViewFactory for this type must have been registered.
+  final String viewType;
+
+  /// Callback to invoke after the platform view has been created.
+  ///
+  /// May be null.
+  final PlatformViewCreatedCallback? onPlatformViewCreated;
+
+  /// Passed as the 2nd argument (i.e. `params`) of the registered view factory.
+  final Object? creationParams;
+
+  @override
+  Widget build(BuildContext context) => buildImpl(context);
 }
 
 class _AndroidViewState extends State<AndroidView> {

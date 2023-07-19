@@ -285,7 +285,7 @@ void main() {
     });
   });
 
-  group('HtmlElementView.domElement', () {
+  group('HtmlElementView.fromTagName', () {
     const String kDefaultVisibleViewType = '_default_document_create_element_visible';
     const String kDefaultInvisibleViewType = '_default_document_create_element_invisible';
 
@@ -299,7 +299,7 @@ void main() {
     });
 
     testWidgets('Auto-registers default view factories', (WidgetTester tester) async {
-      HtmlElementView.domElement(tagName: 'div');
+      HtmlElementView.fromTagName(tagName: 'div');
 
       expect(fakePlatformViewRegistry.registeredViewTypes, hasLength(2));
 
@@ -322,7 +322,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: HtmlElementView.domElement(tagName: 'div'),
+            child: HtmlElementView.fromTagName(tagName: 'div'),
           ),
         ),
       );
@@ -347,7 +347,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: HtmlElementView.domElement(tagName: 'div', isVisible: false),
+            child: HtmlElementView.fromTagName(tagName: 'div', isVisible: false),
           ),
         ),
       );
@@ -376,7 +376,7 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: HtmlElementView.domElement(
+            child: HtmlElementView.fromTagName(
               tagName: 'div',
               onElementCreated: onElementCreated,
             ),
