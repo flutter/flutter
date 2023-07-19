@@ -76,8 +76,13 @@ abstract class CupertinoLocalizations {
   ///
   ///  - US English: January
   ///  - Korean: 1월
+  ///  - Russian: Января
+  ///
+  /// Examples: datePickerMonth(1, true) in:
+  ///
+  /// - Russian: Январь
   // The global version uses date symbols data from the intl package.
-  String datePickerMonth(int monthIndex);
+  String datePickerMonth(int monthIndex, [bool standalone = false]);
 
   /// Day of month that is shown in [CupertinoDatePicker] spinner corresponding
   /// to the given day index.
@@ -365,7 +370,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String datePickerYear(int yearIndex) => yearIndex.toString();
 
   @override
-  String datePickerMonth(int monthIndex) => _months[monthIndex - 1];
+  String datePickerMonth(int monthIndex, [bool standalone = false]) => _months[monthIndex - 1];
 
   @override
   String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {

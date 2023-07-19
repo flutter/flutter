@@ -93,10 +93,14 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  String datePickerMonth(int monthIndex) {
+  String datePickerMonth(int monthIndex, [bool standalone = false]) {
     // It doesn't actually have anything to do with _fullYearFormat. It's just
     // taking advantage of the fact that _fullYearFormat loaded the needed
     // locale's symbols.
+    if (standalone) {
+      return _fullYearFormat.dateSymbols.STANDALONEMONTHS[monthIndex - 1];
+    }
+    
     return _fullYearFormat.dateSymbols.MONTHS[monthIndex - 1];
   }
 
