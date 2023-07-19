@@ -504,6 +504,70 @@ TEST_F(DisplayListTest, BuilderInitialClipBoundsNonZero) {
   ASSERT_EQ(builder.GetDestinationClipBounds(), clip_bounds);
 }
 
+TEST_F(DisplayListTest, UnclippedSaveLayerContentAccountsForFilter) {
+  SkRect cull_rect = SkRect::MakeLTRB(0.0f, 0.0f, 300.0f, 300.0f);
+  SkRect clip_rect = SkRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+  SkRect draw_rect = SkRect::MakeLTRB(50.0f, 140.0f, 101.0f, 160.0f);
+  auto filter = DlBlurImageFilter::Make(10.0f, 10.0f, DlTileMode::kDecal);
+  DlPaint layer_paint = DlPaint().setImageFilter(filter);
+
+  ASSERT_TRUE(clip_rect.intersects(draw_rect));
+  ASSERT_TRUE(cull_rect.contains(clip_rect));
+  ASSERT_TRUE(cull_rect.contains(draw_rect));
+
+  DisplayListBuilder builder;
+  builder.Save();
+  {
+    builder.ClipRect(clip_rect, ClipOp::kIntersect, false);
+    builder.SaveLayer(&cull_rect, &layer_paint);
+    {  //
+      builder.DrawRect(draw_rect, DlPaint());
+    }
+    builder.Restore();
+  }
+  builder.Restore();
+  auto display_list = builder.Build();
+
+  ASSERT_EQ(display_list->op_count(), 6u);
+
+  SkRect result_rect = draw_rect.makeOutset(30.0f, 30.0f);
+  ASSERT_TRUE(result_rect.intersect(clip_rect));
+  ASSERT_EQ(result_rect, SkRect::MakeLTRB(100.0f, 110.0f, 131.0f, 190.0f));
+  ASSERT_EQ(display_list->bounds(), result_rect);
+}
+
+TEST_F(DisplayListTest, ClippedSaveLayerContentAccountsForFilter) {
+  SkRect cull_rect = SkRect::MakeLTRB(0.0f, 0.0f, 300.0f, 300.0f);
+  SkRect clip_rect = SkRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+  SkRect draw_rect = SkRect::MakeLTRB(50.0f, 140.0f, 99.0f, 160.0f);
+  auto filter = DlBlurImageFilter::Make(10.0f, 10.0f, DlTileMode::kDecal);
+  DlPaint layer_paint = DlPaint().setImageFilter(filter);
+
+  ASSERT_FALSE(clip_rect.intersects(draw_rect));
+  ASSERT_TRUE(cull_rect.contains(clip_rect));
+  ASSERT_TRUE(cull_rect.contains(draw_rect));
+
+  DisplayListBuilder builder;
+  builder.Save();
+  {
+    builder.ClipRect(clip_rect, ClipOp::kIntersect, false);
+    builder.SaveLayer(&cull_rect, &layer_paint);
+    {  //
+      builder.DrawRect(draw_rect, DlPaint());
+    }
+    builder.Restore();
+  }
+  builder.Restore();
+  auto display_list = builder.Build();
+
+  ASSERT_EQ(display_list->op_count(), 6u);
+
+  SkRect result_rect = draw_rect.makeOutset(30.0f, 30.0f);
+  ASSERT_TRUE(result_rect.intersect(clip_rect));
+  ASSERT_EQ(result_rect, SkRect::MakeLTRB(100.0f, 110.0f, 129.0f, 190.0f));
+  ASSERT_EQ(display_list->bounds(), result_rect);
+}
+
 TEST_F(DisplayListTest, SingleOpSizes) {
   for (auto& group : allGroups) {
     for (size_t i = 0; i < group.variants.size(); i++) {
