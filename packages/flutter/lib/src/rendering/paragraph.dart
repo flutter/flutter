@@ -1525,7 +1525,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         // new position where to cause an inverted selection.
         final bool shouldSwapEdgesWhenSelectionIsNormalized = isEnd ? position.offset < existingSelectionStart.offset : position.offset > existingSelectionEnd.offset;
         final bool shouldSwapEdgesWhenSelectionNotNormalized = isEnd ? position.offset > existingSelectionStart.offset : position.offset < existingSelectionEnd.offset;
-        if (existingSelectionStart.offset < existingSelectionEnd.offset) {
+        if (existingSelectionStart.offset <= existingSelectionEnd.offset) {
           // The selection is normalized, i.e. the start of the selection is before
           // the end.
           if (shouldSwapEdgesWhenSelectionIsNormalized) {
