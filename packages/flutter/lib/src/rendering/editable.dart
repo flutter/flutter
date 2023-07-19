@@ -2648,11 +2648,11 @@ class _RenderEditableCustomPaint extends RenderBox {
 /// when only auxiliary content changes (e.g. a blinking cursor) are present. It
 /// will be scheduled to repaint when:
 ///
-///  * It's assigned to a new [RenderEditable] and the [shouldRepaint] method
-///    returns true.
+///  * It's assigned to a new [RenderEditable] and the 
+///    [RenderEditablePainter.shouldRepaint] method returns true.
 ///  * Any of the [RenderEditable]s it is attached to repaints.
-///  * The [notifyListeners] method is called, which typically happens when the
-///    painter's attributes change.
+///  * The [RenderEditablePainter.notifyListeners] method is called, which 
+///    typically happens when the painter's attributes change.
 ///
 /// See also:
 ///
