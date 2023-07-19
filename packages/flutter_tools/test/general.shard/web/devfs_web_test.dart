@@ -8,6 +8,7 @@ import 'dart:io' hide Directory, File;
 import 'package:dwds/dwds.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -27,6 +28,7 @@ import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/testbed.dart';
 
@@ -1175,6 +1177,77 @@ void main() {
     expect(uri.host, 'localhost');
     // Matches base URI specified in html.
     expect(uri.path, '/foo');
+
+    await webDevFS.destroy();
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
+  }));
+
+  test('Can start web with tls connection ', () => testbed.run(() async {
+    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      ..createSync(recursive: true);
+    const String htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
+    globals.fs.currentDirectory
+      .childDirectory('web')
+      .childFile('index.html')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(htmlContent);
+    outputFile.parent.childFile('a.sources').writeAsStringSync('');
+    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
+
+    final String dataPath = globals.fs.path.join(
+      getFlutterRoot(),
+      'packages',
+      'flutter_tools',
+      'test',
+      'data',
+      'asset_test',
+    );
+
+    final AssetBundle asset = AssetBundleFactory.instance.createBundle();
+    final String manifestPath =
+        globals.fs.path.join(dataPath, 'main', 'pubspec.yaml');
+    final String packagesPath =
+        globals.fs.path.join(dataPath, 'main', '.packages');
+    await asset.build(
+      manifestPath: manifestPath,
+      packagesPath: packagesPath,
+    );
+
+    final String dummyCertPath =
+        globals.fs.path.join(dataPath, 'tls_cert', 'dummy-cert.pem');
+    final String dummyCertKeyPath =
+        globals.fs.path.join(dataPath, 'tls_cert', 'dummy-key.pem');
+
+    final WebDevFS webDevFS = WebDevFS(
+      hostname: 'localhost',
+      port: 0,
+      tlsCertPath: dummyCertPath,
+      tlsCertKeyPath: dummyCertKeyPath,
+      packagesFilePath: '.packages',
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
+      nullAssertions: true,
+      nativeNullAssertions: true,
+      buildInfo: BuildInfo.debug,
+      enableDwds: false,
+      enableDds: false,
+      entrypoint: Uri.base,
+      testMode: true,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      nullSafetyMode: NullSafetyMode.unsound,
+    );
+
+    final Uri uri = await webDevFS.create();
+
+    // Ensure the connection established is in secure
+    print(uri);
+    expect(uri.scheme, 'https');
 
     await webDevFS.destroy();
   }, overrides: <Type, Generator>{

@@ -1,0 +1,12 @@
+name: tls_cert
+description: A test project that contains dummy certificates.
+
+environment:
+  sdk: '>=3.0.0-0 <4.0.0'
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - dummy-cert.pem
+    - dummy-key.pem

@@ -797,10 +797,13 @@ class WebDevFS implements DevFS {
     } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
       webAssetServer.webRenderer = WebRendererMode.canvaskit;
     }
+    String url = '$hostname:$selectedPort';
     if (hostname == 'any') {
-      _baseUri = Uri.http('localhost:$selectedPort', webAssetServer.basePath);
-    } else {
-      _baseUri = Uri.http('$hostname:$selectedPort', webAssetServer.basePath);
+      url ='localhost:$selectedPort';
+    }
+    _baseUri = Uri.http(url, webAssetServer.basePath);
+    if (tlsCertPath !=null && tlsCertKeyPath!=null) {
+      _baseUri = Uri.https(url, webAssetServer.basePath);
     }
     return _baseUri!;
   }

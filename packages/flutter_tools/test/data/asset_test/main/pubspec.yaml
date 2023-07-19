@@ -7,5 +7,7 @@ environment:
 dependencies:
   font:
     path: ../font
+  tls_cert:
+    path: ../tls_cert
 
 # PUBSPEC CHECKSUM: 0000
