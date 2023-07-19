@@ -168,6 +168,7 @@ bool ImageMatchesFixture(const std::string& fixture_file_name,
   FML_CHECK(scene_image) << "Invalid scene image.";
 
   auto scene_image_subset = scene_image->makeSubset(
+      nullptr,
       SkIRect::MakeWH(fixture_image->width(), fixture_image->height()));
 
   FML_CHECK(scene_image_subset)
