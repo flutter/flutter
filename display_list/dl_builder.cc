@@ -522,12 +522,25 @@ void DisplayListBuilder::saveLayer(const SkRect* bounds,
     }
   }
 
-  // Even though Skia claims that the bounds are only a hint, they actually
-  // use them as the temporary layer bounds during rendering the layer, so
-  // we set them as if a clip operation were performed.
-  if (bounds) {
+  if (options.renders_with_attributes() && current_.getImageFilter()) {
+    // We use |resetCullRect| here because we will be accumulating bounds of
+    // primitives before applying the filter to those bounds. We might
+    // encounter a primitive whose bounds are clipped, but whose filtered
+    // bounds will not be clipped. If the individual rendering ops bounds
+    // are clipped, it will not contribute to the overall bounds which
+    // could lead to inaccurate (subset) bounds of the DisplayList.
+    // We need to reset the cull rect here to avoid this premature clipping.
+    // The filtered bounds will be clipped to the existing clip rect when
+    // this layer is restored.
+    // If bounds is null then the original cull_rect will be used.
+    tracker_.resetCullRect(bounds);
+  } else if (bounds) {
+    // Even though Skia claims that the bounds are only a hint, they actually
+    // use them as the temporary layer bounds during rendering the layer, so
+    // we set them as if a clip operation were performed.
     tracker_.clipRect(*bounds, ClipOp::kIntersect, false);
   }
+
   if (backdrop) {
     // A backdrop will affect up to the entire surface, bounded by the clip
     AccumulateUnbounded();
