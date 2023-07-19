@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
@@ -59,7 +60,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final bool material3 = theme.useMaterial3;
     final Color defaultCursorColor = material3 ? theme.colorScheme.primary : const Color(0xff2196f3);
@@ -106,7 +107,18 @@ void main() {
     await tester.pumpAndSettle();
     final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
     expect(handle, paints..path(color: defaultSelectionHandleColor));
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/130469
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    notDisposedAllowList: <String, int?>{
+      'ValueNotifier<MagnifierInfo>': 1,
+      'ValueNotifier<_OverlayEntryWidgetState?>': 2,
+      'ValueNotifier<bool>': 1,
+    },
+    // TODO(polina-c): investigate notGCed, if it does not disappear after fixing notDisposed.
+    allowAllNotGCed: true,
+  ));
 
   testWidgets('ThemeData.textSelectionTheme will be used if provided', (WidgetTester tester) async {
     const TextSelectionThemeData textSelectionTheme = TextSelectionThemeData(

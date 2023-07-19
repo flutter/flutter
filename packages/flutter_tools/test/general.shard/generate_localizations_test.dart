@@ -59,6 +59,13 @@ void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
     .writeAsStringSync(singleMessageArbFileString);
   l10nDirectory.childFile(esArbFileName)
     .writeAsStringSync(singleEsMessageArbFileString);
+  fs.file('pubspec.yaml')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('''
+flutter:
+  generate: true
+''');
+
 }
 
 void main() {
@@ -88,6 +95,7 @@ void main() {
       bool useEscaping = false,
       bool areResourceAttributeRequired = false,
       bool suppressWarnings = false,
+      bool relaxSyntax = false,
       void Function(Directory)? setup,
     }
   ) {
@@ -119,6 +127,7 @@ void main() {
       useEscaping: useEscaping,
       areResourceAttributesRequired: areResourceAttributeRequired,
       suppressWarnings: suppressWarnings,
+      useRelaxedSyntax: relaxSyntax,
     )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: isFromYaml);
@@ -763,7 +772,7 @@ class FooEn extends Foo {
       _standardFlutterDirectoryL10nSetup(fs);
 
       // Missing flutter: generate: true should throw exception.
-      fs.file(fs.path.join(syntheticPackagePath, 'pubspec.yaml'))
+      fs.file('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 flutter:
@@ -797,6 +806,34 @@ flutter:
               'flutter: generate flag turned on.',
         ),
       );
+    });
+
+    testWithoutContext('uses the same line terminator as pubspec.yaml', () async {
+      _standardFlutterDirectoryL10nSetup(fs);
+
+      fs.file('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+flutter:\r
+  generate: true\r
+''');
+
+      final LocalizationOptions options = LocalizationOptions(
+        arbDir: fs.path.join('lib', 'l10n'),
+        outputClass: defaultClassNameString,
+        outputLocalizationFile: defaultOutputFileString,
+      );
+      await generateLocalizations(
+        fileSystem: fs,
+        options: options,
+        logger: BufferLogger.test(),
+        projectDir: fs.currentDirectory,
+        dependenciesDir: fs.currentDirectory,
+        artifacts: artifacts,
+        processManager: processManager,
+      );
+      final String content = getGeneratedFileContent(locale: 'en');
+      expect(content, contains('\r\n'));
     });
 
     testWithoutContext('blank lines generated nicely', () async {
@@ -1439,6 +1476,22 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         });
         expect(getGeneratedFileContent(locale: 'en'), contains('String helloWorld(Object name) {'));
         expect(getGeneratedFileContent(locale: 'es'), contains('String helloWorld(Object name) {'));
+      });
+
+      testWithoutContext('braces are ignored as special characters if placeholder does not exist', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "helloWorld": "Hello {name}",
+  "@@helloWorld": {
+    "placeholders": {
+      "names": {}
+    }
+  }
+}'''
+        }, relaxSyntax: true);
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains("String get helloWorld => 'Hello {name}'"));
       });
     });
 
