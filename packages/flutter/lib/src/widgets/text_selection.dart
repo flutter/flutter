@@ -2069,7 +2069,7 @@ class TextSelectionGestureDetectorBuilder {
   RenderEditable get renderEditable => editableText.renderEditable;
 
   /// Whether the Shift key was pressed when the most recent [PointerDownEvent]
-  /// was tracked by the [TapAndDragGestureRecognizer].
+  /// was tracked by the [BaseTapAndDragGestureRecognizer].
   bool _isShiftPressed = false;
 
   /// The viewport offset pixels of any [Scrollable] containing the
@@ -3032,11 +3032,10 @@ class TextSelectionGestureDetector extends StatefulWidget {
     required this.child,
   });
 
-  /// Called whenever [TapAndDragGestureRecognizer] has started tracking
-  /// a tap gesture.
+  /// {@macro flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.onTapTrackStart}
   final VoidCallback? onTapTrackStart;
 
-  /// Called when [TapAndDragGestureRecognizer] tap tracking has been reset.
+  /// {@macro flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.onTapTrackReset}
   final VoidCallback? onTapTrackReset;
 
   /// Called for every tap down including every tap down that's part of a
