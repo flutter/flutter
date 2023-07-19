@@ -3,6 +3,12 @@
 # found in the LICENSE file.
 
 # See https://github.com/actions/labeler/blob/main/README.md for docs.
+'affects: desktop':
+  - shell/platform/darwin/common/**/*
+  - shell/platform/darwin/macos/**/*
+  - shell/platform/linux/**/*
+  - shell/platform/windows/**/*
+
 embedder:
   - shell/platform/embedder
 
