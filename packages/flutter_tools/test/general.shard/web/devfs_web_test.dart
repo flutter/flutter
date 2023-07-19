@@ -28,7 +28,6 @@ import 'package:shelf/shelf.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/testbed.dart';
 
@@ -1246,7 +1245,6 @@ void main() {
     final Uri uri = await webDevFS.create();
 
     // Ensure the connection established is in secure
-    print(uri);
     expect(uri.scheme, 'https');
 
     await webDevFS.destroy();
