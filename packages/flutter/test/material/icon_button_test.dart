@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -2729,18 +2730,18 @@ void main() {
       final ColorScheme lightScheme = const ColorScheme.light().copyWith(onSurfaceVariant: const Color(0xffe91e60));
       // Brightness.dark
       await tester.pumpWidget(
-          MaterialApp(
-              theme: ThemeData(colorScheme: lightScheme, useMaterial3: true,),
-              home: Scaffold(
-                body: IconTheme.merge(
-                  data: const IconThemeData(size: 26),
-                  child: IconButton(
-                    icon: const Icon(Icons.account_box),
-                    onPressed: () {},
-                  ),
-                ),
-              )
+        MaterialApp(
+          theme: ThemeData(colorScheme: lightScheme, useMaterial3: true,),
+          home: Scaffold(
+            body: IconTheme.merge(
+              data: const IconThemeData(size: 26),
+              child: IconButton(
+                icon: const Icon(Icons.account_box),
+                onPressed: () {},
+              ),
+            ),
           )
+        )
       );
 
       Color? iconColor0() => _iconStyle(tester, Icons.account_box)?.color;
@@ -2769,6 +2770,25 @@ void main() {
       );
 
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgetsWithLeakTracking('Material3 - IconButton memory leak', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/130708.
+      Widget buildWidget(bool showIconButton) {
+        return showIconButton
+          ? MaterialApp(
+              theme: ThemeData(useMaterial3: true),
+              home: IconButton(
+                onPressed: () { },
+                icon: const Icon(Icons.search),
+              ),
+            )
+          : const SizedBox();
+      }
+      await tester.pumpWidget(buildWidget(true));
+      await tester.pumpWidget(buildWidget(false));
+
+      // No exception is thrown.
     });
   });
 }
