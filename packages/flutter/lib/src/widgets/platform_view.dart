@@ -196,30 +196,15 @@ class AndroidView extends StatefulWidget {
   State<AndroidView> createState() => _AndroidViewState();
 }
 
-// TODO(amirh): describe the embedding mechanism.
-// TODO(ychris): remove the documentation for conic path not supported once https://github.com/flutter/flutter/issues/35062 is resolved.
-/// Embeds an iOS view in the Widget hierarchy.
+/// Common superclass for iOS and macOS platform views.
 ///
-/// Embedding iOS views is an expensive operation and should be avoided when a Flutter
-/// equivalent is possible.
-///
-/// {@macro flutter.widgets.AndroidView.layout}
-///
-/// {@macro flutter.widgets.AndroidView.gestures}
-///
-/// {@macro flutter.widgets.AndroidView.lifetime}
-///
-/// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
-/// nothing while maintaining the same layout constraints.
-///
-/// Clipping operations on a UiKitView can result slow performance.
-/// If a conic path clipping is applied to a UIKitView,
-/// a quad path is used to approximate the clip due to limitation of Quartz.
-class UiKitView extends StatefulWidget {
-  /// Creates a widget that embeds an iOS view.
+/// Platform views are used to embed native views in the widget hierarchy, with
+/// support for transforms, clips, and opacity similar to any other Flutter widget.
+abstract class _DarwinView extends StatefulWidget {
+  /// Creates a widget that embeds a platform view.
   ///
   /// {@macro flutter.widgets.AndroidView.constructorArgs}
-  const UiKitView({
+  const _DarwinView({
     super.key,
     required this.viewType,
     this.onPlatformViewCreated,
@@ -300,6 +285,41 @@ class UiKitView extends StatefulWidget {
   // TODO(amirh): get a list of GestureRecognizers here.
   // https://github.com/flutter/flutter/issues/20953
   final Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers;
+}
+
+// TODO(amirh): describe the embedding mechanism.
+// TODO(ychris): remove the documentation for conic path not supported once https://github.com/flutter/flutter/issues/35062 is resolved.
+/// Embeds an iOS view in the Widget hierarchy.
+///
+/// Embedding iOS views is an expensive operation and should be avoided when a Flutter
+/// equivalent is possible.
+///
+/// {@macro flutter.widgets.AndroidView.layout}
+///
+/// {@macro flutter.widgets.AndroidView.gestures}
+///
+/// {@macro flutter.widgets.AndroidView.lifetime}
+///
+/// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
+/// nothing while maintaining the same layout constraints.
+///
+/// Clipping operations on a UiKitView can result slow performance.
+/// If a conic path clipping is applied to a UIKitView,
+/// a quad path is used to approximate the clip due to limitation of Quartz.
+class UiKitView extends _DarwinView {
+  /// Creates a widget that embeds an iOS view.
+  ///
+  /// {@macro flutter.widgets.AndroidView.constructorArgs}
+  const UiKitView({
+    super.key,
+    required super.viewType,
+    super.onPlatformViewCreated,
+    super.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
+    super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+    super.gestureRecognizers,
+  }) : assert(creationParams == null || creationParamsCodec != null);
 
   @override
   State<UiKitView> createState() => _UiKitViewState();
@@ -552,8 +572,8 @@ class _AndroidViewState extends State<AndroidView> {
   }
 }
 
-class _UiKitViewState extends State<UiKitView> {
-  UiKitViewController? _controller;
+abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT extends DarwinPlatformViewController, RenderT extends RenderDarwinPlatformView<ControllerT>, ViewT extends _DarwinPlatformView<ControllerT, RenderT>> extends State<PlatformViewT> {
+  ControllerT? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
 
@@ -565,20 +585,18 @@ class _UiKitViewState extends State<UiKitView> {
 
   @override
   Widget build(BuildContext context) {
-    final UiKitViewController? controller = _controller;
+    final ControllerT? controller = _controller;
     if (controller == null) {
       return const SizedBox.expand();
     }
     return Focus(
       focusNode: focusNode,
       onFocusChange: (bool isFocused) => _onFocusChange(isFocused, controller),
-      child: _UiKitPlatformView(
-        controller: _controller!,
-        hitTestBehavior: widget.hitTestBehavior,
-        gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
-      ),
+      child: childPlatformView()
     );
   }
+
+  ViewT childPlatformView();
 
   void _initializeOnce() {
     if (_initialized) {
@@ -604,7 +622,7 @@ class _UiKitViewState extends State<UiKitView> {
   }
 
   @override
-  void didUpdateWidget(UiKitView oldWidget) {
+  void didUpdateWidget(PlatformViewT oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     final TextDirection newLayoutDirection = _findLayoutDirection();
@@ -638,15 +656,8 @@ class _UiKitViewState extends State<UiKitView> {
 
   Future<void> _createNewUiKitView() async {
     final int id = platformViewsRegistry.getNextPlatformViewId();
-    final UiKitViewController controller = await PlatformViewsService.initUiKitView(
-      id: id,
-      viewType: widget.viewType,
-      layoutDirection: _layoutDirection!,
-      creationParams: widget.creationParams,
-      creationParamsCodec: widget.creationParamsCodec,
-      onFocus: () {
-        focusNode?.requestFocus();
-      }
+    final ControllerT controller = await createNewViewController(
+      id
     );
     if (!mounted) {
       controller.dispose();
@@ -659,7 +670,9 @@ class _UiKitViewState extends State<UiKitView> {
     });
   }
 
-  void _onFocusChange(bool isFocused, UiKitViewController controller) {
+  Future<ControllerT> createNewViewController(int id);
+
+  void _onFocusChange(bool isFocused, ControllerT controller) {
     if (!isFocused) {
       // Unlike Android, we do not need to send "clearFocus" channel message
       // to the engine, because focusing on another view will automatically
@@ -670,6 +683,31 @@ class _UiKitViewState extends State<UiKitView> {
       'TextInput.setPlatformViewClient',
       <String, dynamic>{'platformViewId': controller.id},
     );
+  }
+}
+
+class _UiKitViewState extends _DarwinViewState<UiKitView, UiKitViewController, RenderUiKitView, _UiKitPlatformView> {
+  @override
+  Future<UiKitViewController> createNewViewController(int id) async {
+    return PlatformViewsService.initUiKitView(
+      id: id,
+      viewType: widget.viewType,
+      layoutDirection: _layoutDirection!,
+      creationParams: widget.creationParams,
+      creationParamsCodec: widget.creationParamsCodec,
+      onFocus: () {
+        focusNode?.requestFocus();
+      }
+    );
+  }
+
+  @override
+  _UiKitPlatformView childPlatformView() {
+    return _UiKitPlatformView(
+        controller: _controller!,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers ?? _DarwinViewState._emptyRecognizersSet,
+      );
   }
 }
 
@@ -704,16 +742,28 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
   }
 }
 
-class _UiKitPlatformView extends LeafRenderObjectWidget {
-  const _UiKitPlatformView({
+abstract class _DarwinPlatformView<TController extends DarwinPlatformViewController, TRender extends RenderDarwinPlatformView<TController>> extends LeafRenderObjectWidget {
+  const _DarwinPlatformView({
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
   });
 
-  final UiKitViewController controller;
+  final TController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+
+  @override
+  @mustCallSuper
+  void updateRenderObject(BuildContext context, TRender renderObject) {
+    renderObject
+      ..viewController = controller
+      ..hitTestBehavior = hitTestBehavior;
+  }
+}
+
+class _UiKitPlatformView extends _DarwinPlatformView<UiKitViewController, RenderUiKitView> {
+  const _UiKitPlatformView({required super.controller, required super.hitTestBehavior, required super.gestureRecognizers});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -726,8 +776,7 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderUiKitView renderObject) {
-    renderObject.viewController = controller;
-    renderObject.hitTestBehavior = hitTestBehavior;
+    super.updateRenderObject(context, renderObject);
     renderObject.updateGestureRecognizers(gestureRecognizers);
   }
 }
