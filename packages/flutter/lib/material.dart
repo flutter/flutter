@@ -122,6 +122,7 @@ export 'src/material/menu_button_theme.dart';
 export 'src/material/menu_style.dart';
 export 'src/material/menu_theme.dart';
 export 'src/material/mergeable_material.dart';
+export 'src/material/motion.dart';
 export 'src/material/navigation_bar.dart';
 export 'src/material/navigation_bar_theme.dart';
 export 'src/material/navigation_drawer.dart';
