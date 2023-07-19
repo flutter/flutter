@@ -13,6 +13,11 @@
   - '**/animation/*'
   - '**/*animation*'
 
+'a: desktop':
+  - '**/linux/*'
+  - '**/macos/*'
+  - '**/windows/*'
+
 'a: internationalization':
   - packages/flutter_localizations/**/*
 
