@@ -32,5 +32,5 @@
   "tabSemanticsLabel": "Вкладка $tabIndex из $tabCount",
   "modalBarrierDismissLabel": "Закрыть",
   "searchTextFieldPlaceholderLabel": "Поиск",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "Замен не найдено"
 }
