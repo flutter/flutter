@@ -14,9 +14,9 @@
   - '**/*animation*'
 
 'a: desktop':
-  - '**/linux/*'
-  - '**/macos/*'
-  - '**/windows/*'
+  - '**/linux/**/*'
+  - '**/macos/**/*'
+  - '**/windows/**/*'
 
 'a: internationalization':
   - packages/flutter_localizations/**/*
