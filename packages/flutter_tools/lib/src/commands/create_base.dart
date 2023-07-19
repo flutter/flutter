@@ -784,12 +784,30 @@ bool isValidPackageName(String name) {
       !_keywords.contains(name);
 }
 
+/// Returns a potential valid name from the given [name].
+@visibleForTesting
+String potentialValidPackageName(String name){
+  final String lowerCaseName = name.toLowerCase();
+  if (lowerCaseName.startsWith(RegExp(r'[0-9]'))) {
+    // If the package starts with a number, prepend '_'.
+    return '_$lowerCaseName';
+  }
+  // Replaces all the non-alphanumeric characters with '_' and join the
+  // consecutive '_'s.
+  return lowerCaseName.replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+}
+
 // Return null if the project name is legal. Return a validation message if
 // we should disallow the project name.
 String? _validateProjectName(String projectName) {
   if (!isValidPackageName(projectName)) {
-    return '"$projectName" is not a valid Dart package name.\n\n'
-        'See https://dart.dev/tools/pub/pubspec#name for more information.';
+    final String potentialValidName = potentialValidPackageName(projectName);
+    
+    return <String>[
+      '"$projectName" is not a valid Dart package name',
+      if (isValidPackageName(potentialValidName)) '\nTry "$potentialValidName" instead.',
+      '\n\n',
+      'See https://dart.dev/tools/pub/pubspec#name for more information.'].join();
   }
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "
