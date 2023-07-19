@@ -229,11 +229,15 @@ class DlBlurImageFilter final : public DlImageFilter {
   static std::shared_ptr<DlImageFilter> Make(SkScalar sigma_x,
                                              SkScalar sigma_y,
                                              DlTileMode tile_mode) {
-    if (SkScalarIsFinite(sigma_x) && sigma_x > SK_ScalarNearlyZero &&
-        SkScalarIsFinite(sigma_y) && sigma_y > SK_ScalarNearlyZero) {
-      return std::make_shared<DlBlurImageFilter>(sigma_x, sigma_y, tile_mode);
+    if (!SkScalarIsFinite(sigma_x) || !SkScalarIsFinite(sigma_y)) {
+      return nullptr;
     }
-    return nullptr;
+    if (sigma_x < SK_ScalarNearlyZero && sigma_y < SK_ScalarNearlyZero) {
+      return nullptr;
+    }
+    sigma_x = (sigma_x < SK_ScalarNearlyZero) ? 0 : sigma_x;
+    sigma_y = (sigma_y < SK_ScalarNearlyZero) ? 0 : sigma_y;
+    return std::make_shared<DlBlurImageFilter>(sigma_x, sigma_y, tile_mode);
   }
 
   std::shared_ptr<DlImageFilter> shared() const override {
