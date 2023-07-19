@@ -1070,6 +1070,65 @@ void main() {
     await webDevFS.destroy();
   }));
 
+  test('Can start web server with tls connection', () => testbed.run(() async {
+    final String dataPath = globals.fs.path.join(
+      getFlutterRoot(),
+      'packages',
+      'flutter_tools',
+      'test',
+      'data',
+      'asset_test',
+    );
+
+    final AssetBundle asset = AssetBundleFactory.instance.createBundle();
+    final String manifestPath =
+        globals.fs.path.join(dataPath, 'main', 'pubspec.yaml');
+    final String packagesPath =
+        globals.fs.path.join(dataPath, 'main', '.packages');
+    await asset.build(
+      manifestPath: manifestPath,
+      packagesPath: packagesPath,
+    );
+
+    final String dummyCertPath =
+        globals.fs.path.join(dataPath, 'tls_cert', 'dummy-cert.pem');
+    final String dummyCertKeyPath =
+        globals.fs.path.join(dataPath, 'tls_cert', 'dummy-key.pem');
+
+    final WebDevFS webDevFS = WebDevFS(
+      hostname: 'localhost',
+      port: 0,
+      tlsCertPath: dummyCertPath,
+      tlsCertKeyPath: dummyCertKeyPath,
+      packagesFilePath: '.packages',
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
+      nullAssertions: true,
+      nativeNullAssertions: true,
+      buildInfo: BuildInfo.debug,
+      enableDwds: false,
+      enableDds: false,
+      entrypoint: Uri.base,
+      testMode: true,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      nullSafetyMode: NullSafetyMode.unsound,
+    );
+    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.stackTraceMapper.createSync(recursive: true);
+
+    final Uri uri = await webDevFS.create();
+
+    // Ensure the connection established is secure
+    expect(uri.scheme, 'https');
+
+    await webDevFS.destroy();
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
+  }));
+
   test('allows frame embedding', () async {
     final WebAssetServer webAssetServer = await WebAssetServer.start(
       null,
@@ -1176,63 +1235,6 @@ void main() {
     expect(uri.host, 'localhost');
     // Matches base URI specified in html.
     expect(uri.path, '/foo');
-
-    await webDevFS.destroy();
-  }, overrides: <Type, Generator>{
-    Artifacts: () => Artifacts.test(),
-  }));
-
-  test('DevFS starts with scheme https', () => testbed.run(() async {
-    final String dataPath = globals.fs.path.join(
-      getFlutterRoot(),
-      'packages',
-      'flutter_tools',
-      'test',
-      'data',
-      'asset_test',
-    );
-
-    final AssetBundle asset = AssetBundleFactory.instance.createBundle();
-    final String manifestPath =
-        globals.fs.path.join(dataPath, 'main', 'pubspec.yaml');
-    final String packagesPath =
-        globals.fs.path.join(dataPath, 'main', '.packages');
-    await asset.build(
-      manifestPath: manifestPath,
-      packagesPath: packagesPath,
-    );
-
-    final String dummyCertPath =
-        globals.fs.path.join(dataPath, 'tls_cert', 'dummy-cert.pem');
-    final String dummyCertKeyPath =
-        globals.fs.path.join(dataPath, 'tls_cert', 'dummy-key.pem');
-
-    final WebDevFS webDevFS = WebDevFS(
-      hostname: 'localhost',
-      port: 0,
-      tlsCertPath: dummyCertPath,
-      tlsCertKeyPath: dummyCertKeyPath,
-      packagesFilePath: '.packages',
-      urlTunneller: null, // ignore: avoid_redundant_argument_values
-      useSseForDebugProxy: true,
-      useSseForDebugBackend: true,
-      useSseForInjectedClient: true,
-      nullAssertions: true,
-      nativeNullAssertions: true,
-      buildInfo: BuildInfo.debug,
-      enableDwds: false,
-      enableDds: false,
-      entrypoint: Uri.base,
-      testMode: true,
-      expressionCompiler: null, // ignore: avoid_redundant_argument_values
-      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-      nullSafetyMode: NullSafetyMode.unsound,
-    );
-
-    final Uri uri = await webDevFS.create();
-
-    // Ensure the connection established is secure
-    expect(uri.scheme, 'https');
 
     await webDevFS.destroy();
   }, overrides: <Type, Generator>{
