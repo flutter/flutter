@@ -2661,6 +2661,7 @@ class _RenderEditableCustomPaint extends RenderBox {
 ///  * [RenderEditable.painter], which takes a [RenderEditablePainter]
 ///    and sets it as the background painter of the [RenderEditable].
 ///  * [CustomPainter] a similar class which paints within a [RenderCustomPaint].
+/// {@endtemplate}
 abstract class RenderEditablePainter extends ChangeNotifier {
 
   /// Determines whether repaint is needed when a new [RenderEditablePainter]
