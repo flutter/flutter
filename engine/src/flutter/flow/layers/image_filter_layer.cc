@@ -64,6 +64,7 @@ void ImageFilterLayer::Preroll(PrerollContext* context) {
   PrerollChildren(context, &child_bounds);
 
   if (!filter_) {
+    child_bounds.offset(offset_);
     set_paint_bounds(child_bounds);
     return;
   }
