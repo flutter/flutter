@@ -136,6 +136,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.mvp = geometry_result.transform;
   frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
+  frame_info.alpha = GetOpacityFactor();
 
   Command cmd;
   cmd.label = uses_emulated_tile_mode ? "TiledTextureFill" : "TextureFill";
@@ -158,13 +159,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
     FS::FragInfo frag_info;
     frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
     frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
-    frag_info.alpha = GetOpacityFactor();
     FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
-  } else {
-    TextureFillFragmentShader::FragInfo frag_info;
-    frag_info.alpha = GetOpacityFactor();
-    TextureFillFragmentShader::BindFragInfo(
-        cmd, host_buffer.EmplaceUniform(frag_info));
   }
 
   if (color_filter_) {

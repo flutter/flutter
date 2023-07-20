@@ -338,16 +338,13 @@ bool AtlasTextureContents::Render(const ContentContext& renderer,
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransformation();
   frame_info.texture_sampler_y_coord_scale = texture->GetYCoordScale();
-
-  FS::FragInfo frag_info;
-  frag_info.alpha = alpha_;
+  frame_info.alpha = alpha_;
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   cmd.pipeline = renderer.GetTexturePipeline(options);
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
-  FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
   FS::BindTextureSampler(cmd, texture,
                          renderer.GetContext()->GetSamplerLibrary()->GetSampler(
                              parent_.GetSamplerDescriptor()));

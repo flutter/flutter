@@ -131,7 +131,6 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
     }
 
     using VS = SolidFillPipeline::VertexShader;
-    using FS = SolidFillPipeline::FragmentShader;
 
     Command cmd;
     cmd.label = "Draw Stroke";
@@ -164,12 +163,9 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     frame_info.mvp =
         Matrix::MakeOrthographic(pass.GetRenderTargetSize()) * world_matrix;
+    frame_info.color = Color::Red().Premultiply();
     VS::BindFrameInfo(cmd,
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
-
-    FS::FragInfo frag_info;
-    frag_info.color = Color::Red().Premultiply();
-    FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
 
     if (!pass.AddCommand(std::move(cmd))) {
       return false;
@@ -339,7 +335,6 @@ TEST_P(ComputeSubgroupTest, LargePath) {
     }
 
     using VS = SolidFillPipeline::VertexShader;
-    using FS = SolidFillPipeline::FragmentShader;
 
     Command cmd;
     cmd.label = "Draw Stroke";
@@ -372,12 +367,9 @@ TEST_P(ComputeSubgroupTest, LargePath) {
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     frame_info.mvp =
         Matrix::MakeOrthographic(pass.GetRenderTargetSize()) * world_matrix;
+    frame_info.color = Color::Red().Premultiply();
     VS::BindFrameInfo(cmd,
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
-
-    FS::FragInfo frag_info;
-    frag_info.color = Color::Red().Premultiply();
-    FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
 
     if (!pass.AddCommand(std::move(cmd))) {
       return false;
@@ -427,7 +419,6 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
     }
 
     using VS = SolidFillPipeline::VertexShader;
-    using FS = SolidFillPipeline::FragmentShader;
 
     Command cmd;
     cmd.label = "Draw Stroke";
@@ -460,12 +451,9 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     frame_info.mvp =
         Matrix::MakeOrthographic(pass.GetRenderTargetSize()) * world_matrix;
+    frame_info.color = Color::Red().Premultiply();
     VS::BindFrameInfo(cmd,
                       pass.GetTransientsBuffer().EmplaceUniform(frame_info));
-
-    FS::FragInfo frag_info;
-    frag_info.color = Color::Red().Premultiply();
-    FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
 
     if (!pass.AddCommand(std::move(cmd))) {
       return false;

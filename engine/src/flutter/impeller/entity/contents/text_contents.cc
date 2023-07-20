@@ -125,6 +125,7 @@ bool TextContents::Render(const ContentContext& renderer,
   frame_info.is_translation_scale =
       entity.GetTransformation().IsTranslationScaleOnly();
   frame_info.entity_transform = entity.GetTransformation();
+  frame_info.text_color = ToVector(color.Premultiply());
 
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
@@ -142,10 +143,6 @@ bool TextContents::Render(const ContentContext& renderer,
     sampler_desc.mag_filter = MinMagFilter::kLinear;
   }
   sampler_desc.mip_filter = MipFilter::kNearest;
-
-  FS::FragInfo frag_info;
-  frag_info.text_color = ToVector(color.Premultiply());
-  FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
 
   FS::BindGlyphAtlasSampler(
       cmd,                  // command

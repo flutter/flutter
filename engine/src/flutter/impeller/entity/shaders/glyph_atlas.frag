@@ -8,16 +8,13 @@ precision mediump float;
 
 uniform f16sampler2D glyph_atlas_sampler;
 
-uniform FragInfo {
-  f16vec4 text_color;
-}
-frag_info;
-
 in highp vec2 v_uv;
+
+IMPELLER_MAYBE_FLAT in f16vec4 v_text_color;
 
 out f16vec4 frag_color;
 
 void main() {
   f16vec4 value = texture(glyph_atlas_sampler, v_uv);
-  frag_color = value.aaaa * frag_info.text_color;
+  frag_color = value.aaaa * v_text_color;
 }
