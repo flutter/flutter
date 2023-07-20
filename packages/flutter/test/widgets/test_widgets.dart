@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -58,34 +57,4 @@ class FlipWidgetState extends State<FlipWidget> {
 
 void flipStatefulWidget(WidgetTester tester, { bool skipOffstage = true }) {
   tester.state<FlipWidgetState>(find.byType(FlipWidget, skipOffstage: skipOffstage)).flip();
-}
-
-// Test sliver which always attempts to paint itself whether it is visible or not.
-// Use for checking if slivers which take sliver children paints optimally.
-class RenderMockSliverToBoxAdapter extends RenderSliverToBoxAdapter {
-  RenderMockSliverToBoxAdapter({
-    super.child,
-    required this.incrementCounter,
-  });
-  final void Function() incrementCounter;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    incrementCounter();
-  }
-}
-
-class MockSliverToBoxAdapter extends SingleChildRenderObjectWidget {
-  /// Creates a sliver that contains a single box widget.
-  const MockSliverToBoxAdapter({
-    super.key,
-    super.child,
-    required this.incrementCounter,
-  });
-
-  final void Function() incrementCounter;
-
-  @override
-  RenderMockSliverToBoxAdapter createRenderObject(BuildContext context) =>
-    RenderMockSliverToBoxAdapter(incrementCounter: incrementCounter);
 }
