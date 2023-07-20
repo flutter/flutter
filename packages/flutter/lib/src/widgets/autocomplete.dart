@@ -106,6 +106,7 @@ class RawAutocompleteController<T extends Object> {
   RawAutocompleteController({
     Iterable<T>? options,
     int? highlightedOptionIndex,
+    this.selection,
   }) : options = options ?? Iterable<T>.empty(),
        highlightedOptionIndex = ValueNotifier<int>(highlightedOptionIndex ?? 0);
 
@@ -114,6 +115,9 @@ class RawAutocompleteController<T extends Object> {
 
   /// A [ValueNotifier] for the index of the highlighted option.
   ValueNotifier<int> highlightedOptionIndex;
+
+  /// The selected option.
+  T? selection;
 }
 
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
@@ -326,7 +330,6 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   late final _AutocompleteCallbackAction<AutocompletePreviousOptionIntent> _previousOptionAction;
   late final _AutocompleteCallbackAction<AutocompleteNextOptionIntent> _nextOptionAction;
   late final _AutocompleteCallbackAction<DismissIntent> _hideOptionsAction;
-  T? _selection;
   bool _userHidOptions = false;
   String _lastFieldText = '';
 
@@ -340,7 +343,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   // True iff the state indicates that the options should be visible.
   bool get _shouldShowOptions {
-    return !_userHidOptions && _focusNode.hasFocus && _selection == null && _controller.options.isNotEmpty;
+    return !_userHidOptions && _focusNode.hasFocus && _controller.selection == null && _controller.options.isNotEmpty;
   }
 
   // Called when _textEditingController changes.
@@ -351,9 +354,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     );
     _controller.options = options;
     _updateHighlight(_controller.highlightedOptionIndex.value);
-    if (_selection != null
-        && value.text != widget.displayStringForOption(_selection!)) {
-      _selection = null;
+    if (_controller.selection != null
+        && value.text != widget.displayStringForOption(_controller.selection!)) {
+      _controller.selection = null;
     }
 
     // Make sure the options are no longer hidden if the content of the field
@@ -384,10 +387,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   // Select the given option and update the widget.
   void _select(T nextSelection) {
-    if (nextSelection == _selection) {
+    if (nextSelection == _controller.selection) {
       return;
     }
-    _selection = nextSelection;
+    _controller.selection = nextSelection;
     final String selectionString = widget.displayStringForOption(nextSelection);
     _textEditingController.value = TextEditingValue(
       selection: TextSelection.collapsed(offset: selectionString.length),
@@ -395,7 +398,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     );
     _updateActions();
     _updateOverlay();
-    widget.onSelected?.call(_selection!);
+    widget.onSelected?.call(_controller.selection!);
   }
 
   void _updateHighlight(int newIndex) {
@@ -443,7 +446,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   void _updateActions() {
-    _setActionsEnabled(_focusNode.hasFocus && _selection == null && _controller.options.isNotEmpty);
+    _setActionsEnabled(_focusNode.hasFocus && _controller.selection == null && _controller.options.isNotEmpty);
   }
 
   bool _floatingOptionsUpdateScheduled = false;
