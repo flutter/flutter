@@ -106,9 +106,10 @@ class RawAutocompleteController<T extends Object> {
   RawAutocompleteController({
     Iterable<T>? options,
     int? highlightedOptionIndex,
-    this.selection,
+    T? selection,
   }) : _options = options ?? Iterable<T>.empty(),
-       _highlightedOptionIndexNotifier = ValueNotifier<int>(highlightedOptionIndex ?? 0);
+       _highlightedOptionIndexNotifier = ValueNotifier<int>(highlightedOptionIndex ?? 0),
+       _selection = selection;
 
   /// The options.
   Iterable<T> get options => _options; // ignore: unnecessary_getters_setters
@@ -128,7 +129,11 @@ class RawAutocompleteController<T extends Object> {
   ValueNotifier<int> get highlightedOptionIndexNotifier => _highlightedOptionIndexNotifier;
 
   /// The selected option.
-  T? selection;
+  T? get selection => _selection; // ignore: unnecessary_getters_setters
+  T? _selection;
+  set selection(T? newSelection) {
+    _selection = newSelection;
+  }
 }
 
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
