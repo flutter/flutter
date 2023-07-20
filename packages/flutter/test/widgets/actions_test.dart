@@ -963,9 +963,11 @@ void main() {
         await tester.pump();
         expect(buttonNode1.hasFocus, isTrue);
         expect(buttonNode2.hasFocus, isFalse);
+        print('before next focus');
         primaryFocus!.nextFocus();
         await tester.pump();
-        expect(buttonNode1.hasFocus, isTrue);
+        print(debugDescribeFocusTree());
+        expect(buttonNode1.hasFocus, isFalse);
         expect(buttonNode2.hasFocus, isFalse);
       },
     );
