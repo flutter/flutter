@@ -308,10 +308,10 @@ ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
-  final RichText iconRichText = tester.widget<RichText>(
-    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
-  );
-  return iconRichText.text.style;
+  return tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon),
+    matching: find.byType(RichText)),
+  ).text.style;
 }
 
 TextStyle? _labelStyle(WidgetTester tester, String label) {
