@@ -212,8 +212,8 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   }) {
     if (node is FocusScopeNode) {
       if (node.focusedChild != null) {
-        // Can't stop here as the `focusedChild` may be a focus scope node with
-        // out a first focus. In this case, first focus will be picked in the
+        // Can't stop here as the `focusedChild` may be a focus scope node
+        // without a first focus. The first focus will be picked in the
         // next iteration.
         return _requestTabTraversalFocus(
           node.focusedChild!,
@@ -235,7 +235,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
           forward: forward,
         );
         // Regardless if _requestTabTraversalFocus return true or false, a first
-        // focus has been picked in this method.
+        // focus has been picked.
         return true;
       }
     }
