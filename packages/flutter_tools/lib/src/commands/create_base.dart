@@ -804,7 +804,7 @@ String? _validateProjectName(String projectName) {
     final String potentialValidName = potentialValidPackageName(projectName);
 
     return <String>[
-      '"$projectName" is not a valid Dart package name',
+      '"$projectName" is not a valid Dart package name.',
       if (isValidPackageName(potentialValidName)) '\nTry "$potentialValidName" instead.',
       '\n\n',
       'See https://dart.dev/tools/pub/pubspec#name for more information.',
