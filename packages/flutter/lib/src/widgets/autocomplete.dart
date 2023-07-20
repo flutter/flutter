@@ -107,11 +107,15 @@ class RawAutocompleteController<T extends Object> {
     Iterable<T>? options,
     int? highlightedOptionIndex,
     this.selection,
-  }) : options = options ?? Iterable<T>.empty(),
+  }) : _options = options ?? Iterable<T>.empty(),
        highlightedOptionIndex = ValueNotifier<int>(highlightedOptionIndex ?? 0);
 
   /// The options.
-  Iterable<T> options;
+  Iterable<T> get options => _options; // ignore: unnecessary_getters_setters
+  Iterable<T> _options;
+  set options(Iterable<T> newOptions) {
+    _options = newOptions;
+  }
 
   /// A [ValueNotifier] for the index of the highlighted option.
   ValueNotifier<int> highlightedOptionIndex;
