@@ -12,8 +12,8 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewTreeObserver;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -33,11 +33,15 @@ class VirtualDisplayController {
       int viewId,
       Object createParams,
       OnFocusChangeListener focusChangeListener) {
-
-    DisplayMetrics metrics = context.getResources().getDisplayMetrics();
     if (width == 0 || height == 0) {
       return null;
     }
+
+    DisplayManager displayManager =
+        (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
+    final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+    final PlatformViewRenderTarget renderTarget =
+        new SurfaceTexturePlatformViewRenderTarget(textureEntry);
 
     // Virtual Display crashes for some PlatformViews if the width or height is bigger
     // than the physical screen size. We have tried to clamp or scale down the size to prevent
@@ -49,14 +53,15 @@ class VirtualDisplayController {
     // TODO(cyanglaz): find a way to prevent the crash without introducing size mistach betewen
     // virtual display and AndroidPlatformView widget.
     // https://github.com/flutter/flutter/issues/93115
-    textureEntry.surfaceTexture().setDefaultBufferSize(width, height);
-    Surface surface = new Surface(textureEntry.surfaceTexture());
-    DisplayManager displayManager =
-        (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
-
-    int densityDpi = context.getResources().getDisplayMetrics().densityDpi;
+    renderTarget.resize(width, height);
     VirtualDisplay virtualDisplay =
-        displayManager.createVirtualDisplay("flutter-vd", width, height, densityDpi, surface, 0);
+        displayManager.createVirtualDisplay(
+            "flutter-vd#" + viewId,
+            width,
+            height,
+            metrics.densityDpi,
+            renderTarget.getSurface(),
+            0);
 
     if (virtualDisplay == null) {
       return null;
@@ -67,13 +72,11 @@ class VirtualDisplayController {
             accessibilityEventsDelegate,
             virtualDisplay,
             view,
-            surface,
+            renderTarget,
             textureEntry,
             focusChangeListener,
             viewId,
             createParams);
-    controller.bufferWidth = width;
-    controller.bufferHeight = height;
     return controller;
   }
 
@@ -82,31 +85,31 @@ class VirtualDisplayController {
   private final Context context;
   private final AccessibilityEventsDelegate accessibilityEventsDelegate;
   private final int densityDpi;
+  private final int viewId;
   private final TextureRegistry.SurfaceTextureEntry textureEntry;
+  private final PlatformViewRenderTarget renderTarget;
   private final OnFocusChangeListener focusChangeListener;
-  private final Surface surface;
 
   private VirtualDisplay virtualDisplay;
-  private int bufferWidth;
-  private int bufferHeight;
 
   private VirtualDisplayController(
       Context context,
       AccessibilityEventsDelegate accessibilityEventsDelegate,
       VirtualDisplay virtualDisplay,
       PlatformView view,
-      Surface surface,
+      PlatformViewRenderTarget renderTarget,
       TextureRegistry.SurfaceTextureEntry textureEntry,
       OnFocusChangeListener focusChangeListener,
       int viewId,
       Object createParams) {
     this.context = context;
     this.accessibilityEventsDelegate = accessibilityEventsDelegate;
+    this.renderTarget = renderTarget;
     this.textureEntry = textureEntry;
     this.focusChangeListener = focusChangeListener;
-    this.surface = surface;
+    this.viewId = viewId;
     this.virtualDisplay = virtualDisplay;
-    densityDpi = context.getResources().getDisplayMetrics().densityDpi;
+    this.densityDpi = context.getResources().getDisplayMetrics().densityDpi;
     presentation =
         new SingleViewPresentation(
             context,
@@ -118,33 +121,33 @@ class VirtualDisplayController {
     presentation.show();
   }
 
-  public int getBufferWidth() {
-    return bufferWidth;
+  public int getRenderTargetWidth() {
+    if (renderTarget != null) {
+      return renderTarget.getWidth();
+    }
+    return 0;
   }
 
-  public int getBufferHeight() {
-    return bufferHeight;
+  public int getRenderTargetHeight() {
+    if (renderTarget != null) {
+      return renderTarget.getHeight();
+    }
+    return 0;
   }
 
   public void resize(final int width, final int height, final Runnable onNewSizeFrameAvailable) {
     boolean isFocused = getView().isFocused();
     final SingleViewPresentation.PresentationState presentationState = presentation.detachState();
     // We detach the surface to prevent it being destroyed when releasing the vd.
-    //
-    // setSurface is only available starting API 20. We could support API 19 by re-creating a new
-    // SurfaceTexture here. This will require refactoring the TextureRegistry to allow recycling
-    // texture
-    // entry IDs.
     virtualDisplay.setSurface(null);
     virtualDisplay.release();
 
-    bufferWidth = width;
-    bufferHeight = height;
-    textureEntry.surfaceTexture().setDefaultBufferSize(width, height);
-    DisplayManager displayManager =
+    final DisplayManager displayManager =
         (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
+    renderTarget.resize(width, height);
     virtualDisplay =
-        displayManager.createVirtualDisplay("flutter-vd", width, height, densityDpi, surface, 0);
+        displayManager.createVirtualDisplay(
+            "flutter-vd#" + viewId, width, height, densityDpi, renderTarget.getSurface(), 0);
 
     final View embeddedView = getView();
     // There's a bug in Android version older than O where view tree observer onDrawListeners don't
