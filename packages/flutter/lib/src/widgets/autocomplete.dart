@@ -105,10 +105,15 @@ class RawAutocompleteController<T extends Object> {
   /// Creates a controller for a [RawAutocomplete].
   RawAutocompleteController({
     Iterable<T>? options,
-  }) : options = options ?? Iterable<T>.empty();
+    int? highlightedOptionIndex,
+  }) : options = options ?? Iterable<T>.empty(),
+       highlightedOptionIndex = ValueNotifier<int>(highlightedOptionIndex ?? 0);
 
   /// The options.
   Iterable<T> options;
+
+  /// A [ValueNotifier] for the index of the highlighted option.
+  ValueNotifier<int> highlightedOptionIndex;
 }
 
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
@@ -324,7 +329,6 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   T? _selection;
   bool _userHidOptions = false;
   String _lastFieldText = '';
-  final ValueNotifier<int> _highlightedOptionIndex = ValueNotifier<int>(0);
 
   static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.arrowUp): AutocompletePreviousOptionIntent(),
@@ -346,7 +350,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       value,
     );
     _controller.options = options;
-    _updateHighlight(_highlightedOptionIndex.value);
+    _updateHighlight(_controller.highlightedOptionIndex.value);
     if (_selection != null
         && value.text != widget.displayStringForOption(_selection!)) {
       _selection = null;
@@ -375,7 +379,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     if (_controller.options.isEmpty || _userHidOptions) {
       return;
     }
-    _select(_controller.options.elementAt(_highlightedOptionIndex.value));
+    _select(_controller.options.elementAt(_controller.highlightedOptionIndex.value));
   }
 
   // Select the given option and update the widget.
@@ -395,7 +399,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   void _updateHighlight(int newIndex) {
-    _highlightedOptionIndex.value = _controller.options.isEmpty ? 0 : newIndex % _controller.options.length;
+    _controller.highlightedOptionIndex.value = _controller.options.isEmpty ? 0 : newIndex % _controller.options.length;
   }
 
   void _highlightPreviousOption(AutocompletePreviousOptionIntent intent) {
@@ -405,7 +409,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _updateOverlay();
       return;
     }
-    _updateHighlight(_highlightedOptionIndex.value - 1);
+    _updateHighlight(_controller.highlightedOptionIndex.value - 1);
   }
 
   void _highlightNextOption(AutocompleteNextOptionIntent intent) {
@@ -415,7 +419,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _updateOverlay();
       return;
     }
-    _updateHighlight(_highlightedOptionIndex.value + 1);
+    _updateHighlight(_controller.highlightedOptionIndex.value + 1);
   }
 
   Object? _hideOptions(DismissIntent intent) {
@@ -473,7 +477,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             },
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
-                highlightIndexNotifier: _highlightedOptionIndex,
+                highlightIndexNotifier: _controller.highlightedOptionIndex,
                 child: Builder(
                   builder: (BuildContext context) {
                     return widget.optionsViewBuilder(context, _select, _controller.options);
