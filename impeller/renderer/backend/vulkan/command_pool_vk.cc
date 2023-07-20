@@ -72,7 +72,8 @@ CommandPoolVK::CommandPoolVK(const ContextVK* context)
   vk::CommandPoolCreateInfo pool_info;
 
   pool_info.queueFamilyIndex = context->GetGraphicsQueue()->GetIndex().family;
-  pool_info.flags = vk::CommandPoolCreateFlagBits::eTransient;
+  pool_info.flags = vk::CommandPoolCreateFlagBits::eTransient |
+                    vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
   auto pool = context->GetDevice().createCommandPoolUnique(pool_info);
   if (pool.result != vk::Result::eSuccess) {
     return;
