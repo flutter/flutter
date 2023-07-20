@@ -486,6 +486,53 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
+  testWidgets('focus is returned to previous focus before invoking onPressed', (WidgetTester tester) async {
+    final FocusNode buttonFocus = FocusNode(debugLabel: 'Button Focus');
+    FocusNode? focusInOnPressed;
+
+    void onMenuSelected(TestMenu item) {
+      focusInOnPressed = FocusManager.instance.primaryFocus;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              MenuBar(
+                controller: controller,
+                children: createTestMenus(
+                  onPressed: onMenuSelected,
+                ),
+              ),
+              ElevatedButton(
+                autofocus: true,
+                onPressed: () {},
+                focusNode: buttonFocus,
+                child: const Text('Press Me'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(FocusManager.instance.primaryFocus, equals(buttonFocus));
+
+    await tester.tap(find.text(TestMenu.mainMenu1.label));
+    await tester.pump();
+
+    await tester.tap(find.text(TestMenu.subMenu11.label));
+    await tester.pump();
+
+    await tester.tap(find.text(TestMenu.subSubMenu110.label));
+    await tester.pump();
+
+    expect(focusInOnPressed, equals(buttonFocus));
+    expect(FocusManager.instance.primaryFocus, equals(buttonFocus));
+  });
+
   group('Menu functions', () {
     testWidgets('basic menu structure', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2335,7 +2382,7 @@ void main() {
           Rect.fromLTRB(112.0, 0.0, 220.0, 48.0),
           Rect.fromLTRB(220.0, 0.0, 328.0, 48.0),
           Rect.fromLTRB(328.0, 0.0, 506.0, 48.0),
-          Rect.fromLTRB(112.0, 104.0, 326.0, 152.0)
+          Rect.fromLTRB(112.0, 104.0, 326.0, 152.0),
         ]),
       );
     });
@@ -2382,7 +2429,7 @@ void main() {
           Rect.fromLTRB(580.0, 0.0, 688.0, 48.0),
           Rect.fromLTRB(472.0, 0.0, 580.0, 48.0),
           Rect.fromLTRB(294.0, 0.0, 472.0, 48.0),
-          Rect.fromLTRB(474.0, 104.0, 688.0, 152.0)
+          Rect.fromLTRB(474.0, 104.0, 688.0, 152.0),
         ]),
       );
     });
@@ -2427,7 +2474,7 @@ void main() {
           Rect.fromLTRB(112.0, 0.0, 220.0, 48.0),
           Rect.fromLTRB(220.0, 0.0, 328.0, 48.0),
           Rect.fromLTRB(328.0, 0.0, 506.0, 48.0),
-          Rect.fromLTRB(86.0, 104.0, 300.0, 152.0)
+          Rect.fromLTRB(86.0, 104.0, 300.0, 152.0),
         ]),
       );
     });
