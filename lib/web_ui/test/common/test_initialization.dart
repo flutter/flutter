@@ -22,11 +22,11 @@ void setUpUnitTests({
     }
 
     // Some of our tests rely on color emoji
-    final engine.FlutterConfiguration config = engine.FlutterConfiguration()
-      ..setUserConfiguration(
-        js_util.jsify(<String, Object?>{
-          'useColorEmoji': true,
-        }) as engine.JsFlutterConfiguration);
+    final engine.FlutterConfiguration config = engine.configuration.merge(
+      js_util.jsify(<String, Object?>{
+        'useColorEmoji': true,
+      }) as engine.JsFlutterConfiguration,
+    );
     engine.debugSetConfiguration(config);
 
     debugFontsScope = configureDebugFontsAssetScope(fakeAssetManager);

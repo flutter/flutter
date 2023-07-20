@@ -202,6 +202,11 @@ class FeltConfig {
       if (runConfig == null) {
         throw AssertionError('Run config not found with name: `$runConfigName` (referenced by test suite: `$name`)');
       }
+      if (bundle.compileConfig.renderer == Renderer.canvaskit && runConfig.variant == null) {
+        throw AssertionError(
+            'Run config `$runConfigName` was used with a CanvasKit test bundle `$testBundleName` '
+            'but did not specify a CanvasKit variant (referenced by test suite: `$name`)');
+      }
       bool canvasKit = false;
       bool canvasKitChromium = false;
       bool skwasm = false;
