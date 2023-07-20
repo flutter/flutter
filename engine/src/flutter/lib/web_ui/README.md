@@ -151,6 +151,8 @@ cipd auth-login
 felt roll-fallback-fonts --key=<Google Fonts API key>
 ```
 
+You can obtain a GoogleFonts API key from here: https://developers.google.com/fonts/docs/developer_api#APIKey
+
 This will take the following steps:
 * Fetch a list of fonts from the Google Fonts API
 * Download each font we use for fallbacks and calculate its unicode ranges
