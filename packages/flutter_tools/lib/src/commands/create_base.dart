@@ -802,7 +802,7 @@ String potentialValidPackageName(String name){
 String? _validateProjectName(String projectName) {
   if (!isValidPackageName(projectName)) {
     final String potentialValidName = potentialValidPackageName(projectName);
-    
+
     return <String>[
       '"$projectName" is not a valid Dart package name',
       if (isValidPackageName(potentialValidName)) '\nTry "$potentialValidName" instead.',
