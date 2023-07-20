@@ -13,7 +13,7 @@ void main() {
 // the appearance of other components, add additional component specific
 // themes, rather than tweaking the color scheme.
 //
-// Creating an entire color Scheme from a single seed color is a good
+// Creating an entire color scheme from a single seed color is a good
 // way to ensure a visually appealing color palette where the default
 // component colors have sufficient contrast for accessibility. Another
 // good way to create an app's color scheme is to use
