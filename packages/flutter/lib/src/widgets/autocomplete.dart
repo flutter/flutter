@@ -101,7 +101,7 @@ enum OptionsViewOpenDirection {
 }
 
 /// A controller for a [RawAutocomplete].
-class RawAutocompleteController<T extends Object> {
+class RawAutocompleteController<T extends Object> extends ChangeNotifier {
   /// Creates a controller for a [RawAutocomplete].
   RawAutocompleteController({
     Iterable<T>? options,
@@ -112,27 +112,45 @@ class RawAutocompleteController<T extends Object> {
        _selection = selection;
 
   /// The options.
-  Iterable<T> get options => _options; // ignore: unnecessary_getters_setters
+  Iterable<T> get options => _options;
   Iterable<T> _options;
+  /// When [options] is replaced with something
+  /// that is not == to the old value, listeners are notified.
   set options(Iterable<T> newOptions) {
+    if (_options == newOptions) {
+      return;
+    }
     _options = newOptions;
+    notifyListeners();
   }
 
   /// The index of the highlighted option.
   int get highlightedOptionIndex => _highlightedOptionIndexNotifier.value;
   final ValueNotifier<int> _highlightedOptionIndexNotifier;
+  /// When [highlightedOptionIndex] is replaced with something
+  /// that is not == to the old value, listeners are notified.
   set highlightedOptionIndex(int newIndex) {
+    if (_highlightedOptionIndexNotifier.value == newIndex) {
+      return;
+    }
     _highlightedOptionIndexNotifier.value = newIndex;
+    notifyListeners();
   }
 
   /// A [ValueNotifier] for [highlightedOptionIndex].
   ValueNotifier<int> get highlightedOptionIndexNotifier => _highlightedOptionIndexNotifier;
 
   /// The selected option.
-  T? get selection => _selection; // ignore: unnecessary_getters_setters
+  T? get selection => _selection;
   T? _selection;
+  /// When [selection] is replaced with something
+  /// that is not == to the old value, listeners are notified.
   set selection(T? newSelection) {
+    if (_selection == newSelection) {
+      return;
+    }
     _selection = newSelection;
+    notifyListeners();
   }
 }
 
