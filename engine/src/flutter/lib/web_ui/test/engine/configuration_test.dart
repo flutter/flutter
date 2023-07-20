@@ -33,6 +33,29 @@ void testMain() {
 
       expect(config.canvasKitMaximumSurfaces, 16);
     });
+
+    test('merge', () {
+      final FlutterConfiguration originalConfig = FlutterConfiguration.legacy(
+        js_util.jsify(<String, Object?>{
+          'useColorEmoji': false,
+          'canvasKitMaximumSurfaces': 99,
+        }) as JsFlutterConfiguration,
+      );
+      final FlutterConfiguration mergedConfig = originalConfig.merge(
+        js_util.jsify(<String, Object?>{
+          'useColorEmoji': true,
+        }) as JsFlutterConfiguration,
+      );
+
+      // `useColorEmoji` should've been overriden.
+      expect(mergedConfig.useColorEmoji, isTrue);
+      // `canvasKitMaximumSurfaces` should've been preserved.
+      expect(mergedConfig.canvasKitMaximumSurfaces, 99);
+
+      // Original config should not have been mutated.
+      expect(originalConfig.useColorEmoji, isFalse);
+      expect(originalConfig.canvasKitMaximumSurfaces, 99);
+    });
   });
 
   group('setUserConfiguration', () {

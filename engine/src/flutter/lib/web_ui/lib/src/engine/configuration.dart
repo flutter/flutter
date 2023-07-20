@@ -121,6 +121,16 @@ class FlutterConfiguration {
     }
   }
 
+  FlutterConfiguration merge(JsFlutterConfiguration newConfig) {
+    final JSAny mergedJsConfig = objectConstructor.assign(
+      <String, Object?>{}.jsify()!,
+      _configuration.jsify(),
+      newConfig.jsify(),
+    );
+    return FlutterConfiguration()
+      ..setUserConfiguration(mergedJsConfig as JsFlutterConfiguration);
+  }
+
   // Static constant parameters.
   //
   // These properties affect tree shaking and therefore cannot be supplied at
