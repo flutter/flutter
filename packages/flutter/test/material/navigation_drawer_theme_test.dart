@@ -135,65 +135,65 @@ void main() {
   });
 
   testWidgets(
-      'NavigationDrawer values take priority over NavigationDrawerThemeData values when both properties are specified',
-      (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    'NavigationDrawer values take priority over NavigationDrawerThemeData values when both properties are specified',
+    (WidgetTester tester) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      const NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerThemeData(
+        backgroundColor: Color(0x00000001),
+        elevation: 7.0,
+        shadowColor: Color(0x00000002),
+        surfaceTintColor: Color(0x00000003),
+        indicatorColor: Color(0x00000004),
+        indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(16.0))),
+        labelTextStyle:MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+        iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000005))),
+      );
+      const Color backgroundColor = Color(0x00000009);
+      const double elevation = 14.0;
+      const Color shadowColor = Color(0x00000008);
+      const Color surfaceTintColor = Color(0x00000007);
+      const RoundedRectangleBorder indicatorShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(32.0)));
+      const Color indicatorColor = Color(0x00000006);
 
-    const Color backgroundColor = Color(0x00000001);
-    const double elevation = 7.0;
-    const Color shadowColor = Color(0x00000003);
-    const Color surfaceTintColor = Color(0x00000004);
-    const RoundedRectangleBorder indicatorShape = RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(16.0)));
-
-    const Color indicatorColor = Color(0x00000005);
-    final ThemeData theme = ThemeData(
-      navigationDrawerTheme: const NavigationDrawerThemeData(
-        backgroundColor: Color(0x00000000),
-        elevation: 3,
-        shadowColor: Color(0x00000000),
-        surfaceTintColor: Color(0x00000000),
-        indicatorShape: RoundedRectangleBorder(),
-        indicatorColor: Color(0x00000000),
-      ),
-    );
-    await tester.pumpWidget(
-      _buildWidget(
-        scaffoldKey,
-        NavigationDrawer(
-          backgroundColor: backgroundColor,
-          elevation: elevation,
-          shadowColor: shadowColor,
-          surfaceTintColor: surfaceTintColor,
-          indicatorShape: indicatorShape,
-          indicatorColor: indicatorColor,
-          children: <Widget>[
-            Text('Headline', style: theme.textTheme.bodyLarge),
-            const NavigationDrawerDestination(
-              icon: Icon(Icons.ac_unit),
-              label: Text('AC'),
-            ),
-            const NavigationDrawerDestination(
-              icon: Icon(Icons.access_alarm),
-              label: Text('Alarm'),
-            ),
-          ],
-          onDestinationSelected: (int i) {},
+      await tester.pumpWidget(
+        _buildWidget(
+          scaffoldKey,
+          NavigationDrawer(
+            backgroundColor: backgroundColor,
+            elevation: elevation,
+            shadowColor: shadowColor,
+            surfaceTintColor: surfaceTintColor,
+            indicatorShape: indicatorShape,
+            indicatorColor: indicatorColor,
+            children: const <Widget>[
+              Text('Headline'),
+              NavigationDrawerDestination(
+                icon: Icon(Icons.ac_unit),
+                label: Text('AC'),
+              ),
+              NavigationDrawerDestination(
+                icon: Icon(Icons.access_alarm),
+                label: Text('Alarm'),
+              ),
+            ],
+            onDestinationSelected: (int i) {},
+          ),
+          theme: ThemeData(
+            navigationDrawerTheme: navigationDrawerTheme,
+          ),
         ),
-        theme: theme,
-      ),
-    );
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pump(const Duration(seconds: 1));
+      );
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pump(const Duration(seconds: 1));
 
-    // Test drawer Material.
-    expect(_getMaterial(tester).color, backgroundColor);
-    expect(_getMaterial(tester).surfaceTintColor, surfaceTintColor);
-    expect(_getMaterial(tester).shadowColor, shadowColor);
-    expect(_getMaterial(tester).elevation, 7);
-    // Test indicator decoration.
-    expect(_getIndicatorDecoration(tester)?.color, indicatorColor);
-    expect(_getIndicatorDecoration(tester)?.shape, indicatorShape);
+      // Test drawer Material.
+      expect(_getMaterial(tester).color, backgroundColor);
+      expect(_getMaterial(tester).surfaceTintColor, surfaceTintColor);
+      expect(_getMaterial(tester).shadowColor, shadowColor);
+      expect(_getMaterial(tester).elevation, elevation);
+      // Test indicator decoration.
+      expect(_getIndicatorDecoration(tester)?.color, indicatorColor);
+      expect(_getIndicatorDecoration(tester)?.shape, indicatorShape);
   });
 
   testWidgets('Local NavigationDrawerTheme takes priority over ThemeData.navigationDrawerTheme', (WidgetTester tester) async {
