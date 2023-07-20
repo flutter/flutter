@@ -501,9 +501,15 @@ abstract class ScrollView extends StatelessWidget {
           double ypos = details.position.dy;
 
           SystemChannels.textInput.invokeMethod<void>(
-          'TextInput.onMouseMove',
-          <String, dynamic>{'mouseY': ypos});
-          print("On Mouse Move");
+          'TextInput.onPointerMove',
+          <String, dynamic>{'pointerY': ypos});
+        },
+        onPointerUp: (PointerUpEvent details) {
+          double ypos = details.position.dy;
+
+          SystemChannels.textInput.invokeMethod<void>(
+          'TextInput.onPointerUp',
+          <String, dynamic>{'pointerY': ypos});
         }
       );
     } else {
