@@ -144,7 +144,10 @@ void main() {
               ),
             );
           }
-          return Container();
+          return View(
+            view: tester.view,
+            child: const SizedBox(),
+          );
         },
       ),
     );

@@ -24,7 +24,7 @@ void main() {
 
     RichText text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaleFactor, 1.3);
+    expect(text.textScaler, const TextScaler.linear(1.3));
 
     await tester.pumpWidget(const Center(
       child: Text('Hello', textDirection: TextDirection.ltr),
@@ -32,7 +32,7 @@ void main() {
 
     text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaleFactor, 1.0);
+    expect(text.textScaler, TextScaler.noScaling);
   });
 
   testWidgets('Text respects textScaleFactor with default font size', (WidgetTester tester) async {
@@ -42,7 +42,7 @@ void main() {
 
     RichText text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaleFactor, 1.0);
+    expect(text.textScaler, TextScaler.noScaling);
     final Size baseSize = tester.getSize(find.byType(RichText));
     expect(baseSize.width, equals(70.0));
     expect(baseSize.height, equals(14.0));
@@ -57,7 +57,7 @@ void main() {
 
     text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaleFactor, 1.5);
+    expect(text.textScaler, const TextScaler.linear(1.5));
     final Size largeSize = tester.getSize(find.byType(RichText));
     expect(largeSize.width, 105.0);
     expect(largeSize.height, equals(21.0));
@@ -74,7 +74,7 @@ void main() {
 
     RichText text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaleFactor, 1.0);
+    expect(text.textScaler, TextScaler.noScaling);
     final Size baseSize = tester.getSize(find.byType(RichText));
     expect(baseSize.width, equals(100.0));
     expect(baseSize.height, equals(20.0));
@@ -90,7 +90,7 @@ void main() {
 
     text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaleFactor, 1.3);
+    expect(text.textScaler, const TextScaler.linear(1.3));
     final Size largeSize = tester.getSize(find.byType(RichText));
     expect(largeSize.width, 130.0);
     expect(largeSize.height, equals(26.0));
@@ -264,6 +264,23 @@ void main() {
     renderText = tester.renderObject(find.byKey(key));
     // The RichText in the widget span should wrap into three lines.
     expect(renderText.size.height, singleLineHeight * textScaleFactor * 3);
+  });
+
+  testWidgets("Inline widgets' scaled sizes are constrained", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/130588
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100.3,
+            child: Text.rich(WidgetSpan(child: Row()), textScaleFactor: 0.3),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
