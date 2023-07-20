@@ -172,6 +172,9 @@ abstract class Layer with DiagnosticableTreeMixin {
   }
 
   void _fireCompositionCallbacks({required bool includeChildren}) {
+    if (_callbacks.isEmpty) {
+      return;
+    }
     for (final VoidCallback callback in List<VoidCallback>.of(_callbacks.values)) {
       callback();
     }
@@ -495,46 +498,43 @@ abstract class Layer with DiagnosticableTreeMixin {
     _needsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
   }
 
-  /// The owner for this node (null if unattached).
+  /// The owner for this layer (null if unattached).
   ///
-  /// The entire subtree that this node belongs to will have the same owner.
+  /// The entire layer tree that this layer belongs to will have the same owner.
+  ///
+  /// Typically the owner is a [RenderView].
   Object? get owner => _owner;
   Object? _owner;
 
-  /// Whether this node is in a tree whose root is attached to something.
+  /// Whether the layer tree containing this layer is attached to an owner.
   ///
   /// This becomes true during the call to [attach].
   ///
   /// This becomes false during the call to [detach].
   bool get attached => _owner != null;
 
-  /// Mark this node as attached to the given owner.
+  /// Mark this layer as attached to the given owner.
   ///
   /// Typically called only from the [parent]'s [attach] method, and by the
   /// [owner] to mark the root of a tree as attached.
   ///
-  /// Subclasses with children should override this method to first call their
-  /// inherited [attach] method, and then [attach] all their children to the
-  /// same [owner].
-  ///
-  /// Implementations of this method should start with a call to the inherited
-  /// method, as in `super.attach(owner)`.
+  /// Subclasses with children should override this method to
+  /// [attach] all their children to the same [owner]
+  /// after calling the inherited method, as in `super.attach(owner)`.
   @mustCallSuper
   void attach(covariant Object owner) {
     assert(_owner == null);
     _owner = owner;
   }
 
-  /// Mark this node as detached.
+  /// Mark this layer as detached from its owner.
   ///
   /// Typically called only from the [parent]'s [detach], and by the [owner] to
   /// mark the root of a tree as detached.
   ///
-  /// Subclasses with children should override this method to first call their
-  /// inherited [detach] method, and then [detach] all their children.
-  ///
-  /// Implementations of this method should end with a call to the inherited
-  /// method, as in `super.detach()`.
+  /// Subclasses with children should override this method to
+  /// [detach] all their children after calling the inherited method,
+  /// as in `super.detach()`.
   @mustCallSuper
   void detach() {
     assert(_owner != null);
@@ -542,10 +542,12 @@ abstract class Layer with DiagnosticableTreeMixin {
     assert(parent == null || attached == parent!.attached);
   }
 
-  /// The depth of this node in the tree.
+  /// The depth of this layer in the layer tree.
   ///
   /// The depth of nodes in a tree monotonically increases as you traverse down
-  /// the tree.
+  /// the tree.  There's no guarantee regarding depth between siblings.
+  ///
+  /// The depth is used to ensure that nodes are processed in depth order.
   int get depth => _depth;
   int _depth = 0;
 
