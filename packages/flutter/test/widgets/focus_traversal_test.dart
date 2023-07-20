@@ -2090,6 +2090,61 @@ void main() {
       expect(Focus.of(upperLeftKey.currentContext!).hasPrimaryFocus, isTrue);
     }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
+    testWidgets('Focus traversal actions works when current focus skip traversal', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: 'key1');
+      final GlobalKey key2 = GlobalKey(debugLabel: 'key2');
+      final GlobalKey key3 = GlobalKey(debugLabel: 'key3');
+
+      await tester.pumpWidget(
+        WidgetsApp(
+          color: const Color(0xFFFFFFFF),
+          onGenerateRoute: (RouteSettings settings) {
+            return TestRoute(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: FocusScope(
+                  debugLabel: 'scope',
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Focus(
+                            autofocus: true,
+                            skipTraversal: true,
+                            debugLabel: '1',
+                            child: SizedBox(width: 100, height: 100, key: key1),
+                          ),
+                          Focus(
+                            debugLabel: '2',
+                            child: SizedBox(width: 100, height: 100, key: key2),
+                          ),
+                          Focus(
+                            debugLabel: '3',
+                            child: SizedBox(width: 100, height: 100, key: key3),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(Focus.of(key1.currentContext!).hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      expect(Focus.of(key2.currentContext!).hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      expect(Focus.of(key3.currentContext!).hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      // Skips key 1 because it skips traversal.
+      expect(Focus.of(key2.currentContext!).hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      expect(Focus.of(key3.currentContext!).hasPrimaryFocus, isTrue);
+    }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
+
     testWidgets('Focus traversal inside a vertical scrollable scrolls to stay visible.', (WidgetTester tester) async {
       final List<int> items = List<int>.generate(11, (int index) => index).toList();
       final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();

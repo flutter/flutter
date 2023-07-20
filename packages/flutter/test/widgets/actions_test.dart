@@ -908,6 +908,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
+              focusNode: FocusNode(skipTraversal: true),
               child: Column(
                 children: <Widget>[
                   ElevatedButton(
@@ -938,6 +939,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
+              focusNode: FocusNode(skipTraversal: true),
               descendantsAreTraversable: false,
               child: Column(
                 children: <Widget>[
