@@ -12,7 +12,6 @@ void main() {
     await tester.pumpWidget(const example.ThemeDataExampleApp());
 
     final ColorScheme colorScheme = ColorScheme.fromSeed(
-      brightness: Brightness.light,
       seedColor: Colors.indigo,
     );
 

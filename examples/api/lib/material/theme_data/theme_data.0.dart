@@ -82,7 +82,6 @@ class _HomeState extends State<Home> {
           color: colorScheme.tertiaryContainer,
           shape: StarBorder(
             points: pointCount,
-            innerRadiusRatio: 0.4,
             pointRounding: 0.4,
             valleyRounding: 0.6,
             side: BorderSide(
@@ -104,7 +103,7 @@ class _HomeState extends State<Home> {
             buttonPressCount += 1;
           });
         },
-        tooltip: 'Change the shape\'s point count',
+        tooltip: "Change the shape's point count",
         child: const Icon(Icons.add),
       ),
     );
