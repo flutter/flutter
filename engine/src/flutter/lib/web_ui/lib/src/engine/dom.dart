@@ -61,8 +61,16 @@ extension JSAnyToObjectExtension on JSAny {
 }
 
 @JS('Object')
-external JSAny get _objectConstructor;
-Object get objectConstructor => _objectConstructor.toObjectShallow;
+external DomObjectConstructor get objectConstructor;
+
+
+@JS()
+@staticInterop
+class DomObjectConstructor {}
+
+extension DomObjectConstructorExtension on DomObjectConstructor {
+  external JSAny assign(JSAny target, JSAny? source1, [JSAny? source2]);
+}
 
 @JS()
 @staticInterop
