@@ -6,16 +6,19 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [ReorderableListView].
 
-void main() => runApp(const ReorderableApp());
+void main() {
+  runApp(const ReorderableApp());
+}
 
 class ReorderableApp extends StatelessWidget {
-  const ReorderableApp({super.key});
+  const ReorderableApp({ super.key });
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
-        appBar: AppBar(title: const Text('ReorderableListView Sample')),
+        appBar: AppBar(title: const Text('ReorderableListView Example')),
         body: const ReorderableExample(),
       ),
     );
@@ -23,40 +26,41 @@ class ReorderableApp extends StatelessWidget {
 }
 
 class ReorderableExample extends StatefulWidget {
-  const ReorderableExample({super.key});
+  const ReorderableExample({ super.key });
 
   @override
-  State<ReorderableExample> createState() => _ReorderableListViewExampleState();
+  State<ReorderableExample> createState() => _ReorderableExampleState();
 }
 
-class _ReorderableListViewExampleState extends State<ReorderableExample> {
-  final List<int> _items = List<int>.generate(50, (int index) => index);
+class _ReorderableExampleState extends State<ReorderableExample> {
+  final List<Widget> items = List<Widget>.generate(20, (int index) {
+    final Color color = Color.lerp(Colors.blue, Colors.orange, index / 20)!;
+    // The Material wiget is needed to ensure that the ListTile's
+    // tileColor Ink is rendered correctly when the tile occupies the
+    // reorderable list's "gap".
+    return Material(
+      key: ValueKey<int>(index),
+      child: ListTile(
+        tileColor: color,
+        selectedTileColor: color,
+        title: Text('$index $color'),
+      ),
+    );
+  });
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
-    final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
-
     return ReorderableListView(
       padding: const EdgeInsets.symmetric(horizontal: 40),
-      children: <Widget>[
-        for (int index = 0; index < _items.length; index += 1)
-          ListTile(
-            key: Key('$index'),
-            tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
-            title: Text('Item ${_items[index]}'),
-          ),
-      ],
       onReorder: (int oldIndex, int newIndex) {
         setState(() {
           if (oldIndex < newIndex) {
             newIndex -= 1;
           }
-          final int item = _items.removeAt(oldIndex);
-          _items.insert(newIndex, item);
+          items.insert(newIndex, items.removeAt(oldIndex));
         });
       },
+      children: items,
     );
   }
 }

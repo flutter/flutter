@@ -171,7 +171,19 @@ class ReorderableList extends StatefulWidget {
   /// removing the item at oldIndex from the list will
   /// reduce the list's length by one.
   /// Implementations will need to account for this
-  /// when inserting before newIndex.
+  /// when inserting before newIndex, for example:
+  ///
+  /// ```
+  /// onReorder: (int oldIndex, int newIndex) {
+  ///       if (oldIndex < newIndex) {
+  ///         // removing the item at oldIndex will shorten the list by 1.
+  ///         newIndex -= 1;
+  ///       }
+  ///       ....
+  ///     }
+  /// ```
+  ///
+  ///
   /// {@endtemplate}
   final ReorderCallback onReorder;
 
