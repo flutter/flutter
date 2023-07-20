@@ -294,10 +294,10 @@ Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, { ThemeD
 }
 
 Material _getMaterial(WidgetTester tester) {
-  return tester.firstWidget<Material>(
-    find.descendant(
-        of: find.byType(NavigationDrawer), matching: find.byType(Material)),
-  );
+  return tester.firstWidget<Material>(find.descendant(
+    of: find.byType(NavigationDrawer),
+    matching: find.byType(Material),
+  ));
 }
 
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
