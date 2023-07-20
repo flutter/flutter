@@ -282,8 +282,7 @@ void main() {
   });
 }
 
-Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child,
-    {ThemeData? theme}) {
+Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, { ThemeData? theme }) {
   return MaterialApp(
     theme: theme,
     home: Scaffold(
