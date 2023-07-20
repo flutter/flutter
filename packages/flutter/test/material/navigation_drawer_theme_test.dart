@@ -315,8 +315,8 @@ TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
 }
 
 TextStyle? _labelStyle(WidgetTester tester, String label) {
-  final RichText labelRichText = tester.widget<RichText>(
-    find.descendant(of: find.text(label), matching: find.byType(RichText)),
-  );
-  return labelRichText.text.style;
+  return tester.widget<RichText>(find.descendant(
+    of: find.text(label),
+    matching: find.byType(RichText),
+  )).text.style;
 }
