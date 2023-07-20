@@ -36,16 +36,13 @@ void main() {
       tileHeight: 50,
       backgroundColor: Color(0x00000099),
       elevation: 5.0,
-      shadowColor: Color(0x00000097),
-      surfaceTintColor: Color(0x00000096),
-      indicatorColor: Color(0x00000098),
-      indicatorShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(2.0))),
+      shadowColor: Color(0x00000098),
+      surfaceTintColor: Color(0x00000097),
+      indicatorColor: Color(0x00000096),
+      indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       indicatorSize: Size(10, 10),
-      labelTextStyle:
-          MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
-      iconTheme: MaterialStatePropertyAll<IconThemeData>(
-          IconThemeData(color: Color(0x00000097))),
+      labelTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+      iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000095))),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
