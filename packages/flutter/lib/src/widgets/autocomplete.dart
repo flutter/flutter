@@ -100,6 +100,17 @@ enum OptionsViewOpenDirection {
   down,
 }
 
+/// A controller for a [RawAutocomplete].
+class RawAutocompleteController<T extends Object> {
+  /// Creates a controller for a [RawAutocomplete].
+  RawAutocompleteController({
+    Iterable<T>? options,
+  }) : options = options ?? Iterable<T>.empty();
+
+  /// The options.
+  Iterable<T> options;
+}
+
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
 /// {@template flutter.widgets.RawAutocomplete.RawAutocomplete}
 /// A widget for helping the user make a selection by entering some text and
@@ -303,13 +314,13 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
+  late RawAutocompleteController<T> _controller = RawAutocompleteController<T>();
   late TextEditingController _textEditingController;
   late FocusNode _focusNode;
   late final Map<Type, Action<Intent>> _actionMap;
   late final _AutocompleteCallbackAction<AutocompletePreviousOptionIntent> _previousOptionAction;
   late final _AutocompleteCallbackAction<AutocompleteNextOptionIntent> _nextOptionAction;
   late final _AutocompleteCallbackAction<DismissIntent> _hideOptionsAction;
-  Iterable<T> _options = Iterable<T>.empty();
   T? _selection;
   bool _userHidOptions = false;
   String _lastFieldText = '';
@@ -325,7 +336,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   // True iff the state indicates that the options should be visible.
   bool get _shouldShowOptions {
-    return !_userHidOptions && _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
+    return !_userHidOptions && _focusNode.hasFocus && _selection == null && _controller.options.isNotEmpty;
   }
 
   // Called when _textEditingController changes.
@@ -334,7 +345,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final Iterable<T> options = await widget.optionsBuilder(
       value,
     );
-    _options = options;
+    _controller.options = options;
     _updateHighlight(_highlightedOptionIndex.value);
     if (_selection != null
         && value.text != widget.displayStringForOption(_selection!)) {
@@ -361,10 +372,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   // Called from fieldViewBuilder when the user submits the field.
   void _onFieldSubmitted() {
-    if (_options.isEmpty || _userHidOptions) {
+    if (_controller.options.isEmpty || _userHidOptions) {
       return;
     }
-    _select(_options.elementAt(_highlightedOptionIndex.value));
+    _select(_controller.options.elementAt(_highlightedOptionIndex.value));
   }
 
   // Select the given option and update the widget.
@@ -384,7 +395,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   void _updateHighlight(int newIndex) {
-    _highlightedOptionIndex.value = _options.isEmpty ? 0 : newIndex % _options.length;
+    _highlightedOptionIndex.value = _controller.options.isEmpty ? 0 : newIndex % _controller.options.length;
   }
 
   void _highlightPreviousOption(AutocompletePreviousOptionIntent intent) {
@@ -428,7 +439,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   void _updateActions() {
-    _setActionsEnabled(_focusNode.hasFocus && _selection == null && _options.isNotEmpty);
+    _setActionsEnabled(_focusNode.hasFocus && _selection == null && _controller.options.isNotEmpty);
   }
 
   bool _floatingOptionsUpdateScheduled = false;
@@ -465,7 +476,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
                 highlightIndexNotifier: _highlightedOptionIndex,
                 child: Builder(
                   builder: (BuildContext context) {
-                    return widget.optionsViewBuilder(context, _select, _options);
+                    return widget.optionsViewBuilder(context, _select, _controller.options);
                   }
                 )
               ),
@@ -523,6 +534,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   @override
   void initState() {
     super.initState();
+    _controller = RawAutocompleteController<T>();
     _textEditingController = widget.textEditingController ?? TextEditingController.fromValue(widget.initialValue);
     _textEditingController.addListener(_onChangedField);
     _focusNode = widget.focusNode ?? FocusNode();
