@@ -62,7 +62,7 @@ void main() {
     );
   });
 
-  test('usage string is correct for icons that should be mirrored in RTL', () {
+  test('certain icons should be mirrored in RTL', () {
     // Exact match
     expect(
       Icon(const MapEntry<String, String>('help', '')).isMirroredInRTL,
