@@ -1099,10 +1099,16 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 
   void _handleSelect() {
     assert(_debugMenuInfo('Selected ${widget.child} menu'));
-    widget.onPressed?.call();
     if (widget.closeOnActivate) {
       _MenuAnchorState._maybeOf(context)?._root._close();
     }
+    // Delay the call to onPressed until post-frame so that the focus is
+    // restored to what it was before the menu was opened before the action is
+    // executed.
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      FocusManager.instance.applyFocusChangesIfNeeded();
+      widget.onPressed?.call();
+    });
   }
 
   void _createInternalFocusNodeIfNeeded() {
