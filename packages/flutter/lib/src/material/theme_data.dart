@@ -179,68 +179,15 @@ enum MaterialTapTargetSize {
 /// for the subtree that appears below the new [Theme], or insert a widget
 /// that creates a new BuildContext, like [Builder].
 ///
-/// {@tool snippet}
-/// In this example, the [Container] widget uses [Theme.of] to retrieve the
-/// primary color from the theme's [colorScheme] to draw an amber square.
-/// The [Builder] widget separates the parent theme's [BuildContext] from the
-/// child's [BuildContext].
+/// {@tool dartpad}
+/// This example demonstrates how a typical [MaterialApp] specifies
+/// and uses a custom [Theme]. The theme's [ColorScheme] is based on a
+/// single "seed" color and configures itself to match the platform's
+/// current light or dark color configuration. The theme overrides the
+/// default configuration of [FloatingActionButton] to show how to
+/// customize the appearance a class of components.
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/theme_data.png)
-///
-/// ```dart
-/// Theme(
-///   data: ThemeData.from(
-///     colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.amber),
-///   ),
-///   child: Builder(
-///     builder: (BuildContext context) {
-///       return Container(
-///         width: 100,
-///         height: 100,
-///         color: Theme.of(context).colorScheme.primary,
-///       );
-///     },
-///   ),
-/// )
-/// ```
-/// {@end-tool}
-///
-/// {@tool snippet}
-///
-/// This sample creates a [MaterialApp] with a [Theme] whose
-/// [ColorScheme] is based on [Colors.blue], but with the color
-/// scheme's [ColorScheme.secondary] color overridden to be green. The
-/// [AppBar] widget uses the color scheme's [ColorScheme.primary] as
-/// its default background color and the [FloatingActionButton] widget
-/// uses the color scheme's [ColorScheme.secondary] for its default
-/// background. By default, the [Text] widget uses
-/// [TextTheme.bodyMedium], and the color of that [TextStyle] has been
-/// changed to purple.
-///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_theme_data.png)
-///
-/// ```dart
-/// MaterialApp(
-///   theme: ThemeData(
-///     colorScheme: ColorScheme.fromSwatch().copyWith(
-///       secondary: Colors.green,
-///     ),
-///     textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.purple)),
-///   ),
-///   home: Scaffold(
-///     appBar: AppBar(
-///       title: const Text('ThemeData Demo'),
-///     ),
-///     floatingActionButton: FloatingActionButton(
-///       child: const Icon(Icons.add),
-///       onPressed: () {},
-///     ),
-///     body: const Center(
-///       child: Text('Button pressed 0 times'),
-///     ),
-///   ),
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/theme_data/theme_data.0.dart **
 /// {@end-tool}
 ///
 /// See <https://material.io/design/color/> for
