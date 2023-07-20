@@ -938,6 +938,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     controller: primaryScrollController,
                     child: FocusScope(
                       node: focusScopeNode, // immutable
+                      // Only top most route can participate in focus traversal.
                       skipTraversal: !widget.route.isCurrent,
                       child: RepaintBoundary(
                         child: AnimatedBuilder(
@@ -1722,7 +1723,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void changedInternalState() {
     super.changedInternalState();
-    // No need to mark dirty of this method is called during build phase.
+    // No need to mark dirty if this method is called during build phase.
     if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       setState(() { /* internal state already changed */ });
       _modalBarrier.markNeedsBuild();
