@@ -82,6 +82,14 @@ void main() {
       Icon(const MapEntry<String, String>('help_new', '')).isMirroredInRTL,
       true,
     );
+    expect(
+      Icon(const MapEntry<String, String>('help_off', '')).isMirroredInRTL,
+      true,
+    );
+    expect(
+      Icon(const MapEntry<String, String>('help_on', '')).isMirroredInRTL,
+      true,
+    );
     // Common suffixes + variant
     expect(
       Icon(const MapEntry<String, String>('help_alt_rounded', '')).isMirroredInRTL,
@@ -89,6 +97,14 @@ void main() {
     );
     expect(
       Icon(const MapEntry<String, String>('help_new_rounded', '')).isMirroredInRTL,
+      true,
+    );
+    expect(
+      Icon(const MapEntry<String, String>('help_off_rounded', '')).isMirroredInRTL,
+      true,
+    );
+    expect(
+      Icon(const MapEntry<String, String>('help_on_rounded', '')).isMirroredInRTL,
       true,
     );
     // No match
