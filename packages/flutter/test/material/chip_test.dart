@@ -639,7 +639,7 @@ void main() {
     },
   );
 
-  testWidgets('delete button tap target is the right proportion of the chip', (WidgetTester tester) async {
+  testWidgets('Delete button tap target is the right proportion of the chip', (WidgetTester tester) async {
     final UniqueKey deleteKey = UniqueKey();
     bool calledDelete = false;
     await tester.pumpWidget(
@@ -657,12 +657,15 @@ void main() {
         ),
       ),
     );
-    await tester.tapAt(tester.getCenter(find.byKey(deleteKey)) - const Offset(24.0, 0.0));
+
+    // Test correct tap target size.
+    await tester.tapAt(tester.getCenter(find.byKey(deleteKey)) - const Offset(18.0, 0.0)); // Half the width of the delete button + right label padding.
     await tester.pump();
     expect(calledDelete, isTrue);
     calledDelete = false;
 
-    await tester.tapAt(tester.getCenter(find.byKey(deleteKey)) - const Offset(25.0, 0.0));
+    // Test incorrect tap target size.
+    await tester.tapAt(tester.getCenter(find.byKey(deleteKey)) - const Offset(19.0, 0.0));
     await tester.pump();
     expect(calledDelete, isFalse);
     calledDelete = false;
@@ -3457,6 +3460,48 @@ void main() {
 
     // Enabled & selected chip should have the provided selectedColor.
     expect(getMaterialBox(tester), paints..rrect(color: selectedColor));
+  });
+
+  testWidgets('Delete button tap target area does not include label', (WidgetTester tester) async {
+    bool calledDelete = false;
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Column(
+          children: <Widget>[
+            Chip(
+              label: const Text('Chip'),
+              onDeleted: () {
+                calledDelete = true;
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Tap on the delete button.
+    await tester.tapAt(tester.getCenter(find.byType(Icon)));
+    await tester.pump();
+    expect(calledDelete, isTrue);
+    calledDelete = false;
+
+    final Offset labelCenter = tester.getCenter(find.text('Chip'));
+
+    // Tap on the label.
+    await tester.tapAt(labelCenter);
+    await tester.pump();
+    expect(calledDelete, isFalse);
+
+    // Tap before end of the label.
+    final Size labelSize = tester.getSize(find.text('Chip'));
+    await tester.tapAt(Offset(labelCenter.dx + (labelSize.width / 2) - 1, labelCenter.dy));
+    await tester.pump();
+    expect(calledDelete, isFalse);
+
+    // Tap after end of the label.
+    await tester.tapAt(Offset(labelCenter.dx + (labelSize.width / 2), labelCenter.dy));
+    await tester.pump();
+    expect(calledDelete, isTrue);
   });
 
   group('Material 2', () {
