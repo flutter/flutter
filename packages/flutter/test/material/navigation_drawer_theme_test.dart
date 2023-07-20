@@ -50,19 +50,20 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description[0], 'tileHeight: 50.0');
-    expect(description[1], 'backgroundColor: Color(0x00000099)');
-    expect(description[2], 'elevation: 5.0');
-    expect(description[3], 'shadowColor: Color(0x00000097)');
-    expect(description[4], 'surfaceTintColor: Color(0x00000096)');
-    expect(description[5], 'indicatorColor: Color(0x00000098)');
-    expect(description[6], 'indicatorShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))');
-    expect(description[7], 'indicatorSize: Size(10.0, 10.0)');
-    expect(description[8], 'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
-
-    // Ignore instance address for IconThemeData.
-    expect(description[9].contains('iconTheme: MaterialStatePropertyAll(IconThemeData'),isTrue);
-    expect(description[9].contains('(color: Color(0x00000097))'), isTrue);
+    expect(description, equalsIgnoringHashCodes(
+      <String>[
+      'tileHeight: 50.0',
+      'backgroundColor: Color(0x00000099)',
+      'elevation: 5.0',
+      'shadowColor: Color(0x00000097)',
+      'surfaceTintColor: Color(0x00000096)',
+      'indicatorColor: Color(0x00000098)',
+      'indicatorShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
+      'indicatorSize: Size(10.0, 10.0)',
+      'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))',
+      'iconTheme: MaterialStatePropertyAll(IconThemeData#00000(color: Color(0x00000097)))'
+      ],
+    ));
   });
 
   testWidgets(
