@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
-import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, StringAttribute, TextDirection;
+import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, SemanticsUpdate, SemanticsUpdateBuilder, StringAttribute, TextDirection;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -52,7 +51,7 @@ typedef SemanticsActionHandler = void Function(Object? args);
 /// Signature for a function that receives a semantics update and returns no result.
 ///
 /// Used by [SemanticsOwner.onSemanticsUpdate].
-typedef SemanticsUpdateCallback = void Function(ui.SemanticsUpdate update);
+typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 
 /// Signature for the [SemanticsConfiguration.childConfigurationsDelegate].
 ///
@@ -2000,25 +1999,29 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   /// The owner for this node (null if unattached).
   ///
-  /// The entire subtree that this node belongs to will have the same owner.
+  /// The entire semantics tree that this node belongs to will have the same owner.
   SemanticsOwner? get owner => _owner;
   SemanticsOwner? _owner;
 
-  /// Whether this node is in a tree whose root is attached to something.
+  /// Whether the semantics tree this node belongs to is attached to a [SemanticsOwner].
   ///
   /// This becomes true during the call to [attach].
   ///
   /// This becomes false during the call to [detach].
   bool get attached => _owner != null;
 
-  /// The parent of this node in the tree.
+  /// The parent of this node in the semantics tree.
+  ///
+  /// The [parent] of the root node in the semantics tree is null.
   SemanticsNode? get parent => _parent;
   SemanticsNode? _parent;
 
-  /// The depth of this node in the tree.
+  /// The depth of this node in the semantics tree.
   ///
   /// The depth of nodes in a tree monotonically increases as you traverse down
-  /// the tree.
+  /// the tree.  There's no guarantee regarding depth between siblings.
+  ///
+  /// The depth is used to ensure that nodes are processed in depth order.
   int get depth => _depth;
   int _depth = 0;
 
@@ -2083,7 +2086,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// Mark this node as detached.
+  /// Mark this node as detached from its owner.
   @visibleForTesting
   void detach() {
     assert(_owner != null);
@@ -2668,7 +2671,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
-  void _addToUpdate(ui.SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
+  void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
     final Int32List childrenInTraversalOrder;
@@ -3288,7 +3291,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    final ui.SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
+    final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
     for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
