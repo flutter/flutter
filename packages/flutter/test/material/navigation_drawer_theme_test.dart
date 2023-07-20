@@ -67,71 +67,71 @@ void main() {
   });
 
   testWidgets(
-      'NavigationDrawerThemeData values are used when no NavigationDrawer properties are specified',
-      (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    'NavigationDrawerThemeData values are used when no NavigationDrawer properties are specified',
+    (WidgetTester tester) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      const NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerThemeData(
+        backgroundColor: Color(0x00000001),
+        elevation: 7.0,
+        shadowColor: Color(0x00000002),
+        surfaceTintColor: Color(0x00000003),
+        indicatorColor: Color(0x00000004),
+        indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(16.0))),
+        labelTextStyle:MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+        iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000005))),
+      );
 
-    const Color backgroundColor = Color(0x00000001);
-    const double elevation = 7.0;
-    const Color shadowColor = Color(0x00000003);
-    const Color surfaceTintColor = Color(0x00000004);
-    const Color iconColor = Color(0x00000005);
-    const TextStyle labelStyle = TextStyle(fontSize: 7.0);
-    const RoundedRectangleBorder indicatorShape = RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(16.0)));
-
-    const Color indicatorColor = Color(0x00000005);
-    final ThemeData theme = ThemeData(
-      navigationDrawerTheme: const NavigationDrawerThemeData(
-        backgroundColor: backgroundColor,
-        elevation: elevation,
-        shadowColor: shadowColor,
-        surfaceTintColor: surfaceTintColor,
-        indicatorShape: indicatorShape,
-        indicatorColor: indicatorColor,
-        labelTextStyle:
-            MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
-        iconTheme: MaterialStatePropertyAll<IconThemeData>(
-            IconThemeData(color: iconColor)),
-      ),
-    );
-    await tester.pumpWidget(
-      _buildWidget(
-        scaffoldKey,
-        NavigationDrawer(
-          children: <Widget>[
-            Text('Headline', style: theme.textTheme.bodyLarge),
-            const NavigationDrawerDestination(
-              icon: Icon(Icons.ac_unit),
-              label: Text('AC'),
-            ),
-            const NavigationDrawerDestination(
-              icon: Icon(Icons.access_alarm),
-              label: Text('Alarm'),
-            ),
-          ],
-          onDestinationSelected: (int i) {},
+      await tester.pumpWidget(
+        _buildWidget(
+          scaffoldKey,
+          NavigationDrawer(
+            children: const <Widget>[
+              Text('Headline'),
+              NavigationDrawerDestination(
+                icon: Icon(Icons.ac_unit),
+                label: Text('AC'),
+              ),
+              NavigationDrawerDestination(
+                icon: Icon(Icons.access_alarm),
+                label: Text('Alarm'),
+              ),
+            ],
+            onDestinationSelected: (int i) {},
+          ),
+          theme: ThemeData(
+            navigationDrawerTheme: navigationDrawerTheme,
+          ),
         ),
-        theme: theme,
-      ),
-    );
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pump(const Duration(seconds: 1));
+      );
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pump(const Duration(seconds: 1));
 
-    // Test drawer Material.
-    expect(_getMaterial(tester).color, backgroundColor);
-    expect(_getMaterial(tester).surfaceTintColor, surfaceTintColor);
-    expect(_getMaterial(tester).shadowColor, shadowColor);
-    expect(_getMaterial(tester).elevation, 7);
-    // Test indicator decoration.
-    expect(_getIndicatorDecoration(tester)?.color, indicatorColor);
-    expect(_getIndicatorDecoration(tester)?.shape, indicatorShape);
-    // Test icon.
-    expect(_iconStyle(tester, Icons.ac_unit)?.color, iconColor);
-    expect(_iconStyle(tester, Icons.access_alarm)?.color, iconColor);
-    // Test label.
-    expect(_labelStyle(tester, 'AC'), labelStyle);
-    expect(_labelStyle(tester, 'Alarm'), labelStyle);
+      // Test drawer Material.
+      expect(_getMaterial(tester).color, navigationDrawerTheme.backgroundColor);
+      expect(_getMaterial(tester).surfaceTintColor, navigationDrawerTheme.surfaceTintColor);
+      expect(_getMaterial(tester).shadowColor, navigationDrawerTheme.shadowColor);
+      expect(_getMaterial(tester).elevation, 7);
+      // Test indicator decoration.
+      expect(_getIndicatorDecoration(tester)?.color, navigationDrawerTheme.indicatorColor);
+      expect(_getIndicatorDecoration(tester)?.shape, navigationDrawerTheme.indicatorShape);
+      // Test icon.
+      expect(
+        _iconStyle(tester, Icons.ac_unit)?.color,
+        navigationDrawerTheme.iconTheme?.resolve(<MaterialState>{})?.color,
+      );
+      expect(
+        _iconStyle(tester, Icons.access_alarm)?.color,
+        navigationDrawerTheme.iconTheme?.resolve(<MaterialState>{})?.color,
+      );
+      // Test label.
+      expect(
+        _labelStyle(tester, 'AC'),
+        navigationDrawerTheme.labelTextStyle?.resolve(<MaterialState>{})
+      );
+      expect(
+        _labelStyle(tester, 'Alarm'),
+        navigationDrawerTheme.labelTextStyle?.resolve(<MaterialState>{})
+      );
   });
 
   testWidgets(
