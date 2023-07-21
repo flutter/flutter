@@ -20,7 +20,7 @@ void main() {
     expect(isValidPackageName('Foo_bar'), false);
   });
 
-  test('Suggest a valid Pub package name', () {
+  test('Suggests a valid Pub package name', () {
     expect(potentialValidPackageName('92'), '_92');
     expect(potentialValidPackageName('a-b-c'), 'a_b_c');
 
