@@ -167,6 +167,7 @@ dev_dependencies:
   testUsingContext(
       'Confirmation that the reporter, timeout, and concurrency args are not set by default',
       () async {
+    processManager.addCommand(const FakeCommand(command: <String>['chmod', '755', r'cache/bin/cache/artifacts']));
     final FakePackageTest fakePackageTest = FakePackageTest();
 
     final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
@@ -186,12 +187,13 @@ dev_dependencies:
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => processManager,
-    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
+    Cache: () => Cache.test(processManager: processManager),
   });
 
   group('shard-index and total-shards', () {
     testUsingContext('with the params they are Piped to package:test',
         () async {
+        processManager.addCommand(const FakeCommand(command: <String>['chmod', '755', r'cache/bin/cache/artifacts']));
       final FakePackageTest fakePackageTest = FakePackageTest();
 
       final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
@@ -210,11 +212,11 @@ dev_dependencies:
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => processManager,
-      Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
+      Cache: () => Cache.test(processManager: processManager),
     });
 
-    testUsingContext('without the params they not Piped to package:test',
-        () async {
+    testUsingContext('without the params they not Piped to package:test', () async {
+      processManager.addCommand(const FakeCommand(command: <String>['chmod', '755', r'cache/bin/cache/artifacts']));
       final FakePackageTest fakePackageTest = FakePackageTest();
 
       final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
@@ -231,11 +233,12 @@ dev_dependencies:
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => processManager,
-      Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
+      Cache: () => Cache.test(processManager: processManager),
     });
   });
 
   testUsingContext('Supports coverage and machine', () async {
+    processManager.addCommand(const FakeCommand(command: <String>['chmod', '755', r'cache/bin/cache/artifacts']));
     final FakePackageTest fakePackageTest = FakePackageTest();
 
     final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
@@ -253,7 +256,7 @@ dev_dependencies:
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => processManager,
-    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
+    Cache: () => Cache.test(processManager: processManager),
   });
 
   testUsingContext('Coverage provides current library name to Coverage Collector by default', () async {
@@ -389,6 +392,7 @@ dev_dependencies:
 
   testUsingContext('Pipes start-paused to package:test',
       () async {
+    processManager.addCommand(const FakeCommand(command: <String>['chmod', '755', r'cache/bin/cache/artifacts']));
     final FakePackageTest fakePackageTest = FakePackageTest();
 
     final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
@@ -409,11 +413,11 @@ dev_dependencies:
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => processManager,
-    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
+    Cache: () => Cache.test(processManager: processManager),
   });
 
-  testUsingContext('Pipes run-skipped to package:test',
-      () async {
+  testUsingContext('Pipes run-skipped to package:test', () async {
+    processManager.addCommand(const FakeCommand(command: <String>['chmod', '755', r'cache/bin/cache/artifacts']));
     final FakePackageTest fakePackageTest = FakePackageTest();
 
     final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
@@ -434,7 +438,7 @@ dev_dependencies:
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => processManager,
-    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
+    Cache: () => Cache.test(processManager: processManager),
   });
 
   testUsingContext('Pipes enable-vmService', () async {
