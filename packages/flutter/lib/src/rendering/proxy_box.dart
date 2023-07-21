@@ -1908,8 +1908,6 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   }
 }
 
-final Paint _transparentPaint = Paint()..color = const Color(0x00000000);
-
 /// Creates a physical model layer that clips its child to a rounded
 /// rectangle.
 ///
@@ -2113,7 +2111,6 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
     }
 
     _updateClip();
-    final Rect offsetBounds = offset & size;
     final Path offsetPath = _clip!.shift(offset);
     bool paintShadows = true;
     assert(() {
