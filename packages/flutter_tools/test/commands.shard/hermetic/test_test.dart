@@ -994,8 +994,27 @@ dev_dependencies:
       expect(testRunner.lastFileReporterValue, 'json:out.jsonl');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager.empty(),
     });
+  });
+
+  testUsingContext('throws toolexit if --device-id option provided', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    expect(
+      () async => commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--device-id=linux',
+      ]),
+      throwsToolExit(message: r'The --device-id (-d) option is not supported with the "test" sub-command.'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.empty(),
   });
 }
 

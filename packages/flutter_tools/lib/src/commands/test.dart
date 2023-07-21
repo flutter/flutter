@@ -268,6 +268,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) {
+    if (stringArg('device-id', global: true) != null) {
+      throwToolExit('The --device-id (-d) option is not supported with the "test" sub-command.');
+    }
     final List<Uri> testUris = argResults!.rest.map(_parseTestArgument).toList();
     if (testUris.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
