@@ -1066,6 +1066,63 @@ void main() {
       expect(clipboardData['text'], 'w are you?Good, and you?Fine, ');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
+    testWidgets('check onSelectionEvent callback is called correctly', (WidgetTester tester) async {
+      const String text1 = 'How are you?';
+      TextSelection? selection1;
+      void onSelectionEvent1(TextSelection selection, SelectionEvent event) {
+        selection1 = selection;
+      }
+
+      const String text2 = 'Good, and you?';
+      TextSelection? selection2;
+      void onSelectionEvent2(TextSelection selection, SelectionEvent event) {
+        selection2 = selection;
+      }
+
+      const String text3 = 'Fine, thank you.';
+      TextSelection? selection3;
+      void onSelectionEvent3(TextSelection selection, SelectionEvent event) {
+        selection3 = selection;
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: Column(
+              children: <Widget>[
+                Text(text1, onSelectionEvent: onSelectionEvent1,),
+                Text(text2, onSelectionEvent: onSelectionEvent2,),
+                Text(text3, onSelectionEvent: onSelectionEvent3,),
+              ],
+            ),
+          ),
+        ),
+      );
+      // Select from offset 2 of paragraph 1 to offset 6 of paragraph3.
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraph3, 6));
+      await gesture.up();
+
+      expect(selection1?.start, 2);
+      expect(selection1?.end, text1.length);
+      expect(text1.substring(selection1!.start, selection1!.end), 'w are you?');
+
+      expect(selection2?.start, 0);
+      expect(selection2?.end, text2.length);
+      expect(text2.substring(selection2!.start, selection2!.end), 'Good, and you?');
+
+      expect(selection3?.start, 0);
+      expect(selection3?.end, 6);
+      expect(text3.substring(selection3!.start, selection3!.end), 'Fine, ');
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
+
     testWidgets(
       'does not override TextField keyboard shortcuts if the TextField is focused - non apple',
       (WidgetTester tester) async {
