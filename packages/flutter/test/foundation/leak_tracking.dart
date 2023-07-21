@@ -95,7 +95,8 @@ bool _webWarningPrinted = false;
 Future<void> _withFlutterLeakTracking(
   DartAsyncCallback callback,
   WidgetTester tester,
-  LeakTrackingTestConfig config) async {
+  LeakTrackingTestConfig config
+) async {
   // Leak tracker does not work for web platform.
   if (kIsWeb) {
     final bool shouldPrintWarning = !_webWarningPrinted && LeakTrackerGlobalSettings.warnForNonSupportedPlatforms;
