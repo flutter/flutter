@@ -1186,7 +1186,7 @@ class _UnsupportedDisplay implements TestDisplay {
 /// If a test needs to override a real [SingletonFlutterWindow] property and
 /// then later return to using the real [SingletonFlutterWindow] property,
 /// [TestWindow] provides methods to clear each individual test value, e.g.,
-/// [clearLocaleTestValue].
+/// [clearDevicePixelRatioTestValue].
 ///
 /// To clear all fake test values in a [TestWindow], consider using
 /// [clearAllTestValues].
@@ -1860,7 +1860,7 @@ class TestWindow implements SingletonFlutterWindow {
   /// [PlatformDispatcher] values are reported again.
   ///
   /// If desired, clearing of properties can be done on an individual basis,
-  /// e.g., [clearLocaleTestValue].
+  /// e.g., [clearDevicePixelRatioTestValue].
   @Deprecated(
     'Use WidgetTester.platformDispatcher.clearAllTestValues() and WidgetTester.view.reset() instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
