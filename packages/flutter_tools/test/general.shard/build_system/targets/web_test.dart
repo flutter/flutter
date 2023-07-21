@@ -95,6 +95,7 @@ void main() {
         fileSystem: globals.fs,
       );
       environment.buildDir.createSync(recursive: true);
+      environment.buildDir.childFile('AssetManifest.bin').createSync();
     }, overrides: <Type, Generator>{
       Platform: () => linux,
     });
@@ -944,7 +945,6 @@ void main() {
       fileGeneratorsPath,
       <String, String>{'/foo': 'abcd'},
       <String>[],
-      '', // todo fix
       serviceWorkerStrategy: ServiceWorkerStrategy.none,
     );
 
@@ -958,7 +958,6 @@ void main() {
       fileGeneratorsPath,
       <String, String>{'/foo': 'abcd'},
       <String>[],
-      '', // todo fix
       serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
     );
 
@@ -972,7 +971,6 @@ void main() {
       fileGeneratorsPath,
       <String, String>{'/foo': 'abcd'},
       <String>['foo', 'bar'],
-      '', // todo fix
       serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
     );
 
@@ -980,8 +978,6 @@ void main() {
   }));
 
   test('WebServiceWorker generates a service_worker for a web resource folder', () => testbed.run(() async {
-    environment.buildDir.childFile('AssetManifest.bin').createSync();
-
     environment.outputDir.childDirectory('a').childFile('a.txt')
       ..createSync(recursive: true)
       ..writeAsStringSync('A');
@@ -1002,8 +998,6 @@ void main() {
   }));
 
   test('WebServiceWorker contains baseUrl cache', () => testbed.run(() async {
-    environment.buildDir.childFile('AssetManifest.bin').createSync();
-
     environment.outputDir
       .childFile('index.html')
       .createSync(recursive: true);
@@ -1019,8 +1013,6 @@ void main() {
   }));
 
   test('WebServiceWorker does not cache source maps', () => testbed.run(() async {
-    environment.buildDir.childFile('AssetManifest.bin').createSync();
-
     environment.outputDir
       .childFile('main.dart.js')
       .createSync(recursive: true);

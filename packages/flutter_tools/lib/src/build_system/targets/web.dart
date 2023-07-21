@@ -9,6 +9,7 @@ import 'package:crypto/crypto.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
+import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
@@ -41,6 +42,55 @@ const String kBaseHref = 'baseHref';
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
+/// Builds the asset bundle but only writes the asset manifest to the build
+/// directory.
+class AssetManifestTarget extends Target {
+  const AssetManifestTarget();
+
+  @override
+  String get name => 'asset_manifest_target';
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  List<Source> get inputs => const <Source>[];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/AssetManifest.bin'),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final String? temp = environment.defines[kIconTreeShakerFlag];
+
+    final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
+    // Only the default asset bundle style is supported in assemble.
+    final AssetBundle assetBundle = AssetBundleFactory.defaultInstance(
+      logger: environment.logger,
+      fileSystem: environment.fileSystem,
+      platform: environment.platform,
+    ).createBundle();
+    final int resultCode = await assetBundle.build(
+      manifestPath: pubspecFile.path,
+      packagesPath: environment.projectDir.childFile('.packages').path,
+      deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
+      targetPlatform: TargetPlatform.web_javascript,
+    );
+    if (resultCode != 0) {
+      throw Exception('Failed to bundle asset files.');
+    }
+
+    final List<int> assetManifest = await assetBundle.entries['AssetManifest.bin']!.contentsAsBytes();
+    await environment.buildDir.childFile('AssetManifest.bin').writeAsBytes(assetManifest);
+
+    if (temp != null) {
+      environment.defines[kIconTreeShakerFlag] = temp;
+    }
+  }
+}
+
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
 class WebEntrypointTarget extends Target {
@@ -50,11 +100,14 @@ class WebEntrypointTarget extends Target {
   String get name => 'web_entrypoint';
 
   @override
-  List<Target> get dependencies => const <Target>[];
+  List<Target> get dependencies => const <Target>[
+    AssetManifestTarget(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart'),
+    Source.pattern('{BUILD_DIR}/AssetManifest.bin'),
   ];
 
   @override
@@ -96,9 +149,12 @@ class WebEntrypointTarget extends Target {
     // the web_plugin_registrant.dart file alongside the generated main.dart
     const String generatedImport = 'web_plugin_registrant.dart';
 
+    final Uint8List assetManifestBytes = await environment.buildDir.childFile('AssetManifest.bin').readAsBytes();
+
     final String contents = main_dart.generateMainDartFile(importedEntrypoint,
       languageVersion: languageVersion,
       pluginRegistrantEntrypoint: generatedImport,
+      assetManifestBytes: assetManifestBytes,
     );
 
     environment.buildDir.childFile('main.dart').writeAsStringSync(contents);
@@ -603,11 +659,6 @@ class WebServiceWorker extends Target {
       }
     }
 
-    final String assetManifest = await(() async {
-      final Uint8List bytes = await environment.buildDir.childFile('AssetManifest.bin').readAsBytes();
-      return '[${bytes.join(',')}]';
-    })();
-
     final File serviceWorkerFile = environment.outputDir
       .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
@@ -626,7 +677,6 @@ class WebServiceWorker extends Target {
         if (urlToHash.containsKey('assets/FontManifest.json'))
           'assets/FontManifest.json',
       ],
-      assetManifest,
       serviceWorkerStrategy: serviceWorkerStrategy,
     );
     serviceWorkerFile

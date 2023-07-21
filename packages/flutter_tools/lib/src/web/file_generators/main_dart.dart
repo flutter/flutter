@@ -2,25 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:package_config/package_config.dart';
-
-import '../../asset.dart';
-
-final String? _assetManifestAsByteList = (){
-  if (generatedAssetManifest == null) {
-    return null;
-  }
-  final ByteBuffer buffer = generatedAssetManifest!.buffer;
-  final Uint8List list = buffer.asUint8List(generatedAssetManifest!.offsetInBytes, generatedAssetManifest!.lengthInBytes);
-  return '[${list.join(',')}]';
-}();
 
 /// Generates the main.dart file.
 String generateMainDartFile(String appEntrypoint, {
   required String pluginRegistrantEntrypoint,
   LanguageVersion? languageVersion,
+  required List<int> assetManifestBytes,
 }) {
   return <String>[
     if (languageVersion != null)
@@ -45,8 +33,7 @@ String generateMainDartFile(String appEntrypoint, {
     'Future<void> main() async {',
     '  await ui_web.bootstrapEngine(',
     '    runApp: () {',
-    if (_assetManifestAsByteList != null)
-      '      js.context["_flutter_assetManifestAsByteList"] = $_assetManifestAsByteList;',
+    '      js.context["_flutter_assetManifestAsByteList"] = [${assetManifestBytes.join(',')}];',
     '      if (entrypoint.main is _UnaryFunction) {',
     '        return (entrypoint.main as _UnaryFunction)(<String>[]);',
     '      }',

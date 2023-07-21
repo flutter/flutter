@@ -455,7 +455,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   // Flutter web projects need to include a generated main entrypoint to call the
   // appropriate bootstrap method and inject plugins.
   // Keep this in sync with build_system/targets/web.dart.
-  Future<Uri> _generateEntrypoint(Uri mainUri, PackageConfig? packageConfig) async {
+  Future<Uri> _generateEntrypoint(Uri mainUri, PackageConfig? packageConfig, List<int> assetManifestBytes) async {
     File? result = _generatedEntrypointDirectory?.childFile('web_entrypoint.dart');
     if (_generatedEntrypointDirectory == null) {
       _generatedEntrypointDirectory ??= _fileSystem.systemTempDirectory.createTempSync('flutter_tools.')
@@ -489,6 +489,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       final String entrypoint = main_dart.generateMainDartFile(importedEntrypoint.toString(),
         languageVersion: languageVersion,
         pluginRegistrantEntrypoint: generatedImport,
+        assetManifestBytes: assetManifestBytes,
       );
 
       result.writeAsStringSync(entrypoint);
@@ -523,6 +524,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       mainUri: await _generateEntrypoint(
         _fileSystem.file(mainPath).absolute.uri,
         invalidationResult.packageConfig,
+        await assetBundle.entries['AssetManifest.bin']!.contentsAsBytes(),
       ),
       target: target,
       bundle: assetBundle,

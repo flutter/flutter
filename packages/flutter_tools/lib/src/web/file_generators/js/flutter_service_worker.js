@@ -8,8 +8,6 @@ const RESOURCES = $$RESOURCES_MAP;
 // start.
 const CORE = $$CORE_LIST;
 
-const ASSET_MANIFEST = $$ASSET_MANIFEST;
-
 // During install, the TEMP cache is populated with the application shell files.
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -95,15 +93,6 @@ self.addEventListener("fetch", (event) => {
   if (event.request.url == origin || event.request.url.startsWith(origin + '/#') || key == '') {
     key = '/';
   }
-
-  // TODO write this to cache on initialization instead of having special early check here.
-  if (key == 'assets/AssetManifest.bin') {
-    const responseBody = new Blob([new Uint8Array(ASSET_MANIFEST)], {type: 'application/octet-stream'});
-    const response = new Response(responseBody);
-    event.respondWith(response);
-    return;
-  }
-
   // If the URL is not the RESOURCE list then return to signal that the
   // browser should take over.
   if (!RESOURCES[key]) {
@@ -113,7 +102,6 @@ self.addEventListener("fetch", (event) => {
   if (key == '/') {
     return onlineFirst(event);
   }
-
   event.respondWith(caches.open(CACHE_NAME)
     .then((cache) =>  {
       return cache.match(event.request).then((response) => {
