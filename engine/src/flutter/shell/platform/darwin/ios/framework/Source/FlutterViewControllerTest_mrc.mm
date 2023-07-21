@@ -32,7 +32,7 @@ FLUTTER_ASSERT_NOT_ARC
 @property(nonatomic, retain) VSyncClient* touchRateCorrectionVSyncClient;
 
 - (void)createTouchRateCorrectionVSyncClientIfNeeded;
-- (void)setupKeyboardAnimationVsyncClient:
+- (void)setUpKeyboardAnimationVsyncClient:
     (FlutterKeyboardAnimationCallback)keyboardAnimationCallback;
 - (void)startKeyBoardAnimation:(NSTimeInterval)duration;
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches;
@@ -58,7 +58,7 @@ FLUTTER_ASSERT_NOT_ARC
                                                                                  bundle:nil];
   FlutterKeyboardAnimationCallback callback = ^(fml::TimePoint targetTime) {
   };
-  [viewController setupKeyboardAnimationVsyncClient:callback];
+  [viewController setUpKeyboardAnimationVsyncClient:callback];
   XCTAssertNotNil(viewController.keyboardAnimationVSyncClient);
   CADisplayLink* link = [viewController.keyboardAnimationVSyncClient getDisplayLink];
   XCTAssertNotNil(link);
@@ -196,7 +196,7 @@ FLUTTER_ASSERT_NOT_ARC
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
                                                                                 nibName:nil
                                                                                  bundle:nil];
-  [viewController setupKeyboardAnimationVsyncClient:nil];
+  [viewController setUpKeyboardAnimationVsyncClient:nil];
   XCTAssertNil(viewController.keyboardAnimationVSyncClient);
 }
 

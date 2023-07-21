@@ -211,7 +211,7 @@ function pipeline configuration.
 
 ![alt_text](assets/read_frame_captures/image7.png "image_tooltip")
 
-You will get intimately familiar with this view when you setup a new pipeline
+You will get intimately familiar with this view when you set up a new pipeline
 state object in Impeller or try to reason about the correctness of one of the
 pipeline state object variants.
 

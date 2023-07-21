@@ -43,7 +43,7 @@ QueuesVK::QueuesVK(const vk::Device& device,
   auto vk_compute = device.getQueue(compute.family, compute.index);
   auto vk_transfer = device.getQueue(transfer.family, transfer.index);
 
-  // Always setup the graphics queue.
+  // Always set up the graphics queue.
   graphics_queue = std::make_shared<QueueVK>(graphics, vk_graphics);
   ContextVK::SetDebugName(device, vk_graphics, "ImpellerGraphicsQ");
 

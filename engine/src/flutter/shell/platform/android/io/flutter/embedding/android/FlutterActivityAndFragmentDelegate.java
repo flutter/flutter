@@ -186,7 +186,7 @@ import java.util.List;
     // When "retain instance" is true, the FlutterEngine will survive configuration
     // changes. Therefore, we create a new one only if one does not already exist.
     if (flutterEngine == null) {
-      setupFlutterEngine();
+      setUpFlutterEngine();
     }
 
     if (host.shouldAttachEngineToActivity()) {
@@ -268,7 +268,7 @@ import java.util.List;
    * then a new {@link FlutterEngine} is instantiated.
    */
   @VisibleForTesting
-  /* package */ void setupFlutterEngine() {
+  /* package */ void setUpFlutterEngine() {
     Log.v(TAG, "Setting up FlutterEngine.");
 
     // First, check if the host wants to use a cached FlutterEngine.
