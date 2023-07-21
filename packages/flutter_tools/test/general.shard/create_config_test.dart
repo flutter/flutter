@@ -25,9 +25,10 @@ void main() {
     expect(potentialValidPackageName('a-b-c'), 'a_b_c');
 
 
-    expect(potentialValidPackageName('foo.bar'), 'foo_bar');
     expect(potentialValidPackageName('Foo_bar'), 'foo_bar');
-    expect(potentialValidPackageName('foo._bar'), 'foo_bar');
+    expect(potentialValidPackageName('foo-_bar'), 'foo__bar');
+
+    expect(potentialValidPackageName('잘못된 이름'), isNull, reason: 'It should return null if it cannot find a valid name.');
 
   });
 
