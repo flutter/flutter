@@ -785,7 +785,7 @@ bool isValidPackageName(String name) {
 }
 
 /// Returns a potential valid name from the given [name].
-/// 
+///
 /// If a valid name cannot be found, returns `null`.
 @visibleForTesting
 String? potentialValidPackageName(String name){
