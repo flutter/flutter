@@ -22,7 +22,7 @@ class DisplayListGLComplexityCalculator
 
   bool ShouldBeCached(unsigned int complexity_score) override {
     // Set cache threshold at 1ms
-    return complexity_score > 200000u;
+    return false;
   }
 
   void SetComplexityCeiling(unsigned int ceiling) override {
