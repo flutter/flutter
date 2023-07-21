@@ -8,10 +8,9 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'image_provider.dart';
-
 import '_asset_manifest_contents_io.dart'
-  if (dart.library.js_util) '_asset_manifest_contents_web.dart';
+  if (dart.library.js) '_asset_manifest_contents_web.dart';
+import 'image_provider.dart';
 
 /// A screen with a device-pixel ratio strictly less than this value is
 /// considered a low-resolution screen (typically entry-level to mid-range
