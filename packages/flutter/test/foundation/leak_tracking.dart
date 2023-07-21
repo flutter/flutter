@@ -122,7 +122,7 @@ Future<void> _withFlutterLeakTracking(
         asyncCodeRunner: asyncCodeRunner,
         leakDiagnosticConfig: config.leakDiagnosticConfig,
         shouldThrowOnLeaks: false,
-        gcCountBuffer: 1,
+        gcCountBuffer: 2,
       );
 
       leaks = LeakCleaner(config).clean(leaks);
