@@ -10,6 +10,9 @@ import 'package:flutter/services.dart';
 
 import 'image_provider.dart';
 
+import '_asset_manifest_contents_io.dart'
+  if (dart.library.js_util) '_asset_manifest_contents_web.dart';
+
 /// A screen with a device-pixel ratio strictly less than this value is
 /// considered a low-resolution screen (typically entry-level to mid-range
 /// laptops, desktop screens up to QHD, low-end tablets such as Kindle Fire).
@@ -281,7 +284,7 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    AssetManifest.loadFromAssetBundle(chosenBundle)
+    loadAssetManifest(chosenBundle)
       .then((AssetManifest manifest) {
         final Iterable<AssetMetadata>? candidateVariants = manifest.getAssetVariants(keyName);
         final AssetMetadata chosenVariant = _chooseVariant(
