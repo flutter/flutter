@@ -605,7 +605,7 @@ public class FlutterActivityTest {
     @SuppressLint("MissingSuperCall")
     protected void onCreate(@Nullable Bundle savedInstanceState) {
       super.delegate = new FlutterActivityAndFragmentDelegate(this);
-      super.delegate.setupFlutterEngine();
+      super.delegate.setUpFlutterEngine();
     }
 
     @Nullable

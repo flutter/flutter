@@ -556,7 +556,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 // If you add a channel, be sure to also update `resetChannels`.
 // Channels get a reference to the engine, and therefore need manual
 // cleanup for proper collection.
-- (void)setupChannels {
+- (void)setUpChannels {
   // This will be invoked once the shell is done setting up and the isolate ID
   // for the UI isolate is available.
   fml::WeakPtr<FlutterEngine> weakSelf = [self getWeakPtr];
@@ -643,7 +643,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   FlutterTextInputPlugin* textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:self];
   _textInputPlugin.reset(textInputPlugin);
   textInputPlugin.indirectScribbleDelegate = self;
-  [textInputPlugin setupIndirectScribbleInteraction:self.viewController];
+  [textInputPlugin setUpIndirectScribbleInteraction:self.viewController];
 
   FlutterUndoManagerPlugin* undoManagerPlugin =
       [[FlutterUndoManagerPlugin alloc] initWithDelegate:self];
@@ -735,10 +735,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                                                           entrypointArgs:entrypointArgs]);
 }
 
-- (void)setupShell:(std::unique_ptr<flutter::Shell>)shell
+- (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
     withVMServicePublication:(BOOL)doesVMServicePublication {
   _shell = std::move(shell);
-  [self setupChannels];
+  [self setUpChannels];
   [self onLocaleUpdated:nil];
   [self updateDisplays];
   _publisher.reset([[FlutterDartVMServicePublisher alloc]
@@ -873,7 +873,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   } else {
     // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
     FML_LOG(INFO) << "Enabled VM Service Publication: " << settings.enable_vm_service_publication;
-    [self setupShell:std::move(shell)
+    [self setUpShell:std::move(shell)
         withVMServicePublication:settings.enable_vm_service_publication];
     if ([FlutterEngine isProfilerEnabled]) {
       [self startProfiler];
@@ -1407,7 +1407,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   result->_profiler = _profiler;
   result->_profiler_metrics = _profiler_metrics;
   result->_isGpuDisabled = _isGpuDisabled;
-  [result setupShell:std::move(shell) withVMServicePublication:NO];
+  [result setUpShell:std::move(shell) withVMServicePublication:NO];
   return [result autorelease];
 }
 

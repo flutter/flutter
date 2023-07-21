@@ -34,7 +34,7 @@ class CommandBufferMock;
 ///
 ///             A command buffer is only meant to be used on a single thread. If
 ///             a frame workload needs to be encoded from multiple threads,
-///             setup and record into multiple command buffers. The order of
+///             set up and record into multiple command buffers. The order of
 ///             submission of commands encoded in multiple command buffers can
 ///             be controlled via either the order in which the command buffers
 ///             were created, or, using the `ReserveSpotInQueue` command which

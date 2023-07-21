@@ -54,7 +54,7 @@ typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
  * These are used by the UIIndirectScribbleInteractionDelegate methods to handle focusing on the
  * correct element.
  */
-- (void)setupIndirectScribbleInteraction:(id<FlutterViewResponder>)viewResponder;
+- (void)setUpIndirectScribbleInteraction:(id<FlutterViewResponder>)viewResponder;
 - (void)resetViewResponder;
 
 @end
