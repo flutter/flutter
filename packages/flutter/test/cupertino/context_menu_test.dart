@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -809,5 +810,72 @@ void main() {
       final Offset right = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
       expect(right.dx, lessThan(left.dx));
     });
+  });
+
+  testWidgets('Is gesture conflicts of ctx_menu resolved',
+      (WidgetTester tester) async {
+    int? onPointerDownTime;
+    int? onPointerUpTime;
+    bool insideTapTriggered = false;
+    // 500ms < duration < 900ms
+    const Duration pressDuration = Duration(milliseconds: 501);
+
+    int now() => clock.now().millisecondsSinceEpoch;
+
+    await tester.pumpWidget(Listener(
+      onPointerDown: (PointerDownEvent event) => onPointerDownTime = now(),
+      onPointerUp: (PointerUpEvent event) => onPointerUpTime = now(),
+      child: CupertinoApp(
+        home: Align(
+          child: CupertinoContextMenu(
+            actions: const <CupertinoContextMenuAction>[
+              CupertinoContextMenuAction(
+                child: Text('CupertinoContextMenuAction'),
+              ),
+            ],
+            child: GestureDetector(
+              onTap: () => insideTapTriggered = true,
+              child: Container(
+                width: 200,
+                height: 200,
+                key: const Key('container'),
+                color: const Color(0xFF00FF00),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.down(tester.getCenter(find.byKey(const Key('container'))));
+    await tester.pump();
+    // simulate a press with specified duration
+    for (int i = 0; i < 100; i++) {
+      // simulate 100 frames
+      await tester.pump(pressDuration ~/ 100);
+    }
+    await gesture.up();
+    // await pushing route
+    await tester.pumpAndSettle();
+
+    // judge whether _ContextMenuRouteStatic present on the screen
+    final Finder static = find.byWidgetPredicate(
+          (Widget w) => '${w.runtimeType}' == '_ContextMenuRouteStatic',
+    );
+    // can't present together
+    if (insideTapTriggered) {
+      // calculate the actual duration
+      final int actualDuration = onPointerUpTime! - onPointerDownTime!;
+
+      expect(static, findsNothing,
+          reason:
+          'When actualDuration($actualDuration) is in the range of 500ms~900ms, '
+              'which means the route is pushed, '
+              'insideTap should not be triggered.');
+    } else {
+      expect(static, findsOneWidget);
+    }
   });
 }
