@@ -158,9 +158,8 @@ abstract class BindingBase {
     initServiceExtensions();
     assert(_debugServiceExtensionsRegistered);
 
-    developer.postEvent('Flutter.FrameworkInitialization', <String, String>{});
-
     if (!kReleaseMode) {
+      developer.postEvent('Flutter.FrameworkInitialization', <String, String>{});
       FlutterTimeline.finishSync();
     }
   }
@@ -657,14 +656,19 @@ abstract class BindingBase {
   /// [locked].
   @protected
   Future<void> lockEvents(Future<void> Function() callback) {
-    final developer.TimelineTask timelineTask = developer.TimelineTask()..start('Lock events');
+    developer.TimelineTask? debugTimelineTask;
+    if (!kReleaseMode) {
+      debugTimelineTask = developer.TimelineTask()..start('Lock events');
+    }
 
     _lockCount += 1;
     final Future<void> future = callback();
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
-        timelineTask.finish();
+        if (!kReleaseMode) {
+          debugTimelineTask!.finish();
+        }
         try {
           unlocked();
         } catch (error, stack) {

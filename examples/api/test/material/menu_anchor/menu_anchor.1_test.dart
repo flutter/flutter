@@ -20,7 +20,7 @@ void main() {
     await tester.pumpWidget(const example.ContextMenuApp());
 
     await tester.tapAt(const Offset(100, 200), buttons: kSecondaryButton);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(tester.getRect(findMenu()), equals(const Rect.fromLTRB(100.0, 200.0, 433.0, 360.0)));
 
     // Make sure tapping in a different place causes the menu to move.
@@ -46,7 +46,7 @@ void main() {
     expect(find.text('Background Color'), findsOneWidget);
 
     await tester.tap(find.text('Background Color'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text(example.MenuEntry.colorRed.label), findsOneWidget);
     expect(find.text(example.MenuEntry.colorGreen.label), findsOneWidget);
@@ -54,7 +54,7 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text(example.ContextMenuApp.kMessage), findsOneWidget);
     expect(find.text('Last Selected: ${example.MenuEntry.showMessage.label}'), findsOneWidget);
