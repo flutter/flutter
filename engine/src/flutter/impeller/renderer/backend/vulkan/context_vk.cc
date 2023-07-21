@@ -120,6 +120,10 @@ ContextVK::~ContextVK() {
   CommandPoolVK::ClearAllPools(this);
 }
 
+Context::BackendType ContextVK::GetBackendType() const {
+  return Context::BackendType::kVulkan;
+}
+
 void ContextVK::Setup(Settings settings) {
   TRACE_EVENT0("impeller", "ContextVK::Setup");
 

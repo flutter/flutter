@@ -52,6 +52,9 @@ class ContextMTL final : public Context,
   // |Context|
   ~ContextMTL() override;
 
+  // |Context|
+  BackendType GetBackendType() const override;
+
   id<MTLDevice> GetMTLDevice() const;
 
   // |Context|
