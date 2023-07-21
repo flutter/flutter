@@ -26,7 +26,7 @@ const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
 const Curve _modalBottomSheetCurve = decelerateEasing;
 const double _minFlingVelocity = 700.0;
 const double _closeProgressThreshold = 0.5;
-const double _scrollControlledMaxHeightRatio = 9.0 / 16.0;
+const double _defaultScrollControlledMaxHeightRatio = 9.0 / 16.0;
 
 /// A callback for when the user begins dragging the bottom sheet.
 ///
@@ -651,7 +651,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.clipBehavior,
     this.constraints,
     this.isScrollControlled = false,
-    this.scrollControlledMaxHeightRatio = _scrollControlledMaxHeightRatio,
+    this.scrollControlledMaxHeightRatio = _defaultScrollControlledMaxHeightRatio,
     this.enableDrag = true,
     this.showDragHandle = false,
   });
@@ -835,7 +835,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.enableDrag = true,
     this.showDragHandle,
     required this.isScrollControlled,
-    this.scrollControlledMaxHeightRatio = _scrollControlledMaxHeightRatio,
+    this.scrollControlledMaxHeightRatio = _defaultScrollControlledMaxHeightRatio,
     super.settings,
     this.transitionAnimationController,
     this.anchorPoint,
@@ -864,7 +864,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final bool isScrollControlled;
 
   /// The max height constraint ratio for the bottom sheet
-  /// when [isScrollControlled] set to true.
+  /// when [isScrollControlled] set to true,
+  /// no ratio will be applied when [isScrollControlled] set to false.
   ///
   /// Defaults to 9 / 16.
   final double scrollControlledMaxHeightRatio;
@@ -1220,7 +1221,7 @@ Future<T?> showModalBottomSheet<T>({
   BoxConstraints? constraints,
   Color? barrierColor,
   bool isScrollControlled = false,
-  double scrollControlledMaxHeightRatio = _scrollControlledMaxHeightRatio,
+  double scrollControlledMaxHeightRatio = _defaultScrollControlledMaxHeightRatio,
   bool useRootNavigator = false,
   bool isDismissible = true,
   bool enableDrag = true,
