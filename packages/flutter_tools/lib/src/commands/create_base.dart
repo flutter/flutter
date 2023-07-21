@@ -813,6 +813,9 @@ String? _validateProjectName(String projectName) {
       '"$projectName" is not a valid Dart package name.',
       if (potentialValidName != null) '\nTry "$potentialValidName" instead.',
       '\n\n',
+      'The name should be all lowercase, with underscores to separate words, "just_like_this".',
+      'Use only basic Latin letters and Arabic digits: [a-z0-9_].',
+      "Also, make sure the name is a valid Dart identifier—that it doesn't start with digits and isn't a reserved word.\n",
       'See https://dart.dev/tools/pub/pubspec#name for more information.',
     ].join();
   }
