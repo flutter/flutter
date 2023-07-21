@@ -7,7 +7,6 @@ import 'package:pub_semver/pub_semver.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'cmake_project.dart';
-import 'globals.dart' as globals;
 
 /// Extracts the `BINARY_NAME` from a project's CMake file.
 ///

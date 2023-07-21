@@ -11,18 +11,15 @@ import 'package:flutter_tools/src/cmake.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 const String _kTestFlutterRoot = '/flutter';
 const String _kTestWindowsFlutterRoot = r'C:\flutter';
 
 void main() {
   late FileSystem fileSystem;
-  late ProcessManager processManager;
   late BufferLogger logger;
 
   setUp(() {
-    processManager = FakeProcessManager.any();
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
   });
