@@ -735,10 +735,13 @@ void main() {
   testUsingContext('plugin project with invalid custom project name', () async {
     expect(
       () => _createProject(projectDir,
-        <String>['--no-pub', '--template=plugin', '--project-name', 'xyz.xyz', '--platforms', 'android,ios',],
+        <String>['--no-pub', '--template=plugin', '--project-name', 'xyz-xyz', '--platforms', 'android,ios',],
         <String>[],
       ),
-      throwsToolExit(message: '"xyz.xyz" is not a valid Dart package name.\nTry "xyz_xyz" instead.'),
+      allOf(
+        throwsToolExit(message: '"xyz-xyz" is not a valid Dart package name.'),
+        throwsToolExit(message: 'Try "xyz_xyz" instead.'),
+      ),
     );
   });
 
