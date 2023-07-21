@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
 import 'container.dart';
-import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
@@ -21,26 +18,9 @@ import 'tap_region.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// The type of the [RawAutocomplete] callback which computes the list of
-/// optional completions for the widget's field, based on the text the user has
-/// entered so far.
-///
-/// See also:
-///
-///   * [RawAutocomplete.optionsBuilder], which is of this type.
-typedef AutocompleteOptionsBuilder<T extends Object> = FutureOr<Iterable<T>> Function(TextEditingValue textEditingValue);
-
-/// The type of the callback used by the [RawAutocomplete] widget to indicate
-/// that the user has selected an option.
-///
-/// See also:
-///
-///   * [RawAutocomplete.onSelected], which is of this type.
-typedef AutocompleteOnSelected<T extends Object> = void Function(T option);
-
 /// The type of the [RawAutocomplete] callback which returns a [Widget] that
-/// displays the specified [options] and calls [onSelected] if the user
-/// selects an option.
+/// displays the specified [options].
+/// It should set [controller.selection] when the user selects an option.
 ///
 /// The returned widget from this callback will be wrapped in an
 /// [AutocompleteHighlightedOption] inherited widget. This will allow
@@ -52,8 +32,7 @@ typedef AutocompleteOnSelected<T extends Object> = void Function(T option);
 ///   * [RawAutocomplete.optionsViewBuilder], which is of this type.
 typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
   BuildContext context,
-  AutocompleteOnSelected<T> onSelected,
-  Iterable<T> options,
+  RawAutocompleteController<T> controller,
 );
 
 /// The type of the Autocomplete callback which returns the widget that
@@ -64,18 +43,8 @@ typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
 ///   * [RawAutocomplete.fieldViewBuilder], which is of this type.
 typedef AutocompleteFieldViewBuilder = Widget Function(
   BuildContext context,
-  TextEditingController textEditingController,
   FocusNode focusNode,
-  VoidCallback onFieldSubmitted,
 );
-
-/// The type of the [RawAutocomplete] callback that converts an option value to
-/// a string which can be displayed in the widget's options menu.
-///
-/// See also:
-///
-///   * [RawAutocomplete.displayStringForOption], which is of this type.
-typedef AutocompleteOptionToString<T extends Object> = String Function(T option);
 
 /// A direction in which to open the options-view overlay.
 ///
@@ -160,8 +129,8 @@ class RawAutocompleteController<T extends Object> extends ChangeNotifier {
 /// choosing from among a list of options.
 ///
 /// The user's text input is received in a field built with the
-/// [fieldViewBuilder] parameter. The options to be displayed are determined
-/// using [optionsBuilder] and rendered with [optionsViewBuilder].
+/// [fieldViewBuilder] parameter. The options to be displayed are
+/// [controller.options] and rendered with [optionsViewBuilder].
 /// {@endtemplate}
 ///
 /// This is a core framework widget with very basic UI.
@@ -175,8 +144,7 @@ class RawAutocompleteController<T extends Object> extends ChangeNotifier {
 ///
 /// The type parameter T represents the type of the options. Most commonly this
 /// is a String, as in the example above. However, it's also possible to use
-/// another type with a `toString` method, or a custom [displayStringForOption].
-/// Options will be compared using `==`, so it may be beneficial to override
+/// another type. Options will be compared using `==`, so it may be beneficial to override
 /// [Object.==] and [Object.hashCode] for custom types.
 ///
 /// {@tool dartpad}
@@ -199,39 +167,29 @@ class RawAutocompleteController<T extends Object> extends ChangeNotifier {
 class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// Create an instance of RawAutocomplete.
   ///
-  /// [displayStringForOption], [optionsBuilder] and [optionsViewBuilder] must
-  /// not be null.
+  /// [controller] and [optionsViewBuilder] must not be null.
   const RawAutocomplete({
     super.key,
+    required this.controller,
     required this.optionsViewBuilder,
-    required this.optionsBuilder,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
-    this.displayStringForOption = defaultStringForOption,
     this.fieldViewBuilder,
     this.focusNode,
-    this.onSelected,
-    this.textEditingController,
-    this.initialValue,
   }) : assert(
          fieldViewBuilder != null
-            || (key != null && focusNode != null && textEditingController != null),
-         'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
-        ),
-       assert((focusNode == null) == (textEditingController == null)),
-       assert(
-         !(textEditingController != null && initialValue != null),
-         'textEditingController and initialValue cannot be simultaneously defined.',
-       );
+            || (key != null && focusNode != null),
+         'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
+        );
+
+  /// The controller.
+  final RawAutocompleteController<T> controller;
 
   /// {@template flutter.widgets.RawAutocomplete.fieldViewBuilder}
   /// Builds the field whose input is used to get the options.
-  ///
-  /// Pass the provided [TextEditingController] to the field built here so that
-  /// RawAutocomplete can listen for changes.
   /// {@endtemplate}
   ///
   /// If this parameter is null, then a [SizedBox.shrink] is built instead.
-  /// For how that pattern can be useful, see [textEditingController].
+  /// For how that pattern can be useful, see [focusNode].
   final AutocompleteFieldViewBuilder? fieldViewBuilder;
 
   /// The [FocusNode] that is used for the text field.
@@ -245,8 +203,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// When following this pattern, [fieldViewBuilder] can be omitted,
   /// so that a text field is not drawn where it would normally be.
   /// A separate text field can be created elsewhere, and a
-  /// FocusNode and TextEditingController can be passed both to that text field
-  /// and to RawAutocomplete.
+  /// FocusNode can be passed both to that text field and to RawAutocomplete.
   ///
   /// {@tool dartpad}
   /// This examples shows how to create an autocomplete widget with the text
@@ -255,9 +212,6 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// ** See code in examples/api/lib/widgets/autocomplete/raw_autocomplete.focus_node.0.dart **
   /// {@end-tool}
   /// {@endtemplate}
-  ///
-  /// If this parameter is not null, then [textEditingController] must also be
-  /// not null.
   final FocusNode? focusNode;
 
   /// {@template flutter.widgets.RawAutocomplete.optionsViewBuilder}
@@ -286,70 +240,6 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// {@endtemplate}
   final OptionsViewOpenDirection optionsViewOpenDirection;
 
-  /// {@template flutter.widgets.RawAutocomplete.displayStringForOption}
-  /// Returns the string to display in the field when the option is selected.
-  ///
-  /// This is useful when using a custom T type and the string to display is
-  /// different than the string to search by.
-  ///
-  /// If not provided, will use `option.toString()`.
-  /// {@endtemplate}
-  final AutocompleteOptionToString<T> displayStringForOption;
-
-  /// {@template flutter.widgets.RawAutocomplete.onSelected}
-  /// Called when an option is selected by the user.
-  /// {@endtemplate}
-  final AutocompleteOnSelected<T>? onSelected;
-
-  /// {@template flutter.widgets.RawAutocomplete.optionsBuilder}
-  /// A function that returns the current selectable options objects given the
-  /// current TextEditingValue.
-  /// {@endtemplate}
-  final AutocompleteOptionsBuilder<T> optionsBuilder;
-
-  /// The [TextEditingController] that is used for the text field.
-  ///
-  /// {@macro flutter.widgets.RawAutocomplete.split}
-  ///
-  /// If this parameter is not null, then [focusNode] must also be not null.
-  final TextEditingController? textEditingController;
-
-  /// {@template flutter.widgets.RawAutocomplete.initialValue}
-  /// The initial value to use for the text field.
-  /// {@endtemplate}
-  ///
-  /// Setting the initial value does not notify [textEditingController]'s
-  /// listeners, and thus will not cause the options UI to appear.
-  ///
-  /// This parameter is ignored if [textEditingController] is defined.
-  final TextEditingValue? initialValue;
-
-  /// Calls [AutocompleteFieldViewBuilder]'s onFieldSubmitted callback for the
-  /// RawAutocomplete widget indicated by the given [GlobalKey].
-  ///
-  /// This is not typically used unless a custom field is implemented instead of
-  /// using [fieldViewBuilder]. In the typical case, the onFieldSubmitted
-  /// callback is passed via the [AutocompleteFieldViewBuilder] signature. When
-  /// not using fieldViewBuilder, the same callback can be called by using this
-  /// static method.
-  ///
-  /// See also:
-  ///
-  ///  * [focusNode] and [textEditingController], which contain a code example
-  ///    showing how to create a separate field outside of fieldViewBuilder.
-  static void onFieldSubmitted<T extends Object>(GlobalKey key) {
-    final _RawAutocompleteState<T> rawAutocomplete = key.currentState! as _RawAutocompleteState<T>;
-    rawAutocomplete._onFieldSubmitted();
-  }
-
-  /// The default way to convert an option to a string in
-  /// [displayStringForOption].
-  ///
-  /// Uses the `toString` method of the given `option`.
-  static String defaultStringForOption(Object? option) {
-    return option.toString();
-  }
-
   @override
   State<RawAutocomplete<T>> createState() => _RawAutocompleteState<T>();
 }
@@ -357,15 +247,12 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
-  late RawAutocompleteController<T> _controller = RawAutocompleteController<T>();
-  late TextEditingController _textEditingController;
   late FocusNode _focusNode;
   late final Map<Type, Action<Intent>> _actionMap;
   late final _AutocompleteCallbackAction<AutocompletePreviousOptionIntent> _previousOptionAction;
   late final _AutocompleteCallbackAction<AutocompleteNextOptionIntent> _nextOptionAction;
   late final _AutocompleteCallbackAction<DismissIntent> _hideOptionsAction;
   bool _userHidOptions = false;
-  String _lastFieldText = '';
 
   static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.arrowUp): AutocompletePreviousOptionIntent(),
@@ -377,29 +264,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   // True iff the state indicates that the options should be visible.
   bool get _shouldShowOptions {
-    return !_userHidOptions && _focusNode.hasFocus && _controller.selection == null && _controller.options.isNotEmpty;
+    return !_userHidOptions && _focusNode.hasFocus && widget.controller.selection == null && widget.controller.options.isNotEmpty;
   }
 
-  // Called when _textEditingController changes.
-  Future<void> _onChangedField() async {
-    final TextEditingValue value = _textEditingController.value;
-    final Iterable<T> options = await widget.optionsBuilder(
-      value,
-    );
-    _controller.options = options;
-    _updateHighlight(_controller.highlightedOptionIndex);
-    if (_controller.selection != null
-        && value.text != widget.displayStringForOption(_controller.selection!)) {
-      _controller.selection = null;
-    }
-
-    // Make sure the options are no longer hidden if the content of the field
-    // changes (ignore selection changes).
-    if (value.text != _lastFieldText) {
-      _userHidOptions = false;
-      _lastFieldText = value.text;
-    }
-    _updateActions();
+  void _controllerChanged() {
     _updateOverlay();
   }
 
@@ -411,32 +279,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _updateOverlay();
   }
 
-  // Called from fieldViewBuilder when the user submits the field.
-  void _onFieldSubmitted() {
-    if (_controller.options.isEmpty || _userHidOptions) {
-      return;
-    }
-    _select(_controller.options.elementAt(_controller.highlightedOptionIndex));
-  }
-
-  // Select the given option and update the widget.
-  void _select(T nextSelection) {
-    if (nextSelection == _controller.selection) {
-      return;
-    }
-    _controller.selection = nextSelection;
-    final String selectionString = widget.displayStringForOption(nextSelection);
-    _textEditingController.value = TextEditingValue(
-      selection: TextSelection.collapsed(offset: selectionString.length),
-      text: selectionString,
-    );
-    _updateActions();
-    _updateOverlay();
-    widget.onSelected?.call(_controller.selection!);
-  }
-
   void _updateHighlight(int newIndex) {
-    _controller.highlightedOptionIndex = _controller.options.isEmpty ? 0 : newIndex % _controller.options.length;
+    widget.controller.highlightedOptionIndex = widget.controller.options.isEmpty ? 0 : newIndex % widget.controller.options.length;
   }
 
   void _highlightPreviousOption(AutocompletePreviousOptionIntent intent) {
@@ -446,7 +290,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _updateOverlay();
       return;
     }
-    _updateHighlight(_controller.highlightedOptionIndex - 1);
+    _updateHighlight(widget.controller.highlightedOptionIndex - 1);
   }
 
   void _highlightNextOption(AutocompleteNextOptionIntent intent) {
@@ -456,7 +300,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _updateOverlay();
       return;
     }
-    _updateHighlight(_controller.highlightedOptionIndex + 1);
+    _updateHighlight(widget.controller.highlightedOptionIndex + 1);
   }
 
   Object? _hideOptions(DismissIntent intent) {
@@ -480,7 +324,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   void _updateActions() {
-    _setActionsEnabled(_focusNode.hasFocus && _controller.selection == null && _controller.options.isNotEmpty);
+    _setActionsEnabled(_focusNode.hasFocus && widget.controller.selection == null && widget.controller.options.isNotEmpty);
   }
 
   bool _floatingOptionsUpdateScheduled = false;
@@ -514,10 +358,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             },
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
-                highlightIndexNotifier: _controller.highlightedOptionIndexNotifier,
+                highlightIndexNotifier: widget.controller.highlightedOptionIndexNotifier,
                 child: Builder(
                   builder: (BuildContext context) {
-                    return widget.optionsViewBuilder(context, _select, _controller.options);
+                    return widget.optionsViewBuilder(context, widget.controller);
                   }
                 )
               ),
@@ -530,26 +374,6 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     } else {
       _floatingOptions = null;
     }
-  }
-
-  // Handle a potential change in textEditingController by properly disposing of
-  // the old one and setting up the new one, if needed.
-  void _updateTextEditingController(TextEditingController? old, TextEditingController? current) {
-    if ((old == null && current == null) || old == current) {
-      return;
-    }
-    if (old == null) {
-      _textEditingController.removeListener(_onChangedField);
-      _textEditingController.dispose();
-      _textEditingController = current!;
-    } else if (current == null) {
-      _textEditingController.removeListener(_onChangedField);
-      _textEditingController = TextEditingController();
-    } else {
-      _textEditingController.removeListener(_onChangedField);
-      _textEditingController = current;
-    }
-    _textEditingController.addListener(_onChangedField);
   }
 
   // Handle a potential change in focusNode by properly disposing of the old one
@@ -575,9 +399,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   @override
   void initState() {
     super.initState();
-    _controller = RawAutocompleteController<T>();
-    _textEditingController = widget.textEditingController ?? TextEditingController.fromValue(widget.initialValue);
-    _textEditingController.addListener(_onChangedField);
+    widget.controller.addListener(_controllerChanged);
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onChangedFocus);
     _previousOptionAction = _AutocompleteCallbackAction<AutocompletePreviousOptionIntent>(onInvoke: _highlightPreviousOption);
@@ -595,10 +417,6 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   @override
   void didUpdateWidget(RawAutocomplete<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _updateTextEditingController(
-      oldWidget.textEditingController,
-      widget.textEditingController,
-    );
     _updateFocusNode(oldWidget.focusNode, widget.focusNode);
     _updateActions();
     _updateOverlay();
@@ -606,10 +424,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   @override
   void dispose() {
-    _textEditingController.removeListener(_onChangedField);
-    if (widget.textEditingController == null) {
-      _textEditingController.dispose();
-    }
+    widget.controller.removeListener(_controllerChanged);
     _focusNode.removeListener(_onChangedFocus);
     if (widget.focusNode == null) {
       _focusNode.dispose();
@@ -634,9 +449,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
                 ? const SizedBox.shrink()
                 : widget.fieldViewBuilder!(
                     context,
-                    _textEditingController,
                     _focusNode,
-                    _onFieldSubmitted,
                   ),
             ),
           ),
