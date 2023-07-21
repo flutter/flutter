@@ -167,8 +167,8 @@ abstract class Route<T> {
   /// transitioning off screen, which triggers a notification on this field. At
   /// that point, the route is considered as no longer present for restoration
   /// purposes and its state will not be restored.
-  ValueListenable<String?> get restorationScopeId => _restorationScopeId!;
-  ValueNotifier<String?>? _restorationScopeId = ValueNotifier<String?>(null);
+  ValueListenable<String?> get restorationScopeId => _restorationScopeId;
+  final ValueNotifier<String?> _restorationScopeId = ValueNotifier<String?>(null);
 
   void _updateSettings(RouteSettings newSettings) {
     if (_settings != newSettings) {
@@ -179,7 +179,7 @@ abstract class Route<T> {
 
   // ignore: use_setters_to_change_properties, (setters can't be private)
   void _updateRestorationId(String? restorationId) {
-    _restorationScopeId!.value = restorationId;
+    _restorationScopeId.value = restorationId;
   }
 
   /// The overlay entries of this route.
@@ -454,8 +454,7 @@ abstract class Route<T> {
   @protected
   void dispose() {
     _navigator = null;
-    _restorationScopeId!.dispose();
-    _restorationScopeId = null;
+    _restorationScopeId.dispose();
   }
 
   /// Whether this route is the top-most route on the navigator.
@@ -2862,11 +2861,11 @@ class _RouteEntry extends RouteTransitionRecord {
   final _RestorationInformation? restorationInformation;
   final bool pageBased;
 
-  static Route<dynamic> notAnnounced = _NotAnnounced();
+  static final Route<dynamic> notAnnounced = _NotAnnounced();
 
   _RouteLifecycle currentState;
   Route<dynamic>? lastAnnouncedPreviousRoute = notAnnounced; // last argument to Route.didChangePrevious
-  Route<dynamic> lastAnnouncedPoppedNextRoute = notAnnounced; // last argument to Route.didPopNext
+  WeakReference<Route<dynamic>> lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(notAnnounced); // last argument to Route.didPopNext
   Route<dynamic>? lastAnnouncedNextRoute = notAnnounced; // last argument to Route.didChangeNext
 
   /// Restoration ID to be used for the encapsulating route when restoration is
@@ -2955,7 +2954,7 @@ class _RouteEntry extends RouteTransitionRecord {
 
   void handleDidPopNext(Route<dynamic> poppedRoute) {
     route.didPopNext(poppedRoute);
-    lastAnnouncedPoppedNextRoute = poppedRoute;
+    lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(poppedRoute);
   }
 
   /// Process the to-be-popped route.
@@ -3154,7 +3153,7 @@ class _RouteEntry extends RouteTransitionRecord {
     // already announced this change by calling didPopNext.
     return !(
       nextRoute == null &&
-        lastAnnouncedPoppedNextRoute == lastAnnouncedNextRoute
+        lastAnnouncedPoppedNextRoute.target == lastAnnouncedNextRoute
     );
   }
 

@@ -194,7 +194,7 @@ class OverlayEntry implements Listenable {
   void _didUnmount() {
     assert(!mounted);
     if (_disposedByOwner) {
-      _overlayEntryStateNotifier!.dispose();
+      _overlayEntryStateNotifier?.dispose();
       _overlayEntryStateNotifier = null;
     }
   }
@@ -218,10 +218,9 @@ class OverlayEntry implements Listenable {
     assert(_overlay == null, 'An OverlayEntry must first be removed from the Overlay before dispose is called.');
     _disposedByOwner = true;
     if (!mounted) {
-      _overlayEntryStateNotifier!.dispose();
-      _overlayEntryStateNotifier = null;
+      _overlayEntryStateNotifier?.dispose();
     }
-    assert(_overlayEntryStateNotifier == null);
+    _overlayEntryStateNotifier = null;
   }
 
   @override
@@ -920,9 +919,9 @@ class _TheaterParentData extends StackParentData {
   // _overlayStateMounted is set to null in _OverlayEntryWidgetState's dispose
   // method. This property is only accessed during layout, paint and hit-test so
   // the `value!` should be safe.
-  Iterator<RenderBox>? get paintOrderIterator => overlayEntry?._overlayEntryStateNotifier!.value!._paintOrderIterable.iterator;
-  Iterator<RenderBox>? get hitTestOrderIterator => overlayEntry?._overlayEntryStateNotifier!.value!._hitTestOrderIterable.iterator;
-  void visitChildrenOfOverlayEntry(RenderObjectVisitor visitor) => overlayEntry?._overlayEntryStateNotifier!.value!._paintOrderIterable.forEach(visitor);
+  Iterator<RenderBox>? get paintOrderIterator => overlayEntry?._overlayEntryStateNotifier?.value!._paintOrderIterable.iterator;
+  Iterator<RenderBox>? get hitTestOrderIterator => overlayEntry?._overlayEntryStateNotifier?.value!._hitTestOrderIterable.iterator;
+  void visitChildrenOfOverlayEntry(RenderObjectVisitor visitor) => overlayEntry?._overlayEntryStateNotifier?.value!._paintOrderIterable.forEach(visitor);
 }
 
 class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheaterMixin {
