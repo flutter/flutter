@@ -785,27 +785,33 @@ bool isValidPackageName(String name) {
 }
 
 /// Returns a potential valid name from the given [name].
+/// 
+/// If a valid name cannot be found, returns `null`.
 @visibleForTesting
-String potentialValidPackageName(String name){
+String? potentialValidPackageName(String name){
   String newName = name.toLowerCase();
   if (newName.startsWith(RegExp(r'[0-9]'))) {
     // If the package starts with a number, prepend '_'.
     newName = '_$newName';
   }
-  // Replaces all the non-alphanumeric characters with '_' and join the
-  // consecutive '_'s.
-  return newName.replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+  // Replaces all hyphens ('-') characters with '_'.
+  newName = newName.replaceAll('-', '_');
+  if (isValidPackageName(newName)) {
+    return newName;
+  } else {
+    return null;
+  }
 }
 
 // Return null if the project name is legal. Return a validation message if
 // we should disallow the project name.
 String? _validateProjectName(String projectName) {
   if (!isValidPackageName(projectName)) {
-    final String potentialValidName = potentialValidPackageName(projectName);
+    final String? potentialValidName = potentialValidPackageName(projectName);
 
     return <String>[
       '"$projectName" is not a valid Dart package name.',
-      if (isValidPackageName(potentialValidName)) '\nTry "$potentialValidName" instead.',
+      if (potentialValidName != null) '\nTry "$potentialValidName" instead.',
       '\n\n',
       'See https://dart.dev/tools/pub/pubspec#name for more information.',
     ].join();
