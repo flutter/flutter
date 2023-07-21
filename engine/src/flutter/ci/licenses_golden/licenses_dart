@@ -1,4 +1,4 @@
-Signature: 52cddc979baec9fe2cb75ccc93a22b8a
+Signature: f783601062fadb99cf3796e74489ca39
 
 ====================================================================================================
 LIBRARY: dart
@@ -4506,6 +4506,8 @@ ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/string_stringref_pa
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/sync_star_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/typed_data.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/weak_patch.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data_helper.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/async/future_extensions.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/js_interop/js_interop.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/js_interop_unsafe/js_interop_unsafe.dart + ../../../third_party/dart/LICENSE
@@ -4550,6 +4552,8 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/string_stringref_patc
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/sync_star_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/typed_data.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/weak_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data_helper.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/async/future_extensions.dart
 FILE: ../../../third_party/dart/sdk/lib/js_interop/js_interop.dart
 FILE: ../../../third_party/dart/sdk/lib/js_interop_unsafe/js_interop_unsafe.dart
