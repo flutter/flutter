@@ -443,7 +443,7 @@ bool CapabilitiesVK::SupportsMemorylessTextures() const {
 
 // |Capabilities|
 bool CapabilitiesVK::SupportsPipelinesWithNoColorAttachments() const {
-  return true;
+  return false;
 }
 
 // |Capabilities|
