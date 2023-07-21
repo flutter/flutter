@@ -15,10 +15,10 @@ public class GeneratedPluginRegister {
    * Registers all plugins that an app lists in its pubspec.yaml.
    *
    * <p>In order to allow each plugin to listen to calls from Dart via Platform Channels, each
-   * plugin is given a chance to initialize and setup Platform Channel listeners in {@link
+   * plugin is given a chance to initialize and set up Platform Channel listeners in {@link
    * io.flutter.embedding.engine.plugins.FlutterPlugin#onAttachedToEngine(io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding)}.
    *
-   * <p>The list of plugins that need to be setup is not known to the Flutter engine. The Flutter
+   * <p>The list of plugins that need to be set up is not known to the Flutter engine. The Flutter
    * tools generates it at build time based on the plugin dependencies specified in the Flutter
    * project's pubspec.yaml.
    *

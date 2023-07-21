@@ -108,7 +108,7 @@ PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
 
   vk::UniqueSurfaceKHR surface{vk_surface, context->GetInstance()};
   if (!context->SetWindowSurface(std::move(surface))) {
-    VALIDATION_LOG << "Could not setup surface for context.";
+    VALIDATION_LOG << "Could not set up surface for context.";
     return;
   }
 

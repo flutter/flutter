@@ -89,7 +89,7 @@ that some of those diagnostics need Xcode to be able to re-compile the
 translation units in the engine. But, it doesn’t know how to do that, only
 GN/Ninja does. So some of those will be unavailable.
 
-Any Impeller test that setup up a Playground will now automatically have GPU
+Any Impeller test that sets up a Playground will now automatically have GPU
 frame capture enabled.
 
 # Select the Playground Enabled Test to Profile
