@@ -219,6 +219,10 @@ class MediaQueryData {
   /// this method again when it changes to keep the constructed [MediaQueryData]
   /// updated.
   ///
+  /// In general, [MediaQuery.of] is the appropriate way to obtain
+  /// [MediaQueryData] from a widget. This `fromView` constructor is primarily
+  /// for use in the implementation of the framework itself.
+  ///
   /// See also:
   ///
   ///  * [MediaQuery.fromView], which constructs [MediaQueryData] from a provided
@@ -262,9 +266,12 @@ class MediaQueryData {
   /// It is considered bad practice to cache and later use the size returned
   /// by `MediaQuery.of(context).size`. It will make the application non responsive
   /// and might lead to unexpected behaviors.
-  /// For instance, during startup, especially in release mode, the first returned
-  /// size might be (0,0). The size will be updated when the native platform
-  /// reports the actual resolution.
+  ///
+  /// For instance, during startup, especially in release mode, the first
+  /// returned size might be (0,0). The size will be updated when the native
+  /// platform reports the actual resolution. Using [MediaQuery.of] will ensure
+  /// that when the size changes, any widgets depending on the size are
+  /// automatically rebuilt.
   ///
   /// See the article on [Creating responsive and adaptive
   /// apps](https://docs.flutter.dev/development/ui/layout/adaptive-responsive)
