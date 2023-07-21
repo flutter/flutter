@@ -63,8 +63,10 @@ void main() {
   Cache.disableLocking();
   late MemoryFileSystem fs;
   late LoggingLogger logger;
+  late FakeProcessManager processManager;
 
   setUp(() {
+    processManager = FakeProcessManager.empty();
     fs = MemoryFileSystem.test(style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
     final Directory package = fs.directory('package');
     package.childFile('pubspec.yaml').createSync(recursive: true);
@@ -98,7 +100,7 @@ void main() {
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     Logger: () => logger,
   });
 
@@ -136,11 +138,11 @@ dev_dependencies:
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
   });
 
-  testUsingContext('Pipes test-randomize-ordering-seed to package:test',
-      () async {
+  testUsingContext('Pipes test-randomize-ordering-seed to package:test', () async {
+    processManager.addCommand(const FakeCommand(command: <String>['chmod', '755', r'cache/bin/cache/artifacts']));
     final FakePackageTest fakePackageTest = FakePackageTest();
 
     final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
@@ -158,8 +160,8 @@ dev_dependencies:
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    ProcessManager: () => processManager,
+    Cache: () => Cache.test(processManager: processManager),
   });
 
   testUsingContext(
@@ -183,8 +185,8 @@ dev_dependencies:
     expect(fakePackageTest.lastArgs, isNot(contains('--concurrency')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    ProcessManager: () => processManager,
+    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
   });
 
   group('shard-index and total-shards', () {
@@ -207,8 +209,8 @@ dev_dependencies:
       expect(fakePackageTest.lastArgs, contains('--shard-index=2'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      ProcessManager: () => processManager,
+      Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
     });
 
     testUsingContext('without the params they not Piped to package:test',
@@ -228,8 +230,8 @@ dev_dependencies:
       expect(fakePackageTest.lastArgs, isNot(contains('--shard-index')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      ProcessManager: () => processManager,
+      Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
     });
   });
 
@@ -250,8 +252,8 @@ dev_dependencies:
     ]), throwsA(isA<ToolExit>().having((ToolExit toolExit) => toolExit.message, 'message', isNull)));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    ProcessManager: () => processManager,
+    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
   });
 
   testUsingContext('Coverage provides current library name to Coverage Collector by default', () async {
@@ -306,8 +308,8 @@ dev_dependencies:
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    ProcessManager: () => processManager,
+    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
   });
 
   testUsingContext('Coverage provides library names matching regexps to Coverage Collector', () async {
@@ -362,8 +364,8 @@ dev_dependencies:
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    ProcessManager: () => processManager,
+    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
   });
 
   testUsingContext('Coverage provides error message if regular expression syntax is invalid', () async {
@@ -382,7 +384,7 @@ dev_dependencies:
     ]), throwsToolExit(message: RegExp(r'Regular expression syntax is invalid. FormatException: Nothing to repeat[ \t]*"\$\+"')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
   });
 
   testUsingContext('Pipes start-paused to package:test',
@@ -406,8 +408,8 @@ dev_dependencies:
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    ProcessManager: () => processManager,
+    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
   });
 
   testUsingContext('Pipes run-skipped to package:test',
@@ -431,8 +433,8 @@ dev_dependencies:
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    ProcessManager: () => processManager,
+    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
   });
 
   testUsingContext('Pipes enable-vmService', () async {
@@ -479,8 +481,8 @@ dev_dependencies:
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    ProcessManager: () => processManager,
+    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
   });
 
   testUsingContext('Verbose prints phase timings', () async {
@@ -507,8 +509,8 @@ dev_dependencies:
     expect(logPhaseMessagesNonZero, isNotEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    ProcessManager: () => processManager,
+    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
     Logger: () => logger,
   });
 
@@ -530,8 +532,8 @@ dev_dependencies:
     expect(logPhaseMessages, isEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    ProcessManager: () => processManager,
+    Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
     Logger: () => logger,
   });
 
@@ -550,7 +552,7 @@ dev_dependencies:
     expect(fakePackageTest.lastArgs, contains('--concurrency=1'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     DeviceManager: () => _FakeDeviceManager(<Device>[
       FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
     ]),
@@ -572,7 +574,7 @@ dev_dependencies:
     expect(fakePackageTest.lastArgs, contains('--concurrency=1'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     DeviceManager: () => _FakeDeviceManager(<Device>[
       FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
     ]),
@@ -593,7 +595,7 @@ dev_dependencies:
       expect(testCommand.isIntegrationTest, false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       DeviceManager: () => _FakeDeviceManager(<Device>[
         FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
       ]),
@@ -614,7 +616,7 @@ dev_dependencies:
       expect(testCommand.isIntegrationTest, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       DeviceManager: () => _FakeDeviceManager(<Device>[
         FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
       ]),
@@ -635,7 +637,7 @@ dev_dependencies:
       expect(testCommand.isIntegrationTest, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       DeviceManager: () => _FakeDeviceManager(<Device>[
         FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
       ]),
@@ -656,7 +658,7 @@ dev_dependencies:
       expect(testCommand.isIntegrationTest, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       DeviceManager: () => _FakeDeviceManager(<Device>[
         FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
       ]),
@@ -677,7 +679,7 @@ dev_dependencies:
       expect(testCommand.isIntegrationTest, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       DeviceManager: () => _FakeDeviceManager(<Device>[
         FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
       ]),
@@ -697,7 +699,7 @@ dev_dependencies:
       ]), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     });
   });
 
@@ -716,7 +718,7 @@ dev_dependencies:
       expect(await testCommand.requiredArtifacts, isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('when platform is chrome', () async {
@@ -734,7 +736,7 @@ dev_dependencies:
       expect(await testCommand.requiredArtifacts, <DevelopmentArtifact>[DevelopmentArtifact.web]);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('Overrides concurrency when running web tests', () async {
@@ -753,7 +755,7 @@ dev_dependencies:
       expect(testRunner.lastConcurrency, 1);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('when running integration tests', () async {
@@ -774,7 +776,7 @@ dev_dependencies:
       ]);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
       DeviceManager: () => _FakeDeviceManager(<Device>[
         FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
       ]),
@@ -794,7 +796,7 @@ dev_dependencies:
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     DeviceManager: () => _FakeDeviceManager(<Device>[]),
   });
 
@@ -812,7 +814,7 @@ dev_dependencies:
     ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     DeviceManager: () => _FakeDeviceManager(<Device>[
       FakeDevice('ephemeral', 'ephemeral'),
     ]),
@@ -836,7 +838,7 @@ dev_dependencies:
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     DeviceManager: () => _FakeDeviceManager(<Device>[
       FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
     ]),
@@ -862,7 +864,7 @@ dev_dependencies:
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     DeviceManager: () => _FakeDeviceManager(<Device>[
       FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
     ]),
@@ -884,7 +886,7 @@ dev_dependencies:
 
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     DeviceManager: () => _FakeDeviceManager(<Device>[]),
   });
 
@@ -905,7 +907,7 @@ dev_dependencies:
 
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     DeviceManager: () => _FakeDeviceManager(<Device>[]),
   });
 
@@ -927,7 +929,7 @@ dev_dependencies:
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     });
     testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
@@ -943,7 +945,7 @@ dev_dependencies:
       ]), throwsToolExit(message: 'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     });
     testUsingContext('fails when --fatal-warnings is set and only errors emitted', () async {
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
@@ -959,7 +961,7 @@ dev_dependencies:
       ]), throwsToolExit(message: 'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     });
   });
 
@@ -977,7 +979,7 @@ dev_dependencies:
       expect(testRunner.lastFileReporterValue, null);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager,
     });
 
     testUsingContext('when set --file-reporter value is passed on', () async {
@@ -994,7 +996,7 @@ dev_dependencies:
       expect(testRunner.lastFileReporterValue, 'json:out.jsonl');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.empty(),
+      ProcessManager: () => processManager,
     });
   });
 
@@ -1014,7 +1016,7 @@ dev_dependencies:
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.empty(),
+    ProcessManager: () => processManager,
   });
 }
 
