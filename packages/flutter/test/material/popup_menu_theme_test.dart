@@ -147,6 +147,13 @@ void main() {
                       enabled: false,
                       child: const Text('Disabled PopupMenuItem'),
                     ),
+                    const CheckedPopupMenuItem<void>(
+                      child: Text('Unchecked item'),
+                    ),
+                    const CheckedPopupMenuItem<void>(
+                      checked: true,
+                      child: Text('Checked item'),
+                    ),
                   ];
                 },
               ),
@@ -179,22 +186,23 @@ void main() {
     /// [PopupMenuItem] specified above, so by finding the last descendent of
     /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
     /// built [PopupMenuItem].
-    final DefaultTextStyle enabledText = tester.widget<DefaultTextStyle>(
+    DefaultTextStyle popupMenuItemLabel = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(enabledPopupItemKey),
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
-    expect(enabledText.style.fontFamily, 'Roboto');
-    expect(enabledText.style.color, theme.colorScheme.onSurface);
+    expect(popupMenuItemLabel.style.fontFamily, 'Roboto');
+    expect(popupMenuItemLabel.style.color, theme.colorScheme.onSurface);
+
     /// Test disabled text color
-    final DefaultTextStyle disabledText = tester.widget<DefaultTextStyle>(
+    popupMenuItemLabel = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(disabledPopupItemKey),
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
-    expect(disabledText.style.color, theme.colorScheme.onSurface.withOpacity(0.38));
+    expect(popupMenuItemLabel.style.color, theme.colorScheme.onSurface.withOpacity(0.38));
 
     final Offset topLeftButton = tester.getTopLeft(find.byType(PopupMenuButton<void>));
     final Offset topLeftMenu = tester.getTopLeft(find.byWidget(button));
@@ -215,6 +223,14 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.click,
     );
+
+    // Test unchecked CheckedPopupMenuItem label.
+    ListTile listTile = tester.widget<ListTile>(find.byType(ListTile).first);
+    expect(listTile.titleTextStyle?.color, theme.colorScheme.onSurface);
+
+    // Test checked CheckedPopupMenuItem label.
+    listTile = tester.widget<ListTile>(find.byType(ListTile).last);
+    expect(listTile.titleTextStyle?.color, theme.colorScheme.onSurface);
   });
 
   testWidgets('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
@@ -249,6 +265,13 @@ void main() {
                     onTap: () { },
                     child: const Text('enabled'),
                   ),
+                  const CheckedPopupMenuItem<Object>(
+                    child: Text('Unchecked item'),
+                  ),
+                  const CheckedPopupMenuItem<Object>(
+                    checked: true,
+                    child: Text('Checked item'),
+                  ),
                 ];
               },
             ),
@@ -276,25 +299,25 @@ void main() {
     expect(button.shape, const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))));
     expect(button.elevation, 12.0);
 
-    final DefaultTextStyle enabledText = tester.widget<DefaultTextStyle>(
+    DefaultTextStyle popupMenuItemLabel = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(enabledPopupItemKey),
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
     expect(
-      enabledText.style,
+      popupMenuItemLabel.style,
       popupMenuTheme.labelTextStyle?.resolve(enabled),
     );
     /// Test disabled text color
-    final DefaultTextStyle disabledText = tester.widget<DefaultTextStyle>(
+    popupMenuItemLabel = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(disabledPopupItemKey),
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
     expect(
-      disabledText.style,
+      popupMenuItemLabel.style,
       popupMenuTheme.labelTextStyle?.resolve(disabled),
     );
 
@@ -313,6 +336,14 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       popupMenuTheme.mouseCursor?.resolve(enabled),
     );
+
+    // Test unchecked CheckedPopupMenuItem label.
+    ListTile listTile = tester.widget<ListTile>(find.byType(ListTile).first);
+    expect(listTile.titleTextStyle, popupMenuTheme.labelTextStyle?.resolve(enabled));
+
+    // Test checked CheckedPopupMenuItem label.
+    listTile = tester.widget<ListTile>(find.byType(ListTile).last);
+    expect(listTile.titleTextStyle, popupMenuTheme.labelTextStyle?.resolve(enabled));
   });
 
   testWidgets('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
@@ -352,6 +383,11 @@ void main() {
                     mouseCursor: cursor,
                     child: const Text('Example'),
                   ),
+                  CheckedPopupMenuItem<void>(
+                    checked: true,
+                    labelTextStyle: MaterialStateProperty.all<TextStyle>(textStyle),
+                    child: const Text('Checked item'),
+                  )
                 ];
               },
             ),
@@ -397,6 +433,10 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byKey(popupItemKey)));
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), cursor);
+
+    // Test CheckedPopupMenuItem label.
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile).first);
+    expect(listTile.titleTextStyle, textStyle);
   });
 
   group('Material 2', () {
