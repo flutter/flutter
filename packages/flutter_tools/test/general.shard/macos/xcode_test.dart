@@ -282,15 +282,43 @@ void main() {
         });
 
         group('SDK Platform Version', () {
-          const String platformVersion = '16.4';
-
           testWithoutContext('--show-sdk-platform-version iphonesimulator', () async {
             fakeProcessManager.addCommand(const FakeCommand(
               command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-platform-version'],
-              stdout: platformVersion,
+              stdout: '16.4',
             ));
 
             expect(await xcode.sdkPlatformVersion(EnvironmentType.simulator), Version(16, 4, null));
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+
+          testWithoutContext('--show-sdk-platform-version iphonesimulator with leading and trailing new line', () async {
+            fakeProcessManager.addCommand(const FakeCommand(
+              command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-platform-version'],
+              stdout: '\n16.4\n',
+            ));
+
+            expect(await xcode.sdkPlatformVersion(EnvironmentType.simulator), Version(16, 4, null));
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+
+          testWithoutContext('--show-sdk-platform-version returns version followed by text', () async {
+            fakeProcessManager.addCommand(const FakeCommand(
+              command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-platform-version'],
+              stdout: '13.2 (a) 12344',
+            ));
+
+            expect(await xcode.sdkPlatformVersion(EnvironmentType.simulator), Version(13, 2, null, text: '13.2 (a) 12344'));
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+
+          testWithoutContext('--show-sdk-platform-version returns something unexpected', () async {
+            fakeProcessManager.addCommand(const FakeCommand(
+              command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-platform-version'],
+              stdout: 'bogus',
+            ));
+
+            expect(await xcode.sdkPlatformVersion(EnvironmentType.simulator), null);
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });
 

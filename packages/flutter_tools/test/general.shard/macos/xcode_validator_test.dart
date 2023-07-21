@@ -304,7 +304,7 @@ void main() {
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
       );
       final FakeIOSSimulatorUtils simulatorUtils = FakeIOSSimulatorUtils(runtimes: <IOSSimulatorRuntime>[
-        IOSSimulatorRuntime(<String, String>{'version': '16.0'}),
+        IOSSimulatorRuntime.fromJson(<String, String>{'version': '16.0'}),
       ]);
       final XcodeValidator validator = XcodeValidator(
         xcode: xcode,
@@ -353,7 +353,7 @@ void main() {
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
       );
       final FakeIOSSimulatorUtils simulatorUtils = FakeIOSSimulatorUtils(runtimes: <IOSSimulatorRuntime>[
-        IOSSimulatorRuntime(<String, String>{'version': '17.0'}),
+        IOSSimulatorRuntime.fromJson(<String, String>{'version': '17.0'}),
       ]);
       final XcodeValidator validator = XcodeValidator(
         xcode: xcode,

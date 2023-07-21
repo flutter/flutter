@@ -328,7 +328,7 @@ class SimControl {
       if (decodeResult is List<Object?>) {
         for (final Object? runtimeData in decodeResult) {
           if (runtimeData is Map<String, Object?>) {
-            runtimes.add(IOSSimulatorRuntime(runtimeData));
+            runtimes.add(IOSSimulatorRuntime.fromJson(runtimeData));
           }
         }
       }
@@ -674,7 +674,17 @@ class IOSSimulator extends Device {
 }
 
 class IOSSimulatorRuntime {
-  IOSSimulatorRuntime(Map<String, Object?> data) : _data = data;
+  IOSSimulatorRuntime._({
+    this.bundlePath,
+    this.buildVersion,
+    this.platform,
+    this.runtimeRoot,
+    this.identifier,
+    this.version,
+    this.isInternal,
+    this.isAvailable,
+    this.name,
+  });
 
   // Example:
   // {
@@ -696,29 +706,29 @@ class IOSSimulatorRuntime {
   //     }
   //   ]
   // },
-  final Map<String, Object?> _data;
+  factory IOSSimulatorRuntime.fromJson(Map<String, Object?> data) {
+    return IOSSimulatorRuntime._(
+      bundlePath: data['bundlePath']?.toString(),
+      buildVersion: data['buildversion']?.toString(),
+      platform: data['platform']?.toString(),
+      runtimeRoot: data['runtimeRoot']?.toString(),
+      identifier: data['identifier']?.toString(),
+      version: Version.parse(data['version']?.toString()),
+      isInternal: data['isInternal'] is bool? ? data['isInternal'] as bool? : null,
+      isAvailable: data['isAvailable'] is bool? ? data['isAvailable'] as bool? : null,
+      name: data['name']?.toString(),
+    );
+  }
 
-  String? get bundlePath => _data['bundlePath']?.toString();
-  String? get buildVersion => _data['buildversion']?.toString();
-  String? get platform => _data['platform']?.toString();
-  String? get runtimeRoot => _data['runtimeRoot']?.toString();
-  String? get identifier => _data['identifier']?.toString();
-  Version? get version {
-    return Version.parse(_data['version']?.toString());
-  }
-  bool? get isInternal {
-    if (_data['isInternal'] is bool?) {
-      return _data['isInternal'] as bool?;
-    }
-    return null;
-  }
-  bool? get isAvailable {
-    if (_data['isAvailable'] is bool?) {
-      return _data['isAvailable'] as bool?;
-    }
-    return null;
-  }
-  String? get name => _data['name']?.toString();
+  final String? bundlePath;
+  final String? buildVersion;
+  final String? platform;
+  final String? runtimeRoot;
+  final String? identifier;
+  final Version? version;
+  final bool? isInternal;
+  final bool? isAvailable;
+  final String? name;
 }
 
 /// Launches the device log reader process on the host and parses the syslog.

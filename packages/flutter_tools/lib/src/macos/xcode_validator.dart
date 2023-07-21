@@ -117,18 +117,13 @@ class XcodeValidator extends DoctorValidator {
 
     // Verify there is a simulator runtime installed matching the
     // iphonesimulator SDK major version.
-    IOSSimulatorRuntime? matchingRuntime;
     try {
-      matchingRuntime = runtimes.firstWhere(
+      runtimes.firstWhere(
         (IOSSimulatorRuntime runtime) =>
             runtime.version?.major == platformSDKVersion.major,
       );
     } on StateError {
-      matchingRuntime = null;
-    }
-
-    if (matchingRuntime == null) {
-      return ValidationMessage.hint( _iOSSimulatorMissing(platformSDKVersion.toString()));
+      return ValidationMessage.hint(_iOSSimulatorMissing(platformSDKVersion.toString()));
     }
 
     return null;
