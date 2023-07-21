@@ -428,7 +428,7 @@ targets:
       physical_devices: >-
         [
           "--device", "model=panther,version=33",
-          "--device", "model=redfin,version=30",
+          "--device", "model=redfin,version=30"
         ]
       # TODO(flutter/flutter#123331): This device is flaking.
       # "--device", "model=Nexus6P,version=25",
