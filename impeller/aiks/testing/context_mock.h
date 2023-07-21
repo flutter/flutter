@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "gmock/gmock-function-mocker.h"
 #include "gmock/gmock.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/context.h"
@@ -63,6 +64,8 @@ class CommandBufferMock : public CommandBuffer {
 class ContextMock : public Context {
  public:
   MOCK_CONST_METHOD0(DescribeGpuModel, std::string());
+
+  MOCK_CONST_METHOD0(GetBackendType, Context::BackendType());
 
   MOCK_CONST_METHOD0(IsValid, bool());
 

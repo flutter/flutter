@@ -43,10 +43,31 @@ class Allocator;
 ///             `//impeller/renderer/backend`.
 class Context {
  public:
+  enum class BackendType {
+    kMetal,
+    kOpenGLES,
+    kVulkan,
+  };
+
   //----------------------------------------------------------------------------
   /// @brief      Destroys an Impeller context.
   ///
   virtual ~Context();
+
+  //----------------------------------------------------------------------------
+  /// @brief      Get the graphics backend of an Impeller context.
+  ///
+  ///             This is useful for cases where a renderer needs to track and
+  ///             lookup backend-specific resources, like shaders or uniform
+  ///             layout information.
+  ///
+  ///             It's not recommended to use this as a substitute for
+  ///             per-backend capability checking. Instead, check for specific
+  ///             capabilities via `GetCapabilities()`.
+  ///
+  /// @return     The graphics backend of the `Context`.
+  ///
+  virtual BackendType GetBackendType() const = 0;
 
   // TODO(129920): Refactor and move to capabilities.
   virtual std::string DescribeGpuModel() const = 0;
