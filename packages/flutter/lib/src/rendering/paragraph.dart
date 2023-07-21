@@ -20,6 +20,9 @@ import 'selection.dart';
 
 const String _kEllipsis = '\u2026';
 
+/// Signature for the callback that reports when a selection event was received.
+typedef SelectionEventCallback = void Function(TextSelection selection, SelectionEvent event);
+
 /// Used by the [RenderParagraph] to map its rendering children to their
 /// corresponding semantics nodes.
 ///
@@ -277,6 +280,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     List<RenderBox>? children,
     Color? selectionColor,
     SelectionRegistrar? registrar,
+    this.onSelectionEvent
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
@@ -382,6 +386,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     _updateSelectionRegistrarSubscription();
   }
 
+  /// Called when a [SelectionEvent] is sent.
+  SelectionEventCallback? onSelectionEvent;
+
   void _updateSelectionRegistrarSubscription() {
     if (_registrar == null) {
       return;
@@ -407,7 +414,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
         if (end == -1) {
           end = plainText.length;
         }
-        result.add(_SelectableFragment(paragraph: this, range: TextRange(start: start, end: end), fullText: plainText));
+        result.add(_SelectableFragment(paragraph: this, range: TextRange(start: start, end: end), fullText: plainText, onSelectionEvent: onSelectionEvent));
         start = end;
       }
       start += 1;
@@ -1317,6 +1324,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     required this.paragraph,
     required this.fullText,
     required this.range,
+    this.onSelectionEvent,
   }) : assert(range.isValid && !range.isCollapsed && range.isNormalized) {
     _selectionGeometry = _getSelectionGeometry();
   }
@@ -1324,6 +1332,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   final TextRange range;
   final RenderParagraph paragraph;
   final String fullText;
+  final SelectionEventCallback? onSelectionEvent;
 
   TextPosition? _textSelectionStart;
   TextPosition? _textSelectionEnd;
@@ -1423,6 +1432,12 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     if (existingSelectionStart != _textSelectionStart ||
         existingSelectionEnd != _textSelectionEnd) {
       _didChangeSelection();
+      if (onSelectionEvent != null && existingSelectionStart != null && existingSelectionEnd != null) {
+        final int start = math.min(existingSelectionStart.offset, existingSelectionEnd.offset);
+        final int end = math.max(existingSelectionStart.offset, existingSelectionEnd.offset);
+        final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
+        onSelectionEvent!.call(selection, event);
+      }
     }
     return result;
   }

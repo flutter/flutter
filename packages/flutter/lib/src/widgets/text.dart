@@ -447,6 +447,7 @@ class Text extends StatelessWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
+    this.onSelectionEvent,
   }) : textSpan = null,
        assert(
          textScaler == null || textScaleFactor == null,
@@ -485,6 +486,7 @@ class Text extends StatelessWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
+    this.onSelectionEvent,
   }) : data = null,
        assert(
          textScaler == null || textScaleFactor == null,
@@ -615,6 +617,9 @@ class Text extends StatelessWidget {
   /// (semi-transparent grey).
   final Color? selectionColor;
 
+  /// {@macro flutter.rendering.renderParagraph.onSelectionEvent}
+  final SelectionEventCallback? onSelectionEvent;
+
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -646,6 +651,7 @@ class Text extends StatelessWidget {
       textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
       selectionRegistrar: registrar,
       selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
+      onSelectionEvent: onSelectionEvent,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
