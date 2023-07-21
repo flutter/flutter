@@ -1374,7 +1374,7 @@ abstract class FlutterCommand extends Command<void> {
       for (final String path in configFilePaths) {
         if (!globals.fs.isFileSync(path)) {
           throwToolExit('Did not find the file passed to "--${FlutterOptions
-              .kDartDefineFromFileOption}" is not a file. Path: $path');
+              .kDartDefineFromFileOption}". Path: $path');
         }
 
         final String configRaw = globals.fs.file(path).readAsStringSync();
