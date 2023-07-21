@@ -1908,8 +1908,6 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   }
 }
 
-final Paint _transparentPaint = Paint()..color = const Color(0x00000000);
-
 /// Creates a physical model layer that clips its child to a rounded
 /// rectangle.
 ///
@@ -2113,7 +2111,6 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
     }
 
     _updateClip();
-    final Rect offsetBounds = offset & size;
     final Path offsetPath = _clip!.shift(offset);
     bool paintShadows = true;
     assert(() {
@@ -2134,14 +2131,6 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
 
     final Canvas canvas = context.canvas;
     if (elevation != 0.0 && paintShadows) {
-      // The drawShadow call doesn't add the region of the shadow to the
-      // picture's bounds, so we draw a hardcoded amount of extra space to
-      // account for the maximum potential area of the shadow.
-      // TODO(jsimmons): remove this when Skia does it for us.
-      canvas.drawRect(
-        offsetBounds.inflate(20.0),
-        _transparentPaint,
-      );
       canvas.drawShadow(
         offsetPath,
         shadowColor,
