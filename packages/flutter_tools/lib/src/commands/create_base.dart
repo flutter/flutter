@@ -791,10 +791,8 @@ bool isValidPackageName(String name) {
 String? potentialValidPackageName(String name){
   String newName = name.toLowerCase();
   if (newName.startsWith(RegExp(r'[0-9]'))) {
-    // If the package starts with a number, prepend '_'.
     newName = '_$newName';
   }
-  // Replaces all hyphens ('-') characters with '_'.
   newName = newName.replaceAll('-', '_');
   if (isValidPackageName(newName)) {
     return newName;
