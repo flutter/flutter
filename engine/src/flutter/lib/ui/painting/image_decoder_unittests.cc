@@ -113,6 +113,8 @@ class TestImpellerContext : public impeller::Context {
  public:
   TestImpellerContext() = default;
 
+  BackendType GetBackendType() const override { return BackendType::kMetal; }
+
   std::string DescribeGpuModel() const override { return "TestGpu"; }
 
   bool IsValid() const override { return true; }

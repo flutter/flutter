@@ -28,6 +28,9 @@ class ContextGLES final : public Context,
   // |Context|
   ~ContextGLES() override;
 
+  // |Context|
+  BackendType GetBackendType() const override;
+
   const ReactorGLES::Ref& GetReactor() const;
 
   std::optional<ReactorGLES::WorkerID> AddReactorWorker(

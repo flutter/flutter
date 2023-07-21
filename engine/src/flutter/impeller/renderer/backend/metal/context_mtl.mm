@@ -286,6 +286,10 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
 
 ContextMTL::~ContextMTL() = default;
 
+Context::BackendType ContextMTL::GetBackendType() const {
+  return Context::BackendType::kMetal;
+}
+
 // |Context|
 std::string ContextMTL::DescribeGpuModel() const {
   return std::string([[device_ name] UTF8String]);

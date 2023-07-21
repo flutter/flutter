@@ -56,6 +56,9 @@ class ContextVK final : public Context,
   ~ContextVK() override;
 
   // |Context|
+  BackendType GetBackendType() const override;
+
+  // |Context|
   std::string DescribeGpuModel() const override;
 
   // |Context|
