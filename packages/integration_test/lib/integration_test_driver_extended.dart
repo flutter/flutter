@@ -82,7 +82,7 @@ Future<void> integrationDriver({
   FlutterDriver? driver,
   ScreenshotCallback? onScreenshot,
   ResponseDataCallback? responseDataCallback = writeResponseData,
-  bool? writeResponseOnFailure = false,
+  bool writeResponseOnFailure = false,
 }) async {
   driver ??= await FlutterDriver.connect();
   // Test states that it's waiting on web driver commands.
@@ -175,7 +175,7 @@ Future<void> integrationDriver({
     exit(0);
   } else {
     print('Failure Details:\n${response.formattedFailureDetails}');
-    if (responseDataCallback != null && writeResponseOnFailure!) {
+    if (responseDataCallback != null && writeResponseOnFailure) {
       await responseDataCallback(response.data);
     }
     exit(1);
