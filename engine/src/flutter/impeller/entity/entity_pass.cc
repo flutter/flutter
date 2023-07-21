@@ -604,12 +604,10 @@ bool EntityPass::OnRender(
     return false;
   }
 
-  if (!(GetClearColor(root_pass_size) == Color::BlackTransparent())) {
+  if (!collapsed_parent_pass &&
+      !GetClearColor(root_pass_size).IsTransparent()) {
     // Force the pass context to create at least one new pass if the clear color
-    // is present. The `EndPass` first ensures that the clear color will get
-    // applied even if this EntityPass is getting collapsed into the parent
-    // pass.
-    pass_context.EndPass();
+    // is present.
     pass_context.GetRenderPass(pass_depth);
   }
 
@@ -752,13 +750,15 @@ bool EntityPass::OnRender(
   bool is_collapsing_clear_colors = true;
   for (const auto& element : elements_) {
     // Skip elements that are incorporated into the clear color.
-    if (is_collapsing_clear_colors) {
-      auto [entity_color, _] =
-          ElementAsBackgroundColor(element, root_pass_size);
-      if (entity_color.has_value()) {
-        continue;
+    if (!collapsed_parent_pass) {
+      if (is_collapsing_clear_colors) {
+        auto [entity_color, _] =
+            ElementAsBackgroundColor(element, root_pass_size);
+        if (entity_color.has_value()) {
+          continue;
+        }
+        is_collapsing_clear_colors = false;
       }
-      is_collapsing_clear_colors = false;
     }
 
     EntityResult result =
