@@ -45,6 +45,12 @@ Future<void> writeResponseData(
   await file.writeAsString(resultString);
 }
 
+/// The exit function type for io.exit
+typedef ExitFn = Function(int code);
+
+/// the exit function to help test inject mock exit function
+ExitFn exitFn = exit;
+
 /// Adaptor to run an integration test using `flutter drive`.
 ///
 /// To an integration test `<test_name>.dart` using `flutter drive`, put a file named
@@ -172,13 +178,13 @@ Future<void> integrationDriver({
     if (responseDataCallback != null) {
       await responseDataCallback(response.data);
     }
-    exit(0);
+    exitFn(0);
   } else {
     print('Failure Details:\n${response.formattedFailureDetails}');
     if (responseDataCallback != null && writeResponseOnFailure) {
       await responseDataCallback(response.data);
     }
-    exit(1);
+    exitFn(1);
   }
 }
 
