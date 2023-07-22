@@ -31,6 +31,11 @@ class FilterContentsFilterInput final : public FilterInput {
   // |FilterInput|
   Matrix GetTransform(const Entity& entity) const override;
 
+  // |FilterInput|
+  void PopulateGlyphAtlas(
+      const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
+      Scalar scale) override;
+
  private:
   FilterContentsFilterInput(std::shared_ptr<FilterContents> filter);
 
