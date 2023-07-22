@@ -6,8 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
-  testWidgets('debugCheckHasMaterial control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasMaterial control test', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(child: Chip(label: Text('label'))));
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -47,7 +49,7 @@ void main() {
     ));
   });
 
-  testWidgets('debugCheckHasMaterialLocalizations control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasMaterialLocalizations control test', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(child: BackButton()));
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -84,7 +86,7 @@ void main() {
     ));
   });
 
-  testWidgets('debugCheckHasScaffold control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasScaffold control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
