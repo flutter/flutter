@@ -311,9 +311,7 @@ TEST_P(TypographerTest, MaybeHasOverlapping) {
 
   auto frame_2 =
       TextFrameFromTextBlob(SkTextBlob::MakeFromString("123456789", sk_font));
-  // Characters probably have overlap due to low fidelity text metrics, but this
-  // could be fixed.
-  ASSERT_TRUE(frame_2.MaybeHasOverlapping());
+  ASSERT_FALSE(frame_2.MaybeHasOverlapping());
 }
 
 TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
