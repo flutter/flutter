@@ -924,7 +924,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Tooltip dismiss countdown begins on long press release', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip dismiss countdown begins on long press release', (WidgetTester tester) async {
     // Specs: https://github.com/flutter/flutter/issues/4182
     const Duration showDuration = Duration(seconds: 1);
     const Duration eternity = Duration(days: 9999);
@@ -1868,7 +1868,7 @@ void main() {
     expect(onTriggeredCalled, false);
   });
 
-  testWidgets('dismissAllToolTips dismisses hovered tooltips', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('dismissAllToolTips dismisses hovered tooltips', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
@@ -1904,7 +1904,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Hovered tooltips do not dismiss after showDuration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Hovered tooltips do not dismiss after showDuration', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();

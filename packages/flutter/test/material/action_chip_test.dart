@@ -65,7 +65,7 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgets('ActionChip defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ActionChip defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'action chip';
 
@@ -136,7 +136,7 @@ void main() {
     expect(decoration.color, null);
   });
 
-  testWidgets('ActionChip.elevated defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ActionChip.elevated defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'action chip';
 
@@ -207,7 +207,7 @@ void main() {
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgets('ActionChip.color resolves material states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ActionChip.color resolves material states', (WidgetTester tester) async {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -266,7 +266,7 @@ void main() {
     );
   });
 
-  testWidgets('ActionChip uses provided state color properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ActionChip uses provided state color properties', (WidgetTester tester) async {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     Widget buildApp({ required bool enabled, required bool selected }) {

@@ -10,6 +10,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('BottomAppBarTheme lerp special cases', () {
     expect(BottomAppBarTheme.lerp(null, null, 0), const BottomAppBarTheme());
@@ -18,7 +20,7 @@ void main() {
   });
 
   group('Material 2 tests', () {
-    testWidgets('BAB theme overrides color', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB theme overrides color', (WidgetTester tester) async {
       const Color themedColor = Colors.black87;
       const BottomAppBarTheme theme = BottomAppBarTheme(color: themedColor);
 
@@ -28,7 +30,7 @@ void main() {
       expect(widget.color, themedColor);
     });
 
-    testWidgets('BAB color - Widget', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB color - Widget', (WidgetTester tester) async {
       const Color themeColor = Colors.white10;
       const Color babThemeColor = Colors.black87;
       const Color babColor = Colors.pink;
@@ -47,7 +49,7 @@ void main() {
       expect(widget.color, babColor);
     });
 
-    testWidgets('BAB color - BabTheme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB color - BabTheme', (WidgetTester tester) async {
       const Color themeColor = Colors.white10;
       const Color babThemeColor = Colors.black87;
       const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
@@ -65,7 +67,7 @@ void main() {
       expect(widget.color, babThemeColor);
     });
 
-    testWidgets('BAB color - Theme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB color - Theme', (WidgetTester tester) async {
       const Color themeColor = Colors.white10;
 
       await tester.pumpWidget(MaterialApp(
@@ -77,7 +79,7 @@ void main() {
       expect(widget.color, themeColor);
     });
 
-    testWidgets('BAB color - Default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB color - Default', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: const Scaffold(body: BottomAppBar()),
@@ -88,7 +90,7 @@ void main() {
       expect(widget.color, Colors.white);
     });
 
-    testWidgets('BAB theme customizes shape', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB theme customizes shape', (WidgetTester tester) async {
       const BottomAppBarTheme theme = BottomAppBarTheme(
         color: Colors.white30,
         shape: CircularNotchedRectangle(),
@@ -103,7 +105,7 @@ void main() {
       );
     });
 
-    testWidgets('BAB theme does not affect defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB theme does not affect defaults', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: const Scaffold(body: BottomAppBar()),
@@ -117,7 +119,7 @@ void main() {
   });
 
   group('Material 3 tests', () {
-    testWidgets('BAB theme overrides color - M3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB theme overrides color - M3', (WidgetTester tester) async {
       const Color themedColor = Colors.black87;
       const BottomAppBarTheme theme = BottomAppBarTheme(
         color: themedColor,
@@ -129,7 +131,7 @@ void main() {
       expect(widget.color, themedColor);
     });
 
-    testWidgets('BAB color - Widget - M3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB color - Widget - M3', (WidgetTester tester) async {
       const Color themeColor = Colors.white10;
       const Color babThemeColor = Colors.black87;
       const Color babColor = Colors.pink;
@@ -148,7 +150,7 @@ void main() {
       expect(widget.color, babColor);
     });
 
-    testWidgets('BAB color - BabTheme - M3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB color - BabTheme - M3', (WidgetTester tester) async {
       const Color themeColor = Colors.white10;
       const Color babThemeColor = Colors.black87;
       const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
@@ -166,7 +168,7 @@ void main() {
       expect(widget.color, babThemeColor);
     });
 
-    testWidgets('BAB theme does not affect defaults - M3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB theme does not affect defaults - M3', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: true);
       await tester.pumpWidget(MaterialApp(
         theme: theme,
@@ -179,7 +181,7 @@ void main() {
       expect(widget.elevation, equals(3.0));
     });
 
-    testWidgets('BAB theme overrides surfaceTintColor - M3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB theme overrides surfaceTintColor - M3', (WidgetTester tester) async {
       const Color color = Colors.blue; // base color that the surface tint will be applied to
       const Color babThemeSurfaceTintColor = Colors.black87;
       const BottomAppBarTheme theme = BottomAppBarTheme(
@@ -191,7 +193,7 @@ void main() {
       expect(widget.color, ElevationOverlay.applySurfaceTint(color, babThemeSurfaceTintColor, 0));
     });
 
-    testWidgets('BAB theme overrides shadowColor - M3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB theme overrides shadowColor - M3', (WidgetTester tester) async {
       const Color babThemeShadowColor = Colors.yellow;
       const BottomAppBarTheme theme = BottomAppBarTheme(
         shadowColor: babThemeShadowColor, elevation: 0
@@ -202,7 +204,7 @@ void main() {
       expect(widget.shadowColor, babThemeShadowColor);
     });
 
-    testWidgets('BAB surfaceTintColor - Widget - M3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB surfaceTintColor - Widget - M3', (WidgetTester tester) async {
       const Color color = Colors.white10; // base color that the surface tint will be applied to
       const Color themeSurfaceTintColor = Colors.white10;
       const Color babThemeSurfaceTintColor = Colors.black87;
@@ -225,7 +227,7 @@ void main() {
       expect(widget.color, ElevationOverlay.applySurfaceTint(color, babSurfaceTintColor, 3.0));
     });
 
-    testWidgets('BAB surfaceTintColor - BabTheme - M3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('BAB surfaceTintColor - BabTheme - M3', (WidgetTester tester) async {
       const Color color = Colors.blue; // base color that the surface tint will be applied to
       const Color themeColor = Colors.white10;
       const Color babThemeColor = Colors.black87;

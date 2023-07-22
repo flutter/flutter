@@ -7,6 +7,8 @@ import 'package:flutter/rendering.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('ButtonStyle copyWith, merge, ==, hashCode basics', () {
     expect(const ButtonStyle(), const ButtonStyle().copyWith());
@@ -44,7 +46,7 @@ void main() {
     expect(style.enableFeedback, null);
   });
 
-  testWidgets('Default ButtonStyle debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default ButtonStyle debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ButtonStyle().debugFillProperties(builder);
 
@@ -56,7 +58,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('ButtonStyle debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ButtonStyle debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 10.0)),
@@ -106,7 +108,7 @@ void main() {
     ]);
   });
 
-  testWidgets('ButtonStyle copyWith, merge', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ButtonStyle copyWith, merge', (WidgetTester tester) async {
     const MaterialStateProperty<TextStyle> textStyle = MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 10));
     const MaterialStateProperty<Color> backgroundColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const MaterialStateProperty<Color> foregroundColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
