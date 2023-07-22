@@ -26,11 +26,11 @@ void main() {
     });
 
     test('write response data when all test pass', () async {
-      fakeConnection.fakeResponse = '''
+      fakeConnection.fakeResponse = r'''
 {
   "isError": false,
   "response": {
-    "message": "{\\"result\\": \\"true\\", \\"data\\": {\\"reports\\": \\"passed\\"}}"
+    "message": "{\"result\": \"true\", \"data\": {\"reports\": \"passed\"}}"
   }
 }
 ''';
@@ -47,11 +47,11 @@ void main() {
     test(
         'write response data when test fail and writeResponseOnFailure is true',
         () async {
-      fakeConnection.fakeResponse = '''
+      fakeConnection.fakeResponse = r'''
 {
   "isError": false,
   "response": {
-    "message": "{\\"result\\": \\"false\\", \\"failureDetails\\": [],\\"data\\": {\\"reports\\": \\"failed\\"}}"
+    "message": "{\"result\": \"false\", \"failureDetails\": [],\"data\": {\"reports\": \"failed\"}}"
   }
 }
 ''';
@@ -69,11 +69,11 @@ void main() {
     test(
         'do not write response data when test fail and writeResponseOnFailure is false',
         () async {
-      fakeConnection.fakeResponse = '''
+      fakeConnection.fakeResponse = r'''
 {
   "isError": false,
   "response": {
-    "message": "{\\"result\\": \\"false\\", \\"failureDetails\\": [],\\"data\\": {\\"reports\\": \\"failed\\"}}"
+    "message": "{\"result\": \"false\", \"failureDetails\": [],\"data\": {\"reports\": \"failed\"}}"
   }
 }
 ''';
