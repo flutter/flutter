@@ -64,6 +64,10 @@ Matrix FilterInput::GetTransform(const Entity& entity) const {
   return entity.GetTransformation() * GetLocalTransform(entity);
 }
 
+void FilterInput::PopulateGlyphAtlas(
+    const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
+    Scalar scale) {}
+
 FilterInput::~FilterInput() = default;
 
 }  // namespace impeller
