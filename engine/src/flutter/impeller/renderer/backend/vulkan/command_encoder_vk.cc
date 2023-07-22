@@ -284,12 +284,14 @@ bool CommandEncoderVK::IsTracking(
 }
 
 std::optional<vk::DescriptorSet> CommandEncoderVK::AllocateDescriptorSet(
-    const vk::DescriptorSetLayout& layout) {
+    const vk::DescriptorSetLayout& layout,
+    size_t command_count) {
   if (!IsValid()) {
     return std::nullopt;
   }
 
-  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSet(layout);
+  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSet(
+      layout, command_count);
 }
 
 void CommandEncoderVK::PushDebugGroup(const char* label) const {
