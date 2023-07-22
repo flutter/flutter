@@ -2079,9 +2079,9 @@ void main() {
         expect(
           tester.getRect(find.text('BottomSheet')),
           Rect.fromLTRB(
-            0,
+            80,
             600 * (isScrollControlled ? 0 : (1 - scrollControlledMaxHeightRatio)),
-            800,
+            720,
             600,
           ),
         );
