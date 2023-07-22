@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 const double _kToolbarContentDistance = 8.0;
@@ -75,7 +76,7 @@ void main() {
 
   Finder findOverflowButton() => findPrivate('_TextSelectionToolbarOverflowButton');
 
-  testWidgets('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
     final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
 
@@ -172,7 +173,7 @@ void main() {
     expect(toolbarY, equals(anchorAboveY - height - _kToolbarContentDistance));
   });
 
-  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can create and use a custom toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
