@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -59,7 +60,7 @@ void main() {
     expect(theme.enableFeedback, null);
   });
 
-  testWidgets('Default TooltipThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default TooltipThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TooltipThemeData().debugFillProperties(builder);
 
@@ -71,7 +72,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('TooltipThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TooltipThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Duration wait = Duration(milliseconds: 100);
     const Duration show = Duration(milliseconds: 200);
@@ -113,7 +114,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer above fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -170,7 +171,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer above fits - TooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -225,7 +226,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above does not fit - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer above does not fit - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -293,7 +294,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above does not fit - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer above does not fit - TooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -359,7 +360,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center preferBelow fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center preferBelow fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -415,7 +416,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer below fits - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer below fits - TooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -469,7 +470,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
   });
 
-  testWidgets('Tooltip margin - ThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip margin - ThemeData', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -524,7 +525,7 @@ void main() {
     expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - _customPaddingValue);
   });
 
-  testWidgets('Tooltip margin - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip margin - TooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -577,7 +578,7 @@ void main() {
     expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - _customPaddingValue);
   });
 
-  testWidgets('Tooltip message textStyle - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip message textStyle - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
@@ -607,7 +608,7 @@ void main() {
     expect(textStyle.decoration, TextDecoration.underline);
   });
 
-  testWidgets('Tooltip message textStyle - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip message textStyle - TooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: TooltipTheme(
@@ -636,7 +637,7 @@ void main() {
     expect(textStyle.decoration, TextDecoration.underline);
   });
 
-  testWidgets('Tooltip message textAlign - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip message textAlign - TooltipTheme', (WidgetTester tester) async {
     Future<void> pumpTooltipWithTextAlign({TextAlign? textAlign}) async {
       final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
       await tester.pumpWidget(
@@ -675,7 +676,7 @@ void main() {
     expect(textAlign, TextAlign.end);
   });
 
-  testWidgets('Tooltip decoration - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip decoration - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const Decoration customDecoration = ShapeDecoration(
       shape: StadiumBorder(),
@@ -717,7 +718,7 @@ void main() {
     expect(tip, paints..rrect(color: const Color(0x80800000)));
   });
 
-  testWidgets('Tooltip decoration - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip decoration - TooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const Decoration customDecoration = ShapeDecoration(
       shape: StadiumBorder(),
@@ -757,7 +758,7 @@ void main() {
     expect(tip, paints..rrect(color: const Color(0x80800000)));
   });
 
-  testWidgets('Tooltip height and padding - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip height and padding - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const double customTooltipHeight = 100.0;
     const double customPaddingVal = 20.0;
@@ -804,7 +805,7 @@ void main() {
     expect(content.size.width, equals(tip.size.width - 2 * customPaddingVal));
   });
 
-  testWidgets('Tooltip height and padding - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip height and padding - TooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const double customTooltipHeight = 100.0;
     const double customPaddingValue = 20.0;
@@ -849,7 +850,7 @@ void main() {
     expect(content.size.width, equals(tip.size.width - 2 * customPaddingValue));
   });
 
-  testWidgets('Tooltip waitDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip waitDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
     const Duration customWaitDuration = Duration(milliseconds: 500);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
@@ -896,7 +897,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip waitDuration - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip waitDuration - TooltipTheme', (WidgetTester tester) async {
     const Duration customWaitDuration = Duration(milliseconds: 500);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
@@ -939,7 +940,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip showDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip showDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
     const Duration customShowDuration = Duration(milliseconds: 3000);
     await tester.pumpWidget(
       MaterialApp(
@@ -976,7 +977,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip showDuration - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip showDuration - TooltipTheme', (WidgetTester tester) async {
     const Duration customShowDuration = Duration(milliseconds: 3000);
     await tester.pumpWidget(
       const MaterialApp(
@@ -1009,7 +1010,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip triggerMode - ThemeData.triggerMode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip triggerMode - ThemeData.triggerMode', (WidgetTester tester) async {
     const TooltipTriggerMode triggerMode = TooltipTriggerMode.tap;
     await tester.pumpWidget(
       MaterialApp(
@@ -1034,7 +1035,7 @@ void main() {
     expect(find.text(tooltipText), findsOneWidget); // Tooltip should show immediately after tap
   });
 
-  testWidgets('Tooltip triggerMode - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip triggerMode - TooltipTheme', (WidgetTester tester) async {
     const TooltipTriggerMode triggerMode = TooltipTriggerMode.tap;
     await tester.pumpWidget(
       const MaterialApp(
@@ -1057,7 +1058,7 @@ void main() {
     expect(find.text(tooltipText), findsOneWidget); // Tooltip should show immediately after tap
   });
 
-  testWidgets('Semantics included by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics included by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1098,7 +1099,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics included by default - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics included by default - TooltipTheme', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1141,7 +1142,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics excluded - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics excluded - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1185,7 +1186,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics excluded - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics excluded - TooltipTheme', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1227,7 +1228,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('has semantic events by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('has semantic events by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvents.add(message);
@@ -1270,7 +1271,7 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgets('has semantic events by default - TooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('has semantic events by default - TooltipTheme', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvents.add(message);
@@ -1315,7 +1316,7 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgets('default Tooltip debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('default Tooltip debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const Tooltip(message: 'message').debugFillProperties(builder);
