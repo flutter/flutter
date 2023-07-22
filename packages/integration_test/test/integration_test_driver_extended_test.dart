@@ -79,12 +79,10 @@ void main() {
 ''';
 
       await integrationDriver(
-        driver: driver,
-        responseDataCallback: (_) {
-          called = true;
-        },
-        writeResponseOnFailure: false,
-      );
+          driver: driver,
+          responseDataCallback: (_) {
+            called = true;
+          });
       expect(called, false);
       expect(exitCode, 1);
     });
