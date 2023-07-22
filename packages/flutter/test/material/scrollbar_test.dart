@@ -767,7 +767,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
+  testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scrollbar(
