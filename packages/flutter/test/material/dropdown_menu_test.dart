@@ -1055,17 +1055,13 @@ void main() {
     final TextEditingController controller = TextEditingController();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
-      home: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Scaffold(
-            body: DropdownMenu<TestMenu>(
-              requestFocusOnTap: true,
-              enableFilter: true,
-              dropdownMenuEntries: menuChildren,
-              controller: controller,
-            ),
-          );
-        }
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
+          enableFilter: true,
+          dropdownMenuEntries: menuChildren,
+          controller: controller,
+        ),
       ),
     ));
     // Access the MenuAnchor
