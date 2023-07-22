@@ -69,10 +69,11 @@ static bool UpdateBindingLayouts(const std::vector<ComputeCommand>& commands,
 static bool AllocateAndBindDescriptorSets(const ContextVK& context,
                                           const ComputeCommand& command,
                                           CommandEncoderVK& encoder,
-                                          const ComputePipelineVK& pipeline) {
+                                          const ComputePipelineVK& pipeline,
+                                          size_t command_count) {
   auto desc_set = pipeline.GetDescriptor().GetDescriptorSetLayouts();
-  auto vk_desc_set =
-      encoder.AllocateDescriptorSet(pipeline.GetDescriptorSetLayout());
+  auto vk_desc_set = encoder.AllocateDescriptorSet(
+      pipeline.GetDescriptorSetLayout(), command_count);
   if (!vk_desc_set) {
     return false;
   }
@@ -82,7 +83,6 @@ static bool AllocateAndBindDescriptorSets(const ContextVK& context,
   std::unordered_map<uint32_t, vk::DescriptorBufferInfo> buffers;
   std::unordered_map<uint32_t, vk::DescriptorImageInfo> images;
   std::vector<vk::WriteDescriptorSet> writes;
-
   auto bind_images = [&encoder,     //
                       &images,      //
                       &writes,      //
@@ -241,10 +241,11 @@ bool ComputePassVK::OnEncodeCommands(const Context& context,
 
       cmd_buffer.bindPipeline(vk::PipelineBindPoint::eCompute,
                               pipeline_vk.GetPipeline());
-      if (!AllocateAndBindDescriptorSets(vk_context,  //
-                                         command,     //
-                                         *encoder,    //
-                                         pipeline_vk  //
+      if (!AllocateAndBindDescriptorSets(vk_context,       //
+                                         command,          //
+                                         *encoder,         //
+                                         pipeline_vk,      //
+                                         commands_.size()  //
                                          )) {
         return false;
       }
