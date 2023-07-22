@@ -62,6 +62,11 @@ class FilterInput {
   /// @brief  Get the transform of this `FilterInput`. This is equivalent to
   ///         calling `entity.GetTransformation() * GetLocalTransform()`.
   virtual Matrix GetTransform(const Entity& entity) const;
+
+  /// @see    `Contents::PopulateGlyphAtlas`
+  virtual void PopulateGlyphAtlas(
+      const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
+      Scalar scale);
 };
 
 }  // namespace impeller

@@ -193,6 +193,14 @@ std::optional<Rect> FilterContents::GetCoverage(const Entity& entity) const {
   return GetLocalCoverage(entity_with_local_transform);
 }
 
+void FilterContents::PopulateGlyphAtlas(
+    const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
+    Scalar scale) {
+  for (auto& input : inputs_) {
+    input->PopulateGlyphAtlas(lazy_glyph_atlas, scale);
+  }
+}
+
 std::optional<Rect> FilterContents::GetFilterCoverage(
     const FilterInput::Vector& inputs,
     const Entity& entity,
