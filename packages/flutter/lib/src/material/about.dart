@@ -12,7 +12,6 @@ import 'package:flutter/widgets.dart' hide Flow;
 import 'app_bar.dart';
 import 'back_button.dart';
 import 'card.dart';
-import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'dialog.dart';
@@ -182,7 +181,7 @@ void showAboutDialog({
   String? applicationLegalese,
   List<Widget>? children,
   bool barrierDismissible = true,
-  Color? barrierColor = Colors.black54,
+  Color? barrierColor,
   String? barrierLabel,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,

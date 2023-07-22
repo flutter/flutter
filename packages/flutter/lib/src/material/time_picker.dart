@@ -2956,7 +2956,7 @@ Future<TimeOfDay?> showTimePicker({
   required TimeOfDay initialTime,
   TransitionBuilder? builder,
   bool barrierDismissible = true,
-  Color? barrierColor = Colors.black54,
+  Color? barrierColor,
   String? barrierLabel,
   bool useRootNavigator = true,
   TimePickerEntryMode initialEntryMode = TimePickerEntryMode.dial,
