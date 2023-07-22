@@ -1096,7 +1096,7 @@ targets:
       - .ci.yaml
 
   - name: Linux web_benchmarks_skwasm
-    bringup: true
+    #bringup: true
     recipe: devicelab/devicelab_drone
     #presubmit: false
     timeout: 60
