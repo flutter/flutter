@@ -33,9 +33,13 @@ class DescriptorPoolVK {
   ~DescriptorPoolVK();
 
   std::optional<vk::DescriptorSet> AllocateDescriptorSet(
-      const vk::DescriptorSetLayout& layout);
+      const vk::DescriptorSetLayout& layout,
+      size_t command_count);
 
  private:
+  std::optional<vk::DescriptorSet> AllocateDescriptorSet(
+      const vk::DescriptorSetLayout& layout);
+
   std::weak_ptr<const DeviceHolder> device_holder_;
   uint32_t pool_size_ = 31u;
   std::queue<vk::UniqueDescriptorPool> pools_;

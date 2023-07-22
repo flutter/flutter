@@ -79,7 +79,8 @@ class CommandEncoderVK {
   void InsertDebugMarker(const char* label) const;
 
   std::optional<vk::DescriptorSet> AllocateDescriptorSet(
-      const vk::DescriptorSetLayout& layout);
+      const vk::DescriptorSetLayout& layout,
+      size_t command_count);
 
  private:
   friend class ContextVK;

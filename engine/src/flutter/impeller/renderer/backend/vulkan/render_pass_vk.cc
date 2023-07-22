@@ -284,11 +284,12 @@ static bool UpdateBindingLayouts(const std::vector<Command>& commands,
 static bool AllocateAndBindDescriptorSets(const ContextVK& context,
                                           const Command& command,
                                           CommandEncoderVK& encoder,
-                                          const PipelineVK& pipeline) {
+                                          const PipelineVK& pipeline,
+                                          size_t command_count) {
   auto desc_set =
       pipeline.GetDescriptor().GetVertexDescriptor()->GetDescriptorSetLayouts();
-  auto vk_desc_set =
-      encoder.AllocateDescriptorSet(pipeline.GetDescriptorSetLayout());
+  auto vk_desc_set = encoder.AllocateDescriptorSet(
+      pipeline.GetDescriptorSetLayout(), command_count);
   if (!vk_desc_set) {
     return false;
   }
@@ -445,7 +446,8 @@ static bool EncodeCommand(const Context& context,
                           const Command& command,
                           CommandEncoderVK& encoder,
                           PassBindingsCache& command_buffer_cache,
-                          const ISize& target_size) {
+                          const ISize& target_size,
+                          size_t command_count) {
   if (command.vertex_count == 0u || command.instance_count == 0u) {
     return true;
   }
@@ -465,7 +467,8 @@ static bool EncodeCommand(const Context& context,
   if (!AllocateAndBindDescriptorSets(ContextVK::Cast(context),  //
                                      command,                   //
                                      encoder,                   //
-                                     pipeline_vk                //
+                                     pipeline_vk,               //
+                                     command_count              //
                                      )) {
     return false;
   }
@@ -628,7 +631,7 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
       }
 
       if (!EncodeCommand(context, command, *encoder, pass_bindings_cache_,
-                         target_size)) {
+                         target_size, commands_.size())) {
         return false;
       }
     }
