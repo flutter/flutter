@@ -1460,6 +1460,13 @@ Future<void> _runFlutterPackagesTests() async {
         'run',
         toolScript,
         'analyze',
+        // Fetch the oldest possible dependencies, rather than the newest, to
+        // insulate flutter/flutter from out-of-band failures when new versions
+        // of dependencies are published. This compensates for the fact that
+        // flutter/packages doesn't use pinned dependencies, and for the
+        // purposes of this test using old dependencies is fine. See
+        // https://github.com/flutter/flutter/issues/129633
+        '--downgrade',
         '--custom-analysis=script/configs/custom_analysis.yaml',
       ],
       workingDirectory: checkout.path,

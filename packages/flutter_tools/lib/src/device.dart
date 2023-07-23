@@ -504,12 +504,13 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     if (_timer == null) {
       deviceNotifier ??= ItemListNotifier<Device>();
       // Make initial population the default, fast polling timeout.
-      _timer = _initTimer(null);
+      _timer = _initTimer(null, initialCall: true);
     }
   }
 
-  Timer _initTimer(Duration? pollingTimeout) {
-    return Timer(_pollingInterval, () async {
+  Timer _initTimer(Duration? pollingTimeout, {bool initialCall = false}) {
+    // Poll for devices immediately on the initial call for faster initial population.
+    return Timer(initialCall ? Duration.zero : _pollingInterval, () async {
       try {
         final List<Device> devices = await pollingGetDevices(timeout: pollingTimeout);
         deviceNotifier!.updateWithNewList(devices);
