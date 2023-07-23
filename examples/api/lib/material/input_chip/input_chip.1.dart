@@ -143,12 +143,6 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
-  void _deleteChip(Topping topping) {
-    setState(() {
-      _toppings.remove(topping);
-    });
-  }
-
   Widget _suggestionBuilder(BuildContext context, Topping topping) {
     return ListTile(
       key: ObjectKey(topping),
@@ -176,6 +170,13 @@ class MainScreenState extends State<MainScreen> {
   }
 
   void _onChipTapped(Topping topping) {}
+
+  void _deleteChip(Topping topping) {
+    setState(() {
+      _toppings.remove(topping);
+      _suggestions = List<Topping>.empty();
+    });
+  }
 
   void _onSubmitted(String text) {
     if (text.trim().isNotEmpty) {
@@ -243,7 +244,6 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
   FocusNode? _lastChipFocusNode;
 
   late final FocusNode _focusNode;
-  late final ScrollController _scrollController;
   TextEditingValue _value = TextEditingValue.empty;
   TextInputConnection? _connection;
 
@@ -252,8 +252,6 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
     super.initState();
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onFocusChanged);
-
-    _scrollController = ScrollController();
   }
 
   @override
@@ -263,7 +261,6 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
       _focusNode.dispose();
     }
 
-    _scrollController.dispose();
     _closeInputConnectionIfNeeded();
     super.dispose();
   }
@@ -282,7 +279,6 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
       }
       _value = value;
     });
-    _scrollToEnd();
     widget.onTextChanged?.call(text);
   }
 
@@ -343,41 +339,31 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
       },
     ).toList();
 
-    chipsChildren.add(
-      SizedBox(
-        height: 36.0,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(text),
-            _TextCaret(
-              resumed: _focusNode.hasFocus,
-            ),
-          ],
-        ),
-      ),
-    );
-
-    _scrollToEnd();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    chipsChildren.add(Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _requestKeyboard,
-          child: InputDecorator(
-            decoration: widget.decoration,
-            isFocused: _focusNode.hasFocus,
-            isEmpty: _value.text.isEmpty,
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              scrollDirection: Axis.horizontal,
-              child: Row(children: chipsChildren),
-            ),
-          ),
+        Text(text),
+        TextCaret(
+          resumed: _focusNode.hasFocus,
         ),
       ],
+    ));
+
+    return GestureDetector(
+      onTap: _requestKeyboard,
+      child: InputDecorator(
+        decoration: widget.decoration,
+        isFocused: _focusNode.hasFocus,
+        isEmpty: _value.text.isEmpty,
+        textAlignVertical: TextAlignVertical.center,
+        child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          runSpacing: 4,
+          children: chipsChildren,
+        ),
+      ),
     );
   }
 
@@ -395,15 +381,6 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
     } else {
       FocusScope.of(context).requestFocus(_focusNode);
     }
-  }
-
-  void _scrollToEnd() {
-    Future<void>.delayed(
-        const Duration(milliseconds: 100),
-        () => _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.easeIn));
   }
 
   void _onFocusChanged() {
@@ -459,18 +436,19 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
   }
 }
 
-class _TextCaret extends StatefulWidget {
-  const _TextCaret({
+class TextCaret extends StatefulWidget {
+  const TextCaret({
+    super.key,
     this.resumed = false,
   });
 
   final bool resumed;
 
   @override
-  _TextCursorState createState() => _TextCursorState();
+  TextCursorState createState() => TextCursorState();
 }
 
-class _TextCursorState extends State<_TextCaret>
+class TextCursorState extends State<TextCaret>
     with SingleTickerProviderStateMixin {
   final Duration _duration = const Duration(milliseconds: 500);
 
@@ -496,14 +474,12 @@ class _TextCursorState extends State<_TextCaret>
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return FractionallySizedBox(
-      heightFactor: 0.7,
-      child: Opacity(
-        opacity: _displayed && widget.resumed ? 1.0 : 0.0,
-        child: Container(
-          width: 2.0,
-          color: theme.primaryColor,
-        ),
+    return Opacity(
+      opacity: _displayed && widget.resumed ? 1.0 : 0.0,
+      child: Container(
+        width: 2.0,
+        height: 20,
+        color: theme.primaryColor,
       ),
     );
   }
