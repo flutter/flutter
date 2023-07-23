@@ -128,18 +128,15 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _chipBuilder(BuildContext context, Topping topping) {
-    return Container(
-      margin: const EdgeInsets.only(right: 5),
-      child: InputChip(
-        key: ObjectKey(topping),
-        label: Text(topping.name),
-        avatar: CircleAvatar(
-            child: Text(topping.emoji ?? topping.name[0].toUpperCase())),
-        onDeleted: () => _deleteChip(topping),
-        onSelected: (_) => _onChipTapped(topping),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        padding: const EdgeInsets.all(2),
-      ),
+    return InputChip(
+      key: ObjectKey(topping),
+      label: Text(topping.name),
+      avatar: CircleAvatar(
+          child: Text(topping.emoji ?? topping.name[0].toUpperCase())),
+      onDeleted: () => _deleteChip(topping),
+      onSelected: (_) => _onChipTapped(topping),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      padding: const EdgeInsets.all(2),
     );
   }
 
@@ -361,6 +358,7 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
         child: Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           runSpacing: 4,
+          spacing: 4,
           children: chipsChildren,
         ),
       ),
