@@ -237,6 +237,8 @@ C:\foo\build\windows\runner\Debug\test.exe : fatal error LNK1120: 1 unresolved e
 C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier [C:\foo\build\windows\runner\test.vcxproj]
   -- Install configuration: "Debug"
   -- Installing: C:/foo/build/windows/runner/Debug/data/icudtl.dat
+Error detected in pubspec.yaml:
+No file or variants found for asset: images/a_dot_burr.jpeg.
 ''';
 
     processManager = FakeProcessManager.list(<FakeCommand>[
@@ -256,6 +258,8 @@ C:\foo\windows\runner\main.cpp(18): warning C4706: assignment within conditional
 main.obj : error LNK2019: unresolved external symbol "void __cdecl Bar(void)" (?Bar@@YAXXZ) referenced in function wWinMain [C:\foo\build\windows\runner\test.vcxproj]
 C:\foo\build\windows\runner\Debug\test.exe : fatal error LNK1120: 1 unresolved externals [C:\foo\build\windows\runner\test.vcxproj]
 C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier [C:\foo\build\windows\runner\test.vcxproj]
+Error detected in pubspec.yaml:
+No file or variants found for asset: images/a_dot_burr.jpeg.
 ''');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
