@@ -386,9 +386,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     _updateSelectionRegistrarSubscription();
   }
 
-  /// Called when a [SelectionEvent] is sent.
-  SelectionEventCallback? onSelectionEvent;
-
   void _updateSelectionRegistrarSubscription() {
     if (_registrar == null) {
       return;
@@ -403,6 +400,11 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
     _lastSelectableFragments!.forEach(_registrar!.remove);
   }
+
+  /// {@template flutter.rendering.RenderParagraph.onSelectionEvent}
+  /// Called when a [SelectionEvent] is sent.
+  /// {@endtemplate}
+  SelectionEventCallback? onSelectionEvent;
 
   List<_SelectableFragment> _getSelectableFragments() {
     final String plainText = text.toPlainText(includeSemanticsLabels: false);

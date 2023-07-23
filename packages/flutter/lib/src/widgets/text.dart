@@ -617,7 +617,7 @@ class Text extends StatelessWidget {
   /// (semi-transparent grey).
   final Color? selectionColor;
 
-  /// {@macro flutter.rendering.renderParagraph.onSelectionEvent}
+  /// {@macro flutter.rendering.RenderParagraph.onSelectionEvent}
   final SelectionEventCallback? onSelectionEvent;
 
   @override
