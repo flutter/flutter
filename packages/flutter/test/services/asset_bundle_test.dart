@@ -16,17 +16,16 @@ class TestAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) async {
     loadCallCount[key] = (loadCallCount[key] ?? 0) + 1;
     if (key == 'AssetManifest.json') {
-      return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert('{"one": ["one"]}')).buffer);
+      return ByteData.sublistView(utf8.encode('{"one": ["one"]}'));
     }
 
     if (key == 'AssetManifest.bin') {
-      return const StandardMessageCodec().encodeMessage(<String, Object>{
-        'one': <Object>[]
-      })!;
+      return const StandardMessageCodec()
+          .encodeMessage(<String, Object>{'one': <Object>[]})!;
     }
 
     if (key == 'counter') {
-      return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert(loadCallCount[key]!.toString())).buffer);
+      return ByteData.sublistView(utf8.encode(loadCallCount[key]!.toString()));
     }
 
     if (key == 'one') {
