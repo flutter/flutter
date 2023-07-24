@@ -32,6 +32,7 @@ class NavigatorPopHandler extends StatefulWidget {
   const NavigatorPopHandler({
     super.key,
     this.onPop,
+    this.canPop,
     required this.child,
   });
 
@@ -40,6 +41,11 @@ class NavigatorPopHandler extends StatefulWidget {
   /// Typically this is a [Navigator] that will handle the pop when [onPop] is
   /// called.
   final Widget child;
+
+  /// An override value to control whether or not to allow system back gestures.
+  ///
+  /// When null, this will be decided automatically based on navigation state.
+  final bool? canPop;
 
   /// Called when a handleable pop event happens.
   ///
@@ -63,7 +69,7 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
     // When the widget subtree indicates it can handle a pop, disable popping
     // here, so that it can be manually handled in canPop.
     return PopScope(
-      canPop: _canPop,
+      canPop: widget.canPop ?? _canPop,
       onPopInvoked: (bool didPop) {
         if (didPop) {
           return;

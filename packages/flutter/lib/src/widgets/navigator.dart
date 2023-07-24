@@ -5468,7 +5468,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
           // If the state of this Navigator does not change whether or not the
-          // whole framework can pop, propagate the Notification.
+          // whole framework can pop, propagate the Notification as-is.
           if (notification.canHandlePop || !canPop()) {
             return false;
           }
