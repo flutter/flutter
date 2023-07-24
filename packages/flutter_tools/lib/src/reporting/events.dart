@@ -54,7 +54,9 @@ class HotEvent extends UsageEvent {
     this.scannedSourcesCount,
     this.reassembleTimeInMs,
     this.reloadVMTimeInMs,
-  }) : super('hot', parameter, flutterUsage: globals.flutterUsage);
+    // TODO(fujino): make this required
+    Usage? usage,
+  }) : super('hot', parameter, flutterUsage: usage ?? globals.flutterUsage);
 
   final String? reason;
   final String targetPlatform;
