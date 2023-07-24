@@ -2072,6 +2072,59 @@ void main() {
     );
 
     testWidgets(
+      '${SnackBarBehavior.floating} should not align SnackBar with the top of FloatingActionButton '
+      'when Scaffold has a FloatingActionButton and floatingActionButtonLocation is set to a top position',
+      (WidgetTester tester) async {
+        Future<void> pumpApp({required FloatingActionButtonLocation fabLocation}) async {
+          return tester.pumpWidget(MaterialApp(
+            home: Scaffold(
+              floatingActionButton: FloatingActionButton(
+                child: const Icon(Icons.send),
+                onPressed: () {},
+              ),
+              floatingActionButtonLocation: fabLocation,
+              body: Builder(
+                builder: (BuildContext context) {
+                  return GestureDetector(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: const Text('I am a snack bar.'),
+                        duration: const Duration(seconds: 2),
+                        action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                        behavior: SnackBarBehavior.floating,
+                      ));
+                    },
+                    child: const Text('X'),
+                  );
+                },
+              ),
+            ),
+          ));
+        }
+
+        const List<FloatingActionButtonLocation> topLocations = <FloatingActionButtonLocation>[
+          FloatingActionButtonLocation.startTop,
+          FloatingActionButtonLocation.centerTop,
+          FloatingActionButtonLocation.endTop,
+          FloatingActionButtonLocation.miniStartTop,
+          FloatingActionButtonLocation.miniCenterTop,
+          FloatingActionButtonLocation.miniEndTop,
+        ];
+
+        for (final FloatingActionButtonLocation location in topLocations) {
+          await pumpApp(fabLocation: location);
+
+          await tester.tap(find.text('X'));
+          await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+          final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+
+          expect(snackBarBottomLeft.dy, 600); // Device height is 600.
+        }
+      },
+    );
+
+    testWidgets(
       '${SnackBarBehavior.fixed} should align SnackBar with the top of BottomNavigationBar '
       'when Scaffold has a BottomNavigationBar and FloatingActionButton',
       (WidgetTester tester) async {
