@@ -277,7 +277,9 @@ Future<void> lipoDylibs(String targetFullPath, List<Uri> sources) async {
       for (final Uri source in sources) source.toFilePath(),
     ],
   );
-  assert(lipoResult.exitCode == 0);
+  if (lipoResult.exitCode != 0) {
+    throwToolExit('Failed to create universal binary:\n${lipoResult.stderr}');
+  }
   globals.logger.printTrace(lipoResult.stdout as String);
   globals.logger.printTrace(lipoResult.stderr as String);
 }
@@ -298,9 +300,10 @@ Future<void> setInstallNameDylib(Uri targetUri) async {
       targetUri.toFilePath(),
     ],
   );
-  assert(installNameResult.exitCode == 0);
-  globals.logger.printTrace(installNameResult.stderr as String);
-  globals.logger.printTrace(installNameResult.stdout as String);
+  if (installNameResult.exitCode != 0) {
+    throwToolExit(
+        'Failed to change the install name of $targetUri:\n${installNameResult.stderr}');
+  }
 }
 
 Future<void> codesignDylib(
@@ -325,7 +328,9 @@ Future<void> codesignDylib(
   globals.logger.printTrace(codesignCommand.join(' '));
   final ProcessResult codesignResult =
       await globals.processManager.run(codesignCommand);
-  assert(codesignResult.exitCode == 0);
+  if (codesignResult.exitCode != 0) {
+    throwToolExit('Failed to code sign binary:\n${codesignResult.stderr}');
+  }
   globals.logger.printTrace(codesignResult.stdout as String);
   globals.logger.printTrace(codesignResult.stderr as String);
 }
@@ -435,7 +440,9 @@ final logging.Logger loggingLogger = logging.Logger('')
 final Future<CCompilerConfig> cCompilerConfig = () async {
   final ProcessResult xcrunResult =
       await globals.processManager.run(<String>['xcrun', 'clang', '--version']);
-  assert(xcrunResult.exitCode == 0);
+  if (xcrunResult.exitCode != 0) {
+    throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
+  }
   final String installPath = (xcrunResult.stdout as String)
       .split('\n')
       .firstWhere((String s) => s.startsWith('InstalledDir: '))

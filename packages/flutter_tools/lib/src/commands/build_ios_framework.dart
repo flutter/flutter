@@ -283,7 +283,9 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         outputDirectory.childDirectory('../../native_assets/ios/').path,
         modeDirectory.path,
       ]);
-      assert(rsyncResult.exitCode == 0);
+      if (rsyncResult.exitCode != 0) {
+        throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
+      }
       globals.logger.printTrace(rsyncResult.stderr as String);
       globals.logger.printTrace(rsyncResult.stdout as String);
 

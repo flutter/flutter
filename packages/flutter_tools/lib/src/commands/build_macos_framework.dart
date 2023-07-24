@@ -109,9 +109,9 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         outputDirectory.childDirectory('../../native_assets/macos/').path,
         modeDirectory.path,
       ]);
-      assert(rsyncResult.exitCode == 0);
-      globals.logger.printTrace(rsyncResult.stderr as String);
-      globals.logger.printTrace(rsyncResult.stdout as String);
+      if (rsyncResult.exitCode != 0) {
+        throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
+      }
 
       // Delete the intermediaries since they would have been copied into our
       // output frameworks.
