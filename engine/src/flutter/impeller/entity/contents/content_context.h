@@ -27,6 +27,8 @@
 #include "impeller/entity/blend.vert.h"
 #include "impeller/entity/border_mask_blur.frag.h"
 #include "impeller/entity/border_mask_blur.vert.h"
+#include "impeller/entity/clip.frag.h"
+#include "impeller/entity/clip.vert.h"
 #include "impeller/entity/color_matrix_color_filter.frag.h"
 #include "impeller/entity/color_matrix_color_filter.vert.h"
 #include "impeller/entity/conical_gradient_fill.frag.h"
@@ -179,8 +181,7 @@ using PorterDuffBlendPipeline =
     RenderPipelineT<BlendVertexShader, PorterDuffBlendFragmentShader>;
 // Instead of requiring new shaders for clips, the solid fill stages are used
 // to redirect writing to the stencil instead of color attachments.
-using ClipPipeline =
-    RenderPipelineT<SolidFillVertexShader, SolidFillFragmentShader>;
+using ClipPipeline = RenderPipelineT<ClipVertexShader, ClipFragmentShader>;
 
 using GeometryColorPipeline =
     RenderPipelineT<PositionColorVertexShader, VerticesFragmentShader>;

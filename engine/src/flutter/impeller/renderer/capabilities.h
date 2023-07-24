@@ -39,8 +39,6 @@ class Capabilities {
 
   virtual bool SupportsMemorylessTextures() const = 0;
 
-  virtual bool SupportsPipelinesWithNoColorAttachments() const = 0;
-
   virtual PixelFormat GetDefaultColorFormat() const = 0;
 
   virtual PixelFormat GetDefaultStencilFormat() const = 0;
@@ -85,8 +83,6 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetSupportsMemorylessTextures(bool value);
 
-  CapabilitiesBuilder& SetSupportsPipelinesWithNoColorAttachments(bool value);
-
   std::unique_ptr<Capabilities> Build();
 
  private:
@@ -102,7 +98,6 @@ class CapabilitiesBuilder {
   bool supports_read_from_resolve_ = false;
   bool supports_decal_tile_mode_ = false;
   bool supports_memoryless_textures_ = false;
-  bool supports_pipelines_with_no_color_attachments_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
 
