@@ -257,8 +257,8 @@ struct RenderPassData {
     const auto* color_attachment =
         pipeline.GetDescriptor().GetLegacyCompatibleColorAttachment();
     if (!color_attachment) {
-      VALIDATION_LOG << "The OpenGLES backend requires pipelines to have color "
-                        "attachments.";
+      VALIDATION_LOG
+          << "Color attachment is too complicated for a legacy renderer.";
       return false;
     }
 

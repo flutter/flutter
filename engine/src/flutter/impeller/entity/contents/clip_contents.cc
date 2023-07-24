@@ -85,10 +85,8 @@ bool ClipContents::Render(const ContentContext& renderer,
 
   Command cmd;
 
-  // The color really doesn't matter.
-  info.color = Color::SkyBlue();
-
-  auto options = OptionsFromPassAndEntity(pass, entity);
+  auto options = OptionsFromPass(pass);
+  options.blend_mode = BlendMode::kDestination;
   cmd.stencil_reference = entity.GetStencilDepth();
   options.stencil_compare = CompareFunction::kEqual;
   options.stencil_operation = StencilOperation::kIncrementClamp;
@@ -182,7 +180,8 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
 
   Command cmd;
   cmd.label = "Restore Clip";
-  auto options = OptionsFromPassAndEntity(pass, entity);
+  auto options = OptionsFromPass(pass);
+  options.blend_mode = BlendMode::kDestination;
   options.stencil_compare = CompareFunction::kLess;
   options.stencil_operation = StencilOperation::kSetToReferenceValue;
   options.primitive_type = PrimitiveType::kTriangleStrip;
@@ -204,7 +203,6 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo info;
   info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
-  info.color = Color::SkyBlue();
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(info));
 
   pass.AddCommand(std::move(cmd));

@@ -94,9 +94,6 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsMemorylessTextures() const override;
 
   // |Capabilities|
-  bool SupportsPipelinesWithNoColorAttachments() const override;
-
-  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
 
   // |Capabilities|
