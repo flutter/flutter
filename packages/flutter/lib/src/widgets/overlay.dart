@@ -218,9 +218,12 @@ class OverlayEntry implements Listenable {
     assert(_overlay == null, 'An OverlayEntry must first be removed from the Overlay before dispose is called.');
     _disposedByOwner = true;
     if (!mounted) {
+      // If we're still mounted when disposed, then this will be disposed in
+      // _didUnmount, to allow notifications to occur until the entry is
+      // unmounted.
       _overlayEntryStateNotifier?.dispose();
+      _overlayEntryStateNotifier = null;
     }
-    _overlayEntryStateNotifier = null;
   }
 
   @override
@@ -337,9 +340,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 
   @override
   void dispose() {
-    if (widget.entry._overlayEntryStateNotifier != null) {
-      widget.entry._overlayEntryStateNotifier!.value = null;
-    }
+    widget.entry._overlayEntryStateNotifier?.value = null;
     widget.entry._didUnmount();
     _sortedTheaterSiblings = null;
     super.dispose();
