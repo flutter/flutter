@@ -8,13 +8,6 @@ import 'framework.dart';
 import 'navigator.dart';
 import 'routes.dart';
 
-/// A callback type for informing that a navigation pop has been invoked,
-/// whether or not it was handled successfully.
-///
-/// Accepts a didPop boolean indicating whether or not back navigation
-/// succeeded.
-typedef PopInvokedCallback = void Function(bool didPop);
-
 /// Manages system back gestures.
 ///
 /// The [canPop] parameter can be used to disable system back gestures. Defaults
@@ -138,27 +131,4 @@ class _PopScopeState extends State<PopScope> implements PopEntry {
 
   @override
   Widget build(BuildContext context) => widget.child;
-}
-
-/// Allows listening to and preventing pops.
-///
-/// Can be registered in [ModalRoute] to listen to pops with [onPopInvoked] or
-/// to enable/disable them with [canPopNotifier].
-///
-/// See also:
-///
-///  * [PopScope], which provides similar functionality in a widget.
-///  * [ModalRoute.registerPopEntry], which unregisters instances of this.
-///  * [ModalRoute.unregisterPopEntry], which unregisters instances of this.
-abstract class PopEntry {
-  /// {@macro flutter.widgets.PopScope.onPopInvoked}
-  PopInvokedCallback? get onPopInvoked;
-
-  /// {@macro flutter.widgets.PopScope.canPop}
-  ValueListenable<bool> get canPopNotifier;
-
-  @override
-  String toString() {
-    return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvoked';
-  }
 }

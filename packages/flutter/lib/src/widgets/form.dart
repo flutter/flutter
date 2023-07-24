@@ -13,6 +13,7 @@ import 'navigator.dart';
 import 'pop_scope.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
+import 'routes.dart';
 import 'will_pop_scope.dart';
 
 // Duration for delay before announcement in IOS so that the announcement won't be interrupted.

@@ -21,7 +21,6 @@ import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 import 'page_storage.dart';
-import 'pop_scope.dart';
 import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'scroll_controller.dart';
@@ -1530,22 +1529,22 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return super.willPop();
   }
 
-  /// Returns [RoutePopDisposition.doNotPop] if any of the [PopScope] widgets
-  /// registered with [registerPopEntry] have [PopScope.canPop] set to
+  /// Returns [RoutePopDisposition.doNotPop] if any of the [PopEntry] instances
+  /// registered with [registerPopEntry] have [PopEntry.canPopNotifier] set to
   /// false.
   ///
   /// Typically this method is not overridden because applications usually
   /// don't create modal routes directly, they use higher level primitives
-  /// like [showDialog]. The scoped [PopScope] list makes it possible
-  /// for ModalRoute descendants to collectively define the value of
+  /// like [showDialog]. The scoped [PopEntry] list makes it possible for
+  /// ModalRoute descendants to collectively define the value of
   /// [popDisposition].
   ///
   /// See also:
   ///
   ///  * [Form], which provides an `onPopInvoked` callback that is similar.
-  ///  * [registerPopEntry], which adds a [PopScope] to the list this method
+  ///  * [registerPopEntry], which adds a [PopEntry] to the list this method
   ///    checks.
-  ///  * [unregisterPopEntry], which removes a [PopScope] from the list this
+  ///  * [unregisterPopEntry], which removes a [PopEntry] from the list this
   ///    method checks.
   @override
   RoutePopDisposition get popDisposition {
@@ -1609,12 +1608,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     _willPopCallbacks.remove(callback);
   }
 
-  /// Registers the existence of a [PopScope] widget in the route.
+  /// Registers the existence of a [PopEntry] in the route.
   ///
-  /// [PopScope] widgets registered in this way will have their
-  /// [PopScope.onPopInvoked] callbacks called when a route is popped or a pop is
-  /// attempted. They will also be able to block pop operations with
-  /// [PopScope.canPop] through this route's [popDisposition] method.
+  /// [PopEntry] instances registered in this way will have their
+  /// [PopEntry.onPopInvoked] callbacks called when a route is popped or a pop
+  /// is attempted. They will also be able to block pop operations with
+  /// [PopEntry.canPopNotifier] through this route's [popDisposition] method.
   ///
   /// See also:
   ///
@@ -1625,7 +1624,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     _updateSystemNavigator();
   }
 
-  /// Unregisters a [PopScope] widget in the route's widget subtree.
+  /// Unregisters a [PopEntry] in the route's widget subtree.
   ///
   /// See also:
   ///
@@ -2259,3 +2258,33 @@ typedef RoutePageBuilder = Widget Function(BuildContext context, Animation<doubl
 ///
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
 typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
+
+/// A callback type for informing that a navigation pop has been invoked,
+/// whether or not it was handled successfully.
+///
+/// Accepts a didPop boolean indicating whether or not back navigation
+/// succeeded.
+typedef PopInvokedCallback = void Function(bool didPop);
+
+/// Allows listening to and preventing pops.
+///
+/// Can be registered in [ModalRoute] to listen to pops with [onPopInvoked] or
+/// to enable/disable them with [canPopNotifier].
+///
+/// See also:
+///
+///  * [PopScope], which provides similar functionality in a widget.
+///  * [ModalRoute.registerPopEntry], which unregisters instances of this.
+///  * [ModalRoute.unregisterPopEntry], which unregisters instances of this.
+abstract class PopEntry {
+  /// {@macro flutter.widgets.PopScope.onPopInvoked}
+  PopInvokedCallback? get onPopInvoked;
+
+  /// {@macro flutter.widgets.PopScope.canPop}
+  ValueListenable<bool> get canPopNotifier;
+
+  @override
+  String toString() {
+    return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvoked';
+  }
+}
