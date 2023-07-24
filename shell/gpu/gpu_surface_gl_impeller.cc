@@ -108,8 +108,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
 
         auto cull_rect =
             surface->GetTargetRenderPassDescriptor().GetRenderTargetSize();
-
-        impeller::DlDispatcher impeller_dispatcher;
+        impeller::Rect dl_cull_rect = impeller::Rect::MakeSize(cull_rect);
+        impeller::DlDispatcher impeller_dispatcher(dl_cull_rect);
         display_list->Dispatch(
             impeller_dispatcher,
             SkIRect::MakeWH(cull_rect.width, cull_rect.height));
