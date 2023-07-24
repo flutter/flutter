@@ -81,6 +81,9 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
             // It's possible to receive a NavigationNotification during a build,
             // so wait until the next frame to call setState.
             SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+              if (!mounted) {
+                return;
+              }
               setState(() {
                 _canPop = nextCanPop;
               });
