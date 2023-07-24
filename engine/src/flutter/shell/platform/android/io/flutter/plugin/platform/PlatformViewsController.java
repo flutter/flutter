@@ -254,6 +254,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             if (embeddedView != null) {
               contextToEmbeddedView.remove(embeddedView.getContext());
             }
+            vdController.dispose();
             vdControllers.remove(viewId);
             return;
           }
