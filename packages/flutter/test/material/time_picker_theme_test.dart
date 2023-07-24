@@ -242,7 +242,7 @@ void main() {
     expect(
       dial,
       paints
-        ..circle(color: defaultTheme.colorScheme.surfaceVariant.withOpacity(0.08)) // Dial background color.
+        ..circle(color: defaultTheme.colorScheme.surfaceVariant) // Dial background color.
         ..circle(color: Color(defaultTheme.colorScheme.primary.value)), // Dial hand color.
     );
 

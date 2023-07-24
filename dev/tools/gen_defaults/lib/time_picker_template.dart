@@ -132,7 +132,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dialBackgroundColor {
-    return ${componentColor(dialComponent)}.withOpacity(_colors.brightness == Brightness.dark ? 0.12 : 0.08);
+    return ${componentColor(dialComponent)};
   }
 
   @override
