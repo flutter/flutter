@@ -34,6 +34,8 @@ impeller_shaders("entity_shaders") {
     "shaders/blending/blend.vert",
     "shaders/border_mask_blur.frag",
     "shaders/border_mask_blur.vert",
+    "shaders/clip.frag",
+    "shaders/clip.vert",
     "shaders/color_matrix_color_filter.frag",
     "shaders/color_matrix_color_filter.vert",
     "shaders/conical_gradient_fill.frag",

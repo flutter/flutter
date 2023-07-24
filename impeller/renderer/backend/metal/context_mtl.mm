@@ -65,7 +65,6 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetSupportsReadFromResolve(true)
       .SetSupportsReadFromOnscreenTexture(true)
       .SetSupportsMemorylessTextures(true)
-      .SetSupportsPipelinesWithNoColorAttachments(true)
       .Build();
 }
 

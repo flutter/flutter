@@ -431,7 +431,6 @@ bool CapabilitiesVK::SupportsReadFromOnscreenTexture() const {
   return false;
 }
 
-// |Capabilities|
 bool CapabilitiesVK::SupportsDecalTileMode() const {
   return true;
 }
@@ -439,11 +438,6 @@ bool CapabilitiesVK::SupportsDecalTileMode() const {
 // |Capabilities|
 bool CapabilitiesVK::SupportsMemorylessTextures() const {
   return supports_memoryless_textures_;
-}
-
-// |Capabilities|
-bool CapabilitiesVK::SupportsPipelinesWithNoColorAttachments() const {
-  return false;
 }
 
 // |Capabilities|
