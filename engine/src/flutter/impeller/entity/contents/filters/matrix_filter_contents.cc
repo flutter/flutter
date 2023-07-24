@@ -34,11 +34,45 @@ std::optional<Entity> MatrixFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  auto& transform = is_subpass_ ? effect_transform : entity.GetTransformation();
-  snapshot->transform = transform *           //
-                        matrix_ *             //
-                        transform.Invert() *  //
-                        snapshot->transform;
+  if (is_subpass_) {
+    // There are two special quirks with how Matrix filters behave when used as
+    // subpass backdrop filters:
+    //
+    // 1. For subpass backdrop filters, the snapshot transform is always just a
+    //    translation that positions the parent pass texture correctly relative
+    //    to the subpass texture. However, this translation always needs to be
+    //    applied in screen space.
+    //
+    //    Since we know the snapshot transform will always have an identity
+    //    basis in this case, we safely reverse the order and apply the filter's
+    //    matrix within the snapshot transform space.
+    //
+    // 2. The filter's matrix needs to be applied within the space defined by
+    //    the scene's current transformation matrix (CTM). For example: If the
+    //    CTM is scaled up, then translations applied by the matrix should be
+    //    magnified accordingly.
+    //
+    //    To accomplish this, we sandwitch the filter's matrix within the CTM in
+    //    both cases. But notice that for the subpass backdrop filter case, we
+    //    use the "effect transform" instead of the Entity's transform!
+    //
+    //    That's because in the subpass backdrop filter case, the Entity's
+    //    transform isn't actually the captured CTM of the scene like it usually
+    //    is; instead, it's just a screen space translation that offsets the
+    //    backdrop texture (as mentioned above). And so we sneak the subpass's
+    //    captured CTM in through the effect transform.
+    //
+
+    snapshot->transform = snapshot->transform *  //
+                          effect_transform *     //
+                          matrix_ *              //
+                          effect_transform.Invert();
+  } else {
+    snapshot->transform = entity.GetTransformation() *           //
+                          matrix_ *                              //
+                          entity.GetTransformation().Invert() *  //
+                          snapshot->transform;
+  }
   snapshot->sampler_descriptor = sampler_descriptor_;
   return Entity::FromSnapshot(snapshot, entity.GetBlendMode(),
                               entity.GetStencilDepth());
