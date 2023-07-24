@@ -96,10 +96,43 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no SnackBarThemeData returns defaults', (WidgetTester tester) async {
+  testWidgets('Material2 - Passing no SnackBarThemeData returns defaults', (WidgetTester tester) async {
     const String text = 'I am a snack bar.';
-    final ThemeData theme = ThemeData();
-    final bool material3 = theme.useMaterial3;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text(text),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material material = _getSnackBarMaterial(tester);
+    final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
+
+    expect(content.text.style, Typography.material2018().white.titleMedium);
+    expect(material.color, const Color(0xFF333333));
+    expect(material.elevation, 6.0);
+    expect(material.shape, null);
+  });
+
+  testWidgets('Material3 - Passing no SnackBarThemeData returns defaults', (WidgetTester tester) async {
+    const String text = 'I am a snack bar.';
+    final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(MaterialApp(
       theme: theme,
       home: Scaffold(
@@ -126,10 +159,8 @@ void main() {
     final Material material = _getSnackBarMaterial(tester);
     final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
 
-    expect(content.text.style, material3
-      ? Typography.material2021().englishLike.bodyMedium?.merge(Typography.material2021().black.bodyMedium).copyWith(color: theme.colorScheme.onInverseSurface, decorationColor: theme.colorScheme.onSurface)
-      : Typography.material2018().white.titleMedium);
-    expect(material.color, material3 ? theme.colorScheme.inverseSurface : const Color(0xFF333333));
+    expect(content.text.style, Typography.material2021().englishLike.bodyMedium?.merge(Typography.material2021().black.bodyMedium).copyWith(color: theme.colorScheme.onInverseSurface, decorationColor: theme.colorScheme.onSurface));
+    expect(material.color, theme.colorScheme.inverseSurface);
     expect(material.elevation, 6.0);
     expect(material.shape, null);
   });

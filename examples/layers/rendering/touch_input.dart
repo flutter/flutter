@@ -8,6 +8,8 @@
 import 'package:flutter/material.dart'; // Imported just for its color palette.
 import 'package:flutter/rendering.dart';
 
+import 'src/binding.dart';
+
 // Material design colors. :p
 List<Color> _kColors = <Color>[
   Colors.teal,
@@ -133,5 +135,5 @@ void main() {
     ..left = 20.0;
 
   // Finally, we attach the render tree we've built to the screen.
-  RenderingFlutterBinding(root: stack).scheduleFrame();
+  ViewRenderingFlutterBinding(root: stack).scheduleFrame();
 }

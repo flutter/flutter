@@ -15,7 +15,7 @@ void main() {
         const ActionIconThemeData().copyWith().hashCode);
   });
 
-  testWidgets('ActionIconThemeData copyWith overrides all properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ActionIconThemeData copyWith overrides all properties', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/126762.
     Widget originalButtonBuilder(BuildContext context) {
       return const SizedBox();
