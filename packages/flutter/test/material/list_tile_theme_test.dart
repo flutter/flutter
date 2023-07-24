@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 
 class TestIcon extends StatefulWidget {
@@ -80,7 +81,7 @@ void main() {
     expect(themeData.titleAlignment, null);
   });
 
-  testWidgets('Default ListTileThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default ListTileThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ListTileThemeData().debugFillProperties(builder);
 
@@ -92,7 +93,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('ListTileThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListTileThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ListTileThemeData(
       dense: true,
@@ -147,7 +148,7 @@ void main() {
     );
   });
 
-  testWidgets('ListTileTheme backwards compatibility constructor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListTileTheme backwards compatibility constructor', (WidgetTester tester) async {
     late ListTileThemeData theme;
 
     await tester.pumpWidget(
@@ -197,7 +198,7 @@ void main() {
     expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);
   });
 
-  testWidgets('ListTileTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListTileTheme', (WidgetTester tester) async {
     final Key listTileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key subtitleKey = UniqueKey();
@@ -333,7 +334,7 @@ void main() {
     expect(trailingOffset.dy - titleOffset.dy, 6);
   });
 
-  testWidgets('ListTileTheme colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListTileTheme colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
     final Key leadingKey = UniqueKey();
     final Key trailingKey = UniqueKey();
 
@@ -393,7 +394,7 @@ void main() {
     expect(textColor(trailingKey), theme.disabledColor);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     "ListTile respects ListTileTheme's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle",
     (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
@@ -436,7 +437,7 @@ void main() {
     expect(trailing.text.style!.fontSize, 15.0);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     "ListTile's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle are overridden by ListTile properties",
     (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
@@ -486,7 +487,7 @@ void main() {
     expect(trailing.text.style!.fontSize, 18.0);
   });
 
-  testWidgets("ListTile respects ListTileTheme's tileColor & selectedTileColor", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("ListTile respects ListTileTheme's tileColor & selectedTileColor", (WidgetTester tester) async {
     late ListTileThemeData theme;
     bool isSelected = false;
 
@@ -526,7 +527,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: theme.selectedTileColor));
   });
 
-  testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (WidgetTester tester) async {
     bool isSelected = false;
     final Color tileColor = Colors.green.shade500;
     final Color selectedTileColor = Colors.red.shade500;
@@ -568,7 +569,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
-  testWidgets('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/106303
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -601,7 +602,7 @@ void main() {
     expect(inkWellBorder, shapeBorder);
   });
 
-  testWidgets('ListTile respects MaterialStateColor LisTileTheme.textColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListTile respects MaterialStateColor LisTileTheme.textColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -661,7 +662,7 @@ void main() {
     expect(title.text.style!.color, selectedColor);
   });
 
-  testWidgets('ListTile respects MaterialStateColor LisTileTheme.iconColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListTile respects MaterialStateColor LisTileTheme.iconColor', (WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -720,7 +721,7 @@ void main() {
     expect(iconColor(leadingKey), selectedColor);
   });
 
-  testWidgets('ListTileThemeData copyWith overrides all properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListTileThemeData copyWith overrides all properties', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/119734
 
     const ListTileThemeData original = ListTileThemeData(
@@ -782,7 +783,7 @@ void main() {
     expect(copy.titleAlignment, ListTileTitleAlignment.top);
   });
 
-  testWidgets('ListTileTheme.titleAlignment is overridden by ListTile.titleAlignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListTileTheme.titleAlignment is overridden by ListTile.titleAlignment', (WidgetTester tester) async {
     final Key leadingKey = GlobalKey();
     final Key trailingKey = GlobalKey();
     const String titleText = '\nHeadline Text\n';
@@ -818,7 +819,7 @@ void main() {
     expect(trailingOffset.dy - tileOffset.dy, 8.0);
   });
 
-  testWidgets('ListTileTheme.merge supports all properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListTileTheme.merge supports all properties', (WidgetTester tester) async {
     Widget buildFrame() {
       return MaterialApp(
         theme: ThemeData(
