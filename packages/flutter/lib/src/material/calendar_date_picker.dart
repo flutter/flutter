@@ -267,8 +267,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   }
 
   bool _isSelectable(DateTime date) {
-    return widget.selectableDayPredicate == null ||
-        widget.selectableDayPredicate!.call(date);
+    return widget.selectableDayPredicate == null || widget.selectableDayPredicate!.call(date);
   }
 
   Widget _buildPicker() {
