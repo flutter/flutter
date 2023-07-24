@@ -2,14 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js' as js;
+import 'dart:js_interop';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+@JS('window')
+external _DomWindow get _domWindow;
+
+@JS()
+@staticInterop
+class _DomWindow {}
+
+extension _DomWindowExtension on _DomWindow {
+  @JS('_flutter_assetManifestBytes')
+  external List<int>? get _assetManifestAsByteList;
+}
+
 Future<AssetManifest>? _precachedAssetManifest;
-final List<int>? _assetManifestContents =
-  js.context['_flutter_assetManifestAsByteList'] as List<int>?;
 
 /// Loads the contents of the asset manifest generated at build time.
 ///
@@ -20,9 +30,8 @@ Future<AssetManifest> loadAssetManifest(AssetBundle bundle) {
   if (_precachedAssetManifest != null) {
     return _precachedAssetManifest!;
   }
-
-  if (_assetManifestContents != null) {
-    final List<int> assetManifestAsByteList = _assetManifestContents!;
+  final List<int>? assetManifestAsByteList = _domWindow._assetManifestAsByteList;
+  if (assetManifestAsByteList != null) {
     final ByteData assetManifestByteData = ByteData.view(
       Uint8List.fromList(assetManifestAsByteList)
       .buffer

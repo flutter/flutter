@@ -8,8 +8,8 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '_asset_manifest_contents_io.dart'
-  if (dart.library.js) '_asset_manifest_contents_web.dart';
+import '_load_asset_manifest_io.dart'
+  if (dart.library.js) '_load_asset_manifest_web.dart';
 import 'image_provider.dart';
 
 /// A screen with a device-pixel ratio strictly less than this value is
