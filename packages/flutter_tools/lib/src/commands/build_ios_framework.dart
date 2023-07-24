@@ -272,22 +272,24 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
 
       // Copy the native assets.
-      final ProcessResult rsyncResult =
-          await globals.processManager.run(<Object>[
-        'rsync',
-        '-av',
-        '--filter',
-        '- .DS_Store',
-        '--filter',
-        '- native_assets.yaml',
-        outputDirectory.childDirectory('../../native_assets/ios/').path,
-        modeDirectory.path,
-      ]);
-      if (rsyncResult.exitCode != 0) {
-        throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
+      final Directory nativeAssetsDirectory =
+          outputDirectory.childDirectory('../../native_assets/ios/');
+      if (await nativeAssetsDirectory.exists()) {
+        final ProcessResult rsyncResult =
+            await globals.processManager.run(<Object>[
+          'rsync',
+          '-av',
+          '--filter',
+          '- .DS_Store',
+          '--filter',
+          '- native_assets.yaml',
+          nativeAssetsDirectory.path,
+          modeDirectory.path,
+        ]);
+        if (rsyncResult.exitCode != 0) {
+          throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
+        }
       }
-      globals.logger.printTrace(rsyncResult.stderr as String);
-      globals.logger.printTrace(rsyncResult.stdout as String);
 
       try {
         // Delete the intermediaries since they would have been copied into our

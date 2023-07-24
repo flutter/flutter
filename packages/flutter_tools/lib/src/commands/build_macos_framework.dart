@@ -98,19 +98,23 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       globals.logger.printStatus(' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
 
       // Copy the native assets.
-      final ProcessResult rsyncResult =
-          await globals.processManager.run(<Object>[
-        'rsync',
-        '-av',
-        '--filter',
-        '- .DS_Store',
-        '--filter',
-        '- native_assets.yaml',
-        outputDirectory.childDirectory('../../native_assets/macos/').path,
-        modeDirectory.path,
-      ]);
-      if (rsyncResult.exitCode != 0) {
-        throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
+      final Directory nativeAssetsDirectory =
+          outputDirectory.childDirectory('../../native_assets/macos/');
+      if (await nativeAssetsDirectory.exists()) {
+        final ProcessResult rsyncResult =
+            await globals.processManager.run(<Object>[
+          'rsync',
+          '-av',
+          '--filter',
+          '- .DS_Store',
+          '--filter',
+          '- native_assets.yaml',
+          nativeAssetsDirectory.path,
+          modeDirectory.path,
+        ]);
+        if (rsyncResult.exitCode != 0) {
+          throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
+        }
       }
 
       // Delete the intermediaries since they would have been copied into our
