@@ -9,8 +9,6 @@
 #include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
-#include "third_party/skia/include/gpu/GrRecordingContext.h"
 
 namespace flutter_runner {
 namespace {
@@ -489,10 +487,7 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
       canvas->setMatrix(SkMatrix::I());
       canvas->clear(SK_ColorTRANSPARENT);
       canvas->drawPicture(layer->second.picture);
-      if (GrDirectContext* direct_context =
-              GrAsDirectContext(canvas->recordingContext())) {
-        return direct_context->flushAndSubmit();
-      }
+      canvas->flush();
     }
   }
 
