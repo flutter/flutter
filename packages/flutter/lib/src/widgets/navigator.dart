@@ -2460,7 +2460,7 @@ class Navigator extends StatefulWidget {
   ///
   /// If there is no [Navigator] in scope, returns false.
   ///
-  /// Does not consider [PopScope].
+  /// Does not consider [PopEntry].
   /// {@endtemplate}
   ///
   /// See also:
