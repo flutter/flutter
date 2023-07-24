@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const List<String> _pizzaTopings = <String>[
+const List<String> _pizzaToppings = <String>[
   'Avocado',
   'Tomato',
   'Cheese',
@@ -37,12 +37,13 @@ class EditableChipFieldExample extends StatefulWidget {
   const EditableChipFieldExample({super.key});
 
   @override
-  EditableChipFieldExampleState createState() => EditableChipFieldExampleState();
+  EditableChipFieldExampleState createState() =>
+      EditableChipFieldExampleState();
 }
 
 class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
   final FocusNode _chipFocusNode = FocusNode();
-  Set<String> _toppings = <String>{ _pizzaTopings.first };
+  Set<String> _toppings = <String>{_pizzaToppings.first};
   List<String> _suggestions = <String>[];
 
   @override
@@ -86,8 +87,8 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
     final List<String> results = await _suggestionCallback(value);
     setState(() {
       _suggestions = results
-        .where((String topping) => !_toppings.contains(topping))
-        .toList();
+          .where((String topping) => !_toppings.contains(topping))
+          .toList();
     });
   }
 
@@ -153,7 +154,7 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
 
   FutureOr<List<String>> _suggestionCallback(String text) {
     if (text.isNotEmpty) {
-      return _pizzaTopings.where((String topping) {
+      return _pizzaToppings.where((String topping) {
         return topping.toLowerCase().contains(text.toLowerCase());
       }).toList();
     }
@@ -189,7 +190,8 @@ class ChipsInput<T> extends StatefulWidget {
   ChipsInputState<T> createState() => ChipsInputState<T>();
 }
 
-class ChipsInputState<T> extends State<ChipsInput<T>> implements TextInputClient {
+class ChipsInputState<T> extends State<ChipsInput<T>>
+    implements TextInputClient {
   static const int kObjectReplacementChar = 0xFFFE;
 
   FocusNode? _lastChipFocusNode;
@@ -246,7 +248,8 @@ class ChipsInputState<T> extends State<ChipsInput<T>> implements TextInputClient
   AutofillScope? get currentAutofillScope => throw UnimplementedError();
 
   @override
-  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {}
+  void didChangeInputControl(
+      TextInputControl? oldControl, TextInputControl? newControl) {}
 
   @override
   void insertContent(KeyboardInsertedContent content) {}
@@ -358,8 +361,8 @@ class ChipsInputState<T> extends State<ChipsInput<T>> implements TextInputClient
 
   int _countReplacementsInString(String value) {
     return value.codeUnits
-      .where((int ch) => ch == kObjectReplacementChar)
-      .length;
+        .where((int ch) => ch == kObjectReplacementChar)
+        .length;
   }
 
   int get currentReplacementCount => _countReplacements(_value);
@@ -369,7 +372,8 @@ class ChipsInputState<T> extends State<ChipsInput<T>> implements TextInputClient
     final int newChipCount = widget.values.length;
     final int oldChipCount = _countReplacements(currentTextEditingValue);
 
-    String text = String.fromCharCodes(List<int>.filled(newChipCount, kObjectReplacementChar));
+    String text = String.fromCharCodes(
+        List<int>.filled(newChipCount, kObjectReplacementChar));
     if (newChipCount == oldChipCount) {
       text += this.text;
     }
@@ -390,7 +394,8 @@ class TextCaret extends StatefulWidget {
   TextCursorState createState() => TextCursorState();
 }
 
-class TextCursorState extends State<TextCaret> with SingleTickerProviderStateMixin {
+class TextCursorState extends State<TextCaret>
+    with SingleTickerProviderStateMixin {
   final Duration _duration = const Duration(milliseconds: 500);
   bool _displayed = false;
   Timer? _timer;
