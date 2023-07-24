@@ -61,6 +61,7 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    namespace 'com.example.android_embedding_v2_smoke_test'
 }
 
 flutter {
