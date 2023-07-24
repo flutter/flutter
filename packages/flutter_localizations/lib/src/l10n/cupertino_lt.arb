@@ -32,6 +32,6 @@
   "tabSemanticsLabel": "$tabIndex skirtukas iš $tabCount",
   "modalBarrierDismissLabel": "Atsisakyti",
   "searchTextFieldPlaceholderLabel": "Paieška",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "noSpellCheckReplacementsLabel": "Nerasta jokių pakeitimų",
   "menuDismissLabel": "Dismiss menu"
 }

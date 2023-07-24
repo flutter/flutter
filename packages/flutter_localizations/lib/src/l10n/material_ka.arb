@@ -135,11 +135,11 @@
   "bottomSheetLabel": "ქვედა ფურცელი",
   "scrimOnTapHint": "$modalRouteContentName-ის დახურვა",
   "keyboardKeyShift": "ცვლა",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded",
+  "expansionTileExpandedHint": "ორმაგად შეეხეთ ჩასაკეცად",
+  "expansionTileCollapsedHint": "გასაფართოებლად ორჯერ შეეხეთ",
+  "expansionTileExpandedTapHint": "ჩაკეცვა",
+  "expansionTileCollapsedTapHint": "მეტი დეტალებისთვის გააფართოეთ",
+  "expandedHint": "ჩაკეცილია",
+  "collapsedHint": "გაფართოებულია",
   "menuDismissLabel": "Dismiss menu"
 }

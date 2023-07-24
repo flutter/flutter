@@ -137,11 +137,11 @@
   "bottomSheetLabel": "Panel inferior",
   "scrimOnTapHint": "Pechar $modalRouteContentName",
   "keyboardKeyShift": "Maiús",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded",
+  "expansionTileExpandedHint": "toca dúas veces para contraer",
+  "expansionTileCollapsedHint": "tocar dúas veces para despregar",
+  "expansionTileExpandedTapHint": "Contraer",
+  "expansionTileCollapsedTapHint": "Despregar para obter máis detalles",
+  "expandedHint": "Contraído",
+  "collapsedHint": "Despregado",
   "menuDismissLabel": "Dismiss menu"
 }

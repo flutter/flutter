@@ -22,6 +22,6 @@
   "tabSemanticsLabel": "Қойынды: $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Жабу",
   "searchTextFieldPlaceholderLabel": "Іздеу",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "noSpellCheckReplacementsLabel": "Ауыстыратын ешнәрсе табылмады.",
   "menuDismissLabel": "Dismiss menu"
 }

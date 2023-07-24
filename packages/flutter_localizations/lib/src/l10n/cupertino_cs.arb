@@ -32,6 +32,6 @@
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zavřít",
   "searchTextFieldPlaceholderLabel": "Hledat",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "noSpellCheckReplacementsLabel": "Žádná nahrazení nenalezena",
   "menuDismissLabel": "Dismiss menu"
 }

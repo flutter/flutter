@@ -22,6 +22,6 @@
   "tabSemanticsLabel": "$tabCount میں سے $tabIndex ٹیب",
   "modalBarrierDismissLabel": "برخاست کریں",
   "searchTextFieldPlaceholderLabel": "تلاش کریں",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "noSpellCheckReplacementsLabel": "کوئی تبدیلیاں نہیں ملیں",
   "menuDismissLabel": "Dismiss menu"
 }

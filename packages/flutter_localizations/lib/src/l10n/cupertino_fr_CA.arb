@@ -1,4 +1,5 @@
 {
+  "noSpellCheckReplacementsLabel": "Aucun remplacement trouvé",
   "searchTextFieldPlaceholderLabel": "Rechercher",
   "tabSemanticsLabel": "Onglet $tabIndex sur $tabCount",
   "datePickerHourSemanticsLabelOne": "$hour heure",

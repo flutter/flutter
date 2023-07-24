@@ -22,6 +22,6 @@
   "tabSemanticsLabel": "Thẻ $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Bỏ qua",
   "searchTextFieldPlaceholderLabel": "Tìm kiếm",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "noSpellCheckReplacementsLabel": "Không tìm thấy phương án thay thế",
   "menuDismissLabel": "Dismiss menu"
 }

@@ -22,6 +22,6 @@
   "tabSemanticsLabel": "Tab $tabIndex dari $tabCount",
   "modalBarrierDismissLabel": "Tutup",
   "searchTextFieldPlaceholderLabel": "Telusuri",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "noSpellCheckReplacementsLabel": "Penggantian Tidak Ditemukan",
   "menuDismissLabel": "Dismiss menu"
 }

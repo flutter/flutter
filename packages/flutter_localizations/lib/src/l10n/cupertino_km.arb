@@ -22,6 +22,6 @@
   "tabSemanticsLabel": "ផ្ទាំងទី $tabIndex នៃ $tabCount",
   "modalBarrierDismissLabel": "ច្រាន​ចោល",
   "searchTextFieldPlaceholderLabel": "ស្វែងរក",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "noSpellCheckReplacementsLabel": "រកមិនឃើញ​ការជំនួសទេ",
   "menuDismissLabel": "Dismiss menu"
 }

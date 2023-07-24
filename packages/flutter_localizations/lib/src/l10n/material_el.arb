@@ -136,11 +136,11 @@
   "bottomSheetLabel": "Φύλλο κάτω μέρους",
   "scrimOnTapHint": "Κλείσιμο $modalRouteContentName",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded",
+  "expansionTileExpandedHint": "πατήστε δύο φορές για σύμπτυξη",
+  "expansionTileCollapsedHint": "πατήστε δύο φορές για ανάπτυξη",
+  "expansionTileExpandedTapHint": "Σύμπτυξη",
+  "expansionTileCollapsedTapHint": "Ανάπτυξη για περισσότερες λεπτομέρειες",
+  "expandedHint": "Συμπτύχθηκε",
+  "collapsedHint": "Αναπτύχθηκε",
   "menuDismissLabel": "Dismiss menu"
 }

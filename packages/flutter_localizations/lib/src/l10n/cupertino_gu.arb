@@ -22,6 +22,6 @@
   "tabSemanticsLabel": "$tabCountમાંથી $tabIndex ટૅબ",
   "modalBarrierDismissLabel": "છોડી દો",
   "searchTextFieldPlaceholderLabel": "શોધો",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "noSpellCheckReplacementsLabel": "બદલવા માટે કોઈ શબ્દ મળ્યો નથી",
   "menuDismissLabel": "Dismiss menu"
 }

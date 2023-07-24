@@ -1,4 +1,5 @@
 {
+  "noSpellCheckReplacementsLabel": "No replacements found",
   "searchTextFieldPlaceholderLabel": "Search",
   "tabSemanticsLabel": "Tab $tabIndex of $tabCount",
   "datePickerHourSemanticsLabelOne": "$hour o'clock",

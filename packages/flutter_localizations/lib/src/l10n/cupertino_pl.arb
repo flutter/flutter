@@ -28,10 +28,10 @@
   "cutButtonLabel": "Wytnij",
   "copyButtonLabel": "Kopiuj",
   "pasteButtonLabel": "Wklej",
-  "selectAllButtonLabel": "Zaznacz wszystko",
+  "selectAllButtonLabel": "Wybierz wszystkie",
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zamknij",
   "searchTextFieldPlaceholderLabel": "Szukaj",
-  "noSpellCheckReplacementsLabel": "Nie znaleziono zastąpień",
+  "noSpellCheckReplacementsLabel": "Brak wyników zamieniania",
   "menuDismissLabel": "Dismiss menu"
 }
