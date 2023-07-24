@@ -206,6 +206,7 @@ void main() {
               'build',
               buildSubcommand,
               '--$buildMode',
+              if (buildSubcommand == 'ios') '--no-codesign',
             ],
             workingDirectory: exampleDirectory.path,
           );
