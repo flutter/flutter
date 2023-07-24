@@ -1,4 +1,4 @@
-Signature: 65574602eadcc43140973040174479ad
+Signature: ebccb99d4274702738593c16dd63daf4
 
 ====================================================================================================
 LIBRARY: etc1
@@ -3812,7 +3812,6 @@ ORIGIN: ../../../third_party/skia/include/gpu/vk/GrVkTypes.h + ../../../third_pa
 ORIGIN: ../../../third_party/skia/include/ports/SkFontMgr_FontConfigInterface.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/ports/SkImageGeneratorCG.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/ports/SkImageGeneratorWIC.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/SkBitmaskEnum.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkEncodedInfo.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SingleOwner.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/utils/SkNoDrawCanvas.h + ../../../third_party/skia/LICENSE
@@ -3866,6 +3865,7 @@ ORIGIN: ../../../third_party/skia/modules/svg/src/SkSVGValue.cpp + ../../../thir
 ORIGIN: ../../../third_party/skia/src/base/SkArenaAlloc.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkArenaAlloc.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkAutoMalloc.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/base/SkBitmaskEnum.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkLeanWindows.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkMSAN.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkScopeExit.h + ../../../third_party/skia/LICENSE
@@ -4121,7 +4121,6 @@ FILE: ../../../third_party/skia/include/gpu/vk/GrVkTypes.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_FontConfigInterface.h
 FILE: ../../../third_party/skia/include/ports/SkImageGeneratorCG.h
 FILE: ../../../third_party/skia/include/ports/SkImageGeneratorWIC.h
-FILE: ../../../third_party/skia/include/private/SkBitmaskEnum.h
 FILE: ../../../third_party/skia/include/private/SkEncodedInfo.h
 FILE: ../../../third_party/skia/include/private/base/SingleOwner.h
 FILE: ../../../third_party/skia/include/utils/SkNoDrawCanvas.h
@@ -4175,6 +4174,7 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGValue.cpp
 FILE: ../../../third_party/skia/src/base/SkArenaAlloc.cpp
 FILE: ../../../third_party/skia/src/base/SkArenaAlloc.h
 FILE: ../../../third_party/skia/src/base/SkAutoMalloc.h
+FILE: ../../../third_party/skia/src/base/SkBitmaskEnum.h
 FILE: ../../../third_party/skia/src/base/SkLeanWindows.h
 FILE: ../../../third_party/skia/src/base/SkMSAN.h
 FILE: ../../../third_party/skia/src/base/SkScopeExit.h
