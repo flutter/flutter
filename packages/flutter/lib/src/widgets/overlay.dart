@@ -135,7 +135,7 @@ class OverlayEntry implements Listenable {
   /// Whether the [OverlayEntry] is currently mounted in the widget tree.
   ///
   /// The [OverlayEntry] notifies its listeners when this value changes.
-  bool get mounted => _overlayEntryStateNotifier!.value != null;
+  bool get mounted => _overlayEntryStateNotifier?.value != null;
 
   /// The currently mounted `_OverlayEntryWidgetState` built using this [OverlayEntry].
   ValueNotifier<_OverlayEntryWidgetState?>? _overlayEntryStateNotifier = ValueNotifier<_OverlayEntryWidgetState?>(null);
@@ -143,12 +143,12 @@ class OverlayEntry implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(!_disposedByOwner);
-    _overlayEntryStateNotifier!.addListener(listener);
+    _overlayEntryStateNotifier?.addListener(listener);
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    _overlayEntryStateNotifier!.removeListener(listener);
+    _overlayEntryStateNotifier?.removeListener(listener);
   }
 
   OverlayState? _overlay;
@@ -337,7 +337,9 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 
   @override
   void dispose() {
-    widget.entry._overlayEntryStateNotifier!.value = null;
+    if (widget.entry._overlayEntryStateNotifier != null) {
+      widget.entry._overlayEntryStateNotifier!.value = null;
+    }
     widget.entry._didUnmount();
     _sortedTheaterSiblings = null;
     super.dispose();
