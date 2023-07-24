@@ -115,6 +115,7 @@ Future<void> testMain() async {
     );
     await drawTestImageWithPaint(ui.Paint()..imageFilter = colorFilter);
     await matchGoldenFile('ui_filter_colorfilter_as_imagefilter.png', region: region);
+    expect(colorFilter.toString(), 'ColorFilter.mode(Color(0x800000ff), BlendMode.srcOver)');
   });
 
   test('mode color filter', () async {
@@ -124,18 +125,21 @@ Future<void> testMain() async {
     );
     await drawTestImageWithPaint(ui.Paint()..colorFilter = colorFilter);
     await matchGoldenFile('ui_filter_mode_colorfilter.png', region: region);
+    expect(colorFilter.toString(), 'ColorFilter.mode(Color(0x800000ff), BlendMode.srcOver)');
   });
 
   test('linearToSRGBGamma color filter', () async {
     const ui.ColorFilter colorFilter = ui.ColorFilter.linearToSrgbGamma();
     await drawTestImageWithPaint(ui.Paint()..colorFilter = colorFilter);
     await matchGoldenFile('ui_filter_linear_to_srgb_colorfilter.png', region: region);
+    expect(colorFilter.toString(), 'ColorFilter.linearToSrgbGamma()');
   }, skip: isHtml); // HTML renderer hasn't implemented this.
 
   test('srgbToLinearGamma color filter', () async {
     const ui.ColorFilter colorFilter = ui.ColorFilter.srgbToLinearGamma();
     await drawTestImageWithPaint(ui.Paint()..colorFilter = colorFilter);
     await matchGoldenFile('ui_filter_srgb_to_linear_colorfilter.png', region: region);
+    expect(colorFilter.toString(), 'ColorFilter.srgbToLinearGamma()');
   }, skip: isHtml); // HTML renderer hasn't implemented this.
 
   test('matrix color filter', () async {
@@ -147,6 +151,7 @@ Future<void> testMain() async {
     ]);
     await drawTestImageWithPaint(ui.Paint()..colorFilter = sepia);
     await matchGoldenFile('ui_filter_matrix_colorfilter.png', region: region);
+    expect(sepia.toString(), startsWith('ColorFilter.matrix([0.393, 0.769, 0.189, '));
   });
 
   test('invert colors', () async {
