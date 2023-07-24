@@ -730,7 +730,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
                 addendum.add(node.describeForError('The nearest ancestor providing an unbounded width constraint is'));
               }
             }
-            addendum.add(ErrorHint('See also: https://flutter.dev/layout/'));
+            addendum.add(ErrorHint('See also: https://flutter.dev/unbounded-constraints'));
           } else {
             return true;
           }
