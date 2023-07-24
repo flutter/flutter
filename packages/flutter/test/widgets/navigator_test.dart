@@ -4158,18 +4158,18 @@ void main() {
   });
 
   group('Android Predictive Back', () {
-    final List<bool> calls = <bool>[];
+    bool? lastFrameworkHandlesBack;
     setUp(() {
       // Initialize to false. Because this uses a static boolean internally, it
       // is not reset between tests or calls to pumpWidget. Explicitly setting
       // it to false before each test makes them behave deterministically.
       SystemNavigator.setFrameworkHandlesBack(false);
-      calls.clear();
+      lastFrameworkHandlesBack = null;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           if (methodCall.method == 'SystemNavigator.setFrameworkHandlesBack') {
             expect(methodCall.arguments, isA<bool>());
-            calls.add(methodCall.arguments as bool);
+            lastFrameworkHandlesBack = methodCall.arguments as bool;
           }
           return;
         });
@@ -4190,7 +4190,7 @@ void main() {
         )
       );
 
-      expect(calls, hasLength(0));
+      expect(lastFrameworkHandlesBack, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
@@ -4231,54 +4231,43 @@ void main() {
       );
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(0));
-      int lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isTrue);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isTrue);
 
       await tester.tap(find.text('Go back'));
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isTrue);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isTrue);
 
       await tester.tap(find.text('Go to one/one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one - one'), findsOneWidget);
-      // calls doesn't increment when the value is the same.
-      expect(calls, hasLength(lastCallsLength));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
 
       await tester.tap(find.text('Go back'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(lastCallsLength));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
 
       await tester.tap(find.text('Go back'));
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
+      expect(lastFrameworkHandlesBack, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
@@ -4319,55 +4308,43 @@ void main() {
       );
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(0));
-      int lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isTrue);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isTrue);
 
       await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isTrue);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isTrue);
 
       await tester.tap(find.text('Go to one/one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one - one'), findsOneWidget);
-      // calls doesn't increment when the value is the same.
-      expect(calls.last, isTrue);
-      expect(calls, hasLength(lastCallsLength));
+      expect(lastFrameworkHandlesBack, isTrue);
 
       await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(lastCallsLength));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
 
       await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
@@ -4393,26 +4370,21 @@ void main() {
         ),
       );
 
-      expect(calls, hasLength(0));
-      int lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isFalse);
 
       setState(() {
         canPop = false;
       });
       await tester.pump();
 
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isTrue);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isTrue);
 
       setState(() {
         canPop = true;
       });
       await tester.pump();
 
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
@@ -4438,26 +4410,21 @@ void main() {
         ),
       );
 
-      expect(calls, hasLength(1));
-      expect(calls.last, isTrue);
-      int lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isTrue);
 
       setState(() {
         canPop = true;
       });
       await tester.pump();
 
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isFalse);
 
       setState(() {
         canPop = false;
       });
       await tester.pump();
 
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
@@ -4522,53 +4489,43 @@ void main() {
         );
 
         expect(find.text('Home page'), findsOneWidget);
-        expect(calls, hasLength(0));
-        int lastCallsLength = calls.length;
+        expect(lastFrameworkHandlesBack, isFalse);
 
         await tester.tap(find.text('Go to one'));
         await tester.pumpAndSettle();
 
         expect(find.text('Page one'), findsOneWidget);
-        expect(calls, hasLength(greaterThan(lastCallsLength)));
-        expect(calls.last, isTrue);
-        lastCallsLength = calls.length;
+        expect(lastFrameworkHandlesBack, isTrue);
 
         await goBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Home page'), findsOneWidget);
-        expect(calls, hasLength(greaterThan(lastCallsLength)));
-        expect(calls.last, isFalse);
-        lastCallsLength = calls.length;
+        expect(lastFrameworkHandlesBack, isFalse);
 
         await tester.tap(find.text('Go to nested'));
         await tester.pumpAndSettle();
 
         expect(find.text('Nested - home'), findsOneWidget);
-        expect(calls, hasLength(greaterThan(lastCallsLength)));
-        expect(calls.last, isTrue);
-        lastCallsLength = calls.length;
+        expect(lastFrameworkHandlesBack, isTrue);
 
         await tester.tap(find.text('Go to nested/one'));
         await tester.pumpAndSettle();
 
         expect(find.text('Nested - page one'), findsOneWidget);
-        expect(calls, hasLength(lastCallsLength));
-        expect(calls.last, isTrue);
+        expect(lastFrameworkHandlesBack, isTrue);
 
         await goBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Nested - home'), findsOneWidget);
-        expect(calls, hasLength(lastCallsLength));
-        expect(calls.last, isTrue);
+        expect(lastFrameworkHandlesBack, isTrue);
 
         await goBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Home page'), findsOneWidget);
-        expect(calls, hasLength(greaterThan(lastCallsLength)));
-        expect(calls.last, isFalse);
+        expect(lastFrameworkHandlesBack, isFalse);
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
         skip: isBrowser, // [intended] only non-web Android supports predictive back.
@@ -4623,62 +4580,51 @@ void main() {
       );
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(0));
-      int lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isTrue);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isTrue);
 
       await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isFalse);
 
       await tester.tap(find.text('Go to nested'));
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - home'), findsOneWidget);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isTrue);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isTrue);
 
       await tester.tap(find.text('Go to nested/popscope'));
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - PopScope'), findsOneWidget);
-      expect(calls, hasLength(lastCallsLength));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
 
       // Going back works because canPop is true.
       await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - home'), findsOneWidget);
-      expect(calls, hasLength(lastCallsLength));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
 
       await tester.tap(find.text('Go to nested/popscope'));
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - PopScope'), findsOneWidget);
-      expect(calls, hasLength(lastCallsLength));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
 
       setState(() {
         canPop = false;
       });
       await tester.pumpAndSettle();
 
-      expect(calls, hasLength(lastCallsLength));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
 
       // Now going back doesn't work because canPop is false, but it still
       // has no effect on the system navigator due to all of the other routes.
@@ -4686,31 +4632,27 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - PopScope'), findsOneWidget);
-      expect(calls, hasLength(lastCallsLength));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
 
       setState(() {
         canPop = true;
       });
       await tester.pump();
 
-      expect(calls, hasLength(lastCallsLength));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
 
       // And going back works again after switching canPop back to true.
       await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - home'), findsOneWidget);
-      expect(calls, hasLength(lastCallsLength));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
 
       await simulateSystemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
+      expect(lastFrameworkHandlesBack, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
@@ -4796,43 +4738,31 @@ void main() {
         );
 
         expect(find.text('Home page'), findsOneWidget);
-        expect(calls, hasLength(0));
-        int lastCallsLength = calls.length;
+        expect(lastFrameworkHandlesBack, isFalse);
 
         await tester.tap(find.text('Go to _Page.one'));
         await tester.pumpAndSettle();
 
         expect(find.text('Page one'), findsOneWidget);
-        expect(calls.last, isTrue);
-        // The precise number of calls is an implementation detail. Some cases
-        // may result in diffing the navigation stack and cause multiple calls.
-        // So, only test that the number of calls has increased, not the exact
-        // number.
-        expect(calls, hasLength(greaterThan(lastCallsLength)));
-        lastCallsLength = calls.length;
+        expect(lastFrameworkHandlesBack, isTrue);
 
         await simulateSystemBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Home page'), findsOneWidget);
-        expect(calls, hasLength(greaterThan(lastCallsLength)));
-        expect(calls.last, isFalse);
-        lastCallsLength = calls.length;
+        expect(lastFrameworkHandlesBack, isFalse);
 
         await tester.tap(find.text('Go to _Page.noPop'));
         await tester.pumpAndSettle();
 
         expect(find.text('Cannot pop page'), findsOneWidget);
-        expect(calls, hasLength(greaterThan(lastCallsLength)));
-        expect(calls.last, isTrue);
-        lastCallsLength = calls.length;
+        expect(lastFrameworkHandlesBack, isTrue);
 
         await simulateSystemBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Cannot pop page'), findsOneWidget);
-        expect(calls.last, isTrue);
-        expect(calls, hasLength(lastCallsLength));
+        expect(lastFrameworkHandlesBack, isTrue);
 
         // Circumvent "Cannot pop page" by directly modifying pages.
         builderSetState(() {
@@ -4841,9 +4771,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Home page'), findsOneWidget);
-        expect(calls, hasLength(greaterThan(lastCallsLength)));
-        expect(calls.last, isFalse);
-        lastCallsLength = calls.length;
+        expect(lastFrameworkHandlesBack, isFalse);
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
         skip: isBrowser, // [intended] only non-web Android supports predictive back.
@@ -4927,17 +4855,14 @@ void main() {
 
         expect(find.text('Home page'), findsNothing);
         expect(find.text('Page one'), findsOneWidget);
-        expect(calls.last, isTrue);
-        expect(calls, hasLength(greaterThan(0)));
-        final int lastCallsLength = calls.length;
+        expect(lastFrameworkHandlesBack, isTrue);
 
         await simulateSystemBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Home page'), findsOneWidget);
         expect(find.text('Page one'), findsNothing);
-        expect(calls.last, isFalse);
-        expect(calls, hasLength(greaterThan(lastCallsLength)));
+        expect(lastFrameworkHandlesBack, isFalse);
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
         skip: isBrowser, // [intended] only non-web Android supports predictive back.

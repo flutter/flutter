@@ -8,11 +8,6 @@ import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
 abstract final class SystemNavigator {
-  // This defaults to null because it can't be assumed that the engine is in a
-  // certain state when the app starts. After a hot reload, for example, the
-  // platform will retain its state while this boolean will be reset.
-  static bool? _frameworkHandlesBack;
-
   /// Inform the platform of whether or not the Flutter framework will handle
   /// back events.
   ///
@@ -26,9 +21,6 @@ abstract final class SystemNavigator {
   ///    [migration guide](https://developer.android.com/guide/navigation/predictive-back-gesture)
   ///    for predictive back in native Android apps.
   static Future<void> setFrameworkHandlesBack(bool frameworkHandlesBack) async {
-    if (frameworkHandlesBack == _frameworkHandlesBack) {
-      return;
-    }
     // Currently, this method call is only relevant on Android.
     if (kIsWeb) {
       return;
@@ -41,18 +33,10 @@ abstract final class SystemNavigator {
       case TargetPlatform.windows:
         return;
       case TargetPlatform.android:
-        // Set the local boolean before the call is made, so that duplicate
-        // calls to this method don't cause duplicate calls to the platform.
-        _frameworkHandlesBack = frameworkHandlesBack;
-        try {
-          await SystemChannels.platform.invokeMethod<void>(
-            'SystemNavigator.setFrameworkHandlesBack',
-            frameworkHandlesBack,
-          );
-        } catch (error) {
-          _frameworkHandlesBack = !frameworkHandlesBack;
-          rethrow;
-        }
+        return SystemChannels.platform.invokeMethod<void>(
+          'SystemNavigator.setFrameworkHandlesBack',
+          frameworkHandlesBack,
+        );
     }
   }
 
