@@ -1103,8 +1103,7 @@ mixin WidgetInspectorService {
               renderObject.markNeedsPaint();
               renderObject.visitChildren(markTreeNeedsPaint);
             }
-            final RenderObject root = RendererBinding.instance.renderView;
-            markTreeNeedsPaint(root);
+            RendererBinding.instance.renderViews.forEach(markTreeNeedsPaint);
           } else {
             debugOnProfilePaint = null;
           }
