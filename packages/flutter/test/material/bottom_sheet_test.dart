@@ -2045,11 +2045,11 @@ void main() {
       );
     });
 
-    group('scrollControlledMaxHeightRatio', () {
+    group('scrollControlDisabledMaxHeightRatio', () {
       Future<void> test(
         WidgetTester tester,
         bool isScrollControlled,
-        double scrollControlledMaxHeightRatio,
+        double scrollControlDisabledMaxHeightRatio,
       ) async {
         await tester.pumpWidget(
           MaterialApp(
@@ -2062,7 +2062,7 @@ void main() {
                       showModalBottomSheet<void>(
                         context: context,
                         isScrollControlled: isScrollControlled,
-                        scrollControlledMaxHeightRatio: scrollControlledMaxHeightRatio,
+                        scrollControlDisabledMaxHeightRatio: scrollControlDisabledMaxHeightRatio,
                         builder: (BuildContext context) => const SizedBox.expand(
                           child: Text('BottomSheet'),
                         ),
@@ -2080,7 +2080,7 @@ void main() {
           tester.getRect(find.text('BottomSheet')),
           Rect.fromLTRB(
             80,
-            600 * (isScrollControlled ? 0 : (1 - scrollControlledMaxHeightRatio)),
+            600 * (isScrollControlled ? 0 : (1 - scrollControlDisabledMaxHeightRatio)),
             720,
             600,
           ),
