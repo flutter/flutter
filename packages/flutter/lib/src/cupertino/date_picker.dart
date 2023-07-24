@@ -492,8 +492,11 @@ class CupertinoDatePicker extends StatefulWidget {
           }
         }
       case _PickerColumnType.month:
-        for (int i = 1; i <=12; i++) {
-          final String month = localizations.datePickerMonth(i, standaloneMonth);
+        for (int i = 1; i <= 12; i++) {
+          String month = localizations.datePickerMonth(i);
+          if (standaloneMonth) {
+            month = localizations.datePickerStandaloneMonth(i);
+          }
           if (longestText.length < month.length) {
             longestText = month;
           }
@@ -1281,11 +1284,12 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           final int month = index + 1;
           final bool isInvalidMonth = (widget.minimumDate?.year == selectedYear && widget.minimumDate!.month > month)
                                    || (widget.maximumDate?.year == selectedYear && widget.maximumDate!.month < month);
+          final String monthName = (widget.mode == CupertinoDatePickerMode.monthYear) ? localizations.datePickerStandaloneMonth(month) : localizations.datePickerMonth(month);
 
           return itemPositioningBuilder(
             context,
             Text(
-              localizations.datePickerMonth(month, widget.mode == CupertinoDatePickerMode.monthYear),
+              monthName,
               style: _themeTextStyle(context, isValid: !isInvalidMonth),
             ),
           );
@@ -1614,11 +1618,12 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
           final int month = index + 1;
           final bool isInvalidMonth = (widget.minimumDate?.year == selectedYear && widget.minimumDate!.month > month)
                                    || (widget.maximumDate?.year == selectedYear && widget.maximumDate!.month < month);
+          final String monthName = (widget.mode == CupertinoDatePickerMode.monthYear) ? localizations.datePickerStandaloneMonth(month) : localizations.datePickerMonth(month);
 
           return itemPositioningBuilder(
             context,
             Text(
-              localizations.datePickerMonth(month, widget.mode == CupertinoDatePickerMode.monthYear),
+              monthName,
               style: _themeTextStyle(context, isValid: !isInvalidMonth),
             ),
           );

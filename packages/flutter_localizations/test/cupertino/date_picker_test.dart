@@ -23,7 +23,7 @@ void main() {
       ),
     );
 
-    expect(find.text('май'), findsWidgets);
+    expect(find.text('Май'), findsWidgets);
   });
 
   testWidgets('Test correct month form for CupertinoDatePicker in date mode', (WidgetTester tester) async {
