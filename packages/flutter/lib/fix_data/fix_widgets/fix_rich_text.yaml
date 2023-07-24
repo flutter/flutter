@@ -1,0 +1,43 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/docs/development/tools/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are for RichText from the widgets library. *
+version: 1
+transforms:
+  # Change made in https://github.com/flutter/flutter/pull/128522
+  - title: "Migrate to 'textScaler'"
+    date: 2023-06-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'RichText'
+    changes:
+      - kind: 'addParameter'
+        index: 7
+        name: 'textScaler'
+        style: optional_named
+        argumentValue:
+          expression: 'TextScaler.linear({% textScaleFactor %})'
+          requiredIf: "textScaleFactor != ''"
+      - kind: 'removeParameter'
+        name: 'textScaleFactor'
+    variables:
+      textScaleFactor:
+        kind: 'fragment'
+        value: 'arguments[textScaleFactor]'
+
+# Before adding a new fix: read instructions at the top of this file.
