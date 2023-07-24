@@ -1620,8 +1620,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [unregisterPopEntry], which performs the opposite operation.
   void registerPopEntry(PopEntry popEntry) {
     _popEntries.add(popEntry);
-    popEntry.canPopNotifier.addListener(_updateSystemNavigator);
-    _updateSystemNavigator();
+    popEntry.canPopNotifier.addListener(_handlePopEntryChange);
+    _handlePopEntryChange();
   }
 
   /// Unregisters a [PopEntry] in the route's widget subtree.
@@ -1631,13 +1631,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [registerPopEntry], which performs the opposite operation.
   void unregisterPopEntry(PopEntry popEntry) {
     _popEntries.remove(popEntry);
-    popEntry.canPopNotifier.removeListener(_updateSystemNavigator);
-    _updateSystemNavigator();
+    popEntry.canPopNotifier.removeListener(_handlePopEntryChange);
+    _handlePopEntryChange();
   }
 
-  // Tells the SystemNavigator whether or not a system pop should have an
-  // effect.
-  void _updateSystemNavigator() {
+  void _handlePopEntryChange() {
     if (!isCurrent) {
       return;
     }
