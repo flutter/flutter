@@ -714,9 +714,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
     final Process? server = _server;
     if (server == null) {
       return _compile(
-        mainUri, 
-        request.outputPath, 
-        additionalSourceUri: additionalSourceUri, 
+        mainUri,
+        request.outputPath,
+        additionalSourceUri: additionalSourceUri,
         nativeAssetsUri: nativeAssets,
       );
     }
