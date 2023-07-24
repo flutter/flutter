@@ -186,6 +186,8 @@
 /dev/devicelab/bin/tasks/large_image_changer_perf_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/macos_chrome_dev_mode.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/microbenchmarks_ios.dart @cyanglaz @flutter/engine
+/dev/devicelab/bin/tasks/native_assets_ios_simulator.dart @dacoharkes @flutter/ios
+/dev/devicelab/bin/tasks/native_assets_ios.dart @dacoharkes @flutter/ios
 /dev/devicelab/bin/tasks/native_platform_view_ui_tests_ios.dart @hellohuanlin @flutter/ios
 /dev/devicelab/bin/tasks/new_gallery_ios__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery_skia_ios__transition_perf.dart @zanderso @flutter/engine
