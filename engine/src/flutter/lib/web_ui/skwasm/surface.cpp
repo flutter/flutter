@@ -5,6 +5,7 @@
 #include "surface.h"
 
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 using namespace Skwasm;
 
@@ -171,7 +172,7 @@ void Surface::_renderPicture(const SkPicture* picture) {
   makeCurrent(_glContext);
   auto canvas = _surface->getCanvas();
   canvas->drawPicture(picture);
-  _surface->flush();
+  _grContext->flush(_surface);
 }
 
 void Surface::_rasterizeImage(SkImage* image,
