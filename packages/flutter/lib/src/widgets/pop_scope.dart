@@ -32,6 +32,13 @@ import 'routes.dart';
 /// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how to use this widget to handle nested navigation
+/// in a bottom navigation bar.
+///
+/// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [NavigatorPopHandler], which is a less verbose way to handle system back
