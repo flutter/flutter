@@ -279,6 +279,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// the SnackBar to be visible.
   ///
   /// {@tool dartpad}
+  /// Here is an example showing how to display a [SnackBar] with [showSnackBar]
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
   /// Here is an example showing that a floating [SnackBar] appears above [Scaffold.floatingActionButton].
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.1.dart **
@@ -1136,7 +1142,31 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       }
 
       final double snackBarYOffsetBase;
-      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating) {
+      final bool showAboveFab = switch (currentFloatingActionButtonLocation) {
+        FloatingActionButtonLocation.startTop
+        || FloatingActionButtonLocation.centerTop
+        || FloatingActionButtonLocation.endTop
+        || FloatingActionButtonLocation.miniStartTop
+        || FloatingActionButtonLocation.miniCenterTop
+        || FloatingActionButtonLocation.miniEndTop => false,
+        FloatingActionButtonLocation.startDocked
+        || FloatingActionButtonLocation.startFloat
+        || FloatingActionButtonLocation.centerDocked
+        || FloatingActionButtonLocation.centerFloat
+        || FloatingActionButtonLocation.endContained
+        || FloatingActionButtonLocation.endDocked
+        || FloatingActionButtonLocation.endFloat
+        || FloatingActionButtonLocation.miniStartDocked
+        || FloatingActionButtonLocation.miniStartFloat
+        || FloatingActionButtonLocation.miniCenterDocked
+        || FloatingActionButtonLocation.miniCenterFloat
+        || FloatingActionButtonLocation.miniEndDocked
+        || FloatingActionButtonLocation.miniEndFloat => true,
+        FloatingActionButtonLocation() => throw FlutterError(
+          '$currentFloatingActionButtonLocation is an unknown FloatingActionButtonLocation value.'
+        ),
+      };
+      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating && showAboveFab) {
         snackBarYOffsetBase = floatingActionButtonRect.top;
       } else {
         // SnackBarBehavior.fixed applies a SafeArea automatically.

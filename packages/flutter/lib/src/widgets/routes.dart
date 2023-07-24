@@ -1444,11 +1444,20 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// pops. If this is not necessary, this can be set to false to allow the
   /// framework to entirely discard the route's widget hierarchy when it is not
   /// visible.
+  ///
+  /// Setting [maintainState] to false does not guarantee that the route will be
+  /// discarded. For instance, it will not be descarded if it is still visible
+  /// because the next above it is not opaque (e.g. it is a popup dialog).
   /// {@endtemplate}
   ///
   /// If this getter would ever start returning a different value, the
   /// [changedInternalState] should be invoked so that the change can take
   /// effect.
+  ///
+  /// See also:
+  ///
+  ///  * [OverlayEntry.maintainState], which is the underlying implementation
+  ///    of this property.
   bool get maintainState;
 
 
