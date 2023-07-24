@@ -147,7 +147,7 @@ void main() {
       expect(find.text('31'), findsNothing);
     });
 
-    testWidgets('Changing year does not change selected date', (WidgetTester tester) async {
+    testWidgets('Changing year does change selected date', (WidgetTester tester) async {
       DateTime? selectedDate;
       await tester.pumpWidget(calendarDatePicker(
         onDateChanged: (DateTime date) => selectedDate = date,
@@ -158,7 +158,26 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('2018'));
       await tester.pumpAndSettle();
-      expect(selectedDate, equals(DateTime(2016, DateTime.january, 4)));
+      expect(selectedDate, equals(DateTime(2018, DateTime.january, 4)));
+    });
+
+    testWidgets('Changing year for february 29th', (WidgetTester tester) async {
+      DateTime? selectedDate;
+      await tester.pumpWidget(calendarDatePicker(
+        initialDate: DateTime(2020, DateTime.february, 29),
+        onDateChanged: (DateTime date) => selectedDate = date,
+      ));
+      await tester.tap(find.text('February 2020'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('2018'));
+      await tester.pumpAndSettle();
+      expect(selectedDate, equals(DateTime(2018, DateTime.february, 28)));
+      await tester.tap(find.text('February 2018'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('2020'));
+      await tester.pumpAndSettle();
+      // Changing back to 2020 the 29th is not selected anymore.
+      expect(selectedDate, equals(DateTime(2020, DateTime.february, 28)));
     });
 
     testWidgets('Changing year does not change the month', (WidgetTester tester) async {
@@ -260,11 +279,13 @@ void main() {
     });
 
     testWidgets('Selecting firstDate year respects firstDate', (WidgetTester tester) async {
+      DateTime? selectedDate;
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         firstDate: DateTime(2016, DateTime.june, 9),
         initialDate: DateTime(2018, DateTime.may, 4),
         lastDate: DateTime(2019, DateTime.january, 15),
+        onDateChanged: (DateTime date) => selectedDate = date,
         onDisplayedMonthChanged: (DateTime date) => displayedMonth = date,
       ));
       await tester.tap(find.text('May 2018'));
@@ -274,14 +295,17 @@ void main() {
       // Month should be clamped to June as the range starts at June 2016.
       expect(find.text('June 2016'), findsOneWidget);
       expect(displayedMonth, DateTime(2016, DateTime.june));
+      expect(selectedDate, DateTime(2016, DateTime.june, 9));
     });
 
     testWidgets('Selecting lastDate year respects lastDate', (WidgetTester tester) async {
+      DateTime? selectedDate;
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         firstDate: DateTime(2016, DateTime.june, 9),
         initialDate: DateTime(2018, DateTime.may, 4),
         lastDate: DateTime(2019, DateTime.january, 15),
+        onDateChanged: (DateTime date) => selectedDate = date,
         onDisplayedMonthChanged: (DateTime date) => displayedMonth = date,
       ));
       await tester.tap(find.text('May 2018'));
@@ -291,6 +315,7 @@ void main() {
       // Month should be clamped to January as the range ends at January 2019.
       expect(find.text('January 2019'), findsOneWidget);
       expect(displayedMonth, DateTime(2019));
+      expect(selectedDate, DateTime(2019, DateTime.january, 15));
     });
 
     testWidgets('Only predicate days are selectable', (WidgetTester tester) async {

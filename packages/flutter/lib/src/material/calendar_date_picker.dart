@@ -237,6 +237,10 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   void _handleYearChanged(DateTime value) {
     _vibrate();
 
+    final int daysInMonth = DateUtils.getDaysInMonth(value.year, value.month);
+    final int preferredDay = math.min(_selectedDate.day, daysInMonth);
+    value = value.copyWith(day: preferredDay);
+
     if (value.isBefore(widget.firstDate)) {
       value = widget.firstDate;
     } else if (value.isAfter(widget.lastDate)) {
@@ -246,6 +250,11 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     setState(() {
       _mode = DatePickerMode.day;
       _handleMonthChanged(value);
+
+      if (_isSelectable(value)) {
+        _selectedDate = value;
+        widget.onDateChanged(_selectedDate);
+      }
     });
   }
 
@@ -255,6 +264,10 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       _selectedDate = value;
       widget.onDateChanged(_selectedDate);
     });
+  }
+
+  bool _isSelectable(DateTime date) {
+    return widget.selectableDayPredicate == null || widget.selectableDayPredicate!.call(date);
   }
 
   Widget _buildPicker() {
