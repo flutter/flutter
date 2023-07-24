@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/scheduler.dart';
+
 import 'framework.dart';
 import 'navigator.dart';
 import 'notification_listener.dart';
@@ -76,8 +78,12 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
           // handle the pop instead.
           final bool nextCanPop = !notification.canHandlePop;
           if (nextCanPop != _canPop) {
-            setState(() {
-              _canPop = nextCanPop;
+            // It's possible to receive a NavigationNotification during a build,
+            // so wait until the next frame to call setState.
+            SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+              setState(() {
+                _canPop = nextCanPop;
+              });
             });
           }
           return false;
