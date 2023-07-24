@@ -70,7 +70,7 @@ void Switches::PrintHelp(std::ostream& stream) {
   stream << "[optional,multiple] --include=<include_directory>" << std::endl;
   stream << "[optional,multiple] --define=<define>" << std::endl;
   stream << "[optional] --depfile=<depfile_path>" << std::endl;
-  stream << "[optional] --gles-language-verision=<number>" << std::endl;
+  stream << "[optional] --gles-language-version=<number>" << std::endl;
   stream << "[optional] --json" << std::endl;
   stream << "[optional] --use-half-textures (force openGL semantics when "
             "targeting metal)"
