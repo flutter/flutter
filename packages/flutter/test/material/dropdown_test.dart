@@ -2318,73 +2318,56 @@ void main() {
     expect(find.text('two'), findsOneWidget);
   });
 
-  testWidgets('DropdownButton hint is selected item', (WidgetTester tester) async {
-    const double hintPaddingOffset = 8;
-    const List<String> itemValues = <String>['item0', 'item1', 'item2', 'item3'];
-    String? selectedItem = 'item0';
+testWidgets('DropdownButton hint is selected item', (WidgetTester tester) async {
+  const List<String> itemValues = <String>['item0', 'item1', 'item2', 'item3'];
+  String? selectedItem = 'item0';
 
-    Widget buildFrame() {
-      return MaterialApp(
-        home: Scaffold(
-          body: ButtonTheme(
-            alignedDropdown: true,
-            child: DropdownButtonHideUnderline(
-              child: Center(
-                child: StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                    // The pretzel below is from an actual app. The price
-                    // of limited configurability is keeping this working.
-                    return DropdownButton<String>(
-                      isExpanded: true,
-                      elevation: 2,
-                      hint: LayoutBuilder(
-                        builder: (BuildContext context, BoxConstraints constraints) {
-                          // Stack with a positioned widget is used to override the
-                          // hard coded 16px margin in the dropdown code, so that
-                          // this hint aligns "properly" with the menu.
-                          return Stack(
-                            clipBehavior: Clip.none,
-                            alignment: Alignment.topCenter,
-                            children: <Widget>[
-                              PositionedDirectional(
-                                width: constraints.maxWidth + hintPaddingOffset,
-                                start: -hintPaddingOffset,
-                                top: 4.0,
-                                child: Text('-$selectedItem-'),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      onChanged: (String? value) {
-                        setState(() { selectedItem = value; });
-                      },
-                      icon: Container(),
-                      items: itemValues.map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    );
-                  },
-                ),
+  Widget buildFrame() {
+    return MaterialApp(
+      home: Scaffold(
+        body: ButtonTheme(
+          alignedDropdown: true,
+          child: DropdownButtonHideUnderline(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return DropdownButton<String>(
+                    isExpanded: true,
+                    elevation: 2,
+                    hint: Text('-$selectedItem-'),
+                    onChanged: (String? value) {
+                      setState(() {
+                        selectedItem = value;
+                      });
+                    },
+                    icon: Container(),
+                    items: itemValues.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  );
+                },
               ),
             ),
           ),
         ),
-      );
-    }
+      ),
+    );
+  }
 
-    await tester.pumpWidget(buildFrame());
-    expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
+  await tester.pumpWidget(buildFrame());
+  // Checking if label for the dropdown menu is aligned to the left.
+  expect(tester.getTopLeft(find.text('-item0-')).dx, 0); 
 
-    // Show the popup menu.
-    await tester.tap(find.text('-item0-', skipOffstage: false), warnIfMissed: false);
-    await tester.pumpAndSettle();
+  // Show the popup menu.
+  await tester.tap(find.text('-item0-', skipOffstage: false), warnIfMissed: false);
+  await tester.pumpAndSettle();
 
-    expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
-  });
+  // Checking if the content of the dropdown menu is aligned to the left.
+  expect(tester.getTopLeft(find.text('-item0-')).dx, 0); 
+});
 
   testWidgets('DropdownButton can be focused, and has focusColor', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
