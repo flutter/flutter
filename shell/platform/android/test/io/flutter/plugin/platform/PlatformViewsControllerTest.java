@@ -235,6 +235,36 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void virtualDisplay_ensureDisposeVirtualDisplayController() {
+    final int platformViewId = 0;
+    FlutterView fakeFlutterView = new FlutterView(ApplicationProvider.getApplicationContext());
+    VirtualDisplayController fakeVdController = mock(VirtualDisplayController.class);
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+    FlutterJNI jni = new FlutterJNI();
+    attach(jni, platformViewsController);
+    platformViewsController.attachToView(fakeFlutterView);
+
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    Context context = ApplicationProvider.getApplicationContext();
+    View androidView = new View(context);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+    createPlatformView(
+        jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
+
+    platformViewsController.vdControllers.put(platformViewId, fakeVdController);
+
+    // Simulate dispose call from the framework.
+    disposePlatformView(jni, platformViewsController, platformViewId);
+
+    // Ensure VirtualDisplayController.dispose() is called
+    verify(fakeVdController, times(1)).dispose();
+  }
+
+  @Test
   public void itUsesActionEventTypeFromFrameworkEventForVirtualDisplays() {
     MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
     PlatformViewsController platformViewsController = new PlatformViewsController();
