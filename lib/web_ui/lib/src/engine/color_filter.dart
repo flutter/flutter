@@ -121,4 +121,18 @@ class EngineColorFilter implements SceneImageFilter, ui.ColorFilter {
   /// Color filters don't affect the image bounds
   @override
   ui.Rect filterBounds(ui.Rect inputBounds) => inputBounds;
+
+  @override
+  String toString() {
+    switch (type) {
+      case ColorFilterType.mode:
+        return 'ColorFilter.mode($color, $blendMode)';
+      case ColorFilterType.matrix:
+        return 'ColorFilter.matrix($matrix)';
+      case ColorFilterType.linearToSrgbGamma:
+        return 'ColorFilter.linearToSrgbGamma()';
+      case ColorFilterType.srgbToLinearGamma:
+        return 'ColorFilter.srgbToLinearGamma()';
+    }
+  }
 }
