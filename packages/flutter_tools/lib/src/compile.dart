@@ -713,7 +713,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     final String? nativeAssets = request.nativeAssetsYamlUri?.toString();
     final Process? server = _server;
     if (server == null) {
-      return _compile(mainUri, request.outputPath, additionalSourceUri: additionalSourceUri, nativeAssetsUri: nativeAssets);
+      return _compile(
+        mainUri, 
+        request.outputPath, 
+        additionalSourceUri: additionalSourceUri, 
+        nativeAssetsUri: nativeAssets,
+      );
     }
     final String inputKey = Uuid().generateV4();
 
@@ -762,10 +767,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
   Future<CompilerOutput?> _compile(
     String scriptUri,
-    String? outputPath,
-    {String? additionalSourceUri,
-    String? nativeAssetsUri,}
-  ) async {
+    String? outputPath, {
+    String? additionalSourceUri,
+    String? nativeAssetsUri,
+  }) async {
     final TargetPlatform? platform = (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
     final String frontendServer = _artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk,
