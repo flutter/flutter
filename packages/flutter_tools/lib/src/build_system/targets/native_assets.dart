@@ -15,12 +15,12 @@ import 'common.dart';
 /// Builds the right native assets for a Flutter app.
 ///
 /// Because the build mode and target architecture can be changed from the
-/// native build project (xcode etc.), we can only build the native assets
+/// native build project (Xcode etc.), we can only build the native assets
 /// inside `flutter assemble` when we have all the information.
 ///
 /// All the other invocations for native assets should be dry runs.
 ///
-/// This step needs to be consisent with the other invocations so that the
+/// This step needs to be consistent with the other invocations so that the
 /// kernel mapping of asset id to dylib lines up after hot restart, and so
 /// that the dylibs are bundled by the native build.
 ///
@@ -49,12 +49,12 @@ class NativeAssets extends Target {
 
     switch (targetPlatform) {
       case TargetPlatform.ios:
-        final String? kIosArchsEnvironment = environment.defines[kIosArchs];
-        if (kIosArchsEnvironment == null) {
+        final String? iosArchsEnvironment = environment.defines[kIosArchs];
+        if (iosArchsEnvironment == null) {
           throw MissingDefineException(kIosArchs, name);
         }
         final List<DarwinArch> iosArchs =
-            kIosArchsEnvironment
+            iosArchsEnvironment
             .split(' ')
             .map(getDarwinArchForName)
             .toList();

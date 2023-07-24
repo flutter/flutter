@@ -386,10 +386,10 @@ class _RecompileRequest extends _CompilationRequest {
     this.invalidatedFiles,
     this.outputPath,
     this.packageConfig,
-    this.suppressErrors,
-    {this.additionalSourceUri,
-    this.nativeAssetsYamlUri,}
-  );
+    this.suppressErrors, {
+    this.additionalSourceUri,
+    this.nativeAssetsYamlUri,
+  });
 
   Uri mainUri;
   List<Uri>? invalidatedFiles;

@@ -160,7 +160,7 @@ void main() {
             expectDylibIsBundledMacos(exampleDirectory, buildMode);
           }
           if (device == hostOs) {
-            expectCCIsPassed(exampleDirectory);
+            expectCCompilerIsConfigured(exampleDirectory);
           }
         });
       });
@@ -219,11 +219,10 @@ void main() {
           } else if (buildSubcommand == 'ios') {
             expectDylibIsBundledIos(exampleDirectory, buildMode);
           }
-          expectCCIsPassed(exampleDirectory);
+          expectCCompilerIsConfigured(exampleDirectory);
         });
       });
     }
-
 
     // This could be an hermetic unit test if the native_assets_builder
     // could mock process runs and file system.
@@ -292,7 +291,7 @@ void main() {
           expectDylibIsBundledWithFrameworks(exampleDirectory, buildMode,
               add2appBuildSubcommand.replaceAll('-framework', ''));
         }
-        expectCCIsPassed(exampleDirectory);
+        expectCCompilerIsConfigured(exampleDirectory);
       });
     });
   }
@@ -332,9 +331,10 @@ void expectDylibIsBundledWithFrameworks(
   expect(dylib, exists);
 }
 
-/// We want to pass the compiler that Flutter uses to the native assets builds.
-/// This way we minimize build discrepancies.
-void expectCCIsPassed(Directory appDirectory) {
+/// Check that the native assets are built with the C Compiler that Flutter uses.
+///
+/// This inspects the build configuration to see if the C compiler was configured.
+void expectCCompilerIsConfigured(Directory appDirectory) {
   final Directory nativeAssetsBuilderDir =
       appDirectory.childDirectory('.dart_tool/native_assets_builder/');
   for (final Directory subDir

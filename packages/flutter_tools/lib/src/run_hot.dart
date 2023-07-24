@@ -483,7 +483,7 @@ class HotRunner extends ResidentRunner {
             fileSystem: fileSystem,
           );
         } else {
-          await ensureNoNativeAssetsUnimplementedOs(
+          await ensureNoNativeAssetsOrOsIsSupported(
               projectUri, const LocalPlatform().operatingSystem, fileSystem);
           nativeAssetsYaml = null;
         }
@@ -498,7 +498,7 @@ class HotRunner extends ResidentRunner {
       case TargetPlatform.linux_x64:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
-        await ensureNoNativeAssetsUnimplementedOs(
+        await ensureNoNativeAssetsOrOsIsSupported(
             projectUri, targetPlatform.toString(), fileSystem);
         nativeAssetsYaml = null;
     }

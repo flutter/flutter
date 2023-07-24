@@ -180,7 +180,7 @@ class TestCompiler {
           // used in test/general.shard/test/test_compiler_test.dart ?
           // We need to pass the right file system here in order to check for
           // possible native assets.
-          await ensureNoNativeAssetsUnimplementedOs(
+          await ensureNoNativeAssetsOrOsIsSupported(
               projectUri, const LocalPlatform().operatingSystem, globals.fs);
         }
         nativeAssetsYaml = null;

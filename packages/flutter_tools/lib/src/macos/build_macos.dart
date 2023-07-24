@@ -71,7 +71,7 @@ Future<void> buildMacOS({
     flutterBuildDir.createSync(recursive: true);
   }
 
-  /// The native assets yaml is needed here to add it to the xcode properties so
+  /// The native assets yaml is needed here to add it to the Xcode properties so
   /// that it can be read by the kernel target in `flutter assemble`. See
   /// lib/src/build_system/targets/native_assets.dart for why we don't embed the
   /// native assets yaml produced inside `flutter assemble` itself.

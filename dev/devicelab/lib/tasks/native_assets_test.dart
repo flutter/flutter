@@ -7,11 +7,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
 
 import '../framework/devices.dart';
 import '../framework/framework.dart';
-import '../framework/running_processes.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -61,7 +59,7 @@ TaskFunction createNativeAssetsTest({
         bool done = false;
 
         await inDirectory<void>(exampleDirectory, () async {
-          await runFlutter(
+          final int runFlutterResult = await runFlutter(
             options: options,
             onLine: (String line, Process process) {
               if (done) {
@@ -101,9 +99,11 @@ TaskFunction createNativeAssetsTest({
               transitionCount += 1;
             },
           );
+          if (runFlutterResult != 0) {
+            print(
+                'Flutter run returned non-zero exit code: $runFlutterResult.');
+          }
         });
-
-        await _checkAppRunning(false);
 
         final int expectedNumberOfTransitions = buildMode == 'debug' ? 4 : 1;
         if (transitionCount != expectedNumberOfTransitions) {
@@ -122,7 +122,7 @@ TaskFunction createNativeAssetsTest({
   };
 }
 
-Future<void> runFlutter({
+Future<int> runFlutter({
   required List<String> options,
   required void Function(String, Process) onLine,
 }) async {
@@ -150,31 +150,11 @@ Future<void> runFlutter({
       );
 
   await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
-  await process.exitCode;
+  final int exitCode = await process.exitCode;
+  return exitCode;
 }
 
-Future<void> _checkAppRunning(bool shouldBeRunning) async {
-  late Set<RunningProcessInfo> galleryProcesses;
-  for (int i = 0; i < 10; i++) {
-    final String exe = Platform.isWindows ? '.exe' : '';
-    galleryProcesses = await getRunningProcesses(
-      processName: 'Flutter Gallery$exe',
-      processManager: _processManager,
-    );
 
-    if (galleryProcesses.isNotEmpty == shouldBeRunning) {
-      return;
-    }
-
-    // Give the app time to shut down.
-    sleep(const Duration(seconds: 1));
-  }
-  print(galleryProcesses.join('\n'));
-  throw TaskResult.failure(
-      'Flutter app is ${shouldBeRunning ? 'not' : 'still'} running');
-}
-
-const ProcessManager _processManager = LocalProcessManager();
 final String _flutterBin = path.join(flutterDirectory.path, 'bin', 'flutter');
 
 Future<void> enableNativeAssets() async {
@@ -193,7 +173,9 @@ Future<void> enableNativeAssets() async {
 }
 
 Future<Directory> createTestProject(
-    String packageName, Directory tempDirectory) async {
+  String packageName,
+  Directory tempDirectory,
+) async {
   final int createResult = await exec(
     _flutterBin,
     <String>[

@@ -20,7 +20,7 @@ import '../globals.dart' as globals;
 ///
 /// This does not build native assets, it only simulates what the final paths
 /// of all assets will be so that this can be embedded in the kernel file and
-/// the xcode project.
+/// the Xcode project.
 Future<Uri?> dryRunNativeAssetsMacOS({
   required Uri projectUri,
   bool flutterTester = false,
@@ -36,8 +36,7 @@ Future<Uri?> dryRunNativeAssetsMacOS({
   const OS targetOs = OS.macOS;
   final Uri buildUri_ = buildUri(projectUri, targetOs);
 
-  globals.logger.printTrace(
-      'Dry running native assets for $targetOs.');
+  globals.logger.printTrace('Dry running native assets for $targetOs.');
   final List<Asset> nativeAssets = await NativeAssetsBuildRunner(
     logger: loggingLogger,
     dartExecutable: flutterDartUri(fileSystem),
@@ -52,8 +51,7 @@ Future<Uri?> dryRunNativeAssetsMacOS({
   final Uri? absolutePath = flutterTester ? buildUri_ : null;
   final Map<Asset, Asset> assetTargetLocations =
       _assetTargetLocations(nativeAssets, absolutePath);
-  final Uri nativeAssetsUri =
-      await writeNativeAssetsYaml(
+  final Uri nativeAssetsUri = await writeNativeAssetsYaml(
       assetTargetLocations.values, buildUri_, fileSystem);
   return nativeAssetsUri;
 }
@@ -64,7 +62,7 @@ Future<Uri?> dryRunNativeAssetsMacOS({
 ///
 /// If [flutterTester] is true, absolute paths are emitted in the native
 /// assets mapping. This can be used for JIT mode without sandbox on the host.
-/// This is used in `flutter test` and `flutter run -dflutter-tester`.
+/// This is used in `flutter test` and `flutter run -d flutter-tester`.
 Future<Uri?> buildNativeAssetsMacOS({
   List<DarwinArch>? darwinArchs,
   required Uri projectUri,
@@ -89,8 +87,8 @@ Future<Uri?> buildNativeAssetsMacOS({
   const OS targetOs = OS.macOS;
   final Uri buildUri_ = buildUri(projectUri, targetOs);
 
-  globals.logger.printTrace(
-      'Building native assets for $targets $buildModeCli.');
+  globals.logger
+      .printTrace('Building native assets for $targets $buildModeCli.');
   final List<Asset> nativeAssets = <Asset>[
     for (final Target target in targets)
       ...await NativeAssetsBuildRunner(
@@ -112,18 +110,22 @@ Future<Uri?> buildNativeAssetsMacOS({
       _assetTargetLocations(nativeAssets, absolutePath);
   final Map<AssetPath, List<Asset>> fatAssetTargetLocations =
       _fatAssetTargetLocations(nativeAssets, absolutePath);
-  await copyNativeAssets(
-      buildUri_, fatAssetTargetLocations, codesignIdentity,
+  await copyNativeAssets(buildUri_, fatAssetTargetLocations, codesignIdentity,
       buildMode, fileSystem);
   if (writeYamlFile) {
-    final Uri nativeAssetsUri =
-        await writeNativeAssetsYaml(
+    final Uri nativeAssetsUri = await writeNativeAssetsYaml(
         assetTargetLocations.values, buildUri_, fileSystem);
     return nativeAssetsUri;
   }
   return null;
 }
 
+/// Checks whether this project does not yet have a package config file.
+///
+/// A project has no package config when `pub get` has not yet been run.
+///
+/// Native asset builds cannot be run without a package config. If there is
+/// no package config, leave a logging trace about that.
 Future<bool> hasNoPackageConfig(
     Uri workingDirectory, FileSystem fileSystem) async {
   final File packageConfigJson = fileSystem
@@ -137,6 +139,11 @@ Future<bool> hasNoPackageConfig(
   return !packageConfigExists;
 }
 
+/// Checks that if native assets is disabled, none of the dependencies declare
+/// native assets.
+///
+/// If any of the dependencies have native assets, but native assets are
+/// disabled, exits the tool.
 Future<bool> isDisabledAndNoNativeAssets(Uri workingDirectory) async {
   if (featureFlags.isNativeAssetsEnabled) {
     return false;
@@ -157,7 +164,11 @@ Future<bool> isDisabledAndNoNativeAssets(Uri workingDirectory) async {
   );
 }
 
-Future<void> ensureNoNativeAssetsUnimplementedOs(
+/// Ensures that either this project has no native assets, or that native assets
+/// are supported on that operating system.
+///
+/// Exits the tool if the above condition is not satisfied.
+Future<void> ensureNoNativeAssetsOrOsIsSupported(
     Uri workingDirectory, String os, FileSystem fileSystem) async {
   if (await hasNoPackageConfig(workingDirectory, fileSystem)) {
     return;
@@ -178,6 +189,13 @@ Future<void> ensureNoNativeAssetsUnimplementedOs(
   );
 }
 
+/// Ensure all native assets have a linkmode declared to be dynamic loading.
+///
+/// In JIT, the link mode must always be dynamic linking.
+/// In AOT, the static linking has not yet been implemented in Dart:
+/// https://github.com/dart-lang/sdk/issues/49418.
+///
+/// Therefore, ensure all `build.dart` scripts return only dynamic libraries.
 void ensureNoLinkModeStatic(List<Asset> nativeAssets) {
   final Iterable<Asset> staticAssets =
       nativeAssets.whereLinkMode(LinkMode.static);
@@ -237,13 +255,18 @@ Future<void> copyNativeAssets(
       final Uri targetUri = buildUri.resolveUri(target);
       final String targetFullPath = targetUri.toFilePath();
       await lipoDylibs(targetFullPath, sources);
-      await setInstallnameDylib(targetUri);
+      await setInstallNameDylib(targetUri);
       await codesignDylib(codesignIdentity, buildMode, targetFullPath);
     }
     globals.logger.printTrace('Copying native assets done.');
   }
 }
 
+/// Combines dylibs from [sources] into a fat binary at [targetFullPath].
+///
+/// The dylibs must have different architectures. E.g. a dylib targeting
+/// arm64 ios simulator cannot be combined with a dylib targeting arm64
+/// ios device or macos arm64.
 Future<void> lipoDylibs(String targetFullPath, List<Uri> sources) async {
   final ProcessResult lipoResult = await globals.processManager.run(
     <String>[
@@ -259,7 +282,13 @@ Future<void> lipoDylibs(String targetFullPath, List<Uri> sources) async {
   globals.logger.printTrace(lipoResult.stderr as String);
 }
 
-Future<void> setInstallnameDylib(Uri targetUri) async {
+/// Sets the install name in a dylib with a Mach-O format.
+///
+/// On MacOS and iOS, opening a dylib at runtime fails if the path inside the
+/// dylib itself does not correspond to the path that the file is at. Therefore,
+/// native assets copied into their final location also need their install name
+/// updated with the `install_name_tool`.
+Future<void> setInstallNameDylib(Uri targetUri) async {
   final String fileName = targetUri.pathSegments.last;
   final ProcessResult installNameResult = await globals.processManager.run(
     <String>[
@@ -301,8 +330,7 @@ Future<void> codesignDylib(
   globals.logger.printTrace(codesignResult.stderr as String);
 }
 
-Future<Uri> writeNativeAssetsYaml(
-    Iterable<Asset> nativeAssetsMappingUsed,
+Future<Uri> writeNativeAssetsYaml(Iterable<Asset> nativeAssetsMappingUsed,
     Uri buildUri, FileSystem fileSystem) async {
   globals.logger.printTrace('Writing native_assets.yaml.');
   final String nativeAssetsDartContents =
@@ -352,11 +380,14 @@ Map<AssetPath, List<Asset>> _fatAssetTargetLocations(
 }
 
 Map<Asset, Asset> _assetTargetLocations(
-        List<Asset> nativeAssets, Uri? absolutePath) =>
-    <Asset, Asset>{
-      for (final Asset asset in nativeAssets)
-        asset: _targetLocationMacOS(asset, absolutePath),
-    };
+  List<Asset> nativeAssets,
+  Uri? absolutePath,
+) {
+  return <Asset, Asset>{
+    for (final Asset asset in nativeAssets)
+      asset: _targetLocationMacOS(asset, absolutePath),
+  };
+}
 
 Asset _targetLocationMacOS(Asset asset, Uri? absolutePath) {
   final AssetPath path = asset.path;
