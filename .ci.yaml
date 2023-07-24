@@ -3831,7 +3831,6 @@ targets:
 
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3840,7 +3839,8 @@ targets:
 
   - name: Mac_ios native_assets_ios_simulator
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true # TODO(dacoharkes): Set to false before merging.
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3849,7 +3849,8 @@ targets:
 
   - name: Mac_ios native_assets_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true # TODO(dacoharkes): Set to false before merging.
+    bringup: true
     timeout: 60
     properties:
       tags: >
