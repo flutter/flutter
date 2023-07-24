@@ -7,35 +7,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-@immutable
-class Topping {
-  const Topping(this.name, {this.emoji});
-  final String name;
-  final String? emoji;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Topping &&
-          runtimeType == other.runtimeType &&
-          name == other.name;
-
-  @override
-  int get hashCode => name.hashCode;
-
-  @override
-  String toString() {
-    return 'Topping{$name}';
-  }
-}
-
-const List<Topping> availableToppings = <Topping>[
-  Topping('Avocado', emoji: '🥑'),
-  Topping('Tomato', emoji: '🍅'),
-  Topping('Cheese', emoji: '🧀'),
-  Topping('Lettuce', emoji: '🥬'),
-  Topping('Cucumber', emoji: '🥒'),
-  Topping('Beans'),
+const List<String> _pizzaTopings = <String>[
+  'Avocado',
+  'Tomato',
+  'Cheese',
+  'Pepperoni',
+  'Pickles',
+  'Onion',
+  'Jalapeno',
+  'Mushrooms',
+  'Pineapple',
 ];
 
 void main() => runApp(const EditableChipFieldApp());
@@ -46,45 +27,40 @@ class EditableChipFieldApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
-      home: const MainScreen(),
+      theme: ThemeData(useMaterial3: true),
+      home: const EditableChipFieldExample(),
     );
   }
 }
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+class EditableChipFieldExample extends StatefulWidget {
+  const EditableChipFieldExample({super.key});
 
   @override
-  MainScreenState createState() => MainScreenState();
+  EditableChipFieldExampleState createState() => EditableChipFieldExampleState();
 }
 
-class MainScreenState extends State<MainScreen> {
-  List<Topping> _suggestions = <Topping>[];
-  Set<Topping> _toppings = <Topping>{
-    const Topping('Ham', emoji: '🍖'),
-  };
-
-  Set<Topping> _results = <Topping>{};
-
+class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
   final FocusNode _chipFocusNode = FocusNode();
+  Set<String> _toppings = <String>{ _pizzaTopings.first };
+  List<String> _suggestions = <String>[];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Toppings'),
+        title: const Text('Editable Chip Field Sample'),
       ),
       body: Column(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ChipsInput<Topping>(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ChipsInput<String>(
               values: _toppings,
               decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search), hintText: 'Search'),
+                prefixIcon: Icon(Icons.local_pizza_rounded),
+                hintText: 'Search for toppings',
+              ),
               focusNode: _chipFocusNode,
               onChanged: _onChanged,
               onSubmitted: _onSubmitted,
@@ -92,7 +68,7 @@ class MainScreenState extends State<MainScreen> {
               onTextChanged: _onSearchChanged,
             ),
           ),
-          if (_results.isEmpty)
+          if (_suggestions.isNotEmpty)
             Expanded(
               child: ListView.builder(
                 itemCount: _suggestions.length,
@@ -101,38 +77,27 @@ class MainScreenState extends State<MainScreen> {
                 },
               ),
             ),
-          if (_results.isNotEmpty) ...<Widget>[
-            Text('You selected: ${_results.length} topping/s!'),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _results.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return _resultBuilder(context, _results.elementAt(index));
-                },
-              ),
-            )
-          ],
         ],
       ),
     );
   }
 
   Future<void> _onSearchChanged(String value) async {
-    final List<Topping> results = await _suggestionCallback(value);
+    final List<String> results = await _suggestionCallback(value);
     setState(() {
-      _results = <Topping>{};
       _suggestions = results
-          .where((Topping topping) => !_toppings.contains(topping))
-          .toList();
+        .where((String topping) => !_toppings.contains(topping))
+        .toList();
     });
   }
 
-  Widget _chipBuilder(BuildContext context, Topping topping) {
+  Widget _chipBuilder(BuildContext context, String topping) {
     return InputChip(
       key: ObjectKey(topping),
-      label: Text(topping.name),
+      label: Text(topping),
       avatar: CircleAvatar(
-          child: Text(topping.emoji ?? topping.name[0].toUpperCase())),
+        child: Text(topping[0].toUpperCase()),
+      ),
       onDeleted: () => _deleteChip(topping),
       onSelected: (_) => _onChipTapped(topping),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -140,68 +105,59 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _suggestionBuilder(BuildContext context, Topping topping) {
+  Widget _suggestionBuilder(BuildContext context, String topping) {
     return ListTile(
       key: ObjectKey(topping),
       leading: CircleAvatar(
-          child: Text(topping.emoji ?? topping.name[0].toUpperCase())),
-      title: Text(topping.name),
+        child: Text(topping[0].toUpperCase()),
+      ),
+      title: Text(topping),
       onTap: () => _selectSuggestion(topping),
     );
   }
 
-  Widget _resultBuilder(BuildContext context, Topping topping) {
-    return ListTile(
-      key: ObjectKey(topping),
-      leading: CircleAvatar(
-          child: Text(topping.emoji ?? topping.name[0].toUpperCase())),
-      title: Text(topping.name),
-    );
-  }
-
-  void _selectSuggestion(Topping topping) {
+  void _selectSuggestion(String topping) {
     setState(() {
       _toppings.add(topping);
-      _suggestions = List<Topping>.empty();
+      _suggestions = <String>[];
     });
   }
 
-  void _onChipTapped(Topping topping) {}
+  void _onChipTapped(String topping) {}
 
-  void _deleteChip(Topping topping) {
+  void _deleteChip(String topping) {
     setState(() {
       _toppings.remove(topping);
-      _suggestions = List<Topping>.empty();
+      _suggestions = <String>[];
     });
   }
 
   void _onSubmitted(String text) {
     if (text.trim().isNotEmpty) {
       setState(() {
-        _toppings = <Topping>{..._toppings, Topping(text.trim())};
+        _toppings = <String>{..._toppings, text.trim()};
       });
     } else {
       _chipFocusNode.unfocus();
       setState(() {
-        _results = <Topping>{..._toppings};
-        _toppings = <Topping>{};
+        _toppings = <String>{};
       });
     }
   }
 
-  void _onChanged(Set<Topping> data) {
+  void _onChanged(Set<String> data) {
     setState(() {
       _toppings = data;
     });
   }
 
-  FutureOr<List<Topping>> _suggestionCallback(String text) {
+  FutureOr<List<String>> _suggestionCallback(String text) {
     if (text.isNotEmpty) {
-      return availableToppings.where((Topping topping) {
-        return topping.name.toLowerCase().contains(text.toLowerCase());
+      return _pizzaTopings.where((String topping) {
+        return topping.toLowerCase().contains(text.toLowerCase());
       }).toList();
     }
-    return const <Topping>[];
+    return const <String>[];
   }
 }
 
@@ -217,10 +173,9 @@ class ChipsInput<T> extends StatefulWidget {
     this.onTextChanged,
     this.focusNode,
   });
+
   final Set<T> values;
-
   final InputDecoration decoration;
-
   final FocusNode? focusNode;
 
   final ValueChanged<Set<T>> onChanged;
@@ -234,8 +189,7 @@ class ChipsInput<T> extends StatefulWidget {
   ChipsInputState<T> createState() => ChipsInputState<T>();
 }
 
-class ChipsInputState<T> extends State<ChipsInput<T>>
-    implements TextInputClient {
+class ChipsInputState<T> extends State<ChipsInput<T>> implements TextInputClient {
   static const int kObjectReplacementChar = 0xFFFE;
 
   FocusNode? _lastChipFocusNode;
@@ -253,11 +207,7 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
 
   @override
   void dispose() {
-    if (widget.focusNode != null) {
-      //dispose here just if it was not passed from the parent widget
-      _focusNode.dispose();
-    }
-
+    _focusNode.dispose();
     _closeInputConnectionIfNeeded();
     super.dispose();
   }
@@ -296,8 +246,7 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
   AutofillScope? get currentAutofillScope => throw UnimplementedError();
 
   @override
-  void didChangeInputControl(
-      TextInputControl? oldControl, TextInputControl? newControl) {}
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {}
 
   @override
   void insertContent(KeyboardInsertedContent content) {}
@@ -322,7 +271,6 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
 
   @override
   Widget build(BuildContext context) {
-    //_updateTextInputState();
     _syncTextValue();
 
     final List<Widget> chipsChildren = widget.values.map<Widget>(
@@ -410,8 +358,8 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
 
   int _countReplacementsInString(String value) {
     return value.codeUnits
-        .where((int ch) => ch == kObjectReplacementChar)
-        .length;
+      .where((int ch) => ch == kObjectReplacementChar)
+      .length;
   }
 
   int get currentReplacementCount => _countReplacements(_value);
@@ -421,8 +369,7 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
     final int newChipCount = widget.values.length;
     final int oldChipCount = _countReplacements(currentTextEditingValue);
 
-    String text = String.fromCharCodes(
-        List<int>.filled(newChipCount, kObjectReplacementChar));
+    String text = String.fromCharCodes(List<int>.filled(newChipCount, kObjectReplacementChar));
     if (newChipCount == oldChipCount) {
       text += this.text;
     }
@@ -435,10 +382,7 @@ class ChipsInputState<T> extends State<ChipsInput<T>>
 }
 
 class TextCaret extends StatefulWidget {
-  const TextCaret({
-    super.key,
-    this.resumed = false,
-  });
+  const TextCaret({super.key, this.resumed = false});
 
   final bool resumed;
 
@@ -446,12 +390,10 @@ class TextCaret extends StatefulWidget {
   TextCursorState createState() => TextCursorState();
 }
 
-class TextCursorState extends State<TextCaret>
-    with SingleTickerProviderStateMixin {
+class TextCursorState extends State<TextCaret> with SingleTickerProviderStateMixin {
   final Duration _duration = const Duration(milliseconds: 500);
-
   bool _displayed = false;
-  late Timer _timer;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -460,12 +402,15 @@ class TextCursorState extends State<TextCaret>
   }
 
   void _onTimer(Timer timer) {
-    setState(() => _displayed = !_displayed);
+    setState(() {
+      _displayed = !_displayed;
+    });
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
+    _timer = null;
     super.dispose();
   }
 
