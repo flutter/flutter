@@ -12,10 +12,6 @@ import 'package:flutter/services.dart';
 import 'framework.dart';
 import 'platform_view.dart';
 
-// Keep these values in sync with the ones defined in the engine's `PlatformViewManager`.
-const String _kDefaultVisibleViewType = '_default_document_create_element_visible';
-const String _kDefaultInvisibleViewType = '_default_document_create_element_invisible';
-
 /// The platform-specific implementation of [HtmlElementView].
 extension HtmlElementViewImpl on HtmlElementView {
   /// Creates an [HtmlElementView] that renders a DOM element with the given
@@ -28,7 +24,7 @@ extension HtmlElementViewImpl on HtmlElementView {
   }) {
     return HtmlElementView(
       key: key,
-      viewType: isVisible ? _kDefaultVisibleViewType : _kDefaultInvisibleViewType,
+      viewType: isVisible ? ui_web.kDefaultVisibleViewType : ui_web.kDefaultInvisibleViewType,
       onPlatformViewCreated: _createPlatformViewCallbackForElementCallback(onElementCreated),
       creationParams: <dynamic, dynamic>{'tagName': tagName},
     );
