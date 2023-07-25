@@ -62,6 +62,14 @@ void EntityPass::SetDelegate(std::unique_ptr<EntityPassDelegate> delegate) {
   delegate_ = std::move(delegate);
 }
 
+void EntityPass::SetBoundsLimit(std::optional<Rect> bounds_limit) {
+  bounds_limit_ = bounds_limit;
+}
+
+std::optional<Rect> EntityPass::GetBoundsLimit() const {
+  return bounds_limit_;
+}
+
 void EntityPass::AddEntity(Entity entity) {
   if (entity.GetBlendMode() == BlendMode::kSourceOver &&
       entity.GetContents()->IsOpaque()) {
@@ -129,20 +137,12 @@ std::optional<Rect> EntityPass::GetSubpassCoverage(
     return std::nullopt;
   }
 
-  // The delegates don't have an opinion on what the entity coverage has to be.
-  // Just use that as-is.
-  auto delegate_coverage = subpass.delegate_->GetCoverageRect();
-  if (!delegate_coverage.has_value()) {
+  if (!subpass.bounds_limit_.has_value()) {
     return entities_coverage;
   }
-  // The delegate coverage hint is in given in local space, so apply the subpass
-  // transformation.
-  delegate_coverage = delegate_coverage->TransformBounds(subpass.xformation_);
-
-  // If the delegate tells us the coverage is smaller than it needs to be, then
-  // great. OTOH, if the delegate is being wasteful, limit coverage to what is
-  // actually needed.
-  return entities_coverage->Intersection(delegate_coverage.value());
+  auto user_bounds_coverage =
+      subpass.bounds_limit_->TransformBounds(subpass.xformation_);
+  return entities_coverage->Intersection(user_bounds_coverage);
 }
 
 EntityPass* EntityPass::GetSuperpass() const {

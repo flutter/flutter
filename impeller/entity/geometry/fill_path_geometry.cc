@@ -6,7 +6,9 @@
 
 namespace impeller {
 
-FillPathGeometry::FillPathGeometry(const Path& path) : path_(path) {}
+FillPathGeometry::FillPathGeometry(const Path& path,
+                                   std::optional<Rect> inner_rect)
+    : path_(path), inner_rect_(inner_rect) {}
 
 FillPathGeometry::~FillPathGeometry() = default;
 
@@ -145,6 +147,18 @@ GeometryVertexType FillPathGeometry::GetVertexType() const {
 std::optional<Rect> FillPathGeometry::GetCoverage(
     const Matrix& transform) const {
   return path_.GetTransformedBoundingBox(transform);
+}
+
+bool FillPathGeometry::CoversArea(const Matrix& transform,
+                                  const Rect& rect) const {
+  if (!inner_rect_.has_value()) {
+    return false;
+  }
+  if (!transform.IsTranslationScaleOnly()) {
+    return false;
+  }
+  Rect coverage = inner_rect_->TransformBounds(transform);
+  return coverage.Contains(rect);
 }
 
 }  // namespace impeller

@@ -1979,7 +1979,7 @@ TEST_P(AiksTest, OpacityPeepHoleApplicationTest) {
       ColorFilter::MakeBlend(BlendMode::kSourceOver, Color::Blue());
 
   // Paint has color filter, can't elide.
-  auto delegate = std::make_shared<OpacityPeepholePassDelegate>(paint, rect);
+  auto delegate = std::make_shared<OpacityPeepholePassDelegate>(paint);
   ASSERT_FALSE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
 
   paint.color_filter = nullptr;
@@ -1991,14 +1991,14 @@ TEST_P(AiksTest, OpacityPeepHoleApplicationTest) {
   };
 
   // Paint has image filter, can't elide.
-  delegate = std::make_shared<OpacityPeepholePassDelegate>(paint, rect);
+  delegate = std::make_shared<OpacityPeepholePassDelegate>(paint);
   ASSERT_FALSE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
 
   paint.image_filter = nullptr;
   paint.color = Color::Red();
 
   // Paint has no alpha, can't elide;
-  delegate = std::make_shared<OpacityPeepholePassDelegate>(paint, rect);
+  delegate = std::make_shared<OpacityPeepholePassDelegate>(paint);
   ASSERT_FALSE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
 
   // Positive test.
@@ -2008,7 +2008,7 @@ TEST_P(AiksTest, OpacityPeepHoleApplicationTest) {
   entity_pass->AddEntity(entity);
   paint.color = Color::Red().WithAlpha(0.5);
 
-  delegate = std::make_shared<OpacityPeepholePassDelegate>(paint, rect);
+  delegate = std::make_shared<OpacityPeepholePassDelegate>(paint);
   ASSERT_TRUE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
 }
 
@@ -2112,6 +2112,30 @@ TEST_P(AiksTest, DrawRectAbsorbsClearsNegative) {
   ASSERT_EQ(spy->render_passes_.size(), 1llu);
   std::shared_ptr<RenderPass> render_pass = spy->render_passes_[0];
   ASSERT_EQ(render_pass->GetCommands().size(), 2llu);
+}
+
+TEST_P(AiksTest, ClipRectElidesNoOpClips) {
+  Canvas canvas(Rect(0, 0, 100, 100));
+  canvas.ClipRect(Rect(0, 0, 100, 100));
+  canvas.ClipRect(Rect(-100, -100, 300, 300));
+  canvas.DrawPaint({.color = Color::Red(), .blend_mode = BlendMode::kSource});
+  canvas.DrawPaint({.color = Color::CornflowerBlue().WithAlpha(0.75),
+                    .blend_mode = BlendMode::kSourceOver});
+
+  Picture picture = canvas.EndRecordingAsPicture();
+  auto expected = Color::Red().Blend(Color::CornflowerBlue().WithAlpha(0.75),
+                                     BlendMode::kSourceOver);
+  ASSERT_EQ(picture.pass->GetClearColor(), expected);
+
+  std::shared_ptr<ContextSpy> spy = ContextSpy::Make();
+  std::shared_ptr<Context> real_context = GetContext();
+  std::shared_ptr<ContextMock> mock_context = spy->MakeContext(real_context);
+  AiksContext renderer(mock_context);
+  std::shared_ptr<Image> image = picture.ToImage(renderer, {300, 300});
+
+  ASSERT_EQ(spy->render_passes_.size(), 1llu);
+  std::shared_ptr<RenderPass> render_pass = spy->render_passes_[0];
+  ASSERT_EQ(render_pass->GetCommands().size(), 0llu);
 }
 
 TEST_P(AiksTest, CollapsedDrawPaintInSubpass) {

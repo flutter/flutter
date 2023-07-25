@@ -4,11 +4,14 @@
 
 #include "impeller/entity/geometry/geometry.h"
 
+#include <optional>
+
 #include "impeller/entity/geometry/cover_geometry.h"
 #include "impeller/entity/geometry/fill_path_geometry.h"
 #include "impeller/entity/geometry/point_field_geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
+#include "impeller/geometry/rect.h"
 
 namespace impeller {
 
@@ -107,8 +110,10 @@ GeometryResult Geometry::GetPositionUVBuffer(Rect texture_coverage,
   return {};
 }
 
-std::unique_ptr<Geometry> Geometry::MakeFillPath(const Path& path) {
-  return std::make_unique<FillPathGeometry>(path);
+std::unique_ptr<Geometry> Geometry::MakeFillPath(
+    const Path& path,
+    std::optional<Rect> inner_rect) {
+  return std::make_unique<FillPathGeometry>(path, inner_rect);
 }
 
 std::unique_ptr<Geometry> Geometry::MakePointField(std::vector<Point> points,
