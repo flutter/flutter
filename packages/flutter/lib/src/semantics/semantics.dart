@@ -871,7 +871,6 @@ class SemanticsProperties extends DiagnosticableTree {
     this.checked,
     this.mixed,
     this.expanded,
-    // this.collapsed,
     this.selected,
     this.toggled,
     this.button,
@@ -966,8 +965,6 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This is mutually exclusive with [checked] and [toggled].
   final bool? mixed;
 
-  ///
-  // final bool? collapsed;
   ///
   final bool? expanded;
 
@@ -1619,7 +1616,6 @@ class SemanticsProperties extends DiagnosticableTree {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
-    // properties.add(DiagnosticsProperty<bool>('collapsed', collapsed, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expanded', expanded, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
@@ -4406,17 +4402,6 @@ class SemanticsConfiguration {
   set isSelected(bool value) {
     _setFlag(SemanticsFlag.isSelected, value);
   }
-
-  // bool? get isCollapsed => _hasFlag(SemanticsFlag.isCollapsed);
-  // set isCollapsed(bool? value) {
-  //   _setFlag(SemanticsFlag.isCollapsed, value!);
-  // }
-  // bool? get isChecked => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isChecked) : null;
-  // set isChecked(bool? value) {
-  //   assert(value != true || isCheckStateMixed != true);
-  //   _setFlag(SemanticsFlag.hasCheckedState, true);
-  //   _setFlag(SemanticsFlag.isChecked, value!);
-  // }
 
   bool? get isExpanded => _hasFlag(SemanticsFlag.hasExpandedState) ? _hasFlag(SemanticsFlag.isExpanded) : null;
   set isExpanded(bool? value) {

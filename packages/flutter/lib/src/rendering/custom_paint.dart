@@ -900,9 +900,6 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.button != null) {
       config.isButton = properties.button!;
     }
-    // if (properties.collapsed != null) {
-    //   config.isCollapsed = properties.collapsed;
-    // }
     if (properties.expanded != null) {
       config.isExpanded = properties.expanded;
     }
