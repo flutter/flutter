@@ -465,12 +465,12 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       return EntityPass::EntityResult::Skip();
     }
 
-    std::shared_ptr<Contents> backdrop_filter_contents = nullptr;
+    std::shared_ptr<Contents> subpass_backdrop_filter_contents = nullptr;
     if (subpass->backdrop_filter_proc_) {
       auto texture = pass_context.GetTexture();
       // Render the backdrop texture before any of the pass elements.
       const auto& proc = subpass->backdrop_filter_proc_;
-      backdrop_filter_contents =
+      subpass_backdrop_filter_contents =
           proc(FilterInput::Make(std::move(texture)), subpass->xformation_,
                /*is_subpass*/ true);
 
@@ -507,9 +507,10 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       return EntityPass::EntityResult::Skip();
     }
 
-    auto subpass_coverage = (subpass->flood_clip_ || backdrop_filter_contents)
-                                ? coverage_limit
-                                : GetSubpassCoverage(*subpass, coverage_limit);
+    auto subpass_coverage =
+        (subpass->flood_clip_ || subpass_backdrop_filter_contents)
+            ? coverage_limit
+            : GetSubpassCoverage(*subpass, coverage_limit);
     if (!subpass_coverage.has_value()) {
       return EntityPass::EntityResult::Skip();
     }
@@ -532,17 +533,18 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
 
     // Stencil textures aren't shared between EntityPasses (as much of the
     // time they are transient).
-    if (!subpass->OnRender(renderer,                  // renderer
-                           root_pass_size,            // root_pass_size
-                           subpass_target,            // pass_target
-                           subpass_coverage->origin,  // global_pass_position
-                           subpass_coverage->origin -
-                               global_pass_position,  // local_pass_position
-                           ++pass_depth,              // pass_depth
-                           stencil_coverage_stack,    // stencil_coverage_stack
-                           subpass->stencil_depth_,   // stencil_depth_floor
-                           backdrop_filter_contents  // backdrop_filter_contents
-                           )) {
+    if (!subpass->OnRender(
+            renderer,                  // renderer
+            root_pass_size,            // root_pass_size
+            subpass_target,            // pass_target
+            subpass_coverage->origin,  // global_pass_position
+            subpass_coverage->origin -
+                global_pass_position,         // local_pass_position
+            ++pass_depth,                     // pass_depth
+            stencil_coverage_stack,           // stencil_coverage_stack
+            subpass->stencil_depth_,          // stencil_depth_floor
+            subpass_backdrop_filter_contents  // backdrop_filter_contents
+            )) {
       // Validation error messages are triggered for all `OnRender()` failure
       // cases.
       return EntityPass::EntityResult::Failure();
