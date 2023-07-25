@@ -388,7 +388,7 @@ class CreateCommand extends CreateBase {
         );
         pubContext = PubContext.createPlugin;
       case FlutterProjectType.pluginFfi:
-        generatedFileCount += await _generateFfiPlugin(
+        generatedFileCount += await _generateFfiPluginOrPackage(
           relativeDir,
           templateContext,
           overwrite: overwrite,
@@ -397,7 +397,7 @@ class CreateCommand extends CreateBase {
         );
         pubContext = PubContext.createPlugin;
       case FlutterProjectType.packageFfi:
-        generatedFileCount += await _generateFfiPackage(
+        generatedFileCount += await _generateFfiPluginOrPackage(
           relativeDir,
           templateContext,
           overwrite: overwrite,
@@ -606,7 +606,7 @@ Your $application code is in $relativeAppMain.
     return generatedCount;
   }
 
-  Future<int> _generateFfiPlugin(
+  Future<int> _generateFfiPluginOrPackage(
     Directory directory,
     Map<String, Object?> templateContext, {
     bool overwrite = false,
@@ -634,10 +634,18 @@ Your $application code is in $relativeAppMain.
     int generatedCount = 0;
     final String? description = argResults!.wasParsed('description')
         ? stringArg('description')
-        : 'A new Flutter FFI plugin project.';
+        : projectType == FlutterProjectType.packageFfi
+            ? 'A new Dart FFI package project.'
+            : 'A new Flutter FFI plugin project.';
     templateContext['description'] = description;
     generatedCount += await renderMerged(
-      <String>['plugin_ffi', 'plugin_shared'],
+      <String>[
+        if (projectType == FlutterProjectType.packageFfi) 'package_ffi',
+        if (projectType == FlutterProjectType.pluginFfi) ...<String>[
+          'plugin_ffi',
+          'plugin_shared',
+        ],
+      ],
       directory,
       templateContext,
       overwrite: overwrite,
@@ -645,11 +653,6 @@ Your $application code is in $relativeAppMain.
     );
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
-    final bool generateAndroid = templateContext['android'] == true;
-    if (generateAndroid) {
-      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
-    }
-
     final String? projectName = templateContext['projectName'] as String?;
     final String organization = templateContext['organization']! as String; // Required to make the context.
     final String? androidPluginIdentifier = templateContext['androidIdentifier'] as String?;
@@ -674,75 +677,6 @@ Your $application code is in $relativeAppMain.
     );
     return generatedCount;
   }
-
-
-  Future<int> _generateFfiPackage(
-    Directory directory,
-    Map<String, Object?> templateContext, {
-    bool overwrite = false,
-    bool printStatusWhenWriting = true,
-    required FlutterProjectType projectType,
-  }) async {
-    // Plugins only add a platform if it was requested explicitly by the user.
-    if (!argResults!.wasParsed('platforms')) {
-      for (final String platform in kAllCreatePlatforms) {
-        templateContext[platform] = false;
-      }
-    }
-    final List<String> platformsToAdd =
-        _getSupportedPlatformsFromTemplateContext(templateContext);
-    final List<String> existingPlatforms =
-        _getSupportedPlatformsInPlugin(directory);
-    for (final String existingPlatform in existingPlatforms) {
-      // re-generate files for existing platforms
-      templateContext[existingPlatform] = true;
-    }
-    final bool willAddPlatforms = platformsToAdd.isNotEmpty;
-    templateContext['no_platforms'] = !willAddPlatforms;
-    int generatedCount = 0;
-    final String? description = argResults!.wasParsed('description')
-        ? stringArg('description')
-        : 'A new Dart FFI package project.';
-    templateContext['description'] = description;
-    generatedCount += await renderMerged(
-      <String>['package_ffi'],
-      directory,
-      templateContext,
-      overwrite: overwrite,
-      printStatusWhenWriting: printStatusWhenWriting,
-    );
-    final FlutterProject project = FlutterProject.fromDirectory(directory);
-    final String? projectName = templateContext['projectName'] as String?;
-    final String organization = templateContext['organization']!
-        as String; // Required to make the context.
-    final String? androidPluginIdentifier =
-        templateContext['androidIdentifier'] as String?;
-    final String exampleProjectName = '${projectName}_example';
-    templateContext['projectName'] = exampleProjectName;
-    templateContext['androidIdentifier'] =
-        CreateBase.createAndroidIdentifier(organization, exampleProjectName);
-    templateContext['iosIdentifier'] =
-        CreateBase.createUTIIdentifier(organization, exampleProjectName);
-    templateContext['macosIdentifier'] =
-        CreateBase.createUTIIdentifier(organization, exampleProjectName);
-    templateContext['windowsIdentifier'] =
-        CreateBase.createWindowsIdentifier(organization, exampleProjectName);
-    templateContext['description'] =
-        'Demonstrates how to use the $projectName plugin.';
-    templateContext['pluginProjectName'] = projectName;
-    templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
-    generatedCount += await generateApp(
-      <String>['app'],
-      project.example.directory,
-      templateContext,
-      overwrite: overwrite,
-      pluginExampleApp: true,
-      printStatusWhenWriting: printStatusWhenWriting,
-      projectType: projectType,
-    );
-    return generatedCount;
-  }
-
 
   // Takes an application template and replaces the main.dart with one from the
   // documentation website in sampleCode. Returns the difference in the number
