@@ -2932,15 +2932,27 @@ TEST_P(AiksTest, DrawPictureWithText) {
 
 TEST_P(AiksTest, MatrixBackdropFilter) {
   Canvas canvas;
-  canvas.SaveLayer({}, std::nullopt,
-                   [](const FilterInput::Ref& input,
-                      const Matrix& effect_transform, bool is_subpass) {
-                     return FilterContents::MakeMatrixFilter(
-                         input, Matrix::MakeTranslation(Vector2(100, 100)), {},
-                         Matrix(), true);
-                   });
-  canvas.DrawCircle(Point(100, 100), 100,
-                    {.color = Color::Green(), .blend_mode = BlendMode::kPlus});
+  canvas.DrawPaint({.color = Color::Black()});
+  canvas.SaveLayer({}, std::nullopt);
+  {
+    canvas.DrawCircle(Point(200, 200), 100,
+                      {.color = Color::Green().WithAlpha(0.5),
+                       .blend_mode = BlendMode::kPlus});
+    // Should render a second circle, centered on the bottom-right-most edge of
+    // the circle.
+    canvas.SaveLayer({}, std::nullopt,
+                     [](const FilterInput::Ref& input,
+                        const Matrix& effect_transform, bool is_subpass) {
+                       Matrix matrix =
+                           Matrix::MakeTranslation(Vector2(1, 1) *
+                                                   (100 + 100 * k1OverSqrt2)) *
+                           Matrix::MakeScale(Vector2(1, 1) * 0.2) *
+                           Matrix::MakeTranslation(Vector2(-100, -100));
+                       return FilterContents::MakeMatrixFilter(
+                           input, matrix, {}, Matrix(), true);
+                     });
+    canvas.Restore();
+  }
   canvas.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));

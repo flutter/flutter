@@ -34,11 +34,28 @@ std::optional<Entity> MatrixFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  auto& transform = is_subpass_ ? effect_transform : entity.GetTransformation();
+  // The filter's matrix needs to be applied within the space defined by the
+  // scene's current transformation matrix (CTM). For example: If the CTM is
+  // scaled up, then translations applied by the matrix should be magnified
+  // accordingly.
+  //
+  // To accomplish this, we sandwitch the filter's matrix within the CTM in both
+  // cases. But notice that for the subpass backdrop filter case, we use the
+  // "effect transform" instead of the Entity's transform!
+  //
+  // That's because in the subpass backdrop filter case, the Entity's transform
+  // isn't actually the captured CTM of the scene like it usually is; instead,
+  // it's just a screen space translation that offsets the backdrop texture (as
+  // mentioned above). And so we sneak the subpass's captured CTM in through the
+  // effect transform.
+
+  auto transform = is_subpass_ ? effect_transform.Basis()
+                               : entity.GetTransformation().Basis();
   snapshot->transform = transform *           //
                         matrix_ *             //
                         transform.Invert() *  //
                         snapshot->transform;
+
   snapshot->sampler_descriptor = sampler_descriptor_;
   return Entity::FromSnapshot(snapshot, entity.GetBlendMode(),
                               entity.GetStencilDepth());
