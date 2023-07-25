@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -223,6 +224,70 @@ void main() {
     expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
     // ignore: avoid_dynamic_calls
     expect(selectedLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
+  });
+
+  testWidgets('Material3 - Dial background uses correct default color', (WidgetTester tester) async {
+    ThemeData theme = ThemeData(useMaterial3: true);
+    Widget buildTimePicker(ThemeData themeData) {
+      return MaterialApp(
+        theme: themeData,
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showTimePicker(
+                      context: context,
+                      initialTime: const TimeOfDay(hour: 7, minute: 0),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTimePicker(theme));
+
+    // Open the time picker dialog.
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Test default dial background color.
+    RenderBox dial = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
+    expect(
+      dial,
+      paints
+        ..circle(color: theme.colorScheme.surfaceVariant) // Dial background color.
+        ..circle(color: Color(theme.colorScheme.primary.value)), // Dial hand color.
+    );
+
+    await tester.tap(find.text(okString)); // dismiss the dialog
+    await tester.pumpAndSettle();
+
+    // Test dial background color when theme color scheme is changed.
+    theme = theme.copyWith(
+      colorScheme: theme.colorScheme.copyWith(
+        surfaceVariant: const Color(0xffff0000),
+      ),
+    );
+    await tester.pumpWidget(buildTimePicker(theme));
+
+    // Open the time picker dialog.
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    dial = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
+    expect(
+      dial,
+      paints
+        ..circle(color: const Color(0xffff0000)) // Dial background color.
+        ..circle(color: Color(theme.colorScheme.primary.value)), // Dial hand color.
+    );
   });
 
   for (final MaterialType materialType in MaterialType.values) {
@@ -601,6 +666,167 @@ void main() {
         // layout to match the gap between right edge of the 'OK'
         // button and the right edge of the 800 wide view.
         expect(tester.getBottomLeft(find.text(okString)).dx, 800 - ltrOkRight);
+      });
+
+      group('Barrier dismissible', () {
+        late PickerObserver rootObserver;
+
+        setUpAll(() {
+          rootObserver = PickerObserver();
+        });
+
+        testWidgets('Barrier is dismissible with default parameter', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            MaterialApp(
+              navigatorObservers: <NavigatorObserver>[rootObserver],
+              home: Material(
+                child: Center(
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      return ElevatedButton(
+                        child: const Text('X'),
+                        onPressed: () =>
+                            showTimePicker(
+                              context: context,
+                              initialTime: const TimeOfDay(hour: 7, minute: 0),
+                            ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          );
+
+          // Open the dialog.
+          await tester.tap(find.byType(ElevatedButton));
+          await tester.pumpAndSettle();
+          expect(rootObserver.pickerCount, 1);
+
+          // Tap on the barrier.
+          await tester.tapAt(const Offset(10.0, 10.0));
+          await tester.pumpAndSettle();
+          expect(rootObserver.pickerCount, 0);
+        });
+
+        testWidgets('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            MaterialApp(
+              navigatorObservers: <NavigatorObserver>[rootObserver],
+              home: Material(
+                child: Center(
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      return ElevatedButton(
+                        child: const Text('X'),
+                        onPressed: () =>
+                            showTimePicker(
+                              context: context,
+                              barrierDismissible: false,
+                              initialTime: const TimeOfDay(hour: 7, minute: 0),
+                            ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          );
+
+          // Open the dialog.
+          await tester.tap(find.byType(ElevatedButton));
+          await tester.pumpAndSettle();
+          expect(rootObserver.pickerCount, 1);
+
+          // Tap on the barrier, which shouldn't do anything this time.
+          await tester.tapAt(const Offset(10.0, 10.0));
+          await tester.pumpAndSettle();
+          expect(rootObserver.pickerCount, 1);
+        });
+      });
+
+      testWidgets('Barrier color', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      child: const Text('X'),
+                      onPressed: () => showTimePicker(
+                        context: context,
+                        initialTime: const TimeOfDay(hour: 7, minute: 0),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open the dialog.
+        await tester.tap(find.byType(ElevatedButton));
+        await tester.pumpAndSettle();
+        expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.black54);
+
+        // Dismiss the dialog.
+        await tester.tapAt(const Offset(10.0, 10.0));
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      child: const Text('X'),
+                      onPressed: () => showTimePicker(
+                        context: context,
+                        barrierColor: Colors.pink,
+                        initialTime: const TimeOfDay(hour: 7, minute: 0),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open the dialog.
+        await tester.tap(find.byType(ElevatedButton));
+        await tester.pumpAndSettle();
+        expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
+      });
+
+      testWidgets('Barrier Label', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      child: const Text('X'),
+                      onPressed: () => showTimePicker(
+                        context: context,
+                        barrierLabel: 'Custom Label',
+                        initialTime: const TimeOfDay(hour: 7, minute: 0),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open the dialog.
+        await tester.tap(find.byType(ElevatedButton));
+        await tester.pumpAndSettle();
+        expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).semanticsLabel, 'Custom Label');
       });
 
       testWidgets('uses root navigator by default', (WidgetTester tester) async {
@@ -1741,6 +1967,14 @@ class PickerObserver extends NavigatorObserver {
       pickerCount++;
     }
     super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is DialogRoute) {
+      pickerCount--;
+    }
+    super.didPop(route, previousRoute);
   }
 }
 

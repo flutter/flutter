@@ -742,6 +742,160 @@ void main() {
     expect(nestedObserver.licensePageCount, 0);
   });
 
+  group('Barrier dismissible', () {
+    late AboutDialogObserver rootObserver;
+
+    setUpAll(() {
+      rootObserver = AboutDialogObserver();
+    });
+
+    testWidgets('Barrier is dismissible with default parameter', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorObservers: <NavigatorObserver>[rootObserver],
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () => showAboutDialog(
+                      context: context,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(rootObserver.dialogCount, 1);
+
+      // Tap on the barrier.
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+      expect(rootObserver.dialogCount, 0);
+    });
+
+    testWidgets('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorObservers: <NavigatorObserver>[rootObserver],
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () => showAboutDialog(
+                        context: context,
+                        barrierDismissible: false
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(rootObserver.dialogCount, 1);
+
+      // Tap on the barrier, which shouldn't do anything this time.
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+      expect(rootObserver.dialogCount, 1);
+    });
+  });
+
+  testWidgets('Barrier color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () => showAboutDialog(
+                    context: context,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.black54);
+
+    // Dismiss the dialog.
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () => showAboutDialog(
+                    context: context,
+                    barrierColor: Colors.pink,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
+  });
+
+  testWidgets('Barrier Label', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () => showAboutDialog(
+                    context: context,
+                    barrierLabel: 'Custom Label',
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).semanticsLabel, 'Custom Label');
+  });
+
   testWidgetsWithLeakTracking('showAboutDialog uses root navigator by default', (WidgetTester tester) async {
     final AboutDialogObserver rootObserver = AboutDialogObserver();
     final AboutDialogObserver nestedObserver = AboutDialogObserver();
@@ -1740,5 +1894,13 @@ class AboutDialogObserver extends NavigatorObserver {
       dialogCount++;
     }
     super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is DialogRoute) {
+      dialogCount--;
+    }
+    super.didPop(route, previousRoute);
   }
 }
