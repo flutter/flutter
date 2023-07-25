@@ -6809,7 +6809,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// [IgnorePointer.ignoring] is true. Developers can only use this property to
 /// preserver the semantics subtrees.
 ///
-/// After that version, [IgnorePointer] only prevents semantics users actions
+/// After that version, [IgnorePointer] only prevents semantics user actions
 /// in the semantics subtree but leaves the other [SemanticsProperties] intact.
 /// Therefore, the [ignoringSemantics] is no longer needed.
 /// {@endtemplate}
