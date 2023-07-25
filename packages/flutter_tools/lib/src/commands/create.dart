@@ -224,18 +224,18 @@ class CreateCommand extends CreateBase {
         exitCode: 2);
     } else if (generateFfi && argResults!.wasParsed('platforms') && platforms.contains('web')) {
       throwToolExit(
-        'The web platform is not supported in plugin_ffi template.',
+        'The web platform is not supported in ${template.cliName} template.',
         exitCode: 2,
       );
     } else if (generateFfi && argResults!.wasParsed('ios-language')) {
       throwToolExit(
-        'The "ios-language" option is not supported with the plugin_ffi '
+        'The "ios-language" option is not supported with the ${template.cliName} '
         'template: the language will always be C or C++.',
         exitCode: 2,
       );
     } else if (generateFfi && argResults!.wasParsed('android-language')) {
       throwToolExit(
-        'The "android-language" option is not supported with the plugin_ffi '
+        'The "android-language" option is not supported with the ${template.cliName} '
         'template: the language will always be C or C++.',
         exitCode: 2,
       );
