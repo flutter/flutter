@@ -18,7 +18,7 @@ extension HtmlElementViewImpl on HtmlElementView {
     bool isVisible = true,
     ElementCreatedCallback? onElementCreated,
   }) {
-    return HtmlElementView(key: key, viewType: 'never');
+    throw UnimplementedError('HtmlElementView is only available on Flutter Web');
   }
 
   /// Called from [HtmlElementView.build] to build the widget tree.
