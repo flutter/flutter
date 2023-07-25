@@ -71,6 +71,7 @@ void main() {
     expect(themeData.brightness, null);
     expect(themeData.elevation, null);
     expect(themeData.pressElevation, null);
+    expect(themeData.iconTheme, null);
   });
 
   testWidgetsWithLeakTracking('Default ChipThemeData debugFillProperties', (WidgetTester tester) async {
@@ -108,6 +109,7 @@ void main() {
       brightness: Brightness.dark,
       elevation: 5,
       pressElevation: 6,
+      iconTheme: IconThemeData(color: Color(0xffffff10)),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -115,7 +117,7 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description, <String>[
+    expect(description, equalsIgnoringHashCodes(<String>[
       'color: MaterialStatePropertyAll(Color(0xfffffff0))',
       'backgroundColor: Color(0xfffffff1)',
       'deleteIconColor: Color(0xfffffff2)',
@@ -136,7 +138,8 @@ void main() {
       'brightness: dark',
       'elevation: 5.0',
       'pressElevation: 6.0',
-    ]);
+      'iconTheme: IconThemeData#00000(color: Color(0xffffff10))'
+    ]));
   });
 
   testWidgetsWithLeakTracking('Chip uses ThemeData chip theme', (WidgetTester tester) async {
@@ -867,6 +870,63 @@ void main() {
 
     // Enabled & selected chip should have the provided selectedColor.
     expect(getMaterialBox(tester), paints..rrect(color: chipTheme.selectedColor));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/119163.
+  testWidgetsWithLeakTracking('RawChip respects checkmark properties from ChipTheme', (WidgetTester tester) async {
+    Widget buildRawChip({ChipThemeData? chipTheme}) {
+      return MaterialApp(
+        theme: ThemeData.light(useMaterial3: false).copyWith(
+          chipTheme: chipTheme,
+        ),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+          child: Center(
+              child: RawChip(
+                selected: true,
+                label: const SizedBox(width: 100, height: 100),
+                onSelected: (bool newValue) { },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test that the checkmark is painted.
+    await tester.pumpWidget(buildRawChip(
+      chipTheme: const ChipThemeData(
+        checkmarkColor: Color(0xffff0000),
+      ),
+    ));
+
+    RenderBox materialBox = getMaterialBox(tester);
+    expect(
+      materialBox,
+      paints..path(
+        color: const Color(0xffff0000),
+        style: PaintingStyle.stroke,
+      ),
+    );
+
+    // Test that the checkmark is not painted when ChipThemeData.showCheckmark is false.
+    await tester.pumpWidget(buildRawChip(
+      chipTheme: const ChipThemeData(
+        showCheckmark: false,
+        checkmarkColor: Color(0xffff0000),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    materialBox = getMaterialBox(tester);
+    expect(
+      materialBox,
+      isNot(paints..path(
+        color: const Color(0xffff0000),
+        style: PaintingStyle.stroke,
+      )),
+    );
   });
 }
 
