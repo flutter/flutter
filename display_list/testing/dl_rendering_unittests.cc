@@ -4141,8 +4141,6 @@ class DisplayListNopTest : public DisplayListCanvas {
     auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(w, h));
     SkCanvas* canvas = surface->getCanvas();
     renderer(canvas);
-    canvas->flush();
-    surface->flushAndSubmit(true);
     return std::make_unique<RenderResult>(surface, snapshot);
   }
 
@@ -4258,8 +4256,11 @@ class DisplayListNopTest : public DisplayListCanvas {
       result_canvas->clear(SK_ColorTRANSPARENT);
       result_canvas->drawImage(test_image.get(), 0, 0);
       result_canvas->drawRect(test_bounds, sk_paint);
-      result_canvas->flush();
-      result_surface->sk_surface()->flushAndSubmit(true);
+      if (GrDirectContext* direct_context = GrAsDirectContext(
+              result_surface->sk_surface()->recordingContext())) {
+        direct_context->flushAndSubmit();
+        direct_context->flushAndSubmit(result_surface->sk_surface(), true);
+      }
       auto result_pixels =
           std::make_unique<RenderResult>(result_surface->sk_surface());
 
@@ -4316,8 +4317,11 @@ class DisplayListNopTest : public DisplayListCanvas {
       result_canvas->drawImage(test_image_dst_data->image(), 0, 0);
       result_canvas->drawImage(test_image_src_data->image(), 0, 0,
                                SkSamplingOptions(), &sk_paint);
-      result_canvas->flush();
-      result_surface->sk_surface()->flushAndSubmit(true);
+      if (GrDirectContext* direct_context = GrAsDirectContext(
+              result_surface->sk_surface()->recordingContext())) {
+        direct_context->flushAndSubmit();
+        direct_context->flushAndSubmit(result_surface->sk_surface(), true);
+      }
       auto result_pixels =
           std::make_unique<RenderResult>(result_surface->sk_surface());
 
