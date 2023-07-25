@@ -612,9 +612,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               if (!widget.enableSearch) {
                 currentHighlight = null;
               }
-              if (_textEditingController.text.isNotEmpty) {
-                controller.close();
-              }
+              controller.close();
             },
             onTap: () {
               handlePressed(controller);
