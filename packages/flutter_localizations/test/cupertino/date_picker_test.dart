@@ -18,8 +18,8 @@ void main() {
             mode: CupertinoDatePickerMode.monthYear,
           )),
         ),
-        supportedLocales: [Locale('ru', 'RU')],
-        localizationsDelegates: [GlobalCupertinoLocalizations.delegate],
+        supportedLocales: const <Locale>[Locale('ru', 'RU')],
+        localizationsDelegates: GlobalCupertinoLocalizations.delegates,
       ),
     );
 
@@ -37,8 +37,8 @@ void main() {
             mode: CupertinoDatePickerMode.date,
           )),
         ),
-        supportedLocales: [Locale('ru', 'RU')],
-        localizationsDelegates: [GlobalCupertinoLocalizations.delegate],
+        supportedLocales: const <Locale>[Locale('ru', 'RU')],
+        localizationsDelegates: GlobalCupertinoLocalizations.delegates,
       ),
     );
 

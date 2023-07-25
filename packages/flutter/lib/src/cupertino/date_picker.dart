@@ -438,9 +438,9 @@ class CupertinoDatePicker extends StatefulWidget {
     _PickerColumnType columnType,
     CupertinoLocalizations localizations,
     BuildContext context,
-    bool showDayOfWeek,
-    [bool standaloneMonth = false]
-  ) {
+    bool showDayOfWeek, {
+    bool standaloneMonth = false,
+  }) {
     String longestText = '';
 
     switch (columnType) {
@@ -1582,7 +1582,8 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
   }
 
   void _refreshEstimatedColumnWidths() {
-    estimatedColumnWidths[_PickerColumnType.month.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.month, localizations, context, false, widget.mode == CupertinoDatePickerMode.monthYear);
+    estimatedColumnWidths[_PickerColumnType.month.index] =
+        CupertinoDatePicker._getColumnWidth(_PickerColumnType.month, localizations, context, false, standaloneMonth: widget.mode == CupertinoDatePickerMode.monthYear);
     estimatedColumnWidths[_PickerColumnType.year.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.year, localizations, context, false);
   }
 
