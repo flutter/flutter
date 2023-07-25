@@ -3839,7 +3839,7 @@ targets:
 
   - name: Mac_ios native_assets_ios_simulator
     recipe: devicelab/devicelab_drone
-    presubmit: false 
+    presubmit: false
     bringup: true # TODO(dacoharkes): Set to false in follow up PR and check that test works on CI.
     timeout: 60
     properties:
