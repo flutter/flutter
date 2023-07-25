@@ -184,9 +184,6 @@ void test(String description, FutureOr<void> Function() body, {
     // We don't support "timeout"; see ../../dart_test.yaml which
     // configures all tests to have a 15 minute timeout which should
     // definitely be enough.
-    // Specifying a timeout here as well enables running test files
-    // standalone without `flutter test`.
-    timeout: const Timeout(Duration(minutes: 15)),
   );
 }
 
