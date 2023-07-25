@@ -1339,7 +1339,7 @@ void main() {
       expect(lastFrameworkHandlesBack, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-      skip: kIsWeb,
+      skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.
     );
   });
 }
