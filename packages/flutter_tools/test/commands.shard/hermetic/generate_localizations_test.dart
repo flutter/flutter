@@ -506,12 +506,6 @@ format: true
   testWithoutContext('Empty ARB can be parsed without FormatException', () {
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
-    Object? exception;
-    try {
-      AppResourceBundle(arbFile);
-    } on FormatException catch (e) {
-      exception = e;
-    }
-    expect(exception, isNull);
+    expect(AppResourceBundle(arbFile), isA<AppResourceBundle>());
   });
 }
