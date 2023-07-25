@@ -381,8 +381,10 @@ abstract final class SystemChrome {
   /// // A widget that locks the screen to portrait if it is less than 600
   /// // logical pixels wide.
   /// class MyApp extends StatefulWidget {
+  ///   const MyApp({ super.key });
+  ///
   ///   @override
-  ///   State<StatefulWidget> createState() => _MyAppState();
+  ///   State<MyApp> createState() => _MyAppState();
   /// }
   ///
   /// class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
@@ -406,7 +408,7 @@ abstract final class SystemChrome {
   ///
   ///   @override
   ///   void didChangeMetrics() {
-  ///     final ui.Display display = _display;
+  ///     final ui.Display? display = _display;
   ///     if (display == null) {
   ///       return;
   ///     }
