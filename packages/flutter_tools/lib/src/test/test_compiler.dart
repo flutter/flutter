@@ -175,15 +175,11 @@ class TestCompiler {
           fileSystem: globals.fs,
       );
       } else {
-        if (compiler.toString() != "Instance of 'FakeResidentCompiler'") {
-          // TODO(dacoharkes): How do we get access to the file system that is
-          // used in test/general.shard/test/test_compiler_test.dart ?
-          // We need to pass the right file system here in order to check for
-          // possible native assets.
-          await ensureNoNativeAssetsOrOsIsSupported(
-              projectUri, const LocalPlatform().operatingSystem, globals.fs);
-        }
-        nativeAssetsYaml = null;
+        await ensureNoNativeAssetsOrOsIsSupported(
+          projectUri,
+          const LocalPlatform().operatingSystem,
+          globals.fs,
+        );
       }
 
       final CompilerOutput? compilerOutput = await compiler!.recompile(
