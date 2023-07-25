@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/generate_localizations.dart';
+import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 
 import '../../integration.shard/test_data/basic_project.dart';
 import '../../src/common.dart';
@@ -500,5 +501,17 @@ format: true
       () async => createTestCommandRunner(command).run(<String>['gen-l10n', '--synthetic-package', 'false']),
       throwsToolExit(message: 'Unexpected positional argument "false".')
     );
+  });
+
+  testWithoutContext('Empty ARB can be parsed without FormatException', () {
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    Object? exception;
+    try {
+      AppResourceBundle(arbFile);
+    } on FormatException catch (e) {
+      exception = e;
+    }
+    expect(exception, isNull);
   });
 }
