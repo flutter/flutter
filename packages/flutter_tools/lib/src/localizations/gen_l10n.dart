@@ -88,8 +88,8 @@ Future<LocalizationsGenerator> generateLocalizations({
     final List<String> formatFileList = outputFileList
         .where(
           (String e) =>
-              e.endsWith('.dart') ||
-              e == untranslatedMessagesFile?.absolute.path,
+              e.endsWith('.dart') &&
+              e != untranslatedMessagesFile?.absolute.path,
         )
         .toList(growable: false);
     if (formatFileList.isEmpty) {
