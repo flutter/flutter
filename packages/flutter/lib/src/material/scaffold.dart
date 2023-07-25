@@ -1142,7 +1142,31 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       }
 
       final double snackBarYOffsetBase;
-      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating) {
+      final bool showAboveFab = switch (currentFloatingActionButtonLocation) {
+        FloatingActionButtonLocation.startTop
+        || FloatingActionButtonLocation.centerTop
+        || FloatingActionButtonLocation.endTop
+        || FloatingActionButtonLocation.miniStartTop
+        || FloatingActionButtonLocation.miniCenterTop
+        || FloatingActionButtonLocation.miniEndTop => false,
+        FloatingActionButtonLocation.startDocked
+        || FloatingActionButtonLocation.startFloat
+        || FloatingActionButtonLocation.centerDocked
+        || FloatingActionButtonLocation.centerFloat
+        || FloatingActionButtonLocation.endContained
+        || FloatingActionButtonLocation.endDocked
+        || FloatingActionButtonLocation.endFloat
+        || FloatingActionButtonLocation.miniStartDocked
+        || FloatingActionButtonLocation.miniStartFloat
+        || FloatingActionButtonLocation.miniCenterDocked
+        || FloatingActionButtonLocation.miniCenterFloat
+        || FloatingActionButtonLocation.miniEndDocked
+        || FloatingActionButtonLocation.miniEndFloat => true,
+        FloatingActionButtonLocation() => throw FlutterError(
+          '$currentFloatingActionButtonLocation is an unknown FloatingActionButtonLocation value.'
+        ),
+      };
+      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating && showAboveFab) {
         snackBarYOffsetBase = floatingActionButtonRect.top;
       } else {
         // SnackBarBehavior.fixed applies a SafeArea automatically.

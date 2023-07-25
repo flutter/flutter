@@ -6,8 +6,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:ui' show Locale, Size, TextDirection;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -54,7 +52,7 @@ class ImageConfiguration {
   ImageConfiguration copyWith({
     AssetBundle? bundle,
     double? devicePixelRatio,
-    Locale? locale,
+    ui.Locale? locale,
     TextDirection? textDirection,
     Size? size,
     TargetPlatform? platform,
@@ -77,7 +75,7 @@ class ImageConfiguration {
   final double? devicePixelRatio;
 
   /// The language and region for which to select the image.
-  final Locale? locale;
+  final ui.Locale? locale;
 
   /// The reading direction of the language for which to select the image.
   final TextDirection? textDirection;

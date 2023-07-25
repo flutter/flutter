@@ -440,7 +440,7 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_centerOffsetX, _dockedOffsetY));
     });
 
-    testWidgetsWithLeakTracking('endDocked', (WidgetTester tester) async {
+    testWidgets('endDocked', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.endDocked));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_rightOffsetX, _dockedOffsetY));
@@ -502,7 +502,7 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_leftOffsetX, _topOffsetY));
     });
 
-    testWidgets('miniStartFloat, RTL', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('miniStartFloat, RTL', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.miniStartFloat, textDirection: TextDirection.rtl));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_miniRightOffsetX, _miniFloatOffsetY));
