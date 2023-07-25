@@ -363,16 +363,7 @@ class HotRunner extends ResidentRunner {
   }) async {
     await _calculateTargetPlatform();
 
-    if (flutterDevices.length != 1) {
-      throw UnimplementedError(
-          'Non-single list of flutterDevices: $flutterDevices.');
-    }
-    final FlutterDevice flutterDevice = flutterDevices.single;
-    final Device? device = flutterDevice.device;
-    final TargetPlatform targetPlatform = flutterDevice.targetPlatform!;
-    final Uri projectUri = Uri.directory(projectRootPath);
-    final Uri? nativeAssetsYaml =
-        await _getNativeAssetsYaml(targetPlatform, projectUri, device);
+    final Uri? nativeAssetsYaml = await _getNativeAssetsYaml();
 
     final Stopwatch appStartedTimer = Stopwatch()..start();
     final File mainFile = globals.fs.file(mainPath);
@@ -461,8 +452,19 @@ class HotRunner extends ResidentRunner {
   /// Run hot compiles a kernel file that is pushed to the device after hot
   /// restart. We need to embed the native assets mapping in order to access
   /// native assets after hot restart.
-  Future<Uri?> _getNativeAssetsYaml(
-      TargetPlatform targetPlatform, Uri projectUri, Device? device) async {
+  Future<Uri?> _getNativeAssetsYaml() async {
+    final Uri projectUri = Uri.directory(projectRootPath);
+    if (flutterDevices.length != 1) {
+      return dryRunNativeAssetsMultipeOSes(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        targetPlatforms:
+            flutterDevices.map((FlutterDevice d) => d.targetPlatform).nonNulls,
+      );
+    }
+    final FlutterDevice flutterDevice = flutterDevices.single;
+    final TargetPlatform targetPlatform = flutterDevice.targetPlatform!;
+
     late Uri? nativeAssetsYaml;
     switch (targetPlatform) {
       case TargetPlatform.darwin:

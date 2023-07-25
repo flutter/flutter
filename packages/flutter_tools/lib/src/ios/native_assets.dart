@@ -28,9 +28,17 @@ Future<Uri?> dryRunNativeAssetsiOS({
     return null;
   }
 
-  const OS targetOs = OS.iOS;
-  final Uri buildUri_ = buildUri(projectUri, targetOs);
+  final Uri buildUri_ = buildUri(projectUri, OS.iOS);
+  final Iterable<Asset> assetTargetLocations =
+      await dryRunNativeAssetsIosInternal(fileSystem, projectUri);
+  final Uri nativeAssetsUri =
+      await writeNativeAssetsYaml(assetTargetLocations, buildUri_, fileSystem);
+  return nativeAssetsUri;
+}
 
+Future<Iterable<Asset>> dryRunNativeAssetsIosInternal(
+    FileSystem fileSystem, Uri projectUri) async {
+  const OS targetOs = OS.iOS;
   globals.logger.printTrace(
       'Dry running native assets for $targetOs.');
   final List<Asset> nativeAssets = await NativeAssetsBuildRunner(
@@ -44,12 +52,9 @@ Future<Uri?> dryRunNativeAssetsiOS({
   );
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOs done.');
-  final Map<Asset, Asset> assetTargetLocations =
-      _assetTargetLocations(nativeAssets);
-  final Uri nativeAssetsUri =
-      await writeNativeAssetsYaml(
-      assetTargetLocations.values, buildUri_, fileSystem);
-  return nativeAssetsUri;
+  final Iterable<Asset> assetTargetLocations =
+      _assetTargetLocations(nativeAssets).values;
+  return assetTargetLocations;
 }
 
 /// Builds native assets.

@@ -15,6 +15,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../ios/native_assets.dart';
 
 /// Dry run the native builds.
 ///
@@ -33,6 +34,49 @@ Future<Uri?> dryRunNativeAssetsMacOS({
     return null;
   }
 
+  final Uri buildUri_ = buildUri(projectUri, OS.macOS);
+  final Iterable<Asset> nativeAssetPaths =
+      await dryRunNativeAssetsMacosInternal(
+          fileSystem, projectUri, flutterTester);
+  final Uri nativeAssetsUri =
+      await writeNativeAssetsYaml(nativeAssetPaths, buildUri_, fileSystem);
+  return nativeAssetsUri;
+}
+
+/// Dry run the native builds for multiple OSes.
+///
+/// Needed for `flutter run -d all`.
+Future<Uri?> dryRunNativeAssetsMultipeOSes({
+  required Uri projectUri,
+  required FileSystem fileSystem,
+  required Iterable<TargetPlatform> targetPlatforms,
+}) async {
+  if (await hasNoPackageConfig(projectUri, fileSystem)) {
+    return null;
+  }
+  if (await isDisabledAndNoNativeAssets(projectUri)) {
+    return null;
+  }
+
+  final Uri buildUri_ = buildUriMultiple(projectUri);
+  final Iterable<Asset> nativeAssetPaths = <Asset>[
+    if (targetPlatforms.contains(TargetPlatform.darwin) ||
+        (targetPlatforms.contains(TargetPlatform.tester) &&
+            OS.current == OS.macOS))
+      ...await dryRunNativeAssetsMacosInternal(fileSystem, projectUri, false),
+    if (targetPlatforms.contains(TargetPlatform.ios))
+      ...await dryRunNativeAssetsIosInternal(fileSystem, projectUri)
+  ];
+  final Uri nativeAssetsUri =
+      await writeNativeAssetsYaml(nativeAssetPaths, buildUri_, fileSystem);
+  return nativeAssetsUri;
+}
+
+Future<Iterable<Asset>> dryRunNativeAssetsMacosInternal(
+  FileSystem fileSystem,
+  Uri projectUri,
+  bool flutterTester,
+) async {
   const OS targetOs = OS.macOS;
   final Uri buildUri_ = buildUri(projectUri, targetOs);
 
@@ -51,9 +95,8 @@ Future<Uri?> dryRunNativeAssetsMacOS({
   final Uri? absolutePath = flutterTester ? buildUri_ : null;
   final Map<Asset, Asset> assetTargetLocations =
       _assetTargetLocations(nativeAssets, absolutePath);
-  final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-      assetTargetLocations.values, buildUri_, fileSystem);
-  return nativeAssetsUri;
+  final Iterable<Asset> nativeAssetPaths = assetTargetLocations.values;
+  return nativeAssetPaths;
 }
 
 /// Builds native assets.
@@ -217,8 +260,14 @@ Uri flutterDartUri(FileSystem fileSystem) =>
 /// It should work for all MacOS.
 Uri buildUri(Uri projectUri, OS os) {
   final String buildDir = getBuildDirectory();
-  final Uri buildUri = projectUri.resolve('$buildDir/native_assets/$os/');
-  return buildUri;
+  return projectUri.resolve('$buildDir/native_assets/$os/');
+}
+
+/// With `flutter run -d all` we need a place to store the native assets
+/// mapping for multiple OSes combined.
+Uri buildUriMultiple(Uri projectUri) {
+  final String buildDir = getBuildDirectory();
+  return projectUri.resolve('$buildDir/native_assets/multiple/');
 }
 
 /// The target location for native assets on MacOS.
