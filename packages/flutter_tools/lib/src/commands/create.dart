@@ -655,6 +655,11 @@ Your $application code is in $relativeAppMain.
     );
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
+    final bool generateAndroid = templateContext['android'] == true;
+    if (generateAndroid && projectType == FlutterProjectType.pluginFfi) {
+      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+    }
+
     final String? projectName = templateContext['projectName'] as String?;
     final String organization = templateContext['organization']! as String; // Required to make the context.
     final String? androidPluginIdentifier = templateContext['androidIdentifier'] as String?;
