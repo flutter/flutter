@@ -378,12 +378,38 @@ abstract final class SystemChrome {
   /// must use the `display` property of the current [FlutterView].
   ///
   /// ```dart
-  /// // Lock the screen to portrait if it is less than 600 logical pixels wide.
-  /// const double kOrientationLockBreakpoint = 600;
-  /// class OrientationLockingObserver extends WidgetsBindingObserver {
+  /// // A widget that locks the screen to portrait if it is less than 600
+  /// // logical pixels wide.
+  /// class MyApp extends StatefulWidget {
+  ///   @override
+  ///   State<StatefulWidget> createState() => _MyAppState();
+  /// }
+  ///
+  /// class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  ///   ui.Display? _display;
+  ///   static const double kOrientationLockBreakpoint = 600;
+  ///
+  ///   @override
+  ///   void didChangeDependencies() {
+  ///     super.didChangeDependencies();
+  ///     _display = View.maybeOf(context)?.display;
+  ///     WidgetsBinding.instance.removeObserver(this);
+  ///     WidgetsBinding.instance.addObserver(this);
+  ///   }
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     WidgetsBinding.instance.removeObserver(this);
+  ///     _display = null;
+  ///     super.dispose();
+  ///   }
+  ///
   ///   @override
   ///   void didChangeMetrics() {
-  ///     final ui.Display display = PlatformDispatcher.instance.implicitView!.display;
+  ///     final ui.Display display = _display;
+  ///     if (display == null) {
+  ///       return;
+  ///     }
   ///     if (display.size.width / display.devicePixelRatio < kOrientationLockBreakpoint) {
   ///       SystemChrome.setPreferredOrientations(<DeviceOrientation>[
   ///         DeviceOrientation.portraitUp,
@@ -392,10 +418,13 @@ abstract final class SystemChrome {
   ///       SystemChrome.setPreferredOrientations(<DeviceOrientation>[]);
   ///     }
   ///   }
-  /// }
   ///
-  /// void main() {
-  ///   WidgetsFlutterBinding.ensureInitialized().addObserver(OrientationLockingObserver());
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return const MaterialApp(
+  ///       home: Placeholder(),
+  ///     );
+  ///   }
   /// }
   /// ```
   ///
