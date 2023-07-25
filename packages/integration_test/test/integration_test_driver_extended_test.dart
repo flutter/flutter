@@ -44,6 +44,7 @@ void main() {
       expect(called, true);
       expect(exitCode, 0);
     });
+
     test(
         'write response data when test fail and writeResponseOnFailure is true',
         () async {
@@ -66,6 +67,7 @@ void main() {
       expect(called, true);
       expect(exitCode, 1);
     });
+
     test(
         'do not write response data when test fail and writeResponseOnFailure is false',
         () async {

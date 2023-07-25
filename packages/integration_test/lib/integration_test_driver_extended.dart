@@ -84,6 +84,10 @@ ExitFn exitFn = exit;
 ///
 /// `responseDataCallback` is the handler for processing [Response.data].
 /// The default value is `writeResponseData`.
+///
+/// `writeResponseOnFailure` is the flag determines whether the `responseDataCallback`
+/// function will be called to process the [Response.data] when a test fails.
+/// The default value is `false`.
 Future<void> integrationDriver({
   FlutterDriver? driver,
   ScreenshotCallback? onScreenshot,
