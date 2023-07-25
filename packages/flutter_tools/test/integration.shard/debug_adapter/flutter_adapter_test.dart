@@ -280,8 +280,11 @@ The following _Exception was thrown building App(dirty):
 Exception: c
 
 The relevant error-causing widget was:
-  App
-  App:${Uri.file(project.dir.path)}/lib/main.dart:1:1'''),
+  App'''),
+        );
+        expect(
+          output,
+          contains('App:${Uri.file(project.dir.path)}/lib/main.dart:1:1'),
         );
       });
     });
