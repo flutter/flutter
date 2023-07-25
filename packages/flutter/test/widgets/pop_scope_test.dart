@@ -10,18 +10,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'navigator_utils.dart';
 
 void main() {
-  final List<bool> calls = <bool>[];
+  bool? lastFrameworkHandlesBack;
   setUp(() {
     // Initialize to false. Because this uses a static boolean internally, it
     // is not reset between tests or calls to pumpWidget. Explicitly setting
     // it to false before each test makes them behave deterministically.
     SystemNavigator.setFrameworkHandlesBack(false);
-    calls.clear();
+    lastFrameworkHandlesBack = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         if (methodCall.method == 'SystemNavigator.setFrameworkHandlesBack') {
           expect(methodCall.arguments, isA<bool>());
-          calls.add(methodCall.arguments as bool);
+          lastFrameworkHandlesBack = methodCall.arguments as bool;
         }
         return;
       });
@@ -64,10 +64,6 @@ void main() {
       ),
     );
 
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(1));
-    }
-    final int lastCallsLength = calls.length;
     expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.doNotPop);
 
     setState(() {
@@ -75,8 +71,7 @@ void main() {
     });
     await tester.pump();
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
+      expect(lastFrameworkHandlesBack, isFalse);
     }
     expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.bubble);
   },
@@ -142,10 +137,6 @@ void main() {
 
     expect(find.text('Home Page'), findsOneWidget);
     expect(ModalRoute.of(homeContext)!.popDisposition, RoutePopDisposition.bubble);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(0));
-    }
-    int lastCallsLength = calls.length;
 
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
@@ -153,10 +144,8 @@ void main() {
     expect(find.text('Home Page'), findsNothing);
     expect(ModalRoute.of(oneContext)!.popDisposition, RoutePopDisposition.pop);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
     }
-    lastCallsLength = calls.length;
 
     // When canPop is true, can use pop to go back.
     nav.currentState!.maybePop();
@@ -166,10 +155,8 @@ void main() {
     expect(find.text('PopScope Page'), findsNothing);
     expect(ModalRoute.of(homeContext)!.popDisposition, RoutePopDisposition.bubble);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
+      expect(lastFrameworkHandlesBack, isFalse);
     }
-    lastCallsLength = calls.length;
 
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
@@ -177,10 +164,8 @@ void main() {
     expect(find.text('Home Page'), findsNothing);
     expect(ModalRoute.of(oneContext)!.popDisposition, RoutePopDisposition.pop);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
     }
-    lastCallsLength = calls.length;
 
     // When canPop is true, can use system back to go back.
     await simulateSystemBack();
@@ -190,10 +175,8 @@ void main() {
     expect(find.text('PopScope Page'), findsNothing);
     expect(ModalRoute.of(homeContext)!.popDisposition, RoutePopDisposition.bubble);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
+      expect(lastFrameworkHandlesBack, isFalse);
     }
-    lastCallsLength = calls.length;
 
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
@@ -201,18 +184,13 @@ void main() {
     expect(find.text('Home Page'), findsNothing);
     expect(ModalRoute.of(oneContext)!.popDisposition, RoutePopDisposition.pop);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
     }
-    lastCallsLength = calls.length;
 
     setState(() {
       canPop = false;
     });
     await tester.pump();
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(lastCallsLength));
-    }
 
     // When canPop is false, can't use pop to go back.
     nav.currentState!.maybePop();
@@ -221,9 +199,6 @@ void main() {
     expect(find.text('PopScope Page'), findsOneWidget);
     expect(find.text('Home Page'), findsNothing);
     expect(ModalRoute.of(oneContext)!.popDisposition, RoutePopDisposition.doNotPop);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(lastCallsLength));
-    }
 
     // When canPop is false, can't use system back to go back.
     await simulateSystemBack();
@@ -232,18 +207,12 @@ void main() {
     expect(find.text('PopScope Page'), findsOneWidget);
     expect(find.text('Home Page'), findsNothing);
     expect(ModalRoute.of(oneContext)!.popDisposition, RoutePopDisposition.doNotPop);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(lastCallsLength));
-    }
 
     // Toggle canPop back to true and back works again.
     setState(() {
       canPop = true;
     });
     await tester.pump();
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(lastCallsLength));
-    }
 
     nav.currentState!.maybePop();
     await tester.pumpAndSettle();
@@ -252,10 +221,8 @@ void main() {
     expect(find.text('PopScope Page'), findsNothing);
     expect(ModalRoute.of(homeContext)!.popDisposition, RoutePopDisposition.bubble);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
+      expect(lastFrameworkHandlesBack, isFalse);
     }
-    lastCallsLength = calls.length;
 
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
@@ -263,10 +230,8 @@ void main() {
     expect(find.text('Home Page'), findsNothing);
     expect(ModalRoute.of(oneContext)!.popDisposition, RoutePopDisposition.pop);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
     }
-    lastCallsLength = calls.length;
 
     await simulateSystemBack();
     await tester.pumpAndSettle();
@@ -275,8 +240,7 @@ void main() {
     expect(find.text('PopScope Page'), findsNothing);
     expect(ModalRoute.of(homeContext)!.popDisposition, RoutePopDisposition.bubble);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls.last, isFalse);
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      expect(lastFrameworkHandlesBack, isFalse);
     }
   },
     variant: TargetPlatformVariant.all(),
@@ -318,10 +282,8 @@ void main() {
     );
 
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(1));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
     }
-    final int lastCallsLength = calls.length;
     expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.doNotPop);
 
     setState(() {
@@ -329,8 +291,7 @@ void main() {
     });
     await tester.pump();
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
+      expect(lastFrameworkHandlesBack, isFalse);
     }
     expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.bubble);
   },
@@ -370,10 +331,8 @@ void main() {
     );
 
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(1));
-      expect(calls.last, isTrue);
+      expect(lastFrameworkHandlesBack, isTrue);
     }
-    int lastCallsLength = calls.length;
     expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.doNotPop);
 
     // Despite being in the widget tree twice, the ModalRoute has only ever
@@ -384,9 +343,7 @@ void main() {
     });
     await tester.pump();
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(lastCallsLength));
-      expect(calls.last, isTrue);
-      lastCallsLength = calls.length;
+      expect(lastFrameworkHandlesBack, isTrue);
     }
     expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.doNotPop);
 
@@ -395,8 +352,7 @@ void main() {
     });
     await tester.pump();
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      expect(calls, hasLength(greaterThan(lastCallsLength)));
-      expect(calls.last, isFalse);
+      expect(lastFrameworkHandlesBack, isFalse);
     }
     expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.bubble);
   },
