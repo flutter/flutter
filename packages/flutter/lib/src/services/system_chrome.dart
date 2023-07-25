@@ -392,11 +392,15 @@ abstract final class SystemChrome {
   ///   static const double kOrientationLockBreakpoint = 600;
   ///
   ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     WidgetsBinding.instance.addObserver(this);
+  ///   }
+  ///
+  ///   @override
   ///   void didChangeDependencies() {
   ///     super.didChangeDependencies();
   ///     _display = View.maybeOf(context)?.display;
-  ///     WidgetsBinding.instance.removeObserver(this);
-  ///     WidgetsBinding.instance.addObserver(this);
   ///   }
   ///
   ///   @override
