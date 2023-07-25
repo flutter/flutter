@@ -6800,6 +6800,18 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// semantics subtree is collected. If [ignoring] is true, pointer-related
 /// [SemanticsAction]s are removed from the semantics subtree. Otherwise, the
 /// subtree remains untouched.
+///
+/// The usages of [ignoringSemantics] are deprecated and not recommended. This
+/// property was introduced to workaround the semantics behavior of the
+/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
+///
+/// Before that version, [IgnorePointer] dropped entire semantics subtree if
+/// [IgnorePointer.ignoring] is true. Developers can only use this property to
+/// preserver the semantics subtrees.
+///
+/// After that version, [IgnorePointer] only prevents semantics users actions
+/// in the semantics subtree but leaves the other [SemanticsProperties] intact.
+/// Therefore, the [ignoringSemantics] is no longer needed.
 /// {@endtemplate}
 ///
 /// See also:
