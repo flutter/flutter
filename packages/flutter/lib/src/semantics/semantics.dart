@@ -965,7 +965,12 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This is mutually exclusive with [checked] and [toggled].
   final bool? mixed;
 
+  /// If non-null, indicates that this subtree represents something
+  /// that can be in an "expanded" or "collapsed" state.
   ///
+  /// For example, if a [SubmenuButton] is opened, this property
+  /// should be set to true; otherwise, this property should be
+  /// false.
   final bool? expanded;
 
   /// If non-null, indicates that this subtree represents a toggle switch
