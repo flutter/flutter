@@ -246,6 +246,7 @@ class BasicMessageChannel<T> {
 /// {@endtemplate}
 ///
 /// See: <https://flutter.dev/platform-channels/>
+@pragma('vm:keep-name')
 class MethodChannel {
   /// Creates a [MethodChannel] with the specified [name].
   ///
