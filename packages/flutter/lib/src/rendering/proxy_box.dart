@@ -4306,9 +4306,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.button != null) {
       config.isButton = _properties.button!;
     }
-    // if (_properties.collapsed != null) {
-    //   config.isCollapsed = _properties.collapsed;
-    // }
     if (_properties.expanded != null) {
       config.isExpanded = _properties.expanded;
     }
