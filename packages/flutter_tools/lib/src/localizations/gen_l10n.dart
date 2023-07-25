@@ -84,11 +84,14 @@ Future<LocalizationsGenerator> generateLocalizations({
   final File? untranslatedMessagesFile = generator.untranslatedMessagesFile;
 
   if (options.format) {
-    final List<String> formatFileList = outputFileList.toList();
-    if (untranslatedMessagesFile != null) {
-      // Don't format the messages file using `dart format`.
-      formatFileList.remove(untranslatedMessagesFile.absolute.path);
-    }
+    // Only format Dart files using `dart format`.
+    final List<String> formatFileList = outputFileList
+        .where(
+          (String e) =>
+              e.endsWith('.dart') ||
+              e == untranslatedMessagesFile?.absolute.path,
+        )
+        .toList(growable: false);
     if (formatFileList.isEmpty) {
       return generator;
     }
