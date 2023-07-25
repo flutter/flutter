@@ -376,6 +376,14 @@ Future<Directory> createTestProject(
   }
 
   final Directory packageDirectory = tempDirectory.childDirectory(packageName);
+
+  // No platform-specific boilerplate files.
+  expect(packageDirectory.childDirectory('android/'), isNot(exists));
+  expect(packageDirectory.childDirectory('ios/'), isNot(exists));
+  expect(packageDirectory.childDirectory('linux/'), isNot(exists));
+  expect(packageDirectory.childDirectory('macos/'), isNot(exists));
+  expect(packageDirectory.childDirectory('windows/'), isNot(exists));
+
   return packageDirectory;
 }
 
