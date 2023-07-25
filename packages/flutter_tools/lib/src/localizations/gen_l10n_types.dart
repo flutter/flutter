@@ -569,8 +569,7 @@ class Message {
 // Represents the contents of one ARB file.
 class AppResourceBundle {
   factory AppResourceBundle(File file) {
-    // Assuming that the caller has verified that the file exists and is readable.
-    Map<String, Object?> resources;
+    final Map<String, Object?> resources;
     try {
       final String content = file.readAsStringSync().trim();
       if (content.isEmpty) {
