@@ -176,8 +176,12 @@ bool TextContents::Render(const ContentContext& renderer,
         size_t vertex_offset = 0;
         for (const auto& run : frame_.GetRuns()) {
           const Font& font = run.GetFont();
+          auto rounded_scale = TextFrame::RoundScaledFontSize(
+              scale_, font.GetMetrics().point_size);
+
           for (const auto& glyph_position : run.GetGlyphPositions()) {
-            FontGlyphPair font_glyph_pair{font, glyph_position.glyph, scale_};
+            FontGlyphPair font_glyph_pair{font, glyph_position.glyph,
+                                          rounded_scale};
             auto maybe_atlas_glyph_bounds =
                 atlas->FindFontGlyphBounds(font_glyph_pair);
             if (!maybe_atlas_glyph_bounds.has_value()) {

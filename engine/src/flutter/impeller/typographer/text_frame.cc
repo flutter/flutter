@@ -79,13 +79,27 @@ bool TextFrame::MaybeHasOverlapping() const {
   return false;
 }
 
+// static
+Scalar TextFrame::RoundScaledFontSize(Scalar scale, Scalar point_size) {
+  return std::round(scale * 100) / 100;
+}
+
 void TextFrame::CollectUniqueFontGlyphPairs(FontGlyphPair::Set& set,
                                             Scalar scale) const {
   for (const TextRun& run : GetRuns()) {
     const Font& font = run.GetFont();
+    auto rounded_scale =
+        RoundScaledFontSize(scale, font.GetMetrics().point_size);
     for (const TextRun::GlyphPosition& glyph_position :
          run.GetGlyphPositions()) {
-      set.insert({font, glyph_position.glyph, scale});
+#if false
+// Glyph size error due to RoundScaledFontSize usage above.
+if (rounded_scale != scale) {
+  auto delta = std::abs(rounded_scale - scale);
+  FML_LOG(ERROR) << glyph_position.glyph.bounds.size * delta;
+}
+#endif
+      set.insert({font, glyph_position.glyph, rounded_scale});
     }
   }
 }

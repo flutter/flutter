@@ -24,6 +24,8 @@ class TextFrame {
 
   void CollectUniqueFontGlyphPairs(FontGlyphPair::Set& set, Scalar scale) const;
 
+  static Scalar RoundScaledFontSize(Scalar scale, Scalar point_size);
+
   //----------------------------------------------------------------------------
   /// @brief      The conservative bounding box for this text frame.
   ///

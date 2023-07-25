@@ -2426,6 +2426,13 @@ TEST_P(EntityTest, ColorFilterContentsWithLargeGeometry) {
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
+TEST_P(EntityTest, TextContentsCeilsGlyphScaleToDecimal) {
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.4321111f, 12), 0.43f);
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.5321111f, 12), 0.53f);
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(2.1f, 12), 2.1f);
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.0f, 12), 0.0f);
+}
+
 }  // namespace testing
 }  // namespace impeller
 
