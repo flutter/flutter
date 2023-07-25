@@ -17,16 +17,10 @@ namespace impeller {
 /// PaintPassDelegate
 /// ----------------------------------------------
 
-PaintPassDelegate::PaintPassDelegate(Paint paint, std::optional<Rect> coverage)
-    : paint_(std::move(paint)), coverage_(coverage) {}
+PaintPassDelegate::PaintPassDelegate(Paint paint) : paint_(std::move(paint)) {}
 
 // |EntityPassDelgate|
 PaintPassDelegate::~PaintPassDelegate() = default;
-
-// |EntityPassDelgate|
-std::optional<Rect> PaintPassDelegate::GetCoverageRect() {
-  return coverage_;
-}
 
 // |EntityPassDelgate|
 bool PaintPassDelegate::CanElide() {
@@ -56,18 +50,11 @@ std::shared_ptr<Contents> PaintPassDelegate::CreateContentsForSubpassTarget(
 /// OpacityPeepholePassDelegate
 /// ----------------------------------------------
 
-OpacityPeepholePassDelegate::OpacityPeepholePassDelegate(
-    Paint paint,
-    std::optional<Rect> coverage)
-    : paint_(std::move(paint)), coverage_(coverage) {}
+OpacityPeepholePassDelegate::OpacityPeepholePassDelegate(Paint paint)
+    : paint_(std::move(paint)) {}
 
 // |EntityPassDelgate|
 OpacityPeepholePassDelegate::~OpacityPeepholePassDelegate() = default;
-
-// |EntityPassDelgate|
-std::optional<Rect> OpacityPeepholePassDelegate::GetCoverageRect() {
-  return coverage_;
-}
 
 // |EntityPassDelgate|
 bool OpacityPeepholePassDelegate::CanElide() {
@@ -77,6 +64,11 @@ bool OpacityPeepholePassDelegate::CanElide() {
 // |EntityPassDelgate|
 bool OpacityPeepholePassDelegate::CanCollapseIntoParentPass(
     EntityPass* entity_pass) {
+  // Passes with absorbed clips can not be safely collapsed.
+  if (entity_pass->GetBoundsLimit().has_value()) {
+    return false;
+  }
+
   // OpacityPeepholePassDelegate will only get used if the pass's blend mode is
   // SourceOver, so no need to check here.
   if (paint_.color.alpha <= 0.0 || paint_.color.alpha >= 1.0 ||

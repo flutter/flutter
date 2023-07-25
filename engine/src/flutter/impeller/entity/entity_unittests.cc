@@ -70,14 +70,10 @@ TEST_P(EntityTest, CanCreateEntity) {
 
 class TestPassDelegate final : public EntityPassDelegate {
  public:
-  explicit TestPassDelegate(std::optional<Rect> coverage, bool collapse = false)
-      : coverage_(coverage), collapse_(collapse) {}
+  explicit TestPassDelegate(bool collapse = false) : collapse_(collapse) {}
 
   // |EntityPassDelegate|
   ~TestPassDelegate() override = default;
-
-  // |EntityPassDelegate|
-  std::optional<Rect> GetCoverageRect() override { return coverage_; }
 
   // |EntityPassDelgate|
   bool CanElide() override { return false; }
@@ -107,12 +103,12 @@ auto CreatePassWithRectPath(Rect rect,
   entity.SetContents(SolidColorContents::Make(
       PathBuilder{}.AddRect(rect).TakePath(), Color::Red()));
   subpass->AddEntity(entity);
-  subpass->SetDelegate(
-      std::make_unique<TestPassDelegate>(bounds_hint, collapse));
+  subpass->SetDelegate(std::make_unique<TestPassDelegate>(collapse));
+  subpass->SetBoundsLimit(bounds_hint);
   return subpass;
 }
 
-TEST_P(EntityTest, EntityPassCoverageRespectsDelegateBoundsHint) {
+TEST_P(EntityTest, EntityPassRespectsSubpassBoundsLimit) {
   EntityPass pass;
 
   auto subpass0 = CreatePassWithRectPath(Rect::MakeLTRB(0, 0, 100, 100),
