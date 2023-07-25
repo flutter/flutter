@@ -24,8 +24,8 @@ Future<AssetManifest>? _precachedAssetManifest;
 /// Loads the contents of the asset manifest generated at build time.
 ///
 // For most web apps, the generated entry point code includes code that writes
-// the asset manifest's contents to a JS global as a base64-encoded string.
-// This implementation reads that global.
+// the asset manifest's contents to a JS property on the global window object.
+// This implementation reads that property.
 Future<AssetManifest> loadAssetManifest(AssetBundle bundle) {
   if (_precachedAssetManifest != null) {
     return _precachedAssetManifest!;
