@@ -236,8 +236,8 @@ class DecorationImage {
         '$repeat',
       if (matchTextDirection)
         'match text direction',
-      'scale $scale',
-      'opacity $opacity',
+      'scale ${scale.toStringAsFixed(1)}',
+      'opacity ${opacity.toStringAsFixed(1)}',
       '$filterQuality',
       if (invertColors)
         'invert colors',
