@@ -383,7 +383,7 @@ abstract final class SystemChrome {
   /// class OrientationLockingObserver extends WidgetsBindingObserver {
   ///   @override
   ///   void didChangeMetrics() {
-  ///     final Display display = PlatformDispatcher.instance.implicitView!.display;
+  ///     final ui.Display display = PlatformDispatcher.instance.implicitView!.display;
   ///     if (display.size.width / display.devicePixelRatio < kOrientationLockBreakpoint) {
   ///       SystemChrome.setPreferredOrientations(<DeviceOrientation>[
   ///         DeviceOrientation.portraitUp,
