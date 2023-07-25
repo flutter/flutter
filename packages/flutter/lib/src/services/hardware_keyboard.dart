@@ -457,8 +457,24 @@ class HardwareKeyboard {
   /// of the event.
   Set<KeyboardLockMode> get lockModesEnabled => _lockModes;
 
+  bool _hasReceivedFirstKeyEvent = false;
+
   void _assertEventIsRegular(KeyEvent event) {
     assert(() {
+      bool skipAssert = false;
+      if (!_hasReceivedFirstKeyEvent) {
+        _hasReceivedFirstKeyEvent = true;
+        final bool knownDown = event is KeyDownEvent && _pressedKeys.containsKey(event.physicalKey);
+        final bool knownUp = event is KeyUpEvent && !_pressedKeys.containsKey(event.physicalKey);
+        skipAssert =  knownDown || knownUp;
+      }
+      // Do not assert for the first key event because it is already taken into account
+      // in the initial keyboard state. The first event can be an obsolete buffered event
+      // which leads to a wrong assertion error.
+      if (skipAssert) {
+        return true;
+      }
+
       const String common = 'If this occurs in real application, please report this '
         'bug to Flutter. If this occurs in unit tests, please ensure that '
         "simulated events follow Flutter's event model as documented in "
@@ -542,6 +558,16 @@ class HardwareKeyboard {
         final LogicalKeyboardKey logicalKey = LogicalKeyboardKey(keyboardState[key]!);
         _pressedKeys[physicalKey] = logicalKey;
       }
+    }
+  }
+
+  /// Set the pressing state. Used in tests to set the initial pressed state.
+  @visibleForTesting
+  void setInitialState(Map<PhysicalKeyboardKey, LogicalKeyboardKey> keyboardState) {
+    _hasReceivedFirstKeyEvent = false;
+    _pressedKeys.clear();
+    for (final PhysicalKeyboardKey physicalKey in keyboardState.keys) {
+      _pressedKeys[physicalKey] = keyboardState[physicalKey]!;
     }
   }
 

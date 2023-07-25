@@ -485,6 +485,48 @@ void main() {
     expect(messagesStr, contains('KEYBOARD: Pressed state before processing the event:'));
     expect(messagesStr, contains('KEYBOARD: Pressed state after processing the event:'));
   });
+
+  testWidgets('Do not assert on first up event', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/125975.
+    HardwareKeyboard.instance.setInitialState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
+    bool assertionErrorSent = false;
+
+    try {
+      tester.binding.keyEventManager.handleKeyData(ui.KeyData(
+        type: ui.KeyEventType.up,
+        timeStamp: Duration.zero,
+        logical: LogicalKeyboardKey.keyA.keyId,
+        physical: PhysicalKeyboardKey.keyA.usbHidUsage,
+        character: null,
+        synthesized: true,
+      ));
+    } on AssertionError {
+      assertionErrorSent = true;
+    }
+
+    expect(assertionErrorSent, false);
+  }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
+
+  testWidgets('Do not assert on first down event', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/125975.
+    HardwareKeyboard.instance.setInitialState(<PhysicalKeyboardKey, LogicalKeyboardKey>{PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyA});
+    bool assertionErrorSent = false;
+
+    try {
+      tester.binding.keyEventManager.handleKeyData(ui.KeyData(
+        type: ui.KeyEventType.down,
+        timeStamp: Duration.zero,
+        logical: LogicalKeyboardKey.keyA.keyId,
+        physical: PhysicalKeyboardKey.keyA.usbHidUsage,
+        character: null,
+        synthesized: true,
+      ));
+    } on AssertionError {
+      assertionErrorSent = true;
+    }
+
+    expect(assertionErrorSent, false);
+  }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 }
 
 Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExceptionHandler onError}) async {
