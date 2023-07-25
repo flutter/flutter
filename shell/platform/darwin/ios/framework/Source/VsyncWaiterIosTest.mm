@@ -187,6 +187,37 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   } else {
     XCTAssertEqualWithAccuracy(link.preferredFramesPerSecond, maxFrameRate, 0.1);
   }
+
+  if (@available(iOS 14.0, *)) {
+    // Fake response that we are running on Mac.
+    id processInfo = [NSProcessInfo processInfo];
+    id processInfoPartialMock = OCMPartialMock(processInfo);
+    bool iOSAppOnMac = true;
+    [OCMStub([processInfoPartialMock isiOSAppOnMac]) andReturnValue:OCMOCK_VALUE(iOSAppOnMac)];
+
+    merger->MergeWithLease(5);
+    vsync_waiter.AwaitVSync();
+
+    // On Mac, framerate should be uncapped.
+    if (@available(iOS 15.0, *)) {
+      XCTAssertEqualWithAccuracy(link.preferredFrameRateRange.maximum, maxFrameRate, 0.1);
+      XCTAssertEqualWithAccuracy(link.preferredFrameRateRange.preferred, maxFrameRate, 0.1);
+      XCTAssertEqualWithAccuracy(link.preferredFrameRateRange.minimum, maxFrameRate / 2, 0.1);
+    } else {
+      XCTAssertEqualWithAccuracy(link.preferredFramesPerSecond, 80, 0.1);
+    }
+
+    merger->UnMergeNowIfLastOne();
+    vsync_waiter.AwaitVSync();
+
+    if (@available(iOS 15.0, *)) {
+      XCTAssertEqualWithAccuracy(link.preferredFrameRateRange.maximum, maxFrameRate, 0.1);
+      XCTAssertEqualWithAccuracy(link.preferredFrameRateRange.preferred, maxFrameRate, 0.1);
+      XCTAssertEqualWithAccuracy(link.preferredFrameRateRange.minimum, maxFrameRate / 2, 0.1);
+    } else {
+      XCTAssertEqualWithAccuracy(link.preferredFramesPerSecond, maxFrameRate, 0.1);
+    }
+  }
 }
 
 @end
