@@ -215,8 +215,9 @@ class Context {
     // Copy the native assets.
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     final String projectPath = '$sourceRoot/..';
+    final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
     final String nativeAssetsPath =
-        '$projectPath/build/native_assets/ios/';
+        '$projectPath/$flutterBuildDir/native_assets/ios/';
     if (Directory(nativeAssetsPath).existsSync()) {
       runSync(
         'rsync',

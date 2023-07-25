@@ -216,7 +216,8 @@ Uri flutterDartUri(FileSystem fileSystem) =>
 /// This should be the same for different archs, debug/release, etc.
 /// It should work for all MacOS.
 Uri buildUri(Uri projectUri, OS os) {
-  final Uri buildUri = projectUri.resolve('build/native_assets/$os/');
+  final String buildDir = getBuildDirectory();
+  final Uri buildUri = projectUri.resolve('$buildDir/native_assets/$os/');
   return buildUri;
 }
 

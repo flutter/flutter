@@ -151,7 +151,7 @@ EmbedFrameworks() {
 
   # Copy the native assets.
   local project_path="${SOURCE_ROOT}/.."
-  local native_assets_path="${project_path}/build/native_assets/macos/"
+  local native_assets_path="${project_path}/${FLUTTER_BUILD_DIR}/native_assets/macos/"
   if [[ -d "$native_assets_path" ]]; then
     RunCommand rsync -av --filter "- .DS_Store" --filter "- native_assets.yaml" "${native_assets_path}" "${xcode_frameworks_dir}"
   fi

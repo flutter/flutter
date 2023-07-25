@@ -272,8 +272,9 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
 
       // Copy the native assets.
-      final Directory nativeAssetsDirectory =
-          outputDirectory.childDirectory('../../native_assets/ios/');
+      final Directory nativeAssetsDirectory = globals.fs
+          .directory(getBuildDirectory())
+          .childDirectory('native_assets/ios/');
       if (await nativeAssetsDirectory.exists()) {
         final ProcessResult rsyncResult =
             await globals.processManager.run(<Object>[

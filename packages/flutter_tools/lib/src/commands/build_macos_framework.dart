@@ -98,8 +98,9 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       globals.logger.printStatus(' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
 
       // Copy the native assets.
-      final Directory nativeAssetsDirectory =
-          outputDirectory.childDirectory('../../native_assets/macos/');
+      final Directory nativeAssetsDirectory = globals.fs
+          .directory(getBuildDirectory())
+          .childDirectory('native_assets/macos/');
       if (await nativeAssetsDirectory.exists()) {
         final ProcessResult rsyncResult =
             await globals.processManager.run(<Object>[
