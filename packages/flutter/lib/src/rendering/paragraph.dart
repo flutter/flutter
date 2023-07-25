@@ -71,7 +71,7 @@ class TextParentData extends ParentData with ContainerParentDataMixin<RenderBox>
   }
 
   @override
-  String toString() =>'widget: $span, ${offset == null ? "not laid out" : "offset: $offset"}';
+  String toString() => 'widget: $span, ${offset == null ? "not laid out" : "offset: $offset"}';
 }
 
 /// A mixin that provides useful default behaviors for text [RenderBox]es

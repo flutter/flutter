@@ -397,8 +397,16 @@ class PaintingContext extends ClipContext {
   /// If this hint is not set, the compositor will apply its own heuristics to
   /// decide whether the current layer is complex enough to benefit from
   /// caching.
+  ///
+  /// Calling this ensures a [Canvas] is available. Only draw calls on the
+  /// current canvas will be hinted; the hint is not propagated to new canvases
+  /// created after a new layer is added to the painting context (e.g. with
+  /// [addLayer] or [pushLayer]).
   void setIsComplexHint() {
-    _currentLayer?.isComplexHint = true;
+    if (_currentLayer == null) {
+      _startRecording();
+    }
+    _currentLayer!.isComplexHint = true;
   }
 
   /// Hints that the painting in the current layer is likely to change next frame.
@@ -407,8 +415,16 @@ class PaintingContext extends ClipContext {
   /// cache will not be used in the future. If this hint is not set, the
   /// compositor will apply its own heuristics to decide whether the current
   /// layer is likely to be reused in the future.
+  ///
+  /// Calling this ensures a [Canvas] is available. Only draw calls on the
+  /// current canvas will be hinted; the hint is not propagated to new canvases
+  /// created after a new layer is added to the painting context (e.g. with
+  /// [addLayer] or [pushLayer]).
   void setWillChangeHint() {
-    _currentLayer?.willChangeHint = true;
+    if (_currentLayer == null) {
+      _startRecording();
+    }
+    _currentLayer!.willChangeHint = true;
   }
 
   /// Adds a composited leaf layer to the recording.
@@ -2074,12 +2090,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// Typically called only from the [parent]'s [attach] method, and by the
   /// [owner] to mark the root of a tree as attached.
   ///
-  /// Subclasses with children should override this method to first call their
-  /// inherited [attach] method, and then [attach] all their children to the
-  /// same [owner].
-  ///
-  /// Implementations of this method should start with a call to the inherited
-  /// method, as in `super.attach(owner)`.
+  /// Subclasses with children should override this method to
+  /// [attach] all their children to the same [owner]
+  /// after calling the inherited method, as in `super.attach(owner)`.
   @mustCallSuper
   void attach(PipelineOwner owner) {
     assert(!_debugDisposed);
@@ -2116,11 +2129,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// Typically called only from the [parent]'s [detach], and by the [owner] to
   /// mark the root of a tree as detached.
   ///
-  /// Subclasses with children should override this method to first call their
-  /// inherited [detach] method, and then [detach] all their children.
-  ///
-  /// Implementations of this method should end with a call to the inherited
-  /// method, as in `super.detach()`.
+  /// Subclasses with children should override this method to
+  /// [detach] all their children after calling the inherited method,
+  /// as in `super.detach()`.
   @mustCallSuper
   void detach() {
     assert(_owner != null);
