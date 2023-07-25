@@ -190,6 +190,8 @@ void main() {
 
     group('structured errors', () {
       /// Helper that runs [project] and collects the output.
+      ///
+      /// Line and column numbers are replaced with "1" to avoid fragile tests.
       Future<String> getExceptionOutput(
         Project project, {
         required bool noDebug,
@@ -211,7 +213,12 @@ void main() {
           );
         });
 
-        return _uniqueOutputLines(outputEvents);
+        String output = _uniqueOutputLines(outputEvents);
+
+        // Replace out any line/columns to make tests less fragile.
+        output = output.replaceAll(RegExp(r'\.dart:\d+:\d+'), '.dart:1:1');
+
+        return output;
       }
 
       testWithoutContext('correctly outputs exceptions in debug mode', () async {
@@ -226,7 +233,7 @@ The following _Exception was thrown building App(dirty):
 Exception: c
 
 The relevant error-causing widget was:
-    App App:${Uri.file(project.dir.path)}/lib/main.dart:24:12'''),
+    App App:${Uri.file(project.dir.path)}/lib/main.dart:1:1'''),
         );
       });
 
@@ -245,16 +252,16 @@ The following _Exception was thrown building App(dirty):
 Exception: c
 
 The relevant error-causing widget was:
-    App App:${Uri.file(project.dir.path)}/lib/main.dart:24:12
+    App App:${Uri.file(project.dir.path)}/lib/main.dart:1:1
 
 When the exception was thrown, this was the stack:
-#0      c (package:test/main.dart:19:7)
+#0      c (package:test/main.dart:1:1)
           ^ source: package:test/main.dart
-#1      App.build (package:test/main.dart:30:7)
+#1      App.build (package:test/main.dart:1:1)
           ^ source: package:test/main.dart
-\x1B[2m#2      StatelessElement.build (package:flutter/src/widgets/framework.dart:5367:49)\x1B[0m
+\x1B[2m#2      StatelessElement.build (package:flutter/src/widgets/framework.dart:1:1)\x1B[0m
           ^ source: package:flutter/src/widgets/framework.dart
-\x1B[2m#3      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5297:15)\x1B[0m
+\x1B[2m#3      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:1:1)\x1B[0m
           ^ source: package:flutter/src/widgets/framework.dart'''),
         );
       });
@@ -274,7 +281,7 @@ Exception: c
 
 The relevant error-causing widget was:
   App
-  App:${Uri.file(project.dir.path)}/lib/main.dart:24:12'''),
+  App:${Uri.file(project.dir.path)}/lib/main.dart:1:1'''),
         );
       });
     });
