@@ -572,7 +572,12 @@ class AppResourceBundle {
     // Assuming that the caller has verified that the file exists and is readable.
     Map<String, Object?> resources;
     try {
-      resources = json.decode(file.readAsStringSync()) as Map<String, Object?>;
+      final String content = file.readAsStringSync().trim();
+      if (content.isEmpty) {
+        resources = <String, Object?>{};
+      } else {
+        resources = json.decode(content) as Map<String, Object?>;
+      }
     } on FormatException catch (e) {
       throw L10nException(
         'The arb file ${file.path} has the following formatting issue: \n'
