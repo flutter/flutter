@@ -1297,18 +1297,23 @@ class CheckboxMenuButton extends StatelessWidget {
       style: style,
       shortcut: shortcut,
       statesController: statesController,
-      leadingIcon: ExcludeFocus(
-        child: IgnorePointer(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxHeight: Checkbox.width,
-              maxWidth: Checkbox.width,
-            ),
-            child: Checkbox(
-              tristate: tristate,
-              value: value,
-              onChanged: onChanged,
-              isError: isError,
+      leadingIcon: Semantics(
+        mixed: tristate ? value == null : null,
+        checked: value,
+        selected: value,
+        child: ExcludeFocus(
+          child: IgnorePointer(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxHeight: Checkbox.width,
+                maxWidth: Checkbox.width,
+              ),
+              child: Checkbox(
+                tristate: tristate,
+                value: value,
+                onChanged: onChanged,
+                isError: isError,
+              ),
             ),
           ),
         ),
@@ -1904,19 +1909,23 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             controller._anchor!._focusButton();
           }
         }
-
-        child = TextButton(
-          style: mergedStyle,
-          focusNode: _buttonFocusNode,
-          onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
-          onPressed: _enabled ? () => toggleShowMenu(context) : null,
-          isSemanticButton: null,
-          child: _MenuItemLabel(
-            leadingIcon: widget.leadingIcon,
-            trailingIcon: widget.trailingIcon,
-            hasSubmenu: true,
-            showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
-            child: child ?? const SizedBox(),
+        child = MergeSemantics(
+          child: Semantics(
+            expanded: controller.isOpen,
+            child: TextButton(
+              style: mergedStyle,
+              focusNode: _buttonFocusNode,
+              onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
+              onPressed: _enabled ? () => toggleShowMenu(context) : null,
+              isSemanticButton: null,
+              child: _MenuItemLabel(
+                leadingIcon: widget.leadingIcon,
+                trailingIcon: widget.trailingIcon,
+                hasSubmenu: true,
+                showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                child: child ?? const SizedBox(),
+              ),
+            ),
           ),
         );
 
