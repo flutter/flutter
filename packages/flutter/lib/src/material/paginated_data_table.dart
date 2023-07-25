@@ -17,7 +17,6 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_decoration.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
 
@@ -95,11 +94,6 @@ class PaginatedDataTable extends StatefulWidget {
     this.checkboxHorizontalMargin,
     this.controller,
     this.primary,
-    this.dataRowColor,
-    this.dividerThickness,
-    this.dataTextStyle,
-    this.headingRowColor,
-    this.headingTextStyle,
   }) : assert(actions == null || (header != null)),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -271,21 +265,6 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// {@macro flutter.widgets.scroll_view.primary}
   final bool? primary;
-
-  /// {@macro flutter.material.dataTable.dataRowColor}
-  final MaterialStateProperty<Color?>? dataRowColor;
-
-  /// {@macro flutter.material.dataTable.dataRowColor}
-  final double? dividerThickness;
-
-  /// {@macro flutter.material.dataTable.dataRowColor}
-  final TextStyle? dataTextStyle;
-
-  /// {@macro flutter.material.dataTable.dataRowColor}
-  final MaterialStateProperty<Color?>? headingRowColor;
-
-  /// {@macro flutter.material.dataTable.dataRowColor}
-  final TextStyle? headingTextStyle;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -574,11 +553,6 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     columnSpacing: widget.columnSpacing,
                     showCheckboxColumn: widget.showCheckboxColumn,
                     showBottomBorder: true,
-                    dataRowColor: widget.dataRowColor,
-                    dividerThickness: widget.dividerThickness,
-                    dataTextStyle: widget.dataTextStyle,
-                    headingRowColor: widget.headingRowColor,
-                    headingTextStyle: widget.headingTextStyle,
                     rows: _getRows(_firstRowIndex, widget.rowsPerPage),
                   ),
                 ),

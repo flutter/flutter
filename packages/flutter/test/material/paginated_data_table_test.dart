@@ -170,7 +170,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('PaginatedDataTable fotter page number', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable footer page number', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
     int rowsPerPage = 2;
 
