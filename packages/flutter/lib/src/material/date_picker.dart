@@ -113,10 +113,9 @@ const double _kMaxTextScaleFactor = 1.3;
 /// [locale] and [textDirection] are non-null, [textDirection] overrides the
 /// direction chosen for the [locale].
 ///
-/// The [context], [barrierDismissible], [barrierColor], [barrierLabel],
-/// [useRootNavigator] and [routeSettings] arguments are passed to [showDialog],
-/// the documentation for which discusses how it is used.
-/// [context], [barrierDismissible] and [useRootNavigator] must be non-null.
+/// The [context], [useRootNavigator] and [routeSettings] arguments are passed to
+/// [showDialog], the documentation for which discusses how it is used. [context]
+/// and [useRootNavigator] must be non-null.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
@@ -170,9 +169,6 @@ Future<DateTime?> showDatePicker({
   String? cancelText,
   String? confirmText,
   Locale? locale,
-  bool barrierDismissible = true,
-  Color? barrierColor,
-  String? barrierLabel,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   TextDirection? textDirection,
@@ -247,9 +243,6 @@ Future<DateTime?> showDatePicker({
 
   return showDialog<DateTime>(
     context: context,
-    barrierDismissible: barrierDismissible,
-    barrierColor: barrierColor,
-    barrierLabel: barrierLabel,
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
     builder: (BuildContext context) {
@@ -974,10 +967,9 @@ class _DatePickerHeader extends StatelessWidget {
 /// [locale] and [textDirection] are non-null, [textDirection] overrides the
 /// direction chosen for the [locale].
 ///
-/// The [context], [barrierDismissible], [barrierColor], [barrierLabel],
-/// [useRootNavigator] and [routeSettings] arguments are passed to [showDialog],
-/// the documentation for which discusses how it is used.
-/// [context], [barrierDismissible] and [useRootNavigator] must be non-null.
+/// The [context], [useRootNavigator] and [routeSettings] arguments are passed
+/// to [showDialog], the documentation for which discusses how it is used.
+/// [context] and [useRootNavigator] must be non-null.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
@@ -1030,9 +1022,6 @@ Future<DateTimeRange?> showDateRangePicker({
   String? fieldStartLabelText,
   String? fieldEndLabelText,
   Locale? locale,
-  bool barrierDismissible = true,
-  Color? barrierColor,
-  String? barrierLabel,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   TextDirection? textDirection,
@@ -1111,9 +1100,6 @@ Future<DateTimeRange?> showDateRangePicker({
 
   return showDialog<DateTimeRange>(
     context: context,
-    barrierDismissible: barrierDismissible,
-    barrierColor: barrierColor,
-    barrierLabel: barrierLabel,
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
     useSafeArea: false,
