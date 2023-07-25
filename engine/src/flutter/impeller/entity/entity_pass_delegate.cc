@@ -19,9 +19,6 @@ class DefaultEntityPassDelegate final : public EntityPassDelegate {
   ~DefaultEntityPassDelegate() override = default;
 
   // |EntityPassDelegate|
-  std::optional<Rect> GetCoverageRect() override { return std::nullopt; }
-
-  // |EntityPassDelegate|
   bool CanElide() override { return false; }
 
   // |EntityPassDelegate|

@@ -57,7 +57,9 @@ class Geometry {
 
   virtual ~Geometry();
 
-  static std::unique_ptr<Geometry> MakeFillPath(const Path& path);
+  static std::unique_ptr<Geometry> MakeFillPath(
+      const Path& path,
+      std::optional<Rect> inner_rect = std::nullopt);
 
   static std::unique_ptr<Geometry> MakeStrokePath(
       const Path& path,
@@ -88,8 +90,16 @@ class Geometry {
 
   virtual std::optional<Rect> GetCoverage(const Matrix& transform) const = 0;
 
-  /// @return `true` if this geometry will completely cover all fragments in
-  /// `rect` when the `transform` is applied to it.
+  /// @brief    Determines if this geometry, transformed by the given
+  ///           `transform`, will completely cover all surface area of the given
+  ///           `rect`.
+  ///
+  ///           This is a conservative estimate useful for certain
+  ///           optimizations.
+  ///
+  /// @returns  `true` if the transformed geometry is guaranteed to cover the
+  ///           given `rect`. May return `false` in many undetected cases where
+  ///           the transformed geometry does in fact cover the `rect`.
   virtual bool CoversArea(const Matrix& transform, const Rect& rect) const;
 };
 
