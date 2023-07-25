@@ -150,6 +150,7 @@
 				24E221B221A28A0B008ADF09 /* Frameworks */,
 				24E221B321A28A0B008ADF09 /* Resources */,
 				7FADF19EC61F97E525982780 /* [CP] Embed Pods Frameworks */,
+				2C2C73E6FE045A0B5B8612E8 /* [CP-User] Embed Flutter Build ios_add2app_life_cycle_flutter Script */,
 			);
 			buildRules = (
 			);
@@ -168,7 +169,6 @@
 				F73B66A9262F6F87002080A0 /* Sources */,
 				F73B66AA262F6F87002080A0 /* Frameworks */,
 				F73B66AB262F6F87002080A0 /* Resources */,
-				B7873FC60D5B7AA97A1DE937 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -237,6 +237,16 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		2C2C73E6FE045A0B5B8612E8 /* [CP-User] Embed Flutter Build ios_add2app_life_cycle_flutter Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "[CP-User] Embed Flutter Build ios_add2app_life_cycle_flutter Script";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/flutterapp/.ios/Flutter/flutter_export_environment.sh\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh embed_and_thin";
+		};
 		4375EE880A727341E9C9A57D /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -284,23 +294,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ios_add2app/Pods-ios_add2app-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		B7873FC60D5B7AA97A1DE937 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		F841B20A4BA845744CC6A838 /* [CP] Check Pods Manifest.lock */ = {
