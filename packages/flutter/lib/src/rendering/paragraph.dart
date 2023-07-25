@@ -1408,7 +1408,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
             result = _updateSelectionEdgeByWord(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
           case TextGranularity.document:
           case TextGranularity.line:
-            assert(granularity == TextGranularity.document || granularity == TextGranularity.line, 'Moving the selection edge by line or document is not supported.');
+            assert(granularity != TextGranularity.document && granularity != TextGranularity.line, 'Moving the selection edge by line or document is not supported.');
         }
       case SelectionEventType.clear:
         result = _handleClearSelection();
@@ -1529,7 +1529,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
           if (shouldSwapEdgesWhenSelectionIsNormalized) {
             targetPosition = isEnd ? wordBoundary.wordStart : wordBoundary.wordEnd;
             // The static edge is moved to the opposite end of the word boundary to
-            // keep the entire origin word in the selection
+            // keep the entire origin word in the selection.
             final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
             assert(localWordBoundary.wordStart.offset >= range.start && localWordBoundary.wordEnd.offset <= range.end);
             _setSelectionPosition(isEnd ? localWordBoundary.wordEnd : localWordBoundary.wordStart, isEnd: !isEnd);
@@ -1547,7 +1547,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
           if (shouldSwapEdgesWhenSelectionNotNormalized) {
             targetPosition = isEnd ? wordBoundary.wordEnd : wordBoundary.wordStart;
             // The static edge is moved to the opposite end of the word boundary to
-            // keep the entire origin word in the selection
+            // keep the entire origin word in the selection.
             final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
             assert(localWordBoundary.wordStart.offset >= range.start && localWordBoundary.wordEnd.offset <= range.end);
             _setSelectionPosition(isEnd ? localWordBoundary.wordStart : localWordBoundary.wordEnd, isEnd: !isEnd);
