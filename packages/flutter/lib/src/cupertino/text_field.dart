@@ -14,6 +14,7 @@ import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
+import 'localizations.dart';
 import 'magnifier.dart';
 import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
@@ -228,7 +229,7 @@ class CupertinoTextField extends StatefulWidget {
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
-    this.clearButtonSemanticLabel = 'Text Field Clear',
+    this.clearButtonSemanticLabel,
     TextInputType? keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
@@ -355,7 +356,7 @@ class CupertinoTextField extends StatefulWidget {
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
-    this.clearButtonSemanticLabel = 'Text Field Clear',
+    this.clearButtonSemanticLabel,
     TextInputType? keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
@@ -514,7 +515,7 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// This will be used by screen reading software to identify the clear button
   /// widget. Defaults to "Text Field Clear".
-  final String clearButtonSemanticLabel;
+  final String? clearButtonSemanticLabel;
 
   /// {@macro flutter.widgets.editableText.keyboardType}
   final TextInputType keyboardType;
