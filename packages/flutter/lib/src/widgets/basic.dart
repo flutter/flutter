@@ -6784,11 +6784,6 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/ignore_pointer.0.dart **
 /// {@end-tool}
 ///
-/// ## Semantics
-///
-/// Using this widget may also affect how the semantics subtree underneath this
-/// widget is collected.
-///
 /// {@template flutter.widgets.IgnorePointer.Semantics}
 /// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
 /// the subtree will be invisible to assistive technologies.
@@ -6813,6 +6808,11 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// in the semantics subtree but leaves the other [SemanticsProperties] intact.
 /// Therefore, the [ignoringSemantics] is no longer needed.
 /// {@endtemplate}
+///
+/// ## Semantics
+///
+/// Using this widget may also affect how the semantics subtree underneath this
+/// widget is collected.
 ///
 /// See also:
 ///
