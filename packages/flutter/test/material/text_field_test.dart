@@ -11110,7 +11110,7 @@ void main() {
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
-      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -11125,7 +11125,7 @@ void main() {
       );
 
       // Selected text shows 4 toolbar buttons on iOS, and 3 on macOS.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformMobile ? findsNWidgets(4) : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3));
 
       await gesture.up();
       await tester.pump();
@@ -11137,7 +11137,7 @@ void main() {
       );
 
       // The toolbar is still showing.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformMobile ? findsNWidgets(4) : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -11255,7 +11255,7 @@ void main() {
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
-      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
       await tester.longPressAt(textfieldStart + const Offset(50.0, 9.0));
       await tester.pumpAndSettle();
@@ -11269,7 +11269,7 @@ void main() {
       // Collapsed toolbar shows 3 buttons.
       expect(
         find.byType(CupertinoButton),
-        isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformMobile ? findsNWidgets(4) : findsNWidgets(3)
+        isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3)
       );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
@@ -11528,7 +11528,7 @@ void main() {
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
-      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
       final TestGesture gesture =
           await tester.startGesture(textfieldStart + const Offset(50.0, 9.0));
@@ -11573,7 +11573,7 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 23),
       );
       // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformMobile ? findsNWidgets(4) : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -11685,7 +11685,7 @@ void main() {
     );
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+    final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
     List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 66), // Last character's position.
@@ -11739,7 +11739,7 @@ void main() {
       const TextSelection(baseOffset: 0, extentOffset: 66, affinity: TextAffinity.upstream),
     );
     // The toolbar now shows up.
-    expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformMobile ? findsNWidgets(4) : findsNWidgets(3));
+    expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3));
 
     lastCharEndpoint = renderEditable.getEndpointsForSelection(
       const TextSelection.collapsed(offset: 66), // Last character's position.
@@ -12416,7 +12416,7 @@ void main() {
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
-      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
       await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -12450,7 +12450,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformMobile ? findsNWidgets(4) : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3));
 
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -12466,7 +12466,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformMobile ? findsNWidgets(4) : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
