@@ -1015,6 +1015,7 @@ class HotRunner extends ResidentRunner {
         sdkName,
         emulator,
         reason,
+        globals.flutterUsage,
       );
       if (result.code != 0) {
         return result;
@@ -1237,6 +1238,7 @@ typedef ReloadSourcesHelper = Future<OperationResult> Function(
   String? sdkName,
   bool? emulator,
   String? reason,
+  Usage usage,
 );
 
 @visibleForTesting
@@ -1249,6 +1251,7 @@ Future<OperationResult> defaultReloadSourcesHelper(
   String? sdkName,
   bool? emulator,
   String? reason,
+  Usage usage,
 ) async {
   final Stopwatch vmReloadTimer = Stopwatch()..start();
   const String entryPath = 'main.dart.incremental.dill';
@@ -1288,6 +1291,7 @@ Future<OperationResult> defaultReloadSourcesHelper(
       fullRestart: false,
       reason: reason,
       fastReassemble: false,
+      usage: usage,
     ).send();
     // Reset devFS lastCompileTime to ensure the file will still be marked
     // as dirty on subsequent reloads.
