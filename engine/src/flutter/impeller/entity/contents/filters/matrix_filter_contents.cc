@@ -49,8 +49,7 @@ std::optional<Entity> MatrixFilterContents::RenderFilter(
   // mentioned above). And so we sneak the subpass's captured CTM in through the
   // effect transform.
 
-  auto transform = is_subpass_ ? effect_transform.Basis()
-                               : entity.GetTransformation().Basis();
+  auto transform = is_subpass_ ? effect_transform : entity.GetTransformation();
   snapshot->transform = transform *           //
                         matrix_ *             //
                         transform.Invert() *  //
