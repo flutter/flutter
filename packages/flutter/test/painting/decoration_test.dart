@@ -333,6 +333,19 @@ void main() {
     expect(paint.invertColors, !kIsWeb);
   });
 
+  test('DecorationImage.toString', () async {
+    expect(
+      DecorationImage(
+        image: SynchronousTestImageProvider(
+          await createTestImage(width: 100, height: 100),
+        ),
+        opacity: 0.99,
+        scale: 2.01,
+      ).toString(),
+      'DecorationImage(SynchronousTestImageProvider(), Alignment.center, scale 2.0, opacity 1.0, FilterQuality.low)',
+    );
+  });
+
   test('DecorationImage with null textDirection configuration should throw Error', () async {
     const ColorFilter colorFilter = ui.ColorFilter.mode(Color(0xFF00FF00), BlendMode.src);
     final ui.Image image = await createTestImage(width: 100, height: 100);
