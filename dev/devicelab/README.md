@@ -19,6 +19,7 @@ for information on using the dashboards.
 * [Adding tests to continuous
   integration](#adding-tests-to-continuous-integration)
 * [Adding tests to presubmit](#adding-tests-to-presubmit)
+* [Migrating to build and test model](#migrating-to-build-and-test-model)
 
 ## How the DeviceLab runs tests
 
@@ -226,3 +227,29 @@ target for each operating system.
 
 Flutter's DeviceLab has a limited capacity in presubmit. File an infra ticket
 to investigate feasibility of adding a test to presubmit.
+
+## Migrating to build and test model
+
+To better utilize limited DeviceLab testbed resources and speed up overal validation
+time, it is now supported to separate building artifacts (.apk/.app) from testing them.
+
+Steps:
+1. Update the task class to extend [`BuildTestTask`](https://github.com/flutter/flutter/blob/master/dev/devicelab/lib/tasks/build_test_task.dart)
+  1. Override function `getBuildArgs`
+  2. Override function `getTestArgs`
+  3. Override function `parseTaskResult`
+  4. Override function `getApplicationBinaryPath`
+2. Update the `bin/tasks/{TEST}.dart` to point to the new task class
+2. Validate the task locally
+  1. build only: `dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST} --task-args build --task-args application-binary-path={PATH_TO_ARTIFACT}`
+  2. test only: `dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST} --task-args test --task-args application-binary-path={PATH_TO_ARTIFACT}`
+3. Adding tasks to continuous integration
+  1. Mirror a target with platform `Linux_build_test` or `Mac_build_test`
+  2. The only difference from regular targets is the artifact property: if omitted, it will use the `task_name`.
+4. Once validated in CI, enable the target in `PROD` by removing `bringup: true` and deleting the old target entry without build+test model.
+
+Take gallery tasks for example:
+1. Linux android
+  1. Separating PR: https://github.com/flutter/flutter/pull/103550
+  2. Switching PR: https://github.com/flutter/flutter/pull/110533
+2. Mac iOS: https://github.com/flutter/flutter/pull/111164
