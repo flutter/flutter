@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show clampDouble;
 
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'math.dart' show clampDouble;
 import 'object.dart';
 
 // Examples can assume:
