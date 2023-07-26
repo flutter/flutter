@@ -42,6 +42,19 @@ import 'theme_data.dart';
 /// ** See code in examples/api/lib/material/input_chip/input_chip.0.dart **
 /// {@end-tool}
 ///
+/// Material design guidelines suggest that is possible to generate input chips
+/// from text input and vice versa. This is a common pattern in modern application
+/// and has many advantages like input verification and simplified field editing.
+///
+///
+/// {@tool dartpad}
+/// The following example show you how to convert a text from
+/// user input to a list of one ore more [InputChip]. It cover also
+/// their removal and addition using a list of suggestions.
+///
+/// ** See code in examples/api/lib/material/input_chip/input_chip.1.dart **
+/// {@end-tool}
+///
 /// ## Material Design 3
 ///
 /// [InputChip] can be used for Input chips from Material Design 3.
