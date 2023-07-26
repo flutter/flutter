@@ -470,9 +470,9 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       auto texture = pass_context.GetTexture();
       // Render the backdrop texture before any of the pass elements.
       const auto& proc = subpass->backdrop_filter_proc_;
-      subpass_backdrop_filter_contents =
-          proc(FilterInput::Make(std::move(texture)), subpass->xformation_,
-               /*is_subpass*/ true);
+      subpass_backdrop_filter_contents = proc(
+          FilterInput::Make(std::move(texture)), subpass->xformation_.Basis(),
+          /*is_subpass*/ true);
 
       // The subpass will need to read from the current pass texture when
       // rendering the backdrop, so if there's an active pass, end it prior to
