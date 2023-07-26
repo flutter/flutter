@@ -236,22 +236,22 @@ time, it is now supported to separate building artifacts (.apk/.app) from testin
 Steps:
 
 1. Update the task class to extend [`BuildTestTask`](https://github.com/flutter/flutter/blob/master/dev/devicelab/lib/tasks/build_test_task.dart)
-1.1. Override function `getBuildArgs`
-1.2. Override function `getTestArgs`
-1.3. Override function `parseTaskResult`
-1.4. Override function `getApplicationBinaryPath`
+   - Override function `getBuildArgs`
+   - Override function `getTestArgs`
+   - Override function `parseTaskResult`
+   - Override function `getApplicationBinaryPath`
 2. Update the `bin/tasks/{TEST}.dart` to point to the new task class
 3. Validate the task locally
-3.1. build only: `dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST} --task-args build --task-args application-binary-path={PATH_TO_ARTIFACT}`
-3.2. test only: `dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST} --task-args test --task-args application-binary-path={PATH_TO_ARTIFACT}`
+   - build only: `dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST} --task-args build --task-args application-binary-path={PATH_TO_ARTIFACT}`
+   - test only: `dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST} --task-args test --task-args application-binary-path={PATH_TO_ARTIFACT}`
 4. Adding tasks to continuous integration
-4.1. Mirror a target with platform `Linux_build_test` or `Mac_build_test`
-4.2. The only difference from regular targets is the artifact property: if omitted, it will use the `task_name`.
+   - Mirror a target with platform `Linux_build_test` or `Mac_build_test`
+   - The only difference from regular targets is the artifact property: if omitted, it will use the `task_name`.
 5. Once validated in CI, enable the target in `PROD` by removing `bringup: true` and deleting the old target entry without build+test model.
 
 Take gallery tasks for example:
 
 1. Linux android
-1.1. Separating PR: https://github.com/flutter/flutter/pull/103550
-1.2. Switching PR: https://github.com/flutter/flutter/pull/110533
+   - Separating PR: https://github.com/flutter/flutter/pull/103550
+   - Switching PR: https://github.com/flutter/flutter/pull/110533
 2. Mac iOS: https://github.com/flutter/flutter/pull/111164
