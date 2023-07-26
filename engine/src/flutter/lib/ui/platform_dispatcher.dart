@@ -2315,8 +2315,9 @@ class Locale {
     if (scriptCode != null && scriptCode!.isNotEmpty) {
       out.write('$separator$scriptCode');
     }
-    if (_countryCode != null && _countryCode!.isNotEmpty) {
-      out.write('$separator$countryCode');
+    final String? countryCode = _countryCode;
+    if (countryCode != null && countryCode.isNotEmpty) {
+      out.write('$separator${this.countryCode}');
     }
     return out.toString();
   }
