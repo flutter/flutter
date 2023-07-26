@@ -80,7 +80,7 @@ void main() {
     );
   });
 
-  testUsingContext('dry run', skip: true, () async {
+  testUsingContext('dry run', () async {
     final File packageConfig =
         iosEnvironment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
@@ -91,5 +91,5 @@ void main() {
         await dryRunNativeAssetsMacOS(
             projectUri: iosEnvironment.projectDir.uri, fileSystem: fileSystem),
         null);
-  });
+  }, skip: true); // https://github.com/flutter/flutter/pull/130494#issuecomment-1651680227
 }
