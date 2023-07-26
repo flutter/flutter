@@ -22,7 +22,7 @@ import 'print.dart';
 import 'service_extensions.dart';
 import 'timeline.dart';
 
-export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow; // ignore: deprecated_member_use
+export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow, clampDouble; // ignore: deprecated_member_use
 
 export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter;
 
