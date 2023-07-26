@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -903,11 +904,14 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints
-        ..circle(
+      kIsWeb && !isCanvasKit
+        ? (paints..circle()..circle(
           color: fillColor.withAlpha(kRadialReactionAlpha),
           radius: splashRadius,
-        ),
+        )) : (paints..circle(
+          color: fillColor.withAlpha(kRadialReactionAlpha),
+          radius: splashRadius,
+        )),
       reason: 'Default inactive pressed Checkbox should have overlay color from fillColor',
     );
 
@@ -917,11 +921,14 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints
-        ..circle(
+      kIsWeb && !isCanvasKit
+        ? (paints..circle()..circle(
           color: fillColor.withAlpha(kRadialReactionAlpha),
           radius: splashRadius,
-        ),
+        )) : (paints..circle(
+          color: fillColor.withAlpha(kRadialReactionAlpha),
+          radius: splashRadius,
+        )),
       reason: 'Default active pressed Checkbox should have overlay color from fillColor',
     );
 
@@ -931,11 +938,14 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints
-        ..circle(
-          color: inactivePressedOverlayColor,
-          radius: splashRadius,
-        ),
+      kIsWeb && !isCanvasKit
+          ? (paints..circle()..circle(
+        color: inactivePressedOverlayColor,
+        radius: splashRadius,
+      )) : (paints..circle(
+        color: inactivePressedOverlayColor,
+        radius: splashRadius,
+      )),
       reason: 'Inactive pressed Checkbox should have overlay color: $inactivePressedOverlayColor',
     );
 
@@ -945,11 +955,14 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints
-        ..circle(
+      kIsWeb && !isCanvasKit
+        ? (paints..circle()..circle(
           color: activePressedOverlayColor,
           radius: splashRadius,
-        ),
+        )) : (paints..circle(
+          color: activePressedOverlayColor,
+          radius: splashRadius,
+        )),
       reason: 'Active pressed Checkbox should have overlay color: $activePressedOverlayColor',
     );
 
@@ -965,11 +978,10 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints
-        ..circle(
-          color: hoverOverlayColor,
-          radius: splashRadius,
-        ),
+      paints..circle(
+        color: hoverOverlayColor,
+        radius: splashRadius,
+      ),
       reason: 'Hovered Checkbox should use overlay color $hoverOverlayColor over $hoverColor',
     );
   });
