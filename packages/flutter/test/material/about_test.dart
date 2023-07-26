@@ -743,13 +743,9 @@ void main() {
   });
 
   group('Barrier dismissible', () {
-    late AboutDialogObserver rootObserver;
-
-    setUpAll(() {
-      rootObserver = AboutDialogObserver();
-    });
-
     testWidgets('Barrier is dismissible with default parameter', (WidgetTester tester) async {
+      final AboutDialogObserver rootObserver = AboutDialogObserver();
+
       await tester.pumpWidget(
         MaterialApp(
           navigatorObservers: <NavigatorObserver>[rootObserver],
@@ -782,6 +778,8 @@ void main() {
     });
 
     testWidgets('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
+      final AboutDialogObserver rootObserver = AboutDialogObserver();
+
       await tester.pumpWidget(
         MaterialApp(
           navigatorObservers: <NavigatorObserver>[rootObserver],

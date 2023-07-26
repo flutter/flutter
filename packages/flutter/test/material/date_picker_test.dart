@@ -336,13 +336,9 @@ void main() {
     });
 
     group('Barrier dismissible', () {
-      late _DatePickerObserver rootObserver;
-
-      setUpAll(() {
-        rootObserver = _DatePickerObserver();
-      });
-
       testWidgets('Barrier is dismissible with default parameter', (WidgetTester tester) async {
+        final _DatePickerObserver rootObserver = _DatePickerObserver();
+
         await tester.pumpWidget(
           MaterialApp(
             navigatorObservers: <NavigatorObserver>[rootObserver],
@@ -381,6 +377,8 @@ void main() {
       });
 
       testWidgets('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
+        final _DatePickerObserver rootObserver = _DatePickerObserver();
+
         await tester.pumpWidget(
           MaterialApp(
             navigatorObservers: <NavigatorObserver>[rootObserver],

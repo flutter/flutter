@@ -669,13 +669,9 @@ void main() {
       });
 
       group('Barrier dismissible', () {
-        late PickerObserver rootObserver;
-
-        setUpAll(() {
-          rootObserver = PickerObserver();
-        });
-
         testWidgets('Barrier is dismissible with default parameter', (WidgetTester tester) async {
+          final PickerObserver rootObserver = PickerObserver();
+
           await tester.pumpWidget(
             MaterialApp(
               navigatorObservers: <NavigatorObserver>[rootObserver],
@@ -710,6 +706,8 @@ void main() {
         });
 
         testWidgets('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
+          final PickerObserver rootObserver = PickerObserver();
+
           await tester.pumpWidget(
             MaterialApp(
               navigatorObservers: <NavigatorObserver>[rootObserver],
