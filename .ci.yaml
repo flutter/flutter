@@ -1079,7 +1079,6 @@ targets:
 
   - name: Linux web_benchmarks_html
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -1096,7 +1095,6 @@ targets:
       - .ci.yaml
 
   - name: Linux web_benchmarks_skwasm
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
