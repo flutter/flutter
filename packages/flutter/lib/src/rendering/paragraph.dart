@@ -1493,7 +1493,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
 
-    // _setSelectionPosition(null, isEnd: isEnd);
+    _setSelectionPosition(null, isEnd: isEnd);
     final Matrix4 transform = paragraph.getTransformTo(null);
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
@@ -1507,8 +1507,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     );
 
     final TextPosition position = paragraph.getPositionForOffset(adjustedOffset);
-    final bool isPositionOnPreviousSelection = _positionIsWithinCurrentSelection(position);
-    _setSelectionPosition(null, isEnd: isEnd);
     // Check if the original local position is within the rect, if it is not then
     // we do not need to look up the word boundary for that position. This is to
     // maintain a selectables selection collapsed at 0 when the local position is
@@ -1521,37 +1519,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         final TextPosition edgeToKeepInPlace = isEnd ? existingSelectionStart : existingSelectionEnd;
         final TextPosition currentMovingEdge = isEnd ? existingSelectionEnd : existingSelectionStart;
         if (_selectableContainsOriginWord) {
-          // final bool edgeToKeepInPlaceWithinWordBoundary = edgeToKeepInPlace.offset >= wordBoundary.wordStart.offset && edgeToKeepInPlace.offset <= wordBoundary.wordEnd.offset;
-          // debugPrint('potentially swapping $position $edgeToKeepInPlace');
-          // // if (edgeToKeepInPlaceWithinWordBoundary) {
-          // //   debugPrint('edgeToKeepInPlace is in new wordBoundary');
-          // // }
-          // // if (isPositionOnPreviousSelection) {
-          // //   debugPrint('position is within current selection');
-          // // }
-          // // debugPrint('$edgeToKeepInPlaceWithinWordBoundary $isPositionOnPreviousSelection');
-          // TextPosition pivotEdge = edgeToKeepInPlace;
-          // if (!isPositionOnPreviousSelection) {
-          //   if ((currentMovingEdge.offset < pivotEdge.offset && position.offset >= pivotEdge.offset)
-          //   || (currentMovingEdge.offset > pivotEdge.offset && position.offset <= pivotEdge.offset)) {
-          //     debugPrint('woah');
-          //     if (pivotEdge.affinity != position.affinity) {
-          //       _setSelectionPosition(currentMovingEdge, isEnd: !isEnd);
-          //       pivotEdge = currentMovingEdge;
-          //     }
-          //   }
-          //   // _setSelectionPosition(currentMovingEdge, isEnd: !isEnd);
-          //   // pivotEdge = currentMovingEdge;
-          //   debugPrint('swapping $isEnd $edgeToKeepInPlace $currentMovingEdge $_textSelectionStart $_textSelectionEnd $existingSelectionStart $existingSelectionEnd');
-          // }
-          // if (position.offset < pivotEdge.offset) {
-          //   targetPosition = wordBoundary.wordStart;
-          // } else if (position.offset == pivotEdge.offset && position.affinity == pivotEdge.affinity) {
-          //   debugPrint('same');
-          //   targetPosition = currentMovingEdge;
-          // } else {
-          //   targetPosition = wordBoundary.wordEnd;
-          // }
           // Swap the selection edges to keep the origin word in bounds, when the
           // new position where to cause an inverted selection.
           final bool shouldSwapEdgesWhenSelectionIsNormalized = isEnd ? position.offset < existingSelectionStart.offset : position.offset > existingSelectionEnd.offset;
@@ -1594,7 +1561,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
             }
           }
         } else {
-          debugPrint('normal no swapping');
           // The edge should move to encompass the entire word at the new position.
           if (position.offset < edgeToKeepInPlace.offset) {
             targetPosition = wordBoundary.wordStart;
