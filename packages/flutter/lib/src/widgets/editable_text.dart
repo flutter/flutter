@@ -2412,12 +2412,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Look Up current selection.
+  /// Look up the current selection, as in the "Look Up" edit menu button on iOS.
+  /// Currently this is only implemented for iOS.
+  /// Throws an error if the selection is empty or collapsed.
   Future<void> lookUpSelection(SelectionChangedCause cause) async {
-    if (widget.obscureText) {
+    assert(!widget.obscureText);
+
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    if (widget.obscureText || text.isEmpty) {
       return;
     }
-    final String text = textEditingValue.selection.textInside(textEditingValue.text);
     await SystemChannels.platform.invokeMethod(
       'LookUp.invoke',
       text,

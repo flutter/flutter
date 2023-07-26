@@ -290,7 +290,7 @@ void main() {
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsOneWidget);
 
-      // Tapping the next button shows both the overflow back and next button
+      // Tapping the next button shows both the overflow, back, and next buttons.
       await tester.tapAt(tester.getCenter(findOverflowNextButton()));
       await tester.pumpAndSettle();
       expect(find.text('Cut'), findsNothing);
@@ -402,7 +402,7 @@ void main() {
       expect(findOverflowBackButton(), findsOneWidget);
       expect(findOverflowNextButton(), findsOneWidget);
 
-      // Tapping the next button again shows the last page
+      // Tapping the next button again shows the last page.
       await tester.tapAt(tester.getCenter(findOverflowNextButton()));
       await tester.pumpAndSettle();
       expect(find.text('Cut'), findsNothing);

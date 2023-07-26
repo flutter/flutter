@@ -198,9 +198,18 @@ void main() {
 
   // Web has a less threshold for downstream/upstream text position.
   Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(kIsWeb ? 1 : 0, -2);
+  String? lastLookUp;
 
   setUp(() async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      if (methodCall.method == 'LookUp.invoke') {
+        expect(methodCall.arguments, isA<String>());
+        lastLookUp = methodCall.arguments as String;
+      }
+    });
+
     EditableText.debugDeterministicCursor = false;
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
@@ -250,7 +259,7 @@ void main() {
     },
   );
 
-  testWidgets('Look Up shows up on iOS only', (WidgetTester tester) async {
+  testWidgets('Look Up shows up on iOS only (CupertinoTextField)', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Test',
       );
@@ -279,8 +288,53 @@ void main() {
 
       expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
       expect(find.text('Look Up'), isTargetPlatformiOS? findsOneWidget : findsNothing);
-    },    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
-          skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+
+      if (isTargetPlatformiOS) {
+        await tester.tap(find.text('Look Up'));
+        expect(lastLookUp, 'Test');
+      }
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+      skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    );
+
+  testWidgets('Look Up shows up on iOS only (TextField)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Test',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
+
+    // Long press to put the cursor after the "s".
+    const int index = 3;
+    await tester.longPressAt(textOffsetToPosition(tester, index));
+    await tester.pump();
+
+    // Double tap on the same location to select the word around the cursor.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
+    expect(find.text('Look Up'), isTargetPlatformiOS? findsOneWidget : findsNothing);
+
+    if (isTargetPlatformiOS) {
+      await tester.tap(find.text('Look Up'));
+      expect(lastLookUp, 'Test');
+    }
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
   testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
