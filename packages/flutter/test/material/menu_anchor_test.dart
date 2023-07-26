@@ -3180,22 +3180,23 @@ void main() {
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
-                id: 1,
                 rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                 flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState,
                   SemanticsFlag.hasExpandedState],
                 label: 'ABC',
+                textDirection: TextDirection.ltr,
               ),
             ],
           ),
           ignoreTransform: true,
+          ignoreId: true,
         ),
       );
 
       semantics.dispose();
     });
 
-    testWidgets('SubMenuButton expanded/collapsed state', (WidgetTester tester) async {
+    testWidgets('SubmenuButton expanded/collapsed state', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(
         MaterialApp(
@@ -3276,7 +3277,7 @@ void main() {
         ),
       );
 
-      // Also test collapsed state.
+      // Test collapsed state.
       await tester.tap(find.text('ABC'));
       await tester.pumpAndSettle();
       expect(
