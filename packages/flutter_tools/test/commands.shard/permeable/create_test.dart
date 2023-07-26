@@ -3315,7 +3315,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  for(final String template in <String>['package_ffi', 'plugin_ffi']){
+  for (final String template in <String>['package_ffi', 'plugin_ffi']) { 
     testUsingContext('$template error android language', () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
