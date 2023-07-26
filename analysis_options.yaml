@@ -50,7 +50,7 @@ linter:
     - avoid_field_initializers_in_const_classes
     # - avoid_final_parameters # incompatible with prefer_final_parameters
     - avoid_function_literals_in_foreach_calls
-    - avoid_implementing_value_types
+    # - avoid_implementing_value_types # see https://github.com/dart-lang/linter/issues/4558
     - avoid_init_to_null
     - avoid_js_rounded_ints
     # - avoid_multiple_declarations_per_line # seems to be a stylistic choice we don't subscribe to
