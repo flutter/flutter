@@ -921,7 +921,7 @@ void main() {
       expect(box, isNot(paints..circle()));
     });
 
-    testWidgetsWithLeakTracking('Material2 - border is painted above child by default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('border is painted above child by default', (WidgetTester tester) async {
       final Key painterKey = UniqueKey();
 
       await tester.pumpWidget(MaterialApp(
@@ -956,50 +956,11 @@ void main() {
 
       await expectLater(
         find.byKey(painterKey),
-        matchesGoldenFile('m2_material.border_paint_above.png'),
+        matchesGoldenFile('material.border_paint_above.png'),
       );
     });
 
-    testWidgetsWithLeakTracking('Material3 - border is painted above child by default', (WidgetTester tester) async {
-      final Key painterKey = UniqueKey();
-
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: true),
-        home: Scaffold(
-          body: RepaintBoundary(
-            key: painterKey,
-            child: Card(
-              child: SizedBox(
-                width: 200,
-                height: 300,
-                child: Material(
-                  clipBehavior: Clip.hardEdge,
-                  shape: const RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.grey, width: 6),
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        color: Colors.green,
-                        height: 150,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ));
-
-      await expectLater(
-        find.byKey(painterKey),
-        matchesGoldenFile('m3_material.border_paint_above.png'),
-      );
-    });
-
-    testWidgetsWithLeakTracking('Material2 - border is painted below child when specified', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('border is painted below child when specified', (WidgetTester tester) async {
       final Key painterKey = UniqueKey();
 
       await tester.pumpWidget(MaterialApp(
@@ -1035,47 +996,7 @@ void main() {
 
       await expectLater(
         find.byKey(painterKey),
-        matchesGoldenFile('m2_material.border_paint_below.png'),
-      );
-    });
-
-    testWidgetsWithLeakTracking('Material3 - border is painted below child when specified', (WidgetTester tester) async {
-      final Key painterKey = UniqueKey();
-
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: true),
-        home: Scaffold(
-          body: RepaintBoundary(
-            key: painterKey,
-            child: Card(
-              child: SizedBox(
-                width: 200,
-                height: 300,
-                child: Material(
-                  clipBehavior: Clip.hardEdge,
-                  shape: const RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.grey, width: 6),
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
-                  borderOnForeground: false,
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        color: Colors.green,
-                        height: 150,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ));
-
-      await expectLater(
-        find.byKey(painterKey),
-        matchesGoldenFile('m3_material.border_paint_below.png'),
+        matchesGoldenFile('material.border_paint_below.png'),
       );
     });
   });

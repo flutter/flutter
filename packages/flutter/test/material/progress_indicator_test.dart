@@ -720,7 +720,7 @@ void main() {
     expect(tester.hasRunningAnimations, isTrue);
   });
 
-  testWidgets('Material2 - RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
+  testWidgets('RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
 
     await tester.pumpFrames(animationSheet.record(
@@ -732,23 +732,7 @@ void main() {
 
     await expectLater(
       await animationSheet.collate(20),
-      matchesGoldenFile('m2_material.refresh_progress_indicator.png'),
-    );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
-
-  testWidgets('Material3 - RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
-
-    await tester.pumpFrames(animationSheet.record(
-      Theme(
-          data: ThemeData(useMaterial3: true),
-          child: const _RefreshProgressIndicatorGolden()
-      ),
-    ), const Duration(seconds: 3));
-
-    await expectLater(
-      await animationSheet.collate(20),
-      matchesGoldenFile('m3_material.refresh_progress_indicator.png'),
+      matchesGoldenFile('material.refresh_progress_indicator.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
@@ -1017,7 +1001,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Material2 - Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
+  testWidgets('Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
 
     await tester.pumpFrames(animationSheet.record(
@@ -1035,29 +1019,7 @@ void main() {
 
     await expectLater(
       await animationSheet.collate(20),
-      matchesGoldenFile('m2_material.circular_progress_indicator.indeterminate.png'),
-    );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
-
-  testWidgets('Material3 - Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
-    final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
-
-    await tester.pumpFrames(animationSheet.record(
-      Theme(
-        data: ThemeData(useMaterial3: true),
-        child: const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Padding(
-            padding: EdgeInsets.all(4),
-            child: CircularProgressIndicator(),
-          ),
-        ),
-      ),
-    ), const Duration(seconds: 2));
-
-    await expectLater(
-      await animationSheet.collate(20),
-      matchesGoldenFile('m3_material.circular_progress_indicator.indeterminate.png'),
+      matchesGoldenFile('material.circular_progress_indicator.indeterminate.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
