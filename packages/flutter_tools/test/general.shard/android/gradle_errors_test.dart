@@ -50,6 +50,7 @@ void main() {
           sslExceptionHandler,
           zipExceptionHandler,
           incompatibleJavaAndGradleVersionsHandler,
+          incompatibleJavaAndGradleVersionsASFlamingoHandler,
           remoteTerminatedHandshakeHandler,
           couldNotOpenCacheDirectoryHandler,
         ])
@@ -1353,12 +1354,46 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
     });
   });
 
-  group('incompatible java and gradle versions error', () {
+  group('incompatible java and gradle versions error jdk 17 and below', () {
     const String errorMessage = '''
 Could not compile build file '…/example/android/build.gradle'.
 > startup failed:
   General error during conversion: Unsupported class file major version 61
   java.lang.IllegalArgumentException: Unsupported class file major version 61
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        incompatibleJavaAndGradleVersionsASFlamingoHandler.test(errorMessage),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await incompatibleJavaAndGradleVersionsASFlamingoHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        multidexEnabled: true,
+      );
+
+      // Ensure the error notes the incompatible Gradle/AGP/Java versions and links to related resources.
+      expect(testLogger.statusText, contains('Gradle version is incompatible with the Java version'));
+      expect(testLogger.statusText, contains('docs.flutter.dev/go/android-java-gradle-error'));
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+  });
+
+  group('incompatible java and gradle versions error jdk 18 and above', () {
+    const String errorMessage = '''
+Could not compile build file '…/example/android/build.gradle'.
+> startup failed:
+  General error during conversion: Unsupported class file major version 62
+  java.lang.IllegalArgumentException: Unsupported class file major version 62
 ''';
 
     testWithoutContext('pattern', () {
@@ -1378,7 +1413,7 @@ Could not compile build file '…/example/android/build.gradle'.
 
       // Ensure the error notes the incompatible Gradle/AGP/Java versions and links to related resources.
       expect(testLogger.statusText, contains('Gradle version is incompatible with the Java version'));
-      expect(testLogger.statusText, contains('docs.flutter.dev/go/android-java-gradle-error'));
+      expect(testLogger.statusText, contains('https://docs.gradle.org/current/userguide/compatibility.html#java'));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),

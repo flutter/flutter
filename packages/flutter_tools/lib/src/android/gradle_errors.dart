@@ -82,6 +82,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   sslExceptionHandler,
   zipExceptionHandler,
   incompatibleJavaAndGradleVersionsHandler,
+  incompatibleJavaAndGradleVersionsASFlamingoHandler,
   remoteTerminatedHandshakeHandler,
   couldNotOpenCacheDirectoryHandler,
 ];
@@ -672,12 +673,50 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
 /// If an incompatible Java and Gradle versions error is caught, we expect an
 /// error specifying that the Java major class file version, one of
 /// https://javaalmanac.io/bytecode/versions/, is unsupported by Gradle.
-final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+\d+');
+final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version 6[23456]\s+\d+');
 
 @visibleForTesting
 final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
   test: (String line) {
     return _unsupportedClassFileMajorVersionPattern.hasMatch(line);
+  },
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    final File gradlePropertiesFile = project.directory
+        .childDirectory('android')
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties');
+    globals.printBox(
+      "${globals.logger.terminal.warningMark} Your project's Gradle version "
+          'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
+          'To fix this issue, first, check the Java version used by Flutter by '
+          'running `flutter doctor --verbose`.\n\n'
+          'Then, update the Gradle version specified in ${gradlePropertiesFile.path} '
+          'to be compatible with that Java version. '
+          'See the link below for more information on compatible Java/Gradle versions:\n'
+          'https://docs.gradle.org/current/userguide/compatibility.html#java\n\n',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'incompatible-java-gradle-version',
+);
+
+/// If an incompatible Java and Gradle versions error is caught, we expect an
+/// error specifying that the Java major class file version, one of
+/// https://javaalmanac.io/bytecode/versions/, is unsupported by Gradle.
+final RegExp _unsupportedClassFileMajorVersionASFlamingoPattern = RegExp(r'Unsupported class file major version\s+\d+');
+
+@visibleForTesting
+final GradleHandledError incompatibleJavaAndGradleVersionsASFlamingoHandler = GradleHandledError(
+  test: (String line) {
+    // Return only if this error is occurring with Java version 17 or below.
+    return _unsupportedClassFileMajorVersionASFlamingoPattern.hasMatch(line) && !_unsupportedClassFileMajorVersionPattern.hasMatch(line);
   },
   handler: ({
     required String line,
@@ -695,7 +734,7 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
     );
     return GradleBuildStatus.exit;
   },
-  eventLabel: 'incompatible-java-gradle-version',
+  eventLabel: 'incompatible-java-gradle-version-as-flamingo',
 );
 
 @visibleForTesting
