@@ -284,7 +284,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
   static void runTests() {
     final TestWidgetInspectorService service = TestWidgetInspectorService();
     WidgetInspectorService.instance = service;
-
+    setUp(() {
+      WidgetInspectorService.instance.isSelectMode.value = true;
+    });
     tearDown(() async {
       service.resetAllState();
 
@@ -358,8 +360,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
         return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
       }
-      // State type is private, hence using dynamic.
-      dynamic getInspectorState() => inspectorKey.currentState;
+
       String paragraphText(RenderParagraph paragraph) {
         final TextSpan textSpan = paragraph.text as TextSpan;
         return textSpan.text!;
@@ -394,16 +395,19 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      expect(getInspectorState().selection.current, isNull); // ignore: avoid_dynamic_calls
+      expect(WidgetInspectorService.instance.selection.current, isNull); // ignore: avoid_dynamic_calls
       await tester.tap(find.text('TOP'), warnIfMissed: false);
       await tester.pump();
       // Tap intercepted by the inspector
       expect(log, equals(<String>[]));
       // ignore: avoid_dynamic_calls
-      final InspectorSelection selection = getInspectorState().selection as InspectorSelection;
-      expect(paragraphText(selection.current! as RenderParagraph), equals('TOP'));
+      expect(
+          paragraphText(WidgetInspectorService.instance.selection.current!
+              as RenderParagraph),
+          equals('TOP'));
       final RenderObject topButton = find.byKey(topButtonKey).evaluate().first.renderObject!;
-      expect(selection.candidates, contains(topButton));
+      expect(WidgetInspectorService.instance.selection.candidates,
+          contains(topButton));
 
       await tester.tap(find.text('TOP'));
       expect(log, equals(<String>['top']));
@@ -414,7 +418,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       log.clear();
       // Ensure the inspector selection has not changed to bottom.
       // ignore: avoid_dynamic_calls
-      expect(paragraphText(getInspectorState().selection.current as RenderParagraph), equals('TOP'));
+      expect(
+          paragraphText(WidgetInspectorService.instance.selection.current!
+              as RenderParagraph),
+          equals('TOP'));
 
       await tester.tap(find.byKey(selectButtonKey));
       await tester.pump();
@@ -425,7 +432,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(log, equals(<String>[]));
       log.clear();
       // ignore: avoid_dynamic_calls
-      expect(paragraphText(getInspectorState().selection.current as RenderParagraph), equals('BOTTOM'));
+      expect(
+          paragraphText(WidgetInspectorService.instance.selection.current!
+              as RenderParagraph),
+          equals('BOTTOM'));
     });
 
     testWidgets('WidgetInspector non-invertible transform regression test', (WidgetTester tester) async {
@@ -461,8 +471,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
         return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
       }
-      // State type is private, hence using dynamic.
-      dynamic getInspectorState() => inspectorKey.currentState;
 
       await tester.pumpWidget(
         Directionality(
@@ -498,7 +506,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       await tester.tap(find.byType(ListView), warnIfMissed: false);
       await tester.pump();
-      expect(getInspectorState().selection.current, isNotNull); // ignore: avoid_dynamic_calls
+      expect(WidgetInspectorService.instance.selection.current, isNotNull); // ignore: avoid_dynamic_calls
 
       // Now out of inspect mode due to the click.
       await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 200.0);
@@ -587,12 +595,19 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // The object with width 95.0 wins over the object with width 94.0 because
       // the subtree with width 94.0 is offstage.
       // ignore: avoid_dynamic_calls
-      expect(inspectorState.selection.current.semanticBounds.width, equals(95.0));
+      expect(
+          WidgetInspectorService
+              .instance.selection.current?.semanticBounds.width,
+          equals(95.0));
 
       // Exactly 2 out of the 3 text elements should be in the candidate list of
       // objects to select as only 2 are onstage.
       // ignore: avoid_dynamic_calls
-      expect(inspectorState.selection.candidates.where((RenderObject object) => object is RenderParagraph).length, equals(2));
+      expect(
+          WidgetInspectorService.instance.selection.candidates
+              .whereType<RenderParagraph>()
+              .length,
+          equals(2));
     });
 
     testWidgets('WidgetInspector with Transform above', (WidgetTester tester) async {
@@ -661,9 +676,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         };
       }
 
-      // State type is private, hence using dynamic.
-      // The inspector state is static, so it's enough with reading one of them.
-      dynamic getInspectorState() => inspector1Key.currentState;
       String paragraphText(RenderParagraph paragraph) {
         final TextSpan textSpan = paragraph.text as TextSpan;
         return textSpan.text!;
@@ -699,18 +711,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      // ignore: avoid_dynamic_calls
-      final InspectorSelection selection = getInspectorState().selection as InspectorSelection;
-      // The selection is static, so it may be initialized from previous tests.
-      selection.clear();
-
       await tester.tap(find.text('Child 1'), warnIfMissed: false);
       await tester.pump();
-      expect(paragraphText(selection.current! as RenderParagraph), equals('Child 1'));
+      expect(
+          paragraphText(WidgetInspectorService.instance.selection.current!
+              as RenderParagraph),
+          equals('Child 1'));
+
+      // Re-enable select mode since it's state is shared between the
+      // WidgetInspectors
+      WidgetInspectorService.instance.isSelectMode.value = true;
 
       await tester.tap(find.text('Child 2'), warnIfMissed: false);
       await tester.pump();
-      expect(paragraphText(selection.current! as RenderParagraph), equals('Child 2'));
+      expect(
+          paragraphText(WidgetInspectorService.instance.selection.current!
+              as RenderParagraph),
+          equals('Child 2'));
     });
 
     test('WidgetInspectorService null id', () {

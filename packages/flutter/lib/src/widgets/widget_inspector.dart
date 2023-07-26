@@ -716,7 +716,15 @@ class InspectorReferenceData {
 }
 
 // Production implementation of [WidgetInspectorService].
-class _WidgetInspectorService = Object with WidgetInspectorService;
+class _WidgetInspectorService with WidgetInspectorService {
+  _WidgetInspectorService() {
+    selection.addListener(() {
+      if (selectionChangedCallback != null) {
+        selectionChangedCallback!();
+      }
+    });
+  }
+}
 
 /// Service used by GUI tools to interact with the [WidgetInspector].
 ///
@@ -747,6 +755,15 @@ mixin WidgetInspectorService {
   /// The current [WidgetInspectorService].
   static WidgetInspectorService get instance => _instance;
   static WidgetInspectorService _instance = _WidgetInspectorService();
+
+  /// Whether the inspector is in select mode.
+  ///
+  /// In select mode, pointer interactions trigger widget selection instead of
+  /// normal interactions. Otherwise the previously selected widget is
+  /// highlighted but the application can be interacted with normally.
+  @visibleForTesting
+  final ValueNotifier<bool> isSelectMode = ValueNotifier<bool>(true);
+
   @protected
   static set instance(WidgetInspectorService instance) {
     _instance = instance;
@@ -1562,18 +1579,7 @@ mixin WidgetInspectorService {
         selection.current = object! as RenderObject;
         _sendInspectEvent(selection.current);
       }
-      if (selectionChangedCallback != null) {
-        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
-          selectionChangedCallback!();
-        } else {
-          // It isn't safe to trigger the selection change callback if we are in
-          // the middle of rendering the frame.
-          SchedulerBinding.instance.scheduleTask(
-            selectionChangedCallback!,
-            Priority.touch,
-          );
-        }
-      }
+
       return true;
     }
     return false;
@@ -2675,18 +2681,9 @@ class WidgetInspector extends StatefulWidget {
 class _WidgetInspectorState extends State<WidgetInspector>
     with WidgetsBindingObserver {
 
-  _WidgetInspectorState() : selection = WidgetInspectorService.instance.selection;
+  _WidgetInspectorState();
 
   Offset? _lastPointerLocation;
-
-  final InspectorSelection selection;
-
-  /// Whether the inspector is in select mode.
-  ///
-  /// In select mode, pointer interactions trigger widget selection instead of
-  /// normal interactions. Otherwise the previously selected widget is
-  /// highlighted but the application can be interacted with normally.
-  bool isSelectMode = true;
 
   final GlobalKey _ignorePointerKey = GlobalKey();
 
@@ -2694,27 +2691,29 @@ class _WidgetInspectorState extends State<WidgetInspector>
   /// as selecting the edge of the bounding box.
   static const double _edgeHitMargin = 2.0;
 
-  InspectorSelectionChangedCallback? _selectionChangedCallback;
   @override
   void initState() {
     super.initState();
 
-    _selectionChangedCallback = () {
-      setState(() {
-        // The [selection] property which the build method depends on has
-        // changed.
-      });
-    };
-    WidgetInspectorService.instance.selectionChangedCallback = _selectionChangedCallback;
+    WidgetInspectorService.instance.selection
+        .addListener(_selectionInformationChanged);
+    WidgetInspectorService.instance.isSelectMode
+        .addListener(_selectionInformationChanged);
   }
 
   @override
   void dispose() {
-    if (WidgetInspectorService.instance.selectionChangedCallback == _selectionChangedCallback) {
-      WidgetInspectorService.instance.selectionChangedCallback = null;
-    }
+    WidgetInspectorService.instance.selection
+        .removeListener(_selectionInformationChanged);
+    WidgetInspectorService.instance.isSelectMode
+        .removeListener(_selectionInformationChanged);
     super.dispose();
   }
+
+  void _selectionInformationChanged() => setState((){
+    // Triggers a rebuild of the WidgetInspector. For use when dependant
+    // selection information changes.
+  });
 
   bool _hitTestHelper(
     List<RenderObject> hits,
@@ -2794,7 +2793,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
   }
 
   void _inspectAt(Offset position) {
-    if (!isSelectMode) {
+    if (!WidgetInspectorService.instance.isSelectMode.value) {
       return;
     }
 
@@ -2802,9 +2801,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     final RenderObject userRender = ignorePointer.child!;
     final List<RenderObject> selected = hitTest(position, userRender);
 
-    setState(() {
-      selection.candidates = selected;
-    });
+    WidgetInspectorService.instance.selection.candidates = selected;
   }
 
   void _handlePanDown(DragDownDetails event) {
@@ -2826,36 +2823,34 @@ class _WidgetInspectorState extends State<WidgetInspector>
     final ui.FlutterView view = View.of(context);
     final Rect bounds = (Offset.zero & (view.physicalSize / view.devicePixelRatio)).deflate(_kOffScreenMargin);
     if (!bounds.contains(_lastPointerLocation!)) {
-      setState(() {
-        selection.clear();
-      });
+      WidgetInspectorService.instance.selection.clear();
     }
   }
 
   void _handleTap() {
-    if (!isSelectMode) {
+    if (!WidgetInspectorService.instance.isSelectMode.value) {
       return;
     }
     if (_lastPointerLocation != null) {
       _inspectAt(_lastPointerLocation!);
-      WidgetInspectorService.instance._sendInspectEvent(selection.current);
+      WidgetInspectorService.instance
+          ._sendInspectEvent(WidgetInspectorService.instance.selection.current);
     }
-    setState(() {
-      // Only exit select mode if there is a button to return to select mode.
-      if (widget.selectButtonBuilder != null) {
-        isSelectMode = false;
-      }
-    });
+
+    // Only exit select mode if there is a button to return to select mode.
+    if (widget.selectButtonBuilder != null) {
+      WidgetInspectorService.instance.isSelectMode.value = false;
+    }
   }
 
   void _handleEnableSelect() {
-    setState(() {
-      isSelectMode = true;
-    });
+      WidgetInspectorService.instance.isSelectMode.value = true;
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool isSelectMode =
+        WidgetInspectorService.instance.isSelectMode.value;
     // Be careful changing this build method. The _InspectorOverlayLayer
     // assumes the root RenderObject for the WidgetInspector will be
     // a RenderStack with a _RenderInspectorOverlay as the last child.
@@ -2879,13 +2874,13 @@ class _WidgetInspectorState extends State<WidgetInspector>
           bottom: _kInspectButtonMargin,
           child: widget.selectButtonBuilder!(context, _handleEnableSelect),
         ),
-      _InspectorOverlay(selection: selection),
+      _InspectorOverlay(selection: WidgetInspectorService.instance.selection),
     ]);
   }
 }
 
 /// Mutable selection state of the inspector.
-class InspectorSelection {
+class InspectorSelection with ChangeNotifier {
   /// Render objects that are candidates to be selected.
   ///
   /// Tools may wish to iterate through the list of candidates.
@@ -2924,6 +2919,7 @@ class InspectorSelection {
     if (_current != value) {
       _current = value;
       _currentElement = (value?.debugCreator as DebugCreator?)?.element;
+      notifyListeners();
     }
   }
 
@@ -2941,11 +2937,13 @@ class InspectorSelection {
     if (element?.debugIsDefunct ?? false) {
       _currentElement = null;
       _current = null;
+      notifyListeners();
       return;
     }
     if (currentElement != element) {
       _currentElement = element;
       _current = element!.findRenderObject();
+      notifyListeners();
     }
   }
 
@@ -2953,9 +2951,11 @@ class InspectorSelection {
     if (_index < candidates.length) {
       _current = candidates[index];
       _currentElement = (_current?.debugCreator as DebugCreator?)?.element;
+      notifyListeners();
     } else {
       _current = null;
       _currentElement = null;
+      notifyListeners();
     }
   }
 
@@ -3234,7 +3234,10 @@ class _InspectorOverlayLayer extends Layer {
     Rect targetRect,
   ) {
     canvas.save();
-    final double maxWidth = size.width - 2 * (_kScreenEdgeMargin + _kTooltipPadding);
+    final double maxWidth = math.max(
+      size.width - 2 * (_kScreenEdgeMargin + _kTooltipPadding),
+      0,
+    );
     final TextSpan? textSpan = _textPainter?.text as TextSpan?;
     if (_textPainter == null || textSpan!.text != message || _textPainterMaxWidth != maxWidth) {
       _textPainterMaxWidth = maxWidth;
