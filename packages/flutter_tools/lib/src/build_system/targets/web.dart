@@ -41,7 +41,6 @@ const String kBaseHref = 'baseHref';
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
-
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
 class WebEntrypointTarget extends Target {
@@ -97,8 +96,6 @@ class WebEntrypointTarget extends Target {
     // the web_plugin_registrant.dart file alongside the generated main.dart
     const String generatedImport = 'web_plugin_registrant.dart';
 
-
-    final String? iconTreeShakerFlag = environment.defines[kIconTreeShakerFlag];
     final AssetBundle assetBundle = AssetBundleFactory.defaultInstance(
       logger: environment.logger,
       fileSystem: environment.fileSystem,
@@ -110,9 +107,6 @@ class WebEntrypointTarget extends Target {
       deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
       targetPlatform: TargetPlatform.web_javascript,
     );
-    if (iconTreeShakerFlag != null) {
-      environment.defines[kIconTreeShakerFlag] = iconTreeShakerFlag;
-    }
     if (resultCode != 0) {
       throw Exception('Failed to bundle asset files.');
     }
@@ -387,7 +381,6 @@ class WebReleaseBundle extends Target {
   List<Source> get outputs => <Source>[
     Source.pattern('{OUTPUT_DIR}/$outputFileName'),
     if (isWasm) Source.pattern('{OUTPUT_DIR}/$wasmJSRuntimeFileName'),
-    const Source.pattern('{BUILD_DIR}/AssetManifest.bin'),
   ];
 
   @override
@@ -433,8 +426,6 @@ class WebReleaseBundle extends Target {
       depfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
-    final File assetManifestFile = outputDirectory.childFile('AssetManifest.bin');
-    await assetManifestFile.copy(environment.buildDir.childFile('AssetManifest.bin').path);
 
     final Directory webResources = environment.projectDir
       .childDirectory('web');
