@@ -98,9 +98,7 @@ class PlatformViewMessageHandler {
 
     // For now, we don't need anything fancier. If needed, this can be converted
     // to a PlatformViewStrategy class for each web-renderer backend?
-    if (_contentHandler != null) {
-      _contentHandler!(content);
-    }
+    _contentHandler?.call(content);
     callback(_codec.encodeSuccessEnvelope(null));
   }
 

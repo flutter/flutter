@@ -1550,26 +1550,32 @@ class TextStyle {
   }
 
   @override
-  int get hashCode => Object.hash(
-    Object.hashAll(_encoded),
-    _leadingDistribution,
-    _fontFamily,
-    _fontFamilyFallback,
-    _fontSize,
-    _letterSpacing,
-    _wordSpacing,
-    _height,
-    _locale,
-    _background,
-    _foreground,
-    _shadows == null ? null : Object.hashAll(_shadows!),
-    _decorationThickness,
-    _fontFeatures == null ? null : Object.hashAll(_fontFeatures!),
-    _fontVariations == null ? null : Object.hashAll(_fontVariations!),
-  );
+  int get hashCode {
+    final List<Shadow>? shadows = _shadows;
+    final List<FontFeature>? fontFeatures = _fontFeatures;
+    final List<FontVariation>? fontVariations = _fontVariations;
+    return Object.hash(
+      Object.hashAll(_encoded),
+      _leadingDistribution,
+      _fontFamily,
+      _fontFamilyFallback,
+      _fontSize,
+      _letterSpacing,
+      _wordSpacing,
+      _height,
+      _locale,
+      _background,
+      _foreground,
+      shadows == null ? null : Object.hashAll(shadows),
+      _decorationThickness,
+      fontFeatures == null ? null : Object.hashAll(fontFeatures),
+      fontVariations == null ? null : Object.hashAll(fontVariations),
+    );
+  }
 
   @override
   String toString() {
+    final List<String>? fontFamilyFallback = _fontFamilyFallback;
     return 'TextStyle('
              'color: ${              _encoded[0] & 0x00002 == 0x00002  ? Color(_encoded[1])                           : "unspecified"}, '
              'decoration: ${         _encoded[0] & 0x00004 == 0x00004  ? TextDecoration._(_encoded[2])                : "unspecified"}, '
@@ -1583,8 +1589,8 @@ class TextStyle {
              'fontFamily: ${         _encoded[0] & 0x00200 == 0x00200
                                      && _fontFamily != ''              ? _fontFamily                                  : "unspecified"}, '
              'fontFamilyFallback: ${ _encoded[0] & 0x00200 == 0x00200
-                                     && _fontFamilyFallback != null
-                                     && _fontFamilyFallback!.isNotEmpty ? _fontFamilyFallback                         : "unspecified"}, '
+                                     && fontFamilyFallback != null
+                                     && fontFamilyFallback.isNotEmpty ? fontFamilyFallback                            : "unspecified"}, '
              'fontSize: ${           _encoded[0] & 0x00400 == 0x00400  ? _fontSize                                    : "unspecified"}, '
              'letterSpacing: ${      _encoded[0] & 0x00800 == 0x00800  ? "${_letterSpacing}x"                         : "unspecified"}, '
              'wordSpacing: ${        _encoded[0] & 0x01000 == 0x01000  ? "${_wordSpacing}x"                           : "unspecified"}, '
@@ -3185,8 +3191,9 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
   void pushStyle(TextStyle style) {
     final List<String> fullFontFamilies = <String>[];
     fullFontFamilies.add(style._fontFamily);
-    if (style._fontFamilyFallback != null) {
-      fullFontFamilies.addAll(style._fontFamilyFallback!);
+    final List<String>? fontFamilyFallback = style._fontFamilyFallback;
+    if (fontFamilyFallback != null) {
+      fullFontFamilies.addAll(fontFamilyFallback);
     }
 
     final Int32List encoded = style._encoded;
