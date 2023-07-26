@@ -2944,7 +2944,17 @@ void main() {
         shift: true,
         alt: true,
       );
-      final String allExpected = <String>[expectedAlt, expectedCtrl, expectedMeta, expectedShift, 'A'].join(expectedSeparator);
+      late String allExpected;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          allExpected = <String>[expectedAlt, expectedCtrl, expectedMeta, expectedShift, 'A'].join(expectedSeparator);
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          allExpected = <String>[expectedCtrl, expectedAlt, expectedShift, expectedMeta, 'A'].join(expectedSeparator);
+      }
       const CharacterActivator charShortcuts = CharacterActivator('ñ');
       const String charExpected = 'ñ';
       await tester.pumpWidget(
