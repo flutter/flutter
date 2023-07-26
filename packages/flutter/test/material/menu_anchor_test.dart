@@ -3180,15 +3180,140 @@ void main() {
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
+                id: 1,
                 rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState],
+                flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.hasExpandedState],
                 label: 'ABC',
-                textDirection: TextDirection.ltr,
               ),
             ],
           ),
           ignoreTransform: true,
-          ignoreId: true,
+        ),
+      );
+
+      semantics.dispose();
+    });
+
+    testWidgets('SubMenuButton expanded/collapsed state', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: SubmenuButton(
+              onHover: (bool value) {},
+              style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+              menuChildren: <Widget>[
+                MenuItemButton(
+                  child: const Text('Item 0'),
+                  onPressed: () {},
+                ),
+              ],
+              child: const Text('ABC'),
+            ),
+          ),
+        ),
+      );
+
+      // Test expanded state.
+      await tester.tap(find.text('ABC'));
+      await tester.pumpAndSettle();
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                children: <TestSemantics> [
+                  TestSemantics(
+                    id: 2,
+                    rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                    children: <TestSemantics> [
+                      TestSemantics(
+                        id: 3,
+                        rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                        flags: <SemanticsFlag> [SemanticsFlag.scopesRoute],
+                        children: <TestSemantics> [
+                          TestSemantics(
+                            id: 4,
+                            flags: <SemanticsFlag>[SemanticsFlag.hasExpandedState, SemanticsFlag.isExpanded, SemanticsFlag.isFocused, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'ABC',
+                            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                          )
+                        ]
+                      )
+                    ]
+                  ),
+                  TestSemantics(
+                      id: 6,
+                      rect: const Rect.fromLTRB(0.0, 0.0, 123.0, 64.0),
+                      children: <TestSemantics> [
+                        TestSemantics(
+                            id: 7,
+                            rect: const Rect.fromLTRB(0.0, 0.0, 123.0, 48.0),
+                            flags: <SemanticsFlag> [SemanticsFlag.hasImplicitScrolling],
+                            children: <TestSemantics> [
+                              TestSemantics(
+                                  id: 8,
+                                  label: 'Item 0',
+                                  rect: const Rect.fromLTRB(0.0, 0.0, 123.0, 48.0),
+                                  flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                              ),
+                            ],
+                        ),
+                      ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreTransform: true,
+        ),
+      );
+
+      // Also test collapsed state.
+      await tester.tap(find.text('ABC'));
+      await tester.pumpAndSettle();
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                children: <TestSemantics> [
+                  TestSemantics(
+                      id: 2,
+                      rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                      children: <TestSemantics> [
+                        TestSemantics(
+                            id: 3,
+                            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                            flags: <SemanticsFlag> [SemanticsFlag.scopesRoute],
+                            children: <TestSemantics> [
+                              TestSemantics(
+                                id: 4,
+                                flags: <SemanticsFlag>[SemanticsFlag.hasExpandedState, SemanticsFlag.isFocused, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocusable],
+                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                label: 'ABC',
+                                rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                              )
+                            ]
+                        )
+                      ]
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreTransform: true,
         ),
       );
 
