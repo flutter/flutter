@@ -1079,7 +1079,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       );
     }
 
-    return child;
+    return MergeSemantics(child: child);
   }
 
   void _handleFocusChange() {
@@ -1297,23 +1297,18 @@ class CheckboxMenuButton extends StatelessWidget {
       style: style,
       shortcut: shortcut,
       statesController: statesController,
-      leadingIcon: Semantics(
-        mixed: tristate ? value == null : null,
-        checked: value,
-        selected: value,
-        child: ExcludeFocus(
-          child: IgnorePointer(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxHeight: Checkbox.width,
-                maxWidth: Checkbox.width,
-              ),
-              child: Checkbox(
-                tristate: tristate,
-                value: value,
-                onChanged: onChanged,
-                isError: isError,
-              ),
+      leadingIcon: ExcludeFocus(
+        child: IgnorePointer(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxHeight: Checkbox.width,
+              maxWidth: Checkbox.width,
+            ),
+            child: Checkbox(
+              tristate: tristate,
+              value: value,
+              onChanged: onChanged,
+              isError: isError,
             ),
           ),
         ),
