@@ -55,14 +55,38 @@ FlutterConfiguration get configuration =>
   _configuration ??= FlutterConfiguration.legacy(_jsConfiguration);
 FlutterConfiguration? _configuration;
 
-/// Sets the given configuration as the current one.
+/// Overrides the initial test configuration with new values coming from `newConfig`.
+///
+/// The initial test configuration (AKA `_jsConfiguration`) is set in the
+/// `test_platform.dart` file. See: `window.flutterConfiguration` in `_testBootstrapHandler`.
+///
+/// The result of calling this method each time is:
+///
+///     [configuration] = _jsConfiguration + newConfig
+///
+/// Subsequent calls to this method don't *add* more to an already overridden
+/// configuration; this method always starts from an original `_jsConfiguration`,
+/// and adds `newConfig` to it.
+///
+/// If `newConfig` is null, [configuration] resets to the initial `_jsConfiguration`.
 ///
 /// This must be called before the engine is initialized. Calling it after the
 /// engine is initialized will result in some of the properties not taking
 /// effect because they are consumed during initialization.
 @visibleForTesting
-void debugSetConfiguration(FlutterConfiguration configuration) {
-  _configuration = configuration;
+void debugOverrideJsConfiguration(JsFlutterConfiguration? newConfig) {
+  if (newConfig != null) {
+    final JSObject newJsConfig = objectConstructor.assign(
+      <String, Object>{}.jsify(),
+      _jsConfiguration.jsify(),
+      newConfig.jsify(),
+    );
+    _configuration = FlutterConfiguration()
+        ..setUserConfiguration(newJsConfig as JsFlutterConfiguration);
+    print('Overridden engine JS config to: ${newJsConfig.dartify()}');
+  } else {
+    _configuration = null;
+  }
 }
 
 /// Supplies Web Engine configuration properties.
@@ -119,16 +143,6 @@ class FlutterConfiguration {
         'configuration simultaneously is not supported.');
       _configuration = configuration;
     }
-  }
-
-  FlutterConfiguration merge(JsFlutterConfiguration newConfig) {
-    final JSAny mergedJsConfig = objectConstructor.assign(
-      <String, Object?>{}.jsify()!,
-      _configuration.jsify(),
-      newConfig.jsify(),
-    );
-    return FlutterConfiguration()
-      ..setUserConfiguration(mergedJsConfig as JsFlutterConfiguration);
   }
 
   // Static constant parameters.
