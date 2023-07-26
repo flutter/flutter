@@ -1035,8 +1035,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       _createLocalController();
     }
     _effectiveFocusNode.canRequestFocus = widget.focusNode == null
-        ? widget.canRequestFocus && _isEnabled
-        : widget.focusNode!.canRequestFocus && _isEnabled;
+      ? widget.canRequestFocus && _isEnabled
+      : widget.focusNode!.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
@@ -1045,8 +1045,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     switch (mode) {
       case NavigationMode.traditional:
         return widget.focusNode == null
-            ? widget.canRequestFocus && _isEnabled
-            : widget.focusNode!.canRequestFocus && _isEnabled;
+          ? widget.canRequestFocus && _isEnabled
+          : widget.focusNode!.canRequestFocus && _isEnabled;
       case NavigationMode.directional:
         return true;
     }
@@ -1098,8 +1098,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
     _controller = value == null
-        ? RestorableTextEditingController()
-        : RestorableTextEditingController.fromValue(value);
+      ? RestorableTextEditingController()
+      : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
