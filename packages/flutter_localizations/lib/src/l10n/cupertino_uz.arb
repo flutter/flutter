@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Yopish",
   "searchTextFieldPlaceholderLabel": "Qidiruv",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "lookUpButtonLabel": "Look Up"
+  "lookUpButtonLabel": "Look Up",
+  "menuDismissLabel": "Dismiss menu"
 }

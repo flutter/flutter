@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "విస్మరించు",
   "searchTextFieldPlaceholderLabel": "సెర్చ్ చేయి",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "lookUpButtonLabel": "Look Up"
+  "lookUpButtonLabel": "Look Up",
+  "menuDismissLabel": "Dismiss menu"
 }

@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Cashisa",
   "searchTextFieldPlaceholderLabel": "Sesha",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "lookUpButtonLabel": "Look Up"
+  "lookUpButtonLabel": "Look Up",
+  "menuDismissLabel": "Dismiss menu"
 }

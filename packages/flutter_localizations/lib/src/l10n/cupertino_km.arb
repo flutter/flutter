@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "ច្រាន​ចោល",
   "searchTextFieldPlaceholderLabel": "ស្វែងរក",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "lookUpButtonLabel": "Look Up"
+  "lookUpButtonLabel": "Look Up",
+  "menuDismissLabel": "Dismiss menu"
 }

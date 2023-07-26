@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "დახურვა",
   "searchTextFieldPlaceholderLabel": "ძიება",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "lookUpButtonLabel": "Look Up"
+  "lookUpButtonLabel": "Look Up",
+  "menuDismissLabel": "Dismiss menu"
 }

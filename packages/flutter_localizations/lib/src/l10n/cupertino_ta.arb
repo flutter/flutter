@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "நிராகரிக்கும்",
   "searchTextFieldPlaceholderLabel": "தேடுக",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "lookUpButtonLabel": "Look Up"
+  "lookUpButtonLabel": "Look Up",
+  "menuDismissLabel": "Dismiss menu"
 }

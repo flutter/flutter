@@ -152,5 +152,6 @@
   "expandedHint": "Collapsed",
   "collapsedHint": "Expanded",
   "scanTextButtonLabel": "Scan text",
-  "lookUpButtonLabel": "Look Up"
+  "lookUpButtonLabel": "Look Up",
+  "menuDismissLabel": "Dismiss menu"
 }
