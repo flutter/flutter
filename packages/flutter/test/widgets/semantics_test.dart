@@ -609,6 +609,7 @@ void main() {
           namesRoute: true,
           image: true,
           liveRegion: true,
+          expanded: true,
         ),
     );
     final List<SemanticsFlag> flags = SemanticsFlag.values.toList();
@@ -691,6 +692,7 @@ void main() {
           namesRoute: true,
           image: true,
           liveRegion: true,
+          expanded: true,
         ),
     );
     flags
