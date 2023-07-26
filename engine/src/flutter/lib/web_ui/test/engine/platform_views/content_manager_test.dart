@@ -5,8 +5,7 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-
-import '../../common/matchers.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -97,13 +96,14 @@ void testMain() {
       });
 
       test('refuse to render views for unregistered factories', () async {
-        try {
-          contentManager.renderContent(unregisteredViewType, viewId, null);
-          fail('renderContent should have thrown an Assertion error!');
-        } catch (e) {
-          expect(e, isAssertionError);
-          expect((e as AssertionError).message, contains(unregisteredViewType));
-        }
+        expect(
+          () => contentManager.renderContent(unregisteredViewType, viewId, null),
+          throwsA(const TypeMatcher<AssertionError>().having(
+            (AssertionError error) => error.message,
+            'assertion message',
+            contains(unregisteredViewType),
+          )),
+        );
       });
 
       test('rendered markup contains required attributes', () async {
@@ -202,6 +202,44 @@ void testMain() {
           contentManager.getViewById(viewId);
         }, throwsA(isA<AssertionError>()));
       });
+    });
+
+    test('default factories', () {
+      final DomElement content0 = contentManager.renderContent(
+        ui_web.PlatformViewRegistry.defaultVisibleViewType,
+        viewId,
+        <dynamic, dynamic>{'tagName': 'table'},
+      );
+      expect(
+        contentManager.getViewById(viewId),
+        content0.querySelector('table'),
+      );
+      expect(contentManager.isVisible(viewId), isTrue);
+      expect(contentManager.isInvisible(viewId), isFalse);
+
+      final DomElement content1 = contentManager.renderContent(
+        ui_web.PlatformViewRegistry.defaultInvisibleViewType,
+        viewId + 1,
+        <dynamic, dynamic>{'tagName': 'script'},
+      );
+      expect(
+        contentManager.getViewById(viewId + 1),
+        content1.querySelector('script'),
+      );
+      expect(contentManager.isVisible(viewId + 1), isFalse);
+      expect(contentManager.isInvisible(viewId + 1), isTrue);
+
+      final DomElement content2 = contentManager.renderContent(
+        ui_web.PlatformViewRegistry.defaultVisibleViewType,
+        viewId + 2,
+        <dynamic, dynamic>{'tagName': 'p'},
+      );
+      expect(
+        contentManager.getViewById(viewId + 2),
+        content2.querySelector('p'),
+      );
+      expect(contentManager.isVisible(viewId + 2), isTrue);
+      expect(contentManager.isInvisible(viewId + 2), isFalse);
     });
   });
 }
