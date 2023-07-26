@@ -793,6 +793,9 @@ struct FlutterKeyPendingResponse {
                        guard:guardedCallback];
 }
 
+- (nonnull NSDictionary*)getPressedState {
+  return [NSDictionary dictionaryWithDictionary:_pressingRecords];
+}
 @end
 
 namespace {

@@ -119,6 +119,13 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
     _processingEvent = FALSE;
     _viewDelegate = viewDelegate;
 
+    FlutterMethodChannel* keyboardChannel =
+        [FlutterMethodChannel methodChannelWithName:@"flutter/keyboard"
+                                    binaryMessenger:[_viewDelegate getBinaryMessenger]
+                                              codec:[FlutterStandardMethodCodec sharedInstance]];
+    [keyboardChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+      [self handleKeyboardMethodCall:call result:result];
+    }];
     _primaryResponders = [[NSMutableArray alloc] init];
     [self addPrimaryResponder:[[FlutterEmbedderKeyResponder alloc]
                                   initWithSendEvent:^(const FlutterKeyEvent& event,
@@ -149,6 +156,14 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
     }];
   }
   return self;
+}
+
+- (void)handleKeyboardMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if ([[call method] isEqualToString:@"getKeyboardState"]) {
+    result([self getPressedState]);
+  } else {
+    result(FlutterMethodNotImplemented);
+  }
 }
 
 - (void)addPrimaryResponder:(nonnull id<FlutterKeyPrimaryResponder>)responder {
@@ -326,6 +341,19 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
   FlutterEmbedderKeyResponder* embedderResponder =
       (FlutterEmbedderKeyResponder*)_primaryResponders[0];
   [embedderResponder syncModifiersIfNeeded:modifierFlags timestamp:timestamp];
+}
+
+/**
+ * Returns the keyboard pressed state.
+ *
+ * Returns the keyboard pressed state. The dictionary contains one entry per
+ * pressed keys, mapping from the logical key to the physical key.
+ */
+- (nonnull NSDictionary*)getPressedState {
+  // The embedder responder is the first element in _primaryResponders.
+  FlutterEmbedderKeyResponder* embedderResponder =
+      (FlutterEmbedderKeyResponder*)_primaryResponders[0];
+  return [embedderResponder getPressedState];
 }
 
 @end
