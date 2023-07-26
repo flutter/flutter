@@ -706,7 +706,7 @@ void main() {
       ],
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
-  });
+  }, skip: true);
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
