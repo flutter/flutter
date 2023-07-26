@@ -111,6 +111,78 @@ void main() {
         );
       }, variant: TargetPlatformVariant.all());
 
+      test('maxXIndex and maxYIndex assertions', () {
+        final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+          maxXIndex: 0,
+          maxYIndex: 0,
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            return const SizedBox.shrink();
+          }
+        );
+        // Update
+        expect(
+          () {
+            delegate.maxXIndex = -1;
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('value == null || value >= 0'),
+            ),
+          ),
+        );
+        expect(
+          () {
+            delegate.maxYIndex = -1;
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('value == null || value >= 0'),
+            ),
+          ),
+        );
+        // Constructor
+        expect(
+          () {
+            TwoDimensionalChildBuilderDelegate(
+              maxXIndex: -1,
+              maxYIndex: 0,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return const SizedBox.shrink();
+              }
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('maxXIndex == null || maxXIndex >= 0'),
+            ),
+          ),
+        );
+        expect(
+          () {
+            TwoDimensionalChildBuilderDelegate(
+              maxXIndex: 0,
+              maxYIndex: -1,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return const SizedBox.shrink();
+              }
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('maxYIndex == null || maxYIndex >= 0'),
+            ),
+          ),
+        );
+      });
+
       testWidgets('throws an error when builder throws', (WidgetTester tester) async {
         final List<Object> exceptions = <Object>[];
         final FlutterExceptionHandler? oldHandler = FlutterError.onError;
@@ -1821,4 +1893,29 @@ Future<void> restoreScrollAndVerify(WidgetTester tester) async {
     tester.state<TwoDimensionalScrollableState>(findScrollable).verticalScrollable.position.pixels,
     100.0,
   );
+}
+
+// Validates covariant through analysis.
+mixin _SomeDelegateMixin on TwoDimensionalChildDelegate {}
+
+class _SomeRenderTwoDimensionalViewport extends RenderTwoDimensionalViewport { // ignore: unused_element
+  _SomeRenderTwoDimensionalViewport({
+    required super.horizontalOffset,
+    required super.horizontalAxisDirection,
+    required super.verticalOffset,
+    required super.verticalAxisDirection,
+    required _SomeDelegateMixin super.delegate,
+    required super.mainAxis,
+    required super.childManager,
+  });
+
+  @override
+  _SomeDelegateMixin get delegate => super.delegate as _SomeDelegateMixin;
+  @override
+  set delegate(_SomeDelegateMixin value) { // Analysis would fail without covariant
+    super.delegate = value;
+  }
+
+  @override
+  void layoutChildSequence() {}
 }
