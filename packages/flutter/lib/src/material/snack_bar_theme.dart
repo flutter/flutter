@@ -12,22 +12,19 @@ import 'theme.dart';
 
 /// Defines where a [SnackBar] should appear within a [Scaffold] and how its
 /// location should be adjusted when the scaffold also includes a
-/// [FloatingActionButton], a [BottomNavigationBar], or a [NavigationBar].
+/// [FloatingActionButton] or a [BottomNavigationBar].
 enum SnackBarBehavior {
   /// Fixes the [SnackBar] at the bottom of the [Scaffold].
   ///
   /// The exception is that the [SnackBar] will be shown above a
-  /// [BottomNavigationBar] or a [NavigationBar]. Additionally, the [SnackBar]
-  /// will cause other non-fixed widgets inside [Scaffold] to be pushed above
-  /// (for example, the [FloatingActionButton]).
+  /// [BottomNavigationBar]. Additionally, the [SnackBar] will cause other
+  /// non-fixed widgets inside [Scaffold] to be pushed above (for example, the
+  /// [FloatingActionButton]).
   fixed,
 
   /// This behavior will cause [SnackBar] to be shown above other widgets in the
-  /// [Scaffold]. This includes being displayed above a [BottomNavigationBar] or
-  /// a [NavigationBar], and a [FloatingActionButton] when its location is on the
-  /// bottom. When the floating action button location is on the top, this behavior
-  /// will cause the [SnackBar] to be shown above other widgets in the [Scaffold]
-  /// except the floating action button.
+  /// [Scaffold]. This includes being displayed above a [BottomNavigationBar]
+  /// and a [FloatingActionButton].
   ///
   /// See <https://material.io/design/components/snackbars.html> for more details.
   floating,
