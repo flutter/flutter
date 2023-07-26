@@ -30,7 +30,6 @@
 #include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkBlurTypes.h"
 #include "third_party/skia/include/core/SkClipOp.h"
-#include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkPathBuilder.h"
 #include "third_party/skia/include/core/SkRRect.h"
 
@@ -121,7 +120,7 @@ TEST_P(DisplayListTest, CanDrawCapsAndJoins) {
 
   paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
   paint.setStrokeWidth(30);
-  paint.setColor(SK_ColorRED);
+  paint.setColor(flutter::DlColor::kRed());
 
   auto path =
       SkPathBuilder{}.moveTo(-50, 0).lineTo(0, -50).lineTo(50, 0).snapshot();
@@ -209,10 +208,10 @@ TEST_P(DisplayListTest, CanDrawArc) {
     paint.setStrokeJoin(flutter::DlStrokeJoin::kMiter);
     paint.setStrokeMiter(10);
     auto rect = SkRect::MakeLTRB(p1.x, p1.y, p2.x, p2.y);
-    paint.setColor(SK_ColorGREEN);
+    paint.setColor(flutter::DlColor::kGreen());
     paint.setStrokeWidth(2);
     builder.DrawRect(rect, paint);
-    paint.setColor(SK_ColorRED);
+    paint.setColor(flutter::DlColor::kRed());
     paint.setStrokeWidth(stroke_width);
     builder.DrawArc(rect, start_angle, sweep_angle, use_center, paint);
 
@@ -226,7 +225,7 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
 
-    paint.setColor(SK_ColorRED);
+    paint.setColor(flutter::DlColor::kRed());
     paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
 
     static float stroke_width = 10.0f;
@@ -398,7 +397,7 @@ TEST_P(DisplayListTest, CanDrawWithOddPathWinding) {
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
 
-  paint.setColor(SK_ColorRED);
+  paint.setColor(flutter::DlColor::kRed());
   paint.setDrawStyle(flutter::DlDrawStyle::kFill);
 
   builder.Translate(300, 300);
@@ -427,7 +426,7 @@ TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
 
   // Mask blurred filled path.
   {
-    paint.setColor(SK_ColorYELLOW);
+    paint.setColor(flutter::DlColor::kYellow());
     auto filter =
         flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kOuter, 10.0f);
     paint.setMaskFilter(&filter);
@@ -480,7 +479,7 @@ TEST_P(DisplayListTest, CanDrawWithBlendColorFilter) {
 
   // Pipeline blended image.
   {
-    auto filter = flutter::DlBlendColorFilter(SK_ColorYELLOW,
+    auto filter = flutter::DlBlendColorFilter(flutter::DlColor::kYellow(),
                                               flutter::DlBlendMode::kModulate);
     paint.setColorFilter(&filter);
     builder.DrawImage(DlImageImpeller::Make(texture), SkPoint::Make(100, 100),
@@ -489,8 +488,8 @@ TEST_P(DisplayListTest, CanDrawWithBlendColorFilter) {
 
   // Advanced blended image.
   {
-    auto filter =
-        flutter::DlBlendColorFilter(SK_ColorRED, flutter::DlBlendMode::kScreen);
+    auto filter = flutter::DlBlendColorFilter(flutter::DlColor::kRed(),
+                                              flutter::DlBlendMode::kScreen);
     paint.setColorFilter(&filter);
     builder.DrawImage(DlImageImpeller::Make(texture), SkPoint::Make(250, 250),
                       flutter::DlImageSampling::kNearestNeighbor, &paint);
@@ -860,7 +859,7 @@ TEST_P(DisplayListTest, TransparentShadowProducesCorrectColor) {
   dispatcher.save();
   dispatcher.scale(1.618, 1.618);
   dispatcher.drawShadow(SkPath{}.addRect(SkRect::MakeXYWH(0, 0, 200, 100)),
-                        SK_ColorTRANSPARENT, 15, false, 1);
+                        flutter::DlColor::kTransparent(), 15, false, 1);
   dispatcher.restore();
   auto picture = dispatcher.EndRecordingAsPicture();
 

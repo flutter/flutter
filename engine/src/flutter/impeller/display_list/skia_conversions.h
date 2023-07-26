@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "display_list/dl_color.h"
 #include "impeller/core/formats.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
@@ -31,7 +32,7 @@ std::vector<Point> ToPoints(const SkPoint points[], int count);
 
 Point ToPoint(const SkPoint& point);
 
-Color ToColor(const SkColor& color);
+Color ToColor(const flutter::DlColor& color);
 
 std::vector<Matrix> ToRSXForms(const SkRSXform xform[], int count);
 
