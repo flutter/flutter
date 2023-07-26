@@ -25,6 +25,19 @@ import 'slots.dart';
 /// This class keeps a registry of `factories`, `contents` so the framework can
 /// CRUD Platform Views as needed, regardless of the rendering backend.
 class PlatformViewManager {
+  PlatformViewManager() {
+    // Register some default factories.
+    registerFactory(
+      ui_web.PlatformViewRegistry.defaultVisibleViewType,
+      _defaultFactory,
+    );
+    registerFactory(
+      ui_web.PlatformViewRegistry.defaultInvisibleViewType,
+      _defaultFactory,
+      isVisible: false,
+    );
+  }
+
   // The factory functions, indexed by the viewType
   final Map<String, Function> _factories = <String, Function>{};
 
@@ -222,4 +235,13 @@ class PlatformViewManager {
     _viewIdToType.clear();
     return result;
   }
+}
+
+DomElement _defaultFactory(
+  int viewId, {
+  Object? params,
+}) {
+  params!;
+  params as Map<Object?, Object?>;
+  return domDocument.createElement(params.readString('tagName'));
 }
