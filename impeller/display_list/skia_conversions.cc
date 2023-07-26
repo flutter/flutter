@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/display_list/skia_conversions.h"
+#include "display_list/dl_color.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
 namespace impeller {
@@ -134,12 +135,12 @@ Point ToPoint(const SkPoint& point) {
   return Point::MakeXY(point.fX, point.fY);
 }
 
-Color ToColor(const SkColor& color) {
+Color ToColor(const flutter::DlColor& color) {
   return {
-      static_cast<Scalar>(SkColorGetR(color) / 255.0),  //
-      static_cast<Scalar>(SkColorGetG(color) / 255.0),  //
-      static_cast<Scalar>(SkColorGetB(color) / 255.0),  //
-      static_cast<Scalar>(SkColorGetA(color) / 255.0)   //
+      static_cast<Scalar>(color.getRedF()),    //
+      static_cast<Scalar>(color.getGreenF()),  //
+      static_cast<Scalar>(color.getBlueF()),   //
+      static_cast<Scalar>(color.getAlphaF())   //
   };
 }
 
