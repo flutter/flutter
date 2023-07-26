@@ -142,10 +142,15 @@ abstract mixin class WidgetsBindingObserver {
   ///   @override
   ///   void initState() {
   ///     super.initState();
+  ///     WidgetsBinding.instance.addObserver(this);
+  ///   }
+  ///
+  ///   @override
+  ///   void didChangeDependencies() {
+  ///     super.didChangeDependencies();
   ///     // [View.of] exposes the view from `WidgetsBinding.instance.platformDispatcher.views`
   ///     // into which this widget is drawn.
   ///     _lastSize = View.of(context).physicalSize;
-  ///     WidgetsBinding.instance.addObserver(this);
   ///   }
   ///
   ///   @override
