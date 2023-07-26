@@ -7901,16 +7901,16 @@ void main() {
       ),
     );
 
-    expect(find.bySemanticsLabel('Text Field Clear'), findsOneWidget);
+    expect(find.bySemanticsLabel('Clear'), findsOneWidget);
 
     expect(
       tester.getSemantics(
-        find.bySemanticsLabel('Text Field Clear').first,
+        find.bySemanticsLabel('Clear').first,
       ),
       matchesSemantics(
         isButton: true,
         hasTapAction: true,
-        label: 'Text Field Clear'
+        label: 'Clear'
       ),
     );
   });
