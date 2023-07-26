@@ -192,7 +192,7 @@ Future<void> _runBuild(
   // known error patterns.
   final List<String> errorMessages = <String>[
     r':\s*(?:warning|(?:fatal )?error).*?:',
-    r'Error detected in pubspec.yaml:',
+    r'Error detected in pubspec\.yaml:',
   ];
   // Known secondary error lines for pubspec.yaml errors:
   final List<String> pubspecErrorDetails = <String>[
