@@ -955,6 +955,10 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   return LayoutClue{0, false};
 }
 
+- (nonnull NSDictionary*)getPressedState {
+  return [_keyboardManager getPressedState];
+}
+
 #pragma mark - NSResponder
 
 - (BOOL)acceptsFirstResponder {

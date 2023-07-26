@@ -22,6 +22,7 @@ using flutter::testing::keycodes::kLogicalKeyA;
 using flutter::testing::keycodes::kLogicalKeyM;
 using flutter::testing::keycodes::kLogicalKeyQ;
 using flutter::testing::keycodes::kLogicalKeyT;
+using flutter::testing::keycodes::kPhysicalKeyA;
 
 using flutter::LayoutClue;
 
@@ -211,6 +212,10 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 - (void)recordCallTypesTo:(nonnull NSMutableArray<NSNumber*>*)typeStorage
                  forTypes:(uint32_t)typeMask;
 
+- (id)lastKeyboardChannelResult;
+
+- (void)sendKeyboardChannelMessage:(NSData* _Nullable)message;
+
 @property(readonly, nonatomic, strong) FlutterKeyboardManager* manager;
 @property(nonatomic, nullable, strong) NSResponder* nextResponder;
 
@@ -237,6 +242,10 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 
   flutter::KeyboardLayoutNotifier _keyboardLayoutNotifier;
   const MockLayoutData* _currentLayout;
+
+  id _keyboardChannelResult;
+  NSObject<FlutterBinaryMessenger>* _messengerMock;
+  FlutterBinaryMessageHandler _keyboardHandler;
 }
 
 - (nonnull instancetype)init {
@@ -252,17 +261,21 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 
   _currentLayout = &kUsLayout;
 
-  id messengerMock = OCMStrictProtocolMock(@protocol(FlutterBinaryMessenger));
-  OCMStub([messengerMock sendOnChannel:@"flutter/keyevent"
-                               message:[OCMArg any]
-                           binaryReply:[OCMArg any]])
+  _messengerMock = OCMStrictProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub([_messengerMock sendOnChannel:@"flutter/keyevent"
+                                message:[OCMArg any]
+                            binaryReply:[OCMArg any]])
       .andCall(self, @selector(handleChannelMessage:message:binaryReply:));
-
+  OCMStub([_messengerMock setMessageHandlerOnChannel:@"flutter/keyboard"
+                                binaryMessageHandler:[OCMArg any]])
+      .andCall(self, @selector(setKeyboardChannelHandler:handler:));
+  OCMStub([_messengerMock sendOnChannel:@"flutter/keyboard" message:[OCMArg any]])
+      .andCall(self, @selector(handleKeyboardChannelMessage:message:));
   id viewDelegateMock = OCMStrictProtocolMock(@protocol(FlutterKeyboardViewDelegate));
   OCMStub([viewDelegateMock nextResponder]).andReturn(_nextResponder);
   OCMStub([viewDelegateMock onTextInputKeyEvent:[OCMArg any]])
       .andCall(self, @selector(handleTextInputKeyEvent:));
-  OCMStub([viewDelegateMock getBinaryMessenger]).andReturn(messengerMock);
+  OCMStub([viewDelegateMock getBinaryMessenger]).andReturn(_messengerMock);
   OCMStub([viewDelegateMock sendKeyEvent:FlutterKeyEvent {} callback:nil userData:nil])
       .ignoringNonObjectArgs()
       .andCall(self, @selector(handleEmbedderEvent:callback:userData:));
@@ -274,6 +287,10 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 
   _manager = [[FlutterKeyboardManager alloc] initWithViewDelegate:viewDelegateMock];
   return self;
+}
+
+- (id)lastKeyboardChannelResult {
+  return _keyboardChannelResult;
 }
 
 - (void)respondEmbedderCallsWith:(BOOL)response {
@@ -327,6 +344,10 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
   _typeStorageMask = typeMask;
 }
 
+- (void)sendKeyboardChannelMessage:(NSData* _Nullable)message {
+  [_messengerMock sendOnChannel:@"flutter/keyboard" message:message];
+}
+
 - (void)setLayout:(const MockLayoutData&)layout {
   _currentLayout = &layout;
   if (_keyboardLayoutNotifier != nil) {
@@ -364,6 +385,12 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
   });
 }
 
+- (void)handleKeyboardChannelMessage:(NSString*)channel message:(NSData* _Nullable)message {
+  _keyboardHandler(message, ^(id result) {
+    _keyboardChannelResult = result;
+  });
+}
+
 - (BOOL)handleTextInputKeyEvent:(NSEvent*)event {
   if (_typeStorage != nil && (_typeStorageMask & kTextCall) != 0) {
     [_typeStorage addObject:@(kTextCall)];
@@ -382,6 +409,10 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
   return LayoutClue{cluePair & kCharMask, (cluePair & kDeadKeyMask) != 0};
 }
 
+- (void)setKeyboardChannelHandler:(NSString*)channel handler:(FlutterBinaryMessageHandler)handler {
+  _keyboardHandler = handler;
+}
+
 @end
 
 @interface FlutterKeyboardManagerUnittestsObjC : NSObject
@@ -389,6 +420,8 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 - (bool)doublePrimaryResponder;
 - (bool)textInputPlugin;
 - (bool)emptyNextResponder;
+- (bool)getPressedState;
+- (bool)keyboardChannelGetPressedState;
 - (bool)racingConditionBetweenKeyAndText;
 - (bool)correctLogicalKeyForLayouts;
 @end
@@ -408,6 +441,14 @@ TEST(FlutterKeyboardManagerUnittests, SingleFinalResponder) {
 
 TEST(FlutterKeyboardManagerUnittests, EmptyNextResponder) {
   ASSERT_TRUE([[FlutterKeyboardManagerUnittestsObjC alloc] emptyNextResponder]);
+}
+
+TEST(FlutterKeyboardManagerUnittests, GetPressedState) {
+  ASSERT_TRUE([[FlutterKeyboardManagerUnittestsObjC alloc] getPressedState]);
+}
+
+TEST(FlutterKeyboardManagerUnittests, KeyboardChannelGetPressedState) {
+  ASSERT_TRUE([[FlutterKeyboardManagerUnittestsObjC alloc] keyboardChannelGetPressedState]);
 }
 
 TEST(FlutterKeyboardManagerUnittests, RacingConditionBetweenKeyAndText) {
@@ -560,6 +601,44 @@ TEST(FlutterKeyboardManagerUnittests, CorrectLogicalKeyForLayouts) {
   [tester.manager handleEvent:keyDownEvent(0x50)];
 
   // Passes if no error is thrown.
+  return true;
+}
+
+- (bool)getPressedState {
+  KeyboardTester* tester = [[KeyboardTester alloc] init];
+
+  [tester respondEmbedderCallsWith:false];
+  [tester respondChannelCallsWith:false];
+  [tester respondTextInputWith:false];
+  [tester.manager handleEvent:keyDownEvent(kVK_ANSI_A)];
+
+  NSDictionary* pressingRecords = [tester.manager getPressedState];
+  EXPECT_EQ([pressingRecords count], 1u);
+  EXPECT_EQ(pressingRecords[@(kPhysicalKeyA)], @(kLogicalKeyA));
+
+  return true;
+}
+
+- (bool)keyboardChannelGetPressedState {
+  KeyboardTester* tester = [[KeyboardTester alloc] init];
+
+  [tester respondEmbedderCallsWith:false];
+  [tester respondChannelCallsWith:false];
+  [tester respondTextInputWith:false];
+  [tester.manager handleEvent:keyDownEvent(kVK_ANSI_A)];
+
+  FlutterMethodCall* getKeyboardStateMethodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"getKeyboardState" arguments:nil];
+  NSData* getKeyboardStateMessage =
+      [[FlutterStandardMethodCodec sharedInstance] encodeMethodCall:getKeyboardStateMethodCall];
+  [tester sendKeyboardChannelMessage:getKeyboardStateMessage];
+
+  id encodedResult = [tester lastKeyboardChannelResult];
+  id decoded = [[FlutterStandardMethodCodec sharedInstance] decodeEnvelope:encodedResult];
+
+  EXPECT_EQ([decoded count], 1u);
+  EXPECT_EQ(decoded[@(kPhysicalKeyA)], @(kLogicalKeyA));
+
   return true;
 }
 
