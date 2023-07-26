@@ -104,7 +104,6 @@ class WebEntrypointTarget extends Target {
     final int resultCode = await assetBundle.build(
       manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
       packagesPath: environment.projectDir.childFile('.packages').path,
-      deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
       targetPlatform: TargetPlatform.web_javascript,
     );
     if (resultCode != 0) {
