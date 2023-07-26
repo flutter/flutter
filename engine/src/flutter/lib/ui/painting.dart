@@ -3589,10 +3589,11 @@ class ColorFilter implements ImageFilter {
         }
         return _ColorFilter.mode(this);
       case _kTypeMatrix:
-        if (_matrix == null) {
+        final List<double>? matrix = _matrix;
+        if (matrix == null) {
           return null;
         }
-        assert(_matrix!.length == 20, 'Color Matrix must have 20 entries.');
+        assert(matrix.length == 20, 'Color Matrix must have 20 entries.');
         return _ColorFilter.matrix(this);
       case _kTypeLinearToSrgbGamma:
         return _ColorFilter.linearToSrgbGamma(this);
@@ -3616,7 +3617,10 @@ class ColorFilter implements ImageFilter {
   }
 
   @override
-  int get hashCode => Object.hash(_color, _blendMode, _matrix == null ? null : Object.hashAll(_matrix!), _type);
+  int get hashCode {
+    final List<double>? matrix = _matrix;
+    return Object.hash(_color, _blendMode, matrix == null ? null : Object.hashAll(matrix), _type);
+  }
 
   @override
   String get _shortDescription {

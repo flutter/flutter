@@ -2122,14 +2122,15 @@ class EngineSemanticsOwner {
     // First, update each object's information about itself. This information is
     // later used to fix the parent-child and sibling relationships between
     // objects.
-    for (final SemanticsNodeUpdate nodeUpdate in update._nodeUpdates!) {
+    final List<SemanticsNodeUpdate> nodeUpdates = update._nodeUpdates!;
+    for (final SemanticsNodeUpdate nodeUpdate in nodeUpdates) {
       final SemanticsObject object = getOrCreateObject(nodeUpdate.id);
       object.updateSelf(nodeUpdate);
     }
 
     // Second, fix the tree structure. This is moved out into its own loop,
     // because each object's own information must be updated first.
-    for (final SemanticsNodeUpdate nodeUpdate in update._nodeUpdates!) {
+    for (final SemanticsNodeUpdate nodeUpdate in nodeUpdates) {
       final SemanticsObject object = _semanticsTree[nodeUpdate.id]!;
       object.updateChildren();
       object._dirtyFields = 0;
@@ -2193,10 +2194,13 @@ class EngineSemanticsOwner {
       });
 
       // Validate that all updates were applied
-      for (final SemanticsNodeUpdate update in update._nodeUpdates!) {
+      for (final SemanticsNodeUpdate update in nodeUpdates) {
         // Node was added to the tree.
         assert(_semanticsTree.containsKey(update.id));
       }
+
+      // Verify that `update._nodeUpdates` has not changed.
+      assert(identical(update._nodeUpdates, nodeUpdates));
 
       return true;
     }());
