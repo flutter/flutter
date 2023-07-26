@@ -208,6 +208,7 @@ void main() {
         expect(methodCall.arguments, isA<String>());
         lastLookUp = methodCall.arguments as String;
       }
+      return null;
     });
 
     EditableText.debugDeterministicCursor = false;
