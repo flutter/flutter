@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 
-import 'package:js/js_util.dart' as js_util;
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -806,12 +806,13 @@ void testMain() {
 
     test('works correctly with max overlays == 2', () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      final FlutterConfiguration config = FlutterConfiguration()
-        ..setUserConfiguration(
-          js_util.jsify(<String, Object?>{
-            'canvasKitMaximumSurfaces': 2,
-          }) as JsFlutterConfiguration);
-      debugSetConfiguration(config);
+      debugOverrideJsConfiguration(
+        <String, Object?>{
+          'canvasKitMaximumSurfaces': 2,
+        }.jsify() as JsFlutterConfiguration?
+      );
+      expect(configuration.canvasKitMaximumSurfaces, 2);
+      expect(configuration.canvasKitVariant, isNot(CanvasKitVariant.auto));
 
       SurfaceFactory.instance.debugClear();
 
@@ -854,7 +855,7 @@ void testMain() {
       ]);
 
       // Reset configuration
-      debugSetConfiguration(FlutterConfiguration());
+      debugOverrideJsConfiguration(null);
     });
 
     test(

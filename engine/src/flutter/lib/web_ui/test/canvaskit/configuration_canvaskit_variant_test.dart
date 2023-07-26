@@ -10,35 +10,36 @@ import 'package:ui/src/engine.dart';
 
 import 'common.dart';
 
-@JS('_flutter_canvaskit_variant_for_test_only')
-external String? get _flutterCanvaskitVariantForTestOnly;
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+// This test exists to make sure we don't accidentally run the CanvasKit test suite
+// in "auto" mode. The CanvasKit variant should always be deterministic.
 void testMain() {
   setUpCanvasKitTest();
 
-  // This is to make sure we don't accidentally run the CanvasKit test suite in
-  // auto mode. The CanvasKit variant should always be deterministic.
   test('CanvasKit tests always run with a specific variant', () {
     expect(
       configuration.canvasKitVariant,
       anyOf(CanvasKitVariant.chromium, CanvasKitVariant.full),
-    );
-    expect(
-      _flutterCanvaskitVariantForTestOnly,
-      anyOf('chromium', 'full'),
+      reason: 'canvasKitVariant must be set to "chromium" or "full" in canvaskit tests!',
     );
   });
 
-  // This is to make sure that the variant specified by the test harness is
-  // correctly preserved during tests in the global `configuration` object.
-  test('CanvasKitVariant configuration is preserved in tests', () {
-    expect(
-      configuration.canvasKitVariant,
-      CanvasKitVariant.values.byName(_flutterCanvaskitVariantForTestOnly!),
+  test('debugOverrideJsConfiguration can bypass (and restore) variant', () {
+    // Set-up in the test_platform.dart file. See `_testBootstrapHandler`.
+    final CanvasKitVariant originalValue = configuration.canvasKitVariant;
+    expect(configuration.canvasKitVariant, isNot(CanvasKitVariant.auto));
+
+    debugOverrideJsConfiguration(
+      <String, Object?>{
+        'canvasKitVariant': 'auto',
+      }.jsify() as JsFlutterConfiguration?
     );
+    expect(configuration.canvasKitVariant, CanvasKitVariant.auto);
+
+    debugOverrideJsConfiguration(null);
+    expect(configuration.canvasKitVariant, originalValue);
   });
 }
