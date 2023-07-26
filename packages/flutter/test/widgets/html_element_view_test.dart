@@ -29,12 +29,12 @@ void main() {
     fakePlatformViewRegistry = FakePlatformViewRegistry();
 
     // Simulate the engine registering default factores.
-    fakePlatformViewRegistry.registerViewFactory(ui_web.kDefaultVisibleViewType, (int viewId, {Object? params}) {
+    fakePlatformViewRegistry.registerViewFactory(ui_web.PlatformViewRegistry.defaultVisibleViewType, (int viewId, {Object? params}) {
       params!;
       params as Map<Object?, Object?>;
       return web.document.createElement(params['tagName']! as String);
     });
-    fakePlatformViewRegistry.registerViewFactory(ui_web.kDefaultInvisibleViewType, (int viewId, {Object? params}) {
+    fakePlatformViewRegistry.registerViewFactory(ui_web.PlatformViewRegistry.defaultInvisibleViewType, (int viewId, {Object? params}) {
       params!;
       params as Map<Object?, Object?>;
       return web.document.createElement(params['tagName']! as String);
@@ -323,7 +323,7 @@ void main() {
       expect(fakePlatformViewRegistry.views, hasLength(1));
       final FakePlatformView fakePlatformView = fakePlatformViewRegistry.views.single;
       expect(fakePlatformView.id, currentViewId + 1);
-      expect(fakePlatformView.viewType, ui_web.kDefaultVisibleViewType);
+      expect(fakePlatformView.viewType, ui_web.PlatformViewRegistry.defaultVisibleViewType);
       expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'div'});
 
       // The HTML element should be a div.
@@ -349,7 +349,7 @@ void main() {
       final FakePlatformView fakePlatformView = fakePlatformViewRegistry.views.single;
       expect(fakePlatformView.id, currentViewId + 1);
       // The view should be invisible.
-      expect(fakePlatformView.viewType, ui_web.kDefaultInvisibleViewType);
+      expect(fakePlatformView.viewType, ui_web.PlatformViewRegistry.defaultInvisibleViewType);
       expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'script'});
 
       // The HTML element should be a script.

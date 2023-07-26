@@ -24,7 +24,7 @@ extension HtmlElementViewImpl on HtmlElementView {
   }) {
     return HtmlElementView(
       key: key,
-      viewType: isVisible ? ui_web.kDefaultVisibleViewType : ui_web.kDefaultInvisibleViewType,
+      viewType: isVisible ? ui_web.PlatformViewRegistry.defaultVisibleViewType : ui_web.PlatformViewRegistry.defaultInvisibleViewType,
       onPlatformViewCreated: _createPlatformViewCallbackForElementCallback(onElementCreated),
       creationParams: <dynamic, dynamic>{'tagName': tagName},
     );
