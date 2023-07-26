@@ -232,6 +232,8 @@ to investigate feasibility of adding a test to presubmit.
 
 To better utilize limited DeviceLab testbed resources and speed up overal validation
 time, it is now supported to separate building artifacts (.apk/.app) from testing them.
+The artifact will be built on a host only bot no needing a device, and the test will run
+based on the artifact against a testbed with a device.
 
 Steps:
 
