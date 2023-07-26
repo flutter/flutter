@@ -348,7 +348,7 @@ class _HourMinuteControl extends StatelessWidget {
             child: Text(
               text,
               style: effectiveStyle,
-              textScaleFactor: 1,
+              textScaler: TextScaler.noScaling,
             ),
           ),
         ),
@@ -479,7 +479,7 @@ class _StringFragment extends StatelessWidget {
         child: Text(
           _stringFragmentValue(timeOfDayFormat),
           style: effectiveStyle,
-          textScaleFactor: 1,
+          textScaler: TextScaler.noScaling,
           textAlign: TextAlign.center,
         ),
       ),
@@ -696,7 +696,7 @@ class _AmPmButton extends StatelessWidget {
     final Color resolvedBackgroundColor = MaterialStateProperty.resolveAs<Color>(timePickerTheme.dayPeriodColor ?? defaultTheme.dayPeriodColor, states);
     final Color resolvedTextColor = MaterialStateProperty.resolveAs<Color>(timePickerTheme.dayPeriodTextColor ?? defaultTheme.dayPeriodTextColor, states);
     final TextStyle? resolvedTextStyle = MaterialStateProperty.resolveAs<TextStyle?>(timePickerTheme.dayPeriodTextStyle ?? defaultTheme.dayPeriodTextStyle, states)?.copyWith(color: resolvedTextColor);
-    final double buttonTextScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 2);
+    final TextScaler buttonTextScaler = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 2.0);
 
     return Material(
       color: resolvedBackgroundColor,
@@ -710,7 +710,7 @@ class _AmPmButton extends StatelessWidget {
             child: Text(
               label,
               style: resolvedTextStyle,
-              textScaleFactor: buttonTextScaleFactor,
+              textScaler: buttonTextScaler,
             ),
           ),
         ),
@@ -1394,14 +1394,13 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     required String label,
     required VoidCallback onTap,
   }) {
-    final double labelScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 2);
     return _TappableLabel(
       value: value,
       inner: inner,
       painter: TextPainter(
         text: TextSpan(style: textStyle, text: label),
         textDirection: TextDirection.ltr,
-        textScaleFactor: labelScaleFactor,
+        textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 2.0),
       )..layout(),
       onTap: onTap,
     );
@@ -2063,8 +2062,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
 
     return SizedBox.fromSize(
       size: alwaysUse24HourFormat ? defaultTheme.hourMinuteInputSize24Hour : defaultTheme.hourMinuteInputSize,
-      child: MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+      child: MediaQuery.withNoTextScaling(
         child: UnmanagedRestorationScope(
           bucket: bucket,
           child: Semantics(
@@ -2311,7 +2309,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     // Constrain the textScaleFactor to prevent layout issues. Since only some
     // parts of the time picker scale up with textScaleFactor, we cap the factor
     // to 1.1 as that provides enough space to reasonably fit all the content.
-    final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 1.1);
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.1).textScaleFactor;
 
     final Size timePickerSize;
     switch (_entryMode.value) {
@@ -3436,7 +3434,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dialBackgroundColor {
-    return _colors.surfaceVariant.withOpacity(_colors.brightness == Brightness.dark ? 0.12 : 0.08);
+    return _colors.surfaceVariant;
   }
 
   @override

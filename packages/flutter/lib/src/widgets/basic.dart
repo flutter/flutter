@@ -290,6 +290,22 @@ class Directionality extends _UbiquitousInheritedWidget {
 /// Drawing content into the offscreen buffer may also trigger render target
 /// switches and such switching is particularly slow in older GPUs.
 ///
+/// ## Hit testing
+///
+/// Setting the [opacity] to zero does not prevent hit testing from being applied
+/// to the descendants of the [Opacity] widget. This can be confusing for the
+/// user, who may not see anything, and may believe the area of the interface
+/// where the [Opacity] is hiding a widget to be non-interactive.
+///
+/// With certain widgets, such as [Flow], that compute their positions only when
+/// they are painted, this can actually lead to bugs (from unexpected geometry
+/// to exceptions), because those widgets are not painted by the [Opacity]
+/// widget at all when the [opacity] is zero.
+///
+/// To avoid such problems, it is generally a good idea to use an
+/// [IgnorePointer] widget when setting the [opacity] to zero. This prevents
+/// interactions with any children in the subtree.
+///
 /// See also:
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
@@ -600,11 +616,13 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// `setState` or `markNeedsLayout` during the callback (the layout for this
 /// frame has already happened).
 ///
-/// Custom painters normally size themselves to their child. If they do not have
-/// a child, they attempt to size themselves to the [size], which defaults to
-/// [Size.zero]. [size] must not be null.
+/// Custom painters normally size themselves to their [child]. If they do not
+/// have a child, they attempt to size themselves to the specified [size], which
+/// defaults to [Size.zero]. The parent [may enforce constraints on this
+/// size](https://docs.flutter.dev/ui/layout/constraints).
 ///
-/// [isComplex] and [willChange] are hints to the compositor's raster cache.
+/// The [isComplex] and [willChange] properties are hints to the compositor's
+/// raster cache.
 ///
 /// {@tool snippet}
 ///
@@ -3912,6 +3930,17 @@ class Stack extends MultiChildRenderObjectWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
+  /// Stacks only clip children whose _geometry_ overflows the stack. A child
+  /// that paints outside its bounds (e.g. a box with a shadow) will not be
+  /// clipped, regardless of the value of this property. Similarly, a child that
+  /// itself has a descendant that overflows the stack will not be clipped, as
+  /// only the geometry of the stack's direct children are considered.
+  /// [Transform] is an example of a widget that can cause its children to paint
+  /// outside its geometry.
+  ///
+  /// To clip children whose geometry does not overflow the stack, consider
+  /// using a [ClipRect] widget.
+  ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
@@ -5561,19 +5590,6 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// this animation and repaint whenever the animation ticks, avoiding both the
 /// build and layout phases of the pipeline.
 ///
-/// See also:
-///
-///  * [Wrap], which provides the layout model that some other frameworks call
-///    "flow", and is otherwise unrelated to [Flow].
-///  * [FlowDelegate], which controls the visual presentation of the children.
-///  * [Stack], which arranges children relative to the edges of the container.
-///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
-///    a single child.
-///  * [CustomMultiChildLayout], which uses a delegate to position multiple
-///    children.
-///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-///
-///
 /// {@tool dartpad}
 /// This example uses the [Flow] widget to create a menu that opens and closes
 /// as it is interacted with, shown above. The color of the button in the menu
@@ -5582,6 +5598,38 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/flow.0.dart **
 /// {@end-tool}
 ///
+/// ## Hit testing and hidden [Flow] widgets
+///
+/// The [Flow] widget recomputers its children's positions (as used by hit
+/// testing) during the _paint_ phase rather than during the _layout_ phase.
+///
+/// Widgets like [Opacity] avoid painting their children when those children
+/// would be invisible due to their opacity being zero.
+///
+/// Unfortunately, this means that hiding a [Flow] widget using an [Opacity]
+/// widget will cause bugs when the user attempts to interact with the hidden
+/// region, for example, by tapping it or clicking it.
+///
+/// Such bugs will manifest either as out-of-date geometry (taps going to
+/// different widgets than might be expected by the currently-specified
+/// [FlowDelegate]s), or exceptions (e.g. if the last time the [Flow] was
+/// painted, a different set of children was specified).
+///
+/// To avoid this, when hiding a [Flow] widget with an [Opacity] widget (or
+/// [AnimatedOpacity] or similar), it is wise to also disable hit testing on the
+/// widget by using [IgnorePointer]. This is generally good advice anyway as
+/// hit-testing invisible widgets is often confusing for the user.
+///
+/// See also:
+///
+///  * [Wrap], which provides the layout model that some other frameworks call
+///    "flow", and is otherwise unrelated to [Flow].
+///  * [Stack], which arranges children relative to the edges of the container.
+///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///    a single child.
+///  * [CustomMultiChildLayout], which uses a delegate to position multiple
+///    children.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flow extends MultiChildRenderObjectWidget {
   /// Creates a flow layout.
   ///
@@ -5713,7 +5761,7 @@ class Flow extends MultiChildRenderObjectWidget {
 class RichText extends MultiChildRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
-  /// The [text], [textAlign], [softWrap], [overflow], and [textScaleFactor]
+  /// The [text], [textAlign], [softWrap], [overflow], and [textScaler]
   /// arguments must not be null.
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
@@ -5728,7 +5776,13 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
-    this.textScaleFactor = 1.0,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
+    double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
     this.maxLines,
     this.locale,
     this.strutStyle,
@@ -5738,7 +5792,17 @@ class RichText extends MultiChildRenderObjectWidget {
     this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
-       super(children: WidgetSpan.extractFromInlineSpan(text, textScaleFactor));
+       assert(textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling), 'Use textScaler instead.'),
+       textScaler = _effectiveTextScalerFrom(textScaler, textScaleFactor),
+       super(children: WidgetSpan.extractFromInlineSpan(text, _effectiveTextScalerFrom(textScaler, textScaleFactor)));
+
+  static TextScaler _effectiveTextScalerFrom(TextScaler textScaler, double textScaleFactor) {
+    return switch ((textScaler, textScaleFactor)) {
+      (final TextScaler scaler, 1.0) => scaler,
+      (TextScaler.noScaling, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
+      (final TextScaler scaler, _) => scaler,
+    };
+  }
 
   /// The text to display in this widget.
   final InlineSpan text;
@@ -5770,11 +5834,22 @@ class RichText extends MultiChildRenderObjectWidget {
   /// How visual overflow should be handled.
   final TextOverflow overflow;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [textScaler] instead.
+  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
-  final double textScaleFactor;
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
+  double get textScaleFactor => textScaler.textScaleFactor;
+
+  /// {@macro flutter.painting.textPainter.textScaler}
+  final TextScaler textScaler;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
@@ -5824,7 +5899,7 @@ class RichText extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
       overflow: overflow,
-      textScaleFactor: textScaleFactor,
+      textScaler: textScaler,
       maxLines: maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
@@ -5844,7 +5919,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
       ..overflow = overflow
-      ..textScaleFactor = textScaleFactor
+      ..textScaler = textScaler
       ..maxLines = maxLines
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
@@ -5861,7 +5936,7 @@ class RichText extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
-    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    properties.add(DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: TextScaler.noScaling));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(StringProperty('text', text.toPlainText()));
@@ -6136,7 +6211,7 @@ class RawImage extends LeafRenderObjectWidget {
 ///   @override
 ///   Future<ByteData> load(String key) async {
 ///     if (key == 'resources/test') {
-///       return ByteData.view(Uint8List.fromList(utf8.encode('Hello World!')).buffer);
+///       return ByteData.sublistView(utf8.encode('Hello World!'));
 ///     }
 ///     return ByteData(0);
 ///   }

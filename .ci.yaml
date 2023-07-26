@@ -411,25 +411,9 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux firebase_oriol33_abstract_method_smoke_test
-    recipe: firebaselab/firebaselab
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "open_jdk", "version": "version:11"}
-        ]
-      tags: >
-        ["firebaselab"]
-      task_name: abstract_method_smoke_test
-      physical_devices: >-
-        ["--device", "model=oriole,version=33"]
-      virtual_devices: >-
-        []
-
   - name: Linux firebase_abstract_method_smoke_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/124691
+    bringup: false
+    presubmit: false
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
@@ -443,8 +427,8 @@ targets:
       task_name: abstract_method_smoke_test
       physical_devices: >-
         [
-          "--device", "model=redfin,version=30",
-          "--device", "model=griffin,version=24"
+          "--device", "model=panther,version=33",
+          "--device", "model=redfin,version=30"
         ]
       # TODO(flutter/flutter#123331): This device is flaking.
       # "--device", "model=Nexus6P,version=25",
@@ -453,6 +437,7 @@ targets:
           "--device", "model=Nexus5,version=21",
           "--device", "model=Nexus5,version=22",
           "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus5,version=24",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27",
           "--device", "model=NexusLowRes,version=29"
@@ -1587,7 +1572,6 @@ targets:
         [
           {"dependency": "android_virtual_device", "version": "33"}
         ]
-      use_emulator: "true"
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
@@ -2216,8 +2200,10 @@ targets:
   - name: Linux_android list_text_layout_impeller_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
+      ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux"]
       task_name: list_text_layout_impeller_perf__e2e_summary
@@ -2306,8 +2292,10 @@ targets:
   - name: Linux_android new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
+      ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux"]
       task_name: new_gallery_impeller__transition_perf
@@ -2318,6 +2306,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: new_gallery_impeller__transition_perf
@@ -2409,6 +2398,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux"]
       task_name: platform_views_scroll_perf_impeller__timeline_summary
@@ -2419,6 +2409,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: platform_views_scroll_perf_impeller__timeline_summary
@@ -2592,8 +2583,10 @@ targets:
   - name: Linux_android animated_blur_backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
+      ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux"]
       task_name: animated_blur_backdrop_filter_perf__timeline_summary
@@ -4816,6 +4809,7 @@ targets:
 
   - name: Windows_android channels_integration_test_win
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/130732
     presubmit: false
     timeout: 60
     properties:
