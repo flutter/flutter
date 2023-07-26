@@ -9,8 +9,8 @@
 #include "flutter/shell/common/dl_op_spy.h"
 
 #ifdef IMPELLER_SUPPORTS_RENDERING
-#include "impeller/display_list/dl_dispatcher.h"
-#endif  // IMPELLER_SUPPORTS_RENDERING
+#include "impeller/display_list/dl_dispatcher.h"  // nogncheck
+#endif                                            // IMPELLER_SUPPORTS_RENDERING
 
 namespace flutter {
 
