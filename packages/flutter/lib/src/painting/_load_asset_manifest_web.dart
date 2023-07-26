@@ -32,10 +32,10 @@ Future<AssetManifest> loadAssetManifest(AssetBundle bundle) {
   }
   final List<int>? assetManifestAsByteList = _domWindow._assetManifestAsByteList;
   if (assetManifestAsByteList != null) {
-    final ByteData assetManifestByteData = ByteData.view(
+    final ByteData assetManifestByteData =
       Uint8List.fromList(assetManifestAsByteList)
       .buffer
-    );
+      .asByteData();
 
     return _precachedAssetManifest = SynchronousFuture<AssetManifest>(
       AssetManifest.fromByteData(assetManifestByteData)
