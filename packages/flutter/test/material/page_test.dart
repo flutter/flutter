@@ -240,7 +240,7 @@ void main() {
     expect(find.text('Page 2'), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when view insets change', (WidgetTester tester) async {
+  testWidgets('Material2 - test page transition (_ZoomPageTransition) with rasterization re-rasterizes when view insets change', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(1000, 1000);
     tester.view.viewInsets = FakeViewPadding.zero;
@@ -270,7 +270,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.small.png'));
+    await expectLater(find.byKey(key), matchesGoldenFile('m2_zoom_page_transition.small.png'));
 
     // Change the view insets.
     tester.view.viewInsets = const FakeViewPadding(bottom: 500);
@@ -278,7 +278,48 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.big.png'));
+    await expectLater(find.byKey(key), matchesGoldenFile('m2_zoom_page_transition.big.png'));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
+
+  testWidgets('Material3 - test page transition (_ZoomPageTransition) with rasterization re-rasterizes when view insets change', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(1000, 1000);
+    tester.view.viewInsets = FakeViewPadding.zero;
+
+    // Intentionally use nested scaffolds to simulate the view insets being
+    // consumed.
+    final Key key = GlobalKey();
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: key,
+        child: MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return const Scaffold(body: Scaffold(
+                    body: Material(child: SizedBox.shrink())
+                ));
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await expectLater(find.byKey(key), matchesGoldenFile('m3_zoom_page_transition.small.png'));
+
+    // Change the view insets.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500);
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await expectLater(find.byKey(key), matchesGoldenFile('m3_zoom_page_transition.big.png'));
   }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
   testWidgets(
