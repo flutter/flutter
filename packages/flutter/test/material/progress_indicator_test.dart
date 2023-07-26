@@ -732,7 +732,7 @@ void main() {
 
     await expectLater(
       await animationSheet.collate(20),
-      matchesGoldenFile('material.m2_refresh_progress_indicator.png'),
+      matchesGoldenFile('m2_material.refresh_progress_indicator.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
@@ -748,7 +748,7 @@ void main() {
 
     await expectLater(
       await animationSheet.collate(20),
-      matchesGoldenFile('material.m3_refresh_progress_indicator.png'),
+      matchesGoldenFile('m3_material.refresh_progress_indicator.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
@@ -1035,7 +1035,7 @@ void main() {
 
     await expectLater(
       await animationSheet.collate(20),
-      matchesGoldenFile('material.m2_circular_progress_indicator.indeterminate.png'),
+      matchesGoldenFile('m2_material.circular_progress_indicator.indeterminate.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
@@ -1057,7 +1057,7 @@ void main() {
 
     await expectLater(
       await animationSheet.collate(20),
-      matchesGoldenFile('material.m3_circular_progress_indicator.indeterminate.png'),
+      matchesGoldenFile('m3_material.circular_progress_indicator.indeterminate.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
