@@ -689,6 +689,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     } else {
       _fallbackScrollController?.detach(position);
       _fallbackScrollController?.dispose();
+      _fallbackScrollController = null;//
     }
 
     position.dispose();
@@ -1996,7 +1997,9 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
   @override
   void dispose() {
     _verticalFallbackController?.dispose();
+    _verticalFallbackController = null;//
     _horizontalFallbackController?.dispose();
+    _horizontalFallbackController = null;//
     super.dispose();
   }
 }

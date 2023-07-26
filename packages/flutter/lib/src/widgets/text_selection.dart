@@ -1512,6 +1512,7 @@ class SelectionOverlay {
   /// Disposes this object and release resources.
   /// {@endtemplate}
   void dispose() {
+    _magnifierInfo.dispose();
     hide();
     _magnifierInfo.dispose();
   }
