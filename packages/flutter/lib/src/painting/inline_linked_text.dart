@@ -54,7 +54,7 @@ class InlineLinkedText extends TextSpan {
              ? TextLinker(
                rangesFinder: ranges != null
                    ? (String text) => ranges
-                   : urlRangesFinder,
+                   : defaultRangesFinder,
                linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
              ).getSpans(text)
              : linkSpans(
@@ -63,7 +63,7 @@ class InlineLinkedText extends TextSpan {
                    TextLinker(
                      rangesFinder: ranges != null
                          ? (String text) => ranges
-                         : urlRangesFinder,
+                         : defaultRangesFinder,
                      linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
                    ),
                  ],
@@ -94,7 +94,7 @@ class InlineLinkedText extends TextSpan {
                rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
                linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
              ).getSpans(text)
-             : linkSpans(spans!, urlTextLinkers(onTap)).toList(),
+             : linkSpans(spans!, defaultTextLinkers(onTap)).toList(),
        );
 
   /// Create an instance of [InlineLinkedText] with the given [textLinkers]
@@ -132,14 +132,13 @@ class InlineLinkedText extends TextSpan {
   ///
   ///   * URLs with any protocol other than http or https.
   ///   * Email addresses.
-  static final RangesFinder urlRangesFinder = TextLinker.rangesFinderFromRegExp(_urlRegExp);
+  static final RangesFinder defaultRangesFinder = TextLinker.rangesFinderFromRegExp(_urlRegExp);
 
-  // TODO(justinmc): Rename defaultTextLinkers?
   /// Finds urls in text and replaces them with a plain, platform-specific link.
-  static Iterable<TextLinker> urlTextLinkers(LinkTapCallback? onTap) {
+  static Iterable<TextLinker> defaultTextLinkers(LinkTapCallback? onTap) {
     return <TextLinker>[
       TextLinker(
-        rangesFinder: urlRangesFinder,
+        rangesFinder: defaultRangesFinder,
         linkBuilder: getDefaultLinkBuilder(onTap),
       ),
     ];

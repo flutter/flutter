@@ -53,7 +53,7 @@ class LinkedText extends StatelessWidget {
        textLinkers = <TextLinker>[
          TextLinker(
            rangesFinder: ranges == null
-               ? InlineLinkedText.urlRangesFinder
+               ? InlineLinkedText.defaultRangesFinder
                : (String text) => ranges,
            linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
          ),
