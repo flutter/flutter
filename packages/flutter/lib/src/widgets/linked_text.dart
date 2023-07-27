@@ -18,7 +18,7 @@ import 'text.dart';
 ///
 ///  * [InlineLinkedText], which is like this but is an inline TextSpan instead
 ///    of a widget.
-class LinkedText extends StatelessWidget {
+class LinkedText extends StatefulWidget {
   /// Creates an instance of [LinkedText] from the given [text] or [spans],
   /// highlighting any URLs by default.
   ///
@@ -144,15 +144,20 @@ class LinkedText extends StatelessWidget {
   final TextStyle? style;
 
   @override
+  State<LinkedText> createState() => _LinkedTextState();
+}
+
+class _LinkedTextState extends State<LinkedText> {
+  @override
   Widget build(BuildContext context) {
-    if (spans.isEmpty) {
+    if (widget.spans.isEmpty) {
       return const SizedBox.shrink();
     }
     return Text.rich(
       InlineLinkedText.textLinkers(
-        style: style ?? DefaultTextStyle.of(context).style,
-        textLinkers: textLinkers,
-        spans: spans,
+        style: widget.style ?? DefaultTextStyle.of(context).style,
+        textLinkers: widget.textLinkers,
+        spans: widget.spans,
       ),
     );
   }

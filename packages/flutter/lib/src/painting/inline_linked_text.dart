@@ -3,15 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show TextDecoration;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
+import 'inline_link.dart';
 import 'inline_span.dart';
 import 'text_span.dart';
-import 'text_style.dart';
 
 // TODO(justinmc): On some platforms, may want to underline link?
 
@@ -44,7 +42,7 @@ class InlineLinkedText extends TextSpan {
     super.style,
     String? text,
     List<InlineSpan>? spans,
-    LinkTapCallback? onTap,
+    GestureRecognizer? recognizer,
     Iterable<TextRange>? ranges,
     LinkBuilder? linkBuilder,
   }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
@@ -55,7 +53,7 @@ class InlineLinkedText extends TextSpan {
                rangesFinder: ranges != null
                    ? (String text) => ranges
                    : defaultRangesFinder,
-               linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
+               linkBuilder: linkBuilder ?? getDefaultLinkBuilder(recognizer),
              ).getSpans(text)
              : linkSpans(
                  spans!,
@@ -64,7 +62,7 @@ class InlineLinkedText extends TextSpan {
                      rangesFinder: ranges != null
                          ? (String text) => ranges
                          : defaultRangesFinder,
-                     linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
+                     linkBuilder: linkBuilder ?? getDefaultLinkBuilder(recognizer),
                    ),
                  ],
                ).toList(),
@@ -84,7 +82,7 @@ class InlineLinkedText extends TextSpan {
     required RegExp regExp,
     String? text,
     List<InlineSpan>? spans,
-    LinkTapCallback? onTap,
+    GestureRecognizer? recognizer,
     LinkBuilder? linkBuilder,
   }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
        assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
@@ -92,9 +90,9 @@ class InlineLinkedText extends TextSpan {
          children: text != null
              ? TextLinker(
                rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
-               linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
+               linkBuilder: linkBuilder ?? getDefaultLinkBuilder(recognizer),
              ).getSpans(text)
-             : linkSpans(spans!, defaultTextLinkers(onTap)).toList(),
+             : linkSpans(spans!, defaultTextLinkers(recognizer)).toList(),
        );
 
   /// Create an instance of [InlineLinkedText] with the given [textLinkers]
@@ -135,21 +133,21 @@ class InlineLinkedText extends TextSpan {
   static final RangesFinder defaultRangesFinder = TextLinker.rangesFinderFromRegExp(_urlRegExp);
 
   /// Finds urls in text and replaces them with a plain, platform-specific link.
-  static Iterable<TextLinker> defaultTextLinkers(LinkTapCallback? onTap) {
+  static Iterable<TextLinker> defaultTextLinkers(GestureRecognizer? recognizer) {
     return <TextLinker>[
       TextLinker(
         rangesFinder: defaultRangesFinder,
-        linkBuilder: getDefaultLinkBuilder(onTap),
+        linkBuilder: getDefaultLinkBuilder(recognizer),
       ),
     ];
   }
 
   /// Returns a [LinkBuilder] that highlights the given text and sets the given
   /// [onTap] handler.
-  static LinkBuilder getDefaultLinkBuilder([LinkTapCallback? onTap]) {
+  static LinkBuilder getDefaultLinkBuilder([GestureRecognizer? recognizer]) {
     return (String displayString, String linkString) {
       return InlineLink(
-        onTap: () => onTap?.call(linkString),
+        recognizer: recognizer,
         text: displayString,
       );
     };
@@ -310,52 +308,6 @@ class InlineLinkedText extends TextSpan {
       nextTextLinkerMatches,
     );
   }
-}
-
-// TODO(justinmc): Private?
-// TODO(justinmc): The clickable area is full-width, should be narrow. Maybe this needs to become a widget for that...
-/// An inline, interactive text link.
-class InlineLink extends TextSpan {
-  /// Create an instance of [InlineLink].
-  InlineLink({
-    required String text,
-    VoidCallback? onTap,
-    TextStyle? style,
-    super.locale,
-    super.semanticsLabel,
-  }) : super(
-    style: style ?? defaultLinkStyle,
-    mouseCursor: SystemMouseCursors.click,
-    text: text,
-    // TODO(justinmc): You need to manage the lifecycle of this recognizer. I
-    // think that means this must come from a Widget? So maybe this can't be in
-    // the painting library.
-    recognizer: onTap == null ? null : (TapGestureRecognizer()..onTap = onTap),
-  );
-
-  static Color get _linkColor {
-    return switch (defaultTargetPlatform) {
-      // This value was taken from Safari on an iPhone 14 Pro iOS 16.4
-      // simulator.
-      TargetPlatform.iOS => const Color(0xff1717f0),
-      // This value was taken from Chrome on macOS 13.4.1.
-      TargetPlatform.macOS => const Color(0xff0000ee),
-      // This value was taken from Chrome on Android 14.
-      TargetPlatform.android || TargetPlatform.fuchsia => const Color(0xff0e0eef),
-      // This value was taken from the Chrome browser running on GNOME 43.3 on
-      // Debian.
-      TargetPlatform.linux => const Color(0xff0026e8),
-      // This value was taken from the Edge browser running on Windows 10.
-      TargetPlatform.windows => const Color(0xff1e2b8b),
-    };
-  }
-
-  @visibleForTesting
-  static TextStyle defaultLinkStyle = TextStyle(
-    // And decide underline or not per-platform.
-    color: _linkColor,
-    decoration: TextDecoration.underline,
-  );
 }
 
 /// A matched replacement on some String.
