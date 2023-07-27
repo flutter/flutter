@@ -142,6 +142,11 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
   final bool hasPackageConfigResult;
   final List<Package> packagesWithNativeAssetsResult;
 
+  int buildInvocations = 0;
+  int dryRunInvocations = 0;
+  int hasPackageConfigInvocations = 0;
+  int packagesWithNativeAssetsInvocations = 0;
+
   @override
   Future<List<Asset>> build({
     required bool includeParentEnvironment,
@@ -153,6 +158,7 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     int? targetAndroidNdkApi,
     IOSSdk? targetIOSSdk,
   }) async {
+    buildInvocations++;
     return buildResult;
   }
 
@@ -163,16 +169,19 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     required OS targetOs,
     required Uri workingDirectory,
   }) async {
+    dryRunInvocations++;
     return dryRunResult;
   }
 
   @override
   Future<bool> hasPackageConfig() async {
+    hasPackageConfigInvocations++;
     return hasPackageConfigResult;
   }
 
   @override
   Future<List<Package>> packagesWithNativeAssets() async {
+    packagesWithNativeAssetsInvocations++;
     return packagesWithNativeAssetsResult;
   }
 }

@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/scene_importer.dart';
 import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -27,6 +28,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
@@ -35,15 +37,19 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode, Target;
+import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../commands.shard/hermetic/build_macos_test.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/testbed.dart';
+import 'drive/drive_service_test.dart';
 
 final vm_service.Event fakeUnpausedEvent = vm_service.Event(
   kind: vm_service.EventKind.kResume,
@@ -2442,6 +2448,77 @@ flutter:
     expect(flutterDevice.devFS!.hasSetAssetDirectory, true);
     expect(fakeVmServiceHost!.hasRemainingExpectations, false);
   }));
+
+  testUsingContext('native assets', () => testbed.run(() async {
+    final FileSystem fileSystem = globals.fs;
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      inputs: <String, String>{},
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    final Uri projectUri = environment.projectDir.uri;
+
+    final FakeDevice device = FakeDevice(
+      targetPlatform: TargetPlatform.darwin,
+      sdkNameAndVersion: 'Macos',
+    );
+    final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
+      ..testUri = testUri
+      ..vmServiceHost = (() => fakeVmServiceHost)
+      ..device = device
+      .._devFS = devFS
+      ..targetPlatform = TargetPlatform.darwin;
+
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+    ]);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+        dryRunResult: <Asset>[
+          Asset(
+            name: 'package:bar/bar.dart',
+            linkMode: LinkMode.dynamic,
+            target: native_assets_cli.Target.macOSArm64,
+            path: AssetAbsolutePath(Uri.file('bar.dylib')),
+          ),
+        ],
+      );
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        flutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+        trackWidgetCreation: true,
+      )),
+      target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
+      buildRunner: buildRunner,
+    );
+
+    final int? result = await residentRunner.run();
+    expect(result, 0);
+
+    expect(buildRunner.buildInvocations, 0);
+    expect(buildRunner.dryRunInvocations, 1);
+    expect(buildRunner.hasPackageConfigInvocations, 1);
+    expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
+  }),overrides: <Type, Generator>{
+    Platform: () => macosPlatform,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () =>
+        TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
+  });
 }
 
 // This implements [dds.DartDevelopmentService], not the [DartDevelopmentService]
@@ -2506,7 +2583,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
 
   @override
-  TargetPlatform get targetPlatform => TargetPlatform.android;
+  TargetPlatform targetPlatform = TargetPlatform.android;
 
   @override
   Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);

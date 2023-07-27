@@ -96,9 +96,11 @@ class HotRunner extends ResidentRunner {
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
+    NativeAssetsBuildRunner? buildRunner,
   }) : _stopwatchFactory = stopwatchFactory,
        _reloadSourcesHelper = reloadSourcesHelper,
        _reassembleHelper = reassembleHelper,
+        _buildRunner = buildRunner,
        super(
           hotMode: true,
         );
@@ -135,6 +137,8 @@ class HotRunner extends ResidentRunner {
   String? _targetPlatform;
   String? _sdkName;
   bool? _emulator;
+
+  NativeAssetsBuildRunner? _buildRunner;
 
   Future<void> _calculateTargetPlatform() async {
     if (_targetPlatform != null) {
@@ -455,7 +459,7 @@ class HotRunner extends ResidentRunner {
   /// native assets after hot restart.
   Future<Uri?> _getNativeAssetsYaml() async {
     final Uri projectUri = Uri.directory(projectRootPath);
-    final NativeAssetsBuildRunner buildRunner =
+    _buildRunner ??=
         NativeAssetsBuildRunnerImpl(projectUri, fileSystem);
     if (flutterDevices.length != 1) {
       return dryRunNativeAssetsMultipeOSes(
@@ -463,7 +467,7 @@ class HotRunner extends ResidentRunner {
         fileSystem: fileSystem,
         targetPlatforms:
             flutterDevices.map((FlutterDevice d) => d.targetPlatform).nonNulls,
-        buildRunner: buildRunner,
+        buildRunner: _buildRunner!,
       );
     }
     final FlutterDevice flutterDevice = flutterDevices.single;
@@ -475,13 +479,13 @@ class HotRunner extends ResidentRunner {
         nativeAssetsYaml = await dryRunNativeAssetsMacOS(
           projectUri: projectUri,
           fileSystem: fileSystem,
-          buildRunner: buildRunner,
+          buildRunner: _buildRunner!,
         );
       case TargetPlatform.ios:
         nativeAssetsYaml = await dryRunNativeAssetsiOS(
           projectUri: projectUri,
           fileSystem: fileSystem,
-          buildRunner: buildRunner,
+          buildRunner: _buildRunner!,
         );
       case TargetPlatform.tester:
         if (const LocalPlatform().isMacOS) {
@@ -489,14 +493,14 @@ class HotRunner extends ResidentRunner {
             projectUri: projectUri,
             flutterTester: true,
             fileSystem: fileSystem,
-            buildRunner: buildRunner,
+            buildRunner: _buildRunner!,
           );
         } else {
           await ensureNoNativeAssetsOrOsIsSupported(
             projectUri,
             const LocalPlatform().operatingSystem,
             fileSystem,
-            buildRunner,
+            _buildRunner!,
           );
           nativeAssetsYaml = null;
         }
@@ -515,7 +519,7 @@ class HotRunner extends ResidentRunner {
           projectUri,
           targetPlatform.toString(),
           fileSystem,
-          buildRunner,
+          _buildRunner!,
         );
         nativeAssetsYaml = null;
     }
