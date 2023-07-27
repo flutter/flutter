@@ -16,6 +16,9 @@ import 'viewport_offset.dart';
 // CORE TYPES FOR SLIVERS
 // The RenderSliver base class and its helper types.
 
+/// Called to get the item extent by the index of item.
+typedef ItemExtentGetter = double Function(int index);
+
 /// The direction in which a sliver's contents are ordered, relative to the
 /// scroll offset axis.
 ///
