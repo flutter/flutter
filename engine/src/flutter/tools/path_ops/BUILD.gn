@@ -4,38 +4,12 @@
 
 import("//flutter/shell/version/version.gni")
 
-generated_file("path_ops_license") {
-  source_path = rebase_path(".", "//flutter")
-  git_url = "https://github.com/flutter/engine/tree/$engine_version"
-  outputs = [ "$target_gen_dir/LICENSE.path_ops.md" ]
-  contents = [
-    "# path_ops",
-    "",
-    "This tool is used by the vector_graphics library to calculate path intersections.",
-    "",
-    "Source code for this tool: [flutter/engine/$source_path]($git_url/$source_path).",
-    "",
-    "## Licenses",
-    "",
-    read_file("//flutter/sky/packages/sky_engine/LICENSE", "string"),
-    "",
-    "## Additional open source licenses",
-    "",
-    "### Skia",
-    "",
-    read_file("//third_party/skia/LICENSE", "string"),
-  ]
-}
-
 shared_library("path_ops") {
   sources = [
     "path_ops.cc",
     "path_ops.h",
   ]
-  deps = [
-    ":path_ops_license",
-    "//third_party/skia",
-  ]
+  deps = [ "//third_party/skia" ]
 
   metadata = {
     entitlement_file_path = [ "libpath_ops.dylib" ]
