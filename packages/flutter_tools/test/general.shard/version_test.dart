@@ -325,7 +325,7 @@ void main() {
       const String flutterStandardUrlDotGit = 'https://github.com/flutter/flutter.git';
       const String flutterNonStandardUrlDotGit = 'https://githubmirror.com/flutter/flutter.git';
       const String flutterStandardSshUrlDotGit = 'git@github.com:flutter/flutter.git';
-      const String flutterFullSshUrlDotGit = 'ssh://git@github.com:flutter/flutter.git';
+      const String flutterFullSshUrlDotGit = 'ssh://git@github.com/flutter/flutter.git';
 
       VersionCheckError? runUpstreamValidator({
         String? versionUpstreamUrl,
