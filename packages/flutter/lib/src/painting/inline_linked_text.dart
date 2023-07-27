@@ -187,24 +187,32 @@ class InlineLinkedText extends TextSpan {
     // Flatten the spans and find all ranges in the flat String. This must be done
     // cumulatively, and not during a traversal, because matches may occur across
     // span boundaries.
-    final String spansText = spans.fold<String>('', (String value, InlineSpan span) {
-      return value + span.toPlainText();
-    });
+    final List<({InlineSpan span, int length})> spansWithLength =
+        <({InlineSpan span, int length})>[];
+    String spansText = '';
+    for (final InlineSpan span in spans) {
+      final String string = span.toPlainText();
+      spansText += string;
+      spansWithLength.add((
+        span: span,
+        length: string.length,
+      ));
+    }
     final Iterable<_TextLinkerMatch> textLinkerMatches =
         _cleanTextLinkerMatches(
           _TextLinkerMatch.fromTextLinkers(textLinkers, spansText),
         );
 
     final (Iterable<InlineSpan> output, _) =
-        _linkSpansRecursive(spans, textLinkerMatches, 0);
+        _linkSpansRecursive(spansWithLength, textLinkerMatches, 0);
     return output;
   }
 
-  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>) _linkSpansRecursive(Iterable<InlineSpan> spans, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
+  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>) _linkSpansRecursive(Iterable<({InlineSpan span, int length})> spansWithLength, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
     final List<InlineSpan> output = <InlineSpan>[];
     Iterable<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches;
     int nextIndex = index;
-    for (final InlineSpan span in spans) {
+    for (final (span: InlineSpan span, length: int length) in spansWithLength) {
       final (InlineSpan childSpan, Iterable<_TextLinkerMatch> childTextLinkerMatches) = _linkSpanRecursive(
         span,
         nextTextLinkerMatches,
@@ -212,7 +220,7 @@ class InlineLinkedText extends TextSpan {
       );
       output.add(childSpan);
       nextTextLinkerMatches = childTextLinkerMatches;
-      nextIndex += span.toPlainText().length; // TODO(justinmc): Performance? Maybe you could return the index rather than recalculating it?
+      nextIndex += length;
     }
 
     return (output, nextTextLinkerMatches);
@@ -283,7 +291,10 @@ class InlineLinkedText extends TextSpan {
         Iterable<InlineSpan> childrenSpans,
         Iterable<_TextLinkerMatch> childrenTextLinkerMatches,
       ) = _linkSpansRecursive(
-        span.children!,
+        span.children!.map((InlineSpan childSpan) => (
+          span: childSpan,
+          length: childSpan.toPlainText().length,
+        )),
         nextTextLinkerMatches,
         index + (span.text?.length ?? 0),
       );
