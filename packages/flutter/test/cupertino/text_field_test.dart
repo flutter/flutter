@@ -261,6 +261,16 @@ void main() {
   );
 
   testWidgets('Look Up shows up on iOS only (CupertinoTextField)', (WidgetTester tester) async {
+    String? lastLookUp;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      if (methodCall.method == 'LookUp.invoke') {
+        expect(methodCall.arguments, isA<String>());
+        lastLookUp = methodCall.arguments as String;
+      }
+      return null;
+    });
+
       final TextEditingController controller = TextEditingController(
         text: 'Test',
       );
@@ -300,6 +310,16 @@ void main() {
     );
 
   testWidgets('Look Up shows up on iOS only (TextField)', (WidgetTester tester) async {
+    String? lastLookUp;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      if (methodCall.method == 'LookUp.invoke') {
+        expect(methodCall.arguments, isA<String>());
+        lastLookUp = methodCall.arguments as String;
+      }
+      return null;
+    });
+
     final TextEditingController controller = TextEditingController(
       text: 'Test',
     );
