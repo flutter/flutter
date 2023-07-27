@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(dacoharkes): Remove this tag once the xcrun clang --version state doesn't leak.
+@Tags(<String>['no-shuffle'])
+library;
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -47,7 +51,10 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  testUsingContext('dry run with no package config', () async {
+  testUsingContext('dry run with no package config',
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+      }, () async {
     expect(
       await dryRunNativeAssetsMacOS(
         projectUri: projectUri,
@@ -64,7 +71,9 @@ void main() {
     );
   });
 
-  testUsingContext('build with no package config', () async {
+  testUsingContext('build with no package config', overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
+  }, () async {
     await buildNativeAssetsMacOS(
       darwinArchs: <DarwinArch>[DarwinArch.arm64],
       projectUri: projectUri,
@@ -80,7 +89,10 @@ void main() {
     );
   });
 
-  testUsingContext('dry run with no package config', () async {
+  testUsingContext('dry run with no package config',
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+      }, () async {
     await dryRunNativeAssetsMultipeOSes(
       projectUri: projectUri,
       fileSystem: fileSystem,
@@ -98,7 +110,10 @@ void main() {
     );
   });
 
-  testUsingContext('dry run with assets but not enabled', () async {
+  testUsingContext('dry run with assets but not enabled',
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+      }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
@@ -122,7 +137,8 @@ void main() {
   });
 
   testUsingContext('dry run with assets', overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.any(),
   }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -161,7 +177,10 @@ void main() {
     );
   });
 
-  testUsingContext('build with assets but not enabled', () async {
+  testUsingContext('build with assets but not enabled',
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+      }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
@@ -188,6 +207,18 @@ void main() {
 
   testUsingContext('build no assets', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.list(
+          <FakeCommand>[
+            const FakeCommand(
+              command: <Pattern>['xcrun', 'clang', '--version'],
+              stdout: '''
+Apple clang version 14.0.0 (clang-1400.0.29.202)
+Target: arm64-apple-darwin22.6.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin''',
+            )
+          ],
+        ),
   }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
