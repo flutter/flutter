@@ -904,14 +904,13 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      kIsWeb && !isCanvasKit
-        ? (paints..circle()..circle(
-          color: fillColor.withAlpha(kRadialReactionAlpha),
-          radius: splashRadius,
-        )) : (paints..circle(
-          color: fillColor.withAlpha(kRadialReactionAlpha),
-          radius: splashRadius,
-        )),
+      kIsWeb ? (paints..circle()..circle(
+        color: fillColor.withAlpha(kRadialReactionAlpha),
+        radius: splashRadius,
+      )) : (paints..circle(
+        color: fillColor.withAlpha(kRadialReactionAlpha),
+        radius: splashRadius,
+      )),
       reason: 'Default inactive pressed Checkbox should have overlay color from fillColor',
     );
 
@@ -921,14 +920,13 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      kIsWeb && !isCanvasKit
-        ? (paints..circle()..circle(
-          color: fillColor.withAlpha(kRadialReactionAlpha),
-          radius: splashRadius,
-        )) : (paints..circle(
-          color: fillColor.withAlpha(kRadialReactionAlpha),
-          radius: splashRadius,
-        )),
+      kIsWeb ? (paints..circle()..circle(
+        color: fillColor.withAlpha(kRadialReactionAlpha),
+        radius: splashRadius,
+      )) : (paints..circle(
+        color: fillColor.withAlpha(kRadialReactionAlpha),
+        radius: splashRadius,
+      )),
       reason: 'Default active pressed Checkbox should have overlay color from fillColor',
     );
 
@@ -938,8 +936,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      kIsWeb && !isCanvasKit
-          ? (paints..circle()..circle(
+      kIsWeb ? (paints..circle()..circle(
         color: inactivePressedOverlayColor,
         radius: splashRadius,
       )) : (paints..circle(
@@ -955,14 +952,13 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      kIsWeb && !isCanvasKit
-        ? (paints..circle()..circle(
-          color: activePressedOverlayColor,
-          radius: splashRadius,
-        )) : (paints..circle(
-          color: activePressedOverlayColor,
-          radius: splashRadius,
-        )),
+      kIsWeb ? (paints..circle()..circle(
+        color: activePressedOverlayColor,
+        radius: splashRadius,
+      )) : (paints..circle(
+        color: activePressedOverlayColor,
+        radius: splashRadius,
+      )),
       reason: 'Active pressed Checkbox should have overlay color: $activePressedOverlayColor',
     );
 
