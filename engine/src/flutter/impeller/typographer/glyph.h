@@ -17,7 +17,7 @@ namespace impeller {
 /// @brief      The glyph index in the typeface.
 ///
 struct Glyph {
-  enum class Type {
+  enum class Type : uint8_t {
     kPath,
     kBitmap,
   };
@@ -38,6 +38,10 @@ struct Glyph {
   Glyph(uint16_t p_index, Type p_type, Rect p_bounds)
       : index(p_index), type(p_type), bounds(p_bounds) {}
 };
+
+// Many Glyph instances are instantiated, so care should be taken when
+// increasing the size.
+static_assert(sizeof(Glyph) == 20);
 
 }  // namespace impeller
 
