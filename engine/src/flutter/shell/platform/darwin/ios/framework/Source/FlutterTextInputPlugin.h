@@ -133,6 +133,7 @@ FLUTTER_DARWIN_EXPORT
 @property(nonatomic, strong) UITextRange* markedTextRange;
 @property(nonatomic, copy) NSDictionary* markedTextStyle;
 @property(nonatomic, weak) id<UITextInputDelegate> inputDelegate;
+@property(nonatomic, strong) NSMutableArray* pendingDeltas;
 
 // UITextInputTraits
 @property(nonatomic) UITextAutocapitalizationType autocapitalizationType;
