@@ -160,9 +160,8 @@ static std::unique_ptr<PipelineT> CreateDefaultPipeline(
 
 ContentContext::ContentContext(std::shared_ptr<Context> context)
     : context_(std::move(context)),
+      lazy_glyph_atlas_(std::make_shared<LazyGlyphAtlas>()),
       tessellator_(std::make_shared<Tessellator>()),
-      alpha_glyph_atlas_context_(std::make_shared<GlyphAtlasContext>()),
-      color_glyph_atlas_context_(std::make_shared<GlyphAtlasContext>()),
       scene_context_(std::make_shared<scene::SceneContext>(context_)) {
   if (!context_ || !context_->IsValid()) {
     return;
@@ -409,12 +408,6 @@ std::shared_ptr<scene::SceneContext> ContentContext::GetSceneContext() const {
 
 std::shared_ptr<Tessellator> ContentContext::GetTessellator() const {
   return tessellator_;
-}
-
-std::shared_ptr<GlyphAtlasContext> ContentContext::GetGlyphAtlasContext(
-    GlyphAtlas::Type type) const {
-  return type == GlyphAtlas::Type::kAlphaBitmap ? alpha_glyph_atlas_context_
-                                                : color_glyph_atlas_context_;
 }
 
 std::shared_ptr<Context> ContentContext::GetContext() const {

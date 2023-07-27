@@ -122,13 +122,11 @@ TEST_P(TypographerTest, LazyAtlasTracksColor) {
   lazy_atlas.AddTextFrame(frame, 1.0f);
 
   // Creates different atlases for color and alpha bitmap.
-  auto color_context = std::make_shared<GlyphAtlasContext>();
-  auto bitmap_context = std::make_shared<GlyphAtlasContext>();
   auto color_atlas = lazy_atlas.CreateOrGetGlyphAtlas(
-      GlyphAtlas::Type::kColorBitmap, color_context, GetContext());
+      GlyphAtlas::Type::kColorBitmap, GetContext());
 
   auto bitmap_atlas = lazy_atlas.CreateOrGetGlyphAtlas(
-      GlyphAtlas::Type::kAlphaBitmap, bitmap_context, GetContext());
+      GlyphAtlas::Type::kAlphaBitmap, GetContext());
 
   ASSERT_FALSE(color_atlas == bitmap_atlas);
 }

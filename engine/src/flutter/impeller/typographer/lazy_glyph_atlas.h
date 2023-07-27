@@ -21,14 +21,17 @@ class LazyGlyphAtlas {
 
   void AddTextFrame(const TextFrame& frame, Scalar scale);
 
+  void ResetTextFrames();
+
   std::shared_ptr<GlyphAtlas> CreateOrGetGlyphAtlas(
       GlyphAtlas::Type type,
-      std::shared_ptr<GlyphAtlasContext> atlas_context,
       std::shared_ptr<Context> context) const;
 
  private:
   FontGlyphPair::Set alpha_set_;
   FontGlyphPair::Set color_set_;
+  std::shared_ptr<GlyphAtlasContext> alpha_context_;
+  std::shared_ptr<GlyphAtlasContext> color_context_;
   mutable std::unordered_map<GlyphAtlas::Type, std::shared_ptr<GlyphAtlas>>
       atlas_map_;
 

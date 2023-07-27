@@ -680,9 +680,6 @@ class ContentContext {
 
   std::shared_ptr<Context> GetContext() const;
 
-  std::shared_ptr<GlyphAtlasContext> GetGlyphAtlasContext(
-      GlyphAtlas::Type type) const;
-
   const Capabilities& GetDeviceCapabilities() const;
 
   void SetWireframe(bool wireframe);
@@ -696,11 +693,6 @@ class ContentContext {
                                        ISize texture_size,
                                        const SubpassCallback& subpass_callback,
                                        bool msaa_enabled = true) const;
-
-  void SetLazyGlyphAtlas(
-      const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas) {
-    lazy_glyph_atlas_ = lazy_glyph_atlas;
-  }
 
   std::shared_ptr<LazyGlyphAtlas> GetLazyGlyphAtlas() const {
     return lazy_glyph_atlas_;
@@ -861,8 +853,6 @@ class ContentContext {
 
   bool is_valid_ = false;
   std::shared_ptr<Tessellator> tessellator_;
-  std::shared_ptr<GlyphAtlasContext> alpha_glyph_atlas_context_;
-  std::shared_ptr<GlyphAtlasContext> color_glyph_atlas_context_;
   std::shared_ptr<scene::SceneContext> scene_context_;
   bool wireframe_ = false;
 

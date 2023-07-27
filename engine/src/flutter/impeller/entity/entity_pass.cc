@@ -254,9 +254,8 @@ bool EntityPass::Render(ContentContext& renderer,
     return false;
   }
 
-  renderer.SetLazyGlyphAtlas(std::make_shared<LazyGlyphAtlas>());
   fml::ScopedCleanupClosure reset_lazy_glyph_atlas(
-      [&renderer]() { renderer.SetLazyGlyphAtlas(nullptr); });
+      [&renderer]() { renderer.GetLazyGlyphAtlas()->ResetTextFrames(); });
 
   IterateAllEntities([lazy_glyph_atlas =
                           renderer.GetLazyGlyphAtlas()](const Entity& entity) {

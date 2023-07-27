@@ -11,7 +11,9 @@
 
 namespace impeller {
 
-LazyGlyphAtlas::LazyGlyphAtlas() = default;
+LazyGlyphAtlas::LazyGlyphAtlas()
+    : alpha_context_(std::make_shared<GlyphAtlasContext>()),
+      color_context_(std::make_shared<GlyphAtlasContext>()) {}
 
 LazyGlyphAtlas::~LazyGlyphAtlas() = default;
 
@@ -24,9 +26,14 @@ void LazyGlyphAtlas::AddTextFrame(const TextFrame& frame, Scalar scale) {
   }
 }
 
+void LazyGlyphAtlas::ResetTextFrames() {
+  alpha_set_.clear();
+  color_set_.clear();
+  atlas_map_.clear();
+}
+
 std::shared_ptr<GlyphAtlas> LazyGlyphAtlas::CreateOrGetGlyphAtlas(
     GlyphAtlas::Type type,
-    std::shared_ptr<GlyphAtlasContext> atlas_context,
     std::shared_ptr<Context> context) const {
   {
     auto atlas_it = atlas_map_.find(type);
@@ -40,8 +47,9 @@ std::shared_ptr<GlyphAtlas> LazyGlyphAtlas::CreateOrGetGlyphAtlas(
     return nullptr;
   }
   auto& set = type == GlyphAtlas::Type::kAlphaBitmap ? alpha_set_ : color_set_;
-  auto atlas =
-      text_context->CreateGlyphAtlas(type, std::move(atlas_context), set);
+  auto atlas_context =
+      type == GlyphAtlas::Type::kAlphaBitmap ? alpha_context_ : color_context_;
+  auto atlas = text_context->CreateGlyphAtlas(type, atlas_context, set);
   if (!atlas || !atlas->IsValid()) {
     VALIDATION_LOG << "Could not create valid atlas.";
     return nullptr;

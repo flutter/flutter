@@ -65,7 +65,6 @@ class TextContents final : public Contents {
   std::shared_ptr<GlyphAtlas> ResolveAtlas(
       GlyphAtlas::Type type,
       const std::shared_ptr<LazyGlyphAtlas>& lazy_atlas,
-      std::shared_ptr<GlyphAtlasContext> atlas_context,
       std::shared_ptr<Context> context) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextContents);
