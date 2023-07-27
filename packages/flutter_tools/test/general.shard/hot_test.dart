@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -16,12 +14,16 @@ import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode, Target;
+import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -550,6 +552,76 @@ void main() {
 
       expect(flutterDevice1.stoppedEchoingDeviceLog, true);
       expect(flutterDevice2.stoppedEchoingDeviceLog, true);
+    });
+  });
+
+  group('native assets', () {
+    late TestHotRunnerConfig testingConfig;
+    late FileSystem fileSystem;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      testingConfig = TestHotRunnerConfig(
+        successfulHotRestartSetup: true,
+      );
+    });
+    testUsingContext('native assets', () async {
+      final FakeDevice device = FakeDevice();
+      final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
+      final List<FlutterDevice> devices = <FlutterDevice>[
+        fakeFlutterDevice,
+      ];
+
+      fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
+            success: true,
+            invalidatedSourcesCount: 6,
+            syncedBytes: 8,
+            scannedSourcesCount: 16,
+            compileDuration: const Duration(seconds: 16),
+            transferDuration: const Duration(seconds: 32),
+          );
+
+      (fakeFlutterDevice.devFS! as FakeDevFs).baseUri =
+          Uri.parse('file:///base_uri');
+
+      final FakeNativeAssetsBuildRunner buildRunner =
+          FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', fileSystem.currentDirectory.uri),
+        ],
+        dryRunResult: <Asset>[
+          Asset(
+            name: 'package:bar/bar.dart',
+            linkMode: LinkMode.dynamic,
+            target: native_assets_cli.Target.macOSArm64,
+            path: AssetAbsolutePath(Uri.file('bar.dylib')),
+          ),
+        ],
+      );
+
+      final HotRunner hotRunner = HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
+        devtoolsHandler: createNoOpHandler,
+        buildRunner: buildRunner,
+      );
+      final OperationResult result = await hotRunner.restart(fullRestart: true);
+      expect(result.isOk, true);
+      // Hot restart does not require reruning anything for native assets.
+      // The previous native assets mapping should be used.
+      expect(buildRunner.buildInvocations, 0);
+      expect(buildRunner.dryRunInvocations, 0);
+      expect(buildRunner.hasPackageConfigInvocations, 0);
+      expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
+    }, overrides: <Type, Generator>{
+      HotRunnerConfig: () => testingConfig,
+      Artifacts: () => Artifacts.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(),
+      ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: () =>
+          TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     });
   });
 }
