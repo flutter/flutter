@@ -73,7 +73,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
       native_assets_builder.NativeAssetsBuildRunner(
           logger: _logger, dartExecutable: _dartExecutable);
 
-  late final native_assets_builder.PackageLayout _packageLayout;
+  native_assets_builder.PackageLayout? _packageLayout;
 
   @override
   Future<bool> hasPackageConfig() {
@@ -84,8 +84,11 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   }
 
   @override
-  Future<List<Package>> packagesWithNativeAssets() {
-    return _packageLayout.packagesWithNativeAssets;
+  Future<List<Package>> packagesWithNativeAssets() async {
+    _packageLayout ??=
+        await native_assets_builder.PackageLayout.fromRootPackageRoot(
+            projectUri);
+    return _packageLayout!.packagesWithNativeAssets;
   }
 
   @override
