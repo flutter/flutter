@@ -2637,7 +2637,6 @@ class _RenderEditableCustomPaint extends RenderBox {
   Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
 }
 
-/// {@template flutter.rendering.RenderEditablePainter}
 /// An interface that paints within a [RenderEditable]'s bounds, above or
 /// beneath its text content.
 ///
@@ -2648,11 +2647,11 @@ class _RenderEditableCustomPaint extends RenderBox {
 /// when only auxiliary content changes (e.g. a blinking cursor) are present. It
 /// will be scheduled to repaint when:
 ///
-///  * It's assigned to a new [RenderEditable] and the
-///    [RenderEditablePainter.shouldRepaint] method returns true.
+///  * It's assigned to a new [RenderEditable] and the [shouldRepaint] method
+///    returns true.
 ///  * Any of the [RenderEditable]s it is attached to repaints.
-///  * The [RenderEditablePainter.notifyListeners] method is called, which
-///    typically happens when the painter's attributes change.
+///  * The [notifyListeners] method is called, which typically happens when the
+///    painter's attributes change.
 ///
 /// See also:
 ///
@@ -2661,7 +2660,6 @@ class _RenderEditableCustomPaint extends RenderBox {
 ///  * [RenderEditable.painter], which takes a [RenderEditablePainter]
 ///    and sets it as the background painter of the [RenderEditable].
 ///  * [CustomPainter] a similar class which paints within a [RenderCustomPaint].
-/// {@endtemplate}
 abstract class RenderEditablePainter extends ChangeNotifier {
 
   /// Determines whether repaint is needed when a new [RenderEditablePainter]
