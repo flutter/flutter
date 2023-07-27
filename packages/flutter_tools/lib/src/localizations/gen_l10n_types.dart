@@ -566,8 +566,9 @@ class Message {
   }
 }
 
-// Represents the contents of one ARB file.
+/// Represents the contents of one ARB file.
 class AppResourceBundle {
+  /// Assuming that the caller has verified that the file exists and is readable.
   factory AppResourceBundle(File file) {
     final Map<String, Object?> resources;
     try {
@@ -661,6 +662,9 @@ class AppResourceBundleCollection {
     final RegExp filenameRE = RegExp(r'(\w+)\.arb$');
     final Map<LocaleInfo, AppResourceBundle> localeToBundle = <LocaleInfo, AppResourceBundle>{};
     final Map<String, List<LocaleInfo>> languageToLocales = <String, List<LocaleInfo>>{};
+    // We require the list of files to be sorted so that
+    // "languageToLocales[bundle.locale.languageCode]" is not null
+    // by the time we handle locales with country codes.
     final List<File> files = directory
         .listSync()
         .whereType<File>()
