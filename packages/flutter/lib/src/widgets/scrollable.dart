@@ -689,7 +689,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     } else {
       _fallbackScrollController?.detach(position);
       _fallbackScrollController?.dispose();
-      _fallbackScrollController = null;//
     }
 
     position.dispose();
