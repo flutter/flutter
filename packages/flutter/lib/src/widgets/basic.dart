@@ -1266,6 +1266,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   }
 }
 
+
 // POSITIONING AND SIZING NODES
 
 /// A widget that applies a transformation before painting its child.
@@ -3548,8 +3549,6 @@ class IntrinsicHeight extends SingleChildRenderObjectWidget {
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Baseline extends SingleChildRenderObjectWidget {
   /// Creates a widget that positions its child according to the child's baseline.
-  ///
-  /// The [baseline] and [baselineType] arguments must not be null.
   const Baseline({
     super.key,
     required this.baseline,
@@ -3574,6 +3573,25 @@ class Baseline extends SingleChildRenderObjectWidget {
     renderObject
       ..baseline = baseline
       ..baselineType = baselineType;
+  }
+}
+
+/// A widget that causes the parent to ignore the [child] for the purposes
+/// of baseline alignment.
+///
+/// See also:
+///
+///  * [Baseline], a widget that positions a child relative to a baseline.
+class IgnoreBaseline extends SingleChildRenderObjectWidget {
+  /// Creates a widget that ignores the child for baseline alignment purposes.
+  const IgnoreBaseline({
+    super.key,
+    super.child,
+  });
+
+  @override
+  RenderIgnoreBaseline createRenderObject(BuildContext context) {
+    return RenderIgnoreBaseline();
   }
 }
 
