@@ -14,6 +14,7 @@ import '../desktop_device.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../macos/application_package.dart';
+import '../native_assets.dart';
 import '../project.dart';
 import 'build_macos.dart';
 import 'macos_workflow.dart';
@@ -83,6 +84,10 @@ class MacOSDevice extends DesktopDevice {
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,
       fileSystem: globals.fs,
+      buildRunner: NativeAssetsBuildRunnerImpl(
+        FlutterProject.current().directory.uri,
+        globals.fs,
+      ),
     );
   }
 

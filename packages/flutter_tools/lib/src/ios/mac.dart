@@ -137,6 +137,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   required FileSystem fileSystem,
+  required NativeAssetsBuildRunner buildRunner,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
@@ -240,8 +241,6 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final FlutterProject project = FlutterProject.current();
   final Uri projectUri = project.directory.uri;
-  final NativeAssetsBuildRunner buildRunner =
-      NativeAssetsBuildRunnerImpl(projectUri, fileSystem);
   final Uri? nativeAssetsYaml = await dryRunNativeAssetsiOS(
     projectUri: projectUri,
     fileSystem: fileSystem,

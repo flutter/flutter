@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -17,8 +18,12 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:native_assets_cli/native_assets_cli.dart' hide Target;
+import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
+import 'package:package_config/package_config_types.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -503,7 +508,12 @@ STDERR STUFF
       osUtils: FakeOperatingSystemUtils(),
     ));
 
-    final bool supported = BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false, fileSystem: MemoryFileSystem.test()).supported;
+    final bool supported = BuildMacosCommand(
+      logger: BufferLogger.test(),
+      verboseHelp: false,
+      fileSystem: MemoryFileSystem.test(),
+      buildRunner: FakeNativeAssetsBuildRunner(),
+    ).supported;
     expect(() => runner.run(<String>['build', 'macos', '--no-pub']),
       supported ? throwsToolExit() : throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
@@ -511,14 +521,30 @@ STDERR STUFF
   });
 
   testUsingContext('hidden when not enabled on macOS host', () {
-    expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false, fileSystem: MemoryFileSystem.test()).hidden, true);
+    expect(
+      BuildMacosCommand(
+        logger: BufferLogger.test(),
+        verboseHelp: false,
+        fileSystem: MemoryFileSystem.test(),
+        buildRunner: FakeNativeAssetsBuildRunner(),
+      ).hidden,
+      true,
+    );
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
     Platform: () => macosPlatform,
   });
 
   testUsingContext('Not hidden when enabled and on macOS host', () {
-    expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false, fileSystem: MemoryFileSystem.test()).hidden, false);
+    expect(
+      BuildMacosCommand(
+        logger: BufferLogger.test(),
+        verboseHelp: false,
+        fileSystem: MemoryFileSystem.test(),
+        buildRunner: FakeNativeAssetsBuildRunner(),
+      ).hidden,
+      false,
+    );
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Platform: () => macosPlatform,
@@ -571,5 +597,60 @@ STDERR STUFF
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
+  });
+
+
+  testUsingContext('native assets', () async {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      inputs: <String, String>{},
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    final Uri projectUri = environment.projectDir.uri;
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+      buildRunner: FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+        dryRunResult: <Asset>[
+          Asset(
+            name: 'package:bar/bar.dart',
+            linkMode: LinkMode.dynamic,
+            target: native_assets_cli.Target.macOSArm64,
+            path: AssetAbsolutePath(Uri.file('bar.dylib')),
+          ),
+        ],
+      ),
+    );
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command)
+        .run(const <String>['build', 'macos', '--no-pub', '-v']);
+    // This command should dry run and write native assets.
+    final Uri nativeAssetsYaml =
+        projectUri.resolve('/build/native_assets/macos/native_assets.yaml');
+    expect(
+        testLogger.statusText,
+        stringContainsInOrder(<String>[
+          'Dry running native assets for macos.',
+          'Dry running native assets for macos done.',
+          'Writing native_assets.yaml.',
+          'Writing ${nativeAssetsYaml.path} done.',
+        ]));
+    expect(fileSystem.file(nativeAssetsYaml), exists);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => macosPlatform,
+    FeatureFlags: () =>
+        TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
   });
 }

@@ -24,6 +24,7 @@ import '../device_port_forwarder.dart';
 import '../globals.dart' as globals;
 import '../macos/xcdevice.dart';
 import '../mdns_discovery.dart';
+import '../native_assets.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -446,12 +447,16 @@ class IOSDevice extends Device {
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
-          app: package as BuildableIOSApp,
-          buildInfo: debuggingOptions.buildInfo,
-          targetOverride: mainPath,
-          activeArch: cpuArchitecture,
-          deviceID: id,
-          fileSystem: globals.fs,
+        app: package as BuildableIOSApp,
+        buildInfo: debuggingOptions.buildInfo,
+        targetOverride: mainPath,
+        activeArch: cpuArchitecture,
+        deviceID: id,
+        fileSystem: globals.fs,
+        buildRunner: NativeAssetsBuildRunnerImpl(
+          FlutterProject.current().directory.uri,
+          globals.fs,
+        ),
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');

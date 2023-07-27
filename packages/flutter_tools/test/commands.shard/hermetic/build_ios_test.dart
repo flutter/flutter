@@ -4,7 +4,9 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -15,15 +17,21 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:native_assets_cli/native_assets_cli.dart' hide Target;
+import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
+import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
 
 import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -241,7 +249,12 @@ void main() {
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
-    final bool supported = BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false, fileSystem: fileSystem).supported;
+    final bool supported = BuildIOSCommand(
+      logger: BufferLogger.test(),
+      verboseHelp: false,
+      fileSystem: fileSystem,
+      buildRunner: FakeNativeAssetsBuildRunner(),
+    ).supported;
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'ios', '--no-pub']
     ), supported ? throwsToolExit() : throwsA(isA<UsageException>()));
@@ -1068,6 +1081,61 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
+  });
+
+  testUsingContext('native assets', () async {
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      inputs: <String, String>{},
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    final Uri projectUri = environment.projectDir.uri;
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+      buildRunner: FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+        dryRunResult: <Asset>[
+          Asset(
+            name: 'package:bar/bar.dart',
+            linkMode: LinkMode.dynamic,
+            target: native_assets_cli.Target.macOSArm64,
+            path: AssetAbsolutePath(Uri.file('bar.dylib')),
+          ),
+        ],
+      ),
+    );
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command)
+        .run(const <String>['build', 'ios', '--no-pub', '-v']);
+    // This command should dry run and write native assets.
+    final Uri nativeAssetsYaml =
+        projectUri.resolve('/build/native_assets/ios/native_assets.yaml');
+    expect(
+        testLogger.statusText,
+        stringContainsInOrder(<String>[
+          'Dry running native assets for ios.',
+          'Dry running native assets for ios done.',
+          'Writing native_assets.yaml.',
+          'Writing ${nativeAssetsYaml.path} done.',
+        ]));
+    expect(fileSystem.file(nativeAssetsYaml), exists);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () =>
+        FakeXcodeProjectInterpreterWithBuildSettings(),
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
   });
 }
 

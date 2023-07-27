@@ -43,6 +43,7 @@ Future<void> buildMacOS({
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
   required FileSystem fileSystem,
+  required NativeAssetsBuildRunner buildRunner,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
   if (xcodeWorkspace == null) {
@@ -77,8 +78,6 @@ Future<void> buildMacOS({
   /// lib/src/build_system/targets/native_assets.dart for why we don't embed the
   /// native assets yaml produced inside `flutter assemble` itself.
   final Uri projectUri = flutterProject.directory.uri;
-  final NativeAssetsBuildRunner buildRunner =
-      NativeAssetsBuildRunnerImpl(projectUri, fileSystem);
   final Uri? nativeAssetsYaml = await dryRunNativeAssetsMacOS(
     projectUri: projectUri,
     fileSystem: fileSystem,

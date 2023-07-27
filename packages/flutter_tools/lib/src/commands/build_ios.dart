@@ -20,6 +20,7 @@ import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../native_assets.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
@@ -30,6 +31,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
     required super.logger,
     required super.verboseHelp,
     required super.fileSystem,
+    required super.buildRunner,
   }) {
     argParser
       ..addFlag('config-only',
@@ -99,6 +101,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     required super.logger,
     required super.verboseHelp,
     required super.fileSystem,
+    required super.buildRunner,
   }) {
     argParser.addOption(
       'export-method',
@@ -569,6 +572,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     required super.logger,
     required bool verboseHelp,
     required this.fileSystem,
+    required this.buildRunner,
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
@@ -593,6 +597,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   }
 
   final FileSystem fileSystem;
+  final NativeAssetsBuildRunner buildRunner;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -669,6 +674,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       buildAction: xcodeBuildAction,
       deviceID: globals.deviceManager?.specifiedDeviceId,
       fileSystem: fileSystem,
+      buildRunner: buildRunner,
     );
     xcodeBuildResult = result;
 
