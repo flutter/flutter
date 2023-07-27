@@ -49,7 +49,6 @@ import '../src/context.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/testbed.dart';
-import 'drive/drive_service_test.dart';
 
 final vm_service.Event fakeUnpausedEvent = vm_service.Event(
   kind: vm_service.EventKind.kResume,
