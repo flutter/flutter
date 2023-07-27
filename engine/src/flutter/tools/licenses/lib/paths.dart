@@ -37,9 +37,11 @@ final Set<String> skippedPaths = <String>{
   r'flutter/web_sdk', // this code is not linked into Flutter apps; it's only used by engine tests and tools
   r'fuchsia/sdk/linux/docs',
   r'fuchsia/sdk/linux/meta',
+  r'fuchsia/sdk/linux/NOTICE.fuchsia', // covers things that contribute to the Fuchsia SDK; see fxb/94240
   r'fuchsia/sdk/linux/tools',
   r'fuchsia/sdk/mac/docs',
   r'fuchsia/sdk/mac/meta',
+  r'fuchsia/sdk/mac/NOTICE.fuchsia',
   r'fuchsia/sdk/mac/tools',
   r'out', // output of build
   r'third_party/android_embedding_dependencies', // testing framework for android
