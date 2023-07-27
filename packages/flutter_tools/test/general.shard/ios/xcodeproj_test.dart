@@ -995,7 +995,8 @@ Build settings for action build and target plugin2:
       expect(config.existsSync(), isTrue);
 
       final String contents = config.readAsStringSync();
-      expect(contents, contains('NATIVE_ASSETS=${nativeAssetsYamlUri.path}\n'));
+      expect(contents,
+          contains('NATIVE_ASSETS=${nativeAssetsYamlUri.toFilePath()}\n'));
 
       final File buildPhaseScript = fs.file(
           'path/to/project/macos/Flutter/ephemeral/flutter_export_environment.sh');
@@ -1005,7 +1006,7 @@ Build settings for action build and target plugin2:
           buildPhaseScript.readAsStringSync();
       expect(
         buildPhaseScriptContents,
-        contains('export "NATIVE_ASSETS=${nativeAssetsYamlUri.path}"'),
+        contains('export "NATIVE_ASSETS=${nativeAssetsYamlUri.toFilePath()}"'),
       );
     }, overrides: <Type, Generator>{
       Artifacts: () => Artifacts.test(localEngine: 'out/host_profile_arm64'),
