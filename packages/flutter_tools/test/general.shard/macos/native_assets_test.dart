@@ -289,7 +289,7 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
           'package:bar/bar.dart',
           if (flutterTester)
             // Tests run on host system, so the have the full path on the system.
-            '- ${projectUri.resolve('/build/native_assets/macos/bar.dylib').path}'
+            '- ${projectUri.resolve('/build/native_assets/macos/bar.dylib').toFilePath()}'
           else
             // Apps are a bundle with the dylibs on their dlopen path.
             '- bar.dylib',
