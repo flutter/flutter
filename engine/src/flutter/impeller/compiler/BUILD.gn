@@ -72,26 +72,6 @@ impeller_component("compiler_lib") {
   ]
 }
 
-generated_file("impellerc_license") {
-  source_path = rebase_path(".", "//flutter")
-  git_url = "https://github.com/flutter/engine/tree/$engine_version"
-  outputs = [ "$target_gen_dir/LICENSE.impellerc.md" ]
-  contents = [
-    "# impellerc",
-    "",
-    "This tool is used by the Flutter SDK to compile shaders.",
-    "",
-    "Source code for this tool: [flutter/engine/$source_path]($git_url/$source_path).",
-    "",
-    "## Licenses",
-    "",
-    "### impellerc",
-    "",
-    read_file("//flutter/sky/packages/sky_engine/LICENSE", "string"),
-    "",
-  ]
-}
-
 impeller_component("impellerc") {
   target_type = "executable"
 
@@ -108,10 +88,7 @@ impeller_component("impellerc") {
 }
 
 group("compiler") {
-  deps = [
-    ":impellerc",
-    ":impellerc_license",
-  ]
+  deps = [ ":impellerc" ]
 }
 
 impeller_component("compiler_unittests") {

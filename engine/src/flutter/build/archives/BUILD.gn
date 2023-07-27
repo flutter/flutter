@@ -26,12 +26,10 @@ if (build_engine_artifacts && !is_android) {
     deps = [
       "//flutter/flutter_frontend_server:frontend_server",
       "//flutter/impeller/compiler:impellerc",
-      "//flutter/impeller/compiler:impellerc_license",
       "//flutter/impeller/tessellator:tessellator_shared",
       "//flutter/lib/snapshot:generate_snapshot_bin",
       "//flutter/shell/testing:testing",
       "//flutter/tools/path_ops:path_ops",
-      "//flutter/tools/path_ops:path_ops_license",
       "//third_party/dart/runtime/bin:gen_snapshot",
     ]
     if (is_mac) {
@@ -80,16 +78,6 @@ if (build_engine_artifacts && !is_android) {
         {
           source = "$root_out_dir/flutter_tester$exe"
           destination = "flutter_tester$exe"
-        },
-        {
-          source =
-              "$root_out_dir/gen/flutter/impeller/compiler/LICENSE.impellerc.md"
-          destination = "LICENSE.impellerc.md"
-        },
-        {
-          source =
-              "$root_out_dir/gen/flutter/tools/path_ops/LICENSE.path_ops.md"
-          destination = "LICENSE.path_ops.md"
         },
         {
           source = "$root_out_dir/impellerc$exe"
