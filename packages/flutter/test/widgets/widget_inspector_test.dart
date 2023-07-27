@@ -590,8 +590,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       await tester.longPress(find.byKey(clickTarget), warnIfMissed: false);
-      // State type is private, hence using dynamic.
-      final dynamic inspectorState = inspectorKey.currentState;
       // The object with width 95.0 wins over the object with width 94.0 because
       // the subtree with width 94.0 is offstage.
       // ignore: avoid_dynamic_calls
