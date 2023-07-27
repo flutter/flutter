@@ -7,6 +7,9 @@ import 'package:flutter/foundation.dart';
 import 'asset_bundle.dart';
 import 'message_codecs.dart';
 
+import '_load_asset_manifest_io.dart'
+  if (dart.library.js_util) '_load_asset_manifest_web.dart';
+
 // We use .bin as the extension since it is well-known to represent
 // data in some arbitrary binary format.
 const String _kAssetManifestFilename = 'AssetManifest.bin';
@@ -19,7 +22,7 @@ abstract class AssetManifest {
   /// Loads asset manifest data from an [AssetBundle] object and creates an
   /// [AssetManifest] object from that data.
   static Future<AssetManifest> loadFromAssetBundle(AssetBundle bundle) {
-    return bundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
+    return loadAssetManifest(bundle);
   }
 
   /// Creates an [AssetManifest] directly from the byte data of an asset manifest

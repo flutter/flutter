@@ -8,8 +8,6 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '_load_asset_manifest_io.dart'
-  if (dart.library.js) '_load_asset_manifest_web.dart';
 import 'image_provider.dart';
 
 /// A screen with a device-pixel ratio strictly less than this value is
@@ -283,7 +281,7 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    loadAssetManifest(chosenBundle)
+    AssetManifest.loadFromAssetBundle(chosenBundle)
       .then((AssetManifest manifest) {
         final Iterable<AssetMetadata>? candidateVariants = manifest.getAssetVariants(keyName);
         final AssetMetadata chosenVariant = _chooseVariant(
