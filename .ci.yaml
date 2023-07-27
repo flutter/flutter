@@ -3748,13 +3748,13 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_textfield
 
-  - name: Mac ios_app_with_extensions_test
+  - name: Mac_x64 ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: ios_app_with_extensions_test
     bringup: true
 
@@ -3764,7 +3764,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+        ["devicelab", "hostonly", "mac", "arm64"]
       task_name: ios_app_with_extensions_test
     bringup: true
 
