@@ -9,6 +9,7 @@ import 'dart:ui' as ui hide TextStyle;
 import 'package:characters/characters.dart' show CharacterRange, StringCharacters;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -2785,6 +2786,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void dispose() {
+    // print (StackTrace.current);
+    print('!!!! disposing EditableTextState for $widget');
     _internalScrollController?.dispose();
     _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
