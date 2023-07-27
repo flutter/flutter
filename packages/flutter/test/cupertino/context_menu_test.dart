@@ -861,7 +861,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // judge whether _ContextMenuRouteStatic present on the screen
-    final Finder static = find.byWidgetPredicate(
+    final Finder routeStatic = find.byWidgetPredicate(
           (Widget w) => '${w.runtimeType}' == '_ContextMenuRouteStatic',
     );
     // can't present together
@@ -869,13 +869,13 @@ void main() {
       // calculate the actual duration
       final int actualDuration = onPointerUpTime! - onPointerDownTime!;
 
-      expect(static, findsNothing,
+      expect(routeStatic, findsNothing,
           reason:
           'When actualDuration($actualDuration) is in the range of 500ms~900ms, '
               'which means the route is pushed, '
               'insideTap should not be triggered.');
     } else {
-      expect(static, findsOneWidget);
+      expect(routeStatic, findsOneWidget);
     }
   });
 }
