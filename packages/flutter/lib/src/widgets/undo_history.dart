@@ -248,9 +248,7 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     _effectiveController.onUndo.removeListener(undo);
     _effectiveController.onRedo.removeListener(redo);
     _controller?.dispose();
-    _controller = null;
     _throttleTimer?.cancel();
-    _throttleTimer = null;
     super.dispose();
   }
 

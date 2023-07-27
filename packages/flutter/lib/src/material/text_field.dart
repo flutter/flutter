@@ -1101,7 +1101,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
     _controller?.dispose();
-    _controller = null;
     super.dispose();
   }
 
