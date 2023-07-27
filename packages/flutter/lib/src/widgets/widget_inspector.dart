@@ -2685,13 +2685,9 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
   Offset? _lastPointerLocation;
 
-  InspectorSelection get selection =>
-      WidgetInspectorService.instance.selection;
+  late InspectorSelection selection;
 
-  bool get isSelectMode =>
-      WidgetInspectorService.instance.isSelectMode.value;
-  set isSelectMode(bool value) =>
-      WidgetInspectorService.instance.isSelectMode.value = value;
+  late bool isSelectMode;
 
   final GlobalKey _ignorePointerKey = GlobalKey();
 
@@ -2706,6 +2702,8 @@ class _WidgetInspectorState extends State<WidgetInspector>
     WidgetInspectorService.instance.selection.addListener(_selectionInformationChanged);
     WidgetInspectorService.instance.isSelectMode
         .addListener(_selectionInformationChanged);
+    selection = WidgetInspectorService.instance.selection;
+    isSelectMode = WidgetInspectorService.instance.isSelectMode.value;
   }
 
   @override
@@ -2718,8 +2716,8 @@ class _WidgetInspectorState extends State<WidgetInspector>
   }
 
   void _selectionInformationChanged() => setState((){
-    // Triggers a rebuild of the WidgetInspector. For use when dependant
-    // selection information changes.
+    selection = WidgetInspectorService.instance.selection;
+    isSelectMode = WidgetInspectorService.instance.isSelectMode.value;
   });
 
   bool _hitTestHelper(
@@ -2845,12 +2843,12 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
     // Only exit select mode if there is a button to return to select mode.
     if (widget.selectButtonBuilder != null) {
-      isSelectMode = false;
+      WidgetInspectorService.instance.isSelectMode.value = false;
     }
   }
 
   void _handleEnableSelect() {
-      isSelectMode = true;
+      WidgetInspectorService.instance.isSelectMode.value = true;
   }
 
   @override

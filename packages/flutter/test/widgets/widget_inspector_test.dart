@@ -2016,6 +2016,52 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
   );
 
+    group('InspectorSelection', () {
+      testWidgets('receives notifications when selection changes',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                Text('a'),
+                Text('b'),
+              ],
+            ),
+          ),
+        );
+        final InspectorSelection selection = InspectorSelection();
+        int count = 0;
+        selection.addListener(() {
+          count++;
+        });
+        final RenderParagraph renderObjectA =
+            tester.renderObject<RenderParagraph>(find.text('a'));
+        final RenderParagraph renderObjectB =
+            tester.renderObject<RenderParagraph>(find.text('b'));
+        final Element elementA = find.text('a').evaluate().first;
+
+        selection.candidates = <RenderObject>[renderObjectA, renderObjectB];
+        await tester.pump();
+        expect(count, equals(1));
+
+        selection.index = 1;
+        await tester.pump();
+        expect(count, equals(2));
+
+        selection.clear();
+        await tester.pump();
+        expect(count, equals(3));
+
+        selection.current = renderObjectA;
+        await tester.pump();
+        expect(count, equals(4));
+
+        selection.currentElement = elementA;
+        expect(count, equals(5));
+      });
+    });
+
     test('ext.flutter.inspector.disposeGroup', () async {
       final Object a = Object();
       const String group1 = 'group-1';
