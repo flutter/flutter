@@ -916,7 +916,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       while (child != null) {
         assert(() {
           if (textBaseline == null) {
-            throw FlutterError('To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.');
+            throw FlutterError('To use CrossAxisAlignment.baseline, you must also specify which baseline to use using the "textBaseline" argument.');
           }
           return true;
         }());
