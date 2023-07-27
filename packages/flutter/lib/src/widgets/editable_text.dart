@@ -815,7 +815,7 @@ class EditableText extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
-    this.painter,
+    this.backgroundPainter,
     this.foregroundPainter,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -1829,10 +1829,34 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
-  /// {@macro flutter.rendering.RenderEditablePainter}
-  final RenderEditablePainter? painter;
+  /// {@template flutter.widgets.EditableText.backgroundPainter}
+  /// Painter that can paint beneath the [RenderEditable]'s text content.
+  ///
+  /// It can be used for painting auxiliary content that depends on text layout
+  /// metrics. It is added to [RenderEditable]'s default background painters, which
+  /// paint selection highlight, auto correction highlight, etc.
+  ///
+  /// See also:
+  ///
+  /// * [RenderEditablePainter], which defines the painter interface.
+  /// * [RenderEditable.painter], which this painter is passed to.
+  /// * [EditableText.foregroundPainter], which paints above the text content.
+  /// {@endtemplate}
+  final RenderEditablePainter? backgroundPainter;
 
-  /// {@macro flutter.rendering.RenderEditablePainter}
+  /// {@template flutter.widgets.EditableText.foregroundPainter}
+  /// Painter that can paint above the [RenderEditable]'s text content.
+  ///
+  /// It can be used for painting auxiliary content that depends on text layout
+  /// metrics. It is added to [RenderEditable]'s default foreground painters, which
+  /// paint cursor, etc.
+  ///
+  /// See also:
+  ///
+  /// * [RenderEditablePainter], which defines the painter interface.
+  /// * [RenderEditable.foregroundPainter], which this painter is passed to.
+  /// * [EditableText.backgroundPainter], which paints above the text content.
+  /// {@endtemplate}
   final RenderEditablePainter? foregroundPainter;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
@@ -4748,7 +4772,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             promptRectRange: _currentPromptRectRange,
                             promptRectColor: widget.autocorrectionTextRectColor,
                             clipBehavior: widget.clipBehavior,
-                            painter: widget.painter,
+                            backgroundPainter: widget.backgroundPainter,
                             foregroundPainter: widget.foregroundPainter,
                           ),
                         ),
@@ -4874,7 +4898,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
-    this.painter,
+    this.backgroundPainter,
     this.foregroundPainter,
   }) : super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaler));
 
@@ -4916,7 +4940,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final TextRange? promptRectRange;
   final Color? promptRectColor;
   final Clip clipBehavior;
-  final RenderEditablePainter? painter;
+  final RenderEditablePainter? backgroundPainter;
   final RenderEditablePainter? foregroundPainter;
 
   @override
@@ -4960,7 +4984,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       promptRectRange: promptRectRange,
       promptRectColor: promptRectColor,
       clipBehavior: clipBehavior,
-      painter: painter,
+      painter: backgroundPainter,
       foregroundPainter: foregroundPainter,
     );
   }

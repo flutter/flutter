@@ -317,7 +317,7 @@ class TextField extends StatefulWidget {
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
-    this.painter,
+    this.backgroundPainter,
     this.foregroundPainter
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -795,10 +795,10 @@ class TextField extends StatefulWidget {
   /// configuration, then [materialMisspelledTextStyle] is used by default.
   final SpellCheckConfiguration? spellCheckConfiguration;
 
-  /// {@macro flutter.rendering.RenderEditablePainter}
-  final RenderEditablePainter? painter;
+  /// {@macro flutter.widgets.EditableText.backgroundPainter}
+  final RenderEditablePainter? backgroundPainter;
 
-  /// {@macro flutter.rendering.RenderEditablePainter}
+  /// {@macro flutter.widgets.EditableText.foregroundPainter}
   final RenderEditablePainter? foregroundPainter;
 
   /// The [TextStyle] used to indicate misspelled words in the Material style.
@@ -1445,7 +1445,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           contextMenuBuilder: widget.contextMenuBuilder,
           spellCheckConfiguration: spellCheckConfiguration,
           magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
-          painter: widget.painter,
+          backgroundPainter: widget.backgroundPainter,
           foregroundPainter: widget.foregroundPainter,
         ),
       ),

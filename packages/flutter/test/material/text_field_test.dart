@@ -16637,12 +16637,12 @@ void main() {
   );
 
   testWidgets('Painters are passed to RenderEditable', (WidgetTester tester) async {
-    final RenderEditablePainter painter = _TestRenderEditablePainter();
+    final RenderEditablePainter backgroundPainter = _TestRenderEditablePainter();
     final RenderEditablePainter foregroundPainter = _TestRenderEditablePainter();
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: TextField(painter: painter, foregroundPainter: foregroundPainter),
+          child: TextField(backgroundPainter: backgroundPainter, foregroundPainter: foregroundPainter),
         ),
       ),
     );
@@ -16650,7 +16650,7 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    expect(renderEditable.painter, painter);
+    expect(renderEditable.painter, backgroundPainter);
     expect(renderEditable.foregroundPainter, foregroundPainter);
   });
 }
