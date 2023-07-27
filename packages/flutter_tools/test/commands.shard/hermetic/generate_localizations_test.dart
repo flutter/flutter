@@ -503,9 +503,32 @@ format: true
     );
   });
 
-  testWithoutContext('Empty ARB can be parsed without FormatException', () {
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
-      ..createSync(recursive: true);
-    expect(AppResourceBundle(arbFile), isA<AppResourceBundle>());
+  group(AppResourceBundle, () {
+    testWithoutContext("can be parsed without FormatException when it's content is empty", () {
+      final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+        ..createSync(recursive: true);
+      expect(AppResourceBundle(arbFile), isA<AppResourceBundle>());
+    });
+
+    testUsingContext("would not fail the gen-l10n command when it's content is empty", () async {
+      fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb')).createSync(recursive: true);
+      final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+      pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        artifacts: artifacts,
+        processManager: processManager,
+      );
+      await createTestCommandRunner(command).run(<String>['gen-l10n']);
+
+      final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+      expect(outputDirectory.existsSync(), true);
+      expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
+      expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
