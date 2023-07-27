@@ -10,7 +10,7 @@ target 'ios_add2app' do
 end
 
 target 'ios_add2appTests' do
-  install_flutter_engine_pod
+  install_flutter_engine_pod(flutter_application_path)
   pod 'EarlGreyTest'
 end
 
