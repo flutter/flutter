@@ -977,6 +977,44 @@ Build settings for action build and target plugin2:
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('native assets file', () async {
+      const BuildInfo buildInfo = BuildInfo.debug;
+      final FlutterProject project =
+          FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+      final Uri nativeAssetsYamlUri =
+          project.directory.uri.resolve('some/path/to/native_assets.yaml');
+      await updateGeneratedXcodeProperties(
+        project: project,
+        buildInfo: buildInfo,
+        useMacOSConfig: true,
+        nativeAssets: nativeAssetsYamlUri,
+      );
+
+      final File config = fs.file(
+          'path/to/project/macos/Flutter/ephemeral/Flutter-Generated.xcconfig');
+      expect(config.existsSync(), isTrue);
+
+      final String contents = config.readAsStringSync();
+      expect(contents.contains('NATIVE_ASSETS=${nativeAssetsYamlUri.path}\n'),
+          isTrue);
+
+      final File buildPhaseScript = fs.file(
+          'path/to/project/macos/Flutter/ephemeral/flutter_export_environment.sh');
+      expect(buildPhaseScript.existsSync(), isTrue);
+
+      final String buildPhaseScriptContents =
+          buildPhaseScript.readAsStringSync();
+      expect(
+          buildPhaseScriptContents
+              .contains('export "NATIVE_ASSETS=${nativeAssetsYamlUri.path}"'),
+          isTrue);
+    }, overrides: <Type, Generator>{
+      Artifacts: () => Artifacts.test(localEngine: 'out/host_profile_arm64'),
+      Platform: () => macOS,
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('sets ARCHS=x86_64 when x64 local host engine is set', () async {
       const BuildInfo buildInfo = BuildInfo.debug;
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
