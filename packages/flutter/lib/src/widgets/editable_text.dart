@@ -1830,11 +1830,11 @@ class EditableText extends StatefulWidget {
   final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@template flutter.widgets.EditableText.backgroundPainter}
-  /// Painter that can paint beneath the [RenderEditable]'s text content.
+  /// A painter paints beneath the [RenderEditable]'s text content.
   ///
-  /// It can be used for painting auxiliary content that depends on text layout
-  /// metrics. It is added to [RenderEditable]'s default background painters, which
-  /// paint selection highlight, auto correction highlight, etc.
+  /// It can be used for painting auxiliary content that should repaint when text
+  /// layout metrics. It is added to [RenderEditable]'s default background painters,
+  /// which paint selection highlight, auto correction highlight, etc.
   ///
   /// See also:
   ///
@@ -1845,11 +1845,11 @@ class EditableText extends StatefulWidget {
   final RenderEditablePainter? backgroundPainter;
 
   /// {@template flutter.widgets.EditableText.foregroundPainter}
-  /// Painter that can paint above the [RenderEditable]'s text content.
+  /// A painter that paints above the [RenderEditable]'s text content.
   ///
-  /// It can be used for painting auxiliary content that depends on text layout
-  /// metrics. It is added to [RenderEditable]'s default foreground painters, which
-  /// paint cursor, etc.
+  /// It can be used for painting auxiliary content that should repaint when text
+  /// layout metrics. It is added to [RenderEditable]'s default foreground painters,
+  /// which paint cursor, etc.
   ///
   /// See also:
   ///
