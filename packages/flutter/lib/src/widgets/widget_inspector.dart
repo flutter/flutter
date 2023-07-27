@@ -2685,6 +2685,14 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
   Offset? _lastPointerLocation;
 
+  InspectorSelection get selection =>
+      WidgetInspectorService.instance.selection;
+
+  bool get isSelectMode =>
+      WidgetInspectorService.instance.isSelectMode.value;
+  set isSelectMode(bool value) =>
+      WidgetInspectorService.instance.isSelectMode.value = value;
+
   final GlobalKey _ignorePointerKey = GlobalKey();
 
   /// Distance from the edge of the bounding box for an element to consider
@@ -2695,8 +2703,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
   void initState() {
     super.initState();
 
-    WidgetInspectorService.instance.selection
-        .addListener(_selectionInformationChanged);
+    WidgetInspectorService.instance.selection.addListener(_selectionInformationChanged);
     WidgetInspectorService.instance.isSelectMode
         .addListener(_selectionInformationChanged);
   }
@@ -2793,7 +2800,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
   }
 
   void _inspectAt(Offset position) {
-    if (!WidgetInspectorService.instance.isSelectMode.value) {
+    if (!isSelectMode) {
       return;
     }
 
@@ -2801,7 +2808,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     final RenderObject userRender = ignorePointer.child!;
     final List<RenderObject> selected = hitTest(position, userRender);
 
-    WidgetInspectorService.instance.selection.candidates = selected;
+    selection.candidates = selected;
   }
 
   void _handlePanDown(DragDownDetails event) {
@@ -2823,34 +2830,31 @@ class _WidgetInspectorState extends State<WidgetInspector>
     final ui.FlutterView view = View.of(context);
     final Rect bounds = (Offset.zero & (view.physicalSize / view.devicePixelRatio)).deflate(_kOffScreenMargin);
     if (!bounds.contains(_lastPointerLocation!)) {
-      WidgetInspectorService.instance.selection.clear();
+      selection.clear();
     }
   }
 
   void _handleTap() {
-    if (!WidgetInspectorService.instance.isSelectMode.value) {
+    if (!isSelectMode) {
       return;
     }
     if (_lastPointerLocation != null) {
       _inspectAt(_lastPointerLocation!);
-      WidgetInspectorService.instance
-          ._sendInspectEvent(WidgetInspectorService.instance.selection.current);
+      WidgetInspectorService.instance._sendInspectEvent(selection.current);
     }
 
     // Only exit select mode if there is a button to return to select mode.
     if (widget.selectButtonBuilder != null) {
-      WidgetInspectorService.instance.isSelectMode.value = false;
+      isSelectMode = false;
     }
   }
 
   void _handleEnableSelect() {
-      WidgetInspectorService.instance.isSelectMode.value = true;
+      isSelectMode = true;
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isSelectMode =
-        WidgetInspectorService.instance.isSelectMode.value;
     // Be careful changing this build method. The _InspectorOverlayLayer
     // assumes the root RenderObject for the WidgetInspector will be
     // a RenderStack with a _RenderInspectorOverlay as the last child.
@@ -2874,7 +2878,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
           bottom: _kInspectButtonMargin,
           child: widget.selectButtonBuilder!(context, _handleEnableSelect),
         ),
-      _InspectorOverlay(selection: WidgetInspectorService.instance.selection),
+      _InspectorOverlay(selection: selection),
     ]);
   }
 }
