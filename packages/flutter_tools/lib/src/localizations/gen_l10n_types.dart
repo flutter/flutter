@@ -666,10 +666,10 @@ class AppResourceBundleCollection {
     // "languageToLocales[bundle.locale.languageCode]" is not null
     // by the time we handle locales with country codes.
     final List<File> files = directory
-        .listSync()
-        .whereType<File>()
-        .where((File e) => filenameRE.hasMatch(e.path))
-        .toList()
+      .listSync()
+      .whereType<File>()
+      .where((File e) => filenameRE.hasMatch(e.path))
+      .toList()
       ..sort(sortFilesByPath);
     for (final File file in files) {
       final AppResourceBundle bundle = AppResourceBundle(file);
