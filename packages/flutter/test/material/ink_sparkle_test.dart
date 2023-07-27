@@ -93,38 +93,20 @@ void main() {
   // Goldens //
   /////////////
 
-  testWidgetsWithLeakTracking('Material2 - InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'top_left', 0.2);
   },
     skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
 
-  testWidgetsWithLeakTracking('Material3 - InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
-    await _runM3Test(tester, 'top_left', 0.2);
-  },
-    skip: kIsWeb, // [intended] shaders are not yet supported for web.
-  );
-
-  testWidgetsWithLeakTracking('Material2 - InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'center', 0.5);
   },
     skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
 
-  testWidgetsWithLeakTracking('Material3 - InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
-    await _runM3Test(tester, 'center', 0.5);
-  },
-    skip: kIsWeb, // [intended] shaders are not yet supported for web.
-  );
-
-  testWidgetsWithLeakTracking('Material2 - InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'bottom_right', 0.8);
-  },
-    skip: kIsWeb, // [intended] shaders are not yet supported for web.
-  );
-
-  testWidgetsWithLeakTracking('Material3 - InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
-    await _runM3Test(tester, 'bottom_right', 0.8);
   },
     skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
@@ -164,46 +146,7 @@ Future<void> _runTest(WidgetTester tester, String positionName, double distanceF
     await tester.pump(const Duration(milliseconds: 50));
     await expectLater(
       repaintFinder,
-      matchesGoldenFile('m2_ink_sparkle.$positionName.$i.png'),
-    );
-  }
-}
-
-Future<void> _runM3Test(WidgetTester tester, String positionName, double distanceFromTopLeft) async {
-  final Key repaintKey = UniqueKey();
-  final Key buttonKey = UniqueKey();
-
-  await tester.pumpWidget(MaterialApp(
-    theme: ThemeData(useMaterial3: true),
-    home: Scaffold(
-      body: Center(
-        child: RepaintBoundary(
-          key: repaintKey,
-          child: ElevatedButton(
-            key: buttonKey,
-            style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
-            child: const Text('Sparkle!'),
-            onPressed: () { },
-          ),
-        ),
-      ),
-    ),
-  ));
-
-  final Finder buttonFinder = find.byKey(buttonKey);
-  final Finder repaintFinder = find.byKey(repaintKey);
-  final Offset topLeft = tester.getTopLeft(buttonFinder);
-  final Offset bottomRight = tester.getBottomRight(buttonFinder);
-
-  await _warmUpShader(tester, buttonFinder);
-
-  final Offset target = topLeft + (bottomRight - topLeft) * distanceFromTopLeft;
-  await tester.tapAt(target);
-  for (int i = 0; i <= 5; i++) {
-    await tester.pump(const Duration(milliseconds: 50));
-    await expectLater(
-      repaintFinder,
-      matchesGoldenFile('m3_ink_sparkle.$positionName.$i.png'),
+      matchesGoldenFile('ink_sparkle.$positionName.$i.png'),
     );
   }
 }
