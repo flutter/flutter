@@ -1,6 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
@@ -8,11 +9,12 @@ import 'asset_bundle.dart';
 import 'message_codecs.dart';
 
 // We use .bin as the extension since it is well-known to represent
-// data in some arbitrary binary format. Using a well-known extension here
-// is important for web, because some web servers will not serve files with
-// unrecognized file extensions by default.
-// See https://github.com/flutter/flutter/issues/128456.
+// data in some arbitrary binary format.
 const String _kAssetManifestFilename = 'AssetManifest.bin';
+// We use the same bin file for the web, but slightly bloated because we base64
+// and JSON-encode it so it can be downloaded by even the dumbest of browsers.
+// See https://github.com/flutter/flutter/issues/128456
+const String _kAssetManifestWebFilename = 'AssetManifest.json';
 
 /// Contains details about available assets and their variants.
 /// See [Resolution-aware image assets](https://docs.flutter.dev/ui/assets-and-images#resolution-aware)
@@ -21,6 +23,14 @@ abstract class AssetManifest {
   /// Loads asset manifest data from an [AssetBundle] object and creates an
   /// [AssetManifest] object from that data.
   static Future<AssetManifest> loadFromAssetBundle(AssetBundle bundle) {
+    if (kIsWeb) {
+      return bundle.loadStructuredData(_kAssetManifestWebFilename, (String jsonData) async {
+        // Decode the manifest JSON file to the underlying BIN, and convert to ByteData.
+        final ByteData message = ByteData.sublistView(base64.decode(json.decode(jsonData) as String));
+        // Now we can keep operating as usual.
+        return _AssetManifestBin.fromStandardMessageCodecMessage(message);
+      });
+    }
     return bundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
   }
 

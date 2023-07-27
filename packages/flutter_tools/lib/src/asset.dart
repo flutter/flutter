@@ -437,8 +437,10 @@ class ManifestAssetBundle implements AssetBundle {
 
     final Map<String, List<String>> assetManifest =
       _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
-    final DevFSStringContent assetManifestJson = DevFSStringContent(json.encode(assetManifest));
     final DevFSByteContent assetManifestBinary = _createAssetManifestBinary(assetManifest);
+    final DevFSStringContent assetManifestJson = DevFSStringContent(json.encode(
+      base64.encode(assetManifestBinary.bytes)
+    ));
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
     if (licenseResult.errorMessages.isNotEmpty) {
