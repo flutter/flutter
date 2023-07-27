@@ -612,7 +612,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// Supplies children for layout in the viewport.
   TwoDimensionalChildDelegate get delegate => _delegate;
   TwoDimensionalChildDelegate _delegate;
-  set delegate(TwoDimensionalChildDelegate value) {
+  set delegate(covariant TwoDimensionalChildDelegate value) {
     if (_delegate == value) {
       return;
     }
