@@ -198,18 +198,9 @@ void main() {
 
   // Web has a less threshold for downstream/upstream text position.
   Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(kIsWeb ? 1 : 0, -2);
-  String? lastLookUp;
 
   setUp(() async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'LookUp.invoke') {
-        expect(methodCall.arguments, isA<String>());
-        lastLookUp = methodCall.arguments as String;
-      }
-      return null;
-    });
 
     EditableText.debugDeterministicCursor = false;
     // Fill the clipboard so that the Paste option is available in the text
