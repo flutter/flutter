@@ -1091,7 +1091,7 @@ targets:
       task_name: web_benchmarks_html
     runIf:
       - dev/**
-    - bin/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_benchmarks_skwasm
