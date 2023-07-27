@@ -445,6 +445,7 @@
 ../../../fuchsia/sdk/linux/.build-id
 ../../../fuchsia/sdk/linux/.versions
 ../../../fuchsia/sdk/linux/AUTHORS
+../../../fuchsia/sdk/linux/NOTICE.fuchsia
 ../../../fuchsia/sdk/linux/PATENTS
 ../../../fuchsia/sdk/linux/README.md
 ../../../fuchsia/sdk/linux/arch/arm64/sysroot/dist/lib/asan/ld.so.1
