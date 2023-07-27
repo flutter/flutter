@@ -481,6 +481,11 @@ Your $application code is in $relativeAppMain.
       }
     }
 
+    if(includeAndroid && globals.java?.version != null){
+      _printWarningIncompatibleJavaGradleVersions(javaVersion: globals.java?.version, templateGradleVersion: templateContext.gradleVersion);
+      _printWarningIncompatibleJavaAgpVersions(javaVersion: globals.java?.version, templateAgpVersion: templateContext.agpVersion);
+    }
+
     return FlutterCommandResult.success();
   }
 
@@ -790,4 +795,61 @@ The web is currently not supported on your local environment.
 For more details, see: https://flutter.dev/docs/get-started/web
 ''');
   }
+}
+
+// TODO(camsim99): comfbine warnings into one
+void _printWarningIncompatibleJavaGradleVersions({required String javaVersion, required String templateGradleVersion, required FlutterProjectType projectType}) {
+  if (gradle.validateJavaGradle(globals.logger, javaV: javaVersion, gradleV: templateGradleVersion)) {
+    // Java version and Gradle versions are compatible.
+    return;
+  }
+
+  //TODO(camsim99): try different styles
+  //TODO(camsim99): Get actual path(s)? for gradle properties files.
+  globals.printWarning('''
+The version of Java detected conflicts with the Gradle version used in your new
+Flutter $projectType.
+
+[RECOMMENDED] To keep the default Gradle version $templateGradleVersion, make
+sure to download a compatible Java version. You may configure this compatible
+Java version by running: `flutter config --jdk-dir=<JDK_DIRECTORY>`.
+
+Alternatively, to continue using your configured Java version, update the Gradle
+version specified in any `android/gradle/wrapper/gradle-wrapper.properties`
+files to a compatible Gradle version.
+
+See
+https://docs.gradle.org/current/userguide/compatibility.html#java for more
+details on compatible Java/Gradle versions.
+''',
+    emphasis: true
+  );
+}
+
+void _printWarningIncompatibleJavaAgpVersions({required String javaVersion, required String templateAgpVersion, required FlutterProjectType projectType}) {
+  if (gradle.validateJavaAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersion)) {
+    // Java version and AGP versions are compatible.
+    return;
+  }
+
+  //TODO(camsim99): try different styles
+  //TODO(camsim99): Get path(s)? based on project type
+  globals.printWarning('''
+The version of Java detected conflicts with the Android Gradle Plugin (AGP)
+version used in your new Flutter $projectType.
+
+[STRONGLY RECOMMENDED] To keep the default AGP version $templateAgpVersion, make
+sure to download a compatible Java version. You may configure this compatible
+Java version by running: `flutter config --jdk-dir=<JDK_DIRECTORY>`.
+
+Alternatively, you may attempt to continue using your configured Java version,
+update the AGP version specified in any `android/build.gradle` files to a
+compatible AGP version.
+
+See
+https://developer.android.com/build/releases/gradle-plugin for more details on
+compatible Java/AGP versions.
+''',
+    emphasis: true
+  );
 }
