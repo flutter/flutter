@@ -69,7 +69,9 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   late final Uri _dartExecutable =
       fileSystem.directory(Cache.flutterRoot).uri.resolve('bin/dart');
 
-  late final native_assets_builder.NativeAssetsBuildRunner _buildRunner =
+  // TODO(dacoharkes): Reuse once we can.
+  // https://github.com/dart-lang/native/issues/102
+  native_assets_builder.NativeAssetsBuildRunner _buildRunner() =>
       native_assets_builder.NativeAssetsBuildRunner(
           logger: _logger, dartExecutable: _dartExecutable);
 
@@ -98,7 +100,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     required OS targetOs,
     required Uri workingDirectory,
   }) {
-    return _buildRunner.dryRun(
+    return _buildRunner().dryRun(
       includeParentEnvironment: includeParentEnvironment,
       linkModePreference: linkModePreference,
       targetOs: targetOs,
@@ -117,7 +119,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     int? targetAndroidNdkApi,
     IOSSdk? targetIOSSdk,
   }) {
-    return _buildRunner.build(
+    return _buildRunner().build(
       buildMode: buildMode,
       cCompilerConfig: cCompilerConfig,
       includeParentEnvironment: includeParentEnvironment,
