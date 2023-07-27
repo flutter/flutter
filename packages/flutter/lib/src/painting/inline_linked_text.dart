@@ -155,30 +155,30 @@ class InlineLinkedText extends TextSpan {
     };
   }
 
-  static List<_TextLinkerMatch> _cleanTextLinkerSingles(Iterable<_TextLinkerMatch> textLinkerSingles) {
-    final List<_TextLinkerMatch> nextTextLinkerSingles = textLinkerSingles.toList();
+  static List<_TextLinkerMatch> _cleanTextLinkerMatches(Iterable<_TextLinkerMatch> textLinkerMatches) {
+    final List<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches.toList();
 
     // Sort by start.
-    nextTextLinkerSingles.sort((_TextLinkerMatch a, _TextLinkerMatch b) {
+    nextTextLinkerMatches.sort((_TextLinkerMatch a, _TextLinkerMatch b) {
       return a.textRange.start.compareTo(b.textRange.start);
     });
 
     int lastEnd = 0;
-    nextTextLinkerSingles.removeWhere((_TextLinkerMatch textLinkerSingle) {
+    nextTextLinkerMatches.removeWhere((_TextLinkerMatch textLinkerMatch) {
       // Return empty ranges.
-      if (textLinkerSingle.textRange.start == textLinkerSingle.textRange.end) {
+      if (textLinkerMatch.textRange.start == textLinkerMatch.textRange.end) {
         return true;
       }
 
       // Remove overlapping ranges.
-      final bool overlaps = textLinkerSingle.textRange.start < lastEnd;
+      final bool overlaps = textLinkerMatch.textRange.start < lastEnd;
       if (!overlaps) {
-        lastEnd = textLinkerSingle.textRange.end;
+        lastEnd = textLinkerMatch.textRange.end;
       }
       return overlaps;
     });
 
-    return nextTextLinkerSingles;
+    return nextTextLinkerMatches;
   }
 
   /// Apply the given [TextLinker]s to the given [InlineSpan]s and return the
@@ -190,82 +190,82 @@ class InlineLinkedText extends TextSpan {
     final String spansText = spans.fold<String>('', (String value, InlineSpan span) {
       return value + span.toPlainText();
     });
-    final Iterable<_TextLinkerMatch> textLinkerSingles =
-        _cleanTextLinkerSingles(
+    final Iterable<_TextLinkerMatch> textLinkerMatches =
+        _cleanTextLinkerMatches(
           _TextLinkerMatch.fromTextLinkers(textLinkers, spansText),
         );
 
     final (Iterable<InlineSpan> output, _) =
-        _linkSpansRecursive(spans, textLinkerSingles, 0);
+        _linkSpansRecursive(spans, textLinkerMatches, 0);
     return output;
   }
 
-  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>) _linkSpansRecursive(Iterable<InlineSpan> spans, Iterable<_TextLinkerMatch> textLinkerSingles, int index) {
+  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>) _linkSpansRecursive(Iterable<InlineSpan> spans, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
     final List<InlineSpan> output = <InlineSpan>[];
-    Iterable<_TextLinkerMatch> nextTextLinkerSingles = textLinkerSingles;
+    Iterable<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches;
     int nextIndex = index;
     for (final InlineSpan span in spans) {
-      final (InlineSpan childSpan, Iterable<_TextLinkerMatch> childTextLinkerSingles) = _linkSpanRecursive(
+      final (InlineSpan childSpan, Iterable<_TextLinkerMatch> childTextLinkerMatches) = _linkSpanRecursive(
         span,
-        nextTextLinkerSingles,
+        nextTextLinkerMatches,
         nextIndex,
       );
       output.add(childSpan);
-      nextTextLinkerSingles = childTextLinkerSingles;
+      nextTextLinkerMatches = childTextLinkerMatches;
       nextIndex += span.toPlainText().length; // TODO(justinmc): Performance? Maybe you could return the index rather than recalculating it?
     }
 
-    return (output, nextTextLinkerSingles);
+    return (output, nextTextLinkerMatches);
   }
 
   // index is the index of the start of `span` in the overall flattened tree
   // string.
-  static (InlineSpan, Iterable<_TextLinkerMatch>) _linkSpanRecursive(InlineSpan span, Iterable<_TextLinkerMatch> textLinkerSingles, int index) {
+  static (InlineSpan, Iterable<_TextLinkerMatch>) _linkSpanRecursive(InlineSpan span, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
     if (span is! TextSpan) {
-      return (span, textLinkerSingles);
+      return (span, textLinkerMatches);
     }
 
     final List<InlineSpan> nextChildren = <InlineSpan>[];
-    List<_TextLinkerMatch> nextTextLinkerSingles = <_TextLinkerMatch>[...textLinkerSingles];
+    List<_TextLinkerMatch> nextTextLinkerMatches = <_TextLinkerMatch>[...textLinkerMatches];
     int lastLinkEnd = index;
     if (span.text?.isNotEmpty ?? false) {
       final int textEnd = index + span.text!.length;
-      for (final _TextLinkerMatch textLinkerSingle in textLinkerSingles) {
-        if (textLinkerSingle.textRange.start >= textEnd) {
+      for (final _TextLinkerMatch textLinkerMatch in textLinkerMatches) {
+        if (textLinkerMatch.textRange.start >= textEnd) {
           // Because ranges is ordered, there are no more relevant ranges for this
           // text.
           break;
         }
-        if (textLinkerSingle.textRange.end <= index) {
+        if (textLinkerMatch.textRange.end <= index) {
           // This range ends before this span and is therefore irrelevant to it.
           // It should have been removed from ranges.
           assert(false, 'Invalid ranges.');
-          nextTextLinkerSingles.removeAt(0);
+          nextTextLinkerMatches.removeAt(0);
           continue;
         }
-        if (textLinkerSingle.textRange.start > index) {
+        if (textLinkerMatch.textRange.start > index) {
           // Add the unlinked text before the range.
           nextChildren.add(TextSpan(
             text: span.text!.substring(
               lastLinkEnd - index,
-              textLinkerSingle.textRange.start - index,
+              textLinkerMatch.textRange.start - index,
             ),
           ));
         }
         // Add the link itself.
-        final int linkStart = math.max(textLinkerSingle.textRange.start, index);
-        lastLinkEnd = math.min(textLinkerSingle.textRange.end, textEnd);
-        nextChildren.add(textLinkerSingle.linkBuilder(
+        final int linkStart = math.max(textLinkerMatch.textRange.start, index);
+        lastLinkEnd = math.min(textLinkerMatch.textRange.end, textEnd);
+        nextChildren.add(textLinkerMatch.linkBuilder(
           span.text!.substring(linkStart - index, lastLinkEnd - index),
-          textLinkerSingle.linkString,
+          textLinkerMatch.linkString,
         ));
-        if (textLinkerSingle.textRange.end > textEnd) {
+        if (textLinkerMatch.textRange.end > textEnd) {
           // If we only partially used this range, keep it in nextRanges. Since
           // overlapping ranges have been removed, this must be the last relevant
           // range for this span.
           break;
         }
-        nextTextLinkerSingles.removeAt(0);
+        nextTextLinkerMatches.removeAt(0);
       }
 
       // Add any extra text after any ranges.
@@ -281,13 +281,13 @@ class InlineLinkedText extends TextSpan {
     if (span.children?.isNotEmpty ?? false) {
       final (
         Iterable<InlineSpan> childrenSpans,
-        Iterable<_TextLinkerMatch> childrenTextLinkerSingles,
+        Iterable<_TextLinkerMatch> childrenTextLinkerMatches,
       ) = _linkSpansRecursive(
         span.children!,
-        nextTextLinkerSingles,
+        nextTextLinkerMatches,
         index + (span.text?.length ?? 0),
       );
-      nextTextLinkerSingles = childrenTextLinkerSingles.toList();
+      nextTextLinkerMatches = childrenTextLinkerMatches.toList();
       nextChildren.addAll(childrenSpans);
     }
 
@@ -296,7 +296,7 @@ class InlineLinkedText extends TextSpan {
         style: span.style,
         children: nextChildren,
       ),
-      nextTextLinkerSingles,
+      nextTextLinkerMatches,
     );
   }
 }
@@ -376,11 +376,11 @@ class _TextLinkerMatch {
 
   /// Returns a list of [InlineSpan]s representing all of the [text].
   ///
-  /// Ranges matched by [textLinkerSingles] are built with their respective
+  /// Ranges matched by [textLinkerMatches] are built with their respective
   /// [LinkBuilder], and other text is represented with a simple [TextSpan].
-  static List<InlineSpan> getSpansForMany(Iterable<_TextLinkerMatch> textLinkerSingles, String text) {
+  static List<InlineSpan> getSpansForMany(Iterable<_TextLinkerMatch> textLinkerMatches, String text) {
     // Sort so that overlapping ranges can be detected and ignored.
-    final List<_TextLinkerMatch> textLinkerSinglesList = textLinkerSingles
+    final List<_TextLinkerMatch> textLinkerMatchesList = textLinkerMatches
         .toList()
         ..sort((_TextLinkerMatch a, _TextLinkerMatch b) {
           return a.textRange.start.compareTo(b.textRange.start);
@@ -388,25 +388,25 @@ class _TextLinkerMatch {
 
     final List<InlineSpan> spans = <InlineSpan>[];
     int index = 0;
-    for (final _TextLinkerMatch textLinkerSingle in textLinkerSinglesList) {
+    for (final _TextLinkerMatch textLinkerMatch in textLinkerMatchesList) {
       // Ignore overlapping ranges.
-      if (index > textLinkerSingle.textRange.start) {
+      if (index > textLinkerMatch.textRange.start) {
         continue;
       }
-      if (index < textLinkerSingle.textRange.start) {
+      if (index < textLinkerMatch.textRange.start) {
         spans.add(TextSpan(
-          text: text.substring(index, textLinkerSingle.textRange.start),
+          text: text.substring(index, textLinkerMatch.textRange.start),
         ));
       }
-      spans.add(textLinkerSingle.linkBuilder(
+      spans.add(textLinkerMatch.linkBuilder(
         text.substring(
-          textLinkerSingle.textRange.start,
-          textLinkerSingle.textRange.end,
+          textLinkerMatch.textRange.start,
+          textLinkerMatch.textRange.end,
         ),
-        textLinkerSingle.linkString,
+        textLinkerMatch.linkString,
       ));
 
-      index = textLinkerSingle.textRange.end;
+      index = textLinkerMatch.textRange.end;
     }
     if (index < text.length) {
       spans.add(TextSpan(
@@ -419,7 +419,7 @@ class _TextLinkerMatch {
 
   @override
   String toString() {
-    return '_TextLinkerSingle $textRange, $linkBuilder, $linkString';
+    return '_TextLinkerMatch $textRange, $linkBuilder, $linkString';
   }
 }
 
@@ -507,8 +507,8 @@ class TextLinker {
   /// Builds [linkBuilder] for any ranges found by [rangesFinder]. All other
   /// text is presented in a plain [TextSpan].
   List<InlineSpan> getSpans(String text) {
-    final Iterable<_TextLinkerMatch> textLinkerSingles = _link(text);
-    return _TextLinkerMatch.getSpansForMany(textLinkerSingles, text);
+    final Iterable<_TextLinkerMatch> textLinkerMatches = _link(text);
+    return _TextLinkerMatch.getSpansForMany(textLinkerMatches, text);
   }
 
   @override
