@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:logging/logging.dart' as logging;
-import 'package:native_assets_builder/native_assets_builder.dart';
+// import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 import 'package:package_config/package_config.dart';
@@ -16,6 +16,7 @@ import '../cache.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/native_assets.dart';
+import '../native_assets.dart';
 
 /// Dry run the native builds.
 ///
@@ -23,21 +24,22 @@ import '../ios/native_assets.dart';
 /// of all assets will be so that this can be embedded in the kernel file and
 /// the Xcode project.
 Future<Uri?> dryRunNativeAssetsMacOS({
+  required NativeAssetsBuildRunner buildRunner,
   required Uri projectUri,
   bool flutterTester = false,
   required FileSystem fileSystem,
 }) async {
-  if (await hasNoPackageConfig(projectUri, fileSystem)) {
+  if (await hasNoPackageConfig(buildRunner)) {
     return null;
   }
-  if (await isDisabledAndNoNativeAssets(projectUri)) {
+  if (await isDisabledAndNoNativeAssets(buildRunner)) {
     return null;
   }
 
   final Uri buildUri_ = buildUri(projectUri, OS.macOS);
   final Iterable<Asset> nativeAssetPaths =
       await dryRunNativeAssetsMacosInternal(
-          fileSystem, projectUri, flutterTester);
+          fileSystem, projectUri, flutterTester, buildRunner);
   final Uri nativeAssetsUri =
       await writeNativeAssetsYaml(nativeAssetPaths, buildUri_, fileSystem);
   return nativeAssetsUri;
@@ -47,14 +49,15 @@ Future<Uri?> dryRunNativeAssetsMacOS({
 ///
 /// Needed for `flutter run -d all`.
 Future<Uri?> dryRunNativeAssetsMultipeOSes({
+  required NativeAssetsBuildRunner buildRunner,
   required Uri projectUri,
   required FileSystem fileSystem,
   required Iterable<TargetPlatform> targetPlatforms,
 }) async {
-  if (await hasNoPackageConfig(projectUri, fileSystem)) {
+  if (await hasNoPackageConfig(buildRunner)) {
     return null;
   }
-  if (await isDisabledAndNoNativeAssets(projectUri)) {
+  if (await isDisabledAndNoNativeAssets(buildRunner)) {
     return null;
   }
 
@@ -63,9 +66,11 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
     if (targetPlatforms.contains(TargetPlatform.darwin) ||
         (targetPlatforms.contains(TargetPlatform.tester) &&
             OS.current == OS.macOS))
-      ...await dryRunNativeAssetsMacosInternal(fileSystem, projectUri, false),
+      ...await dryRunNativeAssetsMacosInternal(
+          fileSystem, projectUri, false, buildRunner),
     if (targetPlatforms.contains(TargetPlatform.ios))
-      ...await dryRunNativeAssetsIosInternal(fileSystem, projectUri)
+      ...await dryRunNativeAssetsIosInternal(
+          fileSystem, projectUri, buildRunner)
   ];
   final Uri nativeAssetsUri =
       await writeNativeAssetsYaml(nativeAssetPaths, buildUri_, fileSystem);
@@ -76,15 +81,13 @@ Future<Iterable<Asset>> dryRunNativeAssetsMacosInternal(
   FileSystem fileSystem,
   Uri projectUri,
   bool flutterTester,
+  NativeAssetsBuildRunner buildRunner,
 ) async {
   const OS targetOs = OS.macOS;
   final Uri buildUri_ = buildUri(projectUri, targetOs);
 
   globals.logger.printTrace('Dry running native assets for $targetOs.');
-  final List<Asset> nativeAssets = await NativeAssetsBuildRunner(
-    logger: loggingLogger,
-    dartExecutable: flutterDartUri(fileSystem),
-  ).dryRun(
+  final List<Asset> nativeAssets = await buildRunner.dryRun(
     linkModePreference: LinkModePreference.dynamic,
     targetOs: targetOs,
     workingDirectory: projectUri,
@@ -107,6 +110,7 @@ Future<Iterable<Asset>> dryRunNativeAssetsMacosInternal(
 /// assets mapping. This can be used for JIT mode without sandbox on the host.
 /// This is used in `flutter test` and `flutter run -d flutter-tester`.
 Future<Uri?> buildNativeAssetsMacOS({
+  required NativeAssetsBuildRunner buildRunner,
   List<DarwinArch>? darwinArchs,
   required Uri projectUri,
   required BuildMode buildMode,
@@ -115,10 +119,10 @@ Future<Uri?> buildNativeAssetsMacOS({
   bool writeYamlFile = true,
   required FileSystem fileSystem,
 }) async {
-  if (await hasNoPackageConfig(projectUri, fileSystem)) {
+  if (await hasNoPackageConfig(buildRunner)) {
     return null;
   }
-  if (await isDisabledAndNoNativeAssets(projectUri)) {
+  if (await isDisabledAndNoNativeAssets(buildRunner)) {
     return null;
   }
 
@@ -134,10 +138,7 @@ Future<Uri?> buildNativeAssetsMacOS({
       .printTrace('Building native assets for $targets $buildModeCli.');
   final List<Asset> nativeAssets = <Asset>[
     for (final Target target in targets)
-      ...await NativeAssetsBuildRunner(
-        logger: loggingLogger,
-        dartExecutable: flutterDartUri(fileSystem),
-      ).build(
+      ...await buildRunner.build(
         linkModePreference: LinkModePreference.dynamic,
         target: target,
         buildMode: buildModeCli,
@@ -170,11 +171,8 @@ Future<Uri?> buildNativeAssetsMacOS({
 /// Native asset builds cannot be run without a package config. If there is
 /// no package config, leave a logging trace about that.
 Future<bool> hasNoPackageConfig(
-    Uri workingDirectory, FileSystem fileSystem) async {
-  final File packageConfigJson = fileSystem
-      .directory(workingDirectory.toFilePath())
-      .childFile('.dart_tool/package_config.json');
-  final bool packageConfigExists = await packageConfigJson.exists();
+    NativeAssetsBuildRunner buildRunner) async {
+  final bool packageConfigExists = await buildRunner.hasPackageConfig();
   if (!packageConfigExists) {
     globals.logger.printTrace(
         'No package config found. Skipping native assets compilation.');
@@ -187,15 +185,13 @@ Future<bool> hasNoPackageConfig(
 ///
 /// If any of the dependencies have native assets, but native assets are
 /// disabled, exits the tool.
-Future<bool> isDisabledAndNoNativeAssets(Uri workingDirectory) async {
+Future<bool> isDisabledAndNoNativeAssets(
+    NativeAssetsBuildRunner buildRunner) async {
   if (featureFlags.isNativeAssetsEnabled) {
     return false;
   }
-
-  final PackageLayout packageLayout =
-      await PackageLayout.fromRootPackageRoot(workingDirectory);
   final List<Package> packagesWithNativeAssets =
-      await packageLayout.packagesWithNativeAssets;
+      await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
     return true;
   }
@@ -212,14 +208,16 @@ Future<bool> isDisabledAndNoNativeAssets(Uri workingDirectory) async {
 ///
 /// Exits the tool if the above condition is not satisfied.
 Future<void> ensureNoNativeAssetsOrOsIsSupported(
-    Uri workingDirectory, String os, FileSystem fileSystem) async {
-  if (await hasNoPackageConfig(workingDirectory, fileSystem)) {
+  Uri workingDirectory,
+  String os,
+  FileSystem fileSystem,
+  NativeAssetsBuildRunner buildRunner,
+) async {
+  if (await hasNoPackageConfig(buildRunner)) {
     return;
   }
-  final PackageLayout packageLayout =
-      await PackageLayout.fromRootPackageRoot(workingDirectory);
   final List<Package> packagesWithNativeAssets =
-      await packageLayout.packagesWithNativeAssets;
+      await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
     return;
   }

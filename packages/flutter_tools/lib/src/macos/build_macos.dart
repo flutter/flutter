@@ -15,6 +15,7 @@ import '../ios/xcodeproj.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
+import '../native_assets.dart';
 import '../project.dart';
 import 'cocoapod_utils.dart';
 import 'migrations/flutter_application_migration.dart';
@@ -75,9 +76,13 @@ Future<void> buildMacOS({
   /// that it can be read by the kernel target in `flutter assemble`. See
   /// lib/src/build_system/targets/native_assets.dart for why we don't embed the
   /// native assets yaml produced inside `flutter assemble` itself.
+  final Uri projectUri = flutterProject.directory.uri;
+  final NativeAssetsBuildRunner buildRunner =
+      NativeAssetsBuildRunnerImpl(projectUri, fileSystem);
   final Uri? nativeAssetsYaml = await dryRunNativeAssetsMacOS(
-    projectUri: flutterProject.directory.uri,
+    projectUri: projectUri,
     fileSystem: fileSystem,
+    buildRunner: buildRunner,
   );
 
   // Write configuration to an xconfig file in a standard location.

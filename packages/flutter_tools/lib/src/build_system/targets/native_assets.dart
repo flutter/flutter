@@ -8,6 +8,7 @@ import '../../globals.dart' as globals;
 import '../../ios/native_assets.dart';
 import '../../macos/native_assets.dart';
 import '../../macos/xcode.dart';
+import '../../native_assets.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
 import 'common.dart';
@@ -46,6 +47,8 @@ class NativeAssets extends Target {
 
     final Uri projectUri = environment.projectDir.uri;
     final FileSystem fileSystem = globals.fs;
+    final NativeAssetsBuildRunner buildRunner =
+        NativeAssetsBuildRunnerImpl(projectUri, fileSystem);
 
     switch (targetPlatform) {
       case TargetPlatform.ios:
@@ -76,6 +79,7 @@ class NativeAssets extends Target {
           projectUri: projectUri,
           codesignIdentity: environment.defines[kCodesignIdentity],
           fileSystem: fileSystem,
+          buildRunner: buildRunner,
         );
       case TargetPlatform.darwin:
         final String? darwinArchsEnvironment =
@@ -99,6 +103,7 @@ class NativeAssets extends Target {
           codesignIdentity: environment.defines[kCodesignIdentity],
           writeYamlFile: false,
           fileSystem: fileSystem,
+          buildRunner: buildRunner,
         );
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:

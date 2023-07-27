@@ -24,6 +24,7 @@ import 'features.dart';
 import 'globals.dart' as globals;
 import 'ios/native_assets.dart';
 import 'macos/native_assets.dart';
+import 'native_assets.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
@@ -454,12 +455,15 @@ class HotRunner extends ResidentRunner {
   /// native assets after hot restart.
   Future<Uri?> _getNativeAssetsYaml() async {
     final Uri projectUri = Uri.directory(projectRootPath);
+    final NativeAssetsBuildRunner buildRunner =
+        NativeAssetsBuildRunnerImpl(projectUri, fileSystem);
     if (flutterDevices.length != 1) {
       return dryRunNativeAssetsMultipeOSes(
         projectUri: projectUri,
         fileSystem: fileSystem,
         targetPlatforms:
             flutterDevices.map((FlutterDevice d) => d.targetPlatform).nonNulls,
+        buildRunner: buildRunner,
       );
     }
     final FlutterDevice flutterDevice = flutterDevices.single;
@@ -471,11 +475,13 @@ class HotRunner extends ResidentRunner {
         nativeAssetsYaml = await dryRunNativeAssetsMacOS(
           projectUri: projectUri,
           fileSystem: fileSystem,
+          buildRunner: buildRunner,
         );
       case TargetPlatform.ios:
         nativeAssetsYaml = await dryRunNativeAssetsiOS(
           projectUri: projectUri,
           fileSystem: fileSystem,
+          buildRunner: buildRunner,
         );
       case TargetPlatform.tester:
         if (const LocalPlatform().isMacOS) {
@@ -483,10 +489,15 @@ class HotRunner extends ResidentRunner {
             projectUri: projectUri,
             flutterTester: true,
             fileSystem: fileSystem,
+            buildRunner: buildRunner,
           );
         } else {
           await ensureNoNativeAssetsOrOsIsSupported(
-              projectUri, const LocalPlatform().operatingSystem, fileSystem);
+            projectUri,
+            const LocalPlatform().operatingSystem,
+            fileSystem,
+            buildRunner,
+          );
           nativeAssetsYaml = null;
         }
       case TargetPlatform.android_arm:
@@ -501,7 +512,11 @@ class HotRunner extends ResidentRunner {
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
         await ensureNoNativeAssetsOrOsIsSupported(
-            projectUri, targetPlatform.toString(), fileSystem);
+          projectUri,
+          targetPlatform.toString(),
+          fileSystem,
+          buildRunner,
+        );
         nativeAssetsYaml = null;
     }
     return nativeAssetsYaml;

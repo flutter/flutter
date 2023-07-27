@@ -22,6 +22,7 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../globals.dart' as globals;
 import '../macos/native_assets.dart';
+import '../native_assets.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';
@@ -157,16 +158,23 @@ class FlutterTesterDevice extends Device {
 
     Uri? nativeAssetsYaml;
     final Uri projectUri = FlutterProject.current().directory.uri;
+    final NativeAssetsBuildRunner buildRunner =
+        NativeAssetsBuildRunnerImpl(projectUri, _fileSystem);
     if (globals.platform.isMacOS) {
       nativeAssetsYaml = await buildNativeAssetsMacOS(
         buildMode: BuildMode.debug,
         projectUri: projectUri,
         flutterTester: true,
         fileSystem: _fileSystem,
+          buildRunner: buildRunner
       );
     } else {
       await ensureNoNativeAssetsOrOsIsSupported(
-          projectUri, const LocalPlatform().operatingSystem, _fileSystem);
+        projectUri,
+        const LocalPlatform().operatingSystem,
+        _fileSystem,
+        buildRunner,
+      );
       nativeAssetsYaml = null;
     }
 

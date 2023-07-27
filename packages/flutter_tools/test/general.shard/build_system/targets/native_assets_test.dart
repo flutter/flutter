@@ -66,4 +66,9 @@ void main() {
     // Won't build any native assets as there aren't any in the test project dir.
     await const NativeAssets().build(iosEnvironment);
   });
+
+  // TODO(dacoharkes): Use dependency injection to use FakeNativeAssetsBuildRunner
+  // for testing the NativeAssets Target.
+  // [Target] mentions dependency injection, but doesn't detail how to
+  // inject a dependency.
 }

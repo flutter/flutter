@@ -24,6 +24,7 @@ import '../macos/xcode.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
+import '../native_assets.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'application_package.dart';
@@ -238,10 +239,13 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final FlutterProject project = FlutterProject.current();
-
+  final Uri projectUri = project.directory.uri;
+  final NativeAssetsBuildRunner buildRunner =
+      NativeAssetsBuildRunnerImpl(projectUri, fileSystem);
   final Uri? nativeAssetsYaml = await dryRunNativeAssetsiOS(
-    projectUri: project.directory.uri,
+    projectUri: projectUri,
     fileSystem: fileSystem,
+    buildRunner: buildRunner,
   );
   await updateGeneratedXcodeProperties(
     project: project,

@@ -17,6 +17,7 @@ import '../compile.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/native_assets.dart';
+import '../native_assets.dart';
 import '../project.dart';
 import 'test_time_recorder.dart';
 
@@ -167,18 +168,22 @@ class TestCompiler {
 
       Uri? nativeAssetsYaml;
       final Uri projectUri = FlutterProject.current().directory.uri;
+      final NativeAssetsBuildRunner buildRunner =
+          NativeAssetsBuildRunnerImpl(projectUri, globals.fs);
       if (globals.platform.isMacOS) {
         nativeAssetsYaml = await buildNativeAssetsMacOS(
           buildMode: BuildMode.debug,
           projectUri: projectUri,
           flutterTester: true,
           fileSystem: globals.fs,
+          buildRunner: buildRunner,
       );
       } else {
         await ensureNoNativeAssetsOrOsIsSupported(
           projectUri,
           const LocalPlatform().operatingSystem,
           globals.fs,
+          buildRunner,
         );
       }
 

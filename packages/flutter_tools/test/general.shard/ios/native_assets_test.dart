@@ -9,25 +9,33 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/native_assets.dart';
+import 'package:flutter_tools/src/native_assets.dart';
+import 'package:native_assets_cli/native_assets_cli.dart'
+    hide BuildMode, Target;
+import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
+import 'package:package_config/package_config_types.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   late FakeProcessManager processManager;
-  late Environment iosEnvironment;
+  late Environment environment;
   late Artifacts artifacts;
   late FileSystem fileSystem;
   late BufferLogger logger;
+  late Uri projectUri;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
-    iosEnvironment = Environment.test(
+    environment = Environment.test(
       fileSystem.currentDirectory,
       inputs: <String, String>{},
       artifacts: artifacts,
@@ -35,14 +43,18 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
     );
-    iosEnvironment.buildDir.createSync(recursive: true);
+    environment.buildDir.createSync(recursive: true);
+    projectUri = environment.projectDir.uri;
   });
 
   testUsingContext('dry run with no package config', () async {
     expect(
       await dryRunNativeAssetsiOS(
-        projectUri: iosEnvironment.projectDir.uri,
+        projectUri: projectUri,
         fileSystem: fileSystem,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          hasPackageConfigResult: false,
+        ),
       ),
       null,
     );
@@ -56,13 +68,159 @@ void main() {
     await buildNativeAssetsiOS(
       darwinArchs: <DarwinArch>[DarwinArch.arm64],
       environmentType: EnvironmentType.simulator,
-      projectUri: iosEnvironment.projectDir.uri,
+      projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
+      buildRunner: FakeNativeAssetsBuildRunner(
+        hasPackageConfigResult: false,
+      ),
     );
     expect(
       (globals.logger as BufferLogger).traceText,
       contains('No package config found. Skipping native assets compilation.'),
     );
   });
+
+
+  testUsingContext('dry run with assets but not enabled', () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      () => dryRunNativeAssetsiOS(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+        ),
+      ),
+      throwsToolExit(
+        message:
+            'Package(s) bar require the native assets feature to be enabled. '
+            'Enable using `flutter config --enable-native-assets`.',
+      ),
+    );
+  });
+
+  testUsingContext('dry run with assets', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    final Uri? nativeAssetsYaml = await dryRunNativeAssetsiOS(
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      buildRunner: FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+        dryRunResult: <Asset>[
+          Asset(
+            name: 'package:bar/bar.dart',
+            linkMode: LinkMode.dynamic,
+            target: native_assets_cli.Target.macOSArm64,
+            path: AssetAbsolutePath(Uri.file('bar.dylib')),
+          ),
+          Asset(
+            name: 'package:bar/bar.dart',
+            linkMode: LinkMode.dynamic,
+            target: native_assets_cli.Target.macOSX64,
+            path: AssetAbsolutePath(Uri.file('bar.dylib')),
+          ),
+        ],
+      ),
+    );
+    expect(
+      nativeAssetsYaml,
+      projectUri.resolve('build/native_assets/ios/native_assets.yaml'),
+    );
+    expect(
+      await fileSystem.file(nativeAssetsYaml).readAsString(),
+      contains('package:bar/bar.dart'),
+    );
+  });
+
+  testUsingContext('build with assets but not enabled', () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      () => buildNativeAssetsiOS(
+        darwinArchs: <DarwinArch>[DarwinArch.arm64],
+        environmentType: EnvironmentType.simulator,
+        projectUri: projectUri,
+        buildMode: BuildMode.debug,
+        fileSystem: fileSystem,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+        ),
+      ),
+      throwsToolExit(
+        message:
+            'Package(s) bar require the native assets feature to be enabled. '
+            'Enable using `flutter config --enable-native-assets`.',
+      ),
+    );
+  });
+
+  testUsingContext('build no assets', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    await buildNativeAssetsiOS(
+      darwinArchs: <DarwinArch>[DarwinArch.arm64],
+      environmentType: EnvironmentType.simulator,
+      projectUri: projectUri,
+      buildMode: BuildMode.debug,
+      fileSystem: fileSystem,
+      buildRunner: FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+        buildResult: <Asset>[],
+      ),
+    );
+  });
+
+  testUsingContext('build with assets', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.any(),
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    await buildNativeAssetsiOS(
+      darwinArchs: <DarwinArch>[DarwinArch.arm64],
+      environmentType: EnvironmentType.simulator,
+      projectUri: projectUri,
+      buildMode: BuildMode.debug,
+      fileSystem: fileSystem,
+      buildRunner: FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+        buildResult: <Asset>[
+          Asset(
+            name: 'package:bar/bar.dart',
+            linkMode: LinkMode.dynamic,
+            target: native_assets_cli.Target.macOSArm64,
+            path: AssetAbsolutePath(Uri.file('bar.dylib')),
+          ),
+        ],
+      ),
+    );
+  });
+  
 }
