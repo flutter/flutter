@@ -230,10 +230,10 @@ to investigate feasibility of adding a test to presubmit.
 
 ## Migrating to build and test model
 
-To better utilize limited DeviceLab testbed resources and speed up overal validation
+To better utilize limited DeviceLab testbed resources and speed up commit validation
 time, it is now supported to separate building artifacts (.apk/.app) from testing them.
-The artifact will be built on a host only bot no needing a device, and the test will run
-based on the artifact against a testbed with a device.
+The artifact will be built on a host only bot, a VM or physical bot without a device,
+and the test will run based on the artifact against a testbed with a device.
 
 Steps:
 
@@ -246,7 +246,7 @@ Steps:
 3. Validate the task locally
    - build only: `dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST} --task-args build --task-args application-binary-path={PATH_TO_ARTIFACT}`
    - test only: `dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST} --task-args test --task-args application-binary-path={PATH_TO_ARTIFACT}`
-4. Adding tasks to continuous integration
+4. Add tasks to continuous integration
    - Mirror a target with platform `Linux_build_test` or `Mac_build_test`
    - The only difference from regular targets is the artifact property: if omitted, it will use the `task_name`.
 5. Once validated in CI, enable the target in `PROD` by removing `bringup: true` and deleting the old target entry without build+test model.
