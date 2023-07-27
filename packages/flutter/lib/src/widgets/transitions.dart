@@ -507,6 +507,26 @@ class SizeTransition extends AnimatedWidget {
 /// ** See code in examples/api/lib/widgets/transitions/fade_transition.0.dart **
 /// {@end-tool}
 ///
+/// ## Hit testing
+///
+/// Setting the [opacity] to zero does not prevent hit testing from being
+/// applied to the descendants of the [FadeTransition] widget. This can be
+/// confusing for the user, who may not see anything, and may believe the area
+/// of the interface where the [FadeTransition] is hiding a widget to be
+/// non-interactive.
+///
+/// With certain widgets, such as [Flow], that compute their positions only when
+/// they are painted, this can actually lead to bugs (from unexpected geometry
+/// to exceptions), because those widgets are not painted by the [FadeTransition]
+/// widget at all when the [opacity] animation reaches zero.
+///
+/// To avoid such problems, it is generally a good idea to combine this widget
+/// with an [IgnorePointer] that one enables when the [opacity] animation
+/// reaches zero. This prevents interactions with any children in the subtree
+/// when the [child] is not visible. For performance reasons, when implementing
+/// this, care should be taken not to rebuild the relevant widget (e.g. by
+/// calling [State.setState]) except at the transition point.
+///
 /// See also:
 ///
 ///  * [Opacity], which does not animate changes in opacity.
@@ -579,6 +599,27 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 /// to [Curves.fastOutSlowIn]:
 ///
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/fade_transition.mp4}
+///
+/// ## Hit testing
+///
+/// Setting the [opacity] to zero does not prevent hit testing from being
+/// applied to the descendants of the [SliverFadeTransition] widget. This can be
+/// confusing for the user, who may not see anything, and may believe the area
+/// of the interface where the [SliverFadeTransition] is hiding a widget to be
+/// non-interactive.
+///
+/// With certain widgets, such as [Flow], that compute their positions only when
+/// they are painted, this can actually lead to bugs (from unexpected geometry
+/// to exceptions), because those widgets are not painted by the
+/// [SliverFadeTransition] widget at all when the [opacity] animation reaches
+/// zero.
+///
+/// To avoid such problems, it is generally a good idea to combine this widget
+/// with a [SliverIgnorePointer] that one enables when the [opacity] animation
+/// reaches zero. This prevents interactions with any children in the subtree
+/// when the [sliver] is not visible. For performance reasons, when implementing
+/// this, care should be taken not to rebuild the relevant widget (e.g. by
+/// calling [State.setState]) except at the transition point.
 ///
 /// See also:
 ///
