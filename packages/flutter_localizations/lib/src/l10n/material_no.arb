@@ -28,6 +28,7 @@
   "continueButtonLabel": "Fortsett",
   "copyButtonLabel": "Kopiér",
   "cutButtonLabel": "Klipp ut",
+  "scanTextButtonLabel": "Skann tekst",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Lim inn",
   "selectAllButtonLabel": "Velg alle",
@@ -138,5 +139,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

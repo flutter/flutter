@@ -24,6 +24,7 @@
   "closeButtonLabel": "మూసివేయండి",
   "continueButtonLabel": "కొనసాగించండి",
   "copyButtonLabel": "కాపీ చేయి",
+  "scanTextButtonLabel": "వచనాన్ని స్కాన్ చేయండి",
   "cutButtonLabel": "కత్తిరించండి",
   "okButtonLabel": "సరే",
   "pasteButtonLabel": "పేస్ట్ చేయండి",
@@ -139,5 +140,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

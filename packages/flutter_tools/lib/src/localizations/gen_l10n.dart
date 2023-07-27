@@ -47,6 +47,9 @@ Future<LocalizationsGenerator> generateLocalizations({
 
   precacheLanguageAndRegionTags();
 
+  // Use \r\n if project's pubspec file contains \r\n.
+  final bool useCRLF = fileSystem.file('pubspec.yaml').readAsStringSync().contains('\r\n');
+
   LocalizationsGenerator generator;
   try {
     generator = LocalizationsGenerator(
@@ -69,9 +72,10 @@ Future<LocalizationsGenerator> generateLocalizations({
       useEscaping: options.useEscaping,
       logger: logger,
       suppressWarnings: options.suppressWarnings,
+      useRelaxedSyntax: options.relaxSyntax,
     )
       ..loadResources()
-      ..writeOutputFiles(isFromYaml: true);
+      ..writeOutputFiles(isFromYaml: true, useCRLF: useCRLF);
   } on L10nException catch (e) {
     throwToolExit(e.message);
   }
@@ -79,7 +83,6 @@ Future<LocalizationsGenerator> generateLocalizations({
   final List<String> outputFileList = generator.outputFileList;
   final File? untranslatedMessagesFile = generator.untranslatedMessagesFile;
 
-  // All other post processing.
   if (options.format) {
     final List<String> formatFileList = outputFileList.toList();
     if (untranslatedMessagesFile != null) {
@@ -492,6 +495,7 @@ class LocalizationsGenerator {
     bool useEscaping = false,
     required Logger logger,
     bool suppressWarnings = false,
+    bool useRelaxedSyntax = false,
   }) {
     final Directory? projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(fileSystem, inputPathString, projectDirectory);
@@ -515,6 +519,7 @@ class LocalizationsGenerator {
       useEscaping: useEscaping,
       logger: logger,
       suppressWarnings: suppressWarnings,
+      useRelaxedSyntax: useRelaxedSyntax,
     );
   }
 
@@ -539,6 +544,7 @@ class LocalizationsGenerator {
     required this.logger,
     this.useEscaping = false,
     this.suppressWarnings = false,
+    this.useRelaxedSyntax = false,
   });
 
   final FileSystem _fs;
@@ -614,6 +620,9 @@ class LocalizationsGenerator {
   /// Whether any errors were caught. This is set after encountering any errors
   /// from calling [_generateMethod].
   bool hadErrors = false;
+
+  /// Whether to use relaxed syntax.
+  bool useRelaxedSyntax = false;
 
   /// The list of all arb path strings in [inputDirectory].
   List<String> get arbPathStrings {
@@ -906,7 +915,13 @@ class LocalizationsGenerator {
     }
     // The call to .toList() is absolutely necessary. Otherwise, it is an iterator and will call Message's constructor again.
     _allMessages = _templateBundle.resourceIds.map((String id) => Message(
-       _templateBundle, _allBundles, id, areResourceAttributesRequired, useEscaping: useEscaping, logger: logger,
+      _templateBundle,
+      _allBundles,
+      id,
+      areResourceAttributesRequired,
+      useEscaping: useEscaping,
+      logger: logger,
+      useRelaxedSyntax: useRelaxedSyntax,
     )).toList();
     hadErrors = _allMessages.any((Message message) => message.hadErrors);
     if (inputsAndOutputsListFile != null) {
@@ -1157,6 +1172,7 @@ class LocalizationsGenerator {
       // When traversing through a placeholderExpr node, return "$placeholderName".
       // When traversing through a pluralExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
       // When traversing through a selectExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
+      // When traversing through an argumentExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
       // When traversing through a message node, return concatenation of all of "generateVariables(child)" for each child.
       String generateVariables(Node node, { bool isRoot = false }) {
         switch (node.type) {
@@ -1259,6 +1275,34 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
               .replaceAll('@(selectCases)', selectLogicArgs.join('\n'))
             );
             return '\$$tempVarName';
+          case ST.argumentExpr:
+            requiresIntlImport = true;
+            assert(node.children[1].type == ST.identifier);
+            assert(node.children[3].type == ST.argType);
+            assert(node.children[7].type == ST.identifier);
+            final String identifierName = node.children[1].value!;
+            final Node formatType = node.children[7];
+            // Check that formatType is a valid intl.DateFormat.
+            if (!validDateFormats.contains(formatType.value)) {
+              throw L10nParserException(
+                'Date format "${formatType.value!}" for placeholder '
+                '$identifierName does not have a corresponding DateFormat '
+                "constructor\n. Check the intl library's DateFormat class "
+                'constructors for allowed date formats, or set "isCustomDateFormat" attribute '
+                'to "true".',
+                _inputFileNames[locale]!,
+                message.resourceId,
+                translationForMessage,
+                formatType.positionInMessage,
+              );
+            }
+            final String tempVarName = getTempVariableName();
+            tempVariables.add(dateVariableTemplate
+              .replaceAll('@(varName)', tempVarName)
+              .replaceAll('@(formatType)', formatType.value!)
+              .replaceAll('@(argument)', identifierName)
+            );
+            return '\$$tempVarName';
           // ignore: no_default_cases
           default:
             throw Exception('Cannot call "generateHelperMethod" on node type ${node.type}');
@@ -1281,7 +1325,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     }
   }
 
-  List<String> writeOutputFiles({ bool isFromYaml = false }) {
+  List<String> writeOutputFiles({ bool isFromYaml = false, bool useCRLF = false }) {
     // First, generate the string contents of all necessary files.
     final String generatedLocalizationsFile = _generateCode();
 
@@ -1299,7 +1343,9 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       syntheticPackageDirectory.createSync(recursive: true);
       final File flutterGenPubspec = syntheticPackageDirectory.childFile('pubspec.yaml');
       if (!flutterGenPubspec.existsSync()) {
-        flutterGenPubspec.writeAsStringSync(emptyPubspecTemplate);
+        flutterGenPubspec.writeAsStringSync(
+          useCRLF ? emptyPubspecTemplate.replaceAll('\n', '\r\n') : emptyPubspecTemplate
+        );
       }
     }
 
@@ -1318,11 +1364,13 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
 
     // Generate the required files for localizations.
     _languageFileMap.forEach((File file, String contents) {
-      file.writeAsStringSync(contents);
+      file.writeAsStringSync(useCRLF ? contents.replaceAll('\n', '\r\n') : contents);
       _outputFileList.add(file.absolute.path);
     });
 
-    baseOutputFile.writeAsStringSync(generatedLocalizationsFile);
+    baseOutputFile.writeAsStringSync(
+      useCRLF ? generatedLocalizationsFile.replaceAll('\n', '\r\n') : generatedLocalizationsFile
+    );
     final File? messagesFile = untranslatedMessagesFile;
     if (messagesFile != null) {
       _generateUntranslatedMessagesFile(logger, messagesFile);
@@ -1358,12 +1406,12 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       if (!inputsAndOutputsListFileLocal.existsSync()) {
         inputsAndOutputsListFileLocal.createSync(recursive: true);
       }
-
+      final String filesListContent = json.encode(<String, Object> {
+        'inputs': _inputFileList,
+        'outputs': _outputFileList,
+      });
       inputsAndOutputsListFileLocal.writeAsStringSync(
-        json.encode(<String, Object> {
-          'inputs': _inputFileList,
-          'outputs': _outputFileList,
-        }),
+        useCRLF ? filesListContent.replaceAll('\n', '\r\n') : filesListContent,
       );
     }
 

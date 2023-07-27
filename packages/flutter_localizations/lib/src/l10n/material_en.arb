@@ -192,6 +192,11 @@
     "description": "The label for cut buttons and menu items."
   },
 
+  "scanTextButtonLabel": "Scan text",
+  "@scanTextButtonLabel": {
+    "description": "The label for scan text buttons and menu items for starting the insertion of text via OCR."
+  },
+
   "okButtonLabel": "OK",
   "@okButtonLabel": {
     "description": "The label for OK buttons and menu items."
@@ -235,6 +240,11 @@
   "modalBarrierDismissLabel": "Dismiss",
   "@modalBarrierDismissLabel": {
     "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
+  },
+
+  "menuDismissLabel": "Dismiss menu",
+  "@menuDismissLabel": {
+    "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for the area around a menu to indicate that a tap dismisses the menu."
   },
 
   "dateSeparator": "/",

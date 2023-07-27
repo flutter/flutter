@@ -28,6 +28,7 @@
   "continueButtonLabel": "منځپانګې",
   "copyButtonLabel": "کاپی",
   "cutButtonLabel": "کم کړئ",
+  "scanTextButtonLabel": "متن سکین کړئ",
   "okButtonLabel": "سمه ده",
   "pasteButtonLabel": "پیټ کړئ",
   "selectAllButtonLabel": "غوره کړئ",
@@ -141,5 +142,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

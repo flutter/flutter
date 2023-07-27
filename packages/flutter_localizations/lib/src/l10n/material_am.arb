@@ -25,6 +25,7 @@
   "continueButtonLabel": "ቀጥል",
   "copyButtonLabel": "ቅዳ",
   "cutButtonLabel": "ቁረጥ",
+  "scanTextButtonLabel": "ጽሑፍ ይቃኙ",
   "okButtonLabel": "እሺ",
   "pasteButtonLabel": "ለጥፍ",
   "selectAllButtonLabel": "ሁሉንም ምረጥ",
@@ -139,5 +140,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

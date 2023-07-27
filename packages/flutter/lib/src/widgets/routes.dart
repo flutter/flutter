@@ -1432,11 +1432,20 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// pops. If this is not necessary, this can be set to false to allow the
   /// framework to entirely discard the route's widget hierarchy when it is not
   /// visible.
+  ///
+  /// Setting [maintainState] to false does not guarantee that the route will be
+  /// discarded. For instance, it will not be descarded if it is still visible
+  /// because the next above it is not opaque (e.g. it is a popup dialog).
   /// {@endtemplate}
   ///
   /// If this getter would ever start returning a different value, the
   /// [changedInternalState] should be invoked so that the change can take
   /// effect.
+  ///
+  /// See also:
+  ///
+  ///  * [OverlayEntry.maintainState], which is the underlying implementation
+  ///    of this property.
   bool get maintainState;
 
 
@@ -1813,9 +1822,9 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// ## Type arguments
 ///
-/// When using more aggressive
-/// [lints](http://dart-lang.github.io/linter/lints/), in particular lints such
-/// as `always_specify_types`, the Dart analyzer will require that certain types
+/// When using more aggressive [lints](https://dart.dev/lints),
+/// in particular lints such as `always_specify_types`,
+/// the Dart analyzer will require that certain types
 /// be given with their type arguments. Since the [Route] class and its
 /// subclasses have a type argument, this includes the arguments passed to this
 /// class. Consider using `dynamic` to specify the entire class of routes rather

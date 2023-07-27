@@ -25,6 +25,7 @@
   "continueButtonLabel": "Jätka",
   "copyButtonLabel": "Kopeeri",
   "cutButtonLabel": "Lõika",
+  "scanTextButtonLabel": "Skanni teksti",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Kleebi",
   "selectAllButtonLabel": "Vali kõik",
@@ -140,5 +141,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

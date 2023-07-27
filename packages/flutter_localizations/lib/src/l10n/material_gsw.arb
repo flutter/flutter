@@ -30,6 +30,7 @@
   "continueButtonLabel": "Weiter",
   "copyButtonLabel": "Kopieren",
   "cutButtonLabel": "Ausschneiden",
+  "scanTextButtonLabel": "Text scannen",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Einsetzen",
   "selectAllButtonLabel": "Alle auswählen",
@@ -140,5 +141,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

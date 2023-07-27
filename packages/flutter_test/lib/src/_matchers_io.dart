@@ -124,7 +124,7 @@ class MatchesGoldenFile extends AsyncMatcher {
           image.dispose();
         }
       }
-    }, additionalTime: const Duration(minutes: 1));
+    });
   }
 
   @override

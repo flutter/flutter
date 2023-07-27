@@ -25,6 +25,7 @@
   "continueButtonLabel": "Áfram",
   "copyButtonLabel": "Afrita",
   "cutButtonLabel": "Klippa",
+  "scanTextButtonLabel": "Skannaðu texta",
   "okButtonLabel": "Í lagi",
   "pasteButtonLabel": "Líma",
   "selectAllButtonLabel": "Velja allt",
@@ -139,5 +140,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }
