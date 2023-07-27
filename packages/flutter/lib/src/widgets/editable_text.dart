@@ -2936,7 +2936,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void dispose() {
     _internalScrollController?.dispose();
-    _internalScrollController = null;//
     _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
     _floatingCursorResetController?.dispose();

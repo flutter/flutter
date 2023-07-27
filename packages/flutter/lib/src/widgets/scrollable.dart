@@ -1997,9 +1997,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
   @override
   void dispose() {
     _verticalFallbackController?.dispose();
-    _verticalFallbackController = null;//
     _horizontalFallbackController?.dispose();
-    _horizontalFallbackController = null;//
     super.dispose();
   }
 }

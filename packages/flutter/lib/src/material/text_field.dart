@@ -1100,7 +1100,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   void dispose() {
     _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
-    _focusNode = null;//
     _controller?.dispose();
     _controller = null;
     super.dispose();
