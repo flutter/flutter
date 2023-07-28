@@ -727,6 +727,75 @@ void main() {
     expect(textField.textCapitalization, TextCapitalization.none);
   });
 
+  testWidgets('SearchAnchor respects textCapitalization property', (WidgetTester tester) async {
+    Widget buildSearchAnchor(TextCapitalization textCapitalization) {
+      return MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor(
+              textCapitalization: textCapitalization,
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.ac_unit),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildSearchAnchor(TextCapitalization.characters));
+    await tester.pump();
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
+    await tester.pumpAndSettle();
+    TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.characters);
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.pump();
+
+    await tester.pumpWidget(buildSearchAnchor(TextCapitalization.none));
+    await tester.pump();
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
+    await tester.pumpAndSettle();
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.none);
+  });
+
+  testWidgets('SearchAnchor.bar respects textCapitalization property', (WidgetTester tester) async {
+    Widget buildSearchAnchor(TextCapitalization textCapitalization) {
+      return MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor.bar(
+              textCapitalization: textCapitalization,
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildSearchAnchor(TextCapitalization.characters));
+    await tester.pump();
+    await tester.tap(find.byType(SearchBar)); // Open search view.
+    await tester.pumpAndSettle();
+    final Finder textFieldFinder = find.descendant(of: findViewContent(), matching: find.byType(TextField));
+    final TextField textFieldInView = tester.widget<TextField>(textFieldFinder);
+    expect(textFieldInView.textCapitalization, TextCapitalization.characters);
+    // Close search view.
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.pumpAndSettle();
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.characters);
+  });
+
   testWidgets('hintStyle can override textStyle for hintText', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

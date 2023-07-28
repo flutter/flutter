@@ -126,6 +126,7 @@ class SearchAnchor extends StatefulWidget {
     this.headerHintStyle,
     this.dividerColor,
     this.viewConstraints,
+    this.textCapitalization = TextCapitalization.none,
     required this.builder,
     required this.suggestionsBuilder,
   });
@@ -170,6 +171,7 @@ class SearchAnchor extends StatefulWidget {
     BoxConstraints? viewConstraints,
     bool? isFullScreen,
     SearchController searchController,
+    TextCapitalization textCapitalization,
     required SuggestionsBuilder suggestionsBuilder
   }) = _SearchAnchorWithSearchBar;
 
@@ -286,6 +288,15 @@ class SearchAnchor extends StatefulWidget {
   /// ```
   final BoxConstraints? viewConstraints;
 
+  /// Called to get the suggestion list for the search view.
+  ///
+  /// By default, the list returned by this builder is laid out in a [ListView].
+  /// To get a different layout, use [viewBuilder] to override.
+  final SuggestionsBuilder suggestionsBuilder;
+
+  /// {@macro flutter.widgets.editableText.textCapitalization}
+  final TextCapitalization textCapitalization;
+
   /// Called to create a widget which can open a search view route when it is tapped.
   ///
   /// The widget returned by this builder is faded out when it is tapped.
@@ -293,12 +304,6 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// This must not be null.
   final SearchAnchorChildBuilder builder;
-
-  /// Called to get the suggestion list for the search view.
-  ///
-  /// By default, the list returned by this builder is laid out in a [ListView].
-  /// To get a different layout, use [viewBuilder] to override.
-  final SuggestionsBuilder suggestionsBuilder;
 
   @override
   State<SearchAnchor> createState() => _SearchAnchorState();
@@ -361,6 +366,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       anchorKey: _anchorKey,
       searchController: _searchController,
       suggestionsBuilder: widget.suggestionsBuilder,
+      textCapitalization: widget.textCapitalization,
     ));
   }
 
@@ -426,6 +432,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.viewHeaderHintStyle,
     this.dividerColor,
     this.viewConstraints,
+    required this.textCapitalization,
     required this.showFullScreenView,
     required this.anchorKey,
     required this.searchController,
@@ -447,6 +454,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
   final BoxConstraints? viewConstraints;
+  final TextCapitalization textCapitalization;
   final bool showFullScreenView;
   final GlobalKey anchorKey;
   final SearchController searchController;
@@ -595,6 +603,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
               viewBuilder: viewBuilder,
               searchController: searchController,
               suggestionsBuilder: suggestionsBuilder,
+              textCapitalization: textCapitalization,
             ),
           );
         }
@@ -620,6 +629,7 @@ class _ViewContent extends StatefulWidget {
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
+    required this.textCapitalization,
     required this.showFullScreenView,
     required this.topPadding,
     required this.animation,
@@ -644,6 +654,7 @@ class _ViewContent extends StatefulWidget {
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
+  final TextCapitalization textCapitalization;
   final bool showFullScreenView;
   final double topPadding;
   final Animation<double> animation;
@@ -824,6 +835,7 @@ class _ViewContentState extends State<_ViewContent> {
                             onChanged: (_) {
                               updateSuggestions();
                             },
+                            textCapitalization: widget.textCapitalization,
                           ),
                         ),
                       ),
@@ -884,6 +896,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.viewConstraints,
     super.isFullScreen,
     super.searchController,
+    super.textCapitalization,
     required super.suggestionsBuilder
   }) : super(
     viewHintText: viewHintText ?? barHintText,
@@ -911,6 +924,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
         padding: barPadding ?? const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
         leading: barLeading ?? const Icon(Icons.search),
         trailing: barTrailing,
+        textCapitalization: textCapitalization,
       );
     }
   );
