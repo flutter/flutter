@@ -31,6 +31,7 @@
   "continueButtonLabel": "Працягнуць",
   "copyButtonLabel": "Капіраваць",
   "cutButtonLabel": "Выразаць",
+  "scanTextButtonLabel": "Сканаваць тэкст",
   "okButtonLabel": "ОК",
   "pasteButtonLabel": "Уставіць",
   "selectAllButtonLabel": "Выбраць усе",
@@ -145,5 +146,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

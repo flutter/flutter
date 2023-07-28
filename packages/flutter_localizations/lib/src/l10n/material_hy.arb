@@ -30,6 +30,7 @@
   "continueButtonLabel": "Շարունակել",
   "copyButtonLabel": "Պատճենել",
   "cutButtonLabel": "Կտրել",
+  "scanTextButtonLabel": "Սկանավորեք տեքստը",
   "okButtonLabel": "Եղավ",
   "pasteButtonLabel": "Տեղադրել",
   "selectAllButtonLabel": "Նշել բոլորը",
@@ -145,5 +146,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

@@ -28,6 +28,7 @@
   "continueButtonLabel": "Настави",
   "copyButtonLabel": "Копирај",
   "cutButtonLabel": "Исеци",
+  "scanTextButtonLabel": "Скенирајте текст",
   "okButtonLabel": "Потврди",
   "pasteButtonLabel": "Налепи",
   "selectAllButtonLabel": "Изабери све",
@@ -143,5 +144,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

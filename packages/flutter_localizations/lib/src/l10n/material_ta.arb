@@ -17,6 +17,7 @@
   "reorderItemLeft": "இடப்புறம் நகர்த்தவும்",
   "reorderItemRight": "வலப்புறம் நகர்த்தவும்",
   "cutButtonLabel": "வெட்டு",
+  "scanTextButtonLabel": "உரையை ஸ்கேன் செய்யவும்",
   "pasteButtonLabel": "ஒட்டு",
   "previousMonthTooltip": "முந்தைய மாதம்",
   "nextMonthTooltip": "அடுத்த மாதம்",
@@ -141,5 +142,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

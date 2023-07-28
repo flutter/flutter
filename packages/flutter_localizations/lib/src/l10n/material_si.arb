@@ -25,6 +25,7 @@
   "continueButtonLabel": "ඉදිරියට යන්න",
   "copyButtonLabel": "පිටපත් කරන්න",
   "cutButtonLabel": "කපන්න",
+  "scanTextButtonLabel": "පෙළ පරිලෝකනය කරන්න",
   "okButtonLabel": "හරි",
   "pasteButtonLabel": "අලවන්න",
   "selectAllButtonLabel": "සියල්ල තෝරන්න",
@@ -139,5 +140,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

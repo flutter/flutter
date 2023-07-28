@@ -435,7 +435,16 @@ class RenderStack extends RenderBox
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Stacks only clip children whose geometry overflow the stack. A child that
+  /// paints outside its bounds (e.g. a box with a shadow) will not be clipped,
+  /// regardless of the value of this property. Similarly, a child that itself
+  /// has a descendant that overflows the stack will not be clipped, as only the
+  /// geometry of the stack's direct children are considered.
+  ///
+  /// To clip children whose geometry does not overflow the stack, consider
+  /// using a [RenderClipRect] render object.
+  ///
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {

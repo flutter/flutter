@@ -25,6 +25,7 @@
   "continueButtonLabel": "Συνέχεια",
   "copyButtonLabel": "Αντιγραφή",
   "cutButtonLabel": "Αποκοπή",
+  "scanTextButtonLabel": "Σάρωση κειμένου",
   "okButtonLabel": "ΟΚ",
   "pasteButtonLabel": "Επικόλληση",
   "selectAllButtonLabel": "Επιλογή όλων",
@@ -140,5 +141,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }
