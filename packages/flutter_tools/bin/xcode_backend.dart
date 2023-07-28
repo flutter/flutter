@@ -214,11 +214,19 @@ class Context {
 
     // Copy the native assets.
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
-    final String projectPath = '$sourceRoot/..';
+    String projectPath = '$sourceRoot/..';
+    if (environment['FLUTTER_APPLICATION_PATH'] != null) {
+      projectPath = environment['FLUTTER_APPLICATION_PATH']!;
+    }
     final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
     final String nativeAssetsPath =
         '$projectPath/$flutterBuildDir/native_assets/ios/';
+    final bool verbose = environment['VERBOSE_SCRIPT_LOGGING'] != null &&
+        environment['VERBOSE_SCRIPT_LOGGING'] != '';
     if (Directory(nativeAssetsPath).existsSync()) {
+      if (verbose) {
+        print('♦ Copying native assets from $nativeAssetsPath.');
+      }
       runSync(
         'rsync',
         <String>[
@@ -232,6 +240,8 @@ class Context {
           xcodeFrameworksDir,
         ],
       );
+    } else if (verbose) {
+      print("♦ No native assets to bundle. $nativeAssetsPath doesn't exist.");
     }
 
     addVmServiceBonjourService();

@@ -372,11 +372,10 @@ end
         'isolate_snapshot_data',
       ));
 
-      // TODO(dacoharkes): The dylib does not seem to be bundled.
-      // checkFileExists(path.join(
-      //   hostFrameworksDirectory,
-      //   'lib$ffiPackageName.dylib',
-      // ));
+      checkFileExists(path.join(
+        hostFrameworksDirectory,
+        'lib$ffiPackageName.dylib',
+      ));
 
       section('Check the NOTICE file is correct');
 
