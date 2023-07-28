@@ -1096,7 +1096,7 @@ targets:
 
   - name: Linux web_benchmarks_skwasm
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    #presubmit: false
     timeout: 60
     properties:
       dependencies: >-
