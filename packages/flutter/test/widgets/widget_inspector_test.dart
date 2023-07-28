@@ -4697,6 +4697,53 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         }
         expect(error, isNull);
       });
+
+      testWidgets(
+          'ext.flutter.inspector.getLayoutExplorerNode, on a ToolTip, does not throw StackOverflowError',
+          (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/devtools/issues/5946
+        const Widget widget = MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Row(
+                children: <Widget>[
+                  Flexible(
+                    child: ColoredBox(
+                      color: Colors.green,
+                      child: Tooltip(
+                        message: 'a',
+                        child: ElevatedButton(
+                          onPressed: null,
+                          child: Text('a'),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await tester.pumpWidget(widget);
+
+        final Element elevatedButton =
+            tester.element(find.byType(ElevatedButton).first);
+        service.setSelection(elevatedButton, group);
+
+        final String id = service.toId(elevatedButton, group)!;
+
+        Object? error;
+        try {
+          await service.testExtension(
+            WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+            <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+          );
+        } catch (e) {
+          error = e;
+        }
+        expect(error, isNull);
+      });
     });
 
     test('ext.flutter.inspector.structuredErrors', () async {
