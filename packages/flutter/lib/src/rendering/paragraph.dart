@@ -1515,57 +1515,48 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     TextPosition? targetPosition;
     if (wordBoundary != null) {
       assert(wordBoundary.wordStart.offset >= range.start && wordBoundary.wordEnd.offset <= range.end);
-      if (existingSelectionStart != null && existingSelectionEnd != null) {
+      if (_selectableContainsOriginWord && existingSelectionStart != null && existingSelectionEnd != null) {
         final TextPosition edgeToKeepInPlace = isEnd ? existingSelectionStart : existingSelectionEnd;
         final TextPosition currentMovingEdge = isEnd ? existingSelectionEnd : existingSelectionStart;
-        if (_selectableContainsOriginWord) {
-          // Swap the selection edges to keep the origin word in bounds, when the
-          // new position where to cause an inverted selection.
-          final bool shouldSwapEdgesWhenSelectionIsNormalized = isEnd ? position.offset < existingSelectionStart.offset : position.offset > existingSelectionEnd.offset;
-          final bool shouldSwapEdgesWhenSelectionNotNormalized = isEnd ? position.offset > existingSelectionStart.offset : position.offset < existingSelectionEnd.offset;
-          if (existingSelectionStart.offset <= existingSelectionEnd.offset) {
-            // The selection is normalized, i.e. the start of the selection is before
-            // the end.
-            if (shouldSwapEdgesWhenSelectionIsNormalized) {
-              targetPosition = isEnd ? wordBoundary.wordStart : wordBoundary.wordEnd;
-              // The static edge is moved to the opposite end of the word boundary to
-              // keep the entire origin word in the selection.
-              final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
-              assert(localWordBoundary.wordStart.offset >= range.start && localWordBoundary.wordEnd.offset <= range.end);
-              _setSelectionPosition(isEnd ? localWordBoundary.wordEnd : localWordBoundary.wordStart, isEnd: !isEnd);
-            } else {
-              // If the new position falls on the same position of the static
-              // edge, keep the selection at the same word boundary regardless
-              // of the affinity, so the origin word stays in bounds. If not then
-              // extend the selection to the boundary that would encompass the entire
-              // word at the new position.
-              targetPosition = position.offset == edgeToKeepInPlace.offset ? currentMovingEdge : isEnd ? wordBoundary.wordEnd : wordBoundary.wordStart;
-            }
+        // Swap the selection edges to keep the origin word in bounds, when the
+        // new position where to cause an inverted selection.
+        final bool shouldSwapEdgesWhenSelectionIsNormalized = isEnd ? position.offset < existingSelectionStart.offset : position.offset > existingSelectionEnd.offset;
+        final bool shouldSwapEdgesWhenSelectionNotNormalized = isEnd ? position.offset > existingSelectionStart.offset : position.offset < existingSelectionEnd.offset;
+        if (existingSelectionStart.offset <= existingSelectionEnd.offset) {
+          // The selection is normalized, i.e. the start of the selection is before
+          // the end.
+          if (shouldSwapEdgesWhenSelectionIsNormalized) {
+            targetPosition = isEnd ? wordBoundary.wordStart : wordBoundary.wordEnd;
+            // The static edge is moved to the opposite end of the word boundary to
+            // keep the entire origin word in the selection.
+            final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
+            assert(localWordBoundary.wordStart.offset >= range.start && localWordBoundary.wordEnd.offset <= range.end);
+            _setSelectionPosition(isEnd ? localWordBoundary.wordEnd : localWordBoundary.wordStart, isEnd: !isEnd);
           } else {
-            // The selection is not normalized, i.e. the end of the selection is before
-            // the start.
-            if (shouldSwapEdgesWhenSelectionNotNormalized) {
-              targetPosition = isEnd ? wordBoundary.wordEnd : wordBoundary.wordStart;
-              // The static edge is moved to the opposite end of the word boundary to
-              // keep the entire origin word in the selection.
-              final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
-              assert(localWordBoundary.wordStart.offset >= range.start && localWordBoundary.wordEnd.offset <= range.end);
-              _setSelectionPosition(isEnd ? localWordBoundary.wordStart : localWordBoundary.wordEnd, isEnd: !isEnd);
-            } else {
-              // If the new position falls on the same position of the static
-              // edge, keep the selection at the same word boundary regardless
-              // of the affinity, so the origin word stays in bounds. If not then
-              // expand the selection to the boundary that would encompass the entire
-              // word at the new position.
-              targetPosition = position.offset == edgeToKeepInPlace.offset ? currentMovingEdge : isEnd ? wordBoundary.wordStart : wordBoundary.wordEnd;
-            }
+            // If the new position falls on the same position of the static
+            // edge, keep the selection at the same word boundary regardless
+            // of the affinity, so the origin word stays in bounds. If not then
+            // extend the selection to the boundary that would encompass the entire
+            // word at the new position.
+            targetPosition = position.offset == edgeToKeepInPlace.offset ? currentMovingEdge : isEnd ? wordBoundary.wordEnd : wordBoundary.wordStart;
           }
         } else {
-          // The edge should move to encompass the entire word at the new position.
-          if (position.offset < edgeToKeepInPlace.offset) {
-            targetPosition = wordBoundary.wordStart;
+          // The selection is not normalized, i.e. the end of the selection is before
+          // the start.
+          if (shouldSwapEdgesWhenSelectionNotNormalized) {
+            targetPosition = isEnd ? wordBoundary.wordEnd : wordBoundary.wordStart;
+            // The static edge is moved to the opposite end of the word boundary to
+            // keep the entire origin word in the selection.
+            final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
+            assert(localWordBoundary.wordStart.offset >= range.start && localWordBoundary.wordEnd.offset <= range.end);
+            _setSelectionPosition(isEnd ? localWordBoundary.wordStart : localWordBoundary.wordEnd, isEnd: !isEnd);
           } else {
-            targetPosition = wordBoundary.wordEnd;
+            // If the new position falls on the same position of the static
+            // edge, keep the selection at the same word boundary regardless
+            // of the affinity, so the origin word stays in bounds. If not then
+            // expand the selection to the boundary that would encompass the entire
+            // word at the new position.
+            targetPosition = position.offset == edgeToKeepInPlace.offset ? currentMovingEdge : isEnd ? wordBoundary.wordStart : wordBoundary.wordEnd;
           }
         }
       } else {
