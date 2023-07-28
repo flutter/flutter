@@ -25,6 +25,16 @@
 #     * TextTheme: fix_text_theme.yaml
 version: 1
 transforms:
+  - title: "Remove 'useMaterial3'"
+    date: 2021-11-11
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'useMaterial3'
+
   # Changes made in https://github.com/flutter/flutter/pull/87281
   - title: "Remove 'fixTextFieldOutlineLabel'"
     date: 2021-04-30

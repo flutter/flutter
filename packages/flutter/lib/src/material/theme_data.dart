@@ -1525,7 +1525,6 @@ class ThemeData with Diagnosticable {
     TargetPlatform? platform,
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
-    bool? useMaterial3,
     VisualDensity? visualDensity,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
@@ -1637,6 +1636,12 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? bottomAppBarColor,
+    @Deprecated(
+      'Use ThemeData.useMaterial3 instead. '
+      'Setting this value causes issues on changing the default theme. '
+      'This feature was deprecated after v3.13.0-0.2.pre.',
+    )
+    bool? useMaterial3,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
