@@ -1587,19 +1587,19 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     } else {
       // The localPosition is not contained within the current rect. The adjustedPosition
       // will either be at the end or beginning of the current rect.
-      if (existingSelectionStart != null && existingSelectionEnd != null) {
+      if (_selectableContainsOriginWord && existingSelectionStart != null && existingSelectionEnd != null) {
         final TextPosition edgeToKeepInPlace = isEnd ? existingSelectionStart : existingSelectionEnd;
         final bool shouldSwapEdgesWhenSelectionIsNormalized = isEnd ? position.offset < existingSelectionStart.offset : position.offset > existingSelectionEnd.offset;
         final bool shouldSwapEdgesWhenSelectionNotNormalized = isEnd ? position.offset > existingSelectionStart.offset : position.offset < existingSelectionEnd.offset;
 
         if (existingSelectionStart.offset < existingSelectionEnd.offset) {
-          if (shouldSwapEdgesWhenSelectionIsNormalized || position.offset == edgeToKeepInPlace.offset && _selectableContainsOriginWord) {
+          if (shouldSwapEdgesWhenSelectionIsNormalized || position.offset == edgeToKeepInPlace.offset) {
             final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
             assert(localWordBoundary.wordStart.offset >= range.start && localWordBoundary.wordEnd.offset <= range.end);
             _setSelectionPosition(isEnd ? localWordBoundary.wordEnd : localWordBoundary.wordStart, isEnd: !isEnd);
           }
         } else {
-          if (shouldSwapEdgesWhenSelectionNotNormalized || position.offset == edgeToKeepInPlace.offset && _selectableContainsOriginWord) {
+          if (shouldSwapEdgesWhenSelectionNotNormalized || position.offset == edgeToKeepInPlace.offset) {
             final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
             assert(localWordBoundary.wordStart.offset >= range.start && localWordBoundary.wordEnd.offset <= range.end);
             _setSelectionPosition(isEnd ? localWordBoundary.wordStart : localWordBoundary.wordEnd, isEnd: !isEnd);
