@@ -25,17 +25,6 @@
 #     * TextTheme: fix_text_theme.yaml
 version: 1
 transforms:
-  # Changes made in https://github.com/flutter/flutter/pull/131455
-  - title: "Remove 'useMaterial3'"
-    date: 2023-07-27
-    element:
-      uris: [ 'material.dart' ]
-      method: 'copyWith'
-      inClass: 'ThemeData'
-    changes:
-      - kind: 'removeParameter'
-        name: 'useMaterial3'
-
   # Changes made in https://github.com/flutter/flutter/pull/87281
   - title: "Remove 'fixTextFieldOutlineLabel'"
     date: 2021-04-30
@@ -1696,5 +1685,16 @@ transforms:
       colorScheme:
         kind: 'fragment'
         value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/131455
+  - title: "Remove 'useMaterial3'"
+    date: 2023-07-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'useMaterial3'
 
 # Before adding a new fix: read instructions at the top of this file.

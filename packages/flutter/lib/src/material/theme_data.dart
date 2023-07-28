@@ -1637,8 +1637,10 @@ class ThemeData with Diagnosticable {
     )
     Color? bottomAppBarColor,
     @Deprecated(
-      'Use ThemeData.useMaterial3 instead. '
-      'Setting this value cannot successfully change the default theme. '
+      'Use a ThemeData constructor (.from, .light, or .dark) instead. '
+      'These constructors all have a useMaterial3 argument, '
+      'and they set appropriate default values based on its value. '
+      'See the useMaterial3 API documentation for full details. '
       'This feature was deprecated after v3.13.0-0.2.pre.',
     )
     bool? useMaterial3,
