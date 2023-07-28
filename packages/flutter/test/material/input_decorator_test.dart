@@ -815,7 +815,7 @@ void runAllTests({ required bool useMaterial3 }) {
       ),
     );
 
-    // The label animates downwards from it's initial position
+    // The label animates downwards from its initial position
     // above the input text. The animation's duration is 167ms.
     await tester.pump(const Duration(milliseconds: 50));
     final double labelY50ms = tester.getTopLeft(find.byKey(key)).dy;
