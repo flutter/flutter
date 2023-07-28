@@ -2106,7 +2106,7 @@ mixin WidgetInspectorService {
         addAdditionalPropertiesCallback: (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
           final Object? value = node.value;
           final RenderObject? renderObject = value is Element ? value.renderObject : null;
-          if (renderObject == null) {
+          if (renderObject == null || delegate.subtreeDepth <= 0) {
             return const <String, Object>{};
           }
 

@@ -1632,20 +1632,19 @@ abstract class DiagnosticsNode {
           'allowWrap': allowWrap,
         if (allowNameWrap)
           'allowNameWrap': allowNameWrap,
+        ...delegate.additionalNodeProperties(this),
         if (delegate.includeProperties)
           'properties': toJsonList(
             delegate.filterProperties(getProperties(), this),
             this,
             delegate,
           ),
-        if (delegate.subtreeDepth > 0) ...<String, Object?>{
-          ...delegate.additionalNodeProperties(this),
+        if (delegate.subtreeDepth > 0)
           'children': toJsonList(
             delegate.filterChildren(getChildren(), this),
             this,
             delegate,
           ),
-        }
       };
       return true;
     }());
