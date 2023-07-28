@@ -288,12 +288,6 @@ class SearchAnchor extends StatefulWidget {
   /// ```
   final BoxConstraints? viewConstraints;
 
-  /// Called to get the suggestion list for the search view.
-  ///
-  /// By default, the list returned by this builder is laid out in a [ListView].
-  /// To get a different layout, use [viewBuilder] to override.
-  final SuggestionsBuilder suggestionsBuilder;
-
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization textCapitalization;
 
@@ -304,6 +298,12 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// This must not be null.
   final SearchAnchorChildBuilder builder;
+
+  /// Called to get the suggestion list for the search view.
+  ///
+  /// By default, the list returned by this builder is laid out in a [ListView].
+  /// To get a different layout, use [viewBuilder] to override.
+  final SuggestionsBuilder suggestionsBuilder;
 
   @override
   State<SearchAnchor> createState() => _SearchAnchorState();
