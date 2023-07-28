@@ -236,6 +236,11 @@ typedef enum {
   kFlutterSemanticsFlagIsKeyboardKey = 1 << 24,
   /// Whether the semantics node represents a tristate checkbox in mixed state.
   kFlutterSemanticsFlagIsCheckStateMixed = 1 << 25,
+  /// The semantics node has the quality of either being "expanded" or
+  /// "collapsed".
+  kFlutterSemanticsFlagHasExpandedState = 1 << 26,
+  /// Whether a semantic node that hasExpandedState is currently expanded.
+  kFlutterSemanticsFlagIsExpanded = 1 << 27,
 } FlutterSemanticsFlag;
 
 typedef enum {

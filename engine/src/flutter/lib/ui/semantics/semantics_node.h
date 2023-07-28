@@ -88,6 +88,8 @@ enum class SemanticsFlags : int32_t {
   kIsSlider = 1 << 23,
   kIsKeyboardKey = 1 << 24,
   kIsCheckStateMixed = 1 << 25,
+  kHasExpandedState = 1 << 26,
+  kIsExpanded = 1 << 27,
 };
 
 const int kScrollableSemanticsFlags =
