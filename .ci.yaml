@@ -3764,6 +3764,26 @@ targets:
         ["devicelab", "ios", "mac", "arm64"]
       task_name: ios_app_with_extensions_test
 
+  - name: Mac_x64 ios_app_with_extensions_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: ios_app_with_extensions_test
+    bringup: true
+
+  - name: Mac_arm64 ios_app_with_extensions_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "mac", "arm64"]
+      task_name: ios_app_with_extensions_test
+    bringup: true
+
   - name: Mac_ios ios_content_validation_test
     recipe: devicelab/devicelab_drone
     presubmit: false
