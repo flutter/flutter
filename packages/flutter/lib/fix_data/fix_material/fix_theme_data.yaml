@@ -25,6 +25,7 @@
 #     * TextTheme: fix_text_theme.yaml
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/131455
   - title: "Remove 'useMaterial3'"
     date: 2023-07-27
     element:
