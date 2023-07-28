@@ -1638,8 +1638,8 @@ abstract class DiagnosticsNode {
             this,
             delegate,
           ),
-          ...delegate.additionalNodeProperties(this),
         if (delegate.subtreeDepth > 0) ...<String, Object?>{
+          ...delegate.additionalNodeProperties(this),
           'children': toJsonList(
             delegate.filterChildren(getChildren(), this),
             this,
