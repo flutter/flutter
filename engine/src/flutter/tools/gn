@@ -563,14 +563,16 @@ def to_gn_args(args):
   if args.fstack_protector:
     gn_args['use_fstack_protector'] = True
 
-  if args.enable_vulkan_validation_layers:
-    if args.target_os == 'android':
-      gn_args['android_api_level'] = 26
-    gn_args['enable_vulkan_validation_layers'] = True
+  enable_vulkan_validation = args.enable_vulkan_validation_layers
 
   # Enable Vulkan validation layer automatically on debug builds for arm64.
   if args.unoptimized and args.target_os == 'android' and args.android_cpu == 'arm64':
+    enable_vulkan_validation = True
+
+  if enable_vulkan_validation:
     gn_args['enable_vulkan_validation_layers'] = True
+    if args.target_os == 'android':
+      gn_args['android_api_level'] = 26
 
   # Enable pointer compression on 64-bit mobile targets. iOS is excluded due to
   # its inability to allocate address space without allocating memory.
