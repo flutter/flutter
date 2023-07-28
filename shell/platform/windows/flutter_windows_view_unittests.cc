@@ -132,6 +132,110 @@ class MockAngleSurfaceManager : public AngleSurfaceManager {
 
 }  // namespace
 
+// Ensure that submenu buttons have their expanded/collapsed status set
+// apropriately.
+TEST(FlutterWindowsViewTest, SubMenuExpandedState) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  EngineModifier modifier(engine.get());
+  modifier.embedder_api().UpdateSemanticsEnabled =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine, bool enabled) {
+        return kSuccess;
+      };
+
+  auto window_binding_handler =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  FlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(std::move(engine));
+
+  // Enable semantics to instantiate accessibility bridge.
+  view.OnUpdateSemanticsEnabled(true);
+
+  auto bridge = view.accessibility_bridge().lock();
+  ASSERT_TRUE(bridge);
+
+  FlutterSemanticsNode2 root{sizeof(FlutterSemanticsNode2), 0};
+  root.id = 0;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.child_count = 0;
+  root.custom_accessibility_actions_count = 0;
+  root.flags = static_cast<FlutterSemanticsFlag>(
+      FlutterSemanticsFlag::kFlutterSemanticsFlagHasExpandedState |
+      FlutterSemanticsFlag::kFlutterSemanticsFlagIsExpanded);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+
+  bridge->CommitUpdates();
+
+  {
+    auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+    EXPECT_TRUE(root_node->GetData().HasState(ax::mojom::State::kExpanded));
+
+    // Get the IAccessible for the root node.
+    IAccessible* native_view = root_node->GetNativeViewAccessible();
+    ASSERT_TRUE(native_view != nullptr);
+
+    // Look up against the node itself (not one of its children).
+    VARIANT varchild = {};
+    varchild.vt = VT_I4;
+
+    // Verify the submenu is expanded.
+    varchild.lVal = CHILDID_SELF;
+    VARIANT native_state = {};
+    ASSERT_TRUE(SUCCEEDED(native_view->get_accState(varchild, &native_state)));
+    EXPECT_TRUE(native_state.lVal & STATE_SYSTEM_EXPANDED);
+
+    // Perform similar tests for UIA value;
+    IRawElementProviderSimple* uia_node;
+    native_view->QueryInterface(IID_PPV_ARGS(&uia_node));
+    ASSERT_TRUE(SUCCEEDED(uia_node->GetPropertyValue(
+        UIA_ExpandCollapseExpandCollapseStatePropertyId, &native_state)));
+    EXPECT_EQ(native_state.lVal, ExpandCollapseState_Expanded);
+
+    ASSERT_TRUE(SUCCEEDED(uia_node->GetPropertyValue(
+        UIA_AriaPropertiesPropertyId, &native_state)));
+    EXPECT_NE(std::wcsstr(native_state.bstrVal, L"expanded=true"), nullptr);
+  }
+
+  // Test collapsed too.
+  root.flags = static_cast<FlutterSemanticsFlag>(
+      FlutterSemanticsFlag::kFlutterSemanticsFlagHasExpandedState);
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+
+  {
+    auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+    EXPECT_TRUE(root_node->GetData().HasState(ax::mojom::State::kCollapsed));
+
+    // Get the IAccessible for the root node.
+    IAccessible* native_view = root_node->GetNativeViewAccessible();
+    ASSERT_TRUE(native_view != nullptr);
+
+    // Look up against the node itself (not one of its children).
+    VARIANT varchild = {};
+    varchild.vt = VT_I4;
+
+    // Verify the submenu is collapsed.
+    varchild.lVal = CHILDID_SELF;
+    VARIANT native_state = {};
+    ASSERT_TRUE(SUCCEEDED(native_view->get_accState(varchild, &native_state)));
+    EXPECT_TRUE(native_state.lVal & STATE_SYSTEM_COLLAPSED);
+
+    // Perform similar tests for UIA value;
+    IRawElementProviderSimple* uia_node;
+    native_view->QueryInterface(IID_PPV_ARGS(&uia_node));
+    ASSERT_TRUE(SUCCEEDED(uia_node->GetPropertyValue(
+        UIA_ExpandCollapseExpandCollapseStatePropertyId, &native_state)));
+    EXPECT_EQ(native_state.lVal, ExpandCollapseState_Collapsed);
+
+    ASSERT_TRUE(SUCCEEDED(uia_node->GetPropertyValue(
+        UIA_AriaPropertiesPropertyId, &native_state)));
+    EXPECT_NE(std::wcsstr(native_state.bstrVal, L"expanded=false"), nullptr);
+  }
+}
+
 // The view's surface must be destroyed after the engine is shutdown.
 // See: https://github.com/flutter/flutter/issues/124463
 TEST(FlutterWindowsViewTest, Shutdown) {
