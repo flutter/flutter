@@ -2169,7 +2169,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     IS_LINK(1 << 22),
     IS_SLIDER(1 << 23),
     IS_KEYBOARD_KEY(1 << 24),
-    IS_CHECK_STATE_MIXED(1 << 25);
+    IS_CHECK_STATE_MIXED(1 << 25),
+    HAS_EXPANDED_STATE(1 << 26),
+    IS_EXPANDED(1 << 27);
 
     final int value;
 

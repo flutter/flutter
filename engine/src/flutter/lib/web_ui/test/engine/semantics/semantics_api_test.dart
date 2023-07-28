@@ -18,7 +18,7 @@ void main() {
 
 void testMain() {
   // This must match the number of flags in lib/ui/semantics.dart
-  const int numSemanticsFlags = 26;
+  const int numSemanticsFlags = 28;
   test('SemanticsFlag.values refers to all flags.', () async {
     expect(SemanticsFlag.values.length, equals(numSemanticsFlags));
     for (int index = 0; index < numSemanticsFlags; ++index) {

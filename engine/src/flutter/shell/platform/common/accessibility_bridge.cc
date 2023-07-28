@@ -353,6 +353,13 @@ void AccessibilityBridge::SetStateFromFlutterUpdate(ui::AXNodeData& node_data,
                                                     const SemanticsNode& node) {
   FlutterSemanticsFlag flags = node.flags;
   FlutterSemanticsAction actions = node.actions;
+  if (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagHasExpandedState &&
+      flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsExpanded) {
+    node_data.AddState(ax::mojom::State::kExpanded);
+  } else if (flags &
+             FlutterSemanticsFlag::kFlutterSemanticsFlagHasExpandedState) {
+    node_data.AddState(ax::mojom::State::kCollapsed);
+  }
   if (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField &&
       (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly) == 0) {
     node_data.AddState(ax::mojom::State::kEditable);
