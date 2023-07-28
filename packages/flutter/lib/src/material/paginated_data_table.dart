@@ -456,7 +456,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       Text(
         localizations.pageRowsInfoTitle(
           _firstRowIndex + 1,
-          (_firstRowIndex + widget.rowsPerPage) > _rowCount ? _rowCount : (_firstRowIndex + widget.rowsPerPage),
+          math.min(_firstRowIndex + widget.rowsPerPage, _rowCount),
           _rowCount,
           _rowCountApproximate,
         ),
