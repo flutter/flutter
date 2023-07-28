@@ -72,6 +72,7 @@ Future<LocalizationsGenerator> generateLocalizations({
       useEscaping: options.useEscaping,
       logger: logger,
       suppressWarnings: options.suppressWarnings,
+      useRelaxedSyntax: options.relaxSyntax,
     )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: true, useCRLF: useCRLF);
@@ -79,15 +80,11 @@ Future<LocalizationsGenerator> generateLocalizations({
     throwToolExit(e.message);
   }
 
-  final List<String> outputFileList = generator.outputFileList;
-  final File? untranslatedMessagesFile = generator.untranslatedMessagesFile;
-
   if (options.format) {
-    final List<String> formatFileList = outputFileList.toList();
-    if (untranslatedMessagesFile != null) {
-      // Don't format the messages file using `dart format`.
-      formatFileList.remove(untranslatedMessagesFile.absolute.path);
-    }
+    // Only format Dart files using `dart format`.
+    final List<String> formatFileList = generator.outputFileList
+        .where((String e) => e.endsWith('.dart'))
+        .toList(growable: false);
     if (formatFileList.isEmpty) {
       return generator;
     }
@@ -494,6 +491,7 @@ class LocalizationsGenerator {
     bool useEscaping = false,
     required Logger logger,
     bool suppressWarnings = false,
+    bool useRelaxedSyntax = false,
   }) {
     final Directory? projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(fileSystem, inputPathString, projectDirectory);
@@ -517,6 +515,7 @@ class LocalizationsGenerator {
       useEscaping: useEscaping,
       logger: logger,
       suppressWarnings: suppressWarnings,
+      useRelaxedSyntax: useRelaxedSyntax,
     );
   }
 
@@ -541,6 +540,7 @@ class LocalizationsGenerator {
     required this.logger,
     this.useEscaping = false,
     this.suppressWarnings = false,
+    this.useRelaxedSyntax = false,
   });
 
   final FileSystem _fs;
@@ -616,6 +616,9 @@ class LocalizationsGenerator {
   /// Whether any errors were caught. This is set after encountering any errors
   /// from calling [_generateMethod].
   bool hadErrors = false;
+
+  /// Whether to use relaxed syntax.
+  bool useRelaxedSyntax = false;
 
   /// The list of all arb path strings in [inputDirectory].
   List<String> get arbPathStrings {
@@ -908,7 +911,13 @@ class LocalizationsGenerator {
     }
     // The call to .toList() is absolutely necessary. Otherwise, it is an iterator and will call Message's constructor again.
     _allMessages = _templateBundle.resourceIds.map((String id) => Message(
-       _templateBundle, _allBundles, id, areResourceAttributesRequired, useEscaping: useEscaping, logger: logger,
+      _templateBundle,
+      _allBundles,
+      id,
+      areResourceAttributesRequired,
+      useEscaping: useEscaping,
+      logger: logger,
+      useRelaxedSyntax: useRelaxedSyntax,
     )).toList();
     hadErrors = _allMessages.any((Message message) => message.hadErrors);
     if (inputsAndOutputsListFile != null) {

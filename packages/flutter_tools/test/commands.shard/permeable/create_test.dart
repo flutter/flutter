@@ -735,10 +735,13 @@ void main() {
   testUsingContext('plugin project with invalid custom project name', () async {
     expect(
       () => _createProject(projectDir,
-        <String>['--no-pub', '--template=plugin', '--project-name', 'xyz.xyz', '--platforms', 'android,ios',],
+        <String>['--no-pub', '--template=plugin', '--project-name', 'xyz-xyz', '--platforms', 'android,ios',],
         <String>[],
       ),
-      throwsToolExit(message: '"xyz.xyz" is not a valid Dart package name.'),
+      allOf(
+        throwsToolExit(message: '"xyz-xyz" is not a valid Dart package name.'),
+        throwsToolExit(message: 'Try "xyz_xyz" instead.'),
+      ),
     );
   });
 
@@ -3264,6 +3267,24 @@ void main() {
       platform: globals.platform,
       stdio: mockStdio,
     ),
+  });
+
+  testUsingContext('should escape ":" in project description', () async {
+    await _createProject(
+      projectDir,
+      <String>[
+        '--no-pub',
+        '--description',
+        'a: b',
+      ],
+      <String>[
+        'pubspec.yaml',
+      ],
+    );
+
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+    expect(pubspec.description, 'a: b');
   });
 
   testUsingContext('create an FFI plugin with ios, then add macos', () async {

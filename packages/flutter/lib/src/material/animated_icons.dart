@@ -6,8 +6,7 @@
 library material_animated_icons;
 
 import 'dart:math' as math show pi;
-import 'dart:ui' as ui show Canvas, Paint, Path;
-import 'dart:ui' show lerpDouble;
+import 'dart:ui' as ui show Canvas, Paint, Path, lerpDouble;
 
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
