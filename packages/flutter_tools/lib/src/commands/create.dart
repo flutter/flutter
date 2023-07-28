@@ -482,8 +482,8 @@ Your $application code is in $relativeAppMain.
     }
 
     if(includeAndroid && globals.java?.version != null){
-      _printWarningIncompatibleJavaGradleVersions(javaVersion: globals.java?.version, templateGradleVersion: templateContext.gradleVersion);
-      _printWarningIncompatibleJavaAgpVersions(javaVersion: globals.java?.version, templateAgpVersion: templateContext.agpVersion);
+      _printWarningIncompatibleJavaGradleVersions(javaVersion: globals.java?.version as String, templateGradleVersion: templateContext['gradleVersion'] as String, projectType: template);
+      _printWarningIncompatibleJavaAgpVersions(javaVersion: globals.java?.version as String, templateAgpVersion: templateContext['agpVersion'] as String, projectType: template);
     }
 
     return FlutterCommandResult.success();

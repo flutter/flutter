@@ -588,12 +588,11 @@ bool validateJavaGradle(Logger logger,
 //TODO(camsim99): Add doc
 bool validateJavaAgp(Logger logger,
     {required String? javaV, required String? agpV}) {
-  const String oldestSupportedJavaVersion = '1.8'; //TODO(camsim99): make this outside constant to reduce redundancy
   const String oldestDocumentedJavaAgpCompatibility = '4.2';
 
   if (javaV == null || agpV == null) {
     logger.printTrace(
-        'Java version or AGP version unknown ($javaV, $gradleV).');
+        'Java version or AGP version unknown ($javaV, $agpV).');
     return false;
   }
 
@@ -606,27 +605,27 @@ bool validateJavaAgp(Logger logger,
   // Begin known Java <-> AGP evaluation.
   final List<JavaAgpCompat> compatList = <JavaAgpCompat>[
     JavaAgpCompat(
-      javaMin: 17,
-      javaDefault: 17,
-      agpMin: 8.0,
+      javaMin: '17',
+      javaDefault: '17',
+      agpMin: '8.0',
       agpMax: maxKnownAgpVersion,
     ),
     JavaAgpCompat(
-      javaMin: 11,
-      javaDefault: 11,
-      agpMin: 7.0,
-      agpMax: 7.4,
+      javaMin: '11',
+      javaDefault: '11',
+      agpMin: '7.0',
+      agpMax: '7.4',
     ),
     JavaAgpCompat(
-      javaMin: 7,
-      javaDefault: 8,
-      agpMin: 4.2,
-      agpMax: 4.2,
+      javaMin: '7',
+      javaDefault: '8',
+      agpMin: '4.2',
+      agpMax: '4.2',
     ),
   ];
 
   for (final JavaAgpCompat data in compatList) {
-    if (javaV >= data.javaMin) {
+    if (isWithinVersionRange(javaV, min: data.javaMin, max: '20')) {//TODO(camsim99): make isWithinVersionRange have optional max
       return isWithinVersionRange(agpV, min: data.agpMin, max: data.agpMax);
     }
   }
@@ -779,6 +778,10 @@ class JavaAgpCompat {
     required this.agpMin,
     required this.agpMax,
   });
+  final String javaMin;
+  final String javaDefault;
+  final String agpMin;
+  final String agpMax;
 }
 
 class GradleForAgp {
