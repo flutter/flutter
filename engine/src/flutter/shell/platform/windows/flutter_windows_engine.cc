@@ -584,10 +584,9 @@ void FlutterWindowsEngine::SetNextFrameCallback(fml::closure callback) {
 }
 
 void FlutterWindowsEngine::SetLifecycleState(flutter::AppLifecycleState state) {
-  const char* state_name = flutter::AppLifecycleStateToString(state);
-  SendPlatformMessage("flutter/lifecycle",
-                      reinterpret_cast<const uint8_t*>(state_name),
-                      strlen(state_name), nullptr, nullptr);
+  if (lifecycle_manager_) {
+    lifecycle_manager_->SetLifecycleState(state);
+  }
 }
 
 void FlutterWindowsEngine::SendSystemLocales() {
@@ -794,6 +793,23 @@ void FlutterWindowsEngine::OnDwmCompositionChanged() {
 
 void FlutterWindowsEngine::OnApplicationLifecycleEnabled() {
   lifecycle_manager_->BeginProcessingClose();
+}
+
+void FlutterWindowsEngine::OnWindowStateEvent(HWND hwnd,
+                                              WindowStateEvent event) {
+  lifecycle_manager_->OnWindowStateEvent(hwnd, event);
+}
+
+std::optional<LRESULT> FlutterWindowsEngine::ProcessExternalWindowMessage(
+    HWND hwnd,
+    UINT message,
+    WPARAM wparam,
+    LPARAM lparam) {
+  if (lifecycle_manager_) {
+    return lifecycle_manager_->ExternalWindowMessage(hwnd, message, wparam,
+                                                     lparam);
+  }
+  return std::nullopt;
 }
 
 }  // namespace flutter

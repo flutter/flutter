@@ -27,7 +27,7 @@ class MockFlutterWindow : public FlutterWindow {
     ON_CALL(*this, GetDpiScale())
         .WillByDefault(Return(this->FlutterWindow::GetDpiScale()));
   }
-  virtual ~MockFlutterWindow() {}
+  virtual ~MockFlutterWindow() { SetView(nullptr); }
 
   // Wrapper for GetCurrentDPI() which is a protected method.
   UINT GetDpi() { return GetCurrentDPI(); }
@@ -229,6 +229,10 @@ TEST(FlutterWindowTest, OnPointerStarSendsDeviceType) {
                           kDefaultPointerDeviceId, WM_LBUTTONDOWN);
   win32window.OnPointerLeave(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                              kDefaultPointerDeviceId);
+
+  // Destruction of win32window sends a HIDE update. In situ, the window is
+  // owned by the delegate, and so is destructed first. Not so here.
+  win32window.SetView(nullptr);
 }
 
 // Tests that calls to OnScroll in turn calls GetScrollOffsetMultiplier
@@ -322,6 +326,62 @@ TEST(FlutterWindowTest, AlertNode) {
   alert->get_accRole(self, &role);
   EXPECT_EQ(role.vt, VT_I4);
   EXPECT_EQ(role.lVal, ROLE_SYSTEM_ALERT);
+}
+
+TEST(FlutterWindowTest, LifecycleFocusMessages) {
+  MockFlutterWindow win32window;
+  ON_CALL(win32window, GetPlatformWindow).WillByDefault([]() {
+    return reinterpret_cast<HWND>(1);
+  });
+  MockWindowBindingHandlerDelegate delegate;
+  win32window.SetView(&delegate);
+
+  WindowStateEvent last_event;
+  ON_CALL(delegate, OnWindowStateEvent)
+      .WillByDefault([&last_event](HWND hwnd, WindowStateEvent event) {
+        last_event = event;
+      });
+
+  win32window.InjectWindowMessage(WM_SIZE, 0, 0);
+  EXPECT_EQ(last_event, WindowStateEvent::kHide);
+
+  win32window.InjectWindowMessage(WM_SIZE, 0, MAKEWORD(1, 1));
+  EXPECT_EQ(last_event, WindowStateEvent::kShow);
+
+  win32window.InjectWindowMessage(WM_SETFOCUS, 0, 0);
+  EXPECT_EQ(last_event, WindowStateEvent::kFocus);
+
+  win32window.InjectWindowMessage(WM_KILLFOCUS, 0, 0);
+  EXPECT_EQ(last_event, WindowStateEvent::kUnfocus);
+}
+
+TEST(FlutterWindowTest, CachedLifecycleMessage) {
+  MockFlutterWindow win32window;
+  ON_CALL(win32window, GetPlatformWindow).WillByDefault([]() {
+    return reinterpret_cast<HWND>(1);
+  });
+
+  // Restore
+  win32window.InjectWindowMessage(WM_SIZE, 0, MAKEWORD(1, 1));
+
+  // Focus
+  win32window.InjectWindowMessage(WM_SETFOCUS, 0, 0);
+
+  MockWindowBindingHandlerDelegate delegate;
+  bool focused = false;
+  bool restored = false;
+  ON_CALL(delegate, OnWindowStateEvent)
+      .WillByDefault([&](HWND hwnd, WindowStateEvent event) {
+        if (event == WindowStateEvent::kFocus) {
+          focused = true;
+        } else if (event == WindowStateEvent::kShow) {
+          restored = true;
+        }
+      });
+
+  win32window.SetView(&delegate);
+  EXPECT_TRUE(focused);
+  EXPECT_TRUE(restored);
 }
 
 }  // namespace testing

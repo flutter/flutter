@@ -75,6 +75,26 @@ bool WindowsLifecycleManager::WindowProc(HWND hwnd,
     case WM_DWMCOMPOSITIONCHANGED:
       engine_->OnDwmCompositionChanged();
       break;
+
+    case WM_SIZE:
+      if (wpar == SIZE_MAXIMIZED || wpar == SIZE_RESTORED) {
+        OnWindowStateEvent(hwnd, WindowStateEvent::kShow);
+      } else if (wpar == SIZE_MINIMIZED) {
+        OnWindowStateEvent(hwnd, WindowStateEvent::kHide);
+      }
+      break;
+
+    case WM_SHOWWINDOW:
+      if (!wpar) {
+        OnWindowStateEvent(hwnd, WindowStateEvent::kHide);
+      } else {
+        OnWindowStateEvent(hwnd, WindowStateEvent::kShow);
+      }
+      break;
+
+    case WM_DESTROY:
+      OnWindowStateEvent(hwnd, WindowStateEvent::kHide);
+      break;
   }
   return false;
 }
@@ -161,6 +181,110 @@ bool WindowsLifecycleManager::IsLastWindowOfProcess() {
 
 void WindowsLifecycleManager::BeginProcessingClose() {
   process_close_ = true;
+}
+
+void WindowsLifecycleManager::SetLifecycleState(AppLifecycleState state) {
+  if (state_ == state) {
+    return;
+  }
+  state_ = state;
+  if (engine_) {
+    const char* state_name = AppLifecycleStateToString(state);
+    engine_->SendPlatformMessage("flutter/lifecycle",
+                                 reinterpret_cast<const uint8_t*>(state_name),
+                                 strlen(state_name), nullptr, nullptr);
+  }
+}
+
+void WindowsLifecycleManager::OnWindowStateEvent(HWND hwnd,
+                                                 WindowStateEvent event) {
+  // Synthesize an unfocus event when a focused window is hidden.
+  if (event == WindowStateEvent::kHide &&
+      focused_windows_.find(hwnd) != focused_windows_.end()) {
+    OnWindowStateEvent(hwnd, WindowStateEvent::kUnfocus);
+  }
+
+  std::lock_guard guard(state_update_lock_);
+  switch (event) {
+    case WindowStateEvent::kShow: {
+      bool first_shown_window = visible_windows_.empty();
+      auto pair = visible_windows_.insert(hwnd);
+      if (first_shown_window && pair.second &&
+          state_ == AppLifecycleState::kHidden) {
+        SetLifecycleState(AppLifecycleState::kInactive);
+      }
+      break;
+    }
+    case WindowStateEvent::kHide: {
+      bool present = visible_windows_.erase(hwnd);
+      bool empty = visible_windows_.empty();
+      if (present && empty &&
+          (state_ == AppLifecycleState::kResumed ||
+           state_ == AppLifecycleState::kInactive)) {
+        SetLifecycleState(AppLifecycleState::kHidden);
+      }
+      break;
+    }
+    case WindowStateEvent::kFocus: {
+      bool first_focused_window = focused_windows_.empty();
+      auto pair = focused_windows_.insert(hwnd);
+      if (first_focused_window && pair.second &&
+          state_ == AppLifecycleState::kInactive) {
+        SetLifecycleState(AppLifecycleState::kResumed);
+      }
+      break;
+    }
+    case WindowStateEvent::kUnfocus: {
+      if (focused_windows_.erase(hwnd) && focused_windows_.empty() &&
+          state_ == AppLifecycleState::kResumed) {
+        SetLifecycleState(AppLifecycleState::kInactive);
+      }
+      break;
+    }
+  }
+}
+
+std::optional<LRESULT> WindowsLifecycleManager::ExternalWindowMessage(
+    HWND hwnd,
+    UINT message,
+    WPARAM wparam,
+    LPARAM lparam) {
+  std::optional<flutter::WindowStateEvent> event = std::nullopt;
+
+  // TODO (schectman): Handle WM_CLOSE messages.
+  // https://github.com/flutter/flutter/issues/131497
+  switch (message) {
+    case WM_SHOWWINDOW:
+      event = wparam ? flutter::WindowStateEvent::kShow
+                     : flutter::WindowStateEvent::kHide;
+      break;
+    case WM_SIZE:
+      switch (wparam) {
+        case SIZE_MINIMIZED:
+          event = flutter::WindowStateEvent::kHide;
+          break;
+        case SIZE_RESTORED:
+        case SIZE_MAXIMIZED:
+          event = flutter::WindowStateEvent::kShow;
+          break;
+      }
+      break;
+    case WM_SETFOCUS:
+      event = flutter::WindowStateEvent::kFocus;
+      break;
+    case WM_KILLFOCUS:
+      event = flutter::WindowStateEvent::kUnfocus;
+      break;
+    case WM_DESTROY:
+      event = flutter::WindowStateEvent::kHide;
+      break;
+  }
+
+  if (event.has_value()) {
+    OnWindowStateEvent(hwnd, *event);
+  }
+
+  return std::nullopt;
 }
 
 }  // namespace flutter
