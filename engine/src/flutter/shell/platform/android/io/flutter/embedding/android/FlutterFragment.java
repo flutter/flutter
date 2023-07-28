@@ -1447,18 +1447,6 @@ public class FlutterFragment extends Fragment
     return TransparencyMode.valueOf(transparencyModeName);
   }
 
-  @Override
-  @Nullable
-  public SplashScreen provideSplashScreen() {
-    FragmentActivity parentActivity = getActivity();
-    if (parentActivity instanceof SplashScreenProvider) {
-      SplashScreenProvider splashScreenProvider = (SplashScreenProvider) parentActivity;
-      return splashScreenProvider.provideSplashScreen();
-    }
-
-    return null;
-  }
-
   /**
    * Hook for subclasses to return a {@link io.flutter.embedding.engine.FlutterEngine} with whatever
    * configuration is desired.
