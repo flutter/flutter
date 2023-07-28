@@ -1,6 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -11,10 +12,11 @@ import 'message_codecs.dart';
 // We use .bin as the extension since it is well-known to represent
 // data in some arbitrary binary format.
 const String _kAssetManifestFilename = 'AssetManifest.bin';
-// We use the same bin file for the web, but slightly bloated because we base64
-// and JSON-encode it so it can be downloaded by even the dumbest of browsers.
+
+// We use the same bin file for the web, but re-encoded as JSON(base64(bytes))
+// so it can be downloaded by even the dumbest of browsers.
 // See https://github.com/flutter/flutter/issues/128456
-const String _kAssetManifestWebFilename = 'AssetManifest.json';
+const String _kAssetManifestWebFilename = 'AssetManifest.bin.json';
 
 /// Contains details about available assets and their variants.
 /// See [Resolution-aware image assets](https://docs.flutter.dev/ui/assets-and-images#resolution-aware)
