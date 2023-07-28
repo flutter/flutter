@@ -78,6 +78,11 @@ void main() {
     "description": "Sample description"
   }
 }''');
+    fileSystem
+      .file('pubspec.yaml')
+      .writeAsStringSync('''
+flutter:
+  generate: true''');
 
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
@@ -109,7 +114,11 @@ void main() {
   }
 }''');
     fileSystem.file('header.txt').writeAsStringSync('a header file');
-
+    fileSystem
+      .file('pubspec.yaml')
+      .writeAsStringSync('''
+flutter:
+  generate: true''');
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
@@ -442,7 +451,7 @@ format: true
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-   testUsingContext('throw when generate: false and uses synthetic package when run via commandline options', () async {
+  testUsingContext('throw when generate: false and uses synthetic package when run via commandline options', () async {
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
@@ -475,9 +484,21 @@ format: true
       () async => createTestCommandRunner(command).run(<String>['gen-l10n', '--synthetic-package']),
       throwsToolExit(message: 'Attempted to generate localizations code without having the flutter: generate flag turned on.')
     );
-
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('throws error when unexpected positional argument is provided', () {
+    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+    );
+    expect(
+      () async => createTestCommandRunner(command).run(<String>['gen-l10n', '--synthetic-package', 'false']),
+      throwsToolExit(message: 'Unexpected positional argument "false".')
+    );
   });
 }

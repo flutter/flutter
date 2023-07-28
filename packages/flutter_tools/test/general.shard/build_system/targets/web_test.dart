@@ -118,7 +118,7 @@ void main() {
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
 
     // Main
-    expect(generated, contains('ui.webOnlyWarmupEngine('));
+    expect(generated, contains('ui_web.bootstrapEngine('));
     expect(generated, contains('entrypoint.main as _'));
   }, overrides: <Type, Generator>{
     TemplateRenderer: () => const MustacheTemplateRenderer(),
@@ -270,7 +270,7 @@ void main() {
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
 
     // Main
-    expect(generated, contains('ui.webOnlyWarmupEngine('));
+    expect(generated, contains('ui_web.bootstrapEngine('));
     expect(generated, contains('entrypoint.main as _'));
   }, overrides: <Type, Generator>{
     Platform: () => windows,
@@ -295,7 +295,7 @@ void main() {
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
 
     // Main
-    expect(generated, contains('ui.webOnlyWarmupEngine('));
+    expect(generated, contains('ui_web.bootstrapEngine('));
     expect(generated, contains('entrypoint.main as _'));
   }, overrides: <Type, Generator>{
     TemplateRenderer: () => const MustacheTemplateRenderer(),
@@ -351,7 +351,7 @@ void main() {
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
 
     // Main
-    expect(generated, contains('ui.webOnlyWarmupEngine('));
+    expect(generated, contains('ui_web.bootstrapEngine('));
     expect(generated, contains('entrypoint.main as _'));
   }, overrides: <Type, Generator>{
     TemplateRenderer: () => const MustacheTemplateRenderer(),

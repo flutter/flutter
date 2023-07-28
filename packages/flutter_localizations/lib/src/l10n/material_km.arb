@@ -25,6 +25,7 @@
   "continueButtonLabel": "បន្ត",
   "copyButtonLabel": "ចម្លង",
   "cutButtonLabel": "កាត់",
+  "scanTextButtonLabel": "ស្កេនអត្ថបទ",
   "okButtonLabel": "យល់ព្រម",
   "pasteButtonLabel": "ដាក់​ចូល",
   "selectAllButtonLabel": "ជ្រើសរើស​ទាំងអស់",
@@ -140,5 +141,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

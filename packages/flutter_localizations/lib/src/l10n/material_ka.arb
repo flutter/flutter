@@ -25,6 +25,7 @@
   "continueButtonLabel": "გაგრძელება",
   "copyButtonLabel": "კოპირება",
   "cutButtonLabel": "ამოჭრა",
+  "scanTextButtonLabel": "ტექსტის სკანირება",
   "okButtonLabel": "კარგი",
   "pasteButtonLabel": "ჩასმა",
   "selectAllButtonLabel": "ყველას არჩევა",
@@ -139,5 +140,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

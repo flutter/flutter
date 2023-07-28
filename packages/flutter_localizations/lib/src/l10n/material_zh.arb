@@ -21,6 +21,7 @@
   "closeButtonLabel": "关闭",
   "copyButtonLabel": "复制",
   "cutButtonLabel": "剪切",
+  "scanTextButtonLabel": "扫描文本",
   "okButtonLabel": "确定",
   "pasteButtonLabel": "粘贴",
   "selectAllButtonLabel": "全选",
@@ -140,5 +141,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

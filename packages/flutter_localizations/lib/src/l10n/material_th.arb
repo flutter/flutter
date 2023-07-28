@@ -25,6 +25,7 @@
   "continueButtonLabel": "ต่อไป",
   "copyButtonLabel": "คัดลอก",
   "cutButtonLabel": "ตัด",
+  "scanTextButtonLabel": "สแกนข้อความ",
   "okButtonLabel": "ตกลง",
   "pasteButtonLabel": "วาง",
   "selectAllButtonLabel": "เลือกทั้งหมด",
@@ -140,5 +141,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

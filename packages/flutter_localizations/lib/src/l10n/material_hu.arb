@@ -25,6 +25,7 @@
   "continueButtonLabel": "Folytatás",
   "copyButtonLabel": "Másolás",
   "cutButtonLabel": "Kivágás",
+  "scanTextButtonLabel": "Szöveg beolvasása",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Beillesztés",
   "selectAllButtonLabel": "Összes kijelölése",
@@ -140,5 +141,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

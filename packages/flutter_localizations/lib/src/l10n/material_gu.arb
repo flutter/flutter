@@ -25,6 +25,7 @@
   "continueButtonLabel": "ચાલુ રાખો",
   "copyButtonLabel": "કૉપિ કરો",
   "cutButtonLabel": "કાપો",
+  "scanTextButtonLabel": "ટેક્સ્ટ સ્કેન કરો",
   "okButtonLabel": "ઓકે",
   "pasteButtonLabel": "પેસ્ટ કરો",
   "selectAllButtonLabel": "બધા પસંદ કરો",
@@ -139,5 +140,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

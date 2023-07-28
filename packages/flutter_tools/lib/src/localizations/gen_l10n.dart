@@ -47,6 +47,9 @@ Future<LocalizationsGenerator> generateLocalizations({
 
   precacheLanguageAndRegionTags();
 
+  // Use \r\n if project's pubspec file contains \r\n.
+  final bool useCRLF = fileSystem.file('pubspec.yaml').readAsStringSync().contains('\r\n');
+
   LocalizationsGenerator generator;
   try {
     generator = LocalizationsGenerator(
@@ -69,23 +72,19 @@ Future<LocalizationsGenerator> generateLocalizations({
       useEscaping: options.useEscaping,
       logger: logger,
       suppressWarnings: options.suppressWarnings,
+      useRelaxedSyntax: options.relaxSyntax,
     )
       ..loadResources()
-      ..writeOutputFiles(isFromYaml: true);
+      ..writeOutputFiles(isFromYaml: true, useCRLF: useCRLF);
   } on L10nException catch (e) {
     throwToolExit(e.message);
   }
 
-  final List<String> outputFileList = generator.outputFileList;
-  final File? untranslatedMessagesFile = generator.untranslatedMessagesFile;
-
-  // All other post processing.
   if (options.format) {
-    final List<String> formatFileList = outputFileList.toList();
-    if (untranslatedMessagesFile != null) {
-      // Don't format the messages file using `dart format`.
-      formatFileList.remove(untranslatedMessagesFile.absolute.path);
-    }
+    // Only format Dart files using `dart format`.
+    final List<String> formatFileList = generator.outputFileList
+        .where((String e) => e.endsWith('.dart'))
+        .toList(growable: false);
     if (formatFileList.isEmpty) {
       return generator;
     }
@@ -492,6 +491,7 @@ class LocalizationsGenerator {
     bool useEscaping = false,
     required Logger logger,
     bool suppressWarnings = false,
+    bool useRelaxedSyntax = false,
   }) {
     final Directory? projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(fileSystem, inputPathString, projectDirectory);
@@ -515,6 +515,7 @@ class LocalizationsGenerator {
       useEscaping: useEscaping,
       logger: logger,
       suppressWarnings: suppressWarnings,
+      useRelaxedSyntax: useRelaxedSyntax,
     );
   }
 
@@ -539,6 +540,7 @@ class LocalizationsGenerator {
     required this.logger,
     this.useEscaping = false,
     this.suppressWarnings = false,
+    this.useRelaxedSyntax = false,
   });
 
   final FileSystem _fs;
@@ -614,6 +616,9 @@ class LocalizationsGenerator {
   /// Whether any errors were caught. This is set after encountering any errors
   /// from calling [_generateMethod].
   bool hadErrors = false;
+
+  /// Whether to use relaxed syntax.
+  bool useRelaxedSyntax = false;
 
   /// The list of all arb path strings in [inputDirectory].
   List<String> get arbPathStrings {
@@ -906,7 +911,13 @@ class LocalizationsGenerator {
     }
     // The call to .toList() is absolutely necessary. Otherwise, it is an iterator and will call Message's constructor again.
     _allMessages = _templateBundle.resourceIds.map((String id) => Message(
-       _templateBundle, _allBundles, id, areResourceAttributesRequired, useEscaping: useEscaping, logger: logger,
+      _templateBundle,
+      _allBundles,
+      id,
+      areResourceAttributesRequired,
+      useEscaping: useEscaping,
+      logger: logger,
+      useRelaxedSyntax: useRelaxedSyntax,
     )).toList();
     hadErrors = _allMessages.any((Message message) => message.hadErrors);
     if (inputsAndOutputsListFile != null) {
@@ -1310,7 +1321,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     }
   }
 
-  List<String> writeOutputFiles({ bool isFromYaml = false }) {
+  List<String> writeOutputFiles({ bool isFromYaml = false, bool useCRLF = false }) {
     // First, generate the string contents of all necessary files.
     final String generatedLocalizationsFile = _generateCode();
 
@@ -1328,7 +1339,9 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       syntheticPackageDirectory.createSync(recursive: true);
       final File flutterGenPubspec = syntheticPackageDirectory.childFile('pubspec.yaml');
       if (!flutterGenPubspec.existsSync()) {
-        flutterGenPubspec.writeAsStringSync(emptyPubspecTemplate);
+        flutterGenPubspec.writeAsStringSync(
+          useCRLF ? emptyPubspecTemplate.replaceAll('\n', '\r\n') : emptyPubspecTemplate
+        );
       }
     }
 
@@ -1347,11 +1360,13 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
 
     // Generate the required files for localizations.
     _languageFileMap.forEach((File file, String contents) {
-      file.writeAsStringSync(contents);
+      file.writeAsStringSync(useCRLF ? contents.replaceAll('\n', '\r\n') : contents);
       _outputFileList.add(file.absolute.path);
     });
 
-    baseOutputFile.writeAsStringSync(generatedLocalizationsFile);
+    baseOutputFile.writeAsStringSync(
+      useCRLF ? generatedLocalizationsFile.replaceAll('\n', '\r\n') : generatedLocalizationsFile
+    );
     final File? messagesFile = untranslatedMessagesFile;
     if (messagesFile != null) {
       _generateUntranslatedMessagesFile(logger, messagesFile);
@@ -1387,12 +1402,12 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       if (!inputsAndOutputsListFileLocal.existsSync()) {
         inputsAndOutputsListFileLocal.createSync(recursive: true);
       }
-
+      final String filesListContent = json.encode(<String, Object> {
+        'inputs': _inputFileList,
+        'outputs': _outputFileList,
+      });
       inputsAndOutputsListFileLocal.writeAsStringSync(
-        json.encode(<String, Object> {
-          'inputs': _inputFileList,
-          'outputs': _outputFileList,
-        }),
+        useCRLF ? filesListContent.replaceAll('\n', '\r\n') : filesListContent,
       );
     }
 

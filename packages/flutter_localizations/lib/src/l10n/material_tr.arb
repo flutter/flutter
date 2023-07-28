@@ -25,6 +25,7 @@
   "continueButtonLabel": "Devam",
   "copyButtonLabel": "Kopyala",
   "cutButtonLabel": "Kes",
+  "scanTextButtonLabel": "Metni tara",
   "okButtonLabel": "Tamam",
   "pasteButtonLabel": "Yapıştır",
   "selectAllButtonLabel": "Tümünü seç",
@@ -140,5 +141,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

@@ -28,6 +28,7 @@
   "continueButtonLabel": "Nastavi",
   "copyButtonLabel": "Kopiraj",
   "cutButtonLabel": "Izreži",
+  "scanTextButtonLabel": "Skeniraj tekst",
   "okButtonLabel": "Uredu",
   "pasteButtonLabel": "Zalijepi",
   "selectAllButtonLabel": "Odaberi sve",
@@ -143,5 +144,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

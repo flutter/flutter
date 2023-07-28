@@ -26,6 +26,7 @@
   "continueButtonLabel": "Teruskan",
   "copyButtonLabel": "Salin",
   "cutButtonLabel": "Potong",
+  "scanTextButtonLabel": "Pindai teks",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Tampal",
   "selectAllButtonLabel": "Pilih semua",
@@ -141,5 +142,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

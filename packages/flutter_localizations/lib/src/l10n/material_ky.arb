@@ -25,6 +25,7 @@
   "continueButtonLabel": "Улантуу",
   "copyButtonLabel": "Көчүрүү",
   "cutButtonLabel": "Кесүү",
+  "scanTextButtonLabel": "Текстти скандоо",
   "okButtonLabel": "Макул",
   "pasteButtonLabel": "Чаптоо",
   "selectAllButtonLabel": "Баарын тандоо",
@@ -139,5 +140,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

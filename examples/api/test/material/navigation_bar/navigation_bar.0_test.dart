@@ -17,20 +17,36 @@ void main() {
 
     /// NavigationDestinations must be rendered
     expect(find.text('Home'), findsOneWidget);
-    expect(find.text('Business'), findsOneWidget);
-    expect(find.text('School'), findsOneWidget);
+    expect(find.text('Notifications'), findsOneWidget);
+    expect(find.text('Messages'), findsOneWidget);
 
-    /// initial index must be zero
+    /// Test notification badge.
+    final Badge notificationBadge = tester.firstWidget(find.ancestor(
+      of: find.byIcon(Icons.notifications_sharp),
+      matching: find.byType(Badge),
+    ));
+    expect(notificationBadge.label, null);
+
+    /// Test messages badge.
+    final Badge messagesBadge = tester.firstWidget(find.ancestor(
+      of: find.byIcon(Icons.messenger_sharp),
+      matching: find.byType(Badge),
+    ));
+    expect(messagesBadge.label, isNotNull);
+
+    /// Initial index must be zero
     expect(navigationBarWidget.selectedIndex, 0);
+    expect(find.text('Home page'), findsOneWidget);
 
-    /// switch to second tab
-    await tester.tap(find.text('Business'));
+    /// Switch to second tab
+    await tester.tap(find.text('Notifications'));
     await tester.pumpAndSettle();
-    expect(find.text('Page 2'), findsOneWidget);
+    expect(find.text('This is a notification'), findsNWidgets(2));
 
-    /// switch to third tab
-    await tester.tap(find.text('School'));
+    /// Switch to third tab
+    await tester.tap(find.text('Messages'));
     await tester.pumpAndSettle();
-    expect(find.text('Page 3'), findsOneWidget);
+    expect(find.text('Hi!'), findsOneWidget);
+    expect(find.text('Hello'), findsOneWidget);
   });
 }

@@ -706,6 +706,12 @@ List<Widget> createTestMenus({
       TestMenu.mainMenu3,
       menuChildren: <Widget>[
         menuItemButton(TestMenu.subMenu8),
+        MenuItemButton(
+          onPressed: () {
+            debugPrint('Focused Item: $primaryFocus');
+          },
+          child: const Text('Print Focused Item'),
+        )
       ],
     ),
     submenuButton(
@@ -734,7 +740,11 @@ List<Widget> createTestMenus({
               submenuButton(
                 TestMenu.subSubMenu3,
                 menuChildren: <Widget>[
-                  menuItemButton(TestMenu.subSubSubMenu1),
+                  for (int i=0; i < 100; ++i)
+                    MenuItemButton(
+                      onPressed: () {},
+                      child: Text('Menu Item $i'),
+                    ),
                 ],
               ),
           ],
@@ -778,9 +788,4 @@ enum TestMenu {
   final String acceleratorLabel;
   // Strip the accelerator markers.
   String get label => MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel);
-  int get acceleratorIndex {
-    int index = -1;
-    MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel, setIndex: (int i) => index = i);
-    return index;
-  }
 }
