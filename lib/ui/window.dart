@@ -96,8 +96,7 @@ class FlutterView {
   final PlatformDispatcher platformDispatcher;
 
   /// The configuration of this view.
-  // TODO(goderbauer): remove ignore when https://github.com/dart-lang/linter/issues/4562 is fixed.
-  _ViewConfiguration _viewConfiguration; // ignore: prefer_final_fields
+  _ViewConfiguration _viewConfiguration;
 
   /// The [Display] this view is drawn in.
   Display get display {
