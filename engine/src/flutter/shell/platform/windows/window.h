@@ -18,6 +18,7 @@
 #include "flutter/shell/platform/windows/keyboard_manager.h"
 #include "flutter/shell/platform/windows/sequential_id_generator.h"
 #include "flutter/shell/platform/windows/text_input_manager.h"
+#include "flutter/shell/platform/windows/windows_lifecycle_manager.h"
 #include "flutter/shell/platform/windows/windows_proc_table.h"
 #include "flutter/shell/platform/windows/windowsx_shim.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_fragment_root_delegate_win.h"
@@ -222,6 +223,9 @@ class Window : public KeyboardManager::WindowDelegate {
 
   // Called to obtain a pointer to the fragment root delegate.
   virtual ui::AXFragmentRootDelegateWin* GetAxFragmentRootDelegate() = 0;
+
+  // Called on a resize or focus event.
+  virtual void OnWindowStateEvent(WindowStateEvent event) = 0;
 
  protected:
   // Win32's DefWindowProc.

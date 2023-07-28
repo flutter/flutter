@@ -74,11 +74,19 @@ FlutterWindow::FlutterWindow(int width, int height)
   current_cursor_ = ::LoadCursor(nullptr, IDC_ARROW);
 }
 
-FlutterWindow::~FlutterWindow() {}
+FlutterWindow::~FlutterWindow() {
+  OnWindowStateEvent(WindowStateEvent::kHide);
+}
 
 void FlutterWindow::SetView(WindowBindingHandlerDelegate* window) {
   binding_handler_delegate_ = window;
   direct_manipulation_owner_->SetBindingHandlerDelegate(window);
+  if (restored_) {
+    OnWindowStateEvent(WindowStateEvent::kShow);
+  }
+  if (focused_) {
+    OnWindowStateEvent(WindowStateEvent::kFocus);
+  }
 }
 
 WindowsRenderTarget FlutterWindow::GetRenderTarget() {
@@ -326,6 +334,28 @@ bool FlutterWindow::NeedsVSync() {
   }
 
   return true;
+}
+
+void FlutterWindow::OnWindowStateEvent(WindowStateEvent event) {
+  switch (event) {
+    case WindowStateEvent::kShow:
+      restored_ = true;
+      break;
+    case WindowStateEvent::kHide:
+      restored_ = false;
+      focused_ = false;
+      break;
+    case WindowStateEvent::kFocus:
+      focused_ = true;
+      break;
+    case WindowStateEvent::kUnfocus:
+      focused_ = false;
+      break;
+  }
+  HWND hwnd = GetPlatformWindow();
+  if (hwnd && binding_handler_delegate_) {
+    binding_handler_delegate_->OnWindowStateEvent(hwnd, event);
+  }
 }
 
 }  // namespace flutter

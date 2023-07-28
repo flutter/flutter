@@ -221,6 +221,7 @@ executable("flutter_windows_unittests") {
     "text_input_plugin_unittest.cc",
     "window_proc_delegate_manager_unittests.cc",
     "window_unittests.cc",
+    "windows_lifecycle_manager_unittests.cc",
   ]
 
   configs +=
