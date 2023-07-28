@@ -1638,7 +1638,7 @@ class ThemeData with Diagnosticable {
     Color? bottomAppBarColor,
     @Deprecated(
       'Use ThemeData.useMaterial3 instead. '
-      'Setting this value causes issues on changing the default theme. '
+      'Setting this value cannot successfully change the default theme. '
       'This feature was deprecated after v3.13.0-0.2.pre.',
     )
     bool? useMaterial3,
