@@ -168,6 +168,7 @@ class ManifestAssetBundle implements AssetBundle {
   // We assume the main asset is designed for a device pixel ratio of 1.0.
   static const String _kAssetManifestJsonFilename = 'AssetManifest.json';
   static const String _kAssetManifestBinFilename = 'AssetManifest.bin';
+  static const String _kAssetManifestBinJsonFilename = 'AssetManifest.bin.json';
 
   static const String _kNoticeFile = 'NOTICES';
   // Comically, this can't be name with the more common .gz file extension
@@ -235,13 +236,17 @@ class ManifestAssetBundle implements AssetBundle {
     if (flutterManifest.isEmpty) {
       entries[_kAssetManifestJsonFilename] = DevFSStringContent('{}');
       entryKinds[_kAssetManifestJsonFilename] = AssetKind.regular;
-      entries[_kAssetManifestJsonFilename] = DevFSStringContent('{}');
-      entryKinds[_kAssetManifestJsonFilename] = AssetKind.regular;
       final ByteData emptyAssetManifest =
         const StandardMessageCodec().encodeMessage(<dynamic, dynamic>{})!;
-      entries[_kAssetManifestBinFilename] =
-        DevFSByteContent(emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes));
-      entryKinds[_kAssetManifestBinFilename] = AssetKind.regular;
+      // Create .bin.json on web builds, and .bin for everybody else.
+      if (targetPlatform == TargetPlatform.web_javascript) {
+        entries[_kAssetManifestBinJsonFilename] = DevFSStringContent('""');
+        entryKinds[_kAssetManifestBinJsonFilename] = AssetKind.regular;
+      } else {
+        entries[_kAssetManifestBinFilename] =
+          DevFSByteContent(emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes));
+        entryKinds[_kAssetManifestBinFilename] = AssetKind.regular;
+      }
       return 0;
     }
 
@@ -438,9 +443,7 @@ class ManifestAssetBundle implements AssetBundle {
     final Map<String, List<String>> assetManifest =
       _createAssetManifest(assetVariants, deferredComponentsAssetVariants);
     final DevFSByteContent assetManifestBinary = _createAssetManifestBinary(assetManifest);
-    final DevFSStringContent assetManifestJson = DevFSStringContent(json.encode(
-      base64.encode(assetManifestBinary.bytes)
-    ));
+    final DevFSStringContent assetManifestJson = DevFSStringContent(json.encode(assetManifest));
     final DevFSStringContent fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(packageConfig, additionalLicenseFiles);
     if (licenseResult.errorMessages.isNotEmpty) {
@@ -465,7 +468,15 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     _setIfChanged(_kAssetManifestJsonFilename, assetManifestJson, AssetKind.regular);
-    _setIfChanged(_kAssetManifestBinFilename, assetManifestBinary, AssetKind.regular);
+    // Create .bin.json on web builds, and .bin for everybody else.
+    if (targetPlatform == TargetPlatform.web_javascript) {
+      final DevFSStringContent assetManifestBinaryJson = DevFSStringContent(json.encode(
+        base64.encode(assetManifestBinary.bytes)
+      ));
+      _setIfChanged(_kAssetManifestBinJsonFilename, assetManifestBinaryJson, AssetKind.regular);
+    } else {
+      _setIfChanged(_kAssetManifestBinFilename, assetManifestBinary, AssetKind.regular);
+    }
     _setIfChanged(kFontManifestJson, fontManifest, AssetKind.regular);
     _setLicenseIfChanged(licenseResult.combinedLicenses, targetPlatform);
     return 0;
