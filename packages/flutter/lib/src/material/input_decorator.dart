@@ -2405,12 +2405,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
-<<<<<<< HEAD
-      floatingLabelHeight = ((decoration.floatingLabelGap ?? 4.0) + 0.75 * labelStyle.fontSize!) * MediaQuery.textScalerOf(context).textScaleFactor;
-=======
       // 4.0: the default vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = (decoration.floatingLabelGap + 0.75 * labelStyle.fontSize!) * MediaQuery.textScalerOf(context).textScaleFactor;
->>>>>>> master
+      floatingLabelHeight = ((decoration.floatingLabelGap ?? 4.0) + 0.75 * labelStyle.fontSize!) * MediaQuery.textScalerOf(context).textScaleFactor;
       if (decoration.filled ?? false) {
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
