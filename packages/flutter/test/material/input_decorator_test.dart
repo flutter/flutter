@@ -392,7 +392,7 @@ void runAllTests({ required bool useMaterial3 }) {
   });
 
   testWidgets('InputDecorator input/label text layout with floatingLabelGap', (WidgetTester tester) async {
-    // The label appears above the input text
+    // The label appears above the input text.
     await tester.pumpWidget(
       buildInputDecorator(
         useMaterial3: useMaterial3,
@@ -421,7 +421,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
 
-    // The label appears within the input when there is no text content
+    // The label appears within the input when there is no text content.
     await tester.pumpWidget(
       buildInputDecorator(
         useMaterial3: useMaterial3,
@@ -437,7 +437,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
 
-    // The label appears above the input text when there is no content and floatingLabelBehavior is always
+    // The label appears above the input text when there is no content and floatingLabelBehavior is FloatingLabelBehavior.always.
     await tester.pumpWidget(
       buildInputDecorator(
         useMaterial3: useMaterial3,
@@ -454,7 +454,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
 
-    // The label appears within the input text when there is content and floatingLabelBehavior is never
+    // The label appears within the input text when there is content and floatingLabelBehavior is FloatingLabelBehavior.never.
     await tester.pumpWidget(
       buildInputDecorator(
         useMaterial3: useMaterial3,
@@ -501,7 +501,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
 
-    // isEmpty: true causes the label to be aligned with the input text
+    // isEmpty: true causes the label to be aligned with the input text.
     await tester.pumpWidget(
       buildInputDecorator(
         useMaterial3: useMaterial3,
