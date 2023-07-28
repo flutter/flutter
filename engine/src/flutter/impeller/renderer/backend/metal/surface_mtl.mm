@@ -218,20 +218,6 @@ IRect SurfaceMTL::coverage() const {
   return IRect::MakeSize(resolve_texture_->GetSize());
 }
 
-static bool ShouldWaitForCommandBuffer() {
-#if ((FML_OS_MACOSX && !FML_OS_IOS) || FML_OS_IOS_SIMULATOR)
-  // If a transaction is present, `presentDrawable` will present too early. And
-  // so we wait on an empty command buffer to get scheduled instead, which
-  // forces us to also wait for all of the previous command buffers in the queue
-  // to get scheduled.
-  return true;
-#else
-  // On Physical iOS devices we still need to wait if we're taking a frame
-  // capture.
-  return [[MTLCaptureManager sharedCaptureManager] isCapturing];
-#endif  // ((FML_OS_MACOSX && !FML_OS_IOS) || FML_OS_IOS_SIMULATOR)
-}
-
 // |Surface|
 bool SurfaceMTL::Present() const {
   auto context = context_.lock();
@@ -262,16 +248,12 @@ bool SurfaceMTL::Present() const {
   }
 
   if (drawable_) {
-    // In certain situations, we need to wait until the command queue has been
-    // flushed before presenting to the onscreen texture. See the comments in
-    // `ShouldWaitForCommandBuffer` for more details.
-    if (ShouldWaitForCommandBuffer()) {
-      id<MTLCommandBuffer> command_buffer =
-          ContextMTL::Cast(context.get())
-              ->CreateMTLCommandBuffer("Present Waiter Command Buffer");
-      [command_buffer commit];
-      [command_buffer waitUntilScheduled];
-    }
+    TRACE_EVENT0("flutter", "waitUntilScheduled");
+    id<MTLCommandBuffer> command_buffer =
+        ContextMTL::Cast(context.get())
+            ->CreateMTLCommandBuffer("Present Waiter Command Buffer");
+    [command_buffer commit];
+    [command_buffer waitUntilScheduled];
     [drawable_ present];
   }
 
