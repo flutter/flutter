@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -691,6 +692,39 @@ void main() {
     await tester.pump();
     inputText = tester.widget(find.text('input text'));
     expect(inputText.style.color, focusedColor);
+  });
+
+  testWidgets('SearchBar respects textCapitalization property', (WidgetTester tester) async {
+    Widget buildSearchBar(TextCapitalization textCapitalization) {
+      return MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchBar(
+              textCapitalization: textCapitalization,
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildSearchBar(TextCapitalization.characters));
+    await tester.pump();
+    TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.characters);
+
+    await tester.pumpWidget(buildSearchBar(TextCapitalization.sentences));
+    await tester.pump();
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.sentences);
+
+    await tester.pumpWidget(buildSearchBar(TextCapitalization.words));
+    await tester.pump();
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.words);
+
+    await tester.pumpWidget(buildSearchBar(TextCapitalization.none));
+    await tester.pump();
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.none);
   });
 
   testWidgets('hintStyle can override textStyle for hintText', (WidgetTester tester) async {

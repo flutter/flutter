@@ -1022,6 +1022,7 @@ class SearchBar extends StatefulWidget {
     this.padding,
     this.textStyle,
     this.hintStyle,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1139,6 +1140,9 @@ class SearchBar extends StatefulWidget {
   /// defaults to the `bodyLarge` text style from the current [Theme].
   /// The default text color is [ColorScheme.onSurfaceVariant].
   final MaterialStateProperty<TextStyle?>? hintStyle;
+
+  /// {@macro flutter.widgets.editableText.textCapitalization}
+  final TextCapitalization textCapitalization;
 
   @override
   State<SearchBar> createState() => _SearchBarState();
@@ -1273,6 +1277,7 @@ class _SearchBarState extends State<SearchBar> {
                           // smaller than 48.0
                           isDense: true,
                         )),
+                        textCapitalization: widget.textCapitalization,
                       ),
                     ),
                   )
