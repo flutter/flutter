@@ -26,7 +26,7 @@
 version: 1
 transforms:
   - title: "Remove 'useMaterial3'"
-    date: 2021-11-11
+    date: 2023-07-27
     element:
       uris: [ 'material.dart' ]
       method: 'copyWith'

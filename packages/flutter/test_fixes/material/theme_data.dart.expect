@@ -440,4 +440,6 @@ void main() {
   themeData = ThemeData(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
   themeData = ThemeData.raw(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
   themeData = ThemeData.copyWith(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
+
+  ThemeData themeData = ThemeData.copyWith();
 }
