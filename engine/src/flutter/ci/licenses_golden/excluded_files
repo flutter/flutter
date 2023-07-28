@@ -661,6 +661,7 @@
 ../../../fuchsia/sdk/linux/pkg/inspect/meta.json
 ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/magma_client/meta.json
+../../../fuchsia/sdk/linux/pkg/magma_common/meta.json
 ../../../fuchsia/sdk/linux/pkg/media_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/meta.json
 ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
