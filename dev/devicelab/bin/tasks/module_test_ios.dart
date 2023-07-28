@@ -160,6 +160,12 @@ Future<void> main() async {
       const String dartPluginName = 'dartplugin';
       await _createFakeDartPlugin(dartPluginName, tempDir);
 
+      // Make a package with native assets.
+      section('Create package with native assets');
+
+      const String ffiPackageName = 'ffi_package';
+      await _createffiPackage(ffiPackageName, tempDir);
+
       section('Add plugins');
 
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
@@ -174,6 +180,8 @@ dependencies:
   google_sign_in_ios: 5.5.0
   $dartPluginName:
     path: ../$dartPluginName
+  $ffiPackageName:
+    path: ../$ffiPackageName
 ''',
       );
       await pubspec.writeAsString(content, flush: true);
@@ -220,6 +228,10 @@ dependencies:
 
       // Dart-only, no embedded framework.
       checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', '$dartPluginName.framework'));
+
+      // Native assets embedded, no embedded framework.
+      checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'lib$ffiPackageName.dylib'));
+      checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', '$ffiPackageName.framework'));
 
       section('Clean and pub get module');
 
@@ -296,6 +308,9 @@ end
 
         section('Build iOS Objective-C host app');
 
+        // TODO(dacoharkes): It doesn't look like the xcconfig with NATIVE_ASSETS= is respected.
+        // The native asssets mapping will likely not be embedded in the kernel compilation.
+        // We either need to make sure the mapping is passed, _or_ re-run dry run in the KernelSnapshot target (breaking caching).
         await exec(
           'xcodebuild',
           <String>[
@@ -349,6 +364,12 @@ end
         'flutter_assets',
         'isolate_snapshot_data',
       ));
+
+      // TODO(dacoharkes): The dylib does not seem to be bundled.
+      // checkFileExists(path.join(
+      //   hostFrameworksDirectory,
+      //   'lib$ffiPackageName.dylib',
+      // ));
 
       section('Check the NOTICE file is correct');
 
@@ -685,4 +706,19 @@ class $dartPluginClass {
 
   // Remove the native plugin code.
   await Directory(path.join(pluginDir, 'ios')).delete(recursive: true);
+}
+
+Future<void> _createffiPackage(String name, Directory parent) async {
+  await inDirectory(parent, () async {
+    await flutter(
+      'create',
+      options: <String>[
+        '--org',
+        'io.flutter.devicelab',
+        '--template=package_ffi',
+        '--platforms=ios',
+        name,
+      ],
+    );
+  });
 }
