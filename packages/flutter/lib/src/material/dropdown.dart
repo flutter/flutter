@@ -15,6 +15,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
+import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -1633,6 +1634,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
              }
            }
            final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable();
+           final bool hasError = effectiveDecoration.errorText != null;
 
            // An unfocusable Focus widget so that this widget can detect if its
            // descendants have focus or not.
@@ -1640,6 +1642,31 @@ class DropdownButtonFormField<T> extends FormField<T> {
              canRequestFocus: false,
              skipTraversal: true,
              child: Builder(builder: (BuildContext context) {
+                InputBorder? resolveInputBorder() {
+                  if (hasError) {
+                    if (Focus.of(context).hasFocus) {
+                      return effectiveDecoration.focusedErrorBorder;
+                    }
+                    return effectiveDecoration.errorBorder;
+                  }
+                  if (Focus.of(context).hasFocus) {
+                    return effectiveDecoration.focusedBorder;
+                  }
+                  if (effectiveDecoration.enabled) {
+                    return effectiveDecoration.enabledBorder;
+                  }
+                  return effectiveDecoration.border;
+                }
+                BorderRadius? effectiveBorderRadius() {
+                  if (resolveInputBorder() is OutlineInputBorder) {
+                    return (resolveInputBorder() as OutlineInputBorder?)?.borderRadius;
+                  }
+                  if (resolveInputBorder() is UnderlineInputBorder) {
+                    return (resolveInputBorder() as UnderlineInputBorder?)?.borderRadius;
+                  }
+                  return null;
+                }
+
                return DropdownButtonHideUnderline(
                  child: DropdownButton<T>._formField(
                    items: items,
@@ -1665,7 +1692,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    menuMaxHeight: menuMaxHeight,
                    enableFeedback: enableFeedback,
                    alignment: alignment,
-                   borderRadius: borderRadius,
+                   borderRadius: borderRadius ?? effectiveBorderRadius(),
                    inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
                    isEmpty: isEmpty,
                    isFocused: Focus.of(context).hasFocus,
