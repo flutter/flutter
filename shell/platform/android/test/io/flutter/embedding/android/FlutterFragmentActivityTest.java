@@ -4,19 +4,14 @@ import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_D
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +33,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
@@ -254,93 +248,6 @@ public class FlutterFragmentActivityTest {
     // The framework would have recreated a new fragment but the fragment activity wouldn't have
     // created a new one again.
     assertEquals(0, activity.numberOfEnginesCreated);
-  }
-
-  @Test
-  public void itDoesNotCrashWhenSplashScreenMetadataIsNotDefined() {
-    Intent intent = FlutterFragmentActivity.createDefaultIntent(ctx);
-    ActivityController<FlutterFragmentActivity> activityController =
-        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
-    FlutterFragmentActivity fragmentActivity = activityController.get();
-
-    // We never supplied the resource key to robolectric so it doesn't exist.
-    SplashScreen splashScreen = fragmentActivity.provideSplashScreen();
-    // It should quietly return a null and not crash.
-    assertNull(splashScreen);
-  }
-
-  @Test
-  @Config(
-      sdk = Build.VERSION_CODES.KITKAT,
-      shadows = {SplashShadowResources.class})
-  public void itLoadsSplashScreenDrawable() throws PackageManager.NameNotFoundException {
-    Intent intent = FlutterFragmentActivity.createDefaultIntent(ctx);
-    ActivityController<FlutterFragmentActivity> activityController =
-        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
-    FlutterFragmentActivity activity = activityController.get();
-
-    // Inject splash screen drawable resource id in the metadata
-    PackageManager pm = ctx.getPackageManager();
-    ActivityInfo activityInfo =
-        pm.getActivityInfo(activity.getComponentName(), PackageManager.GET_META_DATA);
-    activityInfo.metaData = new Bundle();
-    activityInfo.metaData.putInt(
-        FlutterActivityLaunchConfigs.SPLASH_SCREEN_META_DATA_KEY,
-        SplashShadowResources.SPLASH_DRAWABLE_ID);
-    shadowOf(ctx.getPackageManager()).addOrUpdateActivity(activityInfo);
-
-    // It should load the drawable.
-    SplashScreen splashScreen = activity.provideSplashScreen();
-    assertNotNull(splashScreen);
-  }
-
-  @Test
-  @Config(
-      sdk = Build.VERSION_CODES.LOLLIPOP,
-      shadows = {SplashShadowResources.class})
-  @TargetApi(21) // Theme references in drawables requires API 21+
-  public void itLoadsThemedSplashScreenDrawable() throws PackageManager.NameNotFoundException {
-    // A drawable with theme references can be parsed only if the app theme is supplied
-    // in getDrawable methods. This test verifies it by fetching a (fake) themed drawable.
-    // On failure, a Resource.NotFoundException will ocurr.
-    Intent intent = FlutterFragmentActivity.createDefaultIntent(ctx);
-    ActivityController<FlutterFragmentActivity> activityController =
-        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
-    FlutterFragmentActivity activity = activityController.get();
-
-    // Inject themed splash screen drawable resource id in the metadata.
-    PackageManager pm = ctx.getPackageManager();
-    ActivityInfo activityInfo =
-        pm.getActivityInfo(activity.getComponentName(), PackageManager.GET_META_DATA);
-    activityInfo.metaData = new Bundle();
-    activityInfo.metaData.putInt(
-        FlutterActivityLaunchConfigs.SPLASH_SCREEN_META_DATA_KEY,
-        SplashShadowResources.THEMED_SPLASH_DRAWABLE_ID);
-    shadowOf(ctx.getPackageManager()).addOrUpdateActivity(activityInfo);
-
-    // It should load the drawable.
-    SplashScreen splashScreen = activity.provideSplashScreen();
-    assertNotNull(splashScreen);
-  }
-
-  @Test
-  public void itWithMetadataWithoutSplashScreenResourceKeyDoesNotProvideSplashScreen()
-      throws PackageManager.NameNotFoundException {
-    Intent intent = FlutterFragmentActivity.createDefaultIntent(ctx);
-    ActivityController<FlutterFragmentActivity> activityController =
-        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
-    FlutterFragmentActivity activity = activityController.get();
-
-    // Setup an empty metadata file.
-    PackageManager pm = ctx.getPackageManager();
-    ActivityInfo activityInfo =
-        pm.getActivityInfo(activity.getComponentName(), PackageManager.GET_META_DATA);
-    activityInfo.metaData = new Bundle();
-    shadowOf(ctx.getPackageManager()).addOrUpdateActivity(activityInfo);
-
-    // It should not load the drawable.
-    SplashScreen splashScreen = activity.provideSplashScreen();
-    assertNull(splashScreen);
   }
 
   static class FlutterFragmentActivityWithProvidedEngine extends FlutterFragmentActivity {

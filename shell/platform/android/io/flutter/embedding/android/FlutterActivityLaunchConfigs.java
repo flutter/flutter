@@ -13,8 +13,6 @@ public class FlutterActivityLaunchConfigs {
   /* package */ static final String DART_ENTRYPOINT_META_DATA_KEY = "io.flutter.Entrypoint";
   /* package */ static final String DART_ENTRYPOINT_URI_META_DATA_KEY = "io.flutter.EntrypointUri";
   /* package */ static final String INITIAL_ROUTE_META_DATA_KEY = "io.flutter.InitialRoute";
-  /* package */ static final String SPLASH_SCREEN_META_DATA_KEY =
-      "io.flutter.embedding.android.SplashScreenDrawable";
   /* package */ static final String NORMAL_THEME_META_DATA_KEY =
       "io.flutter.embedding.android.NormalTheme";
   /* package */ static final String HANDLE_DEEPLINKING_META_DATA_KEY =
