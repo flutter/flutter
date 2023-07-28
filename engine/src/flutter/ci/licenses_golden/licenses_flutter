@@ -2326,7 +2326,6 @@ ORIGIN: ../../../flutter/shell/platform/android/io/flutter/app/FlutterApplicatio
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/app/FlutterFragmentActivity.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPlayStoreSplitApplication.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPluginRegistry.java + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/DrawableSplashScreen.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/ExclusiveAppComponent.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivity.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivityAndFragmentDelegate.java + ../../../flutter/LICENSE
@@ -2337,7 +2336,6 @@ ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/Flu
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterFragmentActivity.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterImageView.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterPlayStoreSplitApplication.java + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterSplashView.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterSurfaceView.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterTextureView.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java + ../../../flutter/LICENSE
@@ -2347,8 +2345,6 @@ ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/Key
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyboardManager.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyboardMap.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/RenderMode.java + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/SplashScreen.java + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/SplashScreenProvider.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/TransparencyMode.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/android/WindowInfoRepositoryCallbackAdapterWrapper.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngine.java + ../../../flutter/LICENSE
@@ -5024,7 +5020,6 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterFragmentActi
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPlayStoreSplitApplication.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/AndroidTouchProcessor.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/DrawableSplashScreen.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/ExclusiveAppComponent.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivity.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivityAndFragmentDelegate.java
@@ -5035,7 +5030,6 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/Flutt
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterFragmentActivity.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterImageView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterPlayStoreSplitApplication.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterSplashView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterSurfaceView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterTextureView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java
@@ -5046,8 +5040,6 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/Keybo
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyboardMap.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/MotionEventTracker.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/RenderMode.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/SplashScreen.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/SplashScreenProvider.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/TransparencyMode.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/WindowInfoRepositoryCallbackAdapterWrapper.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngine.java

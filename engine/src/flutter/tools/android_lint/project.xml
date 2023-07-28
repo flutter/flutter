@@ -31,15 +31,12 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/RenderMode.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterFragmentActivity.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivity.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/DrawableSplashScreen.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyChannelResponder.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivityAndFragmentDelegate.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterSplashView.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyEmbedderResponder.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterTextureView.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/MotionEventTracker.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/SplashScreenProvider.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/WindowInfoRepositoryCallbackAdapterWrapper.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/TransparencyMode.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterEngineProvider.java" />
@@ -50,7 +47,6 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterImageView.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/KeyData.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivityLaunchConfigs.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/android/SplashScreen.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterUiDisplayListener.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/RenderSurface.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterRenderer.java" />
