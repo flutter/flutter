@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_api_samples/material/input_chip/input_chip.1.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
