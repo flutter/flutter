@@ -17,14 +17,17 @@ enum SnackBarBehavior {
   /// Fixes the [SnackBar] at the bottom of the [Scaffold].
   ///
   /// The exception is that the [SnackBar] will be shown above a
-  /// [BottomNavigationBar]. Additionally, the [SnackBar] will cause other
-  /// non-fixed widgets inside [Scaffold] to be pushed above (for example, the
-  /// [FloatingActionButton]).
+  /// [BottomNavigationBar] or a [NavigationBar]. Additionally, the [SnackBar]
+  /// will cause other non-fixed widgets inside [Scaffold] to be pushed above
+  /// (for example, the [FloatingActionButton]).
   fixed,
 
   /// This behavior will cause [SnackBar] to be shown above other widgets in the
-  /// [Scaffold]. This includes being displayed above a [BottomNavigationBar]
-  /// and a [FloatingActionButton].
+  /// [Scaffold]. This includes being displayed above a [BottomNavigationBar] or
+  /// a [NavigationBar], and a [FloatingActionButton] when its location is on the
+  /// bottom. When the floating action button location is on the top, this behavior
+  /// will cause the [SnackBar] to be shown above other widgets in the [Scaffold]
+  /// except the floating action button.
   ///
   /// See <https://material.io/design/components/snackbars.html> for more details.
   floating,
