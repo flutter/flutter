@@ -13,11 +13,11 @@ chrome:
   # `self.m.platform.name.capitalize()` evaluates to. See:
   #
   # recipe_modules/web_util/api.py
-  Linux: 1135561
-  Mac: 1135562
-  Mac_Arm: 1135572
-  Win: 1135559
-  version: '114.0' # CIPD tag for the above Build IDs. Normally "ChromeMajorVersion.UploadAttempt". ;)
+  Linux: 1148103
+  Mac: 1148119
+  Mac_Arm: 1148112
+  Win: 1148119
+  version: '115.0' # CIPD tag for the above Build IDs. Normally "ChromeMajorVersion.UploadAttempt". ;)
 
 firefox:
   version: '106.0'
