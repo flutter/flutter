@@ -2699,7 +2699,8 @@ class _WidgetInspectorState extends State<WidgetInspector>
   void initState() {
     super.initState();
 
-    WidgetInspectorService.instance.selection.addListener(_selectionInformationChanged);
+    WidgetInspectorService.instance.selection
+        .addListener(_selectionInformationChanged);
     WidgetInspectorService.instance.isSelectMode
         .addListener(_selectionInformationChanged);
     selection = WidgetInspectorService.instance.selection;
