@@ -238,14 +238,13 @@ class ManifestAssetBundle implements AssetBundle {
       entryKinds[_kAssetManifestJsonFilename] = AssetKind.regular;
       final ByteData emptyAssetManifest =
         const StandardMessageCodec().encodeMessage(<dynamic, dynamic>{})!;
-      // Create .bin.json on web builds, and .bin for everybody else.
+      entries[_kAssetManifestBinFilename] =
+        DevFSByteContent(emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes));
+      entryKinds[_kAssetManifestBinFilename] = AssetKind.regular;
+      // Create .bin.json on web builds.
       if (targetPlatform == TargetPlatform.web_javascript) {
         entries[_kAssetManifestBinJsonFilename] = DevFSStringContent('""');
         entryKinds[_kAssetManifestBinJsonFilename] = AssetKind.regular;
-      } else {
-        entries[_kAssetManifestBinFilename] =
-          DevFSByteContent(emptyAssetManifest.buffer.asUint8List(0, emptyAssetManifest.lengthInBytes));
-        entryKinds[_kAssetManifestBinFilename] = AssetKind.regular;
       }
       return 0;
     }
@@ -468,14 +467,13 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     _setIfChanged(_kAssetManifestJsonFilename, assetManifestJson, AssetKind.regular);
-    // Create .bin.json on web builds, and .bin for everybody else.
+    _setIfChanged(_kAssetManifestBinFilename, assetManifestBinary, AssetKind.regular);
+    // Create .bin.json on web builds.
     if (targetPlatform == TargetPlatform.web_javascript) {
       final DevFSStringContent assetManifestBinaryJson = DevFSStringContent(json.encode(
         base64.encode(assetManifestBinary.bytes)
       ));
       _setIfChanged(_kAssetManifestBinJsonFilename, assetManifestBinaryJson, AssetKind.regular);
-    } else {
-      _setIfChanged(_kAssetManifestBinFilename, assetManifestBinary, AssetKind.regular);
     }
     _setIfChanged(kFontManifestJson, fontManifest, AssetKind.regular);
     _setLicenseIfChanged(licenseResult.combinedLicenses, targetPlatform);

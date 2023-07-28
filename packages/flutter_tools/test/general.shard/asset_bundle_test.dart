@@ -346,13 +346,16 @@ flutter:
       await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript);
 
       expect(bundle.entries.keys,
-        unorderedEquals(<String>['AssetManifest.json', 'AssetManifest.bin.json'])
+        unorderedEquals(<String>[
+          'AssetManifest.json',
+          'AssetManifest.bin',
+          'AssetManifest.bin.json',
+        ])
       );
       expect(
         utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         '{}',
       );
-      expect(bundle.entries['AssetManifest.bin'], isNull);
       expect(
         utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()),
         '""',
@@ -383,6 +386,7 @@ flutter:
       expect(bundle.entries.keys,
         unorderedEquals(<String>[
           'AssetManifest.json',
+          'AssetManifest.bin',
           'AssetManifest.bin.json',
           'FontManifest.json',
           'NOTICES', // not .Z
@@ -397,21 +401,20 @@ flutter:
       expect(manifestJson, isNotEmpty);
       expect(manifestJson['assets/bar/lizard.png'], isNotNull);
 
-      expect(bundle.entries['AssetManifest.bin'], isNull);
-
-      final Object? manifestBinJson = const StandardMessageCodec().decodeMessage(
-        ByteData.sublistView(
-          base64.decode(
-            json.decode(
-              utf8.decode(
-                await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()
-              )
-            ) as String
+      final Uint8List manifestBinJsonBytes = base64.decode(
+        json.decode(
+          utf8.decode(
+            await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()
           )
-        )
+        ) as String
       );
-      expect(manifestBinJson, isA<Map<Object?, Object?>>());
-      expect(manifestBinJson! as Map<Object?, Object?>, isNotEmpty);
+
+      final Uint8List manifestBinBytes = Uint8List.fromList(
+        await bundle.entries['AssetManifest.bin']!.contentsAsBytes()
+      );
+
+      expect(manifestBinJsonBytes, equals(manifestBinBytes),
+        reason: 'JSON-encoded binary content should be identical to BIN file.');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
