@@ -313,6 +313,10 @@ struct Matrix {
             m[9] == 0 && m[10] == 1 && m[11] == 0 && m[14] == 0 && m[15] == 1);
   }
 
+  constexpr bool HasPerspective() const {
+    return m[3] != 0 || m[7] != 0 || m[11] != 0 || m[15] != 1;
+  }
+
   constexpr bool IsAligned(Scalar tolerance = 0) const {
     int v[] = {!ScalarNearlyZero(m[0], tolerance),  //
                !ScalarNearlyZero(m[1], tolerance),  //

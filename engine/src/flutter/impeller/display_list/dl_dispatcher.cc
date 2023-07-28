@@ -1074,7 +1074,9 @@ void DlDispatcher::drawDisplayList(
     canvas_.SaveLayer(save_paint);
   }
 
-  if (display_list->has_rtree()) {
+  // TODO(131445): Remove this restriction if we can correctly cull with
+  // perspective transforms.
+  if (display_list->has_rtree() && !initial_matrix_.HasPerspective()) {
     // The canvas remembers the screen-space culling bounds clipped by
     // the surface and the history of clip calls. DisplayList can cull
     // the ops based on a rectangle expressed in its "destination bounds"
