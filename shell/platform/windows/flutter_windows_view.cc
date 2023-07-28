@@ -673,4 +673,10 @@ void FlutterWindowsView::OnDwmCompositionChanged() {
   }
 }
 
+void FlutterWindowsView::OnWindowStateEvent(HWND hwnd, WindowStateEvent event) {
+  if (engine_) {
+    engine_->OnWindowStateEvent(hwnd, event);
+  }
+}
+
 }  // namespace flutter

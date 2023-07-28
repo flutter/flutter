@@ -262,6 +262,22 @@ class FlutterWindowsEngine {
   // Registers the top level handler for the WM_CLOSE window message.
   void OnApplicationLifecycleEnabled();
 
+  // Called when a Window receives an event that may alter the application
+  // lifecycle state.
+  void OnWindowStateEvent(HWND hwnd, WindowStateEvent event);
+
+  // Handle a message from a non-Flutter window in the same application.
+  // Returns a result when the message is consumed and should not be processed
+  // further.
+  std::optional<LRESULT> ProcessExternalWindowMessage(HWND hwnd,
+                                                      UINT message,
+                                                      WPARAM wparam,
+                                                      LPARAM lparam);
+
+  WindowsLifecycleManager* lifecycle_manager() {
+    return lifecycle_manager_.get();
+  }
+
  protected:
   // Creates the keyboard key handler.
   //

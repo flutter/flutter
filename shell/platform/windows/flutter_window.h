@@ -162,6 +162,9 @@ class FlutterWindow : public Window, public WindowBindingHandler {
   // |Window|
   ui::AXFragmentRootDelegateWin* GetAxFragmentRootDelegate() override;
 
+  // |Window|
+  void OnWindowStateEvent(WindowStateEvent event) override;
+
  private:
   // A pointer to a FlutterWindowsView that can be used to update engine
   // windowing and input state.
@@ -172,6 +175,12 @@ class FlutterWindow : public Window, public WindowBindingHandler {
 
   // The cursor rect set by Flutter.
   RECT cursor_rect_;
+
+  // The window receives resize and focus messages before its view is set, so
+  // these values cache the state of the window in the meantime so that the
+  // proper application lifecycle state can be updated once the view is set.
+  bool restored_ = false;
+  bool focused_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindow);
 };
