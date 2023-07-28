@@ -4408,6 +4408,14 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isSelected, value);
   }
 
+  /// If this node has Boolean state that can be controlled by the user, whether
+  /// that state is expanded or collapsed, corresponding to true and false, respectively.
+  ///
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have expanded/collapsed state that can be controlled by the user.
+  ///
+  /// The getter returns null if the owning [RenderObject] does not have
+  /// expanded/collapsed state.
   bool? get isExpanded => _hasFlag(SemanticsFlag.hasExpandedState) ? _hasFlag(SemanticsFlag.isExpanded) : null;
   set isExpanded(bool? value) {
     _setFlag(SemanticsFlag.hasExpandedState, true);
