@@ -451,6 +451,8 @@
 ../../../fuchsia/sdk/linux/README.md
 ../../../fuchsia/sdk/linux/arch/arm64/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/arch/arm64/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/arch/riscv64/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/arch/riscv64/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/arch/x64/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/arch/x64/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
