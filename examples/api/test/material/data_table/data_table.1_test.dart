@@ -20,6 +20,3 @@ void main() {
     expect(find.text('Row 19').hitTestable(), findsOneWidget);
   });
 }
-
-
-
