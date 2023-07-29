@@ -854,4 +854,84 @@ void main() {
     expect(fieldValue, '123456');
     expect(formKey.currentState!.validate(), isFalse);
   });
+
+  testWidgets('hasInteractedByUser returns false when the input has not changed', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
+
+    final Widget widget = MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Material(
+              child: TextFormField(
+                key: fieldKey,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    expect(fieldKey.currentState!.hasInteractedByUser, isFalse);
+  });
+
+  testWidgets('hasInteractedByUser returns true after the input has changed', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
+
+    final Widget widget = MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Material(
+              child: TextFormField(
+                key: fieldKey,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    await tester.enterText(find.byType(TextFormField), 'foo');
+    await tester.pump();
+
+    expect(fieldKey.currentState!.hasInteractedByUser, isTrue);
+  });
+
+  testWidgets('hasInteractedByUser returns false after the field is reset', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
+
+    final Widget widget = MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Material(
+              child: TextFormField(
+                key: fieldKey,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    await tester.enterText(find.byType(TextFormField), 'foo');
+    await tester.pump();
+
+    fieldKey.currentState!.reset();
+
+    expect(fieldKey.currentState!.hasInteractedByUser, isFalse);
+  });
 }
