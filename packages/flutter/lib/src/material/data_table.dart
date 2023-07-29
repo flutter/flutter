@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -356,6 +357,11 @@ class DataCell {
 /// target device), it is suggested that you use a
 /// [PaginatedDataTable] which automatically splits the data into
 /// multiple pages.
+///
+/// ## Performance considerations when wrapping [DataTable] with [SingleChildScrollView]
+///
+/// Wrapping a [DataTable] with [SingleChildScrollView] is expensive as [SingleChildScrollView]
+/// mounts and paints the entire [DataTable] even when only some rows are visible.
 ///
 /// {@tool dartpad}
 /// This sample shows how to display a [DataTable] with three columns: name, age, and
