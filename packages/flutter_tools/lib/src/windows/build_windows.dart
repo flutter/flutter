@@ -191,7 +191,7 @@ Future<void> _runBuild(
   // MSBuild sends all output to stdout, including build errors. This surfaces
   // known error patterns.
   final RegExp errorMatcher = RegExp(
-	<String>[
+    <String>[
       // Known error messages
       r'(:\s*(?:warning|(?:fatal )?error).*?:)',
       r'Error detected in pubspec\.yaml:',
