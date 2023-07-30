@@ -1477,8 +1477,23 @@ class TextPainter {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
-    assert(_debugAssertTextLayoutIsValid);
     assert(selection.isValid);
+    return getBoxesForRange(
+      selection.start,
+      selection.end,
+      boxHeightStyle: boxHeightStyle,
+      boxWidthStyle: boxWidthStyle,
+    );
+  }
+
+  /// Returns a list of rects that bound the given range.
+  List<TextBox> getBoxesForRange(
+    int start,
+    int end, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) {
+    assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
     final Offset offset = cachedLayout.paintOffset;
@@ -1486,8 +1501,8 @@ class TextPainter {
       return <TextBox>[];
     }
     final List<TextBox> boxes = cachedLayout.paragraph.getBoxesForRange(
-      selection.start,
-      selection.end,
+      start,
+      end,
       boxHeightStyle: boxHeightStyle,
       boxWidthStyle: boxWidthStyle,
     );
@@ -1501,7 +1516,12 @@ class TextPainter {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
-    return cachedLayout.paragraph.getPositionForOffset(offset - cachedLayout.paintOffset);
+   // print('${cachedLayout.contentWidth}, ${cachedLayout.paintOffset}, ${cachedLayout.paragraph.width}');
+
+    //print('${cachedLayout.paragraph.getPositionForOffset(offset - cachedLayout.paintOffset)}');
+    TextPosition position=cachedLayout.paragraph.getPositionForOffset(offset - cachedLayout.paintOffset);
+    //print('${cachedLayout.paragraph.getBoxesForRange(position.offset-1,position.offset+1)}');
+    return position;
   }
 
   /// {@template flutter.painting.TextPainter.getWordBoundary}
