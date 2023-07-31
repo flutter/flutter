@@ -30,6 +30,7 @@
 #include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
+#include "impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/capabilities.h"
@@ -489,49 +490,8 @@ void ContextVK::Shutdown() {
   raster_message_loop_->Terminate();
 }
 
-std::unique_ptr<Surface> ContextVK::AcquireNextSurface() {
-  TRACE_EVENT0("impeller", __FUNCTION__);
-  auto surface = swapchain_ ? swapchain_->AcquireNextDrawable() : nullptr;
-  if (surface && pipeline_library_) {
-    pipeline_library_->DidAcquireSurfaceFrame();
-  }
-  if (allocator_) {
-    allocator_->DidAcquireSurfaceFrame();
-  }
-  return surface;
-}
-
-#ifdef FML_OS_ANDROID
-
-vk::UniqueSurfaceKHR ContextVK::CreateAndroidSurface(
-    ANativeWindow* window) const {
-  if (!device_holder_->instance) {
-    return vk::UniqueSurfaceKHR{VK_NULL_HANDLE};
-  }
-
-  auto create_info = vk::AndroidSurfaceCreateInfoKHR().setWindow(window);
-  auto surface_res =
-      device_holder_->instance->createAndroidSurfaceKHRUnique(create_info);
-
-  if (surface_res.result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Could not create Android surface, error: "
-                   << vk::to_string(surface_res.result);
-    return vk::UniqueSurfaceKHR{VK_NULL_HANDLE};
-  }
-
-  return std::move(surface_res.value);
-}
-
-#endif  // FML_OS_ANDROID
-
-bool ContextVK::SetWindowSurface(vk::UniqueSurfaceKHR surface) {
-  auto swapchain = SwapchainVK::Create(shared_from_this(), std::move(surface));
-  if (!swapchain) {
-    VALIDATION_LOG << "Could not create swapchain.";
-    return false;
-  }
-  swapchain_ = std::move(swapchain);
-  return true;
+std::shared_ptr<SurfaceContextVK> ContextVK::CreateSurfaceContext() {
+  return std::make_shared<SurfaceContextVK>(shared_from_this());
 }
 
 const std::shared_ptr<const Capabilities>& ContextVK::GetCapabilities() const {
