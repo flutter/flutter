@@ -1658,11 +1658,12 @@ class DropdownButtonFormField<T> extends FormField<T> {
                   return effectiveDecoration.border;
                 }
                 BorderRadius? effectiveBorderRadius() {
-                  if (resolveInputBorder() is OutlineInputBorder) {
-                    return (resolveInputBorder() as OutlineInputBorder?)?.borderRadius;
+                  final InputBorder? inputBorder = resolveInputBorder();
+                  if (inputBorder is OutlineInputBorder) {
+                    return inputBorder.borderRadius;
                   }
-                  if (resolveInputBorder() is UnderlineInputBorder) {
-                    return (resolveInputBorder() as UnderlineInputBorder?)?.borderRadius;
+                  if (inputBorder is UnderlineInputBorder) {
+                    return inputBorder.borderRadius;
                   }
                   return null;
                 }
