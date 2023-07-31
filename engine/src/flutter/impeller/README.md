@@ -100,6 +100,8 @@ states of completion:
   package agnosticism in the Impeller interface. This sub-framework primarily
   provides a custom implementation of the `flutter::DisplayListDispatcher` that
   forwards Flutter rendering intent to Impeller.
+* **`//impeller/typographer`**: Contains a backend agnostic interface for rendering typefaces. While Impeller does **not** do any text layout or shaping, it does render shaped glyph runs. The application specifies these glyph runs to Impeller using the Typographer subsystem.
+  * **`//impeller/typographer/backend`**: Contains code that interfaces with an underlying (usually platform-specific) library or toolkit to render glyphs in typefaces into texture atlases. Impeller will then reference these glyphs when rendering shaped glyph runs. No Impeller sub-frameworks may depend on these targets. There may be multiple typographer backends.
 * **`//impeller/base`**: Contains C++ utilities that are used throughout the
   Impeller family of frameworks. Ideally, these should go in `//flutter/fml` but
   their use is probably not widespread enough to at this time.
@@ -112,11 +114,14 @@ states of completion:
   removal and must not be used outside of tests.
 * **`//fixtures`**: Contains test fixtures used by the various test harnesses.
   This depends on `//flutter/testing`.
-* **`//tools`**: Contains all GN rules and python scripts for working with
+* **`//impeller/tools`**: Contains all GN rules and python scripts for working with
   Impeller. These include GN rules processing GLSL shaders, including reflected
   shader information as source set targets, and, including compiled shader
   intermediate representations into the final executable as binary blobs for
   easier packaging.
+* **`//impeller/toolkit`**: Contains Impeller agnostic toolkits that provide more ergonomic  wrappers around certain APIs like EGL. Toolkits must be dependency free so that an external component using a toolkit doesn't have to pull in a significant portion of Impeller itself.
+* **`//impeller/blobcat`**: Concatenates shader blobs. This is primarily used by rendering backends that don't have the notion of a shader library. In Impeller, all shaders are packaged into a single library that contains a manifest of the shaders in the library along with the pre-compiled shaders themselves. Unlike Metal, backends like OpenGL ES and Vulkan don't have such a concept. For these backends, `//impeller/blobcat` is used to create a single shader library to be packaged with the engine.
+* **`//impeller/scene`**: Contains an experimental 3D model renderer. This is currently only exposed via [a special build of the Flutter Engine](https://github.com/flutter/flutter/wiki/Impeller-Scene).
 
 ## The Offline Shader Compilation Pipeline
 
