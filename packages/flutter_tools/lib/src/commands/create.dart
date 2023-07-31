@@ -481,7 +481,8 @@ Your $application code is in $relativeAppMain.
       }
     }
 
-    if(includeAndroid && globals.java?.version != null){
+    if(includeAndroid && globals.java?.version != null) {
+      //TODO(camsim99): java 19, agp 7.4, gradle 7.6 -- make sure this case works
       _printWarningIncompatibleJavaGradleVersions(javaVersion: globals.java?.version as String, templateGradleVersion: templateContext['gradleVersion'] as String, projectType: template);
       _printWarningIncompatibleJavaAgpVersions(javaVersion: globals.java?.version as String, templateAgpVersion: templateContext['agpVersion'] as String, projectType: template);
     }
@@ -806,6 +807,9 @@ void _printWarningIncompatibleJavaGradleVersions({required String javaVersion, r
 
   //TODO(camsim99): try different styles
   //TODO(camsim99): Get actual path(s)? for gradle properties files.
+  //TODO(camsim99): Modify flutter doctor to say why we picked the Java source that we did (flutter config, etc.), maybe in verbose mode
+  //TODO(camsim99): For update Gradle option, link to help docs if they run into errors, include gradlew update -d ... command they can use, link to docs
+  //TOOD: Also link to Java/Gradle incompatibility docs on flutter.dev and mention range of gradle versions they can update to
   globals.printWarning('''
 The version of Java detected conflicts with the Gradle version used in your new
 Flutter $projectType.
