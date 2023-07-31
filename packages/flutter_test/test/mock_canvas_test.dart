@@ -129,7 +129,7 @@ void main() {
               return false;
             }
             if (method == #drawColor) {
-              throw 'fail';
+              fail('fail');
             }
             return true;
           }),
@@ -223,7 +223,7 @@ void main() {
           paints..everything((Symbol method, List<dynamic> arguments) {
             methodsAndArguments.add(MethodAndArguments(method, arguments));
             if (method == #drawColor) {
-              throw 'failed ';
+              fail('failed ');
             }
             return true;
           }),
