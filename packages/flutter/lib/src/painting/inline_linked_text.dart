@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'inline_link.dart';
 import 'inline_span.dart';
 import 'text_span.dart';
+import 'text_style.dart';
 
 // TODO(justinmc): On some platforms, may want to underline link?
 
@@ -18,7 +19,15 @@ typedef LinkTapCallback = void Function(String linkString);
 
 /// Builds an [InlineSpan] for displaying a link on [displayString] linking to
 /// [linkString].
-typedef LinkBuilder = InlineSpan Function(
+///
+/// Creates a [TapGestureRecognizer] and returns it so that its lifecycle can be
+/// maintained by the caller.
+///
+/// {@template flutter.painting.LinkBuilder.recognizer}
+/// It's necessary to call [TapGestureRecognizer.dispose] on the returned
+/// recognizer when the owning widget is disposed. See [TextSpan.recognizer].
+/// {@endtemplate}
+typedef LinkBuilder = (InlineSpan, TapGestureRecognizer) Function(
   String displayString,
   String linkString,
 );
@@ -38,35 +47,33 @@ class InlineLinkedText extends TextSpan {
   ///    the given [RegExp].
   ///  * [InlineLinkedText.textLinkers], which uses [TextLinker]s to allow
   ///    specifying an arbitrary number of [ranges] and [linkBuilders].
-  InlineLinkedText({
-    super.style,
-    String? text,
-    List<InlineSpan>? spans,
-    GestureRecognizer? recognizer,
-    Iterable<TextRange>? ranges,
+  factory InlineLinkedText({
+    required LinkTapCallback onTap,
+    required TextStyle style,
     LinkBuilder? linkBuilder,
-  }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
-       assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
-       super(
-         children: text != null
-             ? TextLinker(
-               rangesFinder: ranges != null
-                   ? (String text) => ranges
-                   : defaultRangesFinder,
-               linkBuilder: linkBuilder ?? getDefaultLinkBuilder(recognizer),
-             ).getSpans(text)
-             : linkSpans(
-                 spans!,
-                 <TextLinker>[
-                   TextLinker(
-                     rangesFinder: ranges != null
-                         ? (String text) => ranges
-                         : defaultRangesFinder,
-                     linkBuilder: linkBuilder ?? getDefaultLinkBuilder(recognizer),
-                   ),
-                 ],
-               ).toList(),
-       );
+    Iterable<TextRange>? ranges,
+    List<InlineSpan>? spans,
+    String? text,
+  }) {
+    assert(text != null || spans != null, 'Must specify something to link: either text or spans.');
+    assert(text == null || spans == null, 'Pass one of spans or text, not both.');
+    final RangesFinder rangesFinder = ranges != null
+      ? (String text) => ranges
+      : defaultRangesFinder;
+    final TextLinker textLinker = TextLinker(
+      rangesFinder: rangesFinder,
+      linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
+    );
+    final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+        text == null
+            ? linkSpans(spans!, <TextLinker>[textLinker])
+            : textLinker.getSpans(text);
+    return InlineLinkedText._(
+      recognizers: recognizers,
+      style: style,
+      children: linkedSpans.toList(),
+    );
+  }
 
   /// Create an instance of [InlineLinkedText] where the text matched by the
   /// given [regExp] is made interactive.
@@ -77,23 +84,32 @@ class InlineLinkedText extends TextSpan {
   ///    otherwise matches URLs by default.
   ///  * [InlineLinkedText.textLinkers], which uses [TextLinker]s to allow
   ///    specifying an arbitrary number of [ranges] and [linkBuilders].
-  InlineLinkedText.regExp({
-    super.style,
+  factory InlineLinkedText.regExp({
+    required LinkTapCallback onTap,
     required RegExp regExp,
+    required TextStyle style,
     String? text,
     List<InlineSpan>? spans,
-    GestureRecognizer? recognizer,
     LinkBuilder? linkBuilder,
-  }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
-       assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
-       super(
-         children: text != null
-             ? TextLinker(
-               rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
-               linkBuilder: linkBuilder ?? getDefaultLinkBuilder(recognizer),
-             ).getSpans(text)
-             : linkSpans(spans!, defaultTextLinkers(recognizer)).toList(),
-       );
+  }) {
+    assert(text != null || spans != null, 'Must specify something to link: either text or spans.');
+    assert(text == null || spans == null, 'Pass one of spans or text, not both.');
+
+    final TextLinker textLinker = TextLinker(
+      rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
+      linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
+    );
+    final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+        text == null
+            ? linkSpans(spans!, <TextLinker>[textLinker])
+            : textLinker.getSpans(text);
+
+    return InlineLinkedText._(
+      recognizers: recognizers,
+      style: style,
+      children: linkedSpans.toList(),
+    );
+  }
 
   /// Create an instance of [InlineLinkedText] with the given [textLinkers]
   /// applied.
@@ -106,18 +122,34 @@ class InlineLinkedText extends TextSpan {
   ///    otherwise matches URLs by default.
   ///  * [InlineLinkedText.regExp], which automatically finds ranges that match
   ///    the given [RegExp].
-  InlineLinkedText.textLinkers({
-    super.style,
+  factory InlineLinkedText.textLinkers({
+    required TextStyle style,
+    required Iterable<TextLinker> textLinkers,
     String? text,
     List<InlineSpan>? spans,
-    required Iterable<TextLinker> textLinkers,
-  }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
-       assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
-       super(
-         children: text != null
-             ? TextLinker.getSpansForMany(textLinkers, text)
-             : linkSpans(spans!, textLinkers).toList(),
-       );
+  }) {
+    assert(text != null || spans != null, 'Must specify something to link: either text or spans.');
+    assert(text == null || spans == null, 'Pass one of spans or text, not both.');
+    final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+        text == null
+            ? linkSpans(spans!, textLinkers)
+            : TextLinker.getSpansForMany(textLinkers, text);
+
+    return InlineLinkedText._(
+      recognizers: recognizers,
+      style: style,
+      children: linkedSpans.toList(),
+    );
+  }
+
+  const InlineLinkedText._({
+    super.style,
+    super.children,
+    required this.recognizers,
+  });
+
+  // TODO(justinmc): Document.
+  final Iterable<TapGestureRecognizer> recognizers;
 
   static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
 
@@ -133,22 +165,27 @@ class InlineLinkedText extends TextSpan {
   static final RangesFinder defaultRangesFinder = TextLinker.rangesFinderFromRegExp(_urlRegExp);
 
   /// Finds urls in text and replaces them with a plain, platform-specific link.
-  static Iterable<TextLinker> defaultTextLinkers(GestureRecognizer? recognizer) {
+  static Iterable<TextLinker> defaultTextLinkers(LinkTapCallback onTap) {
     return <TextLinker>[
       TextLinker(
         rangesFinder: defaultRangesFinder,
-        linkBuilder: getDefaultLinkBuilder(recognizer),
+        linkBuilder: getDefaultLinkBuilder(onTap),
       ),
     ];
   }
 
   /// Returns a [LinkBuilder] that highlights the given text and sets the given
   /// [onTap] handler.
-  static LinkBuilder getDefaultLinkBuilder([GestureRecognizer? recognizer]) {
+  static LinkBuilder getDefaultLinkBuilder(LinkTapCallback onTap) {
     return (String displayString, String linkString) {
-      return InlineLink(
-        recognizer: recognizer,
-        text: displayString,
+      final TapGestureRecognizer recognizer = TapGestureRecognizer()
+          ..onTap = () => onTap(linkString);
+      return (
+        InlineLink(
+          recognizer: recognizer,
+          text: displayString,
+        ),
+        recognizer,
       );
     };
   }
@@ -180,8 +217,10 @@ class InlineLinkedText extends TextSpan {
   }
 
   /// Apply the given [TextLinker]s to the given [InlineSpan]s and return the
-  /// new resulting spans.
-  static Iterable<InlineSpan> linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
+  /// new resulting spans and any created [TapGestureRecognizer]s.
+  ///
+  /// {@macro flutter.painting.LinkBuilder.recognizer}
+  static (Iterable<InlineSpan>, Iterable<TapGestureRecognizer>) linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
     // Flatten the spans and find all ranges in the flat String. This must be done
     // cumulatively, and not during a traversal, because matches may occur across
     // span boundaries.
@@ -201,37 +240,42 @@ class InlineLinkedText extends TextSpan {
           _TextLinkerMatch.fromTextLinkers(textLinkers, spansText),
         );
 
-    final (Iterable<InlineSpan> output, _) =
+    final (Iterable<InlineSpan> output, Iterable<_TextLinkerMatch> _, Iterable<TapGestureRecognizer> recognizers) =
         _linkSpansRecursive(spansWithLength, textLinkerMatches, 0);
-    return output;
+    return (output, recognizers);
   }
 
-  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>) _linkSpansRecursive(Iterable<({InlineSpan span, int length})> spansWithLength, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
+  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpansRecursive(Iterable<({InlineSpan span, int length})> spansWithLength, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
     final List<InlineSpan> output = <InlineSpan>[];
     Iterable<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches;
+    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
     int nextIndex = index;
     for (final (span: InlineSpan span, length: int length) in spansWithLength) {
-      final (InlineSpan childSpan, Iterable<_TextLinkerMatch> childTextLinkerMatches) = _linkSpanRecursive(
+      final (InlineSpan childSpan, Iterable<_TextLinkerMatch> childTextLinkerMatches, Iterable<TapGestureRecognizer> childRecognizers) = _linkSpanRecursive(
         span,
         nextTextLinkerMatches,
         nextIndex,
       );
       output.add(childSpan);
       nextTextLinkerMatches = childTextLinkerMatches;
+      recognizers.addAll(childRecognizers);
       nextIndex += length;
     }
 
-    return (output, nextTextLinkerMatches);
+    return (output, nextTextLinkerMatches, recognizers);
   }
 
   // index is the index of the start of `span` in the overall flattened tree
   // string.
-  static (InlineSpan, Iterable<_TextLinkerMatch>) _linkSpanRecursive(InlineSpan span, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
+  //
+  // The TapGestureRecognizers must be disposed by an owning widget.
+  static (InlineSpan, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpanRecursive(InlineSpan span, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
     if (span is! TextSpan) {
-      return (span, textLinkerMatches);
+      return (span, textLinkerMatches, <TapGestureRecognizer>[]);
     }
 
     final List<InlineSpan> nextChildren = <InlineSpan>[];
+    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
     List<_TextLinkerMatch> nextTextLinkerMatches = <_TextLinkerMatch>[...textLinkerMatches];
     int lastLinkEnd = index;
     if (span.text?.isNotEmpty ?? false) {
@@ -261,10 +305,12 @@ class InlineLinkedText extends TextSpan {
         // Add the link itself.
         final int linkStart = math.max(textLinkerMatch.textRange.start, index);
         lastLinkEnd = math.min(textLinkerMatch.textRange.end, textEnd);
-        nextChildren.add(textLinkerMatch.linkBuilder(
+        final (InlineSpan nextChild, TapGestureRecognizer recognizer) = textLinkerMatch.linkBuilder(
           span.text!.substring(linkStart - index, lastLinkEnd - index),
           textLinkerMatch.linkString,
-        ));
+        );
+        nextChildren.add(nextChild);
+        recognizers.add(recognizer);
         if (textLinkerMatch.textRange.end > textEnd) {
           // If we only partially used this range, keep it in nextRanges. Since
           // overlapping ranges have been removed, this must be the last relevant
@@ -288,6 +334,7 @@ class InlineLinkedText extends TextSpan {
       final (
         Iterable<InlineSpan> childrenSpans,
         Iterable<_TextLinkerMatch> childrenTextLinkerMatches,
+        Iterable<TapGestureRecognizer> childrenRecognizers,
       ) = _linkSpansRecursive(
         span.children!.map((InlineSpan childSpan) => (
           span: childSpan,
@@ -298,6 +345,7 @@ class InlineLinkedText extends TextSpan {
       );
       nextTextLinkerMatches = childrenTextLinkerMatches.toList();
       nextChildren.addAll(childrenSpans);
+      recognizers.addAll(childrenRecognizers);
     }
 
     return (
@@ -306,6 +354,7 @@ class InlineLinkedText extends TextSpan {
         children: nextChildren,
       ),
       nextTextLinkerMatches,
+      recognizers,
     );
   }
 }
@@ -341,7 +390,7 @@ class _TextLinkerMatch {
   ///
   /// Ranges matched by [textLinkerMatches] are built with their respective
   /// [LinkBuilder], and other text is represented with a simple [TextSpan].
-  static List<InlineSpan> getSpansForMany(Iterable<_TextLinkerMatch> textLinkerMatches, String text) {
+  static (List<InlineSpan>, List<TapGestureRecognizer>) getSpansForMany(Iterable<_TextLinkerMatch> textLinkerMatches, String text) {
     // Sort so that overlapping ranges can be detected and ignored.
     final List<_TextLinkerMatch> textLinkerMatchesList = textLinkerMatches
         .toList()
@@ -350,6 +399,7 @@ class _TextLinkerMatch {
         });
 
     final List<InlineSpan> spans = <InlineSpan>[];
+    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
     int index = 0;
     for (final _TextLinkerMatch textLinkerMatch in textLinkerMatchesList) {
       // Ignore overlapping ranges.
@@ -361,6 +411,17 @@ class _TextLinkerMatch {
           text: text.substring(index, textLinkerMatch.textRange.start),
         ));
       }
+      final (InlineSpan nextChild, TapGestureRecognizer recognizer) =
+          textLinkerMatch.linkBuilder(
+            text.substring(
+              textLinkerMatch.textRange.start,
+              textLinkerMatch.textRange.end,
+            ),
+            textLinkerMatch.linkString,
+          );
+      spans.add(nextChild);
+      recognizers.add(recognizer);
+        /*
       spans.add(textLinkerMatch.linkBuilder(
         text.substring(
           textLinkerMatch.textRange.start,
@@ -368,6 +429,7 @@ class _TextLinkerMatch {
         ),
         textLinkerMatch.linkString,
       ));
+      */
 
       index = textLinkerMatch.textRange.end;
     }
@@ -377,7 +439,7 @@ class _TextLinkerMatch {
       ));
     }
 
-    return spans;
+    return (spans, recognizers);
   }
 
   @override
@@ -386,6 +448,7 @@ class _TextLinkerMatch {
   }
 }
 
+// TODO(justinmc): This shouldn't just be a record should it?
 // TODO(justinmc): Would it simplify things if the public class TextLinker
 // actually handled multiple rangesFinders and linkBuilders? Then there was a
 // private single _TextLinker or something? Seems like it didn't work out when
@@ -424,7 +487,7 @@ class TextLinker {
   /// Returns a flat list of [InlineSpan]s for multiple [TextLinker]s.
   ///
   /// Similar to [getSpans], but for multiple [TextLinker]s instead of just one.
-  static List<InlineSpan> getSpansForMany(Iterable<TextLinker> textLinkers, String text) {
+  static (List<InlineSpan>, List<TapGestureRecognizer>) getSpansForMany(Iterable<TextLinker> textLinkers, String text) {
     final List<_TextLinkerMatch> combinedRanges = textLinkers
         .fold<List<_TextLinkerMatch>>(
           <_TextLinkerMatch>[],
@@ -469,7 +532,7 @@ class TextLinker {
   ///
   /// Builds [linkBuilder] for any ranges found by [rangesFinder]. All other
   /// text is presented in a plain [TextSpan].
-  List<InlineSpan> getSpans(String text) {
+  (List<InlineSpan>, List<TapGestureRecognizer>) getSpans(String text) {
     final Iterable<_TextLinkerMatch> textLinkerMatches = _link(text);
     return _TextLinkerMatch.getSpansForMany(textLinkerMatches, text);
   }

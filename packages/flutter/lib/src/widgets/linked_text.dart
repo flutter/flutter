@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 import 'text.dart';
@@ -42,14 +44,21 @@ class LinkedText extends StatefulWidget {
   ///  * [InlineLinkedText.new], which is like this, but for inline text.
   LinkedText({
     super.key,
+    required LinkTapCallback onTap,
     String? text,
     List<InlineSpan>? spans,
     this.style,
     Iterable<TextRange>? ranges,
-    LinkTapCallback? onTap,
+    // TODO(justinmc): Maybe shouldn't take something that takes a recognizer here, should be callback?
     LinkBuilder? linkBuilder,
   }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
        assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
+       /*
+       recognizers = <GestureRecognizer>[
+         // TODO(justinmc): LinkTapCallback needs to be given the linked string.
+         (TapGestureRecognizer()..onTap = onTap),
+       ],
+       */
        textLinkers = <TextLinker>[
          TextLinker(
            rangesFinder: ranges == null
@@ -63,6 +72,18 @@ class LinkedText extends StatefulWidget {
            text: text,
          ),
        ];
+         /*
+       ] {
+         textLinkers = <TextLinker>[
+           TextLinker(
+             rangesFinder: ranges == null
+                 ? InlineLinkedText.defaultRangesFinder
+                 : (String text) => ranges,
+             linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(recognizers.first),
+           ),
+         ];
+       }
+       */
 
   /// Create an instance of [LinkedText] where text matched by the given
   /// [RegExp] is made interactive.
@@ -76,11 +97,11 @@ class LinkedText extends StatefulWidget {
   ///  * [InlineLinkedText.regExp], which is like this, but for inline text.
   LinkedText.regExp({
     super.key,
+    required LinkTapCallback onTap,
     String? text,
     List<InlineSpan>? spans,
     required RegExp regExp,
     this.style,
-    LinkTapCallback? onTap,
     LinkBuilder? linkBuilder,
   }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
        assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
@@ -135,7 +156,7 @@ class LinkedText extends StatefulWidget {
   ///
   /// [TextLinker]s are applied in the order given. Overlapping matches are not
   /// supported.
-  final List<TextLinker> textLinkers;
+  late final List<TextLinker> textLinkers;
 
   /// The [TextStyle] to apply to the output [InlineSpan].
   ///
@@ -148,12 +169,27 @@ class LinkedText extends StatefulWidget {
 }
 
 class _LinkedTextState extends State<LinkedText> {
+  final GlobalKey _textKey = GlobalKey();
+
+  @override
+  void dispose() {
+    final Text? text = _textKey.currentWidget as Text?;
+    // TODO(justinmc): Analyzer.
+    // TODO(justinmc): Actually you may miss some on rebuild.
+    final InlineLinkedText inlineLinkedText = text!.textSpan as InlineLinkedText;
+    for (final GestureRecognizer recognizer in inlineLinkedText.recognizers) {
+      recognizer.dispose();
+    }
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.spans.isEmpty) {
       return const SizedBox.shrink();
     }
     return Text.rich(
+      key: _textKey,
       InlineLinkedText.textLinkers(
         style: widget.style ?? DefaultTextStyle.of(context).style,
         textLinkers: widget.textLinkers,
