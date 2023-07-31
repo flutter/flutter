@@ -12,7 +12,7 @@ import 'theme.dart';
 
 /// Defines where a [SnackBar] should appear within a [Scaffold] and how its
 /// location should be adjusted when the scaffold also includes a
-/// [FloatingActionButton], a [BottomNavigationBar], or a [NavigationBar].
+/// [FloatingActionButton] or a [BottomNavigationBar].
 enum SnackBarBehavior {
   /// Fixes the [SnackBar] at the bottom of the [Scaffold].
   ///
