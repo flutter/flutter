@@ -544,6 +544,12 @@ enum BlendMode {
   ///
   /// This corresponds to the "Source plus Destination" Porter-Duff operator.
   ///
+  /// This is the right blend mode for cross-fading between two images. Consider
+  /// two images A and B, and an interpolation time variable _t_ (from 0.0 to
+  /// 1.0). To cross fade between them, A should be drawn with opacity 1.0 - _t_
+  /// into a new layer using [BlendMode.srcOver], and B should be drawn on top
+  /// of it, at opacity _t_, into the same layer, using [BlendMode.plus].
+  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/blend_mode_plus.png)
   plus,
 
