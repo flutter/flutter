@@ -36,6 +36,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       if (benchmarkOptions.useWasm) ...<String>[
         '--wasm',
         '--wasm-opt=debug',
+        '--omit-type-checks',
       ],
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
       '--web-renderer=${benchmarkOptions.webRenderer}',
