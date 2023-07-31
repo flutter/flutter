@@ -609,6 +609,7 @@ void main() {
           namesRoute: true,
           image: true,
           liveRegion: true,
+          expanded: true,
         ),
     );
     final List<SemanticsFlag> flags = SemanticsFlag.values.toList();
@@ -691,6 +692,7 @@ void main() {
           namesRoute: true,
           image: true,
           liveRegion: true,
+          expanded: true,
         ),
     );
     flags
@@ -706,7 +708,7 @@ void main() {
       ],
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
-  }, skip: true); // https://github.com/flutter/flutter/issues/127617
+  });
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

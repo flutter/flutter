@@ -1079,7 +1079,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       );
     }
 
-    return child;
+    return MergeSemantics(child: child);
   }
 
   void _handleFocusChange() {
@@ -1904,19 +1904,23 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             controller._anchor!._focusButton();
           }
         }
-
-        child = TextButton(
-          style: mergedStyle,
-          focusNode: _buttonFocusNode,
-          onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
-          onPressed: _enabled ? () => toggleShowMenu(context) : null,
-          isSemanticButton: null,
-          child: _MenuItemLabel(
-            leadingIcon: widget.leadingIcon,
-            trailingIcon: widget.trailingIcon,
-            hasSubmenu: true,
-            showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
-            child: child ?? const SizedBox(),
+        child = MergeSemantics(
+          child: Semantics(
+            expanded: controller.isOpen,
+            child: TextButton(
+              style: mergedStyle,
+              focusNode: _buttonFocusNode,
+              onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
+              onPressed: _enabled ? () => toggleShowMenu(context) : null,
+              isSemanticButton: null,
+              child: _MenuItemLabel(
+                leadingIcon: widget.leadingIcon,
+                trailingIcon: widget.trailingIcon,
+                hasSubmenu: true,
+                showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                child: child ?? const SizedBox(),
+              ),
+            ),
           ),
         );
 
