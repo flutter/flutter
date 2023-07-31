@@ -19,7 +19,7 @@ class TestAssetBundle extends CachingAssetBundle {
       return ByteData.sublistView(utf8.encode('{"one": ["one"]}'));
     }
 
-    if (key == 'AssetManifest.bin') {
+    if (key == 'AssetManifest.bin' || key == 'AssetManifest.bin.json') {
       return const StandardMessageCodec()
           .encodeMessage(<String, Object>{'one': <Object>[]})!;
     }
