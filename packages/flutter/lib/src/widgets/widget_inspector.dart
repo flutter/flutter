@@ -2125,7 +2125,9 @@ mixin WidgetInspectorService {
             expandPropertyValues: false,
           );
           final Map<String, Object> additionalJson = <String, Object>{
-            // Doesn't make sense to add another renderObject to a renderObject
+            // Only include renderObject properties separately if this value is not already the renderObject.
+            // Only include if we are expanding property values to mitigate the risk of infinite loops if
+            // RenderObjects have properties that are Element objects.
             if (value is! RenderObject && delegate.expandPropertyValues)
               'renderObject': renderObject
                   .toDiagnosticsNode()
@@ -2133,7 +2135,7 @@ mixin WidgetInspectorService {
           };
 
           final RenderObject? renderParent = renderObject.parent;
-          if (renderParent is RenderObject &&
+          if (renderParent != null &&
               delegate.subtreeDepth > 0 &&
               delegate.expandPropertyValues) {
             final Object? parentCreator = renderParent.debugCreator;
