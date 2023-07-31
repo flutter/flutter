@@ -25,6 +25,7 @@
   "continueButtonLabel": "Vazhdo",
   "copyButtonLabel": "Kopjo",
   "cutButtonLabel": "Prit",
+  "scanTextButtonLabel": "Skanoni tekstin",
   "okButtonLabel": "Në rregull",
   "pasteButtonLabel": "Ngjit",
   "selectAllButtonLabel": "Zgjidh të gjitha",
@@ -139,5 +140,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

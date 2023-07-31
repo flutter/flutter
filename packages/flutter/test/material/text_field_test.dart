@@ -26,6 +26,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
+import '../widgets/live_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -202,6 +203,47 @@ void main() {
       ),
     );
   }
+
+  testWidgets(
+    'Live Text button shows and hides correctly when LiveTextStatus changes',
+    (WidgetTester tester) async {
+      final LiveTextInputTester liveTextInputTester = LiveTextInputTester();
+      addTearDown(liveTextInputTester.dispose);
+      final TextEditingController controller = TextEditingController(text: '');
+      const Key key = ValueKey<String>('TextField');
+      final FocusNode focusNode = FocusNode();
+      final Widget app = MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          body: Center(
+            child: TextField(
+              key: key,
+              controller: controller,
+              focusNode: focusNode,
+            ),
+          ),
+        ),
+      );
+
+      liveTextInputTester.mockLiveTextInputEnabled = true;
+      await tester.pumpWidget(app);
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(
+        findLiveTextButton(),
+        kIsWeb ? findsNothing : findsOneWidget,
+      );
+
+      liveTextInputTester.mockLiveTextInputEnabled = false;
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(findLiveTextButton(), findsNothing);
+    },
+  );
 
   testWidgets('text field selection toolbar should hide when the user starts typing', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -613,7 +655,7 @@ void main() {
     expect(editableText.cursorOpacityAnimates, false);
   });
 
-  testWidgets('Activates the text field when receives semantics focus on Mac, Windows', (WidgetTester tester) async {
+  testWidgets('Activates the text field when receives semantics focus on desktops', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final FocusNode focusNode = FocusNode();
@@ -644,6 +686,7 @@ void main() {
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
                           SemanticsAction.didGainAccessibilityFocus,
+                          SemanticsAction.didLoseAccessibilityFocus,
                         ],
                         textDirection: TextDirection.ltr,
                       ),
@@ -663,8 +706,12 @@ void main() {
     semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isTrue);
+
+    semanticsOwner.performAction(4, SemanticsAction.didLoseAccessibilityFocus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isFalse);
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }));
 
   testWidgets('TextField passes onEditingComplete to EditableText', (WidgetTester tester) async {
     void onEditingComplete() { }
@@ -2146,6 +2193,52 @@ void main() {
   },
       variant: TargetPlatformVariant.mobile(),
   );
+
+  testWidgets('Can select text with a mouse when wrapped in a GestureDetector with tap/double tap callbacks', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/129161.
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: GestureDetector(
+            onTap: () {},
+            onDoubleTap: () {},
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.up();
+    // This is to allow the GestureArena to decide a winner between TapGestureRecognizer,
+    // DoubleTapGestureRecognizer, and BaseTapAndDragGestureRecognizer.
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+
+    await gesture.down(ePos);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('g'));
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -6597,7 +6690,7 @@ void main() {
     expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
 
-    expect(focusNode1.nextFocus(), isTrue);
+    expect(focusNode1.nextFocus(), isFalse);
     await tester.pump();
 
     expect(focusNode1.hasPrimaryFocus, isTrue);
@@ -15803,7 +15896,7 @@ void main() {
       );
       final TextField textField = TextField(
         magnifierConfiguration: TextMagnifierConfiguration(
-          magnifierBuilder: (_, __, ___) => customMagnifier,
+          magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo>? info) => customMagnifier,
         ),
       );
 
@@ -15901,7 +15994,7 @@ void main() {
             controller: controller,
             magnifierConfiguration: TextMagnifierConfiguration(
               magnifierBuilder: (
-                  _,
+                  BuildContext context,
                   MagnifierController controller,
                   ValueNotifier<MagnifierInfo> localMagnifierInfo
                 ) {
@@ -15965,7 +16058,7 @@ void main() {
                 controller: controller,
                 magnifierConfiguration: TextMagnifierConfiguration(
                   magnifierBuilder: (
-                      _,
+                      BuildContext context,
                       MagnifierController controller,
                       ValueNotifier<MagnifierInfo> localMagnifierInfo
                     ) {
@@ -16067,7 +16160,7 @@ void main() {
                 controller: controller,
                 magnifierConfiguration: TextMagnifierConfiguration(
                   magnifierBuilder: (
-                      _,
+                      BuildContext context,
                       MagnifierController controller,
                       ValueNotifier<MagnifierInfo> localMagnifierInfo
                     ) {
@@ -16118,6 +16211,54 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
+    testWidgets('magnifier does not show when tapping outside field', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/128321
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.all(20),
+              child: TextField(
+                magnifierConfiguration: TextMagnifierConfiguration(
+                  magnifierBuilder: (
+                      BuildContext context,
+                      MagnifierController controller,
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo
+                    ) {
+                      magnifierInfo = localMagnifierInfo;
+                      return fakeMagnifier;
+                    },
+                ),
+                onTapOutside: (PointerDownEvent event) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                }
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tapAt(
+        tester.getCenter(find.byType(TextField)),
+      );
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getBottomLeft(find.byType(TextField)) - const Offset(10.0, 20.0),
+      );
+      await tester.pump();
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+      await gesture.up();
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+    },
+      skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
   });
 
   group('TapRegion integration', () {
@@ -16513,7 +16654,7 @@ class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
     return MaterialApp(
       home: Scaffold(
         body: Builder(
-          builder: (_) {
+          builder: (BuildContext context) {
             return Column(
               children: <Widget>[
                 TextField(

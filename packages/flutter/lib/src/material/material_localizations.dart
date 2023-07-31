@@ -103,6 +103,9 @@ abstract class MaterialLocalizations {
   /// Label for "cut" edit buttons and menu items.
   String get cutButtonLabel;
 
+  /// Label for "scan text" OCR edit buttons and menu items.
+  String get scanTextButtonLabel;
+
   /// Label for OK buttons and menu items.
   String get okButtonLabel;
 
@@ -135,6 +138,10 @@ abstract class MaterialLocalizations {
   /// A modal barrier can for example be found behind an alert or popup to block
   /// user interaction with elements behind it.
   String get modalBarrierDismissLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) for a
+  /// context menu to indicate that a tap dismisses the context menu.
+  String get menuDismissLabel;
 
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// drawer widget is opened.
@@ -1160,6 +1167,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get cutButtonLabel => 'Cut';
 
   @override
+  String get scanTextButtonLabel => 'Scan text';
+
+  @override
   String get okButtonLabel => 'OK';
 
   @override
@@ -1185,6 +1195,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;

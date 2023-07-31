@@ -230,7 +230,6 @@ void main() {
         ' │ maxLines: 1\n'
         ' │ minLines: null\n'
         ' │ selectionColor: null\n'
-        ' │ textScaleFactor: 1.0\n'
         ' │ locale: ja_JP\n'
         ' │ selection: null\n'
         ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
@@ -331,7 +330,7 @@ void main() {
       ),
     ));
 
-    editable.textScaleFactor = 2;
+    editable.textScaler = const TextScaler.linear(2.0);
     pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
@@ -454,7 +453,7 @@ void main() {
       ),
     ));
 
-    editable.textScaleFactor = 2;
+    editable.textScaler = const TextScaler.linear(2.0);
     pumpFrame(phase: EnginePhase.compositingBits);
 
     // Now the caret height is much bigger due to the bigger font scale.
@@ -1631,7 +1630,7 @@ void main() {
         selection: const TextSelection.collapsed(offset: 3),
         maxLines: 2,
         minLines: 2,
-        textScaleFactor: 2.0,
+        textScaler: const TextScaler.linear(2.0),
         children: renderBoxes,
       );
       _applyParentData(renderBoxes, editable.text!);
@@ -1822,6 +1821,52 @@ void main() {
       color: cursorColor.withOpacity(0.75),
       rrect: expectedRRect
     ));
+  });
+
+  test('getWordAtOffset with a negative position', () {
+    const String text = 'abc';
+    final _FakeEditableTextState delegate = _FakeEditableTextState()
+      ..textEditingValue = const TextEditingValue(text: text);
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(height: 1.0, fontSize: 10.0),
+      ),
+    );
+
+    layout(editable, onErrors: expectNoFlutterErrors);
+
+    // Cause text metrics to be computed.
+    editable.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+
+    final TextSelection selection;
+    try {
+      selection = editable.getWordAtOffset(const TextPosition(
+        offset: -1,
+        affinity: TextAffinity.upstream,
+      ));
+    } catch (error) {
+      // In debug mode, negative offsets are caught by an assertion.
+      expect(error, isA<AssertionError>());
+      return;
+    }
+
+    // Web's Paragraph.getWordBoundary behaves differently for a negative
+    // position.
+    if (kIsWeb) {
+      expect(selection, const TextSelection.collapsed(offset: 0));
+    } else {
+      expect(selection, const TextSelection.collapsed(offset: text.length));
+    }
   });
 }
 

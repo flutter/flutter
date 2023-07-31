@@ -25,6 +25,7 @@
   "continueButtonLabel": "ادامه",
   "copyButtonLabel": "کپی",
   "cutButtonLabel": "برش",
+  "scanTextButtonLabel": "اسکن متن",
   "okButtonLabel": "تأیید",
   "pasteButtonLabel": "جای‌گذاری",
   "selectAllButtonLabel": "انتخاب همه",
@@ -140,5 +141,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

@@ -25,6 +25,7 @@
   "continueButtonLabel": "Qhubeka",
   "copyButtonLabel": "Kopisha",
   "cutButtonLabel": "Sika",
+  "scanTextButtonLabel": "Skena umbhalo",
   "okButtonLabel": "KULUNGILE",
   "pasteButtonLabel": "Namathisela",
   "selectAllButtonLabel": "Khetha konke",
@@ -139,5 +140,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

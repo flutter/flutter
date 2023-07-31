@@ -325,6 +325,7 @@ void main() {
       const String flutterStandardUrlDotGit = 'https://github.com/flutter/flutter.git';
       const String flutterNonStandardUrlDotGit = 'https://githubmirror.com/flutter/flutter.git';
       const String flutterStandardSshUrlDotGit = 'git@github.com:flutter/flutter.git';
+      const String flutterFullSshUrlDotGit = 'ssh://git@github.com/flutter/flutter.git';
 
       VersionCheckError? runUpstreamValidator({
         String? versionUpstreamUrl,
@@ -392,6 +393,10 @@ void main() {
 
       testWithoutContext('does not return error at standard ssh url with FLUTTER_GIT_URL unset', () {
         expect(runUpstreamValidator(versionUpstreamUrl: flutterStandardSshUrlDotGit), isNull);
+      });
+
+      testWithoutContext('does not return error at full ssh url with FLUTTER_GIT_URL unset', () {
+        expect(runUpstreamValidator(versionUpstreamUrl: flutterFullSshUrlDotGit), isNull);
       });
 
       testWithoutContext('stripDotGit removes ".git" suffix if any', () {

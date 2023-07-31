@@ -39,14 +39,18 @@ class _ProfiledBinaryMessenger implements BinaryMessenger {
   }
 
   Future<ByteData?>? sendWithPostfix(String channel, String postfix, ByteData? message) async {
-    final TimelineTask task = TimelineTask();
     _debugRecordUpStream(channelTypeName, '$channel$postfix', codecTypeName, message);
-    task.start('Platform Channel send $channel$postfix');
+    TimelineTask? debugTimelineTask;
+    if (!kReleaseMode) {
+      debugTimelineTask = TimelineTask()..start('Platform Channel send $channel$postfix');
+    }
     final ByteData? result;
     try {
       result = await proxy.send(channel, message);
     } finally {
-      task.finish();
+      if (!kReleaseMode) {
+        debugTimelineTask!.finish();
+      }
     }
     _debugRecordDownStream(channelTypeName, '$channel$postfix', codecTypeName, result);
     return result;
@@ -242,6 +246,7 @@ class BasicMessageChannel<T> {
 /// {@endtemplate}
 ///
 /// See: <https://flutter.dev/platform-channels/>
+@pragma('vm:keep-name')
 class MethodChannel {
   /// Creates a [MethodChannel] with the specified [name].
   ///

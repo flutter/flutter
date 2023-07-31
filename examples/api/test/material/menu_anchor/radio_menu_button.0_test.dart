@@ -24,7 +24,7 @@ void main() {
     expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.red));
 
     await tester.tap(find.text('Green Background'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.green));
   });

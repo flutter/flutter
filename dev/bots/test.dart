@@ -971,6 +971,7 @@ Future<void> _runFrameworkTests() async {
     await runTracingTests();
     await runFixTests('flutter');
     await runFixTests('flutter_test');
+    await runFixTests('integration_test');
     await runPrivateTests();
   }
 
@@ -1360,7 +1361,7 @@ Future<void> _runWebTreeshakeTest() async {
   final String javaScript = mainDartJs.readAsStringSync();
 
   // Check that we're not looking at minified JS. Otherwise this test would result in false positive.
-  expect(javaScript.contains('RenderObjectToWidgetElement'), true);
+  expect(javaScript.contains('RootElement'), true);
 
   const String word = 'debugFillProperties';
   int count = 0;
@@ -1374,6 +1375,14 @@ Future<void> _runWebTreeshakeTest() async {
     }
     pos = javaScript.indexOf(word, pos);
   }
+
+  // The following are classes from `timeline.dart` that should be treeshaken
+  // off unless the app (typically a benchmark) uses methods that need them.
+  expect(javaScript.contains('AggregatedTimedBlock'), false);
+  expect(javaScript.contains('AggregatedTimings'), false);
+  expect(javaScript.contains('_BlockBuffer'), false);
+  expect(javaScript.contains('_StringListChain'), false);
+  expect(javaScript.contains('_Float64ListChain'), false);
 
   const int kMaxExpectedDebugFillProperties = 11;
   if (count > kMaxExpectedDebugFillProperties) {
@@ -1451,6 +1460,13 @@ Future<void> _runFlutterPackagesTests() async {
         'run',
         toolScript,
         'analyze',
+        // Fetch the oldest possible dependencies, rather than the newest, to
+        // insulate flutter/flutter from out-of-band failures when new versions
+        // of dependencies are published. This compensates for the fact that
+        // flutter/packages doesn't use pinned dependencies, and for the
+        // purposes of this test using old dependencies is fine. See
+        // https://github.com/flutter/flutter/issues/129633
+        '--downgrade',
         '--custom-analysis=script/configs/custom_analysis.yaml',
       ],
       workingDirectory: checkout.path,

@@ -25,6 +25,7 @@
   "continueButtonLabel": "Magpatuloy",
   "copyButtonLabel": "Kopyahin",
   "cutButtonLabel": "I-cut",
+  "scanTextButtonLabel": "I-scan ang text",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "I-paste",
   "selectAllButtonLabel": "Piliin lahat",
@@ -140,5 +141,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

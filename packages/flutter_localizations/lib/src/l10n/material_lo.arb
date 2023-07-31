@@ -25,6 +25,7 @@
   "continueButtonLabel": "ສືບຕໍ່",
   "copyButtonLabel": "ສຳເນົາ",
   "cutButtonLabel": "ຕັດ",
+  "scanTextButtonLabel": "ສະແກນຂໍ້ຄວາມ",
   "okButtonLabel": "ຕົກລົງ",
   "pasteButtonLabel": "ວາງ",
   "selectAllButtonLabel": "ເລືອກທັງໝົດ",
@@ -139,5 +140,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

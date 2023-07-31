@@ -25,6 +25,7 @@
   "continueButtonLabel": "Tiếp tục",
   "copyButtonLabel": "Sao chép",
   "cutButtonLabel": "Cắt",
+  "scanTextButtonLabel": "Quét văn bản",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Dán",
   "selectAllButtonLabel": "Chọn tất cả",
@@ -140,5 +141,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

@@ -25,6 +25,7 @@
   "continueButtonLabel": "جاری رکھیں",
   "copyButtonLabel": "کاپی کریں",
   "cutButtonLabel": "کٹ کریں",
+  "scanTextButtonLabel": "متن کو اسکین کریں",
   "okButtonLabel": "ٹھیک ہے",
   "pasteButtonLabel": "پیسٹ کریں",
   "selectAllButtonLabel": "سبھی کو منتخب کریں",
@@ -140,5 +141,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

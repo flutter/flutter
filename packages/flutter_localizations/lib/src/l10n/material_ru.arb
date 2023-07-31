@@ -32,6 +32,7 @@
   "continueButtonLabel": "Продолжить",
   "copyButtonLabel": "Копировать",
   "cutButtonLabel": "Вырезать",
+  "scanTextButtonLabel": "Сканировать текст",
   "okButtonLabel": "ОК",
   "pasteButtonLabel": "Вставить",
   "selectAllButtonLabel": "Выбрать все",
@@ -147,5 +148,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

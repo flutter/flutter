@@ -25,6 +25,7 @@
   "continueButtonLabel": "Egin aurrera",
   "copyButtonLabel": "Kopiatu",
   "cutButtonLabel": "Ebaki",
+  "scanTextButtonLabel": "Eskaneatu testua",
   "okButtonLabel": "Ados",
   "pasteButtonLabel": "Itsatsi",
   "selectAllButtonLabel": "Hautatu guztiak",
@@ -139,5 +140,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

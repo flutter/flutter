@@ -35,6 +35,7 @@
   "continueButtonLabel": "المتابعة",
   "copyButtonLabel": "نسخ",
   "cutButtonLabel": "قص",
+  "scanTextButtonLabel": "مسح النص",
   "okButtonLabel": "حسنًا",
   "pasteButtonLabel": "لصق",
   "selectAllButtonLabel": "اختيار الكل",
@@ -150,5 +151,6 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu"
 }

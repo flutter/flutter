@@ -39,6 +39,11 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.invertedStylus,
 };
 
+// In practice some selectables like widgetspan shift several pixels. So when
+// the vertical position diff is within the threshold, compare the horizontal
+// position to make the compareScreenOrder function more robust.
+const double _kSelectableVerticalComparingThreshold = 3.0;
+
 /// A widget that introduces an area for user selections.
 ///
 /// Flutter widgets are not selectable by default. Wrapping a widget subtree
@@ -263,7 +268,7 @@ class SelectableRegion extends StatefulWidget {
     required final VoidCallback onCopy,
     required final VoidCallback onSelectAll,
   }) {
-    final bool canCopy = selectionGeometry.hasSelection;
+    final bool canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
 
     // Determine which buttons will appear so that the order and total number is
@@ -439,8 +444,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         instance
           ..onLongPressStart = _handleTouchLongPressStart
           ..onLongPressMoveUpdate = _handleTouchLongPressMoveUpdate
-          ..onLongPressEnd = _handleTouchLongPressEnd
-          ..onLongPressCancel = _clearSelection;
+          ..onLongPressEnd = _handleTouchLongPressEnd;
       },
     );
   }
@@ -489,12 +493,62 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _updateSelectedContentIfNeeded();
   }
 
+  bool _positionIsOnActiveSelection({required Offset globalPosition}) {
+    for (final Rect selectionRect in _selectionDelegate.value.selectionRects) {
+      final Matrix4 transform = _selectable!.getTransformTo(null);
+      final Rect globalRect = MatrixUtils.transformRect(transform, selectionRect);
+      if (globalRect.contains(globalPosition)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void _handleRightClickDown(TapDownDetails details) {
+    final Offset? previousSecondaryTapDownPosition = lastSecondaryTapDownPosition;
+    final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
     lastSecondaryTapDownPosition = details.globalPosition;
     widget.focusNode.requestFocus();
-    _selectWordAt(offset: details.globalPosition);
-    _showHandles();
-    _showToolbar(location: details.globalPosition);
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        // If lastSecondaryTapDownPosition is within the current selection then
+        // keep the current selection, if not then collapse it.
+        final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
+        if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
+          _selectStartTo(offset: lastSecondaryTapDownPosition!);
+          _selectEndTo(offset: lastSecondaryTapDownPosition!);
+        }
+        _showHandles();
+        _showToolbar(location: lastSecondaryTapDownPosition);
+      case TargetPlatform.iOS:
+        _selectWordAt(offset: lastSecondaryTapDownPosition!);
+        _showHandles();
+        _showToolbar(location: lastSecondaryTapDownPosition);
+      case TargetPlatform.macOS:
+        if (previousSecondaryTapDownPosition == lastSecondaryTapDownPosition && toolbarIsVisible) {
+          hideToolbar();
+          return;
+        }
+        _selectWordAt(offset: lastSecondaryTapDownPosition!);
+        _showHandles();
+        _showToolbar(location: lastSecondaryTapDownPosition);
+      case TargetPlatform.linux:
+        if (toolbarIsVisible) {
+          hideToolbar();
+          return;
+        }
+        // If lastSecondaryTapDownPosition is within the current selection then
+        // keep the current selection, if not then collapse it.
+        final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
+        if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
+          _selectStartTo(offset: lastSecondaryTapDownPosition!);
+          _selectEndTo(offset: lastSecondaryTapDownPosition!);
+        }
+        _showHandles();
+        _showToolbar(location: lastSecondaryTapDownPosition);
+    }
     _updateSelectedContentIfNeeded();
   }
 
@@ -1654,11 +1708,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Returns positive if a is lower, negative if a is higher, 0 if their
   /// order can't be determine solely by their vertical position.
   static int _compareVertically(Rect a, Rect b) {
-    if ((a.top - b.top < precisionErrorTolerance && a.bottom - b.bottom > - precisionErrorTolerance) ||
-        (b.top - a.top < precisionErrorTolerance && b.bottom - a.bottom > - precisionErrorTolerance)) {
+    if ((a.top - b.top < _kSelectableVerticalComparingThreshold && a.bottom - b.bottom > - _kSelectableVerticalComparingThreshold) ||
+        (b.top - a.top < _kSelectableVerticalComparingThreshold && b.bottom - a.bottom > - _kSelectableVerticalComparingThreshold)) {
       return 0;
     }
-    if ((a.top - b.top).abs() > precisionErrorTolerance) {
+    if ((a.top - b.top).abs() > _kSelectableVerticalComparingThreshold) {
       return a.top > b.top ? 1 : -1;
     }
     return a.bottom > b.bottom ? 1 : -1;
@@ -1770,9 +1824,30 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       }
     }
 
+    // Need to collect selection rects from selectables ranging from the
+    // currentSelectionStartIndex to the currentSelectionEndIndex.
+    final List<Rect> selectionRects = <Rect>[];
+    final Rect? drawableArea = hasSize ? Rect
+      .fromLTWH(0, 0, containerSize.width, containerSize.height) : null;
+    for (int index = currentSelectionStartIndex; index <= currentSelectionEndIndex; index++) {
+      final List<Rect> currSelectableSelectionRects = selectables[index].value.selectionRects;
+      final List<Rect> selectionRectsWithinDrawableArea = currSelectableSelectionRects.map((Rect selectionRect) {
+        final Matrix4 transform = getTransformFrom(selectables[index]);
+        final Rect localRect = MatrixUtils.transformRect(transform, selectionRect);
+        if (drawableArea != null) {
+          return drawableArea.intersect(localRect);
+        }
+        return localRect;
+      }).where((Rect selectionRect) {
+        return selectionRect.isFinite && !selectionRect.isEmpty;
+      }).toList();
+      selectionRects.addAll(selectionRectsWithinDrawableArea);
+    }
+
     return SelectionGeometry(
       startSelectionPoint: startPoint,
       endSelectionPoint: endPoint,
+      selectionRects: selectionRects,
       status: startGeometry != endGeometry
         ? SelectionStatus.uncollapsed
         : startGeometry.status,

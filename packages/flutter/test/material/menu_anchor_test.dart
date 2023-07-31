@@ -486,6 +486,53 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
+  testWidgets('focus is returned to previous focus before invoking onPressed', (WidgetTester tester) async {
+    final FocusNode buttonFocus = FocusNode(debugLabel: 'Button Focus');
+    FocusNode? focusInOnPressed;
+
+    void onMenuSelected(TestMenu item) {
+      focusInOnPressed = FocusManager.instance.primaryFocus;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              MenuBar(
+                controller: controller,
+                children: createTestMenus(
+                  onPressed: onMenuSelected,
+                ),
+              ),
+              ElevatedButton(
+                autofocus: true,
+                onPressed: () {},
+                focusNode: buttonFocus,
+                child: const Text('Press Me'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(FocusManager.instance.primaryFocus, equals(buttonFocus));
+
+    await tester.tap(find.text(TestMenu.mainMenu1.label));
+    await tester.pump();
+
+    await tester.tap(find.text(TestMenu.subMenu11.label));
+    await tester.pump();
+
+    await tester.tap(find.text(TestMenu.subSubMenu110.label));
+    await tester.pump();
+
+    expect(focusInOnPressed, equals(buttonFocus));
+    expect(FocusManager.instance.primaryFocus, equals(buttonFocus));
+  });
+
   group('Menu functions', () {
     testWidgets('basic menu structure', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2897,7 +2944,17 @@ void main() {
         shift: true,
         alt: true,
       );
-      final String allExpected = <String>[expectedAlt, expectedCtrl, expectedMeta, expectedShift, 'A'].join(expectedSeparator);
+      late String allExpected;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          allExpected = <String>[expectedAlt, expectedCtrl, expectedMeta, expectedShift, 'A'].join(expectedSeparator);
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          allExpected = <String>[expectedCtrl, expectedAlt, expectedShift, expectedMeta, 'A'].join(expectedSeparator);
+      }
       const CharacterActivator charShortcuts = CharacterActivator('ñ');
       const String charExpected = 'ñ';
       await tester.pumpWidget(
@@ -3064,7 +3121,7 @@ void main() {
           child: Center(
             child: MenuItemButton(
               style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
-              onPressed: () { },
+              onPressed: () {},
               child: const Text('ABC'),
             ),
           ),
@@ -3072,27 +3129,30 @@ void main() {
       );
 
       // The flags should not have SemanticsFlag.isButton
-      expect(semantics, hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics.rootChild(
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              label: 'ABC',
-              rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-              transform: Matrix4.translationValues(356.0, 276.0, 0.0),
-              flags: <SemanticsFlag>[
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocusable,
-              ],
-              textDirection: TextDirection.ltr,
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                actions: <SemanticsAction>[
+                  SemanticsAction.tap,
+                ],
+                label: 'ABC',
+                rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                transform: Matrix4.translationValues(356.0, 276.0, 0.0),
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
+          ignoreId: true,
         ),
-        ignoreId: true,
-      ));
+      );
 
       semantics.dispose();
     });
@@ -3114,22 +3174,23 @@ void main() {
       );
 
       // The flags should not have SemanticsFlag.isButton
-      expect(semantics, hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics.rootChild(
-              label: 'ABC',
-              rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-              transform: Matrix4.translationValues(356.0, 276.0, 0.0),
-              flags: <SemanticsFlag>[
-                SemanticsFlag.hasEnabledState,
-              ],
-              textDirection: TextDirection.ltr,
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState],
+                label: 'ABC',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
+          ignoreTransform: true,
+          ignoreId: true,
         ),
-        ignoreId: true,
-      ));
+      );
 
       semantics.dispose();
     });
@@ -3256,9 +3317,4 @@ enum TestMenu {
   final String acceleratorLabel;
   // Strip the accelerator markers.
   String get label => MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel);
-  int get acceleratorIndex {
-    int index = -1;
-    MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel, setIndex: (int i) => index = i);
-    return index;
-  }
 }
