@@ -391,7 +391,7 @@ class _TwoDimensionalViewportElement extends RenderObjectElement
 /// RenderTwoDimensionalViewport override the paint method, the [paintOffset]
 /// should be used to position the child in the viewport in order to account for
 /// a reversed [AxisDirection] in one or both dimensions.
-class TwoDimensionalViewportParentData extends ParentData {
+class TwoDimensionalViewportParentData extends ParentData  with KeepAliveParentDataMixin {
   /// The offset at which to paint the child in the parent's coordinate system.
   ///
   /// This [Offset] represents the top left corner of the child of the
@@ -473,13 +473,17 @@ class TwoDimensionalViewportParentData extends ParentData {
   Offset? paintOffset;
 
   @override
+  bool get keptAlive => keepAlive && !isVisible;
+
+  @override
   String toString() {
     return 'vicinity=$vicinity; '
       'layoutOffset=$layoutOffset; '
       'paintOffset=$paintOffset; '
       '${_paintExtent == null
-        ? 'not visible '
-        : '${!isVisible ? 'not ' : ''}visible - paintExtent=$_paintExtent'}';
+        ? 'not visible; '
+        : '${!isVisible ? 'not ' : ''}visible - paintExtent=$_paintExtent; '}'
+      '${keepAlive ? "keepAlive; " : ""}';
   }
 }
 
@@ -493,9 +497,7 @@ class TwoDimensionalViewportParentData extends ParentData {
 ///
 /// Subclasses should not override [performLayout], as it handles housekeeping
 /// on either side of the call to [layoutChildSequence].
-// TODO(Piinks): Two follow up changes:
-//  - Keep alive https://github.com/flutter/flutter/issues/126297
-//  - ensureVisible https://github.com/flutter/flutter/issues/126299
+// TODO(Piinks): ensureVisible https://github.com/flutter/flutter/issues/126299
 abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderAbstractViewport {
   /// Initializes fields for subclasses.
   ///
@@ -527,7 +529,12 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
        _delegate = delegate,
        _mainAxis = mainAxis,
        _cacheExtent = cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
-       _clipBehavior = clipBehavior;
+       _clipBehavior = clipBehavior {
+    assert(() {
+      _debugDanglingKeepAlives = <RenderBox>[];
+      return true;
+    }());
+  }
 
   /// Which part of the content inside the viewport should be visible in the
   /// horizontal axis.
@@ -674,6 +681,16 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   final TwoDimensionalChildManager _childManager;
+  final Map<ChildVicinity, RenderBox> _children = <ChildVicinity, RenderBox>{};
+  /// Children that have been laid out (or re-used) during the course of
+  /// performLayout, used to update the keep alive bucket at the end of
+  /// performLayout.
+  final Map<ChildVicinity, RenderBox> _activeChildrenForLayoutPass = <ChildVicinity, RenderBox>{};
+  /// The nodes being kept alive despite not being visible.
+  final Map<ChildVicinity, RenderBox> _keepAliveBucket = <ChildVicinity, RenderBox>{};
+
+  late List<RenderBox> _debugDanglingKeepAlives;
+
   bool _hasVisualOverflow = false;
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
@@ -683,7 +700,6 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   @override
   bool get sizedByParent => true;
 
-  final Map<ChildVicinity, RenderBox> _children = <ChildVicinity, RenderBox>{};
   // Keeps track of the upper and lower bounds of ChildVicinity indices when
   // subclasses call buildOrObtainChildFor during layoutChildSequence. These
   // values are used to sort children in accordance with the mainAxis for
@@ -788,6 +804,9 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     for (final RenderBox child in _children.values) {
       child.attach(owner);
     }
+    for (final RenderBox child in _keepAliveBucket.values) {
+      child.attach(owner);
+    }
   }
 
   @override
@@ -799,6 +818,9 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     for (final RenderBox child in _children.values) {
       child.detach();
     }
+    for (final RenderBox child in _keepAliveBucket.values) {
+      child.detach();
+    }
   }
 
   @override
@@ -806,6 +828,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     for (final RenderBox child in _children.values) {
       child.redepthChildren();
     }
+    _keepAliveBucket.values.forEach(redepthChild);
   }
 
   @override
@@ -815,6 +838,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       visitor(child);
       child = parentDataOf(child)._nextSibling;
     }
+    _keepAliveBucket.values.forEach(visitor);
   }
 
   @override
@@ -829,6 +853,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       }
       child = childParentData._nextSibling;
     }
+    // Do not visit children in [_keepAliveBucket].
   }
 
   @override
@@ -959,6 +984,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   void performLayout() {
     _firstChild = null;
     _lastChild = null;
+    _activeChildrenForLayoutPass.clear();
     _childManager._startLayout();
 
     // Subclass lays out children.
@@ -967,13 +993,33 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     assert(_debugCheckContentDimensions());
     _didResize = false;
     _needsDelegateRebuild = false;
+    _cacheKeepAlives();
     invokeLayoutCallback<BoxConstraints>((BoxConstraints _) {
       _childManager._endLayout();
       assert(_debugOrphans?.isEmpty ?? true);
+      assert(_debugDanglingKeepAlives.isEmpty);
+      // Ensure we are not keeping anything alive that should not be any longer.
+      assert(_keepAliveBucket.values.where((RenderBox child) {
+        return !parentDataOf(child).keepAlive;
+      }).isEmpty);
       // Organize children in paint order and complete parent data after
       // un-used children are disposed of by the childManager.
       _reifyChildren();
     });
+  }
+
+  void _cacheKeepAlives() {
+    final List<RenderBox> remainingChildren = _children.values.toSet().difference(
+      _activeChildrenForLayoutPass.values.toSet()
+    ).toList();
+    for (final RenderBox child in remainingChildren) {
+      final TwoDimensionalViewportParentData childParentData = parentDataOf(child);
+      if (childParentData.keepAlive) {
+        _keepAliveBucket[childParentData.vicinity] = child;
+        // Let the child manager know we intend to keep this.
+        _childManager._reuseChild(childParentData.vicinity);
+      }
+    }
   }
 
   // Ensures all children have a layoutOffset, sets paintExtent & paintOffset,
@@ -1088,6 +1134,8 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// it if it already exists.
   RenderBox? buildOrObtainChildFor(ChildVicinity vicinity) {
     assert(vicinity != ChildVicinity.invalid);
+    // This should only be called during layout.
+    assert(debugDoingThisLayout);
     if (_leadingXIndex == null || _trailingXIndex == null || _leadingXIndex == null || _trailingYIndex == null) {
       // First child of this layout pass. Set leading and trailing trackers.
       _leadingXIndex = vicinity.xIndex;
@@ -1107,11 +1155,14 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       _leadingYIndex = math.min(vicinity.yIndex, _leadingYIndex!);
       _trailingYIndex = math.max(vicinity.yIndex, _trailingYIndex!);
     }
-    if (_needsDelegateRebuild || !_children.containsKey(vicinity)) {
+    if (_needsDelegateRebuild || (!_children.containsKey(vicinity) && !_keepAliveBucket.containsKey(vicinity))) {
       invokeLayoutCallback<BoxConstraints>((BoxConstraints _) {
         _childManager._buildChild(vicinity);
       });
     } else {
+      if (_keepAliveBucket.containsKey(vicinity)) {
+        _keepAliveBucket.remove(vicinity)!;
+      }
       _childManager._reuseChild(vicinity);
     }
     if (!_children.containsKey(vicinity)) {
@@ -1122,6 +1173,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
     assert(_children.containsKey(vicinity));
     final RenderBox child = _children[vicinity]!;
+    _activeChildrenForLayoutPass[vicinity] = child;
     parentDataOf(child).vicinity = vicinity;
     return child;
   }
@@ -1304,23 +1356,59 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
   void _insertChild(RenderBox child, ChildVicinity slot) {
     assert(_debugTrackOrphans(newOrphan: _children[slot]));
+    assert(!_keepAliveBucket.containsValue(child));
     _children[slot] = child;
     adoptChild(child);
   }
 
   void _moveChild(RenderBox child, {required ChildVicinity from, required ChildVicinity to}) {
-    if (_children[from] == child) {
-      _children.remove(from);
+    final TwoDimensionalViewportParentData childParentData = parentDataOf(child);
+    if (!childParentData.keptAlive) {
+      if (_children[from] == child) {
+        _children.remove(from);
+      }
+      assert(_debugTrackOrphans(newOrphan: _children[to], noLongerOrphan: child));
+      _children[to] = child;
+      return;
     }
-    assert(_debugTrackOrphans(newOrphan: _children[to], noLongerOrphan: child));
-    _children[to] = child;
+    // If the child in the bucket is not current child, that means someone has
+    // already moved and replaced current child, and we cannot remove this
+    // child.
+    if (_keepAliveBucket[childParentData.vicinity] == child) {
+      _keepAliveBucket.remove(childParentData.vicinity);
+    }
+    assert(() {
+      _debugDanglingKeepAlives.remove(child);
+      return true;
+    }());
+    // If there is an existing child in the new slot, that mean that child
+    // will be moved to other index. In other cases, the existing child should
+    // have been removed by _removeChild. Thus, it is ok to overwrite it.
+    assert(() {
+      if (_keepAliveBucket.containsKey(childParentData.vicinity)) {
+        _debugDanglingKeepAlives.add(_keepAliveBucket[childParentData.vicinity]!);
+      }
+      return true;
+    }());
+    _keepAliveBucket[childParentData.vicinity] = child;
   }
 
   void _removeChild(RenderBox child, ChildVicinity slot) {
-    if (_children[slot] == child) {
-      _children.remove(slot);
+    final TwoDimensionalViewportParentData childParentData = parentDataOf(child);
+    if (!childParentData.keptAlive) {
+      if (_children[slot] == child) {
+        _children.remove(slot);
+      }
+      assert(_debugTrackOrphans(noLongerOrphan: child));
+      dropChild(child);
+      return;
     }
-    assert(_debugTrackOrphans(noLongerOrphan: child));
+    assert(_keepAliveBucket[childParentData.vicinity] == child);
+    assert(() {
+      _debugDanglingKeepAlives.remove(child);
+      return true;
+    }());
+    _keepAliveBucket.remove(childParentData.vicinity);
     dropChild(child);
   }
 
