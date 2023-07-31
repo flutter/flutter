@@ -14,7 +14,7 @@ ninja -C out/host_debug_unopt/
 
 3. Start RenderDoc, and click the "Launch Application" button.
 
-<img src="assets/launch-app.png" height="200" />
+![Launch App](assets/renderdoc_frame_capture/launch-app.png)
 
 4. Fill out the following parameters, and click launch:
   - executable: `$ENGINE_SRC/out/host_debug_impeller_vulkan/impeller_unittests` (expand `ENGINE_SRC`).
@@ -23,4 +23,4 @@ ninja -C out/host_debug_unopt/
 
 5. For the frame you wish to capture, press `F12`, you will now be able to see the frame capture and inspect the state.
 
-<img src="assets/render-doc-capture.png" />
+![Renderdoc Capture](assets/renderdoc_frame_capture/render-doc-capture.png)
