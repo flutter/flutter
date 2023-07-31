@@ -162,8 +162,8 @@ class ImageConfiguration {
 
 /// Performs the decode process for use in [ImageProvider.load].
 ///
-/// This typedef is deprecated. Use [DecoderBufferCallback] with
-/// [ImageProvider.loadBuffer] instead.
+/// This typedef is deprecated. Use [ImageDecoderCallback] with
+/// [ImageProvider.loadImage] instead.
 ///
 /// This callback allows decoupling of the `cacheWidth`, `cacheHeight`, and
 /// `allowUpscaling` parameters from implementations of [ImageProvider] that do
@@ -247,16 +247,16 @@ typedef ImageDecoderCallback = Future<ui.Codec> Function(
 ///      using that key. This is handled by [resolveStreamForKey]. That method
 ///      may fizzle if it determines the image is no longer necessary, use the
 ///      provided [ImageErrorListener] to report an error, set the completer
-///      from the cache if possible, or call [loadBuffer] to fetch the encoded image
+///      from the cache if possible, or call [loadImage] to fetch the encoded image
 ///      bytes and schedule decoding.
-///   4. The [loadBuffer] method is responsible for both fetching the encoded bytes
+///   4. The [loadImage] method is responsible for both fetching the encoded bytes
 ///      and decoding them using the provided [DecoderCallback]. It is called
 ///      in a context that uses the [ImageErrorListener] to report errors back.
 ///
-/// Subclasses normally only have to implement the [loadBuffer] and [obtainKey]
+/// Subclasses normally only have to implement the [loadImage] and [obtainKey]
 /// methods. A subclass that needs finer grained control over the [ImageStream]
 /// type must override [createStream]. A subclass that needs finer grained
-/// control over the resolution, such as delaying calling [loadBuffer], must override
+/// control over the resolution, such as delaying calling [loadImage], must override
 /// [resolveStreamForKey].
 ///
 /// The [resolve] method is marked as [nonVirtual] so that [ImageProvider]s can
@@ -610,9 +610,9 @@ abstract class ImageProvider<T extends Object> {
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
   ///
-  /// This method is deprecated. Implement [loadBuffer] for faster image
-  /// loading. Only one of [load] and [loadBuffer] must be implemented, and
-  /// [loadBuffer] is preferred.
+  /// This method is deprecated. Implement [loadImage] for faster image
+  /// loading. Only one of [load] and [loadImage] must be implemented, and
+  /// [loadImage] is preferred.
   ///
   /// The [decode] callback provides the logic to obtain the codec for the
   /// image.
@@ -626,7 +626,7 @@ abstract class ImageProvider<T extends Object> {
     'This feature was deprecated after v2.13.0-1.0.pre.',
   )
   ImageStreamCompleter load(T key, DecoderCallback decode) {
-    throw UnsupportedError('Implement loadBuffer for faster image loading');
+    throw UnsupportedError('Implement loadImage for faster image loading');
   }
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
