@@ -260,7 +260,6 @@ void main() {
 
     expect(find.text('497–500 of 500'), findsOneWidget);
 
-
     state.pageTo(1);
     rowsPerPage = 5;
 
