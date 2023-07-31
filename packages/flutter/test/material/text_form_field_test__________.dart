@@ -23,8 +23,8 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
-  // testWidgetsWithLeakTracking('leak test', (WidgetTester tester) async {
-  testWidgets('leak test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('leak test', (WidgetTester tester) async {
+  //testWidgets('leak test', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );

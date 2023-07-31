@@ -112,7 +112,7 @@ Future<void> _withFlutterLeakTracking(
     return dispatchObjectEvent(event.toMap());
   }
 
-  return TestAsyncUtils.guard<void>(() async {
+  //return TestAsyncUtils.guard<void>(() async {
     MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
     Future<void> asyncCodeRunner(DartAsyncCallback action) async => tester.runAsync(action);
 
@@ -135,7 +135,7 @@ Future<void> _withFlutterLeakTracking(
     } finally {
       MemoryAllocations.instance.removeListener(flutterEventToLeakTracker);
     }
-  });
+  //});
 }
 
 /// Cleans leaks that are allowed by [config].
