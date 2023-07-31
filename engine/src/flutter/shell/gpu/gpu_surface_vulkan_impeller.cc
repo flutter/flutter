@@ -7,7 +7,8 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/impeller/display_list/dl_dispatcher.h"
 #include "flutter/impeller/renderer/renderer.h"
-#include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/surface_context_vk.h"
+#include "impeller/renderer/surface.h"
 
 namespace flutter {
 
@@ -54,7 +55,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     return nullptr;
   }
 
-  auto& context_vk = impeller::ContextVK::Cast(*impeller_context_);
+  auto& context_vk = impeller::SurfaceContextVK::Cast(*impeller_context_);
   std::unique_ptr<impeller::Surface> surface = context_vk.AcquireNextSurface();
 
   SurfaceFrame::SubmitCallback submit_callback =

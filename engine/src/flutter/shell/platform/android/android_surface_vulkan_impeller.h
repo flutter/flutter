@@ -6,7 +6,7 @@
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/macros.h"
-#include "flutter/impeller/renderer/context.h"
+#include "flutter/impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "flutter/shell/platform/android/android_context_vulkan_impeller.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
@@ -46,7 +46,7 @@ class AndroidSurfaceVulkanImpeller : public AndroidSurface {
   bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
  private:
-  std::shared_ptr<AndroidContextVulkanImpeller> android_context_;
+  std::shared_ptr<impeller::SurfaceContextVK> surface_context_vk_;
   fml::RefPtr<AndroidNativeWindow> native_window_;
   bool is_valid_ = false;
 
