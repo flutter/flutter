@@ -1,0 +1,40 @@
+name: dds
+version: 2.2.5
+description: >-
+  A library used to spawn the Dart Developer Service, used to communicate with
+  a Dart VM Service instance.
+repository: https://github.com/dart-lang/sdk/tree/main/pkg/dds
+
+environment:
+  sdk: '>=2.15.0 <3.0.0'
+
+dependencies:
+  args: ^2.0.0
+  async: ^2.4.1
+  browser_launcher: ^1.0.0
+  collection: ^1.15.0
+  dds_service_extensions: ^1.3.0
+  devtools_shared: ^2.14.1
+  http_multi_server: ^3.0.0
+  json_rpc_2: ^3.0.0
+  meta: ^1.1.8
+  path: ^1.8.0
+  shelf_proxy: ^1.0.0
+  shelf_static: ^1.0.0
+  shelf_web_socket: ^1.0.0
+  shelf: ^1.0.0
+  sse: ^4.0.0
+  stack_trace: ^1.10.0
+  stream_channel: ^2.0.0
+  vm_service: ^9.0.0
+  web_socket_channel: ^2.0.0
+
+# We use 'any' version constraints here as we get our package versions from
+# the dart-lang/sdk repo's DEPS file. Note that this is a special case; the
+# best practice for packages is to specify their compatible version ranges.
+# See also https://dart.dev/tools/pub/dependencies.
+dev_dependencies:
+  http: any
+  lints: any
+  test: any
+  webdriver: any

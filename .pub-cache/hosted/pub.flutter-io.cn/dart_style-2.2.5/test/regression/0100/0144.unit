@@ -1,0 +1,26 @@
+>>>
+class Selector {
+  factory Selector.call(String name,
+                        LibraryElement library,
+                        int arity,
+                        [List<String> namedArguments])
+      => new Selector(SelectorKind.CALL, name, library, arity, namedArguments);
+}
+<<<
+class Selector {
+  factory Selector.call(String name, LibraryElement library, int arity,
+          [List<String> namedArguments]) =>
+      new Selector(SelectorKind.CALL, name, library, arity, namedArguments);
+}
+>>> a knock-on issue caused by the initial fix for the above
+class Foo {
+  get getter => "result";
+
+    // Comment.
+}
+<<<
+class Foo {
+  get getter => "result";
+
+  // Comment.
+}

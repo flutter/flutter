@@ -1,0 +1,158 @@
+40 columns                              |
+>>> split collection before for
+var map = {for (a in b) somewhatLongThingHere: 1};
+<<<
+var map = {
+  for (a in b) somewhatLongThingHere: 1
+};
+>>> one line in multi-line
+var map = {veryLongThingThatForcesASplit: 1, for (a in b) 2: 2, 3: 3};
+<<<
+var map = {
+  veryLongThingThatForcesASplit: 1,
+  for (a in b) 2: 2,
+  3: 3
+};
+>>> long body forces split
+var map = {1: 1, for (a in b) veryLongThingThatForcesASplit, 3: 3};
+<<<
+var map = {
+  1: 1,
+  for (a in b)
+    veryLongThingThatForcesASplit,
+  3: 3
+};
+>>> split inside body
+var map = {1: 1, for (a in b) veryLongThingThatForcesASplit + anotherLongThing, 3: 3};
+<<<
+var map = {
+  1: 1,
+  for (a in b)
+    veryLongThingThatForcesASplit +
+        anotherLongThing,
+  3: 3
+};
+>>> trailing comma
+var map = {for (a in b) 2: 2,};
+<<<
+var map = {
+  for (a in b) 2: 2,
+};
+>>> spread map inside for stays on one line if it fits
+var map = {for (a in b) ...{1: 1, 2: 2}};
+<<<
+var map = {
+  for (a in b) ...{1: 1, 2: 2}
+};
+>>> spread map inside for formats like block if it splits
+var map = {for (a in b) ...{1: 1, 2: 2,}};
+<<<
+var map = {
+  for (a in b) ...{
+    1: 1,
+    2: 2,
+  }
+};
+>>> a split collection that isn't spread wraps and indents
+var map = {for (a in b) {1: 1,2: 2,}};
+<<<
+var map = {
+  for (a in b)
+    {
+      1: 1,
+      2: 2,
+    }
+};
+>>> lambda inside body
+var map = {for (a in b) k: () { body; }};
+<<<
+var map = {
+  for (a in b)
+    k: () {
+      body;
+    }
+};
+>>> nested for splits outer
+({for (a in b) for (c in d) 1: 1});
+<<<
+({
+  for (a in b)
+    for (c in d) 1: 1
+});
+>>> split collection before body
+var map = {for (a in b) longThingThatIsLong};
+<<<
+var map = {
+  for (a in b) longThingThatIsLong
+};
+>>> just split outer for
+var map = {for (a in b) for (c in d) 1: longThingThatIsLong};
+<<<
+var map = {
+  for (a in b)
+    for (c in d) 1: longThingThatIsLong
+};
+>>> split in for-in type
+var map = {for (LongGenericTypeName<TypeArg, AnotherTypeArgument> a in b) 1: body};
+<<<
+var map = {
+  for (LongGenericTypeName<TypeArg,
+      AnotherTypeArgument> a in b)
+    1: body
+};
+>>> split in for-in expression
+var map = {for (a in sequenceExpression + thatDoesNotFit) 1: body};
+<<<
+var map = {
+  for (a in sequenceExpression +
+      thatDoesNotFit)
+    1: body
+};
+>>> split in for var type
+var map = {for (LongGenericTypeName<TypeArg, AnotherTypeArgument> a = 0; a < 1; a++) 1: body};
+<<<
+var map = {
+  for (LongGenericTypeName<TypeArg,
+          AnotherTypeArgument> a = 0;
+      a < 1;
+      a++)
+    1: body
+};
+>>> split in for initializer
+var map = {for (a = initializerExpression + thatDoesNotFit; a < 1; a++) 1: body};
+<<<
+var map = {
+  for (a = initializerExpression +
+          thatDoesNotFit;
+      a < 1;
+      a++)
+    1: body
+};
+>>> split in for condition
+var map = {for (a = b; conditionExpression + thatDoesNotFit; a++) 1: body};
+<<<
+var map = {
+  for (a = b;
+      conditionExpression +
+          thatDoesNotFit;
+      a++)
+    1: body
+};
+>>> split in for increment
+var map = {for (a = b; a < 1; incrementExpression + thatDoesNotFit) 1: body};
+<<<
+var map = {
+  for (a = b;
+      a < 1;
+      incrementExpression +
+          thatDoesNotFit)
+    1: body
+};
+>>> if key/value splits, body splits
+var map = {for (a in b) someLongKeyExpression: andAVeryLongValue};
+<<<
+var map = {
+  for (a in b)
+    someLongKeyExpression:
+        andAVeryLongValue
+};

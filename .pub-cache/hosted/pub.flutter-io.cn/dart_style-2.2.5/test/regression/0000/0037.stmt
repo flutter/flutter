@@ -1,0 +1,36 @@
+>>>
+var map = {
+  'af' : const {
+    'd': 'd', // DAY
+    'E': 'EEE', // ABBR_WEEKDAY
+    'EEEE': 'EEEE', // WEEKDAY
+    'LLL': 'LLL', // ABBR_STANDALONE_MONTH
+  }
+};
+<<<
+var map = {
+  'af': const {
+    'd': 'd', // DAY
+    'E': 'EEE', // ABBR_WEEKDAY
+    'EEEE': 'EEEE', // WEEKDAY
+    'LLL': 'LLL', // ABBR_STANDALONE_MONTH
+  }
+};
+>>>
+  remote.then((_) => response.first)
+      .whenComplete(response.close) // Close when complete.
+      .then((sendPort) {
+        sendReceive(sendPort, 'foo')
+            .then((msg) {
+              print('remote isolate handler received msg: $msg');
+            });
+      });
+<<<
+remote
+    .then((_) => response.first)
+    .whenComplete(response.close) // Close when complete.
+    .then((sendPort) {
+  sendReceive(sendPort, 'foo').then((msg) {
+    print('remote isolate handler received msg: $msg');
+  });
+});

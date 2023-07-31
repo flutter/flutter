@@ -1,0 +1,460 @@
+40 columns                              |
+>>> split all chained calls if they don't fit on one line
+compiler.something().something().something();
+<<<
+compiler
+    .something()
+    .something()
+    .something();
+>>> do not split chained calls if not needed
+compiler.something().something().some();
+<<<
+compiler.something().something().some();
+>>> don't split before implicit receiver
+return
+     call({'type': type, 'id': id})
+    .then(deserializeAsset);
+<<<
+return call({'type': type, 'id': id})
+    .then(deserializeAsset);
+>>> trailing functions in a chain do not force it to split
+compiler
+    .run(script)
+    .then((_) {
+  body;
+});
+<<<
+compiler.run(script).then((_) {
+  body;
+});
+>>> a function in the middle of a chain is indented
+compiler.a().b((_) {body;}).c().d();
+<<<
+compiler
+    .a()
+    .b((_) {
+      body;
+    })
+    .c()
+    .d();
+>>> a function in the middle of a chain is indented
+compiler.a().b((_) {body;}).somethingLong().somethingLong().somethingLong();
+<<<
+compiler
+    .a()
+    .b((_) {
+      body;
+    })
+    .somethingLong()
+    .somethingLong()
+    .somethingLong();
+>>> a function in the middle of a chain is indented
+compiler.somethingLong().somethingLong().somethingLong((_) {
+  body;
+}).a().b();
+<<<
+compiler
+    .somethingLong()
+    .somethingLong()
+    .somethingLong((_) {
+      body;
+    })
+    .a()
+    .b();
+>>> one trailing call does not force function to indent
+compiler.somethingLong().somethingLong().somethingLong((_) {
+  body;
+}).a();
+<<<
+compiler
+    .somethingLong()
+    .somethingLong()
+    .somethingLong((_) {
+  body;
+}).a();
+>>> nest calls one more than target
+someVeryLongExpression = someVeryLongExpression.someLongMethod();
+<<<
+someVeryLongExpression =
+    someVeryLongExpression
+        .someLongMethod();
+>>> split properties after a method chain
+compiler.method().method().method().property.property;
+<<<
+compiler
+    .method()
+    .method()
+    .method()
+    .property
+    .property;
+>>> split properties in a method chain
+compiler.method().property.method().property.method();
+<<<
+compiler
+    .method()
+    .property
+    .method()
+    .property
+    .method();
+>>> do not split leading properties in a chain
+compiler.property.property.method().method().method();
+<<<
+compiler.property.property
+    .method()
+    .method()
+    .method();
+>>> do not split leading properties even if others splits
+compiler.property.method().property.method();
+<<<
+compiler.property
+    .method()
+    .property
+    .method();
+>>> split between a pair of properties
+avian.bovine.canine.equine.feline.piscine.orycteropodian.camelid;
+<<<
+avian.bovine.canine.equine.feline
+    .piscine.orycteropodian.camelid;
+>>> split before all properties if they don't fit on two lines
+avian.bovine.canine.equine.feline.piscine.orycteropodian.camelid
+.rangiferine;
+<<<
+avian
+    .bovine
+    .canine
+    .equine
+    .feline
+    .piscine
+    .orycteropodian
+    .camelid
+    .rangiferine;
+>>> unsplit cascade unsplit method
+object.method().method()..c()..c();
+<<<
+object.method().method()
+  ..c()
+  ..c();
+>>> split cascade unsplit method
+object.method().method()..cascade()..cascade();
+<<<
+object.method().method()
+  ..cascade()
+  ..cascade();
+>>> split cascade split method
+object.method().method().method().method()..cascade()..cascade()..cascade();
+<<<
+object
+    .method()
+    .method()
+    .method()
+    .method()
+  ..cascade()
+  ..cascade()
+  ..cascade();
+>>> cascade setters on method chain
+object.method().method().method().method()..x=1..y=2;
+<<<
+object
+    .method()
+    .method()
+    .method()
+    .method()
+  ..x = 1
+  ..y = 2;
+>>> cascade index
+object..[index]..method()..[index]=value;
+<<<
+object
+  ..[index]
+  ..method()
+  ..[index] = value;
+>>> null-aware cascade index
+object?..[index]..method()..[index]=value;
+<<<
+object
+  ?..[index]
+  ..method()
+  ..[index] = value;
+>>> conditional invocation
+object?.method().method()?.method().method();
+<<<
+object
+    ?.method()
+    .method()
+    ?.method()
+    .method();
+>>> index in property chain
+someReceiverObject.property1.property2
+        .property3[0]
+    .property4
+    .property5
+    .property6;
+<<<
+someReceiverObject
+    .property1
+    .property2
+    .property3[0]
+    .property4
+    .property5
+    .property6;
+>>> chained indexes
+someReceiverObject.property1.property2
+            .property3[argument]
+        [argument][argument]
+    .property4
+    .property5
+    .property6;
+<<<
+someReceiverObject
+    .property1
+    .property2
+    .property3[argument][argument]
+        [argument]
+    .property4
+    .property5
+    .property6;
+>>> index on method call
+someReceiverObject.property1.property2
+        .method3()[0]
+    .property4
+    .property5
+    .property6;
+<<<
+someReceiverObject.property1.property2
+    .method3()[0]
+    .property4
+    .property5
+    .property6;
+>>> index on block calls
+receiver.method(() {;})[0].block(() {;})[1];
+<<<
+receiver.method(() {
+  ;
+})[0].block(() {
+  ;
+})[1];
+>>> target splits more deeply than method chain
+someTargetFunction(argument, argument, argument).method().method();
+<<<
+someTargetFunction(
+        argument, argument, argument)
+    .method()
+    .method();
+>>> splitting the target forces methods to split
+someVeryLongTargetFunction(argument, argument).one().two();
+<<<
+someVeryLongTargetFunction(
+        argument, argument)
+    .one()
+    .two();
+>>> target splits more deeply than property chain
+someTargetFunction(argument, argument, argument).property.property;
+<<<
+someTargetFunction(
+        argument, argument, argument)
+    .property
+    .property;
+>>> splitting the target forces methods to split
+someVeryLongTargetFunction(argument, argument).one.two;
+<<<
+someVeryLongTargetFunction(
+        argument, argument)
+    .one
+    .two;
+>>> do not split on "." when target is list
+[element, element, element, element, element].someLongMethod();
+<<<
+[
+  element,
+  element,
+  element,
+  element,
+  element
+].someLongMethod();
+>>> do not split on "." when target is map
+<String,String>{"key": "value", "another": "another value"}.someLongMethod();
+<<<
+<String, String>{
+  "key": "value",
+  "another": "another value"
+}.someLongMethod();
+>>> do not split on "." when target is function literal passed to method
+method(() {;}).someLongMethod();
+<<<
+method(() {
+  ;
+}).someLongMethod();
+>>> do not split on "." when target is function literal passed to constructor
+new Foo(() {;}).someLongMethod();
+<<<
+new Foo(() {
+  ;
+}).someLongMethod();
+>>> do not split on "." when target is function literal passed to function
+(function)(() {;}).someLongMethod();
+<<<
+(function)(() {
+  ;
+}).someLongMethod();
+>>> do not split on "." when target is parenthesized unsplittable
+((([element,]))).someLongMethod();
+<<<
+((([
+  element,
+]))).someLongMethod();
+>>> trailing comma argument list does not force trailing method chain to split
+function(argument,).method().method();
+<<<
+function(
+  argument,
+).method().method();
+>>> if method chain splits, split before first too
+function(argument,).method().method().method().method().method();
+<<<
+function(
+  argument,
+)
+    .method()
+    .method()
+    .method()
+    .method()
+    .method();
+>>> if invocation looks like named constructor, don't put in chain
+Foo.named().method().method().method().method().method();
+<<<
+Foo.named()
+    .method()
+    .method()
+    .method()
+    .method()
+    .method();
+>>> if invocation looks like prefixed constructor, don't put in chain
+prefix.Foo().method().method().method().method().method();
+<<<
+prefix.Foo()
+    .method()
+    .method()
+    .method()
+    .method()
+    .method();
+>>> if invocation looks like prefixed named constructor, don't put in chain
+prefix.Foo.named().method().method().method().method().method();
+<<<
+prefix.Foo.named()
+    .method()
+    .method()
+    .method()
+    .method()
+    .method();
+>>> if invocation looks like private named constructor, don't put in chain
+_Foo.named().method().method().method().method().method();
+<<<
+_Foo.named()
+    .method()
+    .method()
+    .method()
+    .method()
+    .method();
+>>> if invocation looks like private prefixed constructor, don't put in chain
+prefix._Foo().method().method().method().method().method();
+<<<
+prefix._Foo()
+    .method()
+    .method()
+    .method()
+    .method()
+    .method();
+>>> if invocation looks like private prefixed named constructor, don't put in chain
+prefix._Foo.named().method().method().method().method().method();
+<<<
+prefix._Foo.named()
+    .method()
+    .method()
+    .method()
+    .method()
+    .method();
+>>> invocations in method chain
+someReceiverObject.method1().method2().method3()(argument)
+.method4().method5().method6();
+<<<
+someReceiverObject
+    .method1()
+    .method2()
+    .method3()(argument)
+    .method4()
+    .method5()
+    .method6();
+>>> chained invocations
+someReceiverObject.method1().method2().method3()
+(argument)(argument)<T, R>(argument, argument, argument, argument, argument)(argument)
+.method4().method5().method6();
+<<<
+someReceiverObject
+    .method1()
+    .method2()
+    .method3()(argument)(argument)
+        <T, R>(
+            argument,
+            argument,
+            argument,
+            argument,
+            argument)(argument)
+    .method4()
+    .method5()
+    .method6();
+>>> "!" stays with operand before method call
+verylongIdentifier!.longIdentifier().another()!.aThird()!;
+<<<
+verylongIdentifier!
+    .longIdentifier()
+    .another()!
+    .aThird()!;
+>>> "!" stays with operand before property access
+verylongIdentifier!.longIdentifier.another!.aThird!;
+<<<
+verylongIdentifier!
+    .longIdentifier.another!.aThird!;
+>>> "!" stays with operand before property access
+verylongIdentifier!.longIdentifier.another!.aThird!.longerPropertyChain;
+<<<
+verylongIdentifier!
+    .longIdentifier
+    .another!
+    .aThird!
+    .longerPropertyChain;
+>>> "!" stays with operand before index
+verylongIdentifier![i]![j].longIdentifier[i][j].another[i]![j].aThird!;
+<<<
+verylongIdentifier![i]![j]
+    .longIdentifier[i][j]
+    .another[i]![j]
+    .aThird!;
+>>> "!" stays with operand before call
+verylongIdentifier!(i)!(j).longIdentifier(i)(j).another(i)!(j).aThird!;
+<<<
+verylongIdentifier!(i)!(j)
+    .longIdentifier(i)(j)
+    .another(i)!(j)
+    .aThird!;
+>>> do not split null-asserted chained calls if not needed
+compiler!.a().b()!.c.d();
+<<<
+compiler!.a().b()!.c.d();
+>>> null-assert in block calls
+compiler!.a(() {;})!.b(() {;})!;
+<<<
+compiler!.a(() {
+  ;
+})!.b(() {
+  ;
+})!;
+>>> null-aware index
+receiver.property1.property2
+        .property3?[0][1]?[2]
+    .method1()?[0][1]?[2]
+    .method2();
+<<<
+receiver.property1.property2
+    .property3?[0][1]?[2]
+    .method1()?[0][1]?[2]
+    .method2();

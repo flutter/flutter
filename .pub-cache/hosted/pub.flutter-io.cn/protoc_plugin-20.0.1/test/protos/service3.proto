@@ -1,0 +1,8 @@
+syntax = "proto2";
+
+package service3;
+
+message SearchResult {
+  optional string url = 1;
+  optional string snippet = 2;
+}

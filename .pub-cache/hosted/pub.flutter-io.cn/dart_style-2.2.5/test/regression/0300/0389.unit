@@ -1,0 +1,21 @@
+>>>
+class SpongePublishers extends ResultPublishers {
+  SpongePublishers(
+      [FilenameConvention _filenameConvention = const DefaultFilenameConvention()])
+      : super(<ResultPublisher>[
+          new RedirectPublisher(),
+          new ImagePublisher(_filenameConvention),
+          new ResultPropertyPublisher(_filenameConvention)
+        ]);
+}
+<<<
+class SpongePublishers extends ResultPublishers {
+  SpongePublishers(
+      [FilenameConvention _filenameConvention =
+          const DefaultFilenameConvention()])
+      : super(<ResultPublisher>[
+          new RedirectPublisher(),
+          new ImagePublisher(_filenameConvention),
+          new ResultPropertyPublisher(_filenameConvention)
+        ]);
+}

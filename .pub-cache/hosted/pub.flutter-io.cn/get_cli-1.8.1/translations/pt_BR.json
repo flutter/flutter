@@ -1,0 +1,82 @@
+{
+  "ask": {
+    "existing_page": "A página [%s] já existe, deseja sobrescrevê-la?",
+    "name_to_project": "Qual é o nome do projeto?",
+    "company_domain": "Qual é o domínio da sua empresa?",
+    "model_name": "Não foi possível definir o nome do modelo automaticamente, qual nome você deseja usar?",
+    "package_already_installed": "pacote: %s já instalado, deseja atualizar?",
+    "lib_not_empty": "Sua pasta lib não está vazia. Tem certeza de que deseja sobrescrever seu aplicativo? \\n AVISO: essa ação é irreversível"
+  },
+  "error": {
+    "failed_to_connect": "Falha ao conectar com %s",
+    "no_valid_file_or_url": "'%s' não é um arquivo ou url válido",
+    "unnecessary_parameter": "O parâmetro %s não é necessário",
+    "unnecessary_parameter_plural": "Os parâmetros %s não são necessários",
+    "nonexistent_directory": "O diretório %s não existe.",
+    "empty_directory": "o diretório %s está vazio",
+    "invalid_json": "%s não é um arquivo json válido",
+    "special_characters_in_key": "Caracteres especiais não são permitidos na key. \\n key: %s",
+    "required_path": "Necessário para passar o path do arquivo ou diretório",
+    "invalid_dart": "O %s não é um arquivo dart válido",
+    "invalid_file_or_directory": "O %s não é um arquivo ou diretório válido",
+    "package_not_found": "Pacote: %s não encontrado em pub.dev",
+    "cli_version_not_found": "Não foi possível encontrar a versão instalada da CLI",
+    "update_cli": "Ocorreu um erro ao atualizar get_cli",
+    "folder_not_found": "Pasta %s não encontrada",
+    "file_not_found": "Arquivo não encontrado em %s",
+    "access_denied": "Acesso negado a %s",
+    "unexpected": "Ocorreu um erro inesperado:"
+  },
+  "example": "Exemplo:",
+  "hint": {
+    "create": {
+      "controller": "Gerar um novo controller",
+      "page": "Gerar um novo modulo, (controller, view e bindigns) (Use essa opção se está usando getx_pattern)",
+      "project": "Crie um novo projeto, escolha flutter ou get server",
+      "provider": "Cria uma classe Provider",
+      "screen": "Gera uma nova Screen, [controller, view e bindigns] (Use essa opção se for está usando clean)",
+      "view": "Cria uma nova view"
+    },
+    "generate": {
+      "locales": "Gerar um arquivo de tradução compatível com getx usando json",
+      "model": "Crie sua classe model apartir de um json"
+    },
+    "help": "mostra a tela de help",
+    "init": "Gere a estrutura escolhida em um projeto existente:",
+    "install": "Use para instalar um pacote em seu projeto (dependencies):",
+    "remove": "Use para remover um pacote em seu projeto (dependencies):",
+    "sort": "Classificar os imports e formatar arquivos dart",
+    "update": "Para atualizar GET_CLI",
+    "version": "Mostra a versão atual do get_cli"
+  },
+  "info": {
+    "unnecessary_flag": "A flag: %s não é necessária",
+    "unnecessary_flag_prural": "As flags: %s não são necessárias",
+    "package_not_installed": "Pacote: %s não está instalado neste aplicativo",
+    "cli_last_version_already_installed": "Versão mais recente de get_cli já instalada",
+    "no_file_overwritten": "Nenhum arquivo foi sobrescrito",
+    "update_available": "Há uma atualização disponível! Versão atual instalada: %s",
+    "update_available2": "Nova versão disponível: %s Por favor, execute:"
+  },
+  "options": {
+    "yes": "Sim!",
+    "no": "Não!",
+    "rename": "Quero renomear!"
+
+  },
+  "optional_parameters": "Parâmetros opcionais: %s",
+  "sucess": {
+    "page_create": "Página %s criada com sucesso.",
+    "locale_generate": "Arquivo de tradução gerado com sucesso.",
+    "getx_pattern_generated": "Estrutura GetX Pattern gerada com sucesso.",
+    "clean_Pattern_generated": "Estrutura CLEAN gerada com sucesso.",
+    "file_formatted": " '%s' foi formatado com sucesso",
+    "package_removed": "Pacote: %s removido!",
+    "package_installed": "Pacote: %s instalado!",
+    "update_cli": "Upgrade concluído",
+    "add_controller_in_bindings": "O %s foi adicionado ao binging no path: %s ",
+    "navigation_added": "%s navigation adicionada com sucesso.",
+    "file_created": "Arquivo: %s criado com sucesso no path: %s",
+    "route_created": "Rota %s criada com sucesso."
+  }
+}

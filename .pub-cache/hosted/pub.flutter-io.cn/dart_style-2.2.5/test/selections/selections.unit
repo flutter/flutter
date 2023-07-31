@@ -1,0 +1,84 @@
+40 columns                              |
+>>> inside script tag
+#!scr‹ip›t
+<<<
+#!scr‹ip›t
+>>> select entire file
+‹main(  )  {
+  body(   )  ;}›
+<<<
+‹main() {
+  body();
+}›
+>>> trailing comment
+   ma‹in() {}
+// com›ment
+<<<
+ma‹in() {}
+// com›ment
+>>> in discarded whitespace
+foo(  ‹  argument){  ›  }
+<<<
+foo(‹argument) {›}
+>>> in zero split whitespace
+main(){veryLongMethodCall(‹veryLongArgumentName);
+veryLongMethodCall(›veryLongArgumentName);
+}
+<<<
+main() {
+  veryLongMethodCall(
+      ‹veryLongArgumentName);
+  veryLongMethodCall(›
+      veryLongArgumentName);
+}
+>>> in soft space split whitespace
+main() {shortCall(argument, ‹  argument);
+shortCall(argument,  › argument);
+}
+<<<
+main() {
+  shortCall(argument, ‹argument);
+  shortCall(argument,› argument);
+}
+>>> in hard split whitespace
+foo() {body;  ‹  }
+bar() {body;  ›  }
+<<<
+foo() {
+  body;
+‹}
+
+bar() {
+  body;›
+}
+>>> across lines that get split separately
+foo() {
+
+
+  fir‹st();
+}
+
+bar() {sec›ond();}
+<<<
+foo() {
+  fir‹st();
+}
+
+bar() {
+  sec›ond();
+}
+>>> only whitespace in newline selected
+foo() {} ‹  › bar() {}
+<<<
+foo() {}
+‹›bar() {}
+>>> only whitespace in double newline selected
+class Foo {}
+
+‹  ›
+
+class Bar {}
+<<<
+class Foo {}
+
+‹›class Bar {}

@@ -1,0 +1,42 @@
+# Defines a default set of lint rules enforced for
+# projects at Google. For details and rationale,
+# see https://github.com/dart-lang/pedantic#enabled-lints.
+include: package:lints/recommended.yaml
+
+# Until there are meta linter rules, each desired lint must be explicitly enabled.
+# See: https://github.com/dart-lang/linter/issues/288
+#
+# For a list of lints, see: http://dart-lang.github.io/linter/lints/
+# See the configuration guide for more
+# https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+  errors:
+    # treat missing required parameters as a warning (not a hint)
+    missing_required_param: warning
+    # treat missing returns as a warning (not a hint)
+    missing_return: warning
+    # allow having TODOs in the code
+    todo: ignore
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_dynamic_calls
+    - avoid_slow_async_io
+    - cancel_subscriptions
+    - directives_ordering
+    - no_adjacent_strings_in_list
+    - omit_local_variable_types
+    - package_api_docs
+    - prefer_const_constructors
+    - prefer_single_quotes
+    - sort_child_properties_last
+    - test_types_in_equals
+    - throw_in_finally
+    - unawaited_futures
+    - unnecessary_null_aware_assignments
+    - unnecessary_statements
+    - unsafe_html

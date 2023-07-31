@@ -1,0 +1,314 @@
+40 columns                              |
+>>> single
+enum Unity {one}
+<<<
+enum Unity { one }
+>>> single line
+enum Primate{bonobo,chimp,gorilla}
+<<<
+enum Primate { bonobo, chimp, gorilla }
+>>> trailing comma always splits
+enum Primate{bonobo,chimp,}
+<<<
+enum Primate {
+  bonobo,
+  chimp,
+}
+>>> metadata
+@Awesome @Fierce("really")
+enum Primate{bonobo,chimp,gorilla}
+<<<
+@Awesome
+@Fierce("really")
+enum Primate { bonobo, chimp, gorilla }
+>>> preserve one blank line between enums
+enum Primate {
+
+
+  bonobo,
+
+
+  chimp,
+
+
+
+  gorilla
+
+}
+<<<
+enum Primate {
+  bonobo,
+
+  chimp,
+
+  gorilla
+}
+>>> do not preserve single newline
+enum Primate {
+  bonobo,
+  chimp,
+  gorilla
+}
+<<<
+enum Primate { bonobo, chimp, gorilla }
+>>> one blank line between values and members
+enum E { a, b, c;
+
+
+
+int x; }
+<<<
+enum E {
+  a,
+  b,
+  c;
+
+  int x;
+}
+>>> always go multiline if there are members
+enum E { a, b, c; int x; }
+<<<
+enum E {
+  a,
+  b,
+  c;
+
+  int x;
+}
+>>> indentation
+enum A { a;
+var z;
+inc(int x) => ++x;
+foo(int x) {
+if (x == 0) {
+return true;
+}}}
+<<<
+enum A {
+  a;
+
+  var z;
+  inc(int x) => ++x;
+  foo(int x) {
+    if (x == 0) {
+      return true;
+    }
+  }
+}
+>>> trailing space inside body
+enum A { a, b
+  }
+<<<
+enum A { a, b }
+>>> leading space before "enum"
+  enum A { a
+}
+<<<
+enum A { a }
+>>>
+enum A  { a;int meaningOfLife() => 42; }
+<<<
+enum A {
+  a;
+
+  int meaningOfLife() => 42;
+}
+>>>
+enum A{a;var z;inc(int x) => ++x;}
+<<<
+enum A {
+  a;
+
+  var z;
+  inc(int x) => ++x;
+}
+>>> insert blank line after non-empty block-bodied members
+enum Foo {
+  x;
+var a = 1; b() {;} c() => null; get d {;} get e => null; set f(value) {;
+} set g(value) => null; var h = 1;}
+<<<
+enum Foo {
+  x;
+
+  var a = 1;
+  b() {
+    ;
+  }
+
+  c() => null;
+  get d {
+    ;
+  }
+
+  get e => null;
+  set f(value) {
+    ;
+  }
+
+  set g(value) => null;
+  var h = 1;
+}
+>>> no required blank line after empty block-bodied members
+enum Foo {x;
+var a = 1; b() {} c() => null; get d {} get e => null; set f(value) {
+} set g(value) => null; var h = 1;}
+<<<
+enum Foo {
+  x;
+
+  var a = 1;
+  b() {}
+  c() => null;
+  get d {}
+  get e => null;
+  set f(value) {}
+  set g(value) => null;
+  var h = 1;
+}
+>>> blank line before and after enum
+var x = 1;
+enum A { a }
+var y = 2;
+<<<
+var x = 1;
+
+enum A { a }
+
+var y = 2;
+>>> semicolon after values but no members
+enum   E { a, b; }
+<<<
+enum E {
+  a,
+  b;
+}
+>>> enhanced with clauses and members
+enum E with M<R, S>, F implements C<T>, D {
+value;
+late final String field;
+static var staticField = initializer;
+int method() { body; }
+static String staticMethod(int x) => body;
+List<int> get getter => 3;
+int operator +(other) => 3;
+const E([String parameter]) : field = parameter;
+const E.named({String parameter});
+}
+<<<
+enum E
+    with M<R, S>, F
+    implements C<T>, D {
+  value;
+
+  late final String field;
+  static var staticField = initializer;
+  int method() {
+    body;
+  }
+
+  static String staticMethod(int x) =>
+      body;
+  List<int> get getter => 3;
+  int operator +(other) => 3;
+  const E([String parameter])
+      : field = parameter;
+  const E.named({String parameter});
+}
+>>> argument lists in values
+enum Args {
+first(),second(a,b,c),
+third(named:1,2,another:3)
+}
+<<<
+enum Args {
+  first(),
+  second(a, b, c),
+  third(named: 1, 2, another: 3)
+}
+>>> generic enum
+enum MagicNumbers< T    extends num   ,   S> {
+  one(1), two(2),pi<double,String>(3.14159)
+}
+<<<
+enum MagicNumbers<T extends num, S> {
+  one(1),
+  two(2),
+  pi<double, String>(3.14159)
+}
+>>> trailing commas in value arguments
+enum Numbers {
+  one(1,),
+  two(1,2,),
+}
+<<<
+enum Numbers {
+  one(
+    1,
+  ),
+  two(
+    1,
+    2,
+  ),
+}
+>>> trailing comma and semicolon after constants
+enum E {a,b,c,;}
+<<<
+enum E {
+  a,
+  b,
+  c,
+  ;
+}
+>>> trailing comma and semicolon after constants with member
+enum E {a,b,c,;var x;}
+<<<
+enum E {
+  a,
+  b,
+  c,
+  ;
+
+  var x;
+}
+>>> trailing comma and semicolon after constant with argument list
+enum E {a,b,c(123),;}
+<<<
+enum E {
+  a,
+  b,
+  c(123),
+  ;
+}
+>>> discard trailing newlines in body
+enum E {
+  a,
+
+
+
+
+
+}
+<<<
+enum E {
+  a,
+}
+>>> discard trailing newlines in body
+enum E {
+  a;
+
+
+
+  bar() {}
+
+
+
+
+
+}
+<<<
+enum E {
+  a;
+
+  bar() {}
+}

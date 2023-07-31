@@ -1,0 +1,27 @@
+40 columns                              |
+>>>
+mixin    M1    on   UnaryNum     {  }
+<<<
+mixin M1 on UnaryNum {}
+>>>
+mixin   M2  on   UnaryNum   ,UnaryInt{   }
+<<<
+mixin M2 on UnaryNum, UnaryInt {}
+>>>
+mixin    M1    on   UnaryNum     {
+
+
+
+
+  member() {}
+
+
+  }
+<<<
+mixin M1 on UnaryNum {
+  member() {}
+}
+>>> generic
+mixin M<   A  ,B  >on   C  implements    D{ }
+<<<
+mixin M<A, B> on C implements D {}

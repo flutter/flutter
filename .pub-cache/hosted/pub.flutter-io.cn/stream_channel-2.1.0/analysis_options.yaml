@@ -1,0 +1,17 @@
+include: package:pedantic/analysis_options.yaml
+analyzer:
+  strong-mode:
+    implicit-casts: false
+  # These are errors when building in Google
+  errors:
+    unused_import: error
+    unused_element: error
+    unused_local_variable: error
+    dead_code: error
+
+linter:
+  rules:
+    - annotate_overrides
+    - comment_references
+    - prefer_generic_function_type_aliases
+    - prefer_typing_uninitialized_variables

@@ -1,0 +1,12 @@
+name: coverage_integration_test_for_test_with_coverage
+publish_to: none
+
+environment:
+  sdk: '>=2.15.0 <3.0.0'
+
+dev_dependencies:
+  test: ^1.16.0
+
+dependency_overrides:
+  coverage:
+    path: ../../

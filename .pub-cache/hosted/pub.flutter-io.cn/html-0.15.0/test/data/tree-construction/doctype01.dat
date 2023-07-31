@@ -1,0 +1,370 @@
+#data
+<!DOCTYPE html>Hello
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!dOctYpE HtMl>Hello
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPEhtml>Hello
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE>Hello
+#errors
+#document
+| <!DOCTYPE >
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE >Hello
+#errors
+#document
+| <!DOCTYPE >
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato>Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato >Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato taco>Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato taco "ddd>Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato sYstEM>Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato sYstEM    >Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE   potato       sYstEM  ggg>Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato SYSTEM taco  >Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato SYSTEM 'taco"'>Hello
+#errors
+#document
+| <!DOCTYPE potato "" "taco"">
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato SYSTEM "taco">Hello
+#errors
+#document
+| <!DOCTYPE potato "" "taco">
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato SYSTEM "tai'co">Hello
+#errors
+#document
+| <!DOCTYPE potato "" "tai'co">
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato SYSTEMtaco "ddd">Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato grass SYSTEM taco>Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato pUbLIc>Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato pUbLIc >Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato pUbLIcgoof>Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato PUBLIC goof>Hello
+#errors
+#document
+| <!DOCTYPE potato>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato PUBLIC "go'of">Hello
+#errors
+#document
+| <!DOCTYPE potato "go'of" "">
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato PUBLIC 'go'of'>Hello
+#errors
+#document
+| <!DOCTYPE potato "go" "">
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato PUBLIC 'go:hh   of' >Hello
+#errors
+#document
+| <!DOCTYPE potato "go:hh   of" "">
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE potato PUBLIC "W3C-//dfdf" SYSTEM ggg>Hello
+#errors
+#document
+| <!DOCTYPE potato "W3C-//dfdf" "">
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">Hello
+#errors
+#document
+| <!DOCTYPE html "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE ...>Hello
+#errors
+#document
+| <!DOCTYPE ...>
+| <html>
+|   <head>
+|   <body>
+|     "Hello"
+
+#data
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+#errors
+#document
+| <!DOCTYPE html "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+| <html>
+|   <head>
+|   <body>
+
+#data
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+#errors
+#document
+| <!DOCTYPE html "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+| <html>
+|   <head>
+|   <body>
+
+#data
+<!DOCTYPE root-element [SYSTEM OR PUBLIC FPI] "uri" [ 
+<!-- internal declarations -->
+]>
+#errors
+#document
+| <!DOCTYPE root-element>
+| <html>
+|   <head>
+|   <body>
+|     "]>"
+
+#data
+<!DOCTYPE html PUBLIC
+  "-//WAPFORUM//DTD XHTML Mobile 1.0//EN"
+    "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+#errors
+#document
+| <!DOCTYPE html "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+| <html>
+|   <head>
+|   <body>
+
+#data
+<!DOCTYPE HTML SYSTEM "http://www.w3.org/DTD/HTML4-strict.dtd"><body><b>Mine!</b></body>
+#errors
+#document
+| <!DOCTYPE html "" "http://www.w3.org/DTD/HTML4-strict.dtd">
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|       "Mine!"
+
+#data
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html4/strict.dtd">
+#errors
+#document
+| <!DOCTYPE html "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+| <html>
+|   <head>
+|   <body>
+
+#data
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"'http://www.w3.org/TR/html4/strict.dtd'>
+#errors
+#document
+| <!DOCTYPE html "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+| <html>
+|   <head>
+|   <body>
+
+#data
+<!DOCTYPE HTML PUBLIC"-//W3C//DTD HTML 4.01//EN"'http://www.w3.org/TR/html4/strict.dtd'>
+#errors
+#document
+| <!DOCTYPE html "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+| <html>
+|   <head>
+|   <body>
+
+#data
+<!DOCTYPE HTML PUBLIC'-//W3C//DTD HTML 4.01//EN''http://www.w3.org/TR/html4/strict.dtd'>
+#errors
+#document
+| <!DOCTYPE html "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+| <html>
+|   <head>
+|   <body>

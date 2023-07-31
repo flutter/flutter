@@ -1,0 +1,13 @@
+>>>
+class Foo {
+  Stream<
+      api
+          .CreateRecipientSourceFromGroupResponse> createRecipientSourceFromGroup(
+      String groupName, int campaignId, String languagePreference);
+}
+<<<
+class Foo {
+  Stream<api.CreateRecipientSourceFromGroupResponse>
+      createRecipientSourceFromGroup(
+          String groupName, int campaignId, String languagePreference);
+}

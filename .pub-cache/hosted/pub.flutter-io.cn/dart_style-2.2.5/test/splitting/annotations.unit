@@ -1,0 +1,95 @@
+40 columns                              |
+>>> complex annotation that all fits on one line
+@a.B<C,D>(e,f,g) int i = 0;
+<<<
+@a.B<C, D>(e, f, g)
+int i = 0;
+>>> prefer to split between args even when they all fit on next line
+@BigLongClassName<First, Second, Third>() int i = 0;
+<<<
+@BigLongClassName<First, Second,
+    Third>()
+int i = 0;
+>>> split before first if needed
+@BigLongClassName<FirstTypeArgumentIsLong, Second>() int i = 0;
+<<<
+@BigLongClassName<
+    FirstTypeArgumentIsLong, Second>()
+int i = 0;
+>>> split in middle if fit in two lines
+@BigLongClassName<First, Second, Third, Fourth, Fifth, Sixth, Seventh>() int i = 0;
+<<<
+@BigLongClassName<First, Second, Third,
+    Fourth, Fifth, Sixth, Seventh>()
+int i = 0;
+>>> split one per line if they don't fit in two lines
+@BigLongClassName<First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth>() int i = 0;
+<<<
+@BigLongClassName<
+    First,
+    Second,
+    Third,
+    Fourth,
+    Fifth,
+    Sixth,
+    Seventh,
+    Eighth>()
+int i = 0;
+>>> prefers to not split at type arguments
+@SomeBigClass<
+    TypeArgument>(valueArgument)
+int i = 0;
+<<<
+@SomeBigClass<TypeArgument>(
+    valueArgument)
+int i = 0;
+>>> split both type and value arguments
+@SomeBigClass<First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth>(first, second, third, fourth, fifth, sixth, seventh, eighth) int i = 0;
+<<<
+@SomeBigClass<
+        First,
+        Second,
+        Third,
+        Fourth,
+        Fifth,
+        Sixth,
+        Seventh,
+        Eighth>(
+    first,
+    second,
+    third,
+    fourth,
+    fifth,
+    sixth,
+    seventh,
+    eighth)
+int i = 0;
+>>> prefer to split at arguments rather than prefix
+@veryLongPrefix.VeryLongClassName<VeryLongTypeArgument,OtherVeryLongTypeArgument>(veryLongArgument,otherVeryLongArgument,thirdVeryLongArgument) int i = 0;
+<<<
+@veryLongPrefix.VeryLongClassName<
+        VeryLongTypeArgument,
+        OtherVeryLongTypeArgument>(
+    veryLongArgument,
+    otherVeryLongArgument,
+    thirdVeryLongArgument)
+int i = 0;
+>>> nested type arguments, no splitting required
+@A<B<C,D>,E<F,G>>() int i = 0;
+<<<
+@A<B<C, D>, E<F, G>>()
+int i = 0;
+>>> nested type arguments, split at outer level when possible
+@Aaaa<Bbbb<Cccc,Dddd>,Eeee<Ffff,Gggg>>() int i = 0;
+<<<
+@Aaaa<Bbbb<Cccc, Dddd>,
+    Eeee<Ffff, Gggg>>()
+int i = 0;
+>>> nested type arguments, split at inner level when necessary
+@Aaaaaaaaa<Bbbbbbbbbbb<Ccccccccccc,Ddddddddddd>,Eeeeeeeee<Fffffffff,Ggggggggg>>() int i = 0;
+<<<
+@Aaaaaaaaa<
+    Bbbbbbbbbbb<Ccccccccccc,
+        Ddddddddddd>,
+    Eeeeeeeee<Fffffffff, Ggggggggg>>()
+int i = 0;

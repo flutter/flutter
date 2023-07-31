@@ -1,0 +1,6 @@
+>>>
+String say(String from, String msg,
+  [String device='carrier pigeon', String mood]) {}
+<<<
+String say(String from, String msg,
+    [String device = 'carrier pigeon', String mood]) {}

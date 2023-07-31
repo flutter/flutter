@@ -1,0 +1,12 @@
+>>>
+foo() {
+  if (true)
+    // comment!
+    return 0;
+}
+<<<
+foo() {
+  if (true)
+    // comment!
+    return 0;
+}

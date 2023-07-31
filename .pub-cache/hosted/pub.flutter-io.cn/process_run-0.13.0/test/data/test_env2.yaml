@@ -1,0 +1,6 @@
+path:
+  - my_path2
+var:
+  test: 2
+alias:
+  test: test alias

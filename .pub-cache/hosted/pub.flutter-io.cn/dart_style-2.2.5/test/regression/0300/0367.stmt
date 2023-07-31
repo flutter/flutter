@@ -1,0 +1,31 @@
+>>> (indent 6)
+      identifier__ = identifier_____.identifier___
+          .transform(new StreamTransformer<TypeArg____, Type_>.fromHandlers(
+              handleData: (TypeName___ arg__, EventSink<Type_> arg_) {
+        ;
+      }))
+          .asBroadcastStream();
+<<<
+      identifier__ = identifier_____.identifier___.transform(
+          new StreamTransformer<TypeArg____, Type_>.fromHandlers(
+              handleData: (TypeName___ arg__, EventSink<Type_> arg_) {
+        ;
+      })).asBroadcastStream();
+>>> (indent 4)
+    _trigger
+        .then(ut.expectAsync((result) {
+      if (_deferExpectations == null || _deferExpectations == false) {
+        body(result);
+      } else {
+        defer(ut.expectAsync(() => body(result)));
+      }
+    }))
+        .catchError(ut.fail);
+<<<
+    _trigger.then(ut.expectAsync((result) {
+      if (_deferExpectations == null || _deferExpectations == false) {
+        body(result);
+      } else {
+        defer(ut.expectAsync(() => body(result)));
+      }
+    })).catchError(ut.fail);

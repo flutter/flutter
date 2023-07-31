@@ -1,0 +1,15 @@
+// Copyright (c) 2020, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto2";
+
+message F {
+  optional string a = 1 [default = "a\nb"];
+  optional string b = 2 [default = "a'b"];
+  optional string c = 3 [default = "a\"b"];
+  optional string d = 4 [default = "a$b"];
+  optional string e = 5 [default = "a\\b"];
+  optional string f = 6 [default = "a\0b"];
+  optional string g = 7 [default = "\uD83C\uDDFA\uD83C\uDDF8"];
+}

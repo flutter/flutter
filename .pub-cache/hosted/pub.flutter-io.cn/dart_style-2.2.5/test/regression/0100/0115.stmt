@@ -1,0 +1,30 @@
+>>>
+assert(
+    // Indexing send-sets have an argument for the index.
+    (selector.isIndexSet ? 1 : 0) +
+        // Non-increment send-sets have one more argument.
+        (ast.Operator.INCREMENT_OPERATORS.contains(op.source) ? 0 :
+            1) == node.argumentCount());
+<<<
+assert(
+    // Indexing send-sets have an argument for the index.
+    (selector.isIndexSet ? 1 : 0) +
+            // Non-increment send-sets have one more argument.
+            (ast.Operator.INCREMENT_OPERATORS.contains(op.source) ? 0 : 1) ==
+        node.argumentCount());
+>>> (indent 4)
+    assert(
+        // Indexing send-sets have an argument for the index.
+        (selector.isIndexSet ? 1 : 0) +
+            // Non-increment send-sets have one more argument.
+            (ast.Operator.INCREMENT_OPERATORS.contains(op.source) ? 0 :
+                1) == node.argumentCount());
+<<<
+    assert(
+        // Indexing send-sets have an argument for the index.
+        (selector.isIndexSet ? 1 : 0) +
+                // Non-increment send-sets have one more argument.
+                (ast.Operator.INCREMENT_OPERATORS.contains(op.source)
+                    ? 0
+                    : 1) ==
+            node.argumentCount());

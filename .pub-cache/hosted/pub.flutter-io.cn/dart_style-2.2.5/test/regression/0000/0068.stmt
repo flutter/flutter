@@ -1,0 +1,207 @@
+>>> (indent 2)
+  var results = checkProgram(uri,
+      sdkDir: shouldMockSdk ? null : dartSdkPath,
+      mockSdkSources: shouldMockSdk ? mockSdkSources : null,
+      checkSdk: args['sdk-check'],
+      useColors: useColors);
+<<<
+  var results = checkProgram(uri,
+      sdkDir: shouldMockSdk ? null : dartSdkPath,
+      mockSdkSources: shouldMockSdk ? mockSdkSources : null,
+      checkSdk: args['sdk-check'],
+      useColors: useColors);
+>>>
+var map = {
+  /**
+   * Date/time formatting symbols for locale en_ISO.
+   */
+  "en_ISO" : new DateSymbols(
+      NAME: 'en_ISO',
+      ERAS: const ['BC', 'AD'],
+      ERANAMES: const ['Before Christ', 'Anno Domini'],
+      NARROWMONTHS: const ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O',
+        'N', 'D'],
+      STANDALONENARROWMONTHS: const ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A',
+        'S', 'O', 'N', 'D'],
+      MONTHS: const ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'],
+      STANDALONEMONTHS: const ['January', 'February', 'March', 'April', 'May',
+        'June', 'July', 'August', 'September', 'October', 'November',
+        'December'],
+      SHORTMONTHS: const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+        'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      STANDALONESHORTMONTHS: const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      WEEKDAYS: const ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+        'Friday', 'Saturday'],
+      STANDALONEWEEKDAYS: const ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
+        'Thursday', 'Friday', 'Saturday'],
+      SHORTWEEKDAYS: const ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      STANDALONESHORTWEEKDAYS: const ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri',
+        'Sat'],
+      NARROWWEEKDAYS: const ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+      STANDALONENARROWWEEKDAYS: const ['S', 'M', 'T', 'W', 'T',
+        'F', 'S'],
+      SHORTQUARTERS: const ['Q1', 'Q2', 'Q3', 'Q4'],
+      QUARTERS: const ['1st quarter', '2nd quarter', '3rd quarter',
+        '4th quarter'],
+      AMPMS: const ['AM', 'PM'],
+      DATEFORMATS: const ['EEEE, y MMMM dd', 'y MMMM d', 'y MMM d',
+        'yyyy-MM-dd'],
+      TIMEFORMATS: const ['HH:mm:ss v', 'HH:mm:ss z', 'HH:mm:ss', 'HH:mm'],
+      DATETIMEFORMATS: const ['{1} \'at\' {0}', '{1} \'at\' {0}',
+        '{1}, {0}', '{1}, {0}'],
+      AVAILABLEFORMATS: const {'Md': 'M/d', 'MMMMd': 'MMMM d', 'MMMd': 'MMM d'},
+      FIRSTDAYOFWEEK: 0,
+      WEEKENDRANGE: const [5, 6],
+      FIRSTWEEKCUTOFFDAY: 3),
+};
+<<<
+var map = {
+  /**
+   * Date/time formatting symbols for locale en_ISO.
+   */
+  "en_ISO": new DateSymbols(
+      NAME: 'en_ISO',
+      ERAS: const ['BC', 'AD'],
+      ERANAMES: const ['Before Christ', 'Anno Domini'],
+      NARROWMONTHS: const [
+        'J',
+        'F',
+        'M',
+        'A',
+        'M',
+        'J',
+        'J',
+        'A',
+        'S',
+        'O',
+        'N',
+        'D'
+      ],
+      STANDALONENARROWMONTHS: const [
+        'J',
+        'F',
+        'M',
+        'A',
+        'M',
+        'J',
+        'J',
+        'A',
+        'S',
+        'O',
+        'N',
+        'D'
+      ],
+      MONTHS: const [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December'
+      ],
+      STANDALONEMONTHS: const [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December'
+      ],
+      SHORTMONTHS: const [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ],
+      STANDALONESHORTMONTHS: const [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ],
+      WEEKDAYS: const [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+      ],
+      STANDALONEWEEKDAYS: const [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+      ],
+      SHORTWEEKDAYS: const ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      STANDALONESHORTWEEKDAYS: const [
+        'Sun',
+        'Mon',
+        'Tue',
+        'Wed',
+        'Thu',
+        'Fri',
+        'Sat'
+      ],
+      NARROWWEEKDAYS: const ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+      STANDALONENARROWWEEKDAYS: const ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+      SHORTQUARTERS: const ['Q1', 'Q2', 'Q3', 'Q4'],
+      QUARTERS: const [
+        '1st quarter',
+        '2nd quarter',
+        '3rd quarter',
+        '4th quarter'
+      ],
+      AMPMS: const ['AM', 'PM'],
+      DATEFORMATS: const [
+        'EEEE, y MMMM dd',
+        'y MMMM d',
+        'y MMM d',
+        'yyyy-MM-dd'
+      ],
+      TIMEFORMATS: const ['HH:mm:ss v', 'HH:mm:ss z', 'HH:mm:ss', 'HH:mm'],
+      DATETIMEFORMATS: const [
+        '{1} \'at\' {0}',
+        '{1} \'at\' {0}',
+        '{1}, {0}',
+        '{1}, {0}'
+      ],
+      AVAILABLEFORMATS: const {'Md': 'M/d', 'MMMMd': 'MMMM d', 'MMMd': 'MMM d'},
+      FIRSTDAYOFWEEK: 0,
+      WEEKENDRANGE: const [5, 6],
+      FIRSTWEEKCUTOFFDAY: 3),
+};

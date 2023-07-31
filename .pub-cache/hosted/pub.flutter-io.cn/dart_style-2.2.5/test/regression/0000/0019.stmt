@@ -1,0 +1,25 @@
+>>>
+return new _Concat(
+      (left != null) ? left : this.left,
+      (right != null) ? right : this.right);
+<<<
+return new _Concat(
+    (left != null) ? left : this.left, (right != null) ? right : this.right);
+>>> (indent 4)
+    return new _Concat(
+          (left != null) ? left : this.left,
+          (right != null) ? right : this.right);
+<<<
+    return new _Concat((left != null) ? left : this.left,
+        (right != null) ? right : this.right);
+>>> (indent 4)
+    format.maximumFractionDigits = decimalPos >= 0 ? totalDigits - decimalPos :
+        0;
+<<<
+    format.maximumFractionDigits =
+        decimalPos >= 0 ? totalDigits - decimalPos : 0;
+>>> (indent 6)
+      var libname = _builtins.containsKey(package) ? _builtins[package] : package;
+<<<
+      var libname =
+          _builtins.containsKey(package) ? _builtins[package] : package;

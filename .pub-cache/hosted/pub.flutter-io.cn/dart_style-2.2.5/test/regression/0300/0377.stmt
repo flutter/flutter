@@ -1,0 +1,8 @@
+>>> (indent 6)
+      for (int i = 0;
+           i < positionalArgumentCount;
+           arguments = arguments.tail, i++) {}
+<<<
+      for (int i = 0;
+          i < positionalArgumentCount;
+          arguments = arguments.tail, i++) {}

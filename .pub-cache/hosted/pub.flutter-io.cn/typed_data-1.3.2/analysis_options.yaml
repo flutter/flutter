@@ -1,0 +1,17 @@
+include: package:dart_flutter_team_lints/analysis_options.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+
+linter:
+  rules:
+    - avoid_returning_null
+    - avoid_unused_constructor_parameters
+    - cancel_subscriptions
+    - comment_references
+    - no_adjacent_strings_in_list
+    - package_api_docs
+    - prefer_const_constructors
+    - test_types_in_equals
+    - use_super_parameters

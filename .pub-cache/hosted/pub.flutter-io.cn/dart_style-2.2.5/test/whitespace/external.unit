@@ -1,0 +1,45 @@
+40 columns                              |
+>>> top-level function
+ external
+void
+printToConsole(line);
+<<<
+external void printToConsole(line);
+>>> top-level variable
+  external   final   a ,  b  ;
+  external   final    Set < int  >  a ,  b  ;
+  external   var   a  ;
+  external   List < int >   a  ;
+<<<
+external final a, b;
+external final Set<int> a, b;
+external var a;
+external List<int> a;
+>>> static field
+class C {
+  external  static    final   a ,  b  ;
+external    static  final    Set < int  >  a ,  b  ;
+   external   static   var   a  ;
+  external  static    List < int >   a  ;
+}
+<<<
+class C {
+  external static final a, b;
+  external static final Set<int> a, b;
+  external static var a;
+  external static List<int> a;
+}
+>>> instance field
+class C {
+  external   final   a ,  b  ;
+  external   final    Set < String  >  a ,  b  ;
+  external   var   a  ;
+  external   List < int >   a  ;
+}
+<<<
+class C {
+  external final a, b;
+  external final Set<String> a, b;
+  external var a;
+  external List<int> a;
+}

@@ -1,0 +1,4 @@
+path:
+  - my_path
+var:
+  test: 1

@@ -1,0 +1,15 @@
+name: pubspec
+version: 2.3.0
+homepage: https://github.com/j4qfrost/pubspec
+description: A library for manipulating pubspec.yaml files
+environment: 
+  sdk: '>=2.12.0 <3.0.0'
+dependencies: 
+  path: ^1.8.0
+  pub_semver: ^2.0.0
+  yaml: ^3.1.0
+  uri: ^1.0.0
+dev_dependencies: 
+  test: ^1.16.8
+  dcli: ^1.30.2
+  dcli_core: ^1.30.2

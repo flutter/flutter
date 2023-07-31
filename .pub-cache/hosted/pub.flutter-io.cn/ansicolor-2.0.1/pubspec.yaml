@@ -1,0 +1,11 @@
+name: ansicolor
+version: 2.0.1
+description: >-
+  Looking to add some color to your terminal logs? `ansicolor` is an xterm-256
+  color support library that lets you change the foreground and background
+  color of your text.
+homepage: https://github.com/google/ansicolor-dart
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+dev_dependencies:
+  test: ^1.16.8

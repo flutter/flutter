@@ -1,0 +1,4 @@
+>>>
+for (@nullCheck var i in codePoints) {}
+<<<
+for (@nullCheck var i in codePoints) {}

@@ -1,0 +1,25 @@
+40 columns                              |
+>>> members without strings
+class Foo {
+  Foo()   native   ;
+  int bar()   native ;
+}
+<<<
+class Foo {
+  Foo() native;
+  int bar() native;
+}
+>>> members with strings
+class Foo {
+  Foo()   native  "Foo" ;
+  int bar()   native  "bar"   ;
+}
+<<<
+class Foo {
+  Foo() native "Foo";
+  int bar() native "bar";
+}
+>>> class
+class Foo    native   "Foo"  {  }
+<<<
+class Foo native "Foo" {}

@@ -1,0 +1,5 @@
+>>>
+import 'package:analyzer/src/generated/element.dart' show LibraryElement, CompilationUnitElement;
+<<<
+import 'package:analyzer/src/generated/element.dart'
+    show LibraryElement, CompilationUnitElement;

@@ -1,0 +1,79 @@
+// Experimental options controlling Dart code generation.
+syntax = "proto2";
+
+package dart_options;
+
+// This file must be modified for Google internal use,
+// because custom options only work when the package name
+// agrees with the version of protoc we are using.
+// (The import statement and "google.protobuf." prefix need to be changed.)
+
+import "descriptor.proto";
+
+// A mixin that can be used in the 'with' clause of the generated Dart class
+// for a proto message.
+message DartMixin {
+  // The name of the mixin class.
+  optional string name = 1;
+
+  // A URI pointing to the Dart library that defines the mixin.
+  // The generated Dart code will use this in an import statement.
+  optional string import_from = 2;
+
+  // The name of another mixin to be applied ahead of this one.
+  // The generated class for the message will inherit from all mixins
+  // in the parent chain.
+  optional string parent = 3;
+}
+
+// Defines additional Dart imports to be used with messages in this file.
+message Imports {
+
+  // Mixins to be used on messages in this file.
+  // These mixins are in addition to internally defined mixins (e.g PbMapMixin)
+  // and may override them.
+  //
+  // Warning: mixins are experimental. The protoc Dart plugin doesn't check
+  // for name conflicts between mixin class members and generated class members,
+  // so the generated code may contain errors. Therefore, running dartanalyzer
+  // on the generated file is a good idea.
+  repeated DartMixin mixins = 1;
+}
+
+extend google.protobuf.FileOptions {
+
+  optional Imports imports = 28125061;
+
+  // Applies the named mixin to all messages in this file.
+  // (May be overridden by the "mixin" option on a message.)
+  // For now, "PbMapMixin" is the only available mixin.
+  optional string default_mixin = 96128839;
+}
+
+extend google.protobuf.MessageOptions {
+
+  // Applies the named mixin.
+  // For now, "PbMapMixin" is the only available mixin.
+  // The empty string can be used to turn off mixins for this message.
+  optional string mixin = 96128839;
+}
+
+extend google.protobuf.FieldOptions {
+  // Adds @override annotation to the field's getter (for use with mixins).
+  optional bool override_getter = 28205290;
+
+  // Adds @override annotation to the field's setter (for use with mixins).
+  optional bool override_setter = 28937366;
+
+  // Adds @override annotation to the field's hasX() method (for use with
+  // mixins).
+  optional bool override_has_method = 28937461;
+
+  // Adds @override annotation to the field's clearX() method (for use with
+  // mixins).
+  optional bool override_clear_method = 28907907;
+
+  // Uses the given name for getters, setters and as suffixes for has/clear
+  // methods in the generated Dart file. Should be lowerCamelCase.
+  optional string dart_name = 28700919;
+}

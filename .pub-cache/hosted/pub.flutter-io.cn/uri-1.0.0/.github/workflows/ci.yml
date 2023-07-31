@@ -1,0 +1,60 @@
+name: ci
+
+on:
+  # Run on PRs and pushes to the default branch.
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: "0 0 * * 0"
+
+env:
+  PUB_ENVIRONMENT: bot.github
+
+jobs:
+  # Check code formatting and static analysis on a single OS (linux)
+  # against Dart dev.
+  analyze:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # TODO: change beta to 1.12.0 when stable
+        sdk: [beta, dev]
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: dart-lang/setup-dart@v0.5
+        with:
+          sdk: ${{ matrix.sdk }}
+      - id: install
+        name: Install dependencies
+        run: dart pub get
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed .
+        if: always() && steps.install.outcome == 'success'
+      - name: Analyze code
+        run: dart analyze --fatal-infos
+        if: always() && steps.install.outcome == 'success'
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        # TODO: change beta to 1.12.0 when stable
+        sdk: [beta, dev]
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          submodules: true
+      - uses: dart-lang/setup-dart@v0.5
+        with:
+          sdk: ${{ matrix.sdk }}
+      - id: install
+        name: Install dependencies
+        run: dart pub get
+      - name: Run VM tests
+        run: dart test --platform vm
+        if: always() && steps.install.outcome == 'success'

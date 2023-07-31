@@ -1,0 +1,38 @@
+40 columns                              |
+>>> initializer doesn't fit one line, wrap inside, keep name
+var result = myFunction(argument * argument, argument * argument);
+<<<
+var result = myFunction(
+    argument * argument,
+    argument * argument);
+>>> initializer doesn't fit one line, wrap inside, keep name
+result = myFunction(argument, argument, argument, argument);
+<<<
+result = myFunction(argument, argument,
+    argument, argument);
+>>> wrapped initializer fits one line
+variable = longFunctionIsLoooooong(argument);
+<<<
+variable =
+    longFunctionIsLoooooong(argument);
+>>> initializer doesn't fit one line, name too long
+variable = longFunctionIsLooooooooooooooong(argument, argument);
+<<<
+variable =
+    longFunctionIsLooooooooooooooong(
+        argument, argument);
+>>> initializer doesn't fit one line, cannot be split
+variableName = thisIsReallyQuiteAVeryLongVariableName;
+<<<
+variableName =
+    thisIsReallyQuiteAVeryLongVariableName;
+>>> long function call initializer
+variableName = functionName(first, second);
+<<<
+variableName =
+    functionName(first, second);
+>>> long binary expression initializer
+variableName = argument * argument + argument;
+<<<
+variableName =
+    argument * argument + argument;

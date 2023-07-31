@@ -1,0 +1,15 @@
+name: collection
+version: 1.17.2
+description: Collections and utilities functions and classes related to collections.
+repository: https://github.com/dart-lang/collection
+
+topics:
+ - data-structures
+ - collections
+
+environment:
+  sdk: ">=2.18.0 <4.0.0"
+
+dev_dependencies:
+  lints: ^2.0.0
+  test: ^1.16.0

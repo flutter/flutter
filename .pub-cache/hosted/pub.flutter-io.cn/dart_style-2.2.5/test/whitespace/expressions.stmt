@@ -1,0 +1,189 @@
+40 columns                              |
+>>> arithmetic operators
+var a=1+2/(3*-b~/4);
+<<<
+var a = 1 + 2 / (3 * -b ~/ 4);
+>>> triple-shift
+a>>>=1>>>-2>>>3;
+<<<
+a >>>= 1 >>> -2 >>> 3;
+>>> conditional operator
+var c=!condition==a>b;
+<<<
+var c = !condition == a > b;
+>>>
+var d=condition?b:obj.foo(a, b);
+<<<
+var d = condition ? b : obj.foo(a, b);
+>>> as
+identifier     as    TypeName;
+<<<
+identifier as TypeName;
+>>> is
+identifier     is    TypeName;
+<<<
+identifier is TypeName;
+>>> nullable is
+identifier     is    TypeName   ?;
+<<<
+identifier is TypeName?;
+>>> is!
+var d=obj is!SomeType;
+<<<
+var d = obj is! SomeType;
+>>> generic list literal
+< int  >[1,2,(3+4)];
+<<<
+<int>[1, 2, (3 + 4)];
+>>>
+x &&
+    y;
+<<<
+x && y;
+>>> unqualified symbol
+var x = #foo;
+<<<
+var x = #foo;
+>>> qualified symbol
+var y=#foo.bar.baz;
+<<<
+var y = #foo.bar.baz;
+>>> long string literal
+throw new FormatException("This is a long exception message.");
+<<<
+throw new FormatException(
+    "This is a long exception message.");
+>>>
+assert(false);
+<<<
+assert(false);
+>>> DON'T indent lines that are continued with a function expression.
+new Future(new Duration(1), () {
+      print('I am a callback');
+    });
+<<<
+new Future(new Duration(1), () {
+  print('I am a callback');
+});
+>>> DO use a space after : in named arguments.
+new ListBox(showScrollbars :true);
+<<<
+new ListBox(showScrollbars: true);
+>>> multiple prefix operators
+-  ~  !  foo;
+<<<
+-~!foo;
+>>> sequential "-" operators are not joined
+-  -  -  -foo;
+<<<
+- - - -foo;
+>>> a "-" operator before a negative integer is not joined
+-  -1;
+<<<
+- -1;
+>>> a "-" operator before a negative floating point number is not joined
+-  -1.2;
+<<<
+- -1.2;
+>>> "-" before a "--" is not joined
+-  --  foo;
+<<<
+- --foo;
+>>> multiline string inside nested blocks
+main() {
+  inner() {
+    function("""
+string""");
+  }
+}
+<<<
+main() {
+  inner() {
+    function("""
+string""");
+  }
+}
+>>> null coalescing operator
+argument??    argument;
+<<<
+argument ?? argument;
+>>> ?. operator
+receiver ?.  method() ?. getter;
+<<<
+receiver?.method()?.getter;
+>>> null coalescing self assignment
+variableName??=argument;
+<<<
+variableName ??= argument;
+>>> trailing comma in single argument list
+function(argument   ,   );
+<<<
+function(
+  argument,
+);
+>>> trailing comma in argument list
+function(argument,argument  ,  );
+<<<
+function(
+  argument,
+  argument,
+);
+>>> trailing comma in named argument list
+function(named: arg,another:arg,  );
+<<<
+function(
+  named: arg,
+  another: arg,
+);
+>>> generic method call
+method   <int,String   ,    bool>  ();
+<<<
+method<int, String, bool>();
+>>> inside interpolation
+" ${   interp+olate } and ${fn  (  1 ) } end";
+<<<
+" ${interp + olate} and ${fn(1)} end";
+>>> simple null assertion
+obj ! ;
+<<<
+obj!;
+>>> trailing method
+obj . method() ! ;
+<<<
+obj.method()!;
+>>> trailing property
+obj . prop ! ;
+<<<
+obj.prop!;
+>>> null assertion in method chain
+obj ! . getter ! . method ( arg ) ! + 3;
+<<<
+obj!.getter!.method(arg)! + 3;
+>>> null assertion before index and call operators
+obj ! [ index ] ! ( call ) ! + 3;
+<<<
+obj![index]!(call)! + 3;
+>>> null-aware index expressions
+obj   ?[  foo];
+<<<
+obj?[foo];
+>>> generic function expression
+var generic = < T,S >(){};
+<<<
+var generic = <T, S>() {};
+>>> generic method instantiation
+void main() => id  < int   > ;
+<<<
+void main() => id<int>;
+>>> generic method instantiation
+void main() => id  < int , String  , bool   > ;
+<<<
+void main() => id<int, String, bool>;
+>>> generic constructor tear-off
+var x = Class  < int  >;
+<<<
+var x = Class<int>;
+>>> generic name constructor tear-off
+var x = Class  < int  > . named;
+<<<
+var x = Class<int>.named;

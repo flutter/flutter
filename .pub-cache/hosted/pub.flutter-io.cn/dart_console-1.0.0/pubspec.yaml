@@ -1,0 +1,17 @@
+name: dart_console
+description: 
+  A helper library for command-line applications that need more control over input/output than the standard library provides.
+
+version: 1.0.0
+homepage: https://github.com/timsneath/dart_console
+
+environment:
+  sdk: '>=2.12.0-0 <3.0.0'
+
+dependencies:
+  ffi: ^1.0.0
+  win32: ^2.0.0
+
+dev_dependencies:
+  lint: ^1.5.1
+  test: ^1.16.0

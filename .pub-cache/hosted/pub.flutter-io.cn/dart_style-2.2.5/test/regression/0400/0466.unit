@@ -1,0 +1,17 @@
+>>> (indent 4)
+    Future get identifier________ async {
+      var id = identifier________.identifier__;
+
+      return identifier_____________[
+          id] ??= await identifier_______.identifier____________________(
+          identifier___________________________.create()..identifier____ = id);
+    }
+<<<
+    Future get identifier________ async {
+      var id = identifier________.identifier__;
+
+      return identifier_____________[id] ??=
+          await identifier_______.identifier____________________(
+              identifier___________________________.create()
+                ..identifier____ = id);
+    }

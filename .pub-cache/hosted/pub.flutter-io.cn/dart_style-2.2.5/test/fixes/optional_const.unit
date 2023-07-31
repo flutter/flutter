@@ -1,0 +1,107 @@
+40 columns                              |
+>>>
+main() {
+  const a = const A(const A.named());
+  // Don't touch new.
+  new A(new A.named());
+}
+<<<
+main() {
+  const a = A(A.named());
+  // Don't touch new.
+  new A(new A.named());
+}
+>>> preserves block comments before
+const c = /* a */    /* b */ const A();
+<<<
+const c = /* a */ /* b */ A();
+>>> preserves block comments after
+const c = const /* a */    /* b */A();
+<<<
+const c = /* a */ /* b */ A();
+>>> preserves line comments before
+const c = // a
+  // b
+const A();
+<<<
+const c = // a
+    // b
+    A();
+>>> preserves line comments after
+const c = const // a
+  // b
+A();
+<<<
+const c = // a
+    // b
+    A();
+>>> merge surrounding comments
+main() {
+  const c = /* a */ const /* b */ A();
+  const d = /* a */ const // b
+  A();
+  const e = // a
+  const /* b */ A();
+  const f = // a
+  const // b
+  A();
+}
+<<<
+main() {
+  const c = /* a */ /* b */ A();
+  const d = /* a */ // b
+      A();
+  const e = // a
+      /* b */ A();
+  const f = // a
+      // b
+      A();
+}
+>>> handle already-removed keyword
+const c = A<int>(A<int>.named());
+<<<
+const c = A<int>(A<int>.named());
+>>> remove from collection literals
+const c = const [const <int>[], const {}, const <int, bool>{}];
+<<<
+const c = [<int>[], {}, <int, bool>{}];
+>>> const constructor call is a const context
+var a = const A(const B());
+<<<
+var a = const A(B());
+>>> const collection is a const context
+var a = const [const B()];
+<<<
+var a = const [B()];
+>>> const top-level variable is a const context
+const c = const A();
+<<<
+const c = A();
+>>> const local variable is a const context
+main() {
+  const c = const A();
+}
+<<<
+main() {
+  const c = A();
+}
+>>> metadata annotation is a const context
+@Foo(const Bar())
+function() {}
+<<<
+@Foo(Bar())
+function() {}
+>>> nested function is not a const context
+const c = [const A(), () => const B(() { const C(); }), const D()];
+<<<
+const c = [
+  A(),
+  () => const B(() {
+        const C();
+      }),
+  D()
+];
+>>> do not remove erroneous new
+const c = new A();
+<<<
+const c = new A();

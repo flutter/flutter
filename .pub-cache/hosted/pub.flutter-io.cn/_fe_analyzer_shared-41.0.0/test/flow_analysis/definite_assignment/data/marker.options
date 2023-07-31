@@ -1,0 +1,2 @@
+cfe=pkg/front_end/test/id_tests/definite_assignment_test.dart
+analyzer=pkg/analyzer/test/id_tests/definite_assignment_test.dart

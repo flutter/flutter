@@ -1,0 +1,78 @@
+// Benchmark messages for proto3.
+
+syntax = "proto3";
+
+package benchmarks.proto3;
+option java_package = "com.google.protobuf.benchmarks";
+
+// This is the default, but we specify it here explicitly.
+option optimize_for = SPEED;
+
+option cc_enable_arenas = true;
+
+message GoogleMessage1 {
+  string field1 = 1;
+  string field9 = 9;
+  string field18 = 18;
+  bool field80 = 80;
+  bool field81 = 81;
+  int32 field2 = 2;
+  int32 field3 = 3;
+  int32 field280 = 280;
+  int32 field6 = 6;
+  int64 field22 = 22;
+  string field4 = 4;
+  repeated fixed64 field5 = 5;
+  bool field59 = 59;
+  string field7 = 7;
+  int32 field16 = 16;
+  int32 field130 = 130;
+  bool field12 = 12;
+  bool field17 = 17;
+  bool field13 = 13;
+  bool field14 = 14;
+  int32 field104 = 104;
+  int32 field100 = 100;
+  int32 field101 = 101;
+  string field102 = 102;
+  string field103 = 103;
+  int32 field29 = 29;
+  bool field30 = 30;
+  int32 field60 = 60;
+  int32 field271 = 271;
+  int32 field272 = 272;
+  int32 field150 = 150;
+  int32 field23 = 23;
+  bool field24 = 24;
+  int32 field25 = 25;
+  GoogleMessage1SubMessage field15 = 15;
+  bool field78 = 78;
+  int32 field67 = 67;
+  int32 field68 = 68;
+  int32 field128 = 128;
+  string field129 = 129;
+  int32 field131 = 131;
+}
+
+message GoogleMessage1SubMessage {
+  int32 field1 = 1;
+  int32 field2 = 2;
+  int32 field3 = 3;
+  string field15 = 15;
+  bool field12 = 12;
+  int64 field13 = 13;
+  int64 field14 = 14;
+  int32 field16 = 16;
+  int32 field19 = 19;
+  bool field20  = 20;
+  bool field28 = 28;
+  fixed64 field21 = 21;
+  int32 field22 = 22;
+  bool field23 = 23;
+  bool field206 = 206;
+  fixed32 field203 = 203;
+  int32 field204 = 204;
+  string field205 = 205;
+  uint64 field207 = 207;
+  uint64 field300 = 300;
+}

@@ -1,0 +1,19 @@
+>>> (indent 4)
+    var s = new Serialization()
+            ..addRuleFor(Various, constructor: "Foo", constructorFields: [
+          "d",
+          "e"
+        ]);
+<<<
+    var s = new Serialization()
+      ..addRuleFor(Various, constructor: "Foo", constructorFields: ["d", "e"]);
+>>> (indent 6)
+    var s = new Serialization()
+            ..addRuleFor(Various, constructor: "Foo", constructorFields: [
+          "d",
+          "e"
+        ]);
+<<<
+      var s = new Serialization()
+        ..addRuleFor(Various,
+            constructor: "Foo", constructorFields: ["d", "e"]);

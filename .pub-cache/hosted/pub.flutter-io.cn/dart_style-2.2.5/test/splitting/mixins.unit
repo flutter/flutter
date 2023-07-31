@@ -1,0 +1,93 @@
+40 columns                              |
+>>> keep constraints on one line if they fit
+mixin M on A, B, C, D {}
+<<<
+mixin M on A, B, C, D {}
+>>> keep implements on same line
+mixin M implements B {}
+<<<
+mixin M implements B {}
+>>> keep all on same line
+mixin M on B, C implements D, E {}
+<<<
+mixin M on B, C implements D, E {}
+>>> split before name
+mixin MixinWithVeryLongName__________ on A, B, C, D {}
+<<<
+mixin MixinWithVeryLongName__________
+    on A, B, C, D {}
+>>> long constraint name
+mixin MixinWithLongName on LongConstraint {}
+<<<
+mixin MixinWithLongName
+    on LongConstraint {}
+>>> split constraints
+mixin M on Constraint1, Constraint2, Constraint3 {}
+<<<
+mixin M
+    on
+        Constraint1,
+        Constraint2,
+        Constraint3 {}
+>>>
+mixin AVeryLongSomeMixin on BaseClass implements I {}
+<<<
+mixin AVeryLongSomeMixin on BaseClass
+    implements I {}
+>>>
+mixin AVeryLongSomeMixin on BaseClass implements Interface {}
+<<<
+mixin AVeryLongSomeMixin on BaseClass
+    implements Interface {}
+>>> move all implements to next line
+mixin SomeMixin implements Interface, AnotherOne {}
+<<<
+mixin SomeMixin
+    implements Interface, AnotherOne {}
+>>> one interface per line
+mixin SomeMixin implements Interface, Another, Third {}
+<<<
+mixin SomeMixin
+    implements
+        Interface,
+        Another,
+        Third {}
+>>> multiline constraint with single-line interface
+mixin SomeMixin on Base, Another, Third, Fourth, Fifth implements Interface {}
+<<<
+mixin SomeMixin
+    on
+        Base,
+        Another,
+        Third,
+        Fourth,
+        Fifth
+    implements Interface {}
+>>> single-line constraint with multiline interface
+mixin SomeMixin on Base implements Interface, Another, Third {}
+<<<
+mixin SomeMixin on Base
+    implements
+        Interface,
+        Another,
+        Third {}
+>>> multiline constraint with multiline interface
+mixin SomeMixin on Base, Another, Third, Fourth, Fifth implements Interface, Another, Third {}
+<<<
+mixin SomeMixin
+    on
+        Base,
+        Another,
+        Third,
+        Fourth,
+        Fifth
+    implements
+        Interface,
+        Another,
+        Third {}
+>>> double line mixin with double line interface
+mixin SomeMixin on Base, Another implements Interface, Another {}
+<<<
+mixin SomeMixin
+    on Base, Another
+    implements Interface, Another {}

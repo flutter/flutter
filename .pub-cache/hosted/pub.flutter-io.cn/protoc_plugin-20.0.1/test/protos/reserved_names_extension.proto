@@ -1,0 +1,47 @@
+// Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto2";
+
+package reserved_names_extension;
+
+message ExtendMe {
+  extensions 1000 to max;
+}
+
+extend ExtendMe {
+  optional int32 assert = 1001;
+  optional int32 break = 1002;
+  optional int32 case = 1003;
+  optional int32 catch = 1004;
+  optional int32 class = 1005;
+  optional int32 const = 1006;
+  optional int32 continue = 1007;
+  optional int32 default = 1008;
+  optional int32 do = 1009;
+  optional int32 else = 1010;
+  optional int32 enum = 1011;
+  optional int32 extends = 1012;
+  optional int32 false = 1013;
+  optional int32 final = 1014;
+  optional int32 finally = 1015;
+  optional int32 for = 1016;
+  optional int32 if = 1017;
+  optional int32 in = 1018;
+  optional int32 is = 1019;
+  optional int32 new = 1020;
+  optional int32 null = 1021;
+  optional int32 rethrow = 1022;
+  optional int32 return = 1023;
+  optional int32 super = 1024;
+  optional int32 switch = 1025;
+  optional int32 this = 1026;
+  optional int32 throw = 1027;
+  optional int32 true = 1028;
+  optional int32 try = 1029;
+  optional int32 var = 1030;
+  optional int32 void = 1031;
+  optional int32 while = 1032;
+  optional int32 with = 1033;
+}

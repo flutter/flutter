@@ -1,0 +1,6 @@
+syntax = "proto2";
+
+message BytesEntity {
+  optional bytes value = 1;
+  repeated bytes values = 2;
+}

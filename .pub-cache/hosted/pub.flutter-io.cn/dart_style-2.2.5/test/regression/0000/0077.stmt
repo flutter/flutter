@@ -1,0 +1,10 @@
+>>>
+var results = blablablabla(uri, sdkDir: shouldMockSdk ? null :
+dartSdkPath, mockSdkSources: shouldBlaBlab ? someBlaBlablab :
+null, someargn: args['blalbala'], fooBazzzz: fooBazzzz);
+<<<
+var results = blablablabla(uri,
+    sdkDir: shouldMockSdk ? null : dartSdkPath,
+    mockSdkSources: shouldBlaBlab ? someBlaBlablab : null,
+    someargn: args['blalbala'],
+    fooBazzzz: fooBazzzz);

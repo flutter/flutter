@@ -1,0 +1,12 @@
+>>> (indent 2)
+  int get screenY => window.screenTop + window.outerHeight -
+          window.innerHeight -
+          _borderWidth +
+      clientY;
+<<<
+  int get screenY =>
+      window.screenTop +
+      window.outerHeight -
+      window.innerHeight -
+      _borderWidth +
+      clientY;

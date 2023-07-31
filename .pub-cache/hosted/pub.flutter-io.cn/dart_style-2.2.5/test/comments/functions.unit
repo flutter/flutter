@@ -1,0 +1,237 @@
+40 columns                              |
+>>> indented line comment (dartbug.com/16383)
+main() {
+  // comment
+}
+<<<
+main() {
+  // comment
+}
+>>> line comment on opening line
+main() { // comment
+}
+<<<
+main() {
+  // comment
+}
+>>> indented block comment
+main() {
+  /* comment */
+}
+<<<
+main() {
+  /* comment */
+}
+>>> block comment with trailing newline
+main() {/* comment */
+}
+<<<
+main() {
+  /* comment */
+}
+>>> block comment with leading newline
+main() {
+  /* comment */}
+<<<
+main() {
+  /* comment */
+}
+>>> inline block comment
+main() {  /* comment */  }
+<<<
+main() {/* comment */}
+>>> multiple comments on opening line
+main() { /* first */ // second
+}
+<<<
+main() {
+  /* first */ // second
+}
+>>> multiple inline block comments
+main() {  /* 1 */   /* 2 */   /* 3 */  }
+<<<
+main() {/* 1 */ /* 2 */ /* 3 */}
+>>> multiline trailing block comment
+main() {  /* comment
+*/  }
+<<<
+main() {
+  /* comment
+*/
+}
+>>> line comments at the start of the line in a function
+main() {
+//  print(1);
+//  print(2);
+  print(3);
+}
+<<<
+main() {
+//  print(1);
+//  print(2);
+  print(3);
+}
+>>> before "," in param list
+main(a/* c */,b) {}
+<<<
+main(a /* c */, b) {}
+>>> after "," in param list
+main(a,/* c */b) {}
+<<<
+main(a, /* c */ b) {}
+>>> before "[" in param list
+main(/* c */[arg]) {}
+<<<
+main(/* c */ [arg]) {}
+>>> after "[" in param list
+main([/* c */arg]) {}
+<<<
+main([/* c */ arg]) {}
+>>> before "]" in param list
+main([arg/* c */]) {}
+<<<
+main([arg /* c */]) {}
+>>> after "]" in param list
+main([arg]/* c */) {}
+<<<
+main([arg] /* c */) {}
+>>> before "{" in param list
+main(/* c */{arg}) {}
+<<<
+main(/* c */ {arg}) {}
+>>> after "{" in param list
+main({/* c */arg}) {}
+<<<
+main({/* c */ arg}) {}
+>>> before "}" in param list
+main({arg/* c */}) {}
+<<<
+main({arg /* c */}) {}
+>>> after "{" in param list
+main({arg}/* c */) {}
+<<<
+main({arg} /* c */) {}
+>>>
+longFunction(/* a very long block comment */) {}
+<<<
+longFunction(
+    /* a very long block comment */) {}
+>>> remove blank lines before beginning of body
+main() {
+
+
+
+  // comment
+}
+<<<
+main() {
+  // comment
+}
+>>> remove blank lines after end of body
+main() {
+  // comment
+
+
+
+}
+<<<
+main() {
+  // comment
+}
+>>> comment before "]" with trailing comma
+function([parameter,/* c */]) {;}
+<<<
+function([
+  parameter,
+  /* c */
+]) {
+  ;
+}
+>>> comment before ")" with trailing comma
+function([parameter,]/* c */) {;}
+<<<
+function([
+  parameter,
+] /* c */) {
+  ;
+}
+>>>
+function(
+    /* comment */ int a, int b, int c,
+    [direction]) {
+  ;
+}
+<<<
+function(
+    /* comment */ int a, int b, int c,
+    [direction]) {
+  ;
+}
+>>>
+function(
+    /* comment */ int a, int b, int c) {
+  ;
+}
+<<<
+function(
+    /* comment */ int a, int b, int c) {
+  ;
+}
+>>>
+function(
+    /* comment */ int a, int b, int c, int d) {
+  ;
+}
+<<<
+function(/* comment */ int a, int b,
+    int c, int d) {
+  ;
+}
+>>> blank line before comment at beginning of optional parameters
+function([
+
+  // comment
+  a]) {;}
+<<<
+function(
+    [
+    // comment
+    a]) {
+  ;
+}
+>>> blank line before comment at beginning of named parameters
+function({
+
+  // comment
+  a}) {;}
+<<<
+function(
+    {
+    // comment
+    a}) {
+  ;
+}
+>>> blank line before comment at beginning of trailing comma optional parameters
+function([
+
+  // comment
+  a,]) {;}
+<<<
+function([
+  // comment
+  a,
+]) {
+  ;
+}
+>>> blank line before comment at beginning of trailing comma named parameters
+function({
+
+  // comment
+  a,}) {;}
+<<<
+function({
+  // comment
+  a,
+}) {
+  ;
+}

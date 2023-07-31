@@ -1,0 +1,1 @@
+static final clientInfo = $pb.Extension<$core.String>(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Card', const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'clientInfo', 261486461, $pb.PbFieldType.OS);

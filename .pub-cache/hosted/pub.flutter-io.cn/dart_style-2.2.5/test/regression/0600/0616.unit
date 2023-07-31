@@ -1,0 +1,17 @@
+>>>
+import "package:expect/expect.dart";
+int Function() x = () => 42;
+int Function(int Function()) y = (int Function() x) => x();
+List<int Function()> l = <int Function()>[()=>42, x];
+main() {
+  Expect.equals(42, y(l[1]));
+}
+<<<
+import "package:expect/expect.dart";
+
+int Function() x = () => 42;
+int Function(int Function()) y = (int Function() x) => x();
+List<int Function()> l = <int Function()>[() => 42, x];
+main() {
+  Expect.equals(42, y(l[1]));
+}

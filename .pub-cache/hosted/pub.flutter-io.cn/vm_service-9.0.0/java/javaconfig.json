@@ -1,0 +1,5 @@
+{
+    "sourcePath": ["src", "test"],
+    "classPathFile": "classpath.txt",
+    "outputDirectory": "build/classes"
+}

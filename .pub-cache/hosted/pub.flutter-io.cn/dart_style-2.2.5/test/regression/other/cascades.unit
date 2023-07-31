@@ -1,0 +1,48 @@
+>>> over_react-4.1.0/tools/analyzer_plugin/playground/web/pseudo_static_lifecycle.dart
+class C {
+  get defaultProps {
+    return newProps() // This newProps() call should not lint
+      ..addProps(
+          super.defaultProps) // This super.defaultProps access should not lint
+      ..somethingThatCanBeTouched =
+          mcHammer; // This mcHammer access SHOULD lint
+  }
+}
+<<<
+class C {
+  get defaultProps {
+    return newProps() // This newProps() call should not lint
+      ..addProps(
+          super.defaultProps) // This super.defaultProps access should not lint
+      ..somethingThatCanBeTouched =
+          mcHammer; // This mcHammer access SHOULD lint
+  }
+}
+>>> sass-1.32.8/lib/src/executable/options.dart
+class C {
+  static final ArgParser _parser = () {
+    var parser = ArgParser(allowTrailingOptions: true)
+
+      // This is used for compatibility with sass-spec, even though we don't
+      // support setting the precision.
+      ..addOption('precision', hide: true)
+
+      // This is used when testing to ensure that the asynchronous evaluator path
+      // works the same as the synchronous one.
+      ..addFlag('async', hide: true);
+  };
+}
+<<<
+class C {
+  static final ArgParser _parser = () {
+    var parser = ArgParser(allowTrailingOptions: true)
+
+      // This is used for compatibility with sass-spec, even though we don't
+      // support setting the precision.
+      ..addOption('precision', hide: true)
+
+      // This is used when testing to ensure that the asynchronous evaluator path
+      // works the same as the synchronous one.
+      ..addFlag('async', hide: true);
+  };
+}

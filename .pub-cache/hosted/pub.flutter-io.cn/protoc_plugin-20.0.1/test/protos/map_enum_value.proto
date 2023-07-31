@@ -1,0 +1,18 @@
+// Copyright (c) 2021, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto2";
+
+package map_enum_value;
+
+// Test mapped enum value before with unknown values.
+message MapEnumValue {
+  enum NestedEnum {
+    // Unknown values should default to this.
+    UNKNOWN = 0;
+    // A known value to test control.
+    NEW_VALUE = 1;
+  }
+  map<string, NestedEnum> values = 1;
+}

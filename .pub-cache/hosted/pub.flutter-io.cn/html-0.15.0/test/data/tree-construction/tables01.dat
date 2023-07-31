@@ -1,0 +1,212 @@
+#data
+<table><th>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <th>
+
+#data
+<table><td>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+
+#data
+<table><col foo='bar'>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <colgroup>
+|         <col>
+|           foo="bar"
+
+#data
+<table><colgroup></html>foo
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "foo"
+|     <table>
+|       <colgroup>
+
+#data
+<table></table><p>foo
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|     <p>
+|       "foo"
+
+#data
+<table></body></caption></col></colgroup></html></tbody></td></tfoot></th></thead></tr><td>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+
+#data
+<table><select><option>3</select></table>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       <option>
+|         "3"
+|     <table>
+
+#data
+<table><select><table></table></select></table>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|     <table>
+|     <table>
+
+#data
+<table><select></table>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|     <table>
+
+#data
+<table><select><option>A<tr><td>B</td></tr></table>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       <option>
+|         "A"
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             "B"
+
+#data
+<table><td></body></caption></col></colgroup></html>foo
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             "foo"
+
+#data
+<table><td>A</table>B
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             "A"
+|     "B"
+
+#data
+<table><tr><caption>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|       <caption>
+
+#data
+<table><tr></body></caption></col></colgroup></html></td></th><td>foo
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             "foo"
+
+#data
+<table><td><tr>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|         <tr>
+
+#data
+<table><td><button><td>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <button>
+|           <td>
+
+#data
+<table><tr><td><svg><desc><td>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <svg svg>
+|               <svg desc>
+|           <td>

@@ -1,0 +1,20 @@
+// Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto2";
+
+package protobuf_unittest;
+
+message Extendable {
+  extensions 1 to max;
+}
+
+enum Animal {
+  CAT = 1;
+  DOG = 2;
+}
+
+extend Extendable {
+  optional Animal animal = 1;
+}

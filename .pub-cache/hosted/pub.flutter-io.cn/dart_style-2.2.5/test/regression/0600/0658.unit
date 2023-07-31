@@ -1,0 +1,30 @@
+>>>
+class A {
+  A(
+    int a,
+  )
+      : super();
+}
+<<<
+class A {
+  A(
+    int a,
+  ) : super();
+}
+>>>
+class Foo {
+  Foo({
+    Bar bar,
+    Baz baz,
+  })
+      : assert(bar != null),
+        super(baz);
+}
+<<<
+class Foo {
+  Foo({
+    Bar bar,
+    Baz baz,
+  })  : assert(bar != null),
+        super(baz);
+}

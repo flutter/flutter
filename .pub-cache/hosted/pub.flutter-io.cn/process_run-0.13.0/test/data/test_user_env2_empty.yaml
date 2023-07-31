@@ -1,0 +1,3 @@
+# Override the user local env pointing to the proper relative path
+var:
+  TEKARTIK_PROCESS_RUN_LOCAL_ENV_FILE_PATH: test/data/test_env3_empty.yaml

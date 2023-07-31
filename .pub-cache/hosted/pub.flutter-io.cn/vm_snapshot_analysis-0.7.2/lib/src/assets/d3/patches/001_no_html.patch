@@ -1,0 +1,24 @@
+diff --git a/third_party/d3/src/d3.js b/third_party/d3/src/d3.js
+index a3e4b95..8a98c4d 100644
+--- a/third_party/d3/src/d3.js
++++ b/third_party/d3/src/d3.js
+@@ -713,6 +713,7 @@
+     }) : this.node().textContent;
+   };
+   d3_selectionPrototype.html = function(value) {
++    throw "disallowed by chromium security";
+     return arguments.length ? this.each(typeof value === "function" ? function() {
+       var v = value.apply(this, arguments);
+       this.innerHTML = v == null ? "" : v;
+@@ -9274,9 +9275,11 @@
+     return JSON.parse(request.responseText);
+   }
+   d3.html = function(url, callback) {
++    throw "disallowed by chromium security";
+     return d3_xhr(url, "text/html", d3_html, callback);
+   };
+   function d3_html(request) {
++    throw "disallowed by chromium security";
+     var range = d3_document.createRange();
+     range.selectNode(d3_document.body);
+     return range.createContextualFragment(request.responseText);

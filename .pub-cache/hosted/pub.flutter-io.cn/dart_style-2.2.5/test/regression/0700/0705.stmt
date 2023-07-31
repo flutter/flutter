@@ -1,0 +1,10 @@
+>>>
+final _appUrl = Platform.isIOS
+    ? 'https://itunes.apple.com/us/app/google-adwords/id1037457231'
+    : 'https://play.google.com/store/apps/details?id=com.google.android.apps.'
+    'adwords';
+<<<
+final _appUrl = Platform.isIOS
+    ? 'https://itunes.apple.com/us/app/google-adwords/id1037457231'
+    : 'https://play.google.com/store/apps/details?id=com.google.android.apps.'
+        'adwords';

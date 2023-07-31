@@ -1,0 +1,799 @@
+#data
+<!DOCTYPE html><svg></svg>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+
+#data
+<!DOCTYPE html><svg></svg><![CDATA[a]]>
+#errors
+29: Bogus comment
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|     <!-- [CDATA[a]] -->
+
+#data
+<!DOCTYPE html><body><svg></svg>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+
+#data
+<!DOCTYPE html><body><select><svg></svg></select>
+#errors
+35: Stray “svg” start tag.
+42: Stray end tag “svg”
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+
+#data
+<!DOCTYPE html><body><select><option><svg></svg></option></select>
+#errors
+43: Stray “svg” start tag.
+50: Stray end tag “svg”
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       <option>
+
+#data
+<!DOCTYPE html><body><table><svg></svg></table>
+#errors
+34: Start tag “svg” seen in “table”.
+41: Stray end tag “svg”.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|     <table>
+
+#data
+<!DOCTYPE html><body><table><svg><g>foo</g></svg></table>
+#errors
+34: Start tag “svg” seen in “table”.
+46: Stray end tag “g”.
+53: Stray end tag “svg”.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg g>
+|         "foo"
+|     <table>
+
+#data
+<!DOCTYPE html><body><table><svg><g>foo</g><g>bar</g></svg></table>
+#errors
+34: Start tag “svg” seen in “table”.
+46: Stray end tag “g”.
+58: Stray end tag “g”.
+65: Stray end tag “svg”.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg g>
+|         "foo"
+|       <svg g>
+|         "bar"
+|     <table>
+
+#data
+<!DOCTYPE html><body><table><tbody><svg><g>foo</g><g>bar</g></svg></tbody></table>
+#errors
+41: Start tag “svg” seen in “table”.
+53: Stray end tag “g”.
+65: Stray end tag “g”.
+72: Stray end tag “svg”.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg g>
+|         "foo"
+|       <svg g>
+|         "bar"
+|     <table>
+|       <tbody>
+
+#data
+<!DOCTYPE html><body><table><tbody><tr><svg><g>foo</g><g>bar</g></svg></tr></tbody></table>
+#errors
+45: Start tag “svg” seen in “table”.
+57: Stray end tag “g”.
+69: Stray end tag “g”.
+76: Stray end tag “svg”.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg g>
+|         "foo"
+|       <svg g>
+|         "bar"
+|     <table>
+|       <tbody>
+|         <tr>
+
+#data
+<!DOCTYPE html><body><table><tbody><tr><td><svg><g>foo</g><g>bar</g></svg></td></tr></tbody></table>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <svg svg>
+|               <svg g>
+|                 "foo"
+|               <svg g>
+|                 "bar"
+
+#data
+<!DOCTYPE html><body><table><tbody><tr><td><svg><g>foo</g><g>bar</g></svg><p>baz</td></tr></tbody></table>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <svg svg>
+|               <svg g>
+|                 "foo"
+|               <svg g>
+|                 "bar"
+|             <p>
+|               "baz"
+
+#data
+<!DOCTYPE html><body><table><caption><svg><g>foo</g><g>bar</g></svg><p>baz</caption></table>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <caption>
+|         <svg svg>
+|           <svg g>
+|             "foo"
+|           <svg g>
+|             "bar"
+|         <p>
+|           "baz"
+
+#data
+<!DOCTYPE html><body><table><caption><svg><g>foo</g><g>bar</g><p>baz</table><p>quux
+#errors
+70: HTML start tag “p” in a foreign namespace context.
+81: “table” closed but “caption” was still open.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <caption>
+|         <svg svg>
+|           <svg g>
+|             "foo"
+|           <svg g>
+|             "bar"
+|         <p>
+|           "baz"
+|     <p>
+|       "quux"
+
+#data
+<!DOCTYPE html><body><table><caption><svg><g>foo</g><g>bar</g>baz</table><p>quux
+#errors
+78: “table” closed but “caption” was still open.
+78: Unclosed elements on stack.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <caption>
+|         <svg svg>
+|           <svg g>
+|             "foo"
+|           <svg g>
+|             "bar"
+|           "baz"
+|     <p>
+|       "quux"
+
+#data
+<!DOCTYPE html><body><table><colgroup><svg><g>foo</g><g>bar</g><p>baz</table><p>quux
+#errors
+44: Start tag “svg” seen in “table”.
+56: Stray end tag “g”.
+68: Stray end tag “g”.
+71: HTML start tag “p” in a foreign namespace context.
+71: Start tag “p” seen in “table”.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg g>
+|         "foo"
+|       <svg g>
+|         "bar"
+|     <p>
+|       "baz"
+|     <table>
+|       <colgroup>
+|     <p>
+|       "quux"
+
+#data
+<!DOCTYPE html><body><table><tr><td><select><svg><g>foo</g><g>bar</g><p>baz</table><p>quux
+#errors
+50: Stray “svg” start tag.
+54: Stray “g” start tag.
+62: Stray end tag “g”
+66: Stray “g” start tag.
+74: Stray end tag “g”
+77: Stray “p” start tag.
+88: “table” end tag with “select” open.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <select>
+|               "foobarbaz"
+|     <p>
+|       "quux"
+
+#data
+<!DOCTYPE html><body><table><select><svg><g>foo</g><g>bar</g><p>baz</table><p>quux
+#errors
+36: Start tag “select” seen in “table”.
+42: Stray “svg” start tag.
+46: Stray “g” start tag.
+54: Stray end tag “g”
+58: Stray “g” start tag.
+66: Stray end tag “g”
+69: Stray “p” start tag.
+80: “table” end tag with “select” open.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       "foobarbaz"
+|     <table>
+|     <p>
+|       "quux"
+
+#data
+<!DOCTYPE html><body></body></html><svg><g>foo</g><g>bar</g><p>baz
+#errors
+41: Stray “svg” start tag.
+68: HTML start tag “p” in a foreign namespace context.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg g>
+|         "foo"
+|       <svg g>
+|         "bar"
+|     <p>
+|       "baz"
+
+#data
+<!DOCTYPE html><body></body><svg><g>foo</g><g>bar</g><p>baz
+#errors
+34: Stray “svg” start tag.
+61: HTML start tag “p” in a foreign namespace context.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg g>
+|         "foo"
+|       <svg g>
+|         "bar"
+|     <p>
+|       "baz"
+
+#data
+<!DOCTYPE html><frameset><svg><g></g><g></g><p><span>
+#errors
+31: Stray “svg” start tag.
+35: Stray “g” start tag.
+40: Stray end tag “g”
+44: Stray “g” start tag.
+49: Stray end tag “g”
+52: Stray “p” start tag.
+58: Stray “span” start tag.
+58: End of file seen and there were open elements.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+
+#data
+<!DOCTYPE html><frameset></frameset><svg><g></g><g></g><p><span>
+#errors
+42: Stray “svg” start tag.
+46: Stray “g” start tag.
+51: Stray end tag “g”
+55: Stray “g” start tag.
+60: Stray end tag “g”
+63: Stray “p” start tag.
+69: Stray “span” start tag.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+
+#data
+<!DOCTYPE html><body xlink:href=foo><svg xlink:href=foo></svg>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     xlink:href="foo"
+|     <svg svg>
+|       xlink href="foo"
+
+#data
+<!DOCTYPE html><body xlink:href=foo xml:lang=en><svg><g xml:lang=en xlink:href=foo></g></svg>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     xlink:href="foo"
+|     xml:lang="en"
+|     <svg svg>
+|       <svg g>
+|         xlink href="foo"
+|         xml lang="en"
+
+#data
+<!DOCTYPE html><body xlink:href=foo xml:lang=en><svg><g xml:lang=en xlink:href=foo /></svg>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     xlink:href="foo"
+|     xml:lang="en"
+|     <svg svg>
+|       <svg g>
+|         xlink href="foo"
+|         xml lang="en"
+
+#data
+<!DOCTYPE html><body xlink:href=foo xml:lang=en><svg><g xml:lang=en xlink:href=foo />bar</svg>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     xlink:href="foo"
+|     xml:lang="en"
+|     <svg svg>
+|       <svg g>
+|         xlink href="foo"
+|         xml lang="en"
+|       "bar"
+
+#data
+<svg></path>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+
+#data
+<div><svg></div>a
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       <svg svg>
+|     "a"
+
+#data
+<div><svg><path></div>a
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       <svg svg>
+|         <svg path>
+|     "a"
+
+#data
+<div><svg><path></svg><path>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       <svg svg>
+|         <svg path>
+|       <path>
+
+#data
+<div><svg><path><foreignObject><math></div>a
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       <svg svg>
+|         <svg path>
+|           <svg foreignObject>
+|             <math math>
+|               "a"
+
+#data
+<div><svg><path><foreignObject><p></div>a
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       <svg svg>
+|         <svg path>
+|           <svg foreignObject>
+|             <p>
+|               "a"
+
+#data
+<!DOCTYPE html><svg><desc><div><svg><ul>a
+#errors
+40: HTML start tag “ul” in a foreign namespace context.
+41: End of file in a foreign namespace context.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg desc>
+|         <div>
+|           <svg svg>
+|           <ul>
+|             "a"
+
+#data
+<!DOCTYPE html><svg><desc><svg><ul>a
+#errors
+35: HTML start tag “ul” in a foreign namespace context.
+36: End of file in a foreign namespace context.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg desc>
+|         <svg svg>
+|         <ul>
+|           "a"
+
+#data
+<!DOCTYPE html><p><svg><desc><p>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <svg svg>
+|         <svg desc>
+|           <p>
+
+#data
+<!DOCTYPE html><p><svg><title><p>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <svg svg>
+|         <svg title>
+|           <p>
+
+#data
+<div><svg><path><foreignObject><p></foreignObject><p>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       <svg svg>
+|         <svg path>
+|           <svg foreignObject>
+|             <p>
+|             <p>
+
+#data
+<math><mi><div><object><div><span></span></div></object></div></mi><mi>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mi>
+|         <div>
+|           <object>
+|             <div>
+|               <span>
+|       <math mi>
+
+#data
+<math><mi><svg><foreignObject><div><div></div></div></foreignObject></svg></mi><mi>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mi>
+|         <svg svg>
+|           <svg foreignObject>
+|             <div>
+|               <div>
+|       <math mi>
+
+#data
+<svg><script></script><path>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg script>
+|       <svg path>
+
+#data
+<table><svg></svg><tr>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|     <table>
+|       <tbody>
+|         <tr>
+
+#data
+<math><mi><mglyph>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mi>
+|         <math mglyph>
+
+#data
+<math><mi><malignmark>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mi>
+|         <math malignmark>
+
+#data
+<math><mo><mglyph>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mo>
+|         <math mglyph>
+
+#data
+<math><mo><malignmark>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mo>
+|         <math malignmark>
+
+#data
+<math><mn><mglyph>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mn>
+|         <math mglyph>
+
+#data
+<math><mn><malignmark>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mn>
+|         <math malignmark>
+
+#data
+<math><ms><mglyph>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math ms>
+|         <math mglyph>
+
+#data
+<math><ms><malignmark>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math ms>
+|         <math malignmark>
+
+#data
+<math><mtext><mglyph>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mtext>
+|         <math mglyph>
+
+#data
+<math><mtext><malignmark>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mtext>
+|         <math malignmark>
+
+#data
+<math><annotation-xml><svg></svg></annotation-xml><mi>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math annotation-xml>
+|         <svg svg>
+|       <math mi>
+
+#data
+<math><annotation-xml><svg><foreignObject><div><math><mi></mi></math><span></span></div></foreignObject><path></path></svg></annotation-xml><mi>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math annotation-xml>
+|         <svg svg>
+|           <svg foreignObject>
+|             <div>
+|               <math math>
+|                 <math mi>
+|               <span>
+|           <svg path>
+|       <math mi>
+
+#data
+<math><annotation-xml><svg><foreignObject><math><mi><svg></svg></mi><mo></mo></math><span></span></foreignObject><path></path></svg></annotation-xml><mi>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math annotation-xml>
+|         <svg svg>
+|           <svg foreignObject>
+|             <math math>
+|               <math mi>
+|                 <svg svg>
+|               <math mo>
+|             <span>
+|           <svg path>
+|       <math mi>

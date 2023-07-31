@@ -1,0 +1,27 @@
+>>>
+class TokenType {
+  bool get isUserDefinableOperator => identical(lexeme, "==") || identical(lexeme, "~") || identical(lexeme, "[]") || identical(lexeme, "[]=") || identical(lexeme, "*") || identical(lexeme, "/") || identical(lexeme, "%") || identical(lexeme, "~/") || identical(lexeme, "+") || identical(lexeme, "-") || identical(lexeme, "<<") || identical(lexeme, ">>") || identical(lexeme, ">=") || identical(lexeme, ">") || identical(lexeme, "<=") || identical(lexeme, "<") || identical(lexeme, "&") || identical(lexeme, "^") || identical(lexeme, "|");
+}
+<<<
+class TokenType {
+  bool get isUserDefinableOperator =>
+      identical(lexeme, "==") ||
+      identical(lexeme, "~") ||
+      identical(lexeme, "[]") ||
+      identical(lexeme, "[]=") ||
+      identical(lexeme, "*") ||
+      identical(lexeme, "/") ||
+      identical(lexeme, "%") ||
+      identical(lexeme, "~/") ||
+      identical(lexeme, "+") ||
+      identical(lexeme, "-") ||
+      identical(lexeme, "<<") ||
+      identical(lexeme, ">>") ||
+      identical(lexeme, ">=") ||
+      identical(lexeme, ">") ||
+      identical(lexeme, "<=") ||
+      identical(lexeme, "<") ||
+      identical(lexeme, "&") ||
+      identical(lexeme, "^") ||
+      identical(lexeme, "|");
+}

@@ -1,0 +1,4 @@
+# Override the user local env pointing to the proper relative path
+# Mathch a name is test
+var:
+  TEKARTIK_PROCESS_RUN_LOCAL_ENV_FILE_PATH: .dart_tool/process_run/test/test_local_env3_safe.yaml

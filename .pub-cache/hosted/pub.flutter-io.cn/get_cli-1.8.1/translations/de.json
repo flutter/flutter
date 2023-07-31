@@ -1,0 +1,88 @@
+{
+    "ask": {
+        "existing_page": "Die Seite [%s] existiert bereits, möchten Sie die Seite überschreiben?",
+        "name_to_project": "Wie lautet der Name des Projekts?",
+        "company_domain": "Wie lautet die Domäne Ihres Unternehmens?",
+        "model_name": "Der Modellname konnte nicht automatisch gesetzt werden, welchen Namen möchten Sie verwenden?",
+        "package_already_installed": "Paket: %s bereits installiert, möchten Sie es aktualisieren?",
+        "lib_not_empty": "Der lib-Ordner ist nicht leer. Sind Sie sicher, dass Sie Ihre Anwendung überschreiben möchten? \\n WARNUNG: Diese Aktion ist nicht umkehrbar",
+        "ios_lang": "Welche Sprache möchten Sie auf iOS verwenden?",
+        "android_lang": "Welche Sprache möchten Sie auf Android verwenden?",
+        "use_null_safe": "Möchten Sie Null-Safe verwenden?",
+        "use_linter": "Wollen Sie einen Linter verwenden?",
+        "new_page_name": "Wie soll der Name der neuen Seite lauten?"
+    },
+    "error": {
+        "failed_to_connect": "Verbindung mit %s fehlgeschlagen",
+        "no_valid_file_or_url": "%s ist keine Datei oder gültige Url",
+        "unnecessary_parameter": "der Parameter %s ist nicht notwendig",
+        "unnecessary_parameter_plural": "die Parameter %s ist nicht notwendig",
+        "nonexistent_directory": "Das Verzeichnis %s existiert nicht.",
+        "empty_directory": "Das Verzeichnis %s ist leer",
+        "invalid_json": "%s ist keine gültige JSON-Datei",
+        "special_characters_in_key": "Sonderzeichen sind in der Key nicht erlaubt. \\n Key: %s",
+        "required_path": "Wird benötigt, um den Datei- oder Verzeichnispfad zu übergeben",
+        "invalid_dart": "Die %s ist keine gültige Dart-Datei",
+        "invalid_file_or_directory": "Die %s ist keine gültige Datei oder Verzeichnis",
+        "package_not_found": "Paket: %s wurde nicht in pub.dev gefunden",
+        "cli_version_not_found": "die von Ihnen installierte Version wurde nicht gefunden.",
+        "update_cli": "Es gab einen Fehler bei der Aktualisierung von get_cli",
+        "folder_not_found": "Ordner %s nicht gefunden",
+        "file_not_found": "Datei nicht gefunden in %s",
+        "access_denied": "Zugriff auf %s verweigert",
+        "unexpected": "Unerwarteter Fehler ist aufgetreten:",
+        "no_package_to_remove": "Geben Sie den Namen des Pakets ein, das Sie entfernen möchten"
+    },
+    "example": "Beispiel:",
+    "warning": "Warnung:",
+    "hint": {
+        "create": {
+            "controller": "Controller generieren",
+            "page": "Verwendung zum Erzeugen von Pages",
+            "project": "Zum Erzeugen eines neuen Projekts verwenden",
+            "provider": "Einen neuen Provider erstellen",
+            "screen": "Neues Screen generieren",
+            "view": "Neues view generieren"
+        },
+        "generate": {
+            "locales": "Übersetzungsdatei aus JSON-Dateien generieren",
+            "model": "Klassenmodell aus JSON generieren"
+        },
+        "help": "Diese Hilfe anzeigen",
+        "init": "die gewählte Struktur an einem bestehenden Projekt zu erzeugen:",
+        "install": "Dient zur Installation eines Pakets in Ihrem Projekt (dependencies):",
+        "remove": "Verwenden Sie diese Option, um ein Paket in Ihrem Projekt zu entfernen (dependencies):",
+        "sort": "Importierte Dart-Dateien sortieren und formatieren",
+        "update": "So aktualisieren Sie GET_CLI",
+        "version": "Zeigt die aktuelle CLI-Version an'"
+    },
+    "info": {
+        "unnecessary_flag": "Das %s ist nicht notwendig",
+        "unnecessary_flag_prural": "Die %s ist nicht notwendig",
+        "package_not_installed": "Paket: %s ist in dieser Anwendung nicht installiert",
+        "cli_last_version_already_installed": "Neueste Version von get_cli bereits installiert",
+        "no_file_overwritten": "Es wurden keine Dateien überschrieben",
+        "update_available": "Es ist ein Update verfügbar! Aktuell installierte Version: %s",
+        "update_available2": "Neue Version verfügbar: %s Bitte, ausführen:"
+    },
+    "options": {
+        "yes": "Ja!",
+        "no": "Nein",
+        "rename": "Ich möchte es umbenennen"
+    },
+    "optional_parameters": "Optionale Parameter: %s",
+    "sucess": {
+        "page_create": "%s-Page erfolgreich erstellt.",
+        "locale_generate": "Sprachumgebungsdateien erfolgreich generiert.",
+        "getx_pattern_generated": "GetX Pattern-Struktur erfolgreich erzeugt.",
+        "clean_Pattern_generated": "CLEAN Pattern-Struktur erfolgreich erzeugt.",
+        "file_formatted": " '%s' wurde erfolgreich formatiert",
+        "package_removed": "Paket: %s entfernt!",
+        "package_installed": "'Paket: %s installiert!",
+        "update_cli": "Upgrade abgeschlossen",
+        "add_controller_in_bindings": "Das %s wurde dem Binding unter Pfad: %s' hinzugefügt.",
+        "navigation_added": "%s Navigation erfolgreich hinzugefügt.",
+        "file_created": "Datei: %s erfolgreich erstellt unter Pfad: %s",
+        "route_created": "%s-Route erfolgreich erstellt."
+    }
+}

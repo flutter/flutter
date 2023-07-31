@@ -1,0 +1,35 @@
+>>> (indent 2)
+  document.onChange.listen(expectAsync((Delta delta) {
+        observedDeltas.add(delta);
+        if (++observedDeltaCount == 3) applyToNewDocument();
+      }, count: 3));
+<<<
+  document.onChange.listen(expectAsync((Delta delta) {
+    observedDeltas.add(delta);
+    if (++observedDeltaCount == 3) applyToNewDocument();
+  }, count: 3));
+>>> (indent 4)
+    return queryWith(fds, otype, whereClause, whereValues).toList()
+        .catchError((ex, st) {
+      _logger.warning(
+          "Failed loadAllWith($fields, $whereClause, $whereValues)", ex, st);
+      return new Future.error(ex, st);
+    }).then((List<Row> rows) {
+      ;
+    });
+<<<
+    return queryWith(fds, otype, whereClause, whereValues)
+        .toList()
+        .catchError((ex, st) {
+      _logger.warning(
+          "Failed loadAllWith($fields, $whereClause, $whereValues)", ex, st);
+      return new Future.error(ex, st);
+    }).then((List<Row> rows) {
+      ;
+    });
+>>> (indent 4)
+    return _coll.update({"_id": doc["_id"]}, doc, upsert: true)
+        .then((_) => doc);
+<<< TODO(rnystrom): Should split before .then() but map literal splits chain.
+    return _coll
+        .update({"_id": doc["_id"]}, doc, upsert: true).then((_) => doc);

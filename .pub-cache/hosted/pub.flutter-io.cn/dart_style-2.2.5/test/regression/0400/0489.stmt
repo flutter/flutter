@@ -1,0 +1,9 @@
+>>>
+longerNamedFoo..items.add(new Foo()
+  ..name = bar.toto
+  ..placeUrl = place.toString());
+<<<
+longerNamedFoo
+  ..items.add(new Foo()
+    ..name = bar.toto
+    ..placeUrl = place.toString());

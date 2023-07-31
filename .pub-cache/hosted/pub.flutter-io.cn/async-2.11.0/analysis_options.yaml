@@ -1,0 +1,28 @@
+# https://dart.dev/guides/language/analysis-options
+include: package:lints/recommended.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_dynamic_calls
+    - avoid_unused_constructor_parameters
+    - comment_references
+    - directives_ordering
+    - lines_longer_than_80_chars
+    - literal_only_boolean_expressions
+    - missing_whitespace_between_adjacent_strings
+    - no_adjacent_strings_in_list
+    - no_runtimeType_toString
+    - omit_local_variable_types
+    - package_api_docs
+    - prefer_relative_imports
+    - prefer_single_quotes
+    - test_types_in_equals
+    - throw_in_finally
+    - type_annotate_public_apis
+    - unnecessary_lambdas
+    - use_super_parameters

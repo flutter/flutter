@@ -1,0 +1,15 @@
+>>>
+class SomeLongNameForAComponent implements AttachAware, ShadowRootAware,
+    DetachAware, SomeExternalViewFactory, AnotherInterface {
+  // ...
+}
+<<<
+class SomeLongNameForAComponent
+    implements
+        AttachAware,
+        ShadowRootAware,
+        DetachAware,
+        SomeExternalViewFactory,
+        AnotherInterface {
+  // ...
+}

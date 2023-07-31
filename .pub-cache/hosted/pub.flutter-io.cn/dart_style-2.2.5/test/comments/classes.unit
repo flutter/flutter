@@ -1,0 +1,198 @@
+40 columns                              |
+>>> indented line comment (dartbug.com/16383)
+class A {
+  // comment
+}
+<<<
+class A {
+  // comment
+}
+>>> line comment on opening line
+class A { // comment
+}
+<<<
+class A {
+  // comment
+}
+>>> indented block comment
+class A {
+  /* comment */
+}
+<<<
+class A {
+  /* comment */
+}
+>>> block comment with trailing newline
+class A {/* comment */
+}
+<<<
+class A {
+  /* comment */
+}
+>>> block comment with leading newline
+class A {
+  /* comment */}
+<<<
+class A {
+  /* comment */
+}
+>>> inline block comment
+class A {  /* comment */  }
+<<<
+class A {/* comment */}
+>>> multiple comments on opening line
+class A { /* first */ // second
+}
+<<<
+class A {
+  /* first */ // second
+}
+>>> multiple inline block comments
+class A {  /* 1 */   /* 2 */   /* 3 */  }
+<<<
+class A {/* 1 */ /* 2 */ /* 3 */}
+>>> multiline trailing block comment
+class A {  /* comment
+*/  }
+<<<
+class A {
+  /* comment
+*/
+}
+>>> lines comments at the start of the line in a class body
+class A {
+//  int a;
+//  int b;
+  int c;
+}
+<<<
+class A {
+//  int a;
+//  int b;
+  int c;
+}
+>>> block comment
+class C/* is cool */{
+  /* int */ foo(/* comment */) => 42;
+}
+<<<
+class C /* is cool */ {
+  /* int */ foo(/* comment */) => 42;
+}
+>>> block comment
+library foo;
+/* A long
+ * Comment
+*/
+class C /* is cool */ {
+  /* int */ foo() => 42;
+}
+<<<
+library foo;
+
+/* A long
+ * Comment
+*/
+class C /* is cool */ {
+  /* int */ foo() => 42;
+}
+>>> ensure blank line above doc comments
+class Foo {var a = 1;
+/// doc
+var b = 2;}
+<<<
+class Foo {
+  var a = 1;
+
+  /// doc
+  var b = 2;
+}
+>>> remove blank lines before beginning of body
+class A {
+
+
+
+  // comment
+}
+<<<
+class A {
+  // comment
+}
+>>> remove blank lines after end of body
+class A {
+  // comment
+
+
+
+}
+<<<
+class A {
+  // comment
+}
+>>> nested flush left comment
+class Foo {
+  method() {
+// flush
+  }
+}
+<<<
+class Foo {
+  method() {
+// flush
+  }
+}
+>>> nested flush left after non-nested
+class Foo {
+  method() {
+    // ...
+// flush
+  }
+}
+<<<
+class Foo {
+  method() {
+    // ...
+// flush
+  }
+}
+>>> flush left after member
+class Foo {
+  var x = 1;
+// comment
+  var y = 2;
+}
+<<<
+class Foo {
+  var x = 1;
+// comment
+  var y = 2;
+}
+>>> force doc comment between classes to have two newlines before
+class Foo {} /**
+*/
+class Bar {}
+<<<
+class Foo {}
+
+/**
+*/
+class Bar {}
+>>> force doc comment between classes to have newline after
+class Foo {}
+/**
+*/ class Bar {}
+<<<
+class Foo {}
+
+/**
+*/
+class Bar {}
+>>> inline before type parameter
+class Foo</* comment */T> {}
+<<<
+class Foo< /* comment */ T> {}
+>>> TODO(rnystrom): Ideally, would split before the comment, not after.
+class Foo< /* comment */TypeParameter> {}
+<<<
+class Foo< /* comment */
+    TypeParameter> {}

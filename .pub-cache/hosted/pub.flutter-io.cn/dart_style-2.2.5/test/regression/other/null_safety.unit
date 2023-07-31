@@ -1,0 +1,20 @@
+>>> issues found when migrating to null safety
+void main() => print('first: ${first<int>([1, 2, 3])}');
+<<<
+void main() => print('first: ${first<int>([1, 2, 3])}');
+>>>
+var x = '${jsonEncode([
+  1,
+])}';
+<<<
+var x = '${jsonEncode([
+      1,
+    ])}';
+>>>
+main() {
+  patch..[entityId].removeWhere();
+}
+<<<
+main() {
+  patch..[entityId].removeWhere();
+}

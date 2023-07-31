@@ -1,0 +1,17 @@
+name: meta
+# Note, because version `2.0.0` was mistakenly released, the next major version must be `3.x.y`.
+version: 1.9.1
+description: >-
+ Annotations used to express developer intentions that can't otherwise be
+ deduced by statically analyzing source code.
+repository: https://github.com/dart-lang/sdk/tree/main/pkg/meta
+
+environment:
+  sdk: ">=2.12.0 <4.0.0"
+
+# We use 'any' version constraints here as we get our package versions from
+# the dart-lang/sdk repo's DEPS file. Note that this is a special case; the
+# best practice for packages is to specify their compatible version ranges.
+# See also https://dart.dev/tools/pub/dependencies.
+dev_dependencies:
+  lints: any

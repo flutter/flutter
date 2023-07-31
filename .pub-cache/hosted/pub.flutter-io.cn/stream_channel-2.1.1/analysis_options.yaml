@@ -1,0 +1,19 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+  # These are errors when building in Google
+  errors:
+    unused_import: error
+    unused_element: error
+    unused_local_variable: error
+    dead_code: error
+
+linter:
+  rules:
+    - comment_references
+    - always_declare_return_types
+    - omit_local_variable_types
+    - prefer_single_quotes
+    - unawaited_futures

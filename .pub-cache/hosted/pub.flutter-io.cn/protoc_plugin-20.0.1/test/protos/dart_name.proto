@@ -1,0 +1,43 @@
+// Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto2";
+
+import "dart_options.proto";
+
+package dart_name;
+
+message DartName {
+  optional string field = 1 [
+    (dart_options.dart_name) = "renamedField"
+  ];
+}
+
+message SwapNames {
+  optional string first = 1 [
+    (dart_options.dart_name) = "second"
+  ];
+  optional string second = 2 [
+    (dart_options.dart_name) = "first"
+  ];
+}
+
+message TakeExistingName {
+  optional string first = 1;
+  optional string second = 2 [
+    (dart_options.dart_name) = "first"
+  ];
+}
+
+message Function {
+  optional string fun = 1;
+}
+
+message Function_ {
+  optional string fun1 = 1;
+}
+
+message UnderscoreDigitName {
+  optional string _3d = 1;
+}

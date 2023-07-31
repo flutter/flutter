@@ -1,0 +1,14 @@
+name: path
+version: 1.8.2
+description: >-
+  A string-based path manipulation library. All of the path operations you know
+  and love, with solid support for Windows, POSIX (Linux and Mac OS X), and the
+  web.
+repository: https://github.com/dart-lang/path
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dev_dependencies:
+  lints: ^1.0.0
+  test: ^1.16.0

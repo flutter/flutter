@@ -1,0 +1,47 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+
+linter:
+  rules:
+    - avoid_empty_else
+    - avoid_init_to_null
+    - avoid_null_checks_in_equality_operators
+    - avoid_unused_constructor_parameters
+    - await_only_futures
+    - camel_case_types
+    - cancel_subscriptions
+    - constant_identifier_names
+    - control_flow_in_finally
+    - depend_on_referenced_packages
+    - directives_ordering
+    - empty_catches
+    - empty_constructor_bodies
+    - empty_statements
+    - hash_and_equals
+    - implementation_imports
+    - iterable_contains_unrelated_type
+    - library_names
+    - library_prefixes
+    - list_remove_unrelated_type
+    - non_constant_identifier_names
+    - overridden_fields
+    - package_api_docs
+    - package_names
+    - package_prefixed_library_names
+    - prefer_conditional_assignment
+    - prefer_equal_for_default_values
+    - prefer_final_fields
+    - prefer_generic_function_type_aliases
+    - prefer_is_not_empty
+    - slash_for_doc_comments
+    - test_types_in_equals
+    - throw_in_finally
+    - type_init_formals
+    - unnecessary_brace_in_string_interps
+    - unnecessary_const
+    - unnecessary_new
+    - unrelated_type_equality_checks
+    - valid_regexps

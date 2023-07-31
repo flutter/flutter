@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package service2;
+
+import "service3.proto";
+
+message SearchRequest {
+  optional string query = 1;
+}
+
+message SearchResponse {
+  repeated service3.SearchResult results = 1;
+}

@@ -1,0 +1,9 @@
+>>> (indent 4)
+     var handler = new Cascade()
+         .add((_) => new Response.notFound('handler 1'))
+         .add((_) => new Response.ok('handler 2')).handler;
+<<<
+    var handler = new Cascade()
+        .add((_) => new Response.notFound('handler 1'))
+        .add((_) => new Response.ok('handler 2'))
+        .handler;

@@ -1,0 +1,174 @@
+40 columns                              |
+>>> single cascades on same line
+"foo"..toString();
+<<<
+"foo"..toString();
+>>> long single cascade forces multi-line
+"foo"..toString(argument, argument, argument);
+<<<
+"foo"
+  ..toString(
+      argument, argument, argument);
+>>> multiple cascades get the same line when the method names are the same
+list
+  ..add("baz")
+  ..add("bar");
+<<<
+list
+  ..add("baz")
+  ..add("bar");
+>>> cascades indent contained blocks (and force multi-line) multiple cascades get their own line when method names are different
+foo..fooBar()..toString();
+<<<
+foo
+  ..fooBar()
+  ..toString();
+>>> cascaded setters are always multi-line even with the same name
+foo..baz = 3..baz=5;
+<<<
+foo
+  ..baz = 3
+  ..baz = 5;
+>>> cascades indent contained blocks (and force multi-line)
+"foo"..toString(() {body;});
+<<<
+"foo"
+  ..toString(() {
+    body;
+  });
+>>> force split if receiver an expression where the precedence isn't obvious
+main() async {
+  // These are OK.
+  a = b..c();
+  a += b..c();
+  a.b..c();
+
+  // These are unclear.
+  a ? b : c..d();
+  a ?? b..c();
+  a && b..c();
+  a || b..c();
+  a == b..c();
+  a <= b..c();
+  a + b..c();
+  a / b..c();
+  a ^ b..c();
+  a << b..c();
+  -a..b();
+  !a..b();
+  --a..b();
+  await a..b();
+}
+<<<
+main() async {
+  // These are OK.
+  a = b..c();
+  a += b..c();
+  a.b..c();
+
+  // These are unclear.
+  a ? b : c
+    ..d();
+  a ?? b
+    ..c();
+  a && b
+    ..c();
+  a || b
+    ..c();
+  a == b
+    ..c();
+  a <= b
+    ..c();
+  a + b
+    ..c();
+  a / b
+    ..c();
+  a ^ b
+    ..c();
+  a << b
+    ..c();
+  -a
+    ..b();
+  !a
+    ..b();
+  --a
+    ..b();
+  await a
+    ..b();
+}
+>>> omit split if single section on list literal
+[1,]..addAll(more);
+<<<
+[
+  1,
+]..addAll(more);
+>>> omit split if single section on map literal
+var map = {1:2,}..addAll(more);
+<<<
+var map = {
+  1: 2,
+}..addAll(more);
+>>> omit split if single section on trailing comma call
+foo(1,)..addAll(more);
+<<<
+foo(
+  1,
+)..addAll(more);
+>>> omit split if single section on trailing comma constructor
+new Foo(1,)..addAll(more);
+<<<
+new Foo(
+  1,
+)..addAll(more);
+>>> omit split if single section on trailing comma expression call
+(foo)(1,)..addAll(more);
+<<<
+(foo)(
+  1,
+)..addAll(more);
+>>> allow keeping collection on one line and splitting cascade
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]..cascade();
+<<<
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  ..cascade();
+>>> don't force cascade to split on collection target if arg splits
+[1, 2, 3, 4]..cascade(() {;});
+<<<
+[1, 2, 3, 4]..cascade(() {
+    ;
+  });
+>>> don't force cascade to split on collection target if target and arg split
+[1,]..cascade(() {;});
+<<<
+[
+  1,
+]..cascade(() {
+    ;
+  });
+>>> allow same-line cascades to mix null-aware
+list
+  ?..add("baz")
+  ..add("bar");
+<<<
+list
+  ?..add("baz")
+  ..add("bar");
+>>> mixed
+foo?..a()..b()..c();
+<<<
+foo
+  ?..a()
+  ..b()
+  ..c();
+>>> null-aware getter
+foo?..baz..baz;
+<<<
+foo
+  ?..baz
+  ..baz;
+>>> null-aware setter
+foo?..baz = 3..baz=5;
+<<<
+foo
+  ?..baz = 3
+  ..baz = 5;

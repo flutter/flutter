@@ -1,0 +1,23 @@
+# Stripped down from https://github.com/dart-lang/pub/blob/master/.travis.yml
+
+language: dart
+
+dart:
+  - dev
+
+os:
+  - linux
+  - osx
+  - windows
+
+dart_task:
+  - test: .
+  - dartfmt
+  - dartanalyzer: --fatal-infos --fatal-warnings .
+after_success:
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then pub run test_coverage ; fi
+  - if [ ! -f done ]; then if [ "$TRAVIS_OS_NAME" = "osx" ]; then pub run coveralls coverage/lcov.info ; touch done;  fi ; fi
+
+cache:
+  directories:
+    - $HOME/.pub-cache

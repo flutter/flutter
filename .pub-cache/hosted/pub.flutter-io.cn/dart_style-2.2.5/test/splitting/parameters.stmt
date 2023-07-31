@@ -1,0 +1,117 @@
+40 columns                              |
+>>> many parameters
+method(first, second, third, fourth, fifth, sixth, seventh, eighth, ninth,
+    tenth, eleventh, twelfth) {
+  print('42');
+}
+<<<
+method(
+    first,
+    second,
+    third,
+    fourth,
+    fifth,
+    sixth,
+    seventh,
+    eighth,
+    ninth,
+    tenth,
+    eleventh,
+    twelfth) {
+  print('42');
+}
+>>> parameters fit but ) does not
+method(int firstArgument, int argumentTo) {
+  print('42');
+}
+<<<
+method(
+    int firstArgument, int argumentTo) {
+  print('42');
+}
+>>> parameters fit but } does not
+method(int firstArgument, int argument) {
+  print('42');
+}
+<<<
+method(
+    int firstArgument, int argument) {
+  print('42');
+}
+>>> no split after "(" in lambda
+var meth = (
+    int firstArgument, int argumentTo) {
+  print('42');
+};
+<<<
+var meth = (int firstArgument,
+    int argumentTo) {
+  print('42');
+};
+>>> keep mandatory and positional on same line
+foo(param, [foo, bar]) {}
+<<<
+foo(param, [foo, bar]) {}
+>>> keep mandatory and named on same line
+foo(param, {foo, bar}) {}
+<<<
+foo(param, {foo, bar}) {}
+>>> move just optional positional to second line even though all fit on second
+reallyLongMethod(parameter, [foo, bar]) {}
+<<<
+reallyLongMethod(parameter,
+    [foo, bar]) {}
+>>> move just named to second line even though all fit on second
+reallyLongMethod(parameter, {foo, bar}) {}
+<<<
+reallyLongMethod(parameter,
+    {foo, bar}) {}
+>>> avoid splitting in function type parameters
+bool doStuff(parameter1, void printFn(param1, param2)) {}
+<<<
+bool doStuff(parameter1,
+    void printFn(param1, param2)) {}
+>>>
+doStuff(param1, void printFn(param1, param2)) {}
+<<<
+doStuff(param1,
+    void printFn(param1, param2)) {}
+>>> allow splitting in function type parameters
+doStuff(callback(parameter1, parameter2, parameter3, parameter4)) {}
+<<<
+doStuff(
+    callback(parameter1, parameter2,
+        parameter3, parameter4)) {}
+>>> split optional onto one per line if they don't fit on one line
+doStuff([parameter1, parameter2, parameter3]) {}
+<<<
+doStuff(
+    [parameter1,
+    parameter2,
+    parameter3]) {}
+>>> split on positional default value
+doStuff([parameter = veryLongDefaultValueThatSplits, another =
+veryLongDefaultValue, third = alsoQuiteLongDefaultValue]) {}
+<<<
+doStuff(
+    [parameter =
+        veryLongDefaultValueThatSplits,
+    another = veryLongDefaultValue,
+    third =
+        alsoQuiteLongDefaultValue]) {}
+>>> split on named value
+doStuff({parameter: veryLongDefaultValueThatSplits, another:
+veryLongDefaultValue, third: alsoAQuiteLongDefaultValue}) {}
+<<<
+doStuff(
+    {parameter:
+        veryLongDefaultValueThatSplits,
+    another: veryLongDefaultValue,
+    third:
+        alsoAQuiteLongDefaultValue}) {}
+>>> split between type and name
+doStuff(VerylongParameterType parameterName) {}
+<<<
+doStuff(
+    VerylongParameterType
+        parameterName) {}

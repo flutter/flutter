@@ -1,0 +1,16 @@
+#!/bin/bash --
+# Copyright (c) 2017, Google Inc. Please see the AUTHORS file for details.
+# All rights reserved. Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+set -e
+
+dart format $(find bin lib test -name \*.dart 2>/dev/null)
+dart pub get
+dart pub upgrade
+dart analyze \
+    --fatal-warnings \
+    --fatal-infos \
+    $(find bin lib test -name \*.dart 2>/dev/null)
+
+dart test

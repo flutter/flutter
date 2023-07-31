@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+import "service2.proto";
+
+message SearchRequest {
+  optional string query = 1;
+}
+
+message SearchResponse {
+  repeated string result = 1;
+}
+
+service SearchService {
+	rpc Search (SearchRequest) returns (SearchResponse);
+	rpc Search2 (service2.SearchRequest) returns (service2.SearchResponse);
+}

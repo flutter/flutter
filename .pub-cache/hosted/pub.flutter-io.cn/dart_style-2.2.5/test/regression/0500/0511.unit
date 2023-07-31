@@ -1,0 +1,15 @@
+>>>
+class Foo {
+  static const StaticWarningCode FINAL_NOT_INITIALIZED = const StaticWarningCode(
+      'FINAL_NOT_INITIALIZED',
+      "The final variable '{0}' must be initialized", /*correction:*/ null, /*strongModeError:*/ false);
+}
+<<<
+class Foo {
+  static const StaticWarningCode FINAL_NOT_INITIALIZED =
+      const StaticWarningCode(
+          'FINAL_NOT_INITIALIZED',
+          "The final variable '{0}' must be initialized",
+          /*correction:*/ null,
+          /*strongModeError:*/ false);
+}

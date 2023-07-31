@@ -1,0 +1,88 @@
+{
+  "ask": {
+    "existing_page": "La pagina [%s] è già presente, vuoi sovrascriverla?",
+    "name_to_project": "Qual'è il nome del tuo progetto?",
+    "company_domain": "Qual'è il dominio della tua compagnia?",
+    "model_name": "Impossibile impostare automaticamente il nome del modello, quale vuoi usare?",
+    "package_already_installed": "Pacchetto: %s è già presente, desideri aggiornarlo?",
+    "lib_not_empty": "La cartella 'lib' contiene dei file. Sei sicuro di voler sovrascrivere la tua applicazione? \\n ATTENZIONE: Azione irreversibile",
+    "ios_lang": "Quale linguaggio vuoi utilizzare su piattaforma iOS?",
+    "android_lang": "Quale linguaggio vuoi utilizzare su piattaforma Android?",
+    "use_null_safe": "Vuoi usare la metodologia 'null-safe'?",
+    "use_linter": "Vuoi utilizzare qualche 'linter'?",
+    "new_page_name": "Quale sarà il nome della nuova pagina?"
+  },
+  "error": {
+    "failed_to_connect": "Tentativo di connessione con %s fallito.",
+    "no_valid_file_or_url": "%s non è un file o un URL valida.",
+    "unnecessary_parameter": "il parametro %s non è necessario",
+    "unnecessary_parameter_plural": "i parametri %s non sono necessari",
+    "nonexistent_directory": "La cartella %s non è stata trovata.",
+    "empty_directory": "la cartella %s è vuota",
+    "invalid_json": "%s non è un file 'json' valido",
+    "special_characters_in_key": "La chiave non ammette caratteri speciali. \\n chiave: %s",
+    "required_path": "È necessario includere il percorso del file o della cartella.",
+    "invalid_dart": "%s non è un file 'dart' valido",
+    "invalid_file_or_directory": "%s non è un file o una cartella valida.",
+    "package_not_found": "Package: %s non è stato trovato sul 'pub.dev'",
+    "cli_version_not_found": "Impossibile trovare la versione installata.",
+    "update_cli": "Si è verificato un errore durante l'aggiornamento di get_cli",
+    "folder_not_found": "La cartella %s non è stata trovata",
+    "file_not_found": "Il file al percorso %s non è stato trovato",
+    "access_denied": "Accesso negato a %s",
+    "unexpected": "Si è verificato un errore inaspettato:",
+    "no_package_to_remove": "Immetti il nome del pacchetto da rimuovere"
+  },
+  "example": "Esempio:",
+  "warning": "Avvertimento:",
+  "hint": {
+    "create": {
+      "controller": "Genera un controller",
+      "page": "Genera una pagina",
+      "project": "Genera un nuovo progetto",
+      "provider": "Genera un nuovo provider",
+      "screen": "Genera una nuova schermata",
+      "view": "Genera una nuova visuale"
+    },
+    "generate": {
+      "locales": "Genera le traduzioni da un file json",
+      "model": "Genera una classe modello da un file json"
+    },
+    "help": "Mostra la lista comandi",
+    "init": "Genera la struttura selezionata in un progetto esistente:",
+    "install": "Installa pacchetti dal pub.dev sul progetto (dependencies):",
+    "remove": "Rimuovi un pacchetto intallato dal tuo progetto (dependencies):",
+    "sort": "Ordina importazioni e formatta i file dart",
+    "update": "Aggiorna GET_CLI",
+    "version": "Mostra la versione attuale della CLI"
+  },
+  "info": {
+    "unnecessary_flag": "%s non è un argomento necessario",
+    "unnecessary_flag_prural": "%s non sono argomenti necessari",
+    "package_not_installed": "Pacchetto: %s non sembra essere installato",
+    "cli_last_version_already_installed": "Hai già la versione più recente di get_cli",
+    "no_file_overwritten": "Nessun file è stato sovrascritto",
+    "update_available": "C'è un aggiornamento disponibile! Versione attualmente installata: %s",
+    "update_available2": "Nuova versione disponibile: %s Perfavore, esegui:"
+  },
+  "options": {
+    "yes": "Si!",
+    "no": "No",
+    "rename": "Rinomina"
+  },
+  "optional_parameters": "Parametri opzionali: %s",
+  "sucess": {
+    "page_create": "La pagina %s è stata creata con successo.",
+    "locale_generate": "File di localizzazione generato con successo.",
+    "getx_pattern_generated": "Struttura con impronta GetX generata con successo.",
+    "clean_Pattern_generated": "Struttura con impronta CLEAN generata con successo.",
+    "file_formatted": " '%s' è stato formattato con successo",
+    "package_removed": "Pacchetto: %s è stato rimosso!",
+    "package_installed": "'Pacchetto: %s è stato installato con successo!",
+    "update_cli": "Aggiornamento completato",
+    "add_controller_in_bindings": "Il controller %s è stato aggiunto con successo a bindings al percorso: %s'",
+    "navigation_added": "La navigazione %s è stata aggiunta con successo.",
+    "file_created": "File: %s è stato creato con successo al percorso: %s",
+    "route_created": "La route %s è stata aggiunta con successo."
+  }
+}

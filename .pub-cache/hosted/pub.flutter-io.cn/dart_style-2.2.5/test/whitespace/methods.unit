@@ -1,0 +1,75 @@
+40 columns                              |
+>>>
+class A {void x(){}}
+<<<
+class A {
+  void x() {}
+}
+>>>
+class A{static bool x(){return true;}}
+<<<
+class A {
+  static bool x() {
+    return true;
+  }
+}
+>>>
+class A{int x()=>42+3;}
+<<<
+class A {
+  int x() => 42 + 3;
+}
+>>> method body
+class A {
+  foo(path) {
+    var buffer = new StringBuffer();
+    var file = new File(path);
+    return file;
+  }
+}
+<<<
+class A {
+  foo(path) {
+    var buffer = new StringBuffer();
+    var file = new File(path);
+    return file;
+  }
+}
+>>> covariant
+class A {
+  pos(    covariant  int a,covariant    b  );
+  opt([ covariant int a,covariant    b  ]);
+  named({ covariant int a,covariant    b  });
+  fn(     covariant  int f(bool b));
+}
+<<<
+class A {
+  pos(covariant int a, covariant b);
+  opt([covariant int a, covariant b]);
+  named({covariant int a, covariant b});
+  fn(covariant int f(bool b));
+}
+>>> covariant in initializing formal (not valid, but dart format should accept)
+class A {
+  A(   covariant   this.foo);
+}
+<<<
+class A {
+  A(covariant this.foo);
+}
+>>> discard trailing newlines in method body
+class Foo {
+  bar() {
+    baz();
+
+
+
+
+  }
+}
+<<<
+class Foo {
+  bar() {
+    baz();
+  }
+}

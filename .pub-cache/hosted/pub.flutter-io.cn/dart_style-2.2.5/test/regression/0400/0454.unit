@@ -1,0 +1,19 @@
+>>> original bug report actually did fit in 80
+class F {
+  List<
+        AVeryLongTypeNameTHatTheUserCannotChange____________> aDescriptiveName__;
+}
+<<<
+class F {
+  List<AVeryLongTypeNameTHatTheUserCannotChange____________> aDescriptiveName__;
+}
+>>>
+class F {
+  List<
+        AVeryLongTypeNameTHatTheUserCannotChange_____________> aDescriptiveName__;
+}
+<<<
+class F {
+  List<AVeryLongTypeNameTHatTheUserCannotChange_____________>
+      aDescriptiveName__;
+}

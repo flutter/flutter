@@ -1,0 +1,17 @@
+sdk:
+- 2.14.0
+- dev
+
+stages:
+- analyze_and_format:
+  - analyze: --fatal-infos
+  - format:
+    sdk:
+    - dev
+- unit_test:
+  - test: --platform vm
+    os:
+    - linux
+  - test: --platform chrome
+    os:
+    - linux

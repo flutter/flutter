@@ -1,0 +1,32 @@
+// Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto3";
+
+package protobuf_unittest;
+
+message Bar {
+  int32 i = 1;
+}
+
+enum EnumType {
+  DEFAULT = 0;
+  A = 1;
+}
+
+message Foo {
+  oneof oneof_field {
+    string first = 1;
+    int32 second = 5;
+    bool third = 3;
+    bytes fourth = 7;
+    Bar index = 8;
+    EnumType values = 6;
+  }
+
+  oneof colors {
+    string red = 2;
+    string green = 4;
+  }
+}

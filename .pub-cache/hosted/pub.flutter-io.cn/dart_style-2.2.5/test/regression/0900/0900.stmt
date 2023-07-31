@@ -1,0 +1,22 @@
+>>>
+void main() {
+  final f = stdin.readLineSync,
+      p = int.parse,
+      n = p(f()),
+      ranges = List.generate(n, (_) {
+    final t = f().split(' '), a = p(t[0]), b = a + p(t[1]);
+    return [a, b];
+  }),
+      dp = List<int>(n);
+}
+<<<
+void main() {
+  final f = stdin.readLineSync,
+      p = int.parse,
+      n = p(f()),
+      ranges = List.generate(n, (_) {
+        final t = f().split(' '), a = p(t[0]), b = a + p(t[1]);
+        return [a, b];
+      }),
+      dp = List<int>(n);
+}

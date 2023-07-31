@@ -1,0 +1,95 @@
+40 columns                              |
+>>> empty map literal (dartbug.com/16382)
+var m = { };
+<<<
+var m = {};
+>>>
+var m = {};
+<<<
+var m = {};
+>>> generic map literal
+<   int,int  >{   };
+<<<
+<int, int>{};
+>>> generic set literal
+<   int  >{   };
+<<<
+<int>{};
+>>> list spread
+var list = [  ...  a,...b,  ...
+c];
+<<<
+var list = [...a, ...b, ...c];
+>>> map spread
+var map = {  ...  a,...b,1:2,  ...
+c};
+<<<
+var map = {...a, ...b, 1: 2, ...c};
+>>> set spread
+var set = {  ...  a,...b, 1,   ...
+c};
+<<<
+var set = {...a, ...b, 1, ...c};
+>>> list null aware spread
+var list = [  ...?  a,...?b,  ...?
+c];
+<<<
+var list = [...?a, ...?b, ...?c];
+>>> map null aware spread
+var map = {  ...?  a,...?b,1:2,  ...?
+c};
+<<<
+var map = {...?a, ...?b, 1: 2, ...?c};
+>>> set null aware spread
+var set = {  ...?  a,...?b, 1,   ...?
+c};
+<<<
+var set = {...?a, ...?b, 1, ...?c};
+>>> if
+var list = [   if   ( c    )   1    ,];
+<<<
+var list = [
+  if (c) 1,
+];
+>>> if else
+var list = [   if   ( c    )   1    else    2   ,];
+<<<
+var list = [
+  if (c) 1 else 2,
+];
+>>> c-style for
+var l = [for   (  var  i  =  0  ;  i  <  1  ;  i++  )  i];
+<<<
+var l = [for (var i = 0; i < 1; i++) i];
+>>> empty clauses
+var l = [for(  ;  ;  ) 1];
+<<<
+var l = [for (;;) 1];
+>>> empty initializer clause
+var l = [for (  ;   f; bar) 1];
+<<<
+var l = [for (; f; bar) 1];
+>>> for-in
+var l = [for (var    i  in  i   )   i];
+<<<
+var l = [for (var i in i) i];
+>>> for-in with type
+var l = [for (Foo f in foos) f];
+<<<
+var l = [for (Foo f in foos) f];
+>>> for-in with final and type
+var l = [for (final Foo f in foos) f];
+<<<
+var l = [for (final Foo f in foos) f];
+>>> for-in with just final
+var l = [for (final f in foos) f];
+<<<
+var l = [for (final f in foos) f];
+>>> await for
+f() async {
+  var l = [await    for(x in y)    x];
+}
+<<<
+f() async {
+  var l = [await for (x in y) x];
+}

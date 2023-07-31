@@ -1,0 +1,16 @@
+>>> (indent 2)
+  final aaaaaaaaaaaaaaaaaaaa = new Bbbbbbbbbbbbbbbbbbbbbbbb<
+      Cccccccc>((Cccccccc cc) =>
+      'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd');
+<<<
+  final aaaaaaaaaaaaaaaaaaaa = new Bbbbbbbbbbbbbbbbbbbbbbbb<Cccccccc>((Cccccccc
+          cc) =>
+      'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd');
+>>> (indent 2)
+  final aaaaaaaaaaaaaaaaaaaa = new Bbbbbbbbbbbbbbbbbbbbbbbb<
+      Cccccccc>((Cccccccc cc) =>
+      'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd');
+<<<
+  final aaaaaaaaaaaaaaaaaaaa = new Bbbbbbbbbbbbbbbbbbbbbbbb<Cccccccc>(
+      (Cccccccc cc) =>
+          'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd');

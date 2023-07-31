@@ -1,0 +1,380 @@
+>>> preserve flush left comment
+class TestName {
+  static const String realtimePresenceSubscribe = 'realtimePresenceSubscribe';
+// TODO(tiholic) handle realtimeHistoryWithAuthCallback
+
+  // This is not a test, but a way to retrieve
+  // more information of failures from any of the tests cases
+  static const String getFlutterErrors = 'getFlutterErrors';
+}
+<<<
+class TestName {
+  static const String realtimePresenceSubscribe = 'realtimePresenceSubscribe';
+// TODO(tiholic) handle realtimeHistoryWithAuthCallback
+
+  // This is not a test, but a way to retrieve
+  // more information of failures from any of the tests cases
+  static const String getFlutterErrors = 'getFlutterErrors';
+}
+>>> preserve flush left comment
+class BusStationResult {
+  BusStationResult.ios(BusStationResult_iOS result) {
+    pageCount = result.count;
+//    searchSuggestionCities = result.suggestion.cities?.map((city) {
+//      return SuggestionCity(
+//        cityName: city.city,
+//        cityCode: city.citycode,
+//        adCode: city.adcode,
+//        suggestionNum: city.num,
+//        districts: city.districts?.map((district) {
+//          return District(
+//
+//          );
+//        });
+//      );
+//    });
+    searchSuggestionKeywords = result.suggestion.keywords;
+  }
+}
+<<<
+class BusStationResult {
+  BusStationResult.ios(BusStationResult_iOS result) {
+    pageCount = result.count;
+//    searchSuggestionCities = result.suggestion.cities?.map((city) {
+//      return SuggestionCity(
+//        cityName: city.city,
+//        cityCode: city.citycode,
+//        adCode: city.adcode,
+//        suggestionNum: city.num,
+//        districts: city.districts?.map((district) {
+//          return District(
+//
+//          );
+//        });
+//      );
+//    });
+    searchSuggestionKeywords = result.suggestion.keywords;
+  }
+}
+>>> preserve flush left comment
+class Semester {
+  String get code => '$year$value';
+
+//  String get cacheSaveTag => '${Helper.username}_$code';
+
+  Semester({
+    this.year,
+    this.value,
+    this.text,
+  });
+}
+<<<
+class Semester {
+  String get code => '$year$value';
+
+//  String get cacheSaveTag => '${Helper.username}_$code';
+
+  Semester({
+    this.year,
+    this.value,
+    this.text,
+  });
+}
+>>> space before inline block comment
+class _MyAppState extends State<MyApp> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              child: Column(
+                children: <Widget>[
+                  _assetsAudioPlayer.builderCurrent(
+                      builder: (context, Playing? playing) {
+                    return Column(
+                      children: <Widget>[
+                        _assetsAudioPlayer.builderLoopMode(
+                          builder: (context, loopMode) {
+                            return PlayerBuilder.isPlaying(
+                                builder: (context, isPlaying) {
+                                  return PlayingControls(
+                                    onNext: () {
+                                      _assetsAudioPlayer.next(keepLoopMode: true
+                                          /*keepLoopMode: false*/);
+                                    },
+                                    onPrevious: () {
+                                      _assetsAudioPlayer.previous(
+                                          /*keepLoopMode: false*/);
+                                    },
+                                  );
+                                });
+                          },
+                        ),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+<<<
+class _MyAppState extends State<MyApp> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              child: Column(
+                children: <Widget>[
+                  _assetsAudioPlayer.builderCurrent(
+                      builder: (context, Playing? playing) {
+                    return Column(
+                      children: <Widget>[
+                        _assetsAudioPlayer.builderLoopMode(
+                          builder: (context, loopMode) {
+                            return PlayerBuilder.isPlaying(
+                                builder: (context, isPlaying) {
+                              return PlayingControls(
+                                onNext: () {
+                                  _assetsAudioPlayer.next(
+                                      keepLoopMode:
+                                          true /*keepLoopMode: false*/);
+                                },
+                                onPrevious: () {
+                                  _assetsAudioPlayer.previous(
+                                      /*keepLoopMode: false*/);
+                                },
+                              );
+                            });
+                          },
+                        ),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+>>> remove blank line before comment before first case
+class Sizing {
+  double heightOf({weight: sizingWeight}) {
+    switch (weight) {
+
+      //MINIMUM HEIGHT OF ITEM - 5%
+      case sizingWeight.w0:
+        screenWeightedHeight = logicalHeight() * 0.05;
+        break;
+
+      //10% of screen height
+      case sizingWeight.w1:
+        screenWeightedHeight = logicalHeight() * 0.1;
+        break;
+
+      //20% of screen height
+      case sizingWeight.w2:
+        screenWeightedHeight = logicalHeight() * 0.2;
+        break;
+
+      //30% of screen height
+      case sizingWeight.w3:
+        screenWeightedHeight = logicalHeight() * 0.3;
+        break;
+    }
+  }
+}
+<<<
+class Sizing {
+  double heightOf({weight: sizingWeight}) {
+    switch (weight) {
+      //MINIMUM HEIGHT OF ITEM - 5%
+      case sizingWeight.w0:
+        screenWeightedHeight = logicalHeight() * 0.05;
+        break;
+
+      //10% of screen height
+      case sizingWeight.w1:
+        screenWeightedHeight = logicalHeight() * 0.1;
+        break;
+
+      //20% of screen height
+      case sizingWeight.w2:
+        screenWeightedHeight = logicalHeight() * 0.2;
+        break;
+
+      //30% of screen height
+      case sizingWeight.w3:
+        screenWeightedHeight = logicalHeight() * 0.3;
+        break;
+    }
+  }
+}
+>>>
+class CloudWatchLogStack {
+  void fixMessage(List<int> bytes, int time, String msg) {
+    switch (largeMessageBehavior) {
+
+      /// Truncate message by replacing middle with "..."
+      case CloudWatchLargeMessages.truncate:
+        addToStack(time, truncate(bytes));
+        return;
+
+      /// Split up large message into multiple smaller ones
+      case CloudWatchLargeMessages.split:
+        split(bytes).forEach((splitMessage) {
+          addToStack(time, splitMessage);
+        });
+        return;
+    }
+  }
+}
+<<<
+class CloudWatchLogStack {
+  void fixMessage(List<int> bytes, int time, String msg) {
+    switch (largeMessageBehavior) {
+      /// Truncate message by replacing middle with "..."
+      case CloudWatchLargeMessages.truncate:
+        addToStack(time, truncate(bytes));
+        return;
+
+      /// Split up large message into multiple smaller ones
+      case CloudWatchLargeMessages.split:
+        split(bytes).forEach((splitMessage) {
+          addToStack(time, splitMessage);
+        });
+        return;
+    }
+  }
+}
+>>> don't split empty class body
+class _BeagleImageDownloaderMock extends Mock implements BeagleImageDownloader {}
+<<<
+class _BeagleImageDownloaderMock extends Mock
+    implements BeagleImageDownloader {}
+>>> don't split empty class body
+abstract class ParentRepoExternal extends CRUDRepositoryExternal<ParentEntity> {
+}
+<<<
+abstract class ParentRepoExternal
+    extends CRUDRepositoryExternal<ParentEntity> {}
+>>> adjacent strings inside string interpolation
+class _ImageNetworkState extends State<ImageNetwork> {
+  String _imagePage() {
+    return """<!DOCTYPE html>
+            <html>
+              <head>
+                <style  type="text/css" rel="stylesheet">
+                  body {
+                    margin: 0px;
+                    height: 100%;
+                    width: 100%;
+                    overflow: hidden;
+                   }
+                    #myImg {
+                      cursor: ${pointer ? "pointer" : ""};
+                      transition: 0.3s;
+                      width: ${fullScreen ? "100%" : "$width" "px"};
+                      height: ${fullScreen ? "100%" : "$height" "px"};
+                      object-fit: ${fitWeb.name(fitWeb as Fit)};
+                    }
+                    #myImg:hover {opacity: ${pointer ? "0.7" : ""}};}
+                </style>
+                <meta charset="utf-8"
+                <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0">
+                <meta http-equiv="Content-Security-Policy"
+                content="default-src * gap:; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src *;
+                img-src * data: blob: android-webview-video-poster:; style-src * 'unsafe-inline';">
+             </head>
+             <body>
+                <img id="myImg" src="$image" frameborder="0" allow="fullscreen"  allowfullscreen onclick= onClick() onerror= onError(this)>
+                <script>
+                  window.onload = function onLoad(){ callbackLoad(true);}
+                </script>
+             </body>
+            <script>
+                function onClick() { callback() }
+                function onError(source) {
+                  source.src = "https://scaffoldtecnologia.com.br/wp-content/uploads/2021/12/transparente.png";
+                  source.onerror = "";
+                  callbackError(true);
+                  return true;
+                 }
+            </script>
+        </html>
+    """;
+  }
+}
+<<<
+class _ImageNetworkState extends State<ImageNetwork> {
+  String _imagePage() {
+    return """<!DOCTYPE html>
+            <html>
+              <head>
+                <style  type="text/css" rel="stylesheet">
+                  body {
+                    margin: 0px;
+                    height: 100%;
+                    width: 100%;
+                    overflow: hidden;
+                   }
+                    #myImg {
+                      cursor: ${pointer ? "pointer" : ""};
+                      transition: 0.3s;
+                      width: ${fullScreen ? "100%" : "$width" "px"};
+                      height: ${fullScreen ? "100%" : "$height" "px"};
+                      object-fit: ${fitWeb.name(fitWeb as Fit)};
+                    }
+                    #myImg:hover {opacity: ${pointer ? "0.7" : ""}};}
+                </style>
+                <meta charset="utf-8"
+                <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0">
+                <meta http-equiv="Content-Security-Policy"
+                content="default-src * gap:; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src *;
+                img-src * data: blob: android-webview-video-poster:; style-src * 'unsafe-inline';">
+             </head>
+             <body>
+                <img id="myImg" src="$image" frameborder="0" allow="fullscreen"  allowfullscreen onclick= onClick() onerror= onError(this)>
+                <script>
+                  window.onload = function onLoad(){ callbackLoad(true);}
+                </script>
+             </body>
+            <script>
+                function onClick() { callback() }
+                function onError(source) {
+                  source.src = "https://scaffoldtecnologia.com.br/wp-content/uploads/2021/12/transparente.png";
+                  source.onerror = "";
+                  callbackError(true);
+                  return true;
+                 }
+            </script>
+        </html>
+    """;
+  }
+}
+>>>
+class _Action< /*JsonSerializable*/ T> {}
+<<<
+class _Action< /*JsonSerializable*/ T> {}
+>>>
+enum RenovationBackend {
+  frappe,
+  firebase // To be implemented
+}
+<<<
+enum RenovationBackend {
+  frappe,
+  firebase // To be implemented
+}

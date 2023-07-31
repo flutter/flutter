@@ -1,0 +1,5 @@
+# Lint rules and documentation, see http://dart-lang.github.io/linter/lints
+linter:
+  rules:
+    - prefer_equal_for_default_values
+

@@ -1,0 +1,42 @@
+// Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto2";
+
+import "google/protobuf/unittest.proto";
+
+message Outer {
+  optional Inner inner = 1;
+  repeated Inner inners = 2;
+  map<int32, Inner> inner_map = 3;
+  map<string, string> string_map = 4;
+  extensions 5 to max;
+}
+
+extend Outer {
+  optional Inner extension_inner = 5;
+}
+
+message Inner {
+  optional string value = 1;
+  optional InnerMost inner_most = 2;
+  extensions 3 to max;
+}
+
+extend Inner {
+  optional string inner_extension_string = 3;
+}
+
+message InnerMost {
+  optional string value = 1;
+  extensions 2 to max;
+}
+
+extend InnerMost {
+  optional string inner_most_extension_string = 2;
+}
+
+extend protobuf_unittest.TestAllExtensions {
+  optional Outer outer = 104;
+}

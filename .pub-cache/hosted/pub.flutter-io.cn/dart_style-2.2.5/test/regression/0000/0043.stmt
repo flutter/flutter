@@ -1,0 +1,29 @@
+>>>
+switchItUp() {
+  var command = 'CLOSED';
+  switch (command) {
+    case 'CLOSED':
+      executeClosed();
+      continue nowClosed; // Continues executing at the nowClosed label.
+
+  nowClosed: case 'NOW_CLOSED':
+      // Runs for both CLOSED and NOW_CLOSED.
+      executeNowClosed();
+      break;
+  }
+}
+<<<
+switchItUp() {
+  var command = 'CLOSED';
+  switch (command) {
+    case 'CLOSED':
+      executeClosed();
+      continue nowClosed; // Continues executing at the nowClosed label.
+
+    nowClosed:
+    case 'NOW_CLOSED':
+      // Runs for both CLOSED and NOW_CLOSED.
+      executeNowClosed();
+      break;
+  }
+}

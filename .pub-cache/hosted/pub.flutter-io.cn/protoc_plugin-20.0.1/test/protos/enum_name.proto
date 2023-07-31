@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+package enum.name;
+
+// Enum with non-standard value-names.
+enum A {
+  _x = 0;
+  _Y = 1;
+  Z_ = 2;
+  A_A = 4;
+  b_b = 5;
+  camelCase = 6;
+}
+
+message AMessage {
+  optional A a = 1;
+}

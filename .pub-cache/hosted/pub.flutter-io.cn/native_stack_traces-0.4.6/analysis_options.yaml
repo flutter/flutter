@@ -1,0 +1,8 @@
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    - avoid_dynamic_calls
+    - directives_ordering
+    - prefer_expression_function_bodies
+    - sort_pub_dependencies

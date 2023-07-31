@@ -1,0 +1,16 @@
+>>>
+Iterable<Task> generate() sync* {
+  int i = 0;
+
+  while (i++ < 100) {
+    yield new Task(i, rnd.nextInt(100), calc);
+  }
+}
+<<<
+Iterable<Task> generate() sync* {
+  int i = 0;
+
+  while (i++ < 100) {
+    yield new Task(i, rnd.nextInt(100), calc);
+  }
+}

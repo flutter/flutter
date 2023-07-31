@@ -1,0 +1,25 @@
+40 columns                              |
+>>>
+Function ( )  f;
+<<<
+Function() f;
+>>>
+void  Function(  int  i,  String   s)   f;
+<<<
+void Function(int i, String s) f;
+>>>
+Function(  int i,  [  String   s,  bool   b   ]  )   f;
+<<<
+Function(int i, [String s, bool b]) f;
+>>>
+Function(  int i,  {   String  s,  bool   b   }  )   f;
+<<<
+Function(int i, {String s, bool b}) f;
+>>>
+Function  <  T  extends S   >   () f;
+<<<
+Function<T extends S>() f;
+>>>
+int  ?  Function(int  ?  i, {String  ?  s})  ? f;
+<<<
+int? Function(int? i, {String? s})? f;

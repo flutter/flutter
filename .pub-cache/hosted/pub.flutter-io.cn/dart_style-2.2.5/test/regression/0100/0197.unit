@@ -1,0 +1,12 @@
+>>>
+class FormatterBugTest {
+  final String _test;
+
+  FormatterBugTest(@deprecated this._test);
+}
+<<<
+class FormatterBugTest {
+  final String _test;
+
+  FormatterBugTest(@deprecated this._test);
+}

@@ -1,0 +1,46 @@
+40 columns                              |
+>>>
+foo({int a, int c:    1, d: 2, e=3}) {}
+<<<
+foo({int a, int c = 1, d = 2, e = 3}) {}
+>>> preserves block comments before
+foo({a/* b */    /* c */:1}) {}
+<<<
+foo({a /* b */ /* c */ = 1}) {}
+>>> preserves block comments after
+foo({a   :    /* b */ /* c */1}) {}
+<<<
+foo({a = /* b */ /* c */ 1}) {}
+>>> preserves line comments before
+foo({a// b
+
+
+ // c
+ :1}) {}
+<<<
+foo(
+    {a // b
+
+    // c
+    = 1}) {}
+>>> preserves line comments after
+foo({a   :    // b
+
+  // c
+1}) {}
+<<<
+foo(
+    {a = // b
+
+        // c
+        1}) {}
+>>> on required parameter
+class A {
+foo({required int b: 1, required c(): f}) {}
+}
+<<<
+class A {
+  foo(
+      {required int b = 1,
+      required c() = f}) {}
+}

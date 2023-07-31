@@ -1,0 +1,26 @@
+>>>
+class MyElement extends PolymerElement {
+  MyElement.created() : super.created();
+
+  @reflectable
+  void showNodesAndEntryPoints([_, __]) {
+    addAll(
+        'nodesAndEntryPoints',
+        new PolymerDom(
+            this).children.map((child) => '${child.outerHtml} ------> '
+            '${(new PolymerDom(child).getDestinationInsertionPoints()[0] as Element).outerHtml}'));
+  }
+}
+<<<
+class MyElement extends PolymerElement {
+  MyElement.created() : super.created();
+
+  @reflectable
+  void showNodesAndEntryPoints([_, __]) {
+    addAll(
+        'nodesAndEntryPoints',
+        new PolymerDom(this).children.map((child) =>
+            '${child.outerHtml} ------> '
+            '${(new PolymerDom(child).getDestinationInsertionPoints()[0] as Element).outerHtml}'));
+  }
+}

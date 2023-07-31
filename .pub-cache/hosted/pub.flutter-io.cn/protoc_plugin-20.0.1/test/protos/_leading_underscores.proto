@@ -1,0 +1,57 @@
+// Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto2";
+
+package _leading_underscores;
+
+message _A {
+  optional string _f = 1;
+  optional string f = 2;
+  extensions 3 to 4;
+  extend A {
+    optional int64 _q = 3;
+  }
+}
+
+message A_ {
+  optional string foo = 1;
+}
+
+message A {
+  optional string _f = 1;
+  optional string f = 2;
+  extensions 3 to 4;
+  optional _A b = 5;
+  optional _A _b = 6;
+  optional _A _c = 7;
+  optional _Enum _e = 8;
+  map<string, _A> _amap = 9;
+  repeated _A _r = 10;
+
+  oneof _colors {
+    string _red = 11;
+    string _green = 12;
+  }
+}
+
+extend _A {
+  optional int64 _p = 3;
+  optional int64 p = 4;
+}
+
+extend A {
+  optional int64 _q = 4;
+}
+
+enum _Enum {
+  _default = 0;
+  constant = 1;
+  _1digit = 2;
+}
+
+service _service {
+  rpc _search (_A) returns (_A);
+  rpc search (_A) returns (_A);
+}

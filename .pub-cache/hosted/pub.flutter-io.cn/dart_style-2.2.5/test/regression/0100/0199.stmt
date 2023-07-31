@@ -1,0 +1,8 @@
+>>> (indent 4)
+    final monitorTimeout = (utcTime.millisecondsSinceEpoch +
+            3 * Duration.MILLISECONDS_PER_MINUTE) /
+        1000;
+<<<
+    final monitorTimeout = (utcTime.millisecondsSinceEpoch +
+            3 * Duration.MILLISECONDS_PER_MINUTE) /
+        1000;

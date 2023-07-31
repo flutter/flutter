@@ -1,0 +1,12 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+    - lib/src/assets/**
+
+linter:
+  rules:
+    # Enable additional rules.
+    depend_on_referenced_packages: true
+    directives_ordering: true
+    sort_pub_dependencies: true

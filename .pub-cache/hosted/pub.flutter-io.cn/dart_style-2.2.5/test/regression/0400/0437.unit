@@ -1,0 +1,22 @@
+>>>
+class Foo {
+  static ExportElementImpl exportFor(LibraryElement exportedLibrary,
+      [List<NamespaceCombinator> combinators = NamespaceCombinator
+          .EMPTY_LIST]) {
+    ExportElementImpl spec = new ExportElementImpl(-1);
+    spec.exportedLibrary = exportedLibrary;
+    spec.combinators = combinators;
+    return spec;
+  }
+}
+<<<
+class Foo {
+  static ExportElementImpl exportFor(LibraryElement exportedLibrary,
+      [List<NamespaceCombinator> combinators =
+          NamespaceCombinator.EMPTY_LIST]) {
+    ExportElementImpl spec = new ExportElementImpl(-1);
+    spec.exportedLibrary = exportedLibrary;
+    spec.combinators = combinators;
+    return spec;
+  }
+}

@@ -1,0 +1,12 @@
+>>>
+var hawaiianBeaches = {
+  'oahu'       : ['waikiki', 'kailua', 'waimanalo'],
+  'big island' : ['wailea bay', 'pololu beach'],
+  'kauai'      : ['hanalei', 'poipu']
+};
+<<<
+var hawaiianBeaches = {
+  'oahu': ['waikiki', 'kailua', 'waimanalo'],
+  'big island': ['wailea bay', 'pololu beach'],
+  'kauai': ['hanalei', 'poipu']
+};

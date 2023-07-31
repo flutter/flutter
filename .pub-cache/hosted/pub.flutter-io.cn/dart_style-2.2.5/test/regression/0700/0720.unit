@@ -1,0 +1,12 @@
+>>> (fix optional-const)
+@meta(const Foo(const []))
+library foo;
+<<<
+@meta(Foo([]))
+library foo;
+>>> (fix optional-const)
+@meta(const Foo(const []))
+import 'foo.dart';
+<<<
+@meta(Foo([]))
+import 'foo.dart';

@@ -1,0 +1,80 @@
+{
+  "ask": {
+    "existing_page": "[%s] sayfası zaten mevcut, üzerine mi yazılsın?",
+    "name_to_project": "Projenin adı nedir?",
+    "company_domain": "Şirketinizin domain adresi nedir?",
+    "model_name": "Model adı otomatik olarak ayarlanamadı, hangi ad kullanılsın?",
+    "package_already_installed": "Paket: %s zaten yüklü, güncellemek ister misin?",
+    "lib_not_empty": "lib klasörünüz boş değil. Bu uygulamanın üzerine yazmak istediğinden emin misin? \\n UYARI: Bu işlem geri alınamaz"
+  },
+  "error": {
+    "failed_to_connect": "%s ile bağlantı başarısız oldu",
+    "no_valid_file_or_url": "%s bir dosya veya geçerli bir url değil",
+    "unnecessary_parameter": "%s parametresi gerekli değil",
+    "unnecessary_parameter_plural": "%s parametreleri gerekli değil",
+    "nonexistent_directory": "%s dizini mevcut değil.",
+    "empty_directory": "%s dizini boş",
+    "invalid_json": "%s, geçerli bir json dosyası değil",
+    "special_characters_in_key": "Anahtar içerisinde özel karakterlere izin verilmez. \\n karakter: %s",
+    "required_path": "Dosya veya dizin yolunu geçmek için gerekli",
+    "invalid_dart": "%s geçerli bir dart dosyası değil",
+    "invalid_file_or_directory": "%s geçerli bir dosya veya dizin değil",
+    "package_not_found": "Paket: %s pub.dev'de bulunamadı",
+    "cli_version_not_found": "Yüklemek istediğiniz sürüm bulunamadı.",
+    "update_cli": "get_cli yükseltilirken bir hata oluştu",
+    "folder_not_found": "%s klasörü bulunamadı",
+    "file_not_found": "%s içinde dosya bulunamadı",
+    "access_denied": "%s için erişim engellendi",
+    "unexpected": "Beklenmeyen bir hata meydana geldi:"
+  },
+  "example": "Örneğin:",
+  "hint": {
+    "create": {
+      "controller": "Controller oluşturur",
+      "page": "Sayfa oluşturur",
+      "project": "Yeni proje oluşturur",
+      "provider": "Provider oluşturur",
+      "screen": "Screen oluşturur",
+      "view": "View oluşturur"
+    },
+    "generate": {
+      "locales": "Json dosyalarından çeviri dosyası oluşturur.",
+      "model": "Json'dan model sınıfı oluşturur"
+    },
+    "help": "Yardımları gösterir",
+    "init": "Mevcut projede seçilen yapıyı oluşturur:",
+    "install": "Mevcut projeye bir paket yükler (dependencies):",
+    "remove": "Mevcut projedeki bir paketi kaldırır (dependencies):",
+    "sort": "İçe aktarılanları sıralar ve dart dosyalarını biçimlendirir",
+    "update": "GET_CLI günceller",
+    "version": "Mevcut CLI sürümünü gösterir'"
+  },
+  "info": {
+    "unnecessary_flag": "%s gerekli değil",
+    "unnecessary_flag_prural": "%s gerekli değil",
+    "package_not_installed": "Paket: %s bu uygulama için yüklenemedi",
+    "cli_last_version_already_installed": "get_cli'nin son sürümü zaten yüklü",
+    "no_file_overwritten": "Hiçbir dosyanın üzerine yazılmadı",
+    "update_available": "Bir güncelleme mevcut! Mevcut yüklü sürüm: %s",
+    "update_available2": "Yeni sürüm mevcut: %s çalıştırın:"
+  },
+  "options": {
+    "yes": "Evet!",
+    "no": "Hayır"
+  },
+  "optional_parameters": "Opsiyonel parametreler: %s",
+  "sucess": {
+    "page_create": "%s sayfası başarıyla oluşturuldu.",
+    "locale_generate": "yerel dosyalar başarıyla oluşturuldu.",
+    "getx_pattern_generated": "GetX Pattern yapısı başarıyla oluşturuldu.",
+    "clean_Pattern_generated": "CLEAN Pattern yapısı başarıyla oluşturuldu.",
+    "file_formatted": " '%s' başarıyla biçimlendirildi.",
+    "package_removed": "Paket: %s kaldırıldı!",
+    "package_installed": "'Paket: %s yüklendi!",
+    "update_cli": "Yükseltme tamamlandı.",
+    "add_controller_in_bindings": "%s bağlayıcıya eklendi. Eklendiği dizin: %s'",
+    "navigation_added": "%s navigasyonu başarıyla eklendi.",
+    "file_created": "Dosya: %s başarıyla oluşturuldu. Oluşturulduğu dizin: %s",
+    "route_created": "%s rotası başarıyla oluşturuldu."
+  }
+}

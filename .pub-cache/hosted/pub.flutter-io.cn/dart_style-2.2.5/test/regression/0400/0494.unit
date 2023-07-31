@@ -1,0 +1,14 @@
+>>> (note: output is weird, but that's ok. the bug was that an assertion failed)
+main() {
+  for (int i = 0; i < 10; i++)
+    for (int j = 0; j < 3; j++) {
+      print('');
+    }
+}
+<<<
+main() {
+  for (int i = 0; i < 10; i++)
+    for (int j = 0; j < 3; j++) {
+      print('');
+    }
+}

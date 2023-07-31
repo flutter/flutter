@@ -1,0 +1,16 @@
+>>>
+var mymap = {
+  // foo
+  'key': '''
+      value value value value value value value value value value value value
+      value value value value value value value value value
+''',
+};
+<<<
+var mymap = {
+  // foo
+  'key': '''
+      value value value value value value value value value value value value
+      value value value value value value value value value
+''',
+};

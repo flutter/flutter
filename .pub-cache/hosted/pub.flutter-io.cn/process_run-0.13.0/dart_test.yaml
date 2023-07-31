@@ -1,0 +1,4 @@
+platforms:
+  - vm
+  - node
+concurrency: 1

@@ -1,0 +1,15 @@
+// Copyright (c) 2020, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto2";
+
+import "descriptor.proto";
+
+extend google.protobuf.MessageOptions {
+  optional string my_option = 51234;
+}
+
+message MyMessage {
+  option (my_option) = "Hello world!";
+}

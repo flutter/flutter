@@ -1,0 +1,32 @@
+language: dart
+sudo: required
+addons:
+  chrome: stable
+
+dart:
+  - dev
+
+with_content_shell: false
+
+before_install:
+  - "export CHROMEDRIVER_BINARY=/usr/bin/google-chrome"
+  - "export CHROMEDRIVER_ARGS=--no-sandbox"
+  - "/usr/bin/google-chrome --version"
+  - "export CHROME_LATEST_VERSION=$(/usr/bin/google-chrome --version | cut -d' ' -f3 | cut -d'.' -f1)"
+  - "export CHROME_DRIVER_VERSION=$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_LATEST_VERSION)"
+  - "wget https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip"
+  - unzip chromedriver_linux64.zip
+  - "export PATH=$PATH:$PWD"
+  - ./tool/travis-setup.sh
+
+script:
+  - ./tool/travis.sh
+
+cache:
+ directories:
+   - $HOME/.pub-cache
+
+# Only building master means that we don't run two builds for each pull request.
+branches:
+  only:
+    - master

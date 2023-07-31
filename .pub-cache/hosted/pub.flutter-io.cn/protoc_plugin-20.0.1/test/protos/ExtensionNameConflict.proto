@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package protobuf_unittest;
+
+// Cause a conflict with the auto-generated extension class.
+message ExtensionNameConflict {
+}
+
+message AnotherMessageToBeExtended {
+  extensions 1 to max;
+}
+
+extend AnotherMessageToBeExtended {
+  optional int32 someExtension = 1;
+}
+

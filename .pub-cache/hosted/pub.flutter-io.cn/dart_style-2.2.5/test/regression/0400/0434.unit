@@ -1,0 +1,20 @@
+>>> (indent 2)
+  @eventHandler
+  bool computeChangePasswordDisabled(
+          String email, String password, String newPassword) =>
+      email == null ||
+          email.isEmpty ||
+          password == null ||
+          password.isEmpty ||
+          newPassword == null ||
+          newPassword.isEmpty;
+<<<
+  @eventHandler
+  bool computeChangePasswordDisabled(
+          String email, String password, String newPassword) =>
+      email == null ||
+      email.isEmpty ||
+      password == null ||
+      password.isEmpty ||
+      newPassword == null ||
+      newPassword.isEmpty;

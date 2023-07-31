@@ -1,0 +1,18 @@
+>>>
+class PartyOrganizerInterviewer {
+  PartyOrganizerInterviewer(@MinimumAgeRequirement int minAge)
+      : isChampaignIncluded = partyModel
+          .isPropertyTrue(Properties.IS_CHAMPAIGN_AVAILABLE) {
+    this.isFoodIncluded =
+        partyModel.isPropertyTrue(Properties.IS_FOOD_AVAILABLE);
+  }
+}
+<<<
+class PartyOrganizerInterviewer {
+  PartyOrganizerInterviewer(@MinimumAgeRequirement int minAge)
+      : isChampaignIncluded =
+            partyModel.isPropertyTrue(Properties.IS_CHAMPAIGN_AVAILABLE) {
+    this.isFoodIncluded =
+        partyModel.isPropertyTrue(Properties.IS_FOOD_AVAILABLE);
+  }
+}

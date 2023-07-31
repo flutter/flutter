@@ -1,0 +1,23 @@
+language: dart
+
+addons:
+  chrome: stable
+
+dart:
+  - dev
+
+jobs:
+  include:
+  - script: pub run test
+  - script: pub run test -p chrome
+  - dart_task: dartfmt
+  - dart_task:
+      dartanalyzer: --fatal-infos --fatal-warnings .
+
+# Only building master means that we don't run two builds for each pull request.
+branches:
+  only: [master]
+
+cache:
+  directories:
+    - $HOME/.pub-cache

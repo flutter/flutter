@@ -1,0 +1,19 @@
+// Copyright (c) 2020, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto3";
+
+package third_party.dart.protoc_plugin.test.protos;
+
+message Foo {
+  optional int32 optional_field = 1;
+  int32 non_optional_field = 2;
+  optional Submessage optional_submessage = 3;
+  Submessage non_optional_submessage = 4;
+
+}
+
+message Submessage {
+ int32 a = 1;
+}

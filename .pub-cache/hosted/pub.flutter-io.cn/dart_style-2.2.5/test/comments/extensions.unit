@@ -1,0 +1,196 @@
+40 columns                              |
+>>> indented line comment
+extension A on B {
+  // comment
+}
+<<<
+extension A on B {
+  // comment
+}
+>>> line comment on opening line
+extension A on B { // comment
+}
+<<<
+extension A on B {
+  // comment
+}
+>>> indented block comment
+extension A on B {
+  /* comment */
+}
+<<<
+extension A on B {
+  /* comment */
+}
+>>> block comment with trailing newline
+extension A on B {/* comment */
+}
+<<<
+extension A on B {
+  /* comment */
+}
+>>> block comment with leading newline
+extension A on B {
+  /* comment */}
+<<<
+extension A on B {
+  /* comment */
+}
+>>> inline block comment
+extension A on B {  /* comment */  }
+<<<
+extension A on B {/* comment */}
+>>> multiple comments on opening line
+extension A on B { /* first */ // second
+}
+<<<
+extension A on B {
+  /* first */ // second
+}
+>>> multiple inline block comments
+extension A on B {  /*1*/   /*2*/   /*3*/  }
+<<<
+extension A on B {/*1*/ /*2*/ /*3*/}
+>>> multiline trailing block comment
+extension A on B {  /* comment
+*/  }
+<<<
+extension A on B {
+  /* comment
+*/
+}
+>>> lines comments at the start of the line in body
+extension A on B {
+//  a() => 1;
+//  b() => 2;
+  c() => 3;
+}
+<<<
+extension A on B {
+//  a() => 1;
+//  b() => 2;
+  c() => 3;
+}
+>>> block comment
+extension A on B/* is cool */{
+  /* int */ foo(/* comment */) => 42;
+}
+<<<
+extension A on B /* is cool */ {
+  /* int */ foo(/* comment */) => 42;
+}
+>>> block comments in odd places
+extension/*1*/A/*2*/on B {}
+extension A on/*3*/B/*4*/{}
+<<<
+extension /*1*/ A /*2*/ on B {}
+
+extension A on /*3*/ B /*4*/ {}
+>>> line comments in odd places
+extension// 1
+A// 2
+on// 3
+B// 4
+{}
+<<<
+extension // 1
+    A // 2
+    on // 3
+    B // 4
+{}
+>>> block comment
+library foo;
+/* A long
+ * Comment
+*/
+extension A on B /* is cool */ {
+  /* int */ foo() => 42;
+}
+<<<
+library foo;
+
+/* A long
+ * Comment
+*/
+extension A on B /* is cool */ {
+  /* int */ foo() => 42;
+}
+>>> ensure blank line above doc comments
+extension A on B {a() => 1;
+/// doc
+b() => 2;}
+<<<
+extension A on B {
+  a() => 1;
+
+  /// doc
+  b() => 2;
+}
+>>> remove blank lines before beginning of body
+extension A on B {
+
+
+
+  // comment
+}
+<<<
+extension A on B {
+  // comment
+}
+>>> remove blank lines after end of body
+extension A on B {
+  // comment
+
+
+
+}
+<<<
+extension A on B {
+  // comment
+}
+>>> nested flush left comment
+extension A on B {
+  method() {
+// flush
+  }
+}
+<<<
+extension A on B {
+  method() {
+// flush
+  }
+}
+>>> nested flush left after non-nested
+extension A on B {
+  method() {
+    // ...
+// flush
+  }
+}
+<<<
+extension A on B {
+  method() {
+    // ...
+// flush
+  }
+}
+>>> force doc comment between extensions to have two newlines before
+extension A on B {} /**
+*/
+extension A on B {}
+<<<
+extension A on B {}
+
+/**
+*/
+extension A on B {}
+>>> force doc comment between classes to have newline after
+extension A on B {}
+/**
+*/ extension A on B {}
+<<<
+extension A on B {}
+
+/**
+*/
+extension A on B {}

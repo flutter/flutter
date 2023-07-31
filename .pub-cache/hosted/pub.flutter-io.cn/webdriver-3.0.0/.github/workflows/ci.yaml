@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  # Run on PRs and pushes to the default branch.
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+  - cron: "0 0 * * 0"
+
+env:
+  PUB_ENVIRONMENT: bot.github
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: [dev]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dart-lang/setup-dart@v0.3
+      with:
+        sdk: ${{ matrix.sdk }}
+    - id: install
+      name: Install dependencies
+      run: dart pub get
+    - name: Check formatting
+      run: dart format --output=none --set-exit-if-changed .
+      if: always() && steps.install.outcome == 'success'
+    - name: Analyze code
+      run: dart analyze --fatal-infos
+      if: always() && steps.install.outcome == 'success'
+
+  test_chrome:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        sdk: [dev]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dart-lang/setup-dart@v0.3
+      with:
+        sdk: ${{ matrix.sdk }}
+    - uses: nanasess/setup-chromedriver@v1.0.1
+    - id: install
+      name: Install dependencies
+      run: dart pub get
+    - name: test
+      run: |
+        export DISPLAY=:99
+        chromedriver --port=4444 --url-base=/wd/hub &
+        sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+        pub run test --exclude-tags ff
+      if: always() && steps.install.outcome == 'success'
+      env:
+        CHROMEDRIVER_ARGS: '--no-sandbox --headless'
+
+  test_firefox:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        sdk: [dev]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dart-lang/setup-dart@v0.3
+      with:
+        sdk: ${{ matrix.sdk }}
+    - uses: browser-actions/setup-geckodriver@v0.0.0
+    - id: install
+      name: Install dependencies
+      run: dart pub get
+    - name: test
+      run: |
+        export DISPLAY=:99
+        geckodriver --port=4445 &
+        sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+        pub run test --tags ff
+      if: always() && steps.install.outcome == 'success'

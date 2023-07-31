@@ -1,0 +1,13 @@
+// Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto2";
+
+message M {
+  // Make sure that we handle 29 bits of tagnumber.
+  // (1 << 28) + 1
+  optional int32 a = 268435457;
+  // (1 << 29) - 1
+  optional int32 b = 536870911;
+}

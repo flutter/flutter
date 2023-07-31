@@ -1,0 +1,218 @@
+40 columns                              |
+>>> nested functions
+x(){y(){z(){}}}
+<<<
+x() {
+  y() {
+    z() {}
+  }
+}
+>>> named parameters
+int a(var x, {optional: null}) => null;
+<<<
+int a(var x, {optional: null}) => null;
+>>> optional parameters
+int a(var x, [optional = null]) => null;
+<<<
+int a(var x, [optional = null]) => null;
+>>> async
+main()
+    async  {
+  var x = ()   async=> 1;
+  y()async  {}
+  var z = ()
+ async
+     {};
+}
+<<<
+main() async {
+  var x = () async => 1;
+  y() async {}
+  var z = () async {};
+}
+>>>
+fish() => []
+  ..add(1)
+  ..add(2);
+<<<
+fish() => []
+  ..add(1)
+  ..add(2);
+>>>
+fish() => []..add(1);
+<<<
+fish() => []..add(1);
+>>> empty function bodies are a single line
+void main() { }
+<<<
+void main() {}
+>>>
+void main() {
+
+}
+<<<
+void main() {}
+>>> DO use a space after : in named parameters
+foo({showScrollbars :false}) {}
+<<<
+foo({showScrollbars: false}) {}
+>>> DO use a spaces around = in optional positional parameters.
+listen([int port=80]) {}
+<<<
+listen([int port = 80]) {}
+>>> async*
+main()async  *{var lambda = ()async *{};}
+<<<
+main() async* {
+  var lambda = () async* {};
+}
+>>> sync* functions
+main()sync  *{var lambda = ()sync *{};}
+<<<
+main() sync* {
+  var lambda = () sync* {};
+}
+>>> trailing comma in single parameter list
+function(parameter   ,   ) {;}
+<<<
+function(
+  parameter,
+) {
+  ;
+}
+>>> trailing comma in parameter list
+function(parameter,parameter  ,  ) {;}
+<<<
+function(
+  parameter,
+  parameter,
+) {
+  ;
+}
+>>> trailing comma in all optional parameter list
+function([parameter,parameter  ,  ]) {;}
+<<<
+function([
+  parameter,
+  parameter,
+]) {
+  ;
+}
+>>> trailing comma in all named parameter list
+function({parameter,parameter  ,  }) {;}
+<<<
+function({
+  parameter,
+  parameter,
+}) {
+  ;
+}
+>>> trailing comma in mixed optional parameter list
+function(parameter,[parameter,parameter  ,  ]) {;}
+<<<
+function(
+  parameter, [
+  parameter,
+  parameter,
+]) {
+  ;
+}
+>>> trailing comma in mixed named parameter list
+function(parameter,{parameter,parameter  ,  }) {;}
+<<<
+function(
+  parameter, {
+  parameter,
+  parameter,
+}) {
+  ;
+}
+>>> trailing comma with => function containing split
+function(parameter,parameter,) => veryLongBodyThatWraps(argument, argument, argument, argument);
+<<<
+function(
+  parameter,
+  parameter,
+) =>
+    veryLongBodyThatWraps(argument,
+        argument, argument, argument);
+>>> trailing comma with wrap at =>
+function(parameter,parameter,) /* comment */ => "a very very long string";
+<<<
+function(
+  parameter,
+  parameter,
+) /* comment */ =>
+    "a very very long string";
+>>> trailing comma function nested in expression
+main() {
+  someVeryLongFunction(argument, argument, (parameter, parameter,) {;});
+}
+<<< (this looks weird, but it should rare and at least we test it)
+main() {
+  someVeryLongFunction(
+      argument, argument, (
+    parameter,
+    parameter,
+  ) {
+    ;
+  });
+}
+>>> generic function typed parameter
+function(int   foo  <  T  ,S >(T t, S s)) {}
+<<<
+function(int foo<T, S>(T t, S s)) {}
+>>> nullable old style function typed parameter
+function(int? callback()    ?  ) {}
+<<<
+function(int? callback()?) {}
+>>> nullable old style function typed parameter with trailing comma
+function(int? f()?  ,p) {}
+<<<
+function(int? f()?, p) {}
+>>> nullable old style function typed parameter with trailing comma
+function(int? callback()   ?   ,    ) {}
+<<<
+function(
+  int? callback()?,
+) {}
+>>> nullable old style named function typed parameter
+function({int? callback()    ?  }) {}
+<<<
+function({int? callback()?}) {}
+>>> nullable old style initializing formal function typed parameter
+function(int? this.callback()    ?  ) {}
+<<<
+function(int? this.callback()?) {}
+>>> required parameters
+class A {
+f({   required    int a,required   b}) {}
+}
+<<<
+class A {
+  f({required int a, required b}) {}
+}
+>>> required covariant
+class A {
+f({   required    covariant   int a}) {}
+}
+<<<
+class A {
+  f({required covariant int a}) {}
+}
+>>> required function-typed formal
+class A {
+f({   required    callback()}) {}
+}
+<<<
+class A {
+  f({required callback()}) {}
+}
+>>> required initializing formal
+class A {
+A({   required    this.b}) {}
+}
+<<<
+class A {
+  A({required this.b}) {}
+}

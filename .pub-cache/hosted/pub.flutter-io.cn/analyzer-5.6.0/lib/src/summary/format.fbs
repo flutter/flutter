@@ -1,0 +1,447 @@
+// Copyright (c) 2015, the Dart project authors. Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+// This file has been automatically generated.  Please do not edit it manually.
+// To regenerate the file, use the SDK script
+// "pkg/analyzer/tool/summary/generate.dart $IDL_FILE_PATH",
+// or "pkg/analyzer/tool/generate_files" for the analyzer package IDL/sources.
+
+
+/// Enum of declaration kinds in available files.
+enum AvailableDeclarationKind : byte {
+  CLASS,
+
+  CLASS_TYPE_ALIAS,
+
+  CONSTRUCTOR,
+
+  ENUM,
+
+  ENUM_CONSTANT,
+
+  EXTENSION,
+
+  FIELD,
+
+  FUNCTION,
+
+  FUNCTION_TYPE_ALIAS,
+
+  GETTER,
+
+  METHOD,
+
+  MIXIN,
+
+  SETTER,
+
+  TYPE_ALIAS,
+
+  VARIABLE
+}
+
+/// Enum used to indicate the kind of an index relation.
+enum IndexRelationKind : byte {
+  /// Left: class.
+  ///   Is ancestor of (is extended or implemented, directly or indirectly).
+  /// Right: other class declaration.
+  IS_ANCESTOR_OF,
+
+  /// Left: class.
+  ///   Is extended by.
+  /// Right: other class declaration.
+  IS_EXTENDED_BY,
+
+  /// Left: class.
+  ///   Is implemented by.
+  /// Right: other class declaration.
+  IS_IMPLEMENTED_BY,
+
+  /// Left: an interface element.
+  ///   Constrains.
+  /// Right: mixin.
+  CONSTRAINS,
+
+  /// Left: class.
+  ///   Is mixed into.
+  /// Right: other class declaration.
+  IS_MIXED_IN_BY,
+
+  /// Left: method, property accessor, function, variable.
+  ///   Is invoked at.
+  /// Right: location.
+  IS_INVOKED_BY,
+
+  /// Left: an unnamed constructor.
+  ///   Is invoked by an enum constant, without arguments, which is special
+  ///   because when the name given, an empty argument list must be added.
+  /// Right: location.
+  IS_INVOKED_BY_ENUM_CONSTANT_WITHOUT_ARGUMENTS,
+
+  /// Left: any element.
+  ///   Is referenced (and not invoked, read/written) at.
+  /// Right: location.
+  IS_REFERENCED_BY,
+
+  /// Left: a constructor.
+  ///   Is referenced by a constructor tear-off at, which is special because
+  ///   the name of the constructor is required (`new` for unnamed).
+  /// Right: location.
+  IS_REFERENCED_BY_CONSTRUCTOR_TEAR_OFF,
+
+  /// Left: unresolved member name.
+  ///   Is read at.
+  /// Right: location.
+  IS_READ_BY,
+
+  /// Left: unresolved member name.
+  ///   Is both read and written at.
+  /// Right: location.
+  IS_READ_WRITTEN_BY,
+
+  /// Left: unresolved member name.
+  ///   Is written at.
+  /// Right: location.
+  IS_WRITTEN_BY
+}
+
+/// When we need to reference a synthetic element in [PackageIndex] we use a
+/// value of this enum to specify which kind of the synthetic element we
+/// actually reference.
+enum IndexSyntheticElementKind : byte {
+  /// Not a synthetic element.
+  notSynthetic,
+
+  /// The unnamed synthetic constructor a class element.
+  constructor,
+
+  /// The synthetic field element.
+  field,
+
+  /// The synthetic getter of a property introducing element.
+  getter,
+
+  /// The synthetic setter of a property introducing element.
+  setter,
+
+  /// The synthetic top-level variable element.
+  topLevelVariable,
+
+  /// The synthetic `loadLibrary` element.
+  loadLibrary,
+
+  /// The synthetic `index` getter of an enum.
+  enumIndex,
+
+  /// The synthetic `values` getter of an enum.
+  enumValues,
+
+  /// The synthetic `toString` method of an enum.
+  enumToString,
+
+  /// The containing unit itself.
+  unit
+}
+
+/// Information about the context of an exception in analysis driver.
+table AnalysisDriverExceptionContext {
+  /// The exception string.
+  exception:string (id: 1);
+
+  /// The state of files when the exception happened.
+  files:[AnalysisDriverExceptionFile] (id: 3);
+
+  /// The path of the file being analyzed when the exception happened.
+  path:string (id: 0);
+
+  /// The exception stack trace string.
+  stackTrace:string (id: 2);
+}
+
+/// Information about a single file in [AnalysisDriverExceptionContext].
+table AnalysisDriverExceptionFile {
+  /// The content of the file.
+  content:string (id: 1);
+
+  /// The path of the file.
+  path:string (id: 0);
+}
+
+/// Information about a resolved unit.
+table AnalysisDriverResolvedUnit {
+  /// The full list of analysis errors, both syntactic and semantic.
+  errors:[AnalysisDriverUnitError] (id: 0);
+
+  /// The index of the unit.
+  index:AnalysisDriverUnitIndex (id: 1);
+}
+
+/// Information about a subtype of one or more classes.
+table AnalysisDriverSubtype {
+  /// The names of defined instance members.
+  /// They are indexes into [AnalysisDriverUnitError.strings] list.
+  /// The list is sorted in ascending order.
+  members:[uint] (id: 1);
+
+  /// The name of the class.
+  /// It is an index into [AnalysisDriverUnitError.strings] list.
+  name:uint (id: 0);
+}
+
+/// Information about an error in a resolved unit.
+table AnalysisDriverUnitError {
+  /// The context messages associated with the error.
+  contextMessages:[DiagnosticMessage] (id: 5);
+
+  /// The optional correction hint for the error.
+  correction:string (id: 4);
+
+  /// The length of the error in the file.
+  length:uint (id: 1);
+
+  /// The message of the error.
+  message:string (id: 3);
+
+  /// The offset from the beginning of the file.
+  offset:uint (id: 0);
+
+  /// The unique name of the error code.
+  uniqueName:string (id: 2);
+}
+
+/// Information about a resolved unit.
+table AnalysisDriverUnitIndex {
+  /// Each item of this list corresponds to a unique referenced element. It is
+  /// a list of the prefixes associated with references to the element.
+  elementImportPrefixes:[string] (id: 20);
+
+  /// Each item of this list corresponds to a unique referenced element.  It is
+  /// the kind of the synthetic element.
+  elementKinds:[IndexSyntheticElementKind] (id: 4);
+
+  /// Each item of this list corresponds to a unique referenced element.  It is
+  /// the identifier of the class member element name, or `null` if the element
+  /// is a top-level element.  The list is sorted in ascending order, so that
+  /// the client can quickly check whether an element is referenced in this
+  /// index.
+  elementNameClassMemberIds:[uint] (id: 7);
+
+  /// Each item of this list corresponds to a unique referenced element.  It is
+  /// the identifier of the named parameter name, or `null` if the element is
+  /// not a named parameter.  The list is sorted in ascending order, so that the
+  /// client can quickly check whether an element is referenced in this index.
+  elementNameParameterIds:[uint] (id: 8);
+
+  /// Each item of this list corresponds to a unique referenced element.  It is
+  /// the identifier of the top-level element name, or `null` if the element is
+  /// the unit.  The list is sorted in ascending order, so that the client can
+  /// quickly check whether an element is referenced in this index.
+  elementNameUnitMemberIds:[uint] (id: 6);
+
+  /// Each item of this list corresponds to a unique referenced element.  It is
+  /// the index into [unitLibraryUris] and [unitUnitUris] for the library
+  /// specific unit where the element is declared.
+  elementUnits:[uint] (id: 5);
+
+  /// Identifier of the null string in [strings].
+  nullStringId:uint (id: 1);
+
+  /// List of unique element strings used in this index.  The list is sorted in
+  /// ascending order, so that the client can quickly check the presence of a
+  /// string in this index.
+  strings:[string] (id: 0);
+
+  /// The list of classes declared in the unit.
+  subtypes:[AnalysisDriverSubtype] (id: 19);
+
+  /// The identifiers of supertypes of elements at corresponding indexes
+  /// in [subtypes].  They are indexes into [strings] list. The list is sorted
+  /// in ascending order.  There might be more than one element with the same
+  /// value if there is more than one subtype of this supertype.
+  supertypes:[uint] (id: 18);
+
+  /// Each item of this list corresponds to the library URI of a unique library
+  /// specific unit referenced in the index.  It is an index into [strings]
+  /// list.
+  unitLibraryUris:[uint] (id: 2);
+
+  /// Each item of this list corresponds to the unit URI of a unique library
+  /// specific unit referenced in the index.  It is an index into [strings]
+  /// list.
+  unitUnitUris:[uint] (id: 3);
+
+  /// Each item of this list is the `true` if the corresponding element usage
+  /// is qualified with some prefix.
+  usedElementIsQualifiedFlags:[ubyte] (id: 13);
+
+  /// Each item of this list is the kind of the element usage.
+  usedElementKinds:[IndexRelationKind] (id: 10);
+
+  /// Each item of this list is the length of the element usage.
+  usedElementLengths:[uint] (id: 12);
+
+  /// Each item of this list is the offset of the element usage relative to the
+  /// beginning of the file.
+  usedElementOffsets:[uint] (id: 11);
+
+  /// Each item of this list is the index into [elementUnits],
+  /// [elementNameUnitMemberIds], [elementNameClassMemberIds] and
+  /// [elementNameParameterIds].  The list is sorted in ascending order, so
+  /// that the client can quickly find element references in this index.
+  usedElements:[uint] (id: 9);
+
+  /// Each item of this list is the `true` if the corresponding name usage
+  /// is qualified with some prefix.
+  usedNameIsQualifiedFlags:[ubyte] (id: 17);
+
+  /// Each item of this list is the kind of the name usage.
+  usedNameKinds:[IndexRelationKind] (id: 15);
+
+  /// Each item of this list is the offset of the name usage relative to the
+  /// beginning of the file.
+  usedNameOffsets:[uint] (id: 16);
+
+  /// Each item of this list is the index into [strings] for a used name.  The
+  /// list is sorted in ascending order, so that the client can quickly find
+  /// whether a name is used in this index.
+  usedNames:[uint] (id: 14);
+}
+
+/// Information about a single declaration.
+table AvailableDeclaration {
+  children:[AvailableDeclaration] (id: 0);
+
+  codeLength:uint (id: 1);
+
+  codeOffset:uint (id: 2);
+
+  defaultArgumentListString:string (id: 3);
+
+  defaultArgumentListTextRanges:[uint] (id: 4);
+
+  docComplete:string (id: 5);
+
+  docSummary:string (id: 6);
+
+  fieldMask:uint (id: 7);
+
+  isAbstract:bool (id: 8);
+
+  isConst:bool (id: 9);
+
+  isDeprecated:bool (id: 10);
+
+  isFinal:bool (id: 11);
+
+  isStatic:bool (id: 12);
+
+  /// The kind of the declaration.
+  kind:AvailableDeclarationKind (id: 13);
+
+  locationOffset:uint (id: 14);
+
+  locationStartColumn:uint (id: 15);
+
+  locationStartLine:uint (id: 16);
+
+  /// The first part of the declaration name, usually the only one, for example
+  /// the name of a class like `MyClass`, or a function like `myFunction`.
+  name:string (id: 17);
+
+  parameterNames:[string] (id: 18);
+
+  parameters:string (id: 19);
+
+  parameterTypes:[string] (id: 20);
+
+  /// The partial list of relevance tags.  Not every declaration has one (for
+  /// example, function do not currently), and not every declaration has to
+  /// store one (for classes it can be computed when we know the library that
+  /// includes this file).
+  relevanceTags:[string] (id: 21);
+
+  requiredParameterCount:uint (id: 22);
+
+  returnType:string (id: 23);
+
+  typeParameters:string (id: 24);
+}
+
+/// Information about an available, even if not yet imported file.
+table AvailableFile {
+  /// Declarations of the file.
+  declarations:[AvailableDeclaration] (id: 0);
+
+  /// The Dartdoc directives in the file.
+  directiveInfo:DirectiveInfo (id: 1);
+
+  /// Exports directives of the file.
+  exports:[AvailableFileExport] (id: 2);
+
+  /// Is `true` if this file is a library.
+  isLibrary:bool (id: 3);
+
+  /// Is `true` if this file is a library, and it is deprecated.
+  isLibraryDeprecated:bool (id: 4);
+
+  /// Offsets of the first character of each line in the source code.
+  lineStarts:[uint] (id: 5);
+
+  /// URIs of `part` directives.
+  parts:[string] (id: 6);
+}
+
+/// Information about an export directive.
+table AvailableFileExport {
+  /// Combinators contained in this export directive.
+  combinators:[AvailableFileExportCombinator] (id: 1);
+
+  /// URI of the exported library.
+  uri:string (id: 0);
+}
+
+/// Information about a `show` or `hide` combinator in an export directive.
+table AvailableFileExportCombinator {
+  /// List of names which are hidden.  Empty if this is a `show` combinator.
+  hides:[string] (id: 1);
+
+  /// List of names which are shown.  Empty if this is a `hide` combinator.
+  shows:[string] (id: 0);
+}
+
+/// Errors for a single unit.
+table CiderUnitErrors {
+  errors:[AnalysisDriverUnitError] (id: 0);
+}
+
+table DiagnosticMessage {
+  /// The absolute and normalized path of the file associated with this message.
+  filePath:string (id: 0);
+
+  /// The length of the source range associated with this message.
+  length:uint (id: 1);
+
+  /// The text of the message.
+  message:string (id: 2);
+
+  /// The zero-based offset from the start of the file to the beginning of the
+  /// source range associated with this message.
+  offset:uint (id: 3);
+
+  /// The URL of the message, if any.
+  url:string (id: 4);
+}
+
+/// Information about the Dartdoc directives in an [AvailableFile].
+table DirectiveInfo {
+  /// The names of the defined templates.
+  templateNames:[string] (id: 0);
+
+  /// The values of the defined templates.
+  templateValues:[string] (id: 1);
+}
+
+root_type AnalysisDriverResolvedUnit;
+
+file_identifier "ADRU";

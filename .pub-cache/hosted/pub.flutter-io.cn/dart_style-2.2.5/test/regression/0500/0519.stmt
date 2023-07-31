@@ -1,0 +1,9 @@
+>>> (indent 4)
+    <
+        int>[1, 2, 3, 4].forEach((int value) {
+      print(value);
+    });
+<<<
+    <int>[1, 2, 3, 4].forEach((int value) {
+      print(value);
+    });

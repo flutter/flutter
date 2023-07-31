@@ -1,0 +1,26 @@
+>>>
+return log.progress("Loading asset environment", () async {
+  var graph = await entrypoint.loadPackageGraph();
+  graph = _adjustPackageGraph(graph, mode, packages);
+  var barback = new Barback(new PubPackageProvider(graph));
+  barback.log.listen(_log);
+
+  var environment = new AssetEnvironment._(graph, barback, mode,
+      watcherType, hostname, basePort, environmentConstants);
+
+  await environment._load(entrypoints: entrypoints, useDart2JS: useDart2JS);
+  return environment;
+}, fine: true);
+<<<
+return log.progress("Loading asset environment", () async {
+  var graph = await entrypoint.loadPackageGraph();
+  graph = _adjustPackageGraph(graph, mode, packages);
+  var barback = new Barback(new PubPackageProvider(graph));
+  barback.log.listen(_log);
+
+  var environment = new AssetEnvironment._(graph, barback, mode, watcherType,
+      hostname, basePort, environmentConstants);
+
+  await environment._load(entrypoints: entrypoints, useDart2JS: useDart2JS);
+  return environment;
+}, fine: true);

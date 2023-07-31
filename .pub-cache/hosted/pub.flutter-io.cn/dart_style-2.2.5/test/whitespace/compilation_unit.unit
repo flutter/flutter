@@ -1,0 +1,144 @@
+40 columns                              |
+>>> discard newlines before library
+
+
+library a;
+<<<
+library a;
+>>> discard newlines before first import
+
+
+import 'a.dart';
+<<<
+import 'a.dart';
+>>> discard newlines before first export
+
+
+export 'a.dart';
+<<<
+export 'a.dart';
+>>> discard newlines before first class
+
+
+class A {}
+<<<
+class A {}
+>>> discard newlines before first variable
+
+
+var a = 1;
+<<<
+var a = 1;
+>>> discard newlines before first function
+
+
+foo() {}
+<<<
+foo() {}
+>>> collapse extra newlines between declarations
+
+
+
+class A {}
+
+
+
+class B = Base with Mixin;
+
+
+
+var c = 1;
+
+
+d() {}
+
+
+<<<
+class A {}
+
+class B = Base with Mixin;
+
+var c = 1;
+
+d() {}
+>>> force two newlines between directives and declarations
+library a; var b;
+<<<
+library a;
+
+var b;
+>>> dartbug.com/15912
+abstract class A = B with C<E>;
+<<<
+abstract class A = B with C<E>;
+>>> blank line between classes
+class A {} class B {}
+<<<
+class A {}
+
+class B {}
+>>> blank line between variables and classes
+var a = 1; class B{} var c = 3;
+<<<
+var a = 1;
+
+class B {}
+
+var c = 3;
+>>> blank line between functions and classes
+a() {} class B{} c() {}
+<<<
+a() {}
+
+class B {}
+
+c() {}
+>>> require newline between non-class declarations
+var a = 1; var b = 1; c() {} d() {} var e = 1;
+<<<
+var a = 1;
+var b = 1;
+c() {}
+d() {}
+var e = 1;
+>>> require blank line after non-empty block-bodied members
+var a = 1; b() {;} c() => null; get d {;} get e => null; set f(value) {;
+} set g(value) => null; var h = 1;
+<<<
+var a = 1;
+b() {
+  ;
+}
+
+c() => null;
+get d {
+  ;
+}
+
+get e => null;
+set f(value) {
+  ;
+}
+
+set g(value) => null;
+var h = 1;
+>>> no required blank line after empty block-bodied members
+var a = 1; b() {} c() => null; get d {} get e => null; set f(value) {
+} set g(value) => null; var h = 1;
+<<<
+var a = 1;
+b() {}
+c() => null;
+get d {}
+get e => null;
+set f(value) {}
+set g(value) => null;
+var h = 1;
+>>> late top level variables
+late    final int i;
+late   int i;
+late   var i;
+<<<
+late final int i;
+late int i;
+late var i;

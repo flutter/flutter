@@ -1,0 +1,39 @@
+# https://dart.dev/guides/language/analysis-options
+include: package:dart_flutter_team_lints/analysis_options.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    - avoid_bool_literals_in_conditional_expressions
+    - avoid_classes_with_only_static_members
+    - avoid_private_typedef_functions
+    - avoid_redundant_argument_values
+    - avoid_returning_null
+    - avoid_returning_null_for_future
+    - avoid_returning_this
+    - avoid_unused_constructor_parameters
+    - avoid_void_async
+    - cancel_subscriptions
+    - cascade_invocations
+    - comment_references
+    - join_return_with_assignment
+    - literal_only_boolean_expressions
+    - missing_whitespace_between_adjacent_strings
+    - no_adjacent_strings_in_list
+    - no_runtimeType_toString
+    - package_api_docs
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_expression_function_bodies
+    - prefer_relative_imports
+    - test_types_in_equals
+    - unnecessary_await_in_return
+    - use_if_null_to_convert_nulls_to_bools
+    - use_raw_strings
+    - use_string_buffers
+    - use_super_parameters

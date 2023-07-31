@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package protobuf_unittest_nested_any;
+
+import "google/protobuf/any.proto";
+
+message AnyMessage1 {
+  google.protobuf.Any any_field1 = 1;
+  string value = 2;
+}
+
+message AnyMessage2 {
+  google.protobuf.Any any_field2 = 1;
+  string value = 2;
+}

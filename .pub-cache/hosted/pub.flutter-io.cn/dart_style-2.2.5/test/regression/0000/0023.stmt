@@ -1,0 +1,24 @@
+>>>
+return options.releaseMode &&
+
+  // TODO(sigmund): remove this exclusion once we have dev_transformers
+  // (dartbug.com/14187)
+  !id.path.startsWith('lib/') &&
+
+  // may filter non-entry HTML files and internal artifacts
+  (id.extension == '.html' || id.extension == _DATA_EXTENSION) &&
+
+  // keep any entry points
+  !options.isHtmlEntryPoint(id);
+<<<
+return options.releaseMode &&
+
+    // TODO(sigmund): remove this exclusion once we have dev_transformers
+    // (dartbug.com/14187)
+    !id.path.startsWith('lib/') &&
+
+    // may filter non-entry HTML files and internal artifacts
+    (id.extension == '.html' || id.extension == _DATA_EXTENSION) &&
+
+    // keep any entry points
+    !options.isHtmlEntryPoint(id);

@@ -1,0 +1,9 @@
+>>>
+var failed = [
+  for (var e in _restResultEvents) if (!e.isSuccess) e.message,
+];
+<<<
+var failed = [
+  for (var e in _restResultEvents)
+    if (!e.isSuccess) e.message,
+];

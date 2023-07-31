@@ -1,0 +1,113 @@
+40 columns                              |
+>>> do not split before first clause
+for (extremelyReallyQuiteVeryLongFirstClause; second; third) {}
+<<<
+for (extremelyReallyQuiteVeryLongFirstClause;
+    second;
+    third) {}
+>>> split after first clause
+for (veryLongFirstClause; veryLongSecondClause; third) {}
+<<<
+for (veryLongFirstClause;
+    veryLongSecondClause;
+    third) {}
+>>> split after second clause
+for (longFirstClause; longSecondClause; third) {}
+<<<
+for (longFirstClause;
+    longSecondClause;
+    third) {}
+>>> unsplit multiple variable declarations
+for (var a = 1, b = 2; 3; 4) {}
+<<<
+for (var a = 1, b = 2; 3; 4) {}
+>>> split multiple variable declarations
+for (var first = initializer, second = initializer; 1; 2) {}
+<<<
+for (var first = initializer,
+        second = initializer;
+    1;
+    2) {}
+>>> unsplit updaters
+for (foo; bar; a++, b++) {}
+<<<
+for (foo; bar; a++, b++) {}
+>>> split between updaters splits everything
+for (foo; bar; first = 1, second = 2, third = 3, fourth = 4) {}
+<<<
+for (foo;
+    bar;
+    first = 1,
+    second = 2,
+    third = 3,
+    fourth = 4) {}
+>>> nest wrapped initializer
+for (very + long + initialization + expression; a; b) {}
+<<<
+for (very +
+        long +
+        initialization +
+        expression;
+    a;
+    b) {}
+>>> split in for-in loop
+for (var identifier in iteratableExpression) {}
+<<<
+for (var identifier
+    in iteratableExpression) {}
+>>> split in while condition
+while (aLongConditionExpressionThatWraps) {
+  ;
+}
+<<<
+while (
+    aLongConditionExpressionThatWraps) {
+  ;
+}
+>>> don't force variables to split if clauses do
+for (var a = 1, b = 2; longCondition(expression); a += b) {
+  ;
+}
+<<<
+for (var a = 1, b = 2;
+    longCondition(expression);
+    a += b) {
+  ;
+}
+>>> don't force updates to split if clauses do
+for (var a = 0; longCondition(expression); a += 1, b += 1) {
+  ;
+}
+<<<
+for (var a = 0;
+    longCondition(expression);
+    a += 1, b += 1) {
+  ;
+}
+>>> single line for without curlies
+for (i = 0; i < 10; i++) something(i);
+<<<
+for (i = 0; i < 10; i++) something(i);
+>>> multi-line for without curlies
+for (i = 0; i < 10; i++) somethingLonger(i);
+<<<
+for (i = 0; i < 10; i++)
+  somethingLonger(i);
+>>> single line for-in without curlies
+for (i in sequence) something(i);
+<<<
+for (i in sequence) something(i);
+>>> multi-line for-in without curlies
+for (i in sequence) somethingMuchLonger(i);
+<<<
+for (i in sequence)
+  somethingMuchLonger(i);
+>>> single line while without curlies
+while (condition) something(i);
+<<<
+while (condition) something(i);
+>>> multi-line while without curlies
+while (condition) somethingMuchLonger(i);
+<<<
+while (condition)
+  somethingMuchLonger(i);

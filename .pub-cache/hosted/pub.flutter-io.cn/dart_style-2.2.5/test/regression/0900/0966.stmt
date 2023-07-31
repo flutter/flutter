@@ -1,0 +1,24 @@
+>>>
+return [
+      for (final x in exampleList)
+        if (conditionA)
+          ItemConstructorA()
+       // Sample multi-line comment
+      // which broke the formatter
+        else if (conditionB)
+           ItemConstructorB()
+     else
+       ItemConstructorC()
+];
+<<<
+return [
+  for (final x in exampleList)
+    if (conditionA)
+      ItemConstructorA()
+    // Sample multi-line comment
+    // which broke the formatter
+    else if (conditionB)
+      ItemConstructorB()
+    else
+      ItemConstructorC()
+];

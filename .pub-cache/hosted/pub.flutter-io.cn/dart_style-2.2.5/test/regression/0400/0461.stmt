@@ -1,0 +1,11 @@
+>>> (indent 6)
+      receiver___________.property________.add(
+          new SomeClass___________________.someNamedConstructor_____________________());
+<<<
+      receiver___________.property________.add(new SomeClass___________________
+          .someNamedConstructor_____________________());
+>>> (indent 4)
+    new SomeClass___________________.someNamedConstructor_____________________();
+<<<
+    new SomeClass___________________
+        .someNamedConstructor_____________________();

@@ -1,0 +1,180 @@
+>>> enhanced enum language test
+// Full syntax, with every possible option.
+@EnumAll.v1
+@EnumAll.sConst
+enum EnumAll<S extends num, T extends num>
+    with GenericEnumMixin<T>, ObjectMixin
+    implements Interface, GenericInterface<S> {
+  @v1
+  @v2
+  v1,
+  @EnumAll.v2
+  v2(y: 2),
+  @sConst
+  v3<int, int>(y: 2),
+  v4.named(1, y: 2),
+  v5<int, int>.renamed(1, y: 2),
+  v6.new(),
+  ;
+
+  /// Static members.
+  ///
+  /// Any kind of static variable.
+  static const sConst = v3;
+  static final sFinal = v3;
+  static late final EnumAll sLateFinal;
+  static late final sLateFinalInit = v3;
+  static late EnumAll sLateVar;
+  static late var sLateVarInit = v3;
+  static EnumAll? sVar;
+  static EnumAll sVarInit = v3;
+  /// Static getters, setters and methods
+  static EnumAll<int, int> get staticGetSet => v3;
+  static set staticGetSet(EnumAll<int, int> _) {}
+  static int staticMethod() => 42;
+
+  // Constructors.
+  // Generative, non-redirecting, unnamed.
+  const EnumAll({T? y})
+      : constructor = "unnamed", this.x = 0 as S, y = y ?? (0 as T);
+  // Generative, non-redirecting, named.
+  const EnumAll.named(this.x, {T? y, String? constructor})
+      : constructor = constructor ?? "named", y = y ?? (0 as T);
+  // Generative, redirecting.
+  const EnumAll.renamed(S x, {T? y})
+      : this.named(x, y: y, constructor: "renamed");
+  // Factory, non-redirecting.
+  factory EnumAll.factory(int index) => values[index] as EnumAll<S, T>;
+  // Factory, redirecting (only to other factory constructor).
+  factory EnumAll.refactory(int index) = EnumAll<S, T>.factory;
+
+  // Cannot have factory constructors redirecting to generative constructors.
+  // (Nothing can refer to generative constructors except redirecting generative
+  // constructors and the implicit element creation expressions.)
+  // Cannot have const factory constructor, because they *must* redirect to
+  // generative constructors.
+  // Cannot have `super`-constructor invocations in initializer lists.
+
+  // Instance members.
+
+  // Instance variables must be final and non-late because of const constructor.
+  final String constructor;
+  final S x;
+  final num y;
+
+  // Getters, setters, methods and operators.
+  S get instanceGetSet => x;
+  set instanceGetSet(S _) {}
+  S instanceMethod() => x;
+  EnumAll<num, num> operator ^(EnumAll<num, num> other) {
+    var newIndex = index ^ other.index;
+    if (newIndex > 4) newIndex = 4;
+    return values[newIndex]; // Can refer to `values`.
+  }
+
+  // Can access `this` and `super` in an instance method.
+  String thisAndSuper() => "${super.toString()}:${this.toString()}";
+
+  // Can be callable.
+  T call<T>(T value) => value;
+
+  // Can have an `index` setter.
+  set index(int value) {}
+
+  // Instance members shadow extensions.
+  String get notExtension => "not extension";
+
+  String toString() => "this";
+}
+<<<
+// Full syntax, with every possible option.
+@EnumAll.v1
+@EnumAll.sConst
+enum EnumAll<S extends num, T extends num>
+    with GenericEnumMixin<T>, ObjectMixin
+    implements Interface, GenericInterface<S> {
+  @v1
+  @v2
+  v1,
+  @EnumAll.v2
+  v2(y: 2),
+  @sConst
+  v3<int, int>(y: 2),
+  v4.named(1, y: 2),
+  v5<int, int>.renamed(1, y: 2),
+  v6.new(),
+  ;
+
+  /// Static members.
+  ///
+  /// Any kind of static variable.
+  static const sConst = v3;
+  static final sFinal = v3;
+  static late final EnumAll sLateFinal;
+  static late final sLateFinalInit = v3;
+  static late EnumAll sLateVar;
+  static late var sLateVarInit = v3;
+  static EnumAll? sVar;
+  static EnumAll sVarInit = v3;
+
+  /// Static getters, setters and methods
+  static EnumAll<int, int> get staticGetSet => v3;
+  static set staticGetSet(EnumAll<int, int> _) {}
+  static int staticMethod() => 42;
+
+  // Constructors.
+  // Generative, non-redirecting, unnamed.
+  const EnumAll({T? y})
+      : constructor = "unnamed",
+        this.x = 0 as S,
+        y = y ?? (0 as T);
+  // Generative, non-redirecting, named.
+  const EnumAll.named(this.x, {T? y, String? constructor})
+      : constructor = constructor ?? "named",
+        y = y ?? (0 as T);
+  // Generative, redirecting.
+  const EnumAll.renamed(S x, {T? y})
+      : this.named(x, y: y, constructor: "renamed");
+  // Factory, non-redirecting.
+  factory EnumAll.factory(int index) => values[index] as EnumAll<S, T>;
+  // Factory, redirecting (only to other factory constructor).
+  factory EnumAll.refactory(int index) = EnumAll<S, T>.factory;
+
+  // Cannot have factory constructors redirecting to generative constructors.
+  // (Nothing can refer to generative constructors except redirecting generative
+  // constructors and the implicit element creation expressions.)
+  // Cannot have const factory constructor, because they *must* redirect to
+  // generative constructors.
+  // Cannot have `super`-constructor invocations in initializer lists.
+
+  // Instance members.
+
+  // Instance variables must be final and non-late because of const constructor.
+  final String constructor;
+  final S x;
+  final num y;
+
+  // Getters, setters, methods and operators.
+  S get instanceGetSet => x;
+  set instanceGetSet(S _) {}
+  S instanceMethod() => x;
+  EnumAll<num, num> operator ^(EnumAll<num, num> other) {
+    var newIndex = index ^ other.index;
+    if (newIndex > 4) newIndex = 4;
+    return values[newIndex]; // Can refer to `values`.
+  }
+
+  // Can access `this` and `super` in an instance method.
+  String thisAndSuper() => "${super.toString()}:${this.toString()}";
+
+  // Can be callable.
+  T call<T>(T value) => value;
+
+  // Can have an `index` setter.
+  set index(int value) {}
+
+  // Instance members shadow extensions.
+  String get notExtension => "not extension";
+
+  String toString() => "this";
+}

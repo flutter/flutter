@@ -1,0 +1,6 @@
+# See https://dart.dev/guides/libraries/private-files
+# Don’t commit the following directories created by pub.
+.dart_tool/
+.packages
+.pub/
+pubspec.lock

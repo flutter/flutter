@@ -1,0 +1,21 @@
+// Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto3";
+
+package protobuf_unittest;
+
+import "google/protobuf/any.proto";
+
+message TestAny {
+  int32 int32_value = 1;
+  google.protobuf.Any any_value = 2;
+  repeated google.protobuf.Any repeated_any_value = 3;
+}
+
+message Container {
+  message Nested {
+    int32 int32_value = 1;
+  }
+}

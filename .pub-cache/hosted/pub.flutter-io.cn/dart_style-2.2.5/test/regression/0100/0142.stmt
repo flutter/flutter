@@ -1,0 +1,41 @@
+>>> (indent 4)
+    enterBlock.setBlockFlow(
+        new HTryBlockInformation(
+          wrapStatementGraph(bodyGraph),
+          exception,
+          wrapStatementGraph(catchGraph),
+          wrapStatementGraph(finallyGraph)),
+        exitBlock);
+<<<
+    enterBlock.setBlockFlow(
+        new HTryBlockInformation(wrapStatementGraph(bodyGraph), exception,
+            wrapStatementGraph(catchGraph), wrapStatementGraph(finallyGraph)),
+        exitBlock);
+>>> (indent 8)
+        enterBlock.setBlockFlow(
+            new HTryBlockInformation(
+              wrapStatementGraph(bodyGraph),
+              exception,
+              wrapStatementGraph(catchGraph),
+              wrapStatementGraph(finallyGraph)),
+            exitBlock);
+<<<
+        enterBlock.setBlockFlow(
+            new HTryBlockInformation(
+                wrapStatementGraph(bodyGraph),
+                exception,
+                wrapStatementGraph(catchGraph),
+                wrapStatementGraph(finallyGraph)),
+            exitBlock);
+>>> (indent 6)
+      assert(invariant(
+          CURRENT_ELEMENT_SPANNABLE,
+          kind == MessageKind.GENERIC ||
+            !message.contains(new RegExp(r'#\{.+\}')),
+          message: 'Missing arguments in error message: "$message"'));
+<<<
+      assert(invariant(
+          CURRENT_ELEMENT_SPANNABLE,
+          kind == MessageKind.GENERIC ||
+              !message.contains(new RegExp(r'#\{.+\}')),
+          message: 'Missing arguments in error message: "$message"'));

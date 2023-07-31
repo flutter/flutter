@@ -1,0 +1,14 @@
+>>>
+void main() {
+  Type___ variable___ = querySelector('                           ')
+    ..setInnerHtml('                                     ',
+        validator: new Validator___________()
+      ..method______('                '));
+}
+<<<
+void main() {
+  Type___ variable___ = querySelector('                           ')
+    ..setInnerHtml('                                     ',
+        validator: new Validator___________()
+          ..method______('                '));
+}

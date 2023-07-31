@@ -1,0 +1,54 @@
+>>> (indent 2)
+  testThat('backward navigation is disabled when at end of stream',
+      when: (TaskList taskList, TaskService taskService) {
+    var cursorPageNo = 0;
+    final streamCtrl = initCustomTaskServiceMock(taskService,
+        canMoveTo: (pageNo) => pageNo < 0 ? false : true,
+        getCurrentPageNumber: () => cursorPageNo);
+
+    first('attach tasklist', () {
+      taskList.attach();
+      addTasks(streamCtrl);
+    })
+        .thenExpect('pager at page 1', () => {
+      taskList.currentPageNo: 1,
+      taskList.backwardPaginationDisabled: isFalse
+    })
+        .then('go to page 2', () {
+      taskList.nextPage();
+      addTasks(streamCtrl, count: 1);
+      cursorPageNo = 1;
+    }).thenExpect('pager unchanged', () => {
+      taskList.currentPageNo: 2,
+      taskList.backwardPaginationDisabled: isTrue
+    });
+  });
+<<<
+  testThat('backward navigation is disabled when at end of stream',
+      when: (TaskList taskList, TaskService taskService) {
+    var cursorPageNo = 0;
+    final streamCtrl = initCustomTaskServiceMock(taskService,
+        canMoveTo: (pageNo) => pageNo < 0 ? false : true,
+        getCurrentPageNumber: () => cursorPageNo);
+
+    first('attach tasklist', () {
+      taskList.attach();
+      addTasks(streamCtrl);
+    })
+        .thenExpect(
+            'pager at page 1',
+            () => {
+                  taskList.currentPageNo: 1,
+                  taskList.backwardPaginationDisabled: isFalse
+                })
+        .then('go to page 2', () {
+      taskList.nextPage();
+      addTasks(streamCtrl, count: 1);
+      cursorPageNo = 1;
+    }).thenExpect(
+            'pager unchanged',
+            () => {
+                  taskList.currentPageNo: 2,
+                  taskList.backwardPaginationDisabled: isTrue
+                });
+  });

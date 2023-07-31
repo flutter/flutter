@@ -1,0 +1,14 @@
+>>> (indent 2)
+  group('((prevent timeout))', () {
+    setUp(() => ensureImageExists());
+
+    test('((dummy))', () {
+    }, timeout: const Timeout(const Duration(seconds: 300)));
+  });
+<<<
+  group('((prevent timeout))', () {
+    setUp(() => ensureImageExists());
+
+    test('((dummy))', () {},
+        timeout: const Timeout(const Duration(seconds: 300)));
+  });

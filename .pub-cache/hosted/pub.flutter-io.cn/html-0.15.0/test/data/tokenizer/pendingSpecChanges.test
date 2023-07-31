@@ -1,0 +1,7 @@
+{"tests": [
+
+{"description":"<!---- >",
+"input":"<!---- >",
+"output":["ParseError", "ParseError", ["Comment","-- >"]]}
+
+]}

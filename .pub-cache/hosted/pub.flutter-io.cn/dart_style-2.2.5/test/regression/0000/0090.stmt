@@ -1,0 +1,25 @@
+>>>
+var testNumbersOnlyForTheVM = {
+  "10,000,000,000,000,000,000,000,000,000,000" :
+     10000000000000000000000000000000,
+};
+<<<
+var testNumbersOnlyForTheVM = {
+  "10,000,000,000,000,000,000,000,000,000,000":
+      10000000000000000000000000000000,
+};
+>>>
+var map = {
+  "YEAR_MONTH_WEEKDAY_DAY + HOUR_MINUTE_SECOND + GENERIC_TZ": "Freitag, 27. Januar 2012 20:58:59 Nordamerikanische Westküstenzeit",
+  "YEAR_ABBR_MONTH_WEEKDAY_DAY + HOUR_MINUTE_SECOND + ABBR_SPECIFIC_TZ": "Fr., 27. Jan 2012 20:58:59 GMT-08:00",
+  "HOUR_MINUTE_SECOND + ABBR_GENERIC_TZ": "20:58:59 Vereinigte Staaten Zeit (Los Angeles)",
+};
+<<<
+var map = {
+  "YEAR_MONTH_WEEKDAY_DAY + HOUR_MINUTE_SECOND + GENERIC_TZ":
+      "Freitag, 27. Januar 2012 20:58:59 Nordamerikanische Westküstenzeit",
+  "YEAR_ABBR_MONTH_WEEKDAY_DAY + HOUR_MINUTE_SECOND + ABBR_SPECIFIC_TZ":
+      "Fr., 27. Jan 2012 20:58:59 GMT-08:00",
+  "HOUR_MINUTE_SECOND + ABBR_GENERIC_TZ":
+      "20:58:59 Vereinigte Staaten Zeit (Los Angeles)",
+};

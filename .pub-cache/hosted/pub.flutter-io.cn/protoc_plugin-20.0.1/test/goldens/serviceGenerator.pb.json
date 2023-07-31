@@ -1,0 +1,44 @@
+///
+//  Generated code. Do not modify.
+//  source: testpkg.proto
+//
+// @dart = 2.12
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,deprecated_member_use_from_same_package,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+import 'dart:core' as $core;
+import 'dart:convert' as $convert;
+import 'dart:typed_data' as $typed_data;
+import 'foobar.pbjson.dart' as $1;
+
+@$core.Deprecated('Use someRequestDescriptor instead')
+const SomeRequest$json = const {
+  '1': 'SomeRequest',
+};
+
+/// Descriptor for `SomeRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List someRequestDescriptor = $convert.base64Decode('CgtTb21lUmVxdWVzdA==');
+@$core.Deprecated('Use someReplyDescriptor instead')
+const SomeReply$json = const {
+  '1': 'SomeReply',
+};
+
+/// Descriptor for `SomeReply`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List someReplyDescriptor = $convert.base64Decode('CglTb21lUmVwbHk=');
+const $core.Map<$core.String, $core.dynamic> TestServiceBase$json = const {
+  '1': 'Test',
+  '2': const [
+    const {'1': 'AMethod', '2': '.testpkg.SomeRequest', '3': '.testpkg.SomeReply'},
+    const {'1': 'AnotherMethod', '2': '.foo.bar.EmptyMessage', '3': '.foo.bar.AnotherReply'},
+  ],
+};
+
+@$core.Deprecated('Use testServiceDescriptor instead')
+const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> TestServiceBase$messageJson = const {
+  '.testpkg.SomeRequest': SomeRequest$json,
+  '.testpkg.SomeReply': SomeReply$json,
+  '.foo.bar.EmptyMessage': $1.EmptyMessage$json,
+  '.foo.bar.AnotherReply': $1.AnotherReply$json,
+};
+
+/// Descriptor for `Test`. Decode as a `google.protobuf.ServiceDescriptorProto`.
+final $typed_data.Uint8List testServiceDescriptor = $convert.base64Decode('CgRUZXN0EjMKB0FNZXRob2QSFC50ZXN0cGtnLlNvbWVSZXF1ZXN0GhIudGVzdHBrZy5Tb21lUmVwbHkSPQoNQW5vdGhlck1ldGhvZBIVLmZvby5iYXIuRW1wdHlNZXNzYWdlGhUuZm9vLmJhci5Bbm90aGVyUmVwbHk=');

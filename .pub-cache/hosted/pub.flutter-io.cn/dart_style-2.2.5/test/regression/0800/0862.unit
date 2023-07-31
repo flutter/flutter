@@ -1,0 +1,64 @@
+>>>
+class JsonCodec {
+  const JsonCodec({
+      Object? reviver(Object? key, Object? value)?,
+      Object? toEncodable(dynamic object)?})
+      : _reviver = reviver,
+        _toEncodable = toEncodable;
+}
+<<<
+class JsonCodec {
+  const JsonCodec(
+      {Object? reviver(Object? key, Object? value)?,
+      Object? toEncodable(dynamic object)?})
+      : _reviver = reviver,
+        _toEncodable = toEncodable;
+}
+>>>
+class JsonUtf8Encoder {
+  JsonUtf8Encoder(
+      [String? indent, dynamic toEncodable(dynamic object)?, int? bufferSize])
+      : _indent = _utf8Encode(indent),
+        _toEncodable = toEncodable,
+        _bufferSize = bufferSize ?? _defaultBufferSize;
+}
+<<<
+class JsonUtf8Encoder {
+  JsonUtf8Encoder(
+      [String? indent, dynamic toEncodable(dynamic object)?, int? bufferSize])
+      : _indent = _utf8Encode(indent),
+        _toEncodable = toEncodable,
+        _bufferSize = bufferSize ?? _defaultBufferSize;
+}
+>>> comma between parameters
+mandatory(f()?,i) {}
+optional([f()?,i]) {}
+named({f()?,i}) {}
+<<<
+mandatory(f()?, i) {}
+optional([f()?, i]) {}
+named({f()?, i}) {}
+>>> trailing commas
+mandatory(f()?,) {}
+optional([f()?,]) {}
+named({f()?,}) {}
+<<<
+mandatory(
+  f()?,
+) {}
+optional([
+  f()?,
+]) {}
+named({
+  f()?,
+}) {}
+>>> constructor initializer trailing comma
+class C {
+  C(f()?,) : field = 3;
+}
+<<<
+class C {
+  C(
+    f()?,
+  ) : field = 3;
+}

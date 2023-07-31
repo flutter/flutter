@@ -1,0 +1,43 @@
+include: package:lint/analysis_options_package.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+
+linter:
+  rules:
+    # redundancy is good if it leads to better documentation
+    avoid_redundant_argument_values: false
+
+    # print is useful for examples
+    avoid_print: false
+
+    # disable for now per https://github.com/timsneath/win32/issues/87
+    avoid_private_typedef_functions: false
+    
+    # win32 parity requires SCREAMING_CAPS constants
+    camel_case_types: false
+    constant_identifier_names: false  
+
+    # deliberately name generated files after their COM equivalents
+    file_names: false
+
+    # seems to trigger false positives
+    invariant_booleans: false
+
+    # while(true) is useful for Win32 enumerations
+    literal_only_boolean_expressions: false
+
+    # doesn't make sense if adjacent strings are not human language
+    missing_whitespace_between_adjacent_strings: false
+
+    # Win32 parity requires TitleCase method names
+    non_constant_identifier_names: false
+
+    # Some additional lints we want to enforce
+    omit_local_variable_types: true
+    prefer_expression_function_bodies: true
+    prefer_interpolation_to_compose_strings: true
+    prefer_relative_imports: true
+    unnecessary_lambdas: true

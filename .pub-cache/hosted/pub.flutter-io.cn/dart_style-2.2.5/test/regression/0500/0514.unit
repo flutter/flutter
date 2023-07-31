@@ -1,0 +1,11 @@
+>>>
+someFunction() {
+  myFunc(namedParam: complexFunc(
+      complexParam1: "someValue", complexParam2: "anotherValue"));
+}
+<<<
+someFunction() {
+  myFunc(
+      namedParam: complexFunc(
+          complexParam1: "someValue", complexParam2: "anotherValue"));
+}

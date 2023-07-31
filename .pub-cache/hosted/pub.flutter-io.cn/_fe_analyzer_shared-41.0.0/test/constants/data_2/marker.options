@@ -1,0 +1,3 @@
+cfe=pkg/front_end/test/id_tests/constant_test.dart
+analyzer=pkg/analyzer/test/id_tests/constant_test.dart
+dart2js=pkg/compiler/test/model/cfe_constant_test.dart

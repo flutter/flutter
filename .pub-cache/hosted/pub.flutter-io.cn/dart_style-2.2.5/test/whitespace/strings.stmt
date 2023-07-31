@@ -1,0 +1,35 @@
+40 columns                              |
+>>>
+"a"     "b" "c";
+<<<
+"a" "b" "c";
+>>> empty multi-line
+"""""" '''''';
+<<<
+"""""" '''''';
+>>> blank lines in multi-line string
+'''
+
+
+two before
+
+one
+
+
+two
+
+
+''';
+<<<
+'''
+
+
+two before
+
+one
+
+
+two
+
+
+''';

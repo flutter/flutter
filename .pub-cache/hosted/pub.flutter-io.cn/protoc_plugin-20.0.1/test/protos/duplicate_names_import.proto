@@ -1,0 +1,24 @@
+// Copyright (c) 2014, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto2";
+
+package pkg;
+
+import "package1.proto";
+import "package2.proto";
+import "package3.proto";
+
+message M {
+  optional pkg1.M m1 = 1;
+  optional pkg1.M.M m1_m = 2;
+  optional pkg1.pkg2.M m2 = 3;
+  optional pkg1.pkg2.M.M m2_m = 4;
+  optional pkg1_pkg2.M m3 = 5;
+  optional pkg1_pkg2.M.M m3_m = 6;
+}
+
+message M2 {
+  optional int32 pkg1 = 1;
+}

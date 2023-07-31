@@ -1,0 +1,192 @@
+40 columns                              |
+>>> empty map
+var m = { };
+<<<
+var m = {};
+>>> exactly 40 characters
+var m = {first: second, third: forth__};
+<<<
+var m = {first: second, third: forth__};
+>>>
+var m = {first: second, third: fourth, fifth: sixth};
+<<<
+var m = {
+  first: second,
+  third: fourth,
+  fifth: sixth
+};
+>>> splits outer maps even if they fit
+var m = {a: {b: c}, d: {},
+    e: {f: {g: h} }  };
+<<<
+var m = {
+  a: {b: c},
+  d: {},
+  e: {
+    f: {g: h}
+  }
+};
+>>> split indirect outer
+var m = {a: function({b: inner})};
+<<<
+var m = {
+  a: function({b: inner})
+};
+>>> empty literal does not force outer split
+var m = {a:{}, b: [], c: () {}};
+<<<
+var m = {a: {}, b: [], c: () {}};
+>>> nested split map
+var m = {first: 1, second: {third: fourth}, fifth: 5, nested: {sixth: seventh, eighth: nine,
+    tenth: eleventh}};
+<<<
+var m = {
+  first: 1,
+  second: {third: fourth},
+  fifth: 5,
+  nested: {
+    sixth: seventh,
+    eighth: nine,
+    tenth: eleventh
+  }
+};
+>>> force multi-line because of contained block
+var m = {first: 1, fn: () {"fn";},third:fourth};
+<<<
+var m = {
+  first: 1,
+  fn: () {
+    "fn";
+  },
+  third: fourth
+};
+>>> containing comments
+var m = {first: one /* bang */, second: two};
+<<<
+var m = {
+  first: one /* bang */,
+  second: two
+};
+>>> const
+var map = const {"foo": "bar", "fuz": null};
+<<<
+var map = const {
+  "foo": "bar",
+  "fuz": null
+};
+>>> trailing comma forces split
+var map = {"foo": "bar" , };
+<<<
+var map = {
+  "foo": "bar",
+};
+>>> trailing comma multiline
+var map = {"foo": "bar", "fuzzy": null , };
+<<<
+var map = {
+  "foo": "bar",
+  "fuzzy": null,
+};
+>>> preserve newlines in maps containing a line comment
+var map = {
+  // yeah
+  a:b,c:d,
+  e:f,g:h
+};
+<<<
+var map = {
+  // yeah
+  a: b, c: d,
+  e: f, g: h
+};
+>>> wrap between elements even when newlines are preserved
+var map = {
+  // yes
+  first: "value", second: "value", third: "value",
+
+  fourth: "value", fifth: "value", sixth: "value", seventh: "value"
+};
+<<<
+var map = {
+  // yes
+  first: "value", second: "value",
+  third: "value",
+
+  fourth: "value", fifth: "value",
+  sixth: "value", seventh: "value"
+};
+>>> ignore line comment after the "]"
+var map = {
+  a:b,c:
+  d
+} // comment
+;
+<<<
+var map = {a: b, c: d} // comment
+    ;
+>>> preserves one blank line between elements
+var map = {
+
+
+  element: value,
+
+
+
+  // comment
+  element: value,
+
+
+
+  element: value
+
+
+};
+<<<
+var map = {
+  element: value,
+
+  // comment
+  element: value,
+
+  element: value
+};
+>>> ignore newlines between keys and values
+var map = {// comment
+a:
+value
+};
+<<<
+var map = {
+  // comment
+  a: value
+};
+>>> spread cascade
+var map = {1: 1, ...thing..cascade()..another(), 4: 4};
+<<<
+var map = {
+  1: 1,
+  ...thing
+    ..cascade()
+    ..another(),
+  4: 4
+};
+>>> spread lambda
+var map = {1: 1, ...() { body; }, 4: 4};
+<<<
+var map = {
+  1: 1,
+  ...() {
+    body;
+  },
+  4: 4
+};
+>>> spread immediately invoked lambda
+var map = {1: 1, ...() sync* { yield thing; }(), 4: 4};
+<<<
+var map = {
+  1: 1,
+  ...() sync* {
+    yield thing;
+  }(),
+  4: 4
+};

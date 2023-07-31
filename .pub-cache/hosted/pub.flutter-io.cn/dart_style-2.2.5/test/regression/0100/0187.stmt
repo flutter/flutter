@@ -1,0 +1,26 @@
+>>> (indent 2)
+  String someComplicatedHelpMessage(String numberInputFieldPlaceholder,
+        String timeUnitDropdownPlaceholder) => Intl.message(
+            'Deflagrate the persimmon to $numberInputFieldPlaceholder golgafrinchans per'
+            '$timeUnitDropdownPlaceholder maximum, unless we say otherwise',
+            name: 'someComplicatedHelpMessage',
+            args: [numberInputFieldPlaceholder, timeUnitDropdownPlaceholder],
+            examples: {
+      'numberInputFieldPlaceholder': '3',
+      'timeUnitDropdownPlaceholder': 'per light-year'
+    },
+        desc: 'Some very long descriptive text that actually isn\'t obeying the...');
+<<<
+  String someComplicatedHelpMessage(String numberInputFieldPlaceholder,
+          String timeUnitDropdownPlaceholder) =>
+      Intl.message(
+          'Deflagrate the persimmon to $numberInputFieldPlaceholder golgafrinchans per'
+          '$timeUnitDropdownPlaceholder maximum, unless we say otherwise',
+          name: 'someComplicatedHelpMessage',
+          args: [numberInputFieldPlaceholder, timeUnitDropdownPlaceholder],
+          examples: {
+            'numberInputFieldPlaceholder': '3',
+            'timeUnitDropdownPlaceholder': 'per light-year'
+          },
+          desc:
+              'Some very long descriptive text that actually isn\'t obeying the...');

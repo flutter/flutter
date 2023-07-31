@@ -1,0 +1,44 @@
+>>> (indent 2)
+  StatementBuilder assignConst(String variable, [TypeBuilder type]) {
+    return new _AsAssign(
+      this,
+      variable,
+      keyword: _AsAssignType.asConst,
+      type: type,
+    )
+        .asStatement();
+  }
+<<<
+  StatementBuilder assignConst(String variable, [TypeBuilder type]) {
+    return new _AsAssign(
+      this,
+      variable,
+      keyword: _AsAssignType.asConst,
+      type: type,
+    ).asStatement();
+  }
+>>> (indent 4)
+return new _AsAssign(this, variable,
+            keyword: _AsAssignType.asConst, type: type)
+        .asStatement();
+<<<
+    return new _AsAssign(this, variable,
+            keyword: _AsAssignType.asConst, type: type)
+        .asStatement();
+>>> (indent 2)
+StatementBuilder assignConst(String variable, [TypeBuilder type]) =>
+      new _AsAssign(
+        this,
+        variable,
+        keyword: _AsAssignType.asConst,
+        type: type,
+      )
+          .asStatement();
+<<<
+  StatementBuilder assignConst(String variable, [TypeBuilder type]) =>
+      new _AsAssign(
+        this,
+        variable,
+        keyword: _AsAssignType.asConst,
+        type: type,
+      ).asStatement();

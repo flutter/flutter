@@ -1,0 +1,18 @@
+>>>
+const m = 0;
+
+class C {
+  var z, w, u, v;
+  C({@m int this.v()?});
+}
+
+void main() {}
+<<<
+const m = 0;
+
+class C {
+  var z, w, u, v;
+  C({@m int this.v()?});
+}
+
+void main() {}

@@ -1,0 +1,19 @@
+class PhoneType extends $pb.ProtobufEnum {
+  static const PhoneType MOBILE = PhoneType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'MOBILE');
+  static const PhoneType HOME = PhoneType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'HOME');
+  static const PhoneType WORK = PhoneType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'WORK');
+
+  static const PhoneType BUSINESS = WORK;
+
+  static const $core.List<PhoneType> values = <PhoneType> [
+    MOBILE,
+    HOME,
+    WORK,
+  ];
+
+  static final $core.Map<$core.int, PhoneType> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static PhoneType? valueOf($core.int value) => _byValue[value];
+
+  const PhoneType._($core.int v, $core.String n) : super(v, n);
+}
+

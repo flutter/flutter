@@ -1,0 +1,11 @@
+# Format: https://github.com/dart-lang/test/blob/master/doc/configuration.md.
+
+# TODO(https://github.com/dart-lang/test/issues/772): Headless chrome timeout.
+override_platforms:
+  chrome:
+    settings:
+      headless: false
+
+tags:
+  "fails-on-dart2js":
+  "fails-on-dartdevc":

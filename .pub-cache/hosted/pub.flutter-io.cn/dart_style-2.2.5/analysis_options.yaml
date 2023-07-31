@@ -1,0 +1,6 @@
+include: package:lints/recommended.yaml
+linter:
+  rules:
+    - avoid_dynamic_calls
+    - directives_ordering
+    - unawaited_futures

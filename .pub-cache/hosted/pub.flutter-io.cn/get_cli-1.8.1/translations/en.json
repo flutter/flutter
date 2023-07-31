@@ -1,0 +1,88 @@
+{
+  "ask": {
+    "existing_page": "The page [%s] already exists, do you want to overwrite it?",
+    "name_to_project": "what is the name of the project?",
+    "company_domain": "What is your company's domain?",
+    "model_name": "Could not set the model name automatically, which name do you want to use?",
+    "package_already_installed": "package: %s already installed, do you want to update?",
+    "lib_not_empty": "Your lib folder is not empty. Are you sure you want to overwrite your application? \\n WARNING: This action is irreversible",
+    "ios_lang": "what language do you want to use on ios?",
+    "android_lang": "what language do you want to use on android?",
+    "use_null_safe": "Do you want to use null safe?",
+    "use_linter": "do you want to use some linter?",
+    "new_page_name": "what new name for the page?"
+  },
+  "error": {
+    "failed_to_connect": "Failed to connect with %s",
+    "no_valid_file_or_url": "%s is not a file or valid url",
+    "unnecessary_parameter": "the %s parameter is not necessary",
+    "unnecessary_parameter_plural": "the %s parameters are not necessary",
+    "nonexistent_directory": "%s directory does not exist.",
+    "empty_directory": "%s is empty",
+    "invalid_json": "%s is not a valid json file",
+    "special_characters_in_key": "Special characters are not allowed in key. \\n key: %s",
+    "required_path": "Needed to pass the file or directory path",
+    "invalid_dart": "The %s is not a valid dart file",
+    "invalid_file_or_directory": "The %s is not a valid file or directory",
+    "package_not_found": "Package: %s not found in pub.dev",
+    "cli_version_not_found": "failed to find the version you have installed.",
+    "update_cli": "There was an error upgrading get_cli",
+    "folder_not_found": "Folder %s not found",
+    "file_not_found": "File not found in %s",
+    "access_denied": "Access denied to %s",
+    "unexpected": "Unexpected error occurred:",
+    "no_package_to_remove": "Enter the name of the package you wanna remove"
+  },
+  "example": "Example:",
+  "warning": "Warning:",
+  "hint": {
+    "create": {
+      "controller": "Generate controller",
+      "page": "Use to generate pages",
+      "project": "Use to generate new project",
+      "provider": "Create a new Provider",
+      "screen": "Generate new screen",
+      "view": "Generate view"
+    },
+    "generate": {
+      "locales": "Generate translation file from json files",
+      "model": "generate Class model from json"
+    },
+    "help": "Show this help",
+    "init": "generate the chosen structure on an existing project:",
+    "install": "Use to install a package in your project (dependencies):",
+    "remove": "Use to remove a package in your project (dependencies):",
+    "sort": "Sort imports and format dart files",
+    "update": "To update GET_CLI",
+    "version": "Shows the current CLI version'"
+  },
+  "info": {
+    "unnecessary_flag": "The %s is not necessary",
+    "unnecessary_flag_prural": "The %s are not necessary",
+    "package_not_installed": "Package: %s is not installed in this application",
+    "cli_last_version_already_installed": "Latest version of get_cli already installed",
+    "no_file_overwritten": "No files were overwritten",
+    "update_available": "There's an update available! Current installed version: %s",
+    "update_available2": "New version available: %s Please, run:"
+  },
+  "options": {
+    "yes": "Yes!",
+    "no": "No",
+    "rename": "I want to rename"
+  },
+  "optional_parameters": "Optional parameters: %s",
+  "sucess": {
+    "page_create": "%s page created successfully.",
+    "locale_generate": "locale files generated successfully.",
+    "getx_pattern_generated": "GetX Pattern structure successfully generated.",
+    "clean_Pattern_generated": "CLEAN Pattern structure successfully generated.",
+    "file_formatted": " '%s' was successfully formatted",
+    "package_removed": "Package: %s removed!",
+    "package_installed": "'Package: %s installed!",
+    "update_cli": "Upgrade complete",
+    "add_controller_in_bindings": "The %s has been added to binding at path: %s'",
+    "navigation_added": "%s navigation added successfully.",
+    "file_created": "File: %s created successfully at path: %s",
+    "route_created": "%s route created successfully."
+  }
+}

@@ -1,0 +1,15 @@
+# See https://github.com/dart-lang/mono_repo for details
+stages:
+  - format_analyze:
+    - group:
+      - format
+      - command: ./../tool/setup.sh
+      - command: make protos
+      - analyze: --fatal-infos
+      sdk: [dev]
+  - run_tests:
+    - group:
+      - command: ./../tool/setup.sh
+      - command: make protos
+      - test
+      sdk: [2.12.0, dev]

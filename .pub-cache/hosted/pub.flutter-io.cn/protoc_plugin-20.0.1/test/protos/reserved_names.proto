@@ -1,0 +1,293 @@
+// Copyright (c) 2013, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+syntax = "proto2";
+
+package protobuf_unittest;
+
+message ReservedNamesOptional {
+  // Conflicts with Object.
+  optional int32 hash_code = 1;
+  optional int32 no_such_method = 2;
+  optional int32 runtime_type = 3;
+  optional int32 to_string = 4;
+
+  // Conflicts with GeneratedMessage.
+  optional int32 from_buffer = 10;
+  optional int32 from_json = 11;
+  optional int32 has_required_fields = 12;
+  optional int32 is_initialized = 13;
+  optional int32 clear = 14;
+  optional int32 get_tag_number = 15;
+  optional int32 check = 16;
+  optional int32 write_to_buffer = 17;
+  optional int32 write_to_coded_buffer_writer = 18;
+  optional int32 merge_from_coded_buffer_reader = 19;
+  optional int32 merge_from_buffer = 20;
+  optional int32 write_to_json = 21;
+  optional int32 merge_from_json = 22;
+  optional int32 add_extension = 23;
+  optional int32 get_extension = 24;
+  optional int32 set_extension = 25;
+  optional int32 has_extension = 26;
+  optional int32 clear_extension = 27;
+  optional int32 get_field = 28;
+  optional int32 set_field = 29;
+  optional int32 has_field = 30;
+  optional int32 clear_field = 31;
+  optional int32 extensions_are_initialized = 32;
+  optional int32 merge_from_message = 33;
+  optional int32 merge_unknown_fields = 34;
+
+  // Other conflicts.
+  optional int32 hash_code_1 = 40;
+  optional int32 create = 41;
+  optional int32 create_repeated = 42;
+
+  optional int32 x = 50;
+  optional int32 has_x = 51;
+  optional int32 clear_x = 53;
+  optional int32 has_x_51 = 54;
+  optional int32 clear_x_53 = 55;
+}
+
+message ReservedNamesRepeated {
+  // Conflicts with Object.
+  repeated int32 hash_code = 1;
+  repeated int32 no_such_method = 2;
+  repeated int32 runtime_type = 3;
+  repeated int32 to_string = 4;
+
+  // Conflicts with GeneratedMessage.
+  repeated int32 from_buffer = 10;
+  repeated int32 from_json = 11;
+  repeated int32 has_required_fields = 12;
+  repeated int32 is_initialized = 13;
+  repeated int32 clear = 14;
+  repeated int32 get_tag_number = 15;
+  repeated int32 check = 16;
+  repeated int32 write_to_buffer = 17;
+  repeated int32 write_to_coded_buffer_writer = 18;
+  repeated int32 merge_from_coded_buffer_reader = 19;
+  repeated int32 merge_from_buffer = 20;
+  repeated int32 write_to_json = 21;
+  repeated int32 merge_from_json = 22;
+  repeated int32 add_extension = 23;
+  repeated int32 get_extension = 24;
+  repeated int32 set_extension = 25;
+  repeated int32 has_extension = 26;
+  repeated int32 clear_extension = 27;
+  repeated int32 get_field = 28;
+  repeated int32 set_field = 29;
+  repeated int32 has_field = 30;
+  repeated int32 clear_field = 31;
+  repeated int32 extensions_are_initialized = 32;
+  repeated int32 merge_from_message = 33;
+  repeated int32 merge_unknown_fields = 34;
+
+  // Other conflicts.
+  repeated int32 hash_code_1 = 40;
+  repeated int32 create = 41;
+  repeated int32 create_repeated = 42;
+
+  repeated int32 x = 50;
+  repeated int32 has_x = 51;
+  repeated int32 clear_x = 53;
+  repeated int32 has_x_51 = 54;
+  repeated int32 clear_x_53 = 55;
+}
+
+message ReservedNamesRequired {
+  // Conflicts with Object.
+  required int32 hash_code = 1;
+  required int32 no_such_method = 2;
+  required int32 runtime_type = 3;
+  required int32 to_string = 4;
+
+  // Conflicts with GeneratedMessage.
+  required int32 from_buffer = 10;
+  required int32 from_json = 11;
+  required int32 has_required_fields = 12;
+  required int32 is_initialized = 13;
+  required int32 clear = 14;
+  required int32 get_tag_number = 15;
+  required int32 check = 16;
+  required int32 write_to_buffer = 17;
+  required int32 write_to_coded_buffer_writer = 18;
+  required int32 merge_from_coded_buffer_reader = 19;
+  required int32 merge_from_buffer = 20;
+  required int32 write_to_json = 21;
+  required int32 merge_from_json = 22;
+  required int32 add_extension = 23;
+  required int32 get_extension = 24;
+  required int32 set_extension = 25;
+  required int32 has_extension = 26;
+  required int32 clear_extension = 27;
+  required int32 get_field = 28;
+  required int32 set_field = 29;
+  required int32 has_field = 30;
+  required int32 clear_field = 31;
+  required int32 extensions_are_initialized = 32;
+  required int32 merge_from_message = 33;
+  required int32 merge_unknown_fields = 34;
+
+  // Other conflicts.
+  required int32 hash_code_1 = 40;
+  required int32 create = 41;
+  required int32 create_repeated = 42;
+
+  required int32 x = 50;
+  required int32 has_x = 51;
+  required int32 clear_x = 53;
+  required int32 has_x_51 = 54;
+  required int32 clear_x_53 = 55;
+}
+
+message ReservedWordsOptional {
+  optional int32 assert = 1;
+  optional int32 break = 2;
+  optional int32 case = 3;
+  optional int32 catch = 4;
+  optional int32 class = 5;
+  optional int32 const = 6;
+  optional int32 continue = 7;
+  optional int32 default = 8;
+  optional int32 do = 9;
+  optional int32 else = 10;
+  optional int32 enum = 11;
+  optional int32 extends = 12;
+  optional int32 false = 13;
+  optional int32 final = 14;
+  optional int32 finally = 15;
+  optional int32 for = 16;
+  optional int32 if = 17;
+  optional int32 in = 18;
+  optional int32 is = 19;
+  optional int32 new = 20;
+  optional int32 null = 21;
+  optional int32 rethrow = 22;
+  optional int32 return = 23;
+  optional int32 super = 24;
+  optional int32 switch = 25;
+  optional int32 this = 26;
+  optional int32 throw = 27;
+  optional int32 true = 28;
+  optional int32 try = 29;
+  optional int32 var = 30;
+  optional int32 void = 31;
+  optional int32 while = 32;
+  optional int32 with = 33;
+}
+
+message ReservedWordsRepeated {
+  repeated int32 assert = 1;
+  repeated int32 break = 2;
+  repeated int32 case = 3;
+  repeated int32 catch = 4;
+  repeated int32 class = 5;
+  repeated int32 const = 6;
+  repeated int32 continue = 7;
+  repeated int32 default = 8;
+  repeated int32 do = 9;
+  repeated int32 else = 10;
+  repeated int32 enum = 11;
+  repeated int32 extends = 12;
+  repeated int32 false = 13;
+  repeated int32 final = 14;
+  repeated int32 finally = 15;
+  repeated int32 for = 16;
+  repeated int32 if = 17;
+  repeated int32 in = 18;
+  repeated int32 is = 19;
+  repeated int32 new = 20;
+  repeated int32 null = 21;
+  repeated int32 rethrow = 22;
+  repeated int32 return = 23;
+  repeated int32 super = 24;
+  repeated int32 switch = 25;
+  repeated int32 this = 26;
+  repeated int32 throw = 27;
+  repeated int32 true = 28;
+  repeated int32 try = 29;
+  repeated int32 var = 30;
+  repeated int32 void = 31;
+  repeated int32 while = 32;
+  repeated int32 with = 33;
+}
+
+message ReservedWordsRequired {
+  required int32 assert = 1;
+  required int32 break = 2;
+  required int32 case = 3;
+  required int32 catch = 4;
+  required int32 class = 5;
+  required int32 const = 6;
+  required int32 continue = 7;
+  required int32 default = 8;
+  required int32 do = 9;
+  required int32 else = 10;
+  required int32 enum = 11;
+  required int32 extends = 12;
+  required int32 false = 13;
+  required int32 final = 14;
+  required int32 finally = 15;
+  required int32 for = 16;
+  required int32 if = 17;
+  required int32 in = 18;
+  required int32 is = 19;
+  required int32 new = 20;
+  required int32 null = 21;
+  required int32 rethrow = 22;
+  required int32 return = 23;
+  required int32 super = 24;
+  required int32 switch = 25;
+  required int32 this = 26;
+  required int32 throw = 27;
+  required int32 true = 28;
+  required int32 try = 29;
+  required int32 var = 30;
+  required int32 void = 31;
+  required int32 while = 32;
+  required int32 with = 33;
+}
+
+message MessageWithReservedEnum {
+  optional ReservedEnum enum = 1;
+}
+
+enum ReservedEnum {
+  assert = 0;
+  break = 1;
+  case = 2;
+  catch = 3;
+  class = 4;
+  const = 5;
+  continue = 6;
+  default = 7;
+  do = 8;
+  else = 9;
+  enum = 10;
+  extends = 11;
+  false = 12;
+  final = 13;
+  finally = 14;
+  for = 15;
+  if = 16;
+  in = 17;
+  is = 18;
+  new = 19;
+  null = 20;
+  rethrow = 21;
+  return = 22;
+  super = 23;
+  switch = 24;
+  this = 25;
+  throw = 26;
+  true = 27;
+  try = 28;
+  var = 29;
+  void = 30;
+  while = 31;
+  with = 32;
+}

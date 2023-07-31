@@ -1,0 +1,106 @@
+40 columns                              |
+>>> block comment
+library foo;
+/* A long
+ * Comment
+*/
+
+/* And
+ * another...
+*/
+
+// Mixing it up
+
+class C /* is cool */ {
+  /* int */ foo() => 42;
+}
+<<<
+library foo;
+/* A long
+ * Comment
+*/
+
+/* And
+ * another...
+*/
+
+// Mixing it up
+
+class C /* is cool */ {
+  /* int */ foo() => 42;
+}
+>>> mixed doc and line comments
+/// Copyright info
+
+library foo;
+/// Class comment
+//TODO: implement
+class C {
+}
+<<<
+/// Copyright info
+
+library foo;
+
+/// Class comment
+//TODO: implement
+class C {}
+>>> mixed comments
+library foo;
+
+
+/* Comment 1 */
+
+// Comment 2
+
+/* Comment 3 */
+
+
+class C {}
+<<<
+library foo;
+
+/* Comment 1 */
+
+// Comment 2
+
+/* Comment 3 */
+
+class C {}
+>>> multiline comment inside nested blocks
+main() {
+  inner() {
+    function(/*
+comment */argument);
+  }
+}
+<<<
+main() {
+  inner() {
+    function(/*
+comment */
+        argument);
+  }
+}
+>>> line doc comments are indented even if flush left
+class C {
+/// doc
+  method() {}
+}
+<<<
+class C {
+  /// doc
+  method() {}
+}
+>>> commented out comments are not mistaken for doc comments
+class C {
+//// not a doc comment
+//commentedOut() {}
+  method() {}
+}
+<<<
+class C {
+//// not a doc comment
+//commentedOut() {}
+  method() {}
+}

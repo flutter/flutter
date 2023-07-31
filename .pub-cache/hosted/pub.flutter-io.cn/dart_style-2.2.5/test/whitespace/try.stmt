@@ -1,0 +1,25 @@
+40 columns                              |
+>>>
+try {
+doSomething();
+} catch (e) {
+print(e);
+}
+<<<
+try {
+  doSomething();
+} catch (e) {
+  print(e);
+}
+>>>
+try{
+doSomething();
+}on Exception catch (e){
+print(e);
+}
+<<<
+try {
+  doSomething();
+} on Exception catch (e) {
+  print(e);
+}

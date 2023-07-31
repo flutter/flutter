@@ -1,0 +1,32 @@
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_private_typedef_functions
+    - avoid_returning_null
+    - avoid_returning_null_for_future
+    - avoid_unused_constructor_parameters
+    - cancel_subscriptions
+    - comment_references
+    - directives_ordering
+    - lines_longer_than_80_chars
+    - literal_only_boolean_expressions
+    - missing_whitespace_between_adjacent_strings
+    - no_adjacent_strings_in_list
+    - no_runtimeType_toString
+    - omit_local_variable_types
+    - only_throw_errors
+    - package_api_docs
+    - prefer_const_constructors
+    - prefer_relative_imports
+    - prefer_single_quotes
+    - test_types_in_equals
+    - throw_in_finally
+    - type_annotate_public_apis
+    - unawaited_futures
+    - unnecessary_await_in_return
+    - unnecessary_lambdas
+    - unnecessary_parenthesis
+    - unnecessary_statements
+    - use_super_parameters

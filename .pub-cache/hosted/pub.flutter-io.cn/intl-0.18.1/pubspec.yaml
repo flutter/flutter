@@ -1,0 +1,23 @@
+name: intl
+version: 0.18.1
+description: >-
+  Contains code to deal with internationalized/localized messages, date and
+  number formatting and parsing, bi-directional text, and other
+  internationalization issues.
+repository: https://github.com/dart-lang/i18n/tree/main/pkgs/intl
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  clock: ^1.1.0
+  meta: ^1.0.2
+  path: ^1.8.0
+
+dev_dependencies:
+  benchmark_harness: ^2.2.0
+  ffi: ^1.0.0
+  fixnum: ^1.0.0
+  js: ^0.6.3
+  lints: '>=1.0.0 <3.0.0'
+  test: ^1.16.0

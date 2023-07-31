@@ -1,0 +1,28 @@
+>>>
+const _urlAttributes = const [
+  'action', '_action',          // in form
+  'background', '_background',  // in body
+  'cite', '_cite',              // in blockquote, del, ins, q
+  'data', '_data',              // in object
+  'formaction', '_formaction',  // in button, input
+  'href', '_href',              // in a, area, link, base, command
+  'icon', '_icon',              // in command
+  'manifest', '_manifest',      // in html
+  'poster', '_poster',          // in video
+  'src', '_src',                // in audio, embed, iframe, img, input, script,
+                                //    source, track,video
+];
+<<<
+const _urlAttributes = const [
+  'action', '_action', // in form
+  'background', '_background', // in body
+  'cite', '_cite', // in blockquote, del, ins, q
+  'data', '_data', // in object
+  'formaction', '_formaction', // in button, input
+  'href', '_href', // in a, area, link, base, command
+  'icon', '_icon', // in command
+  'manifest', '_manifest', // in html
+  'poster', '_poster', // in video
+  'src', '_src', // in audio, embed, iframe, img, input, script,
+  //    source, track,video
+];

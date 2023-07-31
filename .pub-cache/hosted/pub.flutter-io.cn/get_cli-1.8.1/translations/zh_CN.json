@@ -1,0 +1,88 @@
+{
+  "ask": {
+    "existing_page": "页面 [%s] 已存在，你想覆盖吗？",
+    "name_to_project": "项目名称是？",
+    "company_domain": "你公司的域名是？",
+    "model_name": "无法自动设置model名称，你想用什么名称？",
+    "package_already_installed": "package: %s 已经安装, 你想更新它吗？",
+    "lib_not_empty": "你的 lib 文件夹不是空的。你确定要覆盖你的应用吗？ \\n 警告:操作不可逆",
+    "ios_lang": "你想在 iOS 端使用什么语言？",
+    "android_lang": "你想在 Android 端使用什么语言？",
+    "use_null_safe": "要使用 null safe 吗？",
+    "use_linter": "你想用代码检查器吗？",
+    "new_page_name": "page 的名字是？"
+  },
+  "error": {
+    "failed_to_connect": "连接到 %s 失败",
+    "no_valid_file_or_url": "%s 不是有效的文件或URL",
+    "unnecessary_parameter": "参数 %s 是多余的",
+    "unnecessary_parameter_plural": "参数 %s 是多余的",
+    "nonexistent_directory": "%s 不存在",
+    "empty_directory": "%s 是空的",
+    "invalid_json": "%s 不是个有效的json文件",
+    "special_characters_in_key": "key中包含不允许的特殊字符. \\n key: %s",
+    "required_path": "需要传入文件或路径",
+    "invalid_dart": "%s 不是有效的dart文件",
+    "invalid_file_or_directory": "%s 不是有效的文件或目录",
+    "package_not_found": "依赖: %s 在 pub.dev 中没有找到",
+    "cli_version_not_found": "没有找到已安装版本。",
+    "update_cli": "升级 get_cli 错误",
+    "folder_not_found": "文件夹 %s 未找到",
+    "file_not_found": "在 %s 中没有找到文件",
+    "access_denied": "对 %s 的访问被拒绝",
+    "unexpected": "发生意外错误:",
+    "no_package_to_remove": "请输入你想移除的 package 名称"
+  },
+  "example": "例:",
+  "warning": "警告:",
+  "hint": {
+    "create": {
+      "controller": "生成 controller",
+      "page": "用于生成 page",
+      "project": "用于生成新项目",
+      "provider": "创建一个新 Provider",
+      "screen": "生成新 Screen",
+      "view": "生成 view"
+    },
+    "generate": {
+      "locales": "从 json 文件生成国际化翻译文件",
+      "model": "从 json 生成 model 类"
+    },
+    "help": "显示本帮助",
+    "init": "生成所选结构在现有项目:",
+    "install": "为你的项目安装依赖:",
+    "remove": "为你的项目移除依赖:",
+    "sort": "排序 import 并格式化 dart 文件",
+    "update": "更新 GET_CLI",
+    "version": "显示当前 CLI 版本'"
+  },
+  "info": {
+    "unnecessary_flag": "%s 是多余的",
+    "unnecessary_flag_prural": "%s 是多余的",
+    "package_not_installed": "Package: %s 在本应用中未安装",
+    "cli_last_version_already_installed": "您已安装 get_cli 最新版本",
+    "no_file_overwritten": "没有文件被覆盖",
+    "update_available": "新版本可用！当前版本: %s",
+    "update_available2": "新版本可用: %s 运行:"
+  },
+  "options": {
+    "yes": "是的!",
+    "no": "不",
+    "rename": "我想重命名"
+  },
+  "optional_parameters": "可选参数: %s",
+  "sucess": {
+    "page_create": "%s page 创建成功.",
+    "locale_generate": "翻译文件生成成功.",
+    "getx_pattern_generated": "GetX 结构生成成功。",
+    "clean_Pattern_generated": "CLEAN 结构生成成功。",
+    "file_formatted": " '%s' 格式化成功",
+    "package_removed": "Package: %s 已移除！",
+    "package_installed": "'Package: %s 已安装！",
+    "update_cli": "升级完成",
+    "add_controller_in_bindings": "%s 已经被添加到在 %s 的binding'",
+    "navigation_added": "%s navigation添加成功.",
+    "file_created": "文件: %s 创建成功，路径: %s",
+    "route_created": "%s route 创建成功."
+  }
+}

@@ -1,0 +1,17 @@
+name: package_config
+version: 2.1.0
+description: Support for reading and writing Dart Package Configuration files.
+repository: https://github.com/dart-lang/package_config
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  path: ^1.8.0
+
+dev_dependencies:
+  build_runner: ^2.0.0
+  build_test: ^2.1.2
+  build_web_compilers: ^3.0.0
+  lints: ^1.0.0
+  test: ^1.16.0

@@ -1,0 +1,15 @@
+# Include option is buggy:
+# https://github.com/flutter/flutter/issues/62591
+# In case the include issue gets fixed, lines below INCLUDE_FIX
+# can be removed
+
+include: package:lints/recommended.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+
+linter:
+  rules:
+    constant_identifier_names: false
+

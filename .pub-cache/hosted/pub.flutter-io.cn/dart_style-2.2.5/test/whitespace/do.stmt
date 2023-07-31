@@ -1,0 +1,12 @@
+40 columns                              |
+>>> empty
+do {} while (true);
+<<<
+do {} while (true);
+>>> indented body
+do
+{;} while (true);
+<<<
+do {
+  ;
+} while (true);

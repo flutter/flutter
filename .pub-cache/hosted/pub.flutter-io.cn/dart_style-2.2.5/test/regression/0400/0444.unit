@@ -1,0 +1,26 @@
+>>>
+class MyComponent {
+  Object firstArgument;
+  Object superDuperLongNamedArgument;
+  Object secondArgument;
+
+  MyComponent(
+      @Inject(const MyFirstArgument()) this.firstArgument,
+      @Inject(const MySuperDuperLongNamedArgument())
+      this.superDuperLongNamedArgument, // LOOK AT ME
+      @Inject(const MySecondArgument()) this.secondArgument);
+}
+<<<
+class MyComponent {
+  Object firstArgument;
+  Object superDuperLongNamedArgument;
+  Object secondArgument;
+
+  MyComponent(
+      @Inject(const MyFirstArgument())
+          this.firstArgument,
+      @Inject(const MySuperDuperLongNamedArgument())
+          this.superDuperLongNamedArgument, // LOOK AT ME
+      @Inject(const MySecondArgument())
+          this.secondArgument);
+}

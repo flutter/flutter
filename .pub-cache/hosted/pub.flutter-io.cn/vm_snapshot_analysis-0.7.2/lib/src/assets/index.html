@@ -1,0 +1,525 @@
+<!--
+  Copyright 2014 The Chromium Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+-->
+<html>
+<head>
+<title>Binary Size Analysis</title>
+<script src="d3/d3.js" charset="utf-8"></script>
+<script src="D3SymbolTreeMap.js" charset="utf-8"></script>
+<script src="data.js" charset="utf-8"></script>
+<style>
+body {
+    margin: 0px;
+    padding: 5px;
+}
+.swatch {
+    border: 1px solid rgb(100,100,100);
+    -webkit-user-select: none;
+    cursor: default;
+}
+</style>
+<script>
+var treemap;
+var filterChanging = false;
+var savedSettings = {};
+
+function init() {
+    if (window.metadata !== undefined && window.metadata.subtitle) {
+        document.getElementById('subtitle').innerHTML = ': ' + escape(metadata.subtitle);
+    }
+    initFilterOptions();
+    treemap = new D3SymbolTreeMap(
+        savedSettings.width,
+        savedSettings.height,
+        savedSettings.maxLevels);
+    treemap.init();
+}
+
+function getIdealSizes() {
+    var width = window.innerWidth - 20;
+    var height = window.innerHeight - 70;
+    return {'width': width, 'height': height};
+}
+
+function showReport(title, data, headers, dataFunction, styleFunction) {
+    var div =  d3.select('body').append('div')
+        .style('margin', '0')
+        .style('padding', '5px')
+        .style('position', 'absolute')
+        .style('top', '10%')
+        .style('left', '10%')
+        .style('background-color', 'rgba(255,255,255,0.9)')
+        .style('width', '80%')
+        .style('height', '80%')
+        .style('z-index', '2147483647')
+        .style('border', '3px ridge grey')
+        .style('box-shadow', '10px 10px 5px rgba(80,80,80,0.7)')
+        .style('text-align', 'center')
+        .style('border-radius', '10px');
+    var titlebar = div.append('div')
+        .style('margin', '0')
+        .style('padding', '5px')
+        .style('position', 'absolute')
+        .style('top', '0%')
+        .style('left', '0%')
+        .style('width', '100%')
+        .style('height', '10%')
+        .style('font-size', 'x-large');
+    titlebar.text(title);
+    var controls = div.append('div')
+        .style('margin', '0')
+        .style('padding', '5px')
+        .style('position', 'absolute')
+        .style('top', '90%')
+        .style('left', '0%')
+        .style('width', '100%')
+        .style('height', '10%');
+    controls.append('input').attr('type', 'button')
+        .attr('value', 'Dismiss')
+        .on('click', function(){div.remove();});
+
+    var tableDiv = div.append('div')
+        .style('overflow', 'auto')
+        .style('position', 'absolute')
+        .style('top', '10%')
+        .style('left', '0%')
+        .style('width', '100%')
+        .style('height', '80%')
+        .style('border-top', '1px solid rgb(230,230,230)')
+        .style('border-bottom', '1px solid rgb(230,230,230)');
+    var table = tableDiv.append('table')
+        .attr('border', '1')
+        .attr('cellspacing', '0')
+        .attr('cellpadding', '2')
+        .style('margin-left', 'auto')
+        .style('margin-right', 'auto');
+    var header = table.append('tr');
+    for (var i = 0; i < headers.length; i++) {
+        header.append('th').text(headers[i]);
+    }
+
+    for (var i = 0; i < data.length; i++) {
+        var row = table.append('tr');
+        for (j = 0; j < headers.length; j++) {
+            var td = row.append('td');
+            if (styleFunction) {
+                styleFunction.call(this, td, j);
+            }
+            dataFunction.call(this, data[i], j, td);
+        }
+    }
+}
+
+function bigSymbolsReport() {
+    var list = treemap.biggestSymbols(100);
+    var headers = ['Rank', 'Size (Bytes)', 'Type', 'Location'];
+    var styleFunction = function(selection, index) {
+        if (index === 3) {
+            selection.style('font-family', 'monospace');
+        }
+    };
+    var recordIndex = 1;
+    var dataFunction = function(record, index, cell) {
+        if (index === 0) {
+            cell.text(recordIndex++);
+        } else if (index === 1) {
+            cell.text(D3SymbolTreeMap._pretty(record.value));
+        } else if (index === 2) {
+            cell.text(record.t);
+        } else {
+            if (treemap.pathFor(record).indexOf('/out') == 0) {
+                cell.append('span').text(treemap.pathFor(record));
+                cell.append('br');
+                cell.append('span').text('Symbol: ');
+                cell.append('span').text(record.n);
+            } else {
+                var href = 'https://code.google.com/p/chromium/codesearch#chromium/src'
+                    + treemap.pathFor(record)
+                    + '&q='
+                    + record.n;
+                cell.append('a')
+                    .attr('href', href)
+                    .attr('target', '_blank')
+                    .text(treemap.pathFor(record));
+                cell.append('br');
+                cell.append('span').text('Symbol: ');
+                cell.append('span').text(record.n);
+            }
+        }
+    };
+    showReport('100 Largest Symbols', list, headers, dataFunction, styleFunction);
+}
+
+function bigPathsReport() {
+    var list = treemap.biggestPaths(100);
+    var headers = ['Rank', 'Size (Bytes)', 'Location'];
+    var styleFunction = function(selection, index) {
+        if (index === 2) {
+            selection.style('font-family', 'monospace');
+        }
+    };
+    var recordIndex = 1;
+    var dataFunction = function(record, index, cell) {
+        if (index === 0) {
+            cell.text(recordIndex++);
+        } else if (index === 1) {
+            cell.text(D3SymbolTreeMap._pretty(record.value));
+        } else if (index === 2) {
+            if (treemap.pathFor(record).indexOf('/out') == 0) {
+                cell.text(treemap.pathFor(record));
+            } else {
+                var href = 'https://code.google.com/p/chromium/codesearch#chromium/src' + treemap.pathFor(record);
+                cell.append('a')
+                    .attr('href', href)
+                    .attr('target', '_blank')
+                    .text(treemap.pathFor(record));
+            }
+
+        }
+    };
+    showReport('100 Largest Paths', list, headers, dataFunction, styleFunction);
+}
+
+function symbolFilterTextChanged() {
+    if (filterChanging) return true;
+    filterChanging = true;
+    var enabled = document.getElementById('symbol_types_filter').value;
+    for (var x=0; x<=25; x++) {
+        var checkBox = document.getElementById('check_' + x);
+        checkBox.checked = (enabled.indexOf(checkBox.value) != -1);
+    }
+    filterChanging = false;
+}
+
+function updateFilterText() {
+    if (filterChanging) return true;
+    filterChanging = true;
+    var text = '';
+    for (var x=0; x<=25; x++) {
+        var checkBox = document.getElementById('check_' + x);
+        if (checkBox.checked) {
+            text += checkBox.value;
+        }
+    }
+    document.getElementById('symbol_types_filter').value=text;
+    filterChanging = false;
+}
+
+function initFilterOptions() {
+    updateFilterText();
+    for (var x=0; x<=25; x++) {
+        var checkBox = document.getElementById('check_' + x);
+        checkBox.onchange=updateFilterText;
+        var swatch = document.getElementById('swatch_' + x);
+        swatch.style.backgroundColor = D3SymbolTreeMap.getColorForType(checkBox.value).toString();
+    }
+    var gteCheckbox = document.getElementById('check_gte');
+    gteCheckbox.onchange = function() {
+        document.getElementById('symbol_filter_gte').disabled = !gteCheckbox.checked;
+    }
+    var regexCheckbox = document.getElementById('check_regex');
+    regexCheckbox.onchange = function() {
+        document.getElementById('symbol_filter_regex').disabled = !regexCheckbox.checked;
+    }
+    var excludeRegexCheckbox = document.getElementById('check_exclude_regex');
+    excludeRegexCheckbox.onchange = function() {
+        document.getElementById('symbol_filter_exclude_regex').disabled = !excludeRegexCheckbox.checked;
+    }
+    var idealSizes = getIdealSizes();
+    document.getElementById('width').value = idealSizes.width;
+    document.getElementById('height').value = idealSizes.height;
+    saveFilterSettings();
+}
+
+function filterSetAll(enabled) {
+    for (var x=0; x<=25; x++) {
+        var checkBox = document.getElementById('check_' + x);
+        checkBox.checked = enabled;
+    }
+    updateFilterText();
+}
+
+function showOptions() {
+    loadFilterSettings();
+    var container = document.getElementById('options_container');
+    var w = container.offsetWidth;
+    var h = container.offsetHeight;
+    container.style.margin = '-' + (h/2) + 'px 0 0 -' + (w/2) + 'px';
+    container.style.visibility = 'visible';
+}
+
+function hideOptions() {
+    var container = document.getElementById('options_container');
+    container.style.visibility = 'hidden';
+}
+
+function applySettings() {
+    hideOptions();
+    var oldWidth = savedSettings.width;
+    var oldHeight = savedSettings.height;
+    var oldSymbols = savedSettings.symbolTypes;
+    var oldRegex = savedSettings.regex;
+    var oldExcludeRegex = savedSettings.excludeRegex;
+    var oldGte = savedSettings.gte;
+    var oldMaxLevels = savedSettings.maxLevels;
+    saveFilterSettings();
+    var resizeNeeded = oldWidth !== savedSettings.width || oldHeight !== savedSettings.height;
+    var regexChanged = oldRegex !== savedSettings.regex;
+    var excludeRegexChanged = oldExcludeRegex !== savedSettings.excludeRegex;
+    var symbolsChanged = oldSymbols !== savedSettings.symbolTypes;
+    var gteChanged = oldGte !== savedSettings.gte;
+    var filterChanged = regexChanged || excludeRegexChanged || symbolsChanged || gteChanged;
+    var maxLevelsChanged = oldMaxLevels !== savedSettings.maxLevels;
+
+    if (filterChanged) {
+        // Type filters
+        typeFilter = function(datum) {
+            if (datum.depth === 0) return true; // root node
+            if (datum.t === undefined) return true;
+            return savedSettings.symbolTypes !== undefined &&
+                savedSettings.symbolTypes.indexOf(datum.t) !== -1;
+        }
+
+        // Regex filter
+        var regexFilter = undefined;
+        if (savedSettings.regex !== undefined && savedSettings.regex.length > 0) {
+            console.log('filter: regex is "' + savedSettings.regex + '"');
+            var regex = new RegExp(savedSettings.regex);
+            regexFilter = function(datum) {
+                if (datum.depth === 0) return true; // root node
+                var fullName = this.pathFor(datum);
+                if (datum.children === undefined) { // it is a leaf node (symbol)
+                    fullName += ':' + datum.n;
+                }
+                return regex.test(fullName);
+            }
+        }
+
+        // Exclude regex filter
+        var excludeRegexFilter = undefined;
+        if (savedSettings.excludeRegex !== undefined && savedSettings.excludeRegex.length > 0) {
+            console.log('filter: exclude-regex is "' + savedSettings.excludeRegex + '"');
+            var excludeRegex = new RegExp(savedSettings.excludeRegex);
+            excludeRegexFilter = function(datum) {
+                if (datum.depth === 0) return true; // root node
+                var fullName = this.pathFor(datum);
+                if (datum.children === undefined) { // it is a leaf node (symbol)
+                    fullName += ':' + datum.n;
+                }
+                return !excludeRegex.test(fullName);
+            }
+        }
+
+        // Size filter
+        var sizeFilter = undefined;
+        if (savedSettings.gte !== undefined) {
+            console.log('filter: minimum size is ' + savedSettings.gte + ' bytes');
+            sizeFilter = function(datum) {
+                if (datum.children !== undefined) return true; // non-leaf
+                if (datum.value === undefined) console.log('whoops');
+                return datum.value >= savedSettings.gte;
+            }
+        }
+
+        // Make a filter to apply to the tree
+        var filter = function(datum) {
+            if (typeFilter && !typeFilter.call(this, datum)) return false;
+            if (regexFilter && !regexFilter.call(this, datum)) return false;
+            if (excludeRegexFilter && !excludeRegexFilter.call(this, datum)) return false;
+            if (sizeFilter && !sizeFilter.call(this, datum)) return false;
+            return true;
+        };
+        treemap.filter(filter);
+    }
+
+    // Adjust levels if needed.
+    if (maxLevelsChanged) {
+        treemap.setMaxLevels(savedSettings.maxLevels);
+    }
+
+    // Resize map if necessary.
+    if (resizeNeeded) {
+        console.log('desired treemap dimensions have changed, requesting resize');
+        treemap.resize(savedSettings.width, savedSettings.height);
+    }
+}
+
+function cancelSettings() {
+    hideOptions();
+    loadFilterSettings();
+}
+
+function saveFilterSettings() {
+    savedSettings.symbolTypes = document.getElementById('symbol_types_filter').value;
+    if (document.getElementById('check_regex').checked) {
+        savedSettings.regex = document.getElementById('symbol_filter_regex').value;
+    } else {
+        savedSettings.regex = undefined;
+    }
+    if (document.getElementById('check_exclude_regex').checked) {
+        savedSettings.excludeRegex = document.getElementById('symbol_filter_exclude_regex').value;
+    } else {
+        savedSettings.excludeRegex = undefined;
+    }
+    if (document.getElementById('check_gte').checked) {
+        savedSettings.gte = parseInt(document.getElementById('symbol_filter_gte').value);
+    } else {
+        savedSettings.gte = undefined;
+    }
+    savedSettings.width = parseInt(document.getElementById('width').value);
+    savedSettings.height = parseInt(document.getElementById('height').value);
+    savedSettings.maxLevels = parseInt(document.getElementById('max_levels').value);
+}
+
+function loadFilterSettings() {
+    document.getElementById('symbol_types_filter').value = savedSettings.symbolTypes;
+    symbolFilterTextChanged();
+    if (savedSettings.regex !== undefined) {
+        document.getElementById('check_regex').checked = true;
+        document.getElementById('symbol_filter_regex').value = savedSettings.regex;
+    } else {
+        document.getElementById('check_regex').checked = false;
+    }
+    if (savedSettings.excludeRegex !== undefined) {
+        document.getElementById('check_exclude_regex').checked = true;
+        document.getElementById('symbol_filter_exclude_regex').value = savedSettings.excludeRegex;
+    } else {
+        document.getElementById('check_exclude_regex').checked = false;
+    }
+    if (savedSettings.gte !== undefined) {
+        document.getElementById('check_gte').checked = true;
+        document.getElementById('symbol_filter_gte').value = savedSettings.gte;
+    } else {
+        document.getElementById('check_gte').checked = false;
+    }
+    document.getElementById('width').value = savedSettings.width;
+    document.getElementById('height').value = savedSettings.height;
+    document.getElementById('max_levels').value = savedSettings.maxLevels;
+}
+
+function escape(str) {
+    return str.replace(/&/g, '&amp;')
+              .replace(/"/g, '&quot;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;');
+}
+</script>
+</head>
+<body onload='init()'>
+<div style='position: absolute; top: 5px; left: 5px;'>
+  <input type='button' onclick='showOptions()' value='Options &amp; Legend...'>
+  <span style='-webkit-user-select: none; cursor: help;' title='Click to view the symbol legend or to configure filters and options for the treemap'>[?]</span>
+</div>
+<div style='position: absolute; right: 5px; top: 5px; white-space: nowrap;'>
+    Reports:
+    <input type='button' onclick='bigSymbolsReport()' value='Large Symbols' title='Click to view a report of the largest 100 symbols that are with the bounds of the treemap that is currently displayed.'>
+    <input type='button' onclick='bigPathsReport()' value='Large Files' title='Click to view a report of the largest 100 source files that are with the bounds of the treemap that is currently displayed.'>
+</div>
+<div style='text-align: center; margin-bottom: 5px;'>
+    <span style='font-size: x-large; font-weight: bold; font-variant: small-caps'>Binary Size Analysis<span id='subtitle'></span></span>
+    <br><span style='font-size: small; font-style: italic;'>Double-click a box to zoom in, double-click outermost title to zoom out.</span>
+</div>
+<table id='options_container' style='visibility: hidden; border: 3px ridge grey; padding: 0px; top: 50%; left: 50%; position: fixed; z-index: 2147483646; overflow: auto; background-color: rgba(255,255,255,0.9); border-radius: 10px; box-shadow: 10px 10px 5px rgba(80,80,80,0.7);'><tr><td style='vertical-align: top'>
+    <table cellspacing=0 cellborder=0 style='width:100%'>
+        <tr><th colspan=3 style='padding-bottom: .25em; text-decoration: underline;'>Symbol Types To Show</th></tr>
+        <tr>
+            <td style='width: 33%; white-space: nowrap; vertical-align: top;'>
+                    <span class='swatch' id='swatch_0'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_0' value='A'>Global absolute (A)
+                <br><span class='swatch' id='swatch_1'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_1' value='B'>Global uninitialized data (B)
+                <br><span class='swatch' id='swatch_2'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_2' value='b'>Local uninitialized data (b)
+                <br><span class='swatch' id='swatch_3'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_3' value='C'>Global uninitialized common (C)
+                <br><span class='swatch' id='swatch_4'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_4' value='D'>Global initialized data (D)
+                <br><span class='swatch' id='swatch_5'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_5' value='d'>Local initialized data (d)
+                <br><span class='swatch' id='swatch_6'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_6' value='G'>Global small initialized data (G)
+                <br><span class='swatch' id='swatch_7'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_7' value='g'>Local small initialized data (g)
+                <br><span class='swatch' id='swatch_8'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_8' value='i'>Indirect function (i)
+            </td>
+            <td style='width: 33%; white-space: nowrap; vertical-align: top;'>
+                    <span class='swatch' id='swatch_9'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_9' value='N'>Debugging (N)
+                <br><span class='swatch' id='swatch_10'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_10' value='p'>Stack unwind (p)
+                <br><span class='swatch' id='swatch_11'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_11' value='R'>Global read-only data (R)
+                <br><span class='swatch' id='swatch_12'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_12' value='r'>Local read-only data (r)
+                <br><span class='swatch' id='swatch_13'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_13' value='S'>Global small uninitialized data (S)
+                <br><span class='swatch' id='swatch_14'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_14' value='s'>Local small uninitialized data (s)
+                <br><span class='swatch' id='swatch_15'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_15' value='T'>Global code (T)
+                <br><span class='swatch' id='swatch_16'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_16' value='t'>Local code (t)
+                <br><span class='swatch' id='swatch_17'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_17' value='U'>Undefined (U)
+            </td>
+            <td style='width: 33%; white-space: nowrap; vertical-align: top;'>
+                    <span class='swatch' id='swatch_18'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_18' value='u'>Unique (u)
+                <br><span class='swatch' id='swatch_19'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_19' value='V'>Global weak object (V)
+                <br><span class='swatch' id='swatch_20'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_20' value='v'>Local weak object (v)
+                <br><span class='swatch' id='swatch_21'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_21' value='W'>Global weak symbol (W)
+                <br><span class='swatch' id='swatch_22'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_22' value='w'>Local weak symbol (w)
+                <br><span class='swatch' id='swatch_23'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_23' value='@'>Vtable entry (@)
+                <br><span class='swatch' id='swatch_24'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_24' value='-'>STABS debugging (-)
+                <br><span class='swatch' id='swatch_25'>&nbsp;&nbsp;&nbsp;</span><input checked type='checkbox' id='check_25' value='?'>Unrecognized (?)
+            </td>
+        </tr>
+        <tr><td colspan=3 style='text-align: center; white-space: nowrap; padding-top: 1em;'>
+            Select <input type='button' onclick='filterSetAll(true)' value='All'>,
+            <input type='button' onclick='filterSetAll(false)' value='None'>,
+            or type a string: <input id='symbol_types_filter' size=30 value='' onkeyup='symbolFilterTextChanged()' onblur='updateFilterText()'>
+            <span style='-webkit-user-select: none; cursor: help;' title='Enter codes from the list above for the symbols you want to see. The checkboxes will update automatically to match the string that you enter.'>[?]</span>
+        </td></tr>
+   </table>
+</td></tr><tr><td style='vertical-align: top; padding-top: 10px; border-top: 1px solid grey;'>
+    <table cellspacing=0 cellborder=0 style='width: 100%'>
+        <tr><th colspan=2 style='padding-bottom: .25em; text-decoration: underline;'>Advanced Options</th></tr>
+        <tr>
+            <td style='white-space: nowrap; vertical-align: top;'>
+                <input type='checkbox' id='check_regex'>
+                Only include symbols matching this regex:
+            </td>
+            <td style='text-align: right; vertical-align: top;'>
+                <input disabled id='symbol_filter_regex' size=30 value='' style='text-align: right;'>
+                <span style='-webkit-user-select: none; cursor: help;' title='Enter a javascript regex. Only symbols that match this regex will be shown. This filter applies before any exclusion regex specified below. The format of each symbol is [path]:[symbol_name]'>[?]</span>
+            </td>
+        </tr>
+        <tr>
+            <td style='white-space: nowrap; vertical-align: top;'>
+                <input type='checkbox' id='check_exclude_regex'>
+                Exclude all symbols matching this regex:
+            </td>
+            <td style='text-align: right; vertical-align: top;'>
+                <input disabled id='symbol_filter_exclude_regex' size=30 value='' style='text-align: right;'>
+                <span style='-webkit-user-select: none; cursor: help;' title='Enter a javascript regex. Symbols that match this tegex will not be shown. This filter applies after any inclusion filter specified above. The format of each symbol is [path]:[symbol_name]'>[?]</span>
+            </td>
+        </tr>
+        <tr>
+            <td style='white-space: nowrap; vertical-align: top;'>
+                <input type='checkbox' id='check_gte'>
+                Only include symbols that are at least <span style='font-style: italic;'>n</span> bytes:
+            </td>
+            <td style='text-align: right; vertical-align: top;'>
+                <input disabled id='symbol_filter_gte' size=8 value='' style='text-align: right;'>
+                <span style='-webkit-user-select: none; cursor: help;' title='Symbols whose size is less than this value will be hidden.'>[?]</span>
+            </td>
+        </tr>
+        <tr>
+            <td style='white-space: nowrap vertical-align: top;;'>
+                Show at most <span style='font-style: italic;'>n</span> levels of detail at a time:
+            </td>
+            <td style='text-align: right; vertical-align: top;'>
+                <input id='max_levels' size=4 value='2' style='text-align: right;'><span style='-webkit-user-select: none; cursor: help;' title='Increasing this value shows more detail without the need to zoom, but uses more computing power.'>[?]</span>
+            </td>
+        </tr>
+        <tr>
+            <td style='white-space: nowrap vertical-align: top;;'>
+                Set the size of the treemap to <span style='font-style: italic;'>W x H</span> pixels:
+            </td>
+            <td style='text-align: right; vertical-align: top;'>
+                <input id='width' size=4 value='' style='text-align: right;'>
+                &nbsp;x&nbsp;<input id='height' size=4 value='' style='text-align: right;'>
+            </td>
+        </tr>
+    </table>
+</td></tr>
+<tr><td style='padding-top: 10px; text-align: right; border-top: 1px solid grey'>
+    <input type='button' value='Apply' onclick='applySettings()'>
+    <input type='button' value='Cancel' onclick='cancelSettings()'>
+</td></tr></table>
+</body>
+</html>

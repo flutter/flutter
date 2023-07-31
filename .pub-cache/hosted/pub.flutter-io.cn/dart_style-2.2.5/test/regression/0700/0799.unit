@@ -1,0 +1,14 @@
+>>>
+@ShouldThrow(
+  'Could not generate `toJson` code for `watch`.\n'
+  'None of the provided `TypeHelper` instances support the defined type.',
+  configurations: ['default'],
+)
+class C {}
+<<<
+@ShouldThrow(
+  'Could not generate `toJson` code for `watch`.\n'
+  'None of the provided `TypeHelper` instances support the defined type.',
+  configurations: ['default'],
+)
+class C {}

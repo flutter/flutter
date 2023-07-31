@@ -1,0 +1,134 @@
+40 columns                              |
+>>> inline after "var"
+var /* int */ x;
+<<<
+var /* int */ x;
+>>> trailing line comment
+var x; // x
+<<<
+var x; // x
+>>> multiple variable declaration list
+var x /* X */, y;
+<<<
+var x /* X */, y;
+>>> continue with line comment
+while (true) {
+  continue // comment
+  ;
+}
+<<<
+while (true) {
+  continue // comment
+      ;
+}
+>>> continue with wrapped block comment
+while (true) {
+  continue /* a long comment that does not wrap */;
+}
+<<<
+while (true) {
+  continue /* a long comment that does not wrap */;
+}
+>>> do with line comment
+do // comment
+{;} while (true);
+<<<
+do // comment
+    {
+  ;
+} while (true);
+>>> always place newline after multi-line block comment
+/*
+*/ var i = value;
+<<<
+/*
+*/
+var i = value;
+>>> remove blank lines before beginning of block
+while (true) {
+
+
+
+  // comment
+}
+<<<
+while (true) {
+  // comment
+}
+>>> remove blank lines after end of block
+while (true) {
+  // comment
+
+
+
+}
+<<<
+while (true) {
+  // comment
+}
+>>>
+main() {
+  /* comment */ statement;
+}
+<<<
+main() {
+  /* comment */ statement;
+}
+>>>
+main() {
+  code;
+
+  /* comment */ statement;
+}
+<<<
+main() {
+  code;
+
+  /* comment */ statement;
+}
+>>>
+main() {
+  while (b)
+  /*unreachable*/ {}
+}
+<<<
+main() {
+  while (b) /*unreachable*/ {}
+}
+>>> blank lines before comments in switch
+main() {
+  switch (n) {
+
+
+    // comment
+    case 0:
+
+
+
+    // comment
+
+
+
+    case 1:
+      ;
+
+
+    // comment
+
+
+  }
+}
+<<<
+main() {
+  switch (n) {
+    // comment
+    case 0:
+
+    // comment
+
+    case 1:
+      ;
+
+    // comment
+  }
+}

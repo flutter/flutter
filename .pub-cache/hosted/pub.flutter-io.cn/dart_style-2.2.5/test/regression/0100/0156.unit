@@ -1,0 +1,12 @@
+>>>
+class Foo {
+  final bar;
+  final baz;
+  Foo(int this.bar(), this.baz);
+}
+<<<
+class Foo {
+  final bar;
+  final baz;
+  Foo(int this.bar(), this.baz);
+}

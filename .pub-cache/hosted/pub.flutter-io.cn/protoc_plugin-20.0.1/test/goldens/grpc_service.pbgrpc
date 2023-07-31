@@ -1,0 +1,115 @@
+///
+//  Generated code. Do not modify.
+//  source: test
+//
+// @dart = 2.12
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
+
+import 'dart:async' as $async;
+
+import 'dart:core' as $core;
+
+import 'package:grpc/service_api.dart' as $grpc;
+import 'test.pb.dart' as $0;
+export 'test.pb.dart';
+
+class TestClient extends $grpc.Client {
+  static final _$unary = $grpc.ClientMethod<$0.Input, $0.Output>(
+      '/Test/Unary',
+      ($0.Input value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $0.Output.fromBuffer(value));
+  static final _$clientStreaming = $grpc.ClientMethod<$0.Input, $0.Output>(
+      '/Test/ClientStreaming',
+      ($0.Input value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $0.Output.fromBuffer(value));
+  static final _$serverStreaming = $grpc.ClientMethod<$0.Input, $0.Output>(
+      '/Test/ServerStreaming',
+      ($0.Input value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $0.Output.fromBuffer(value));
+  static final _$bidirectional = $grpc.ClientMethod<$0.Input, $0.Output>(
+      '/Test/Bidirectional',
+      ($0.Input value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $0.Output.fromBuffer(value));
+
+  TestClient($grpc.ClientChannel channel,
+      {$grpc.CallOptions? options,
+      $core.Iterable<$grpc.ClientInterceptor>? interceptors})
+      : super(channel, options: options, interceptors: interceptors);
+
+  $grpc.ResponseFuture<$0.Output> unary($0.Input request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$unary, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.Output> clientStreaming(
+      $async.Stream<$0.Input> request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(_$clientStreaming, request, options: options)
+        .single;
+  }
+
+  $grpc.ResponseStream<$0.Output> serverStreaming($0.Input request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(
+        _$serverStreaming, $async.Stream.fromIterable([request]),
+        options: options);
+  }
+
+  $grpc.ResponseStream<$0.Output> bidirectional($async.Stream<$0.Input> request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(_$bidirectional, request, options: options);
+  }
+}
+
+abstract class TestServiceBase extends $grpc.Service {
+  $core.String get $name => 'Test';
+
+  TestServiceBase() {
+    $addMethod($grpc.ServiceMethod<$0.Input, $0.Output>(
+        'Unary',
+        unary_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.Input.fromBuffer(value),
+        ($0.Output value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Input, $0.Output>(
+        'ClientStreaming',
+        clientStreaming,
+        true,
+        false,
+        ($core.List<$core.int> value) => $0.Input.fromBuffer(value),
+        ($0.Output value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Input, $0.Output>(
+        'ServerStreaming',
+        serverStreaming_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) => $0.Input.fromBuffer(value),
+        ($0.Output value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Input, $0.Output>(
+        'Bidirectional',
+        bidirectional,
+        true,
+        true,
+        ($core.List<$core.int> value) => $0.Input.fromBuffer(value),
+        ($0.Output value) => value.writeToBuffer()));
+  }
+
+  $async.Future<$0.Output> unary_Pre(
+      $grpc.ServiceCall call, $async.Future<$0.Input> request) async {
+    return unary(call, await request);
+  }
+
+  $async.Stream<$0.Output> serverStreaming_Pre(
+      $grpc.ServiceCall call, $async.Future<$0.Input> request) async* {
+    yield* serverStreaming(call, await request);
+  }
+
+  $async.Future<$0.Output> unary($grpc.ServiceCall call, $0.Input request);
+  $async.Future<$0.Output> clientStreaming(
+      $grpc.ServiceCall call, $async.Stream<$0.Input> request);
+  $async.Stream<$0.Output> serverStreaming(
+      $grpc.ServiceCall call, $0.Input request);
+  $async.Stream<$0.Output> bidirectional(
+      $grpc.ServiceCall call, $async.Stream<$0.Input> request);
+}

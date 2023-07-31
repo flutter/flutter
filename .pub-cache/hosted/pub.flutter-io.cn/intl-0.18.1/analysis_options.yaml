@@ -1,0 +1,20 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  language:
+    strict-raw-types: true
+  errors:
+    deprecated_member_use_from_same_package: ignore
+
+linter:
+  rules:
+    # Enable additional lints.
+    - always_declare_return_types
+    - directives_ordering
+    - prefer_single_quotes
+    - sort_pub_dependencies
+    - unnecessary_parenthesis
+
+    # These are works in progress.
+    # - avoid_dynamic_calls
+    # - type_annotate_public_apis

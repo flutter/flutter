@@ -1,0 +1,92 @@
+>>>
+class Foo {
+  Optional<double> get finiteSignificantCost => isSignificant && cost.value.isFinite ? cost : const Optional<double>.absent();
+  Optional<double> get finiteSignificantCost => isSignificant && cost.value.isFinite ? cost : const Optional.absent();
+}
+<<<
+class Foo {
+  Optional<double> get finiteSignificantCost =>
+      isSignificant && cost.value.isFinite
+          ? cost
+          : const Optional<double>.absent();
+  Optional<double> get finiteSignificantCost =>
+      isSignificant && cost.value.isFinite ? cost : const Optional.absent();
+}
+>>> (indent 4)
+    main() {
+      this.changes.exec();
+      Valids.exist(doneSearch)
+          ? doneSearch(err)
+          : null;
+    }
+<<<
+    main() {
+      this.changes.exec();
+      Valids.exist(doneSearch) ? doneSearch(err) : null;
+    }
+>>> (indent 6)
+      main() {
+        var openParensMatch = new RegExp(r'\(').allMatches(matchStr),
+            closeParensMatch = new RegExp(r'\)').allMatches(matchStr),
+            numOpenParens =
+            (openParensMatch != null && openParensMatch.length != null) ? 1 : 0,
+            numCloseParens =
+            (closeParensMatch != null && closeParensMatch.length != null)
+                ? 1
+                : 0;
+      }
+<<<
+      main() {
+        var openParensMatch = new RegExp(r'\(').allMatches(matchStr),
+            closeParensMatch = new RegExp(r'\)').allMatches(matchStr),
+            numOpenParens =
+                (openParensMatch != null && openParensMatch.length != null)
+                    ? 1
+                    : 0,
+            numCloseParens =
+                (closeParensMatch != null && closeParensMatch.length != null)
+                    ? 1
+                    : 0;
+      }
+>>> (indent 4)
+    main() {
+      tree.Node definition = new tree.FunctionExpression(
+          makeIdentifier(param.name),
+          makeParameters(param.parameters),
+          null, // body
+              param.type == null
+              ? null
+              : makeType(param.type),
+          makeEmptyModifiers(), // TODO: Function parameter modifiers?
+          null, // initializers
+          null, // get/set
+          null); // async modifier
+    }
+<<<
+    main() {
+      tree.Node definition = new tree.FunctionExpression(
+          makeIdentifier(param.name),
+          makeParameters(param.parameters),
+          null, // body
+          param.type == null ? null : makeType(param.type),
+          makeEmptyModifiers(), // TODO: Function parameter modifiers?
+          null, // initializers
+          null, // get/set
+          null); // async modifier
+    }
+>>> (indent 2)
+  main() {
+    ConstantExpression constant = new TypeConstantExpression(
+        // TODO(johnniwinther): Use [type] when evaluation of constants is done
+        // directly on the constant expressions.
+        node.isCall
+        ? coreTypes.typeType
+        : type);
+  }
+<<<
+  main() {
+    ConstantExpression constant = new TypeConstantExpression(
+        // TODO(johnniwinther): Use [type] when evaluation of constants is done
+        // directly on the constant expressions.
+        node.isCall ? coreTypes.typeType : type);
+  }

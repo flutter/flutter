@@ -1,0 +1,29 @@
+>>>
+List<dynamic> _generateUsedComponentReferences(
+    Globals globals, FormComponent component) {
+  return component.children == null
+      ? <dynamic>[]
+      : component.children.map<List<dynamic>>((c) {
+          final globalComponent = globals.components.firstWhere(
+              (c) => c.id == component.component.componentId,
+              orElse: () => null);
+          <
+              dynamic>[
+            reference(globalComponent.className, globalComponent.importPath)
+          ]..addAll(_generateUsedComponentReferences(globals, c));
+        }).toList();
+}
+<<<
+List<dynamic> _generateUsedComponentReferences(
+    Globals globals, FormComponent component) {
+  return component.children == null
+      ? <dynamic>[]
+      : component.children.map<List<dynamic>>((c) {
+          final globalComponent = globals.components.firstWhere(
+              (c) => c.id == component.component.componentId,
+              orElse: () => null);
+          <dynamic>[
+            reference(globalComponent.className, globalComponent.importPath)
+          ]..addAll(_generateUsedComponentReferences(globals, c));
+        }).toList();
+}

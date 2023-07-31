@@ -1,0 +1,269 @@
+#data
+<!doctype html><plaintext></plaintext>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <plaintext>
+|       "</plaintext>"
+
+#data
+<!doctype html><table><plaintext></plaintext>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <plaintext>
+|       "</plaintext>"
+|     <table>
+
+#data
+<!doctype html><table><tbody><plaintext></plaintext>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <plaintext>
+|       "</plaintext>"
+|     <table>
+|       <tbody>
+
+#data
+<!doctype html><table><tbody><tr><plaintext></plaintext>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <plaintext>
+|       "</plaintext>"
+|     <table>
+|       <tbody>
+|         <tr>
+
+#data
+<!doctype html><table><tbody><tr><plaintext></plaintext>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <plaintext>
+|       "</plaintext>"
+|     <table>
+|       <tbody>
+|         <tr>
+
+#data
+<!doctype html><table><td><plaintext></plaintext>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <plaintext>
+|               "</plaintext>"
+
+#data
+<!doctype html><table><caption><plaintext></plaintext>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <caption>
+|         <plaintext>
+|           "</plaintext>"
+
+#data
+<!doctype html><table><tr><style></script></style>abc
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "abc"
+|     <table>
+|       <tbody>
+|         <tr>
+|           <style>
+|             "</script>"
+
+#data
+<!doctype html><table><tr><script></style></script>abc
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "abc"
+|     <table>
+|       <tbody>
+|         <tr>
+|           <script>
+|             "</style>"
+
+#data
+<!doctype html><table><caption><style></script></style>abc
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <caption>
+|         <style>
+|           "</script>"
+|         "abc"
+
+#data
+<!doctype html><table><td><style></script></style>abc
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <style>
+|               "</script>"
+|             "abc"
+
+#data
+<!doctype html><select><script></style></script>abc
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       <script>
+|         "</style>"
+|       "abc"
+
+#data
+<!doctype html><table><select><script></style></script>abc
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       <script>
+|         "</style>"
+|       "abc"
+|     <table>
+
+#data
+<!doctype html><table><tr><select><script></style></script>abc
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       <script>
+|         "</style>"
+|       "abc"
+|     <table>
+|       <tbody>
+|         <tr>
+
+#data
+<!doctype html><frameset></frameset><noframes>abc
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+|   <noframes>
+|     "abc"
+
+#data
+<!doctype html><frameset></frameset><noframes>abc</noframes><!--abc-->
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+|   <noframes>
+|     "abc"
+|   <!-- abc -->
+
+#data
+<!doctype html><frameset></frameset></html><noframes>abc
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+|   <noframes>
+|     "abc"
+
+#data
+<!doctype html><frameset></frameset></html><noframes>abc</noframes><!--abc-->
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+|   <noframes>
+|     "abc"
+| <!-- abc -->
+
+#data
+<!doctype html><table><tr></tbody><tfoot>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|       <tfoot>
+
+#data
+<!doctype html><table><td><svg></svg>abc<td>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <svg svg>
+|             "abc"
+|           <td>

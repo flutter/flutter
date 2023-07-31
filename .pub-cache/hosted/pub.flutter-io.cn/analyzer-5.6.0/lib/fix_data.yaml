@@ -1,0 +1,154 @@
+version: 1
+transforms:
+  # CompilationUnitElement
+  - title: "Replace with get enums"
+    date: 2022-10-21
+    element:
+      getter: 'enums2'
+      uris: [ 'package:analyzer/dart/element/element.dart' ]
+      inClass: 'CompilationUnitElement'
+    changes:
+      - kind: 'rename'
+        newName: 'enums'
+  - title: "Replace with get enums"
+    date: 2022-10-21
+    element:
+      getter: 'enums2'
+      uris: [ 'package:analyzer/src/dart/element/element.dart' ]
+      inClass: 'CompilationUnitElementImpl'
+    changes:
+      - kind: 'rename'
+        newName: 'enums'
+  - title: "Replace with get mixins"
+    date: 2022-10-21
+    element:
+      getter: 'mixins2'
+      uris: [ 'package:analyzer/dart/element/element.dart' ]
+      inClass: 'CompilationUnitElement'
+    changes:
+      - kind: 'rename'
+        newName: 'mixins'
+  - title: "Replace with get mixins"
+    date: 2022-10-21
+    element:
+      getter: 'mixins2'
+      uris: [ 'package:analyzer/src/dart/element/element.dart' ]
+      inClass: 'CompilationUnitElementImpl'
+    changes:
+      - kind: 'rename'
+        newName: 'mixins'
+  - title: "Replace with getEnum()"
+    date: 2022-10-21
+    element:
+      method: 'getEnum2'
+      uris: [ 'package:analyzer/dart/element/element.dart' ]
+      inClass: 'CompilationUnitElement'
+    changes:
+      - kind: 'rename'
+        newName: 'getEnum'
+
+  # LibraryElement
+  - title: "Replace with get parts"
+    date: 2022-10-21
+    element:
+      getter: 'parts2'
+      uris: [ 'package:analyzer/dart/element/element.dart' ]
+      inClass: 'LibraryElement'
+    changes:
+      - kind: 'rename'
+        newName: 'parts'
+  - title: "Replace with get parts"
+    date: 2022-10-21
+    element:
+      getter: 'parts2'
+      uris: [ 'package:analyzer/src/dart/element/element.dart' ]
+      inClass: 'LibraryElementImpl'
+    changes:
+      - kind: 'rename'
+        newName: 'parts'
+
+  # PrefixElement
+  - title: "Replace with get imports"
+    date: 2022-10-21
+    element:
+      getter: 'imports2'
+      uris: [ 'package:analyzer/dart/element/element.dart' ]
+      inClass: 'PrefixElement'
+    changes:
+      - kind: 'rename'
+        newName: 'imports'
+
+  # isAccessibleIn
+  - title: "Replace with get isAccessibleIn"
+    date: 2022-10-21
+    element:
+      method: 'isAccessibleIn2'
+      uris: [ 'package:analyzer/dart/element/element.dart' ]
+      inClass: 'Element'
+    changes:
+      - kind: 'rename'
+        newName: 'isAccessibleIn'
+  - title: "Replace with get isAccessibleIn"
+    date: 2022-10-21
+    element:
+      method: 'isAccessibleIn2'
+      uris: [ 'package:analyzer/dart/element/element.dart' ]
+      inClass: 'ClassElement'
+    changes:
+      - kind: 'rename'
+        newName: 'isAccessibleIn'
+  - title: "Replace with get isAccessibleIn"
+    date: 2022-10-21
+    element:
+      method: 'isAccessibleIn2'
+      uris: [ 'package:analyzer/dart/element/element.dart' ]
+      inClass: 'ConstructorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'isAccessibleIn'
+  - title: "Replace with get isAccessibleIn"
+    date: 2022-10-21
+    element:
+      method: 'isAccessibleIn2'
+      uris: [ 'package:analyzer/dart/element/element.dart' ]
+      inClass: 'ExecutableElement'
+    changes:
+      - kind: 'rename'
+        newName: 'isAccessibleIn'
+  - title: "Replace with get isAccessibleIn"
+    date: 2022-10-21
+    element:
+      method: 'isAccessibleIn2'
+      uris: [ 'package:analyzer/dart/element/element.dart' ]
+      inClass: 'MethodElement'
+    changes:
+      - kind: 'rename'
+        newName: 'isAccessibleIn'
+  - title: "Replace with get isAccessibleIn"
+    date: 2022-10-21
+    element:
+      method: 'isAccessibleIn2'
+      uris: [ 'package:analyzer/dart/element/element.dart' ]
+      inClass: 'InterfaceElement'
+    changes:
+      - kind: 'rename'
+        newName: 'isAccessibleIn'
+  - title: "Replace with get isAccessibleIn"
+    date: 2022-10-21
+    element:
+      method: 'isAccessibleIn2'
+      uris: [ 'package:analyzer/dart/element/element.dart' ]
+      inClass: 'PropertyAccessorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'isAccessibleIn'
+
+  # buildSdkSummary()
+  - title: "Replace with get buildSdkSummary()"
+    date: 2022-10-24
+    element:
+      function: 'buildSdkSummary2'
+      uris: [ 'package:analyzer/dart/sdk/build_sdk_summary.dart' ]
+    changes:
+      - kind: 'rename'
+        newName: 'buildSdkSummary'

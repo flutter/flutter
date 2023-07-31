@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Copyright (c) 2014, the Dart project authors.  Please see the AUTHORS file
+# for details. All rights reserved. Use of this source code is governed by a
+# BSD-style license that can be found in the LICENSE file.
+#
+# This script executes code generation tools found in the analyzer
+# "tool" directory.
+
+set -e
+
+function follow_links() {
+  file="$1"
+  while [ -h "$file" ]; do
+    # On Mac OS, readlink -f doesn't work.
+    file="$(readlink "$file")"
+  done
+  echo "$file"
+}
+
+# Unlike $0, $BASH_SOURCE points to the absolute path of this file.
+PROG_NAME="$(follow_links "$BASH_SOURCE")"
+
+SCRIPT_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
+
+ROOT_DIR="$(cd "${SCRIPT_DIR}/../../.." ; pwd -P)"
+
+if [ -z "$DART_CONFIGURATION" ];
+then
+  DART_CONFIGURATION="ReleaseX64"
+fi
+
+if [[ `uname` == 'Darwin' ]];
+then
+  BIN_DIR="${ROOT_DIR}/xcodebuild/$DART_CONFIGURATION/dart-sdk/bin"
+else
+  BIN_DIR="${ROOT_DIR}/out/$DART_CONFIGURATION/dart-sdk/bin"
+fi
+
+DART="${BIN_DIR}/dart"
+
+declare -a VM_OPTIONS
+VM_OPTIONS+=("--enable-asserts")
+
+cd "${SCRIPT_DIR}"
+"${DART}" "${VM_OPTIONS[@]}" "messages/generate.dart"
+"${DART}" "${VM_OPTIONS[@]}" "summary/generate.dart" "${ROOT_DIR}/pkg/analyzer/lib/src/summary/idl.dart"

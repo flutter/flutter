@@ -1,0 +1,8 @@
+>>>
+var long___________________________________________________________name =
+    const Foo.named('long string long string long string', 'second arg').split(
+        ',');
+<<<
+var long___________________________________________________________name =
+    const Foo.named('long string long string long string', 'second arg')
+        .split(',');

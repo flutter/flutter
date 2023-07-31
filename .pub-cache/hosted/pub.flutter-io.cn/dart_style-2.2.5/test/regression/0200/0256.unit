@@ -1,0 +1,12 @@
+>>>
+class Foo {
+  static final UNKNOWN_ERROR = new MapsEngineStatus._('UNKNOWN_ERROR', context[
+      'google']['maps']['visualization']['MapsEngineStatus']['UNKNOWN_ERROR']);
+}
+<<<
+class Foo {
+  static final UNKNOWN_ERROR = new MapsEngineStatus._(
+      'UNKNOWN_ERROR',
+      context['google']['maps']['visualization']['MapsEngineStatus']
+          ['UNKNOWN_ERROR']);
+}

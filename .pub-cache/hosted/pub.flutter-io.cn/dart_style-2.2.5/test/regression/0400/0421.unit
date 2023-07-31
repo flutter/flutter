@@ -1,0 +1,82 @@
+>>>
+@Component(
+    selector: 'my-selector',
+    properties: const ['property-1', 'property-2', 'property-3', 'property-4', 'property-5'])
+@View(
+    directives: const [OtherComponent1, OtherComponent2, OtherComponent3, OtherDirective4, OtherDirective5, OtherDirective6, OtherDirective7,],
+    styleUrls: const ['package:path.to.my.amazing.component.library/my_amazing_component.scss.css'],
+    templateUrl: 'package:path.to.my.amazing.component.library/my_amazing_component.html')
+class MyAmazingComponent {
+  var a = [[[1]]];
+}
+<<<
+@Component(selector: 'my-selector', properties: const [
+  'property-1',
+  'property-2',
+  'property-3',
+  'property-4',
+  'property-5'
+])
+@View(
+    directives: const [
+      OtherComponent1,
+      OtherComponent2,
+      OtherComponent3,
+      OtherDirective4,
+      OtherDirective5,
+      OtherDirective6,
+      OtherDirective7,
+    ],
+    styleUrls: const [
+      'package:path.to.my.amazing.component.library/my_amazing_component.scss.css'
+    ],
+    templateUrl:
+        'package:path.to.my.amazing.component.library/my_amazing_component.html')
+class MyAmazingComponent {
+  var a = [
+    [
+      [1]
+    ]
+  ];
+}
+>>>
+@Component(
+    selector: 'my-selector',
+    properties: const ['property-1', 'property-2', 'property-3', 'property-4', 'property-5'])
+@View(
+    directives: const [OtherComponent1, OtherComponent2, OtherComponent3, OtherDirective4, OtherDirective5, OtherDirective6, OtherDirective7,],
+    templateUrl: 'package:path.to.my.amazing.component.library/my_amazing_component.html',
+    styleUrls: const ['package:path.to.my.amazing.component.library/my_amazing_component.scss.css'])
+class MyAmazingComponent {
+  var a = [[[1]]];
+}
+<<<
+@Component(selector: 'my-selector', properties: const [
+  'property-1',
+  'property-2',
+  'property-3',
+  'property-4',
+  'property-5'
+])
+@View(
+    directives: const [
+      OtherComponent1,
+      OtherComponent2,
+      OtherComponent3,
+      OtherDirective4,
+      OtherDirective5,
+      OtherDirective6,
+      OtherDirective7,
+    ],
+    templateUrl:
+        'package:path.to.my.amazing.component.library/my_amazing_component.html',
+    styleUrls: const [
+      'package:path.to.my.amazing.component.library/my_amazing_component.scss.css'
+    ])
+class MyAmazingComponent {
+  var a = [
+    [
+      [1]
+    ]
+  ];
+}

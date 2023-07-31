@@ -1,0 +1,72 @@
+// Protocol Buffers - Google's data interchange format
+// Copyright 2008 Google Inc.  All rights reserved.
+// http://code.google.com/p/protobuf/
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//     * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//     * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+// Author: kenton@google.com (Kenton Varda)
+//
+// A proto file which tests the java_multiple_files option.
+
+syntax = "proto2";
+
+// Some generic_services option(s) added automatically.
+// See:  http://go/proto2-generic-services-default
+option java_generic_services = true;   // auto-added
+
+import "google/protobuf/unittest.proto";
+
+package protobuf_unittest;
+
+option java_multiple_files = true;
+option java_outer_classname = "MultipleFilesTestProto";
+
+message MessageWithNoOuter {
+  message NestedMessage {
+    optional int32 i = 1;
+  }
+  enum NestedEnum {
+    BAZ = 3;
+  }
+  optional NestedMessage nested = 1;
+  repeated TestAllTypes foreign = 2;
+  optional NestedEnum nested_enum = 3;
+  optional EnumWithNoOuter foreign_enum = 4;
+}
+
+enum EnumWithNoOuter {
+  FOO = 1;
+  BAR = 2;
+}
+
+service ServiceWithNoOuter {
+  rpc Foo(MessageWithNoOuter) returns(TestAllTypes);
+}
+
+extend TestAllExtensions {
+  optional int32 extension_with_outer = 1234567;
+}

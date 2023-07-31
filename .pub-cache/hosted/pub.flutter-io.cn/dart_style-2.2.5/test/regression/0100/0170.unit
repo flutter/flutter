@@ -1,0 +1,16 @@
+>>>
+main() {
+    print(- -2);
+}
+<<<
+main() {
+  print(- -2);
+}
+>>>
+main() {
+  var x = - --y;
+}
+<<<
+main() {
+  var x = - --y;
+}

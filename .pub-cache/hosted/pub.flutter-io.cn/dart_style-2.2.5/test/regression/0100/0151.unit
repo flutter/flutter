@@ -1,0 +1,15 @@
+>>>
+class Foo {
+  Foo(int longArg1, int longArg2, int longArg3, int longArg4, int longArg5,
+      int longArg6) : this._(longArg1);
+
+  Foo._(int a);
+}
+<<<
+class Foo {
+  Foo(int longArg1, int longArg2, int longArg3, int longArg4, int longArg5,
+      int longArg6)
+      : this._(longArg1);
+
+  Foo._(int a);
+}

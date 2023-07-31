@@ -1,0 +1,66 @@
+>>>
+var defaultPipes = {
+  "iterableDiff": [new IterableChangesFactory(), new NullPipeFactory()],
+  "keyValDiff": [new KeyValueChangesFactory(), new NullPipeFactory()]
+}; /**
+ * @exportedAs angular2/change_detection
+ */
+class DynamicChangeDetection extends ChangeDetection {
+  PipeRegistry registry;
+  DynamicChangeDetection(PipeRegistry registry) : super() {
+    /* super call moved to initializer */;
+    this.registry = registry;
+  }
+  ProtoChangeDetector createProtoChangeDetector(String name,
+      [String changeControlStrategy = DEFAULT]) {
+    return new DynamicProtoChangeDetector(this.registry, changeControlStrategy);
+  }
+} /**
+ * @exportedAs angular2/change_detection
+ */
+class JitChangeDetection extends ChangeDetection {
+  PipeRegistry registry;
+  JitChangeDetection(PipeRegistry registry) : super() {
+    /* super call moved to initializer */;
+    this.registry = registry;
+  }
+  ProtoChangeDetector createProtoChangeDetector(String name,
+      [String changeControlStrategy = DEFAULT]) {
+    return new JitProtoChangeDetector(this.registry, changeControlStrategy);
+  }
+}
+<<<
+var defaultPipes = {
+  "iterableDiff": [new IterableChangesFactory(), new NullPipeFactory()],
+  "keyValDiff": [new KeyValueChangesFactory(), new NullPipeFactory()]
+};
+
+/**
+ * @exportedAs angular2/change_detection
+ */
+class DynamicChangeDetection extends ChangeDetection {
+  PipeRegistry registry;
+  DynamicChangeDetection(PipeRegistry registry) : super() {
+    /* super call moved to initializer */;
+    this.registry = registry;
+  }
+  ProtoChangeDetector createProtoChangeDetector(String name,
+      [String changeControlStrategy = DEFAULT]) {
+    return new DynamicProtoChangeDetector(this.registry, changeControlStrategy);
+  }
+}
+
+/**
+ * @exportedAs angular2/change_detection
+ */
+class JitChangeDetection extends ChangeDetection {
+  PipeRegistry registry;
+  JitChangeDetection(PipeRegistry registry) : super() {
+    /* super call moved to initializer */;
+    this.registry = registry;
+  }
+  ProtoChangeDetector createProtoChangeDetector(String name,
+      [String changeControlStrategy = DEFAULT]) {
+    return new JitProtoChangeDetector(this.registry, changeControlStrategy);
+  }
+}

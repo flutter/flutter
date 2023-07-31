@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+package protobuf_unittest;
+
+import "dart_options.proto";
+
+message Rec {
+  option (dart_options.mixin) = "PbMapMixin";
+
+  optional int32 num = 1;
+  repeated int32 nums = 2;
+  optional string str = 3;
+  optional NonMap msg = 4;
+}
+
+message NonMap {
+  optional string str = 1;
+  optional NonMap child = 2;
+}

@@ -1,0 +1,110 @@
+40 columns                              |
+>>> single-line assert
+assert("some short string");
+<<<
+assert("some short string");
+>>> wrapped assert
+assert("some very long string that wraps");
+<<<
+assert(
+    "some very long string that wraps");
+>>> single-line assert with message
+assert(true, "blah");
+<<<
+assert(true, "blah");
+>>> split assert with message before both
+assert(true, "looong string that wraps");
+<<<
+assert(
+    true, "looong string that wraps");
+>>> split assert with message after first
+assert(veryLongCondition, "long string that wraps");
+<<<
+assert(veryLongCondition,
+    "long string that wraps");
+>>> split assert with message at both
+assert(veryVeryVeryVeryVeryLongCondition, "long string that wraps");
+<<<
+assert(
+    veryVeryVeryVeryVeryLongCondition,
+    "long string that wraps");
+>>> split assert with trailing comma
+assert(condition,);
+<<<
+assert(
+  condition,
+);
+>>> split assert with trailing comma and message
+assert(condition, "some message",);
+<<<
+assert(
+  condition,
+  "some message",
+);
+>>> split in do-while condition
+do {} while ("some long string that wraps");
+<<<
+do {} while (
+    "some long string that wraps");
+>>> split in switch value
+switch ("a long string that must wrap") {
+  case 0:
+    return "ok";
+}
+<<<
+switch (
+    "a long string that must wrap") {
+  case 0:
+    return "ok";
+}
+>>> don't split empty block in if without else
+if (condition) {
+
+
+}
+<<<
+if (condition) {}
+>>> split empty block in if if there is an else
+if (condition) {} else {
+
+}
+<<<
+if (condition) {
+} else {}
+>>> split empty catch if there is a finally
+try {;} catch (err) {} finally {;}
+<<<
+try {
+  ;
+} catch (err) {
+} finally {
+  ;
+}
+>>> split empty on if there is a finally
+try {;} on Exception {} finally {;}
+<<<
+try {
+  ;
+} on Exception {
+} finally {
+  ;
+}
+>>> split all empty catches if there is a finally
+try {;} catch (err1) {} catch (err2) {} catch (err3) {} finally {;}
+<<<
+try {
+  ;
+} catch (err1) {
+} catch (err2) {
+} catch (err3) {
+} finally {
+  ;
+}
+>>> split leading empty catches if there are multiple
+try {;} catch (err1) {} catch (err2) {} catch (err3) {}
+<<<
+try {
+  ;
+} catch (err1) {
+} catch (err2) {
+} catch (err3) {}

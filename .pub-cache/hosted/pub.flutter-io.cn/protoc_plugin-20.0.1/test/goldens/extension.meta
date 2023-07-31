@@ -1,0 +1,7 @@
+annotation: {
+  path: 7
+  path: 0
+  sourceFile: sample.proto
+  begin: 13
+  end: 23
+}

@@ -1,0 +1,4 @@
+>>>
+var from = node.baseType, to = node.convertedType;
+<<<
+var from = node.baseType, to = node.convertedType;

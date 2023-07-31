@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+// A public import can be used in the file importing this file. Similar to a
+// Dart export.
+//
+// See https://developers.google.com/protocol-buffers/docs/proto#importing-definitions
+import public "foo.proto";
+
+message A {
+  optional foo.Foo a = 1;
+}

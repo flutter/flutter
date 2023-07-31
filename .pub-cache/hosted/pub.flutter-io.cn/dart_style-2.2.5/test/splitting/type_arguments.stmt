@@ -1,0 +1,136 @@
+40 columns                              |
+>>> all fit on one line
+new Foo<A,B,C,D>();
+<<<
+new Foo<A, B, C, D>();
+>>> prefer to split between args even when they all fit on next line
+new LongClassName<First, Second, Third>();
+<<<
+new LongClassName<First, Second,
+    Third>();
+>>> split before first if needed
+new LongClassName<FirstTypeArgumentIsLong, Second>();
+<<<
+new LongClassName<
+    FirstTypeArgumentIsLong, Second>();
+>>> split in middle if fit in two lines
+new LongClassName<First, Second, Third, Fourth, Fifth, Sixth, Seventh>();
+<<<
+new LongClassName<First, Second, Third,
+    Fourth, Fifth, Sixth, Seventh>();
+>>> split one per line if they don't fit in two lines
+new LongClassName<First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth>();
+<<<
+new LongClassName<
+    First,
+    Second,
+    Third,
+    Fourth,
+    Fifth,
+    Sixth,
+    Seventh,
+    Eighth>();
+>>> prefers to not split at type arguments
+new SomeClass<
+    TypeArgument>(valueArgument);
+<<<
+new SomeClass<TypeArgument>(
+    valueArgument);
+>>> split both type and value arguments
+new SomeClass<First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth>(first, second, third, fourth, fifth, sixth, seventh, eighth);
+<<<
+new SomeClass<
+        First,
+        Second,
+        Third,
+        Fourth,
+        Fifth,
+        Sixth,
+        Seventh,
+        Eighth>(
+    first,
+    second,
+    third,
+    fourth,
+    fifth,
+    sixth,
+    seventh,
+    eighth);
+>>> newline before typed collection should not force <> to split
+{
+  <int>[];
+  <int>[];
+}
+<<<
+{
+  <int>[];
+  <int>[];
+}
+>>> type arguments on invocation expressions, all on one line
+(fn)<T, S>(1, 2);
+<<<
+(fn)<T, S>(1, 2);
+>>> type arguments on invocation, prefer to not split at type args
+(longFunction)<TypeArgument>(valueArgument);
+<<<
+(longFunction)<TypeArgument>(
+    valueArgument);
+>>> type arguments on invocation expressions split both type and value arguments
+(longFunction)<First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth>(first, second, third, fourth, fifth, sixth, seventh, eighth);
+<<<
+(longFunction)<
+        First,
+        Second,
+        Third,
+        Fourth,
+        Fifth,
+        Sixth,
+        Seventh,
+        Eighth>(
+    first,
+    second,
+    third,
+    fourth,
+    fifth,
+    sixth,
+    seventh,
+    eighth);
+>>> generic instantiation all fit on one line
+Foo<A,B,C,D>;
+<<<
+Foo<A, B, C, D>;
+>>> generic instantiation split between args
+LongClassName<First, Second, Third, Fourth>;
+<<<
+LongClassName<First, Second, Third,
+    Fourth>;
+>>> generic instantiation split before first if needed
+LongClassName<FirstTypeArgumentIsTooLong, Second>;
+<<<
+LongClassName<
+    FirstTypeArgumentIsTooLong, Second>;
+>>> generic instantiation split in middle if fit in two lines
+LongClassName<First, Second, Third, Fourth, Fifth, Sixth, Seventh>;
+<<<
+LongClassName<First, Second, Third,
+    Fourth, Fifth, Sixth, Seventh>;
+>>> generic instantiation split one per line if they don't fit in two lines
+LongClassName<First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth>;
+<<<
+LongClassName<
+    First,
+    Second,
+    Third,
+    Fourth,
+    Fifth,
+    Sixth,
+    Seventh,
+    Eighth>;
+>>> generic instantiation indent nested type arguments
+LongClassName<First, Inner<Second, Third, Fourth, Fifth, Sixth, Seventh>, Eighth>;
+<<<
+LongClassName<
+    First,
+    Inner<Second, Third, Fourth, Fifth,
+        Sixth, Seventh>,
+    Eighth>;

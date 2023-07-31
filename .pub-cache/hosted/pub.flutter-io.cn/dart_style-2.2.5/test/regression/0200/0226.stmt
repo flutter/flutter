@@ -1,0 +1,4 @@
+>>>
+test('Bad Request${(detail!='' ? ': ' : '')}$detail');
+<<<
+test('Bad Request${(detail != '' ? ': ' : '')}$detail');

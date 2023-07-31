@@ -1,0 +1,19 @@
+>>>
+greet(@Rest(valueHelp: 'who', help: 'Name(s) to greet.') List<String> who,
+    {@Group.start(title: 'Output')
+    @Option(help: 'How many !\'s to append.')
+    int enthusiasm: 0,
+    @Flag(abbr: 'l', help: 'Put names on separate lines.') bool lineMode: false,
+    @Option(name: 'greeting', help: 'Alternate word to greet with e.g. "Hi".')
+    String salutation: 'Hello'}) {}
+<<<
+greet(
+    @Rest(valueHelp: 'who', help: 'Name(s) to greet.')
+        List<String> who,
+    {@Group.start(title: 'Output')
+    @Option(help: 'How many !\'s to append.')
+        int enthusiasm: 0,
+    @Flag(abbr: 'l', help: 'Put names on separate lines.')
+        bool lineMode: false,
+    @Option(name: 'greeting', help: 'Alternate word to greet with e.g. "Hi".')
+        String salutation: 'Hello'}) {}

@@ -1,0 +1,29 @@
+name: test_api
+version: 0.6.0
+description: >-
+  The user facing API for structuring Dart tests and checking expectations.
+repository: https://github.com/dart-lang/test/tree/master/pkgs/test_api
+
+environment:
+  sdk: ">=2.18.0 <3.0.0"
+
+dependencies:
+  async: ^2.5.0
+  boolean_selector: ^2.1.0
+  collection: ^1.15.0
+  meta: ^1.3.0
+  source_span: ^1.8.0
+  stack_trace: ^1.10.0
+  stream_channel: ^2.1.0
+  string_scanner: ^1.1.0
+  term_glyph: ^1.2.0
+
+dev_dependencies:
+  analyzer: '>=2.1.0 <6.0.0'
+  fake_async: ^1.2.0
+  glob: ^2.0.0
+  graphs: ^2.0.0
+  path: ^1.8.0
+  lints: '>=1.0.0 <3.0.0'
+  test: any
+  test_core: any

@@ -1,0 +1,26 @@
+40 columns                              |
+>>> no trailing whitespace before initializer comment
+class A {
+  A()
+      // comment
+      : field = value;
+}
+<<<
+class A {
+  A()
+      // comment
+      : field = value;
+}
+>>> no trailing whitespace before initializer comment when params wrap
+class A {
+  A(some, very, long, parameter, list, that, wraps)
+      // comment
+      : field = value;
+}
+<<<
+class A {
+  A(some, very, long, parameter, list,
+      that, wraps)
+      // comment
+      : field = value;
+}

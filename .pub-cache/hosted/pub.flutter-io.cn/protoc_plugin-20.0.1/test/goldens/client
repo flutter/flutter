@@ -1,0 +1,14 @@
+class TestApi {
+  $pb.RpcClient _client;
+  TestApi(this._client);
+
+  $async.Future<SomeReply> aMethod($pb.ClientContext? ctx, SomeRequest request) {
+    var emptyResponse = SomeReply();
+    return _client.invoke<SomeReply>(ctx, 'Test', 'AMethod', request, emptyResponse);
+  }
+  $async.Future<$0.AnotherReply> anotherMethod($pb.ClientContext? ctx, $0.EmptyMessage request) {
+    var emptyResponse = $0.AnotherReply();
+    return _client.invoke<$0.AnotherReply>(ctx, 'Test', 'AnotherMethod', request, emptyResponse);
+  }
+}
+

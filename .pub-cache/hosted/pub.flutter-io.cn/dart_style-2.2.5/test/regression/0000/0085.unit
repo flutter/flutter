@@ -1,0 +1,6 @@
+>>>
+@MyGlobal()
+final SomeType type;
+<<<
+@MyGlobal()
+final SomeType type;

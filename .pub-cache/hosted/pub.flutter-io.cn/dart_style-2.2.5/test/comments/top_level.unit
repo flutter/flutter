@@ -1,0 +1,222 @@
+40 columns                              |
+>>> leading whitespace before top comment is deleted
+
+
+// comment
+<<<
+// comment
+>>>
+//comment one
+
+//comment two
+
+<<<
+//comment one
+
+//comment two
+>>>
+  /* foo */   /* bar */
+<<<
+/* foo */ /* bar */
+>>>
+var x;   //x
+<<<
+var x; //x
+>>>
+library foo;
+
+/// Docs
+/// spanning
+/// lines.
+class A {
+}
+
+/// ... and
+
+/// Dangling ones too
+int x;
+<<<
+library foo;
+
+/// Docs
+/// spanning
+/// lines.
+class A {}
+
+/// ... and
+
+/// Dangling ones too
+int x;
+>>>
+library foo;
+
+//comment one
+
+class C {
+}
+<<<
+library foo;
+
+//comment one
+
+class C {}
+>>>
+library foo;
+
+//comment one
+
+//comment two
+
+class C {
+}
+<<<
+library foo;
+
+//comment one
+
+//comment two
+
+class C {}
+>>>
+import 'a.dart'; // a comment
+class Foo {}
+<<<
+import 'a.dart'; // a comment
+
+class Foo {}
+>>>
+import 'a.dart'; // a comment
+                 // comment
+class Foo {}
+<<<
+import 'a.dart'; // a comment
+
+// comment
+class Foo {}
+>>>
+import 'a.dart'; /* a */ // b
+/* c */ // d
+class Foo {}
+<<<
+import 'a.dart'; /* a */ // b
+
+/* c */ // d
+class Foo {}
+>>>
+import 'a.dart';
+// a comment
+class Foo {}
+<<<
+import 'a.dart';
+
+// a comment
+class Foo {}
+>>>
+import 'a.dart';
+// import 'b.dart';
+class Foo {}
+<<<
+import 'a.dart';
+
+// import 'b.dart';
+class Foo {}
+>>>
+import 'a.dart';
+
+// a comment
+class Foo {}
+<<<
+import 'a.dart';
+
+// a comment
+class Foo {}
+>>>
+import 'a.dart';
+// a comment
+
+class Foo {}
+<<<
+import 'a.dart';
+// a comment
+
+class Foo {}
+>>> two lines between library and import
+library foo;
+import 'a.dart';
+<<<
+library foo;
+
+import 'a.dart';
+>>> two lines between library and export
+library foo;
+export 'a.dart';
+<<<
+library foo;
+
+export 'a.dart';
+>>> two lines between library and part
+library foo;
+part 'a.dart';
+<<<
+library foo;
+
+part 'a.dart';
+>>> before library name
+library/* c */foo;
+<<<
+library /* c */ foo;
+>>> block comment before "." in library
+library a/**/.b.c;
+<<<
+library a /**/ .b.c;
+>>> block comment after "." in library
+library a./**/b.c;
+<<<
+library a. /**/ b.c;
+>>> line comment before "." in library
+library a//
+.b.c;
+<<<
+library a //
+    .b.c;
+>>> line comment after "." in library
+library a.//
+b.c;
+<<<
+library a. //
+    b.c;
+>>> comment within unnamed library
+library/* c */;
+<<<
+library /* c */;
+>>> inline block comment between different kinds of directives
+library a; /* comment */ import 'b.dart';
+<<<
+library a;
+
+/* comment */ import 'b.dart';
+>>> inline block comment between directives
+import 'a.dart'; /* comment */ import 'b.dart';
+<<<
+import 'a.dart';
+/* comment */ import 'b.dart';
+>>> block comment between directives
+import 'a.dart'; /* comment */
+import 'b.dart';
+<<<
+import 'a.dart'; /* comment */
+import 'b.dart';
+>>> ensure blank line above doc comments
+var a = 1;
+/// doc
+var b = 2;
+<<<
+var a = 1;
+
+/// doc
+var b = 2;
+>>> in dotted name
+import 'a' if (/**/a/**/./**/b/**/) 'c';
+<<<
+import 'a'
+    if (/**/ a /**/ . /**/ b /**/) 'c';

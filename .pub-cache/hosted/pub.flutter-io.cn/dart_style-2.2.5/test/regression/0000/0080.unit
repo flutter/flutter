@@ -1,0 +1,73 @@
+>>>
+void main(List argv) {
+    // This is ok (it moves the ? and : to the ends of the previous lines)
+    var cg = outputDart
+      ? new A(
+          outputDir, uri, results.libraries, results.infoMap, results.rules,
+          formatOutput)
+      : new B(
+          outputDir, uri, results.libraries, results.infoMap, results.rules);
+
+    // This gets rewritten to something much harder to read
+    //  var cg = outputDart ?
+    //  new ALongerClass(outputDir, uri, results.libraries, results.infoMap,
+    //      results.rules, formatOutput) : new BLongerClass(
+    //      outputDir, uri, results.libraries, results.infoMap, results.rules);
+    var cg = outputDart
+      ? new ALongerClass(
+          outputDir, uri, results.libraries, results.infoMap, results.rules,
+          formatOutput)
+      : new BLongerClass(
+          outputDir, uri, results.libraries, results.infoMap, results.rules);
+
+    // OK, left unchanged
+    var cg = outputDart ?
+      new A(
+          outputDir, uri, results.libraries, results.infoMap, results.rules,
+          formatOutput) :
+      new B(
+          outputDir, uri, results.libraries, results.infoMap, results.rules);
+
+    // Bad, as above
+    var cg = outputDart ?
+      new ALongerClass(
+          outputDir, uri, results.libraries, results.infoMap, results.rules,
+          formatOutput) :
+      new BLongerClass(
+          outputDir, uri, results.libraries, results.infoMap, results.rules);
+
+}
+<<<
+void main(List argv) {
+  // This is ok (it moves the ? and : to the ends of the previous lines)
+  var cg = outputDart
+      ? new A(outputDir, uri, results.libraries, results.infoMap, results.rules,
+          formatOutput)
+      : new B(
+          outputDir, uri, results.libraries, results.infoMap, results.rules);
+
+  // This gets rewritten to something much harder to read
+  //  var cg = outputDart ?
+  //  new ALongerClass(outputDir, uri, results.libraries, results.infoMap,
+  //      results.rules, formatOutput) : new BLongerClass(
+  //      outputDir, uri, results.libraries, results.infoMap, results.rules);
+  var cg = outputDart
+      ? new ALongerClass(outputDir, uri, results.libraries, results.infoMap,
+          results.rules, formatOutput)
+      : new BLongerClass(
+          outputDir, uri, results.libraries, results.infoMap, results.rules);
+
+  // OK, left unchanged
+  var cg = outputDart
+      ? new A(outputDir, uri, results.libraries, results.infoMap, results.rules,
+          formatOutput)
+      : new B(
+          outputDir, uri, results.libraries, results.infoMap, results.rules);
+
+  // Bad, as above
+  var cg = outputDart
+      ? new ALongerClass(outputDir, uri, results.libraries, results.infoMap,
+          results.rules, formatOutput)
+      : new BLongerClass(
+          outputDir, uri, results.libraries, results.infoMap, results.rules);
+}

@@ -1,0 +1,160 @@
+>>>
+void main() async {
+  group('my group', () {
+    setUp(() async {
+      final requestHandler = FakeRequestHandler()
+        ..when(withServiceName(Ng2ProtoFooBarBazService.serviceName))
+            .thenRespond(FooBarBazListResponse()
+              ..entities.add(FooBarBaz()
+                ..fooBarBazEntityId = entityId
+                ..name = 'Test entity'
+                ..baseFooBarBazId = baseFooBarBazId
+                ..entityFooBarBazId = entityFooBarBazId))
+        ..when(allOf(withServiceName(Ng2ProtoFooBarBazService.serviceName),
+                hasFooBarBazId(baseFooBarBazId)))
+            .thenRespond(FooBarBazListResponse()..entities.add(baseFooBarBaz))
+        ..when(allOf(withServiceName(Ng2ProtoFooBarBazService.serviceName),
+                hasFooBarBazId(entityFooBarBazId)))
+            .thenRespond(FooBarBazListResponse()..entities.add(entityFooBarBaz))
+        ..when(allOf(withServiceName(Ng2ProtoFooBarBazService.serviceName),
+                hasFooBarBazIds(Set.from([baseFooBarBazId, entityFooBarBazId]))))
+            .thenRespond(
+                FooBarBazListResponse()..entities.addAll([baseFooBarBaz, entityFooBarBaz]));
+    });
+  });
+}
+<<<
+void main() async {
+  group('my group', () {
+    setUp(() async {
+      final requestHandler = FakeRequestHandler()
+        ..when(withServiceName(Ng2ProtoFooBarBazService.serviceName))
+            .thenRespond(FooBarBazListResponse()
+              ..entities.add(FooBarBaz()
+                ..fooBarBazEntityId = entityId
+                ..name = 'Test entity'
+                ..baseFooBarBazId = baseFooBarBazId
+                ..entityFooBarBazId = entityFooBarBazId))
+        ..when(allOf(withServiceName(Ng2ProtoFooBarBazService.serviceName),
+                hasFooBarBazId(baseFooBarBazId)))
+            .thenRespond(FooBarBazListResponse()..entities.add(baseFooBarBaz))
+        ..when(allOf(withServiceName(Ng2ProtoFooBarBazService.serviceName),
+                hasFooBarBazId(entityFooBarBazId)))
+            .thenRespond(FooBarBazListResponse()..entities.add(entityFooBarBaz))
+        ..when(allOf(
+            withServiceName(Ng2ProtoFooBarBazService.serviceName),
+            hasFooBarBazIds(
+                Set.from([baseFooBarBazId, entityFooBarBazId])))).thenRespond(
+            FooBarBazListResponse()
+              ..entities.addAll([baseFooBarBaz, entityFooBarBaz]));
+    });
+  });
+}
+>>>
+aaaa() {
+  {
+    {
+      {
+        aaaaa aaaaa = AaaAaaaa.aaaaaaa().aaaaaaa((a) => a
+          ..aaaaAaaaa
+                  .aaaaaaaaaaaAaAaaa[AaaaAaaaaaaaaaAaaa_Aaaa.AAA_AAAAAAAAAAA_AAAAA_AAAAAAA.aaaa] =
+              aaaa
+          ..aaaaAaaaa.aaaaaaaaaaaAaAaaa[AaaaAaaaaaaaaaAaaa_Aaaa
+              .AAA_AAAAAAAAAAA_AAAAAAAA_AAAA_AAAAAAAAA.aaaa] = aaaa
+          ..aaaaAaaaa.aaaaaaaaaaaAaAaaa[AaaaAaaaaaaaaaAaaa_Aaaa
+              .AAA_AAAAAAAAAAA_AAAAAAA_AAAA_AAAAAAAAA.aaaa] = aaaa
+          ..aaaaAaaaa.aaaaaaaaaaaAaAaaa[AaaaAaaaaaaaaaAaaa_Aaaa
+              .AAA_AAAAAAAAAAA_AAAAAA_AAAAAAA_AAA_AAAAAAAAAAA_AAAAA.aaaa] = aaaa
+          ..aaaaaaaaAaaaaaAaaaa.aaaaaaa(AaaaaaaaAaaaaaAaaaaAaaaa.aaaaaaa())
+          ..aaaaaaaaAaaaa.aaaaaaaa =
+              (Aaaaaaaa()..aaaaaaaaAaaa = (AaaaaaaaAaaa()..aaAaaaaaa = aaaaa)));
+      }
+    }
+  }
+}
+<<<
+aaaa() {
+  {
+    {
+      {
+        aaaaa aaaaa = AaaAaaaa.aaaaaaa().aaaaaaa((a) => a
+          ..aaaaAaaaa.aaaaaaaaaaaAaAaaa[
+              AaaaAaaaaaaaaaAaaa_Aaaa.AAA_AAAAAAAAAAA_AAAAA_AAAAAAA.aaaa] = aaaa
+          ..aaaaAaaaa.aaaaaaaaaaaAaAaaa[AaaaAaaaaaaaaaAaaa_Aaaa
+              .AAA_AAAAAAAAAAA_AAAAAAAA_AAAA_AAAAAAAAA.aaaa] = aaaa
+          ..aaaaAaaaa.aaaaaaaaaaaAaAaaa[AaaaAaaaaaaaaaAaaa_Aaaa
+              .AAA_AAAAAAAAAAA_AAAAAAA_AAAA_AAAAAAAAA.aaaa] = aaaa
+          ..aaaaAaaaa.aaaaaaaaaaaAaAaaa[AaaaAaaaaaaaaaAaaa_Aaaa
+              .AAA_AAAAAAAAAAA_AAAAAA_AAAAAAA_AAA_AAAAAAAAAAA_AAAAA.aaaa] = aaaa
+          ..aaaaaaaaAaaaaaAaaaa.aaaaaaa(AaaaaaaaAaaaaaAaaaaAaaaa.aaaaaaa())
+          ..aaaaaaaaAaaaa.aaaaaaaa =
+              (Aaaaaaaa()..aaaaaaaaAaaa = (AaaaaaaaAaaa()..aaAaaaaaa = aaaaa)));
+      }
+    }
+  }
+}
+>>>
+void main() {
+  Example()
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(), ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(), ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(), ClassWithLongName(), ClassWithLongName(), ClassWithLongName());
+}
+<<<
+void main() {
+  Example()
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName())
+    ..methodWithLongName(ClassWithLongName(), ClassWithLongName(),
+        ClassWithLongName(), ClassWithLongName(), ClassWithLongName());
+}

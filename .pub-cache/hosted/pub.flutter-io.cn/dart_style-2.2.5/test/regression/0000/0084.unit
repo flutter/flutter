@@ -1,0 +1,92 @@
+>>>
+Future<TextureAtlas> load(String url, BitmapDataLoadOptions bitmapDataLoadOptions) {
+  HttpRequest.getString(url).then((textureAtlasJson) {
+    ;
+
+    loader.then(() {
+      ;
+    }).catchError(() {
+      ;
+    });
+  });
+}
+<<<
+Future<TextureAtlas> load(
+    String url, BitmapDataLoadOptions bitmapDataLoadOptions) {
+  HttpRequest.getString(url).then((textureAtlasJson) {
+    ;
+
+    loader.then(() {
+      ;
+    }).catchError(() {
+      ;
+    });
+  });
+}
+>>>
+class SoundSprite {
+  static Future<SoundSprite> load(String url, [SoundLoadOptions soundLoadOptions = null]) {
+    HttpRequest.getString(url).then((soundSpriteJson) {
+      if (segments is Map) {
+      }
+
+      Sound.load(soundUrl, soundLoadOptions).then((Sound sound) {
+        ;
+      }).catchError((error) {
+        ;
+      });
+
+    });
+  }
+}
+<<<
+class SoundSprite {
+  static Future<SoundSprite> load(String url,
+      [SoundLoadOptions soundLoadOptions = null]) {
+    HttpRequest.getString(url).then((soundSpriteJson) {
+      if (segments is Map) {}
+
+      Sound.load(soundUrl, soundLoadOptions).then((Sound sound) {
+        ;
+      }).catchError((error) {
+        ;
+      });
+    });
+  }
+}
+>>> don't split method multisplits too early because of pending line after ";"
+main() {
+  ;
+  receiver.a(() {
+    ;
+  }).b(() {
+    ;
+  });
+}
+<<<
+main() {
+  ;
+  receiver.a(() {
+    ;
+  }).b(() {
+    ;
+  });
+}
+>>> don't nest too early because of comment before method chain
+main() {
+  //
+  receiver.a(() {
+    ;
+  }).b(() {
+    ;
+  });
+}
+<<<
+main() {
+  //
+  receiver.a(() {
+    ;
+  }).b(() {
+    ;
+  });
+}

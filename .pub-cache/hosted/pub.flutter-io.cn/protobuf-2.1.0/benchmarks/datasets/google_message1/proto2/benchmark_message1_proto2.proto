@@ -1,0 +1,78 @@
+// Benchmark messages for proto2.
+
+syntax = "proto2";
+
+package benchmarks.proto2;
+option java_package = "com.google.protobuf.benchmarks";
+
+// This is the default, but we specify it here explicitly.
+option optimize_for = SPEED;
+
+option cc_enable_arenas = true;
+
+message GoogleMessage1 {
+  required string field1 = 1;
+  optional string field9 = 9;
+  optional string field18 = 18;
+  optional bool field80 = 80 [default = false];
+  optional bool field81 = 81 [default = true];
+  required int32 field2 = 2;
+  required int32 field3 = 3;
+  optional int32 field280 = 280;
+  optional int32 field6 = 6 [default = 0];
+  optional int64 field22 = 22;
+  optional string field4 = 4;
+  repeated fixed64 field5 = 5;
+  optional bool field59 = 59 [default = false];
+  optional string field7 = 7;
+  optional int32 field16 = 16;
+  optional int32 field130 = 130 [default = 0];
+  optional bool field12 = 12 [default = true];
+  optional bool field17 = 17 [default = true];
+  optional bool field13 = 13 [default = true];
+  optional bool field14 = 14 [default = true];
+  optional int32 field104 = 104 [default = 0];
+  optional int32 field100 = 100 [default = 0];
+  optional int32 field101 = 101 [default = 0];
+  optional string field102 = 102;
+  optional string field103 = 103;
+  optional int32 field29 = 29 [default = 0];
+  optional bool field30 = 30 [default = false];
+  optional int32 field60 = 60 [default = -1];
+  optional int32 field271 = 271 [default = -1];
+  optional int32 field272 = 272 [default = -1];
+  optional int32 field150 = 150;
+  optional int32 field23 = 23 [default = 0];
+  optional bool field24 = 24 [default = false];
+  optional int32 field25 = 25 [default = 0];
+  optional GoogleMessage1SubMessage field15 = 15;
+  optional bool field78 = 78;
+  optional int32 field67 = 67 [default = 0];
+  optional int32 field68 = 68;
+  optional int32 field128 = 128 [default = 0];
+  optional string field129 = 129 [default = "xxxxxxxxxxxxxxxxxxxxx"];
+  optional int32 field131 = 131 [default = 0];
+}
+
+message GoogleMessage1SubMessage {
+  optional int32 field1 = 1 [default = 0];
+  optional int32 field2 = 2 [default = 0];
+  optional int32 field3 = 3 [default = 0];
+  optional string field15 = 15;
+  optional bool field12 = 12 [default = true];
+  optional int64 field13 = 13;
+  optional int64 field14 = 14;
+  optional int32 field16 = 16;
+  optional int32 field19 = 19 [default = 2];
+  optional bool field20 = 20 [default = true];
+  optional bool field28 = 28 [default = true];
+  optional fixed64 field21 = 21;
+  optional int32 field22 = 22;
+  optional bool field23 = 23 [default = false];
+  optional bool field206 = 206 [default = false];
+  optional fixed32 field203 = 203;
+  optional int32 field204 = 204;
+  optional string field205 = 205;
+  optional uint64 field207 = 207;
+  optional uint64 field300 = 300;
+}

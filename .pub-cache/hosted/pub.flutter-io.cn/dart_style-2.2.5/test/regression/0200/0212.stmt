@@ -1,0 +1,57 @@
+>>> (indent 4)
+    views.configure({
+      'overview': routeCfg(
+          path: '/overview',
+          view: 'view-overview',
+          defaultRoute: true,
+          dontLeaveOnParamChanges: true,
+          enter: (route) => router.go('overview', {})),
+      'movies': routeCfg(path: '/movies', // /:userId',
+          view: 'view-movies',
+          dontLeaveOnParamChanges: true,
+          mount: {
+        'movie': routeCfg(
+            path: '/movie/:movieId',
+            view: 'view-movie',
+            dontLeaveOnParamChanges: true)
+      }),
+      'people': routeCfg(
+          path: '/people',
+          view: 'view-people',
+          dontLeaveOnParamChanges: true,
+          mount: {
+        'person': routeCfg(
+            path: '/person/:personId',
+            view: 'view-person',
+            dontLeaveOnParamChanges: true)
+      })
+    });
+<<<
+    views.configure({
+      'overview': routeCfg(
+          path: '/overview',
+          view: 'view-overview',
+          defaultRoute: true,
+          dontLeaveOnParamChanges: true,
+          enter: (route) => router.go('overview', {})),
+      'movies': routeCfg(
+          path: '/movies', // /:userId',
+          view: 'view-movies',
+          dontLeaveOnParamChanges: true,
+          mount: {
+            'movie': routeCfg(
+                path: '/movie/:movieId',
+                view: 'view-movie',
+                dontLeaveOnParamChanges: true)
+          }),
+      'people': routeCfg(
+          path: '/people',
+          view: 'view-people',
+          dontLeaveOnParamChanges: true,
+          mount: {
+            'person': routeCfg(
+                path: '/person/:personId',
+                view: 'view-person',
+                dontLeaveOnParamChanges: true)
+          })
+    });
