@@ -1,23 +1,23 @@
 # Enable Metal Validation without Xcode.
 
-To enable validation of all Metal calls without using Xcode, add the following
-to your rc file.
+Metal validation can be enabled for command-line application using environment
+variables.
 
-These flags are not documented and have been reverse engineered from observing
-what Xcode does to enable these validation layers.
+Apple [documents these environment variables on their developer site](https://developer.apple.com/documentation/xcode/validating-your-apps-metal-api-usage#Enable-API-Validation-with-environment-variables).
+More documentation about these environment variables is also available via a man
+page entry: `man MetalValidation`
 
+To enable all relevant Metal API and shader validation without using Xcode, add
+the following to your `.rc` file.
 
+``` sh
+# Metal Validation Defaults
+export MTL_DEBUG_LAYER=1
+export MTL_DEBUG_LAYER_ERROR_MODE=assert
+# Set this to assert for stricter runtime checks. Set to "ignore" if too chatty.
+export MTL_DEBUG_LAYER_WARNING_MODE=nslog
+export MTL_SHADER_VALIDATION=1
 ```
-# Metal Tracing Defaults
-export DYLD_INSERT_LIBRARIES="/usr/lib/libMTLCapture.dylib:/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/GPUToolsPlatform/libMTLToolsDiagnostics.dylib"
-export METAL_DEBUG_ERROR_MODE=0
-export METAL_DEVICE_FORCE_COMMAND_BUFFER_ENHANCED_ERRORS=1
-export METAL_DEVICE_WRAPPER_TYPE=5
-export METAL_DIAGNOSTICS_ENABLED=1
-export METAL_LOAD_INTERPOSER=1
-export MTL_FORCE_COMMAND_BUFFER_ENHANCED_ERRORS=1
-export DYMTL_TOOLS_DYLIB_PATH="/usr/lib/libMTLCapture.dylib"
-```
 
-
-These flags have been validated to work on macOS Monterey (12.0.1)
+These environment variable are good defaults but there are more validation
+related knobs and dials to turn. See `man MetalValidation`.
