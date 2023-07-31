@@ -60,7 +60,7 @@ Future<Iterable<Asset>> dryRunNativeAssetsIosInternal(
 }
 
 /// Builds native assets.
-Future<void> buildNativeAssetsiOS({
+Future<Uri?> buildNativeAssetsiOS({
   required NativeAssetsBuildRunner buildRunner,
   required List<DarwinArch> darwinArchs,
   required EnvironmentType environmentType,
@@ -68,12 +68,13 @@ Future<void> buildNativeAssetsiOS({
   required BuildMode buildMode,
   String? codesignIdentity,
   required FileSystem fileSystem,
+  required Uri writeYamlFileTo,
 }) async {
   if (await hasNoPackageConfig(buildRunner)) {
-    return;
+    return null;
   }
   if (await isDisabledAndNoNativeAssets(buildRunner)) {
-    return;
+    return null;
   }
 
   final List<Target> targets = darwinArchs.map(_getNativeTarget).toList();
@@ -104,6 +105,12 @@ Future<void> buildNativeAssetsiOS({
   await copyNativeAssets(
       buildUri_, fatAssetTargetLocations, codesignIdentity,
       buildMode, fileSystem);
+  
+  final Map<Asset, Asset> assetTargetLocations =
+      _assetTargetLocations(nativeAssets);
+  final Uri nativeAssetsUri = await writeNativeAssetsYaml(
+      assetTargetLocations.values, writeYamlFileTo, fileSystem);
+  return nativeAssetsUri;
 }
 
 IOSSdk _getIosSdk(EnvironmentType environmentType) {

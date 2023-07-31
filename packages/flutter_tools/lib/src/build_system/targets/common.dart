@@ -8,6 +8,7 @@ import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
+import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
@@ -19,6 +20,7 @@ import 'assets.dart';
 import 'dart_plugin_registrant.dart';
 import 'icon_tree_shaker.dart';
 import 'localizations.dart';
+import 'native_assets.dart';
 import 'shader_compiler.dart';
 
 /// Copies the pre-built flutter bundle.
@@ -125,6 +127,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/native_assets.yaml'),
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     Source.artifact(Artifact.platformKernelDill),
@@ -141,9 +144,10 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Target> get dependencies => const <Target>[
-    GenerateLocalizationsTarget(),
-    DartPluginRegistrantTarget(),
+  List<Target> get dependencies => <Target>[
+    if (const LocalPlatform().isMacOS) const NativeAssets(),
+    const GenerateLocalizationsTarget(),
+    const DartPluginRegistrantTarget(),
   ];
 
   @override
@@ -177,8 +181,20 @@ class KernelSnapshot extends Target {
     final List<String> extraFrontEndOptions = decodeCommaSeparated(environment.defines, kExtraFrontEndOptions);
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
-    String? nativeAssets = environment.defines[kNativeAssets];
-    nativeAssets = nativeAssets?.isEmpty ?? true ? null : nativeAssets;
+    final File nativeAssetsFile =
+        environment.buildDir.childFile('native_assets.yaml');
+    String? nativeAssets;
+    if (await nativeAssetsFile.exists()) {
+      nativeAssets = nativeAssetsFile.path;
+      environment.logger.printTrace(
+          'Embedding native assets mapping $nativeAssets in kernel.');
+    }
+    {
+      String? nativeAssets = environment.defines[kNativeAssets];
+      nativeAssets = nativeAssets?.isEmpty ?? true ? null : nativeAssets;
+      environment.logger
+          .printTrace('Ignoring native assets mapping $nativeAssets.');
+    }
 
     TargetModel targetModel = TargetModel.flutter;
     if (targetPlatform == TargetPlatform.fuchsia_x64 ||

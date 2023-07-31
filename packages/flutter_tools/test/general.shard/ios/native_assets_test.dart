@@ -80,6 +80,7 @@ void main() {
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
+      writeYamlFileTo: environment.buildDir.uri,
       buildRunner: FakeNativeAssetsBuildRunner(
         hasPackageConfigResult: false,
       ),
@@ -170,6 +171,7 @@ void main() {
         projectUri: projectUri,
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
+        writeYamlFileTo: environment.buildDir.uri,
         buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
@@ -209,6 +211,7 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
+      writeYamlFileTo: environment.buildDir.uri,
       buildRunner: FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
@@ -232,6 +235,7 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
+      writeYamlFileTo: environment.buildDir.uri,
       buildRunner: FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),

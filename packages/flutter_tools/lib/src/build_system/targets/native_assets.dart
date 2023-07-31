@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../../base/file_system.dart';
+import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals;
 import '../../ios/native_assets.dart';
@@ -50,6 +51,9 @@ class NativeAssets extends Target {
     final NativeAssetsBuildRunner buildRunner =
         NativeAssetsBuildRunnerImpl(projectUri, fileSystem);
 
+    globals.logger.printTrace(
+        'Potentially writing native_assets.yaml to: ${environment.buildDir.path}');
+
     switch (targetPlatform) {
       case TargetPlatform.ios:
         final String? iosArchsEnvironment = environment.defines[kIosArchs];
@@ -80,6 +84,7 @@ class NativeAssets extends Target {
           codesignIdentity: environment.defines[kCodesignIdentity],
           fileSystem: fileSystem,
           buildRunner: buildRunner,
+          writeYamlFileTo: environment.buildDir.uri,
         );
       case TargetPlatform.darwin:
         final String? darwinArchsEnvironment =
@@ -101,10 +106,24 @@ class NativeAssets extends Target {
           buildMode: buildMode,
           projectUri: projectUri,
           codesignIdentity: environment.defines[kCodesignIdentity],
-          writeYamlFile: false,
+          writeYamlFileTo: environment.buildDir.uri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
         );
+      case TargetPlatform.tester:
+        if (const LocalPlatform().isMacOS) {
+          await buildNativeAssetsMacOS(
+            buildMode: BuildMode.debug,
+            projectUri: projectUri,
+            codesignIdentity: environment.defines[kCodesignIdentity],
+            writeYamlFileTo: environment.buildDir.uri,
+            fileSystem: fileSystem,
+            buildRunner: buildRunner,
+            flutterTester: true,
+          );
+        } else {
+          // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
+        }
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
@@ -114,11 +133,9 @@ class NativeAssets extends Target {
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_x64:
-      case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
-        // The NativeAssets Target should not be in any other OS.
-        throw UnimplementedError();
+      // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
     }
   }
 
@@ -132,5 +149,8 @@ class NativeAssets extends Target {
   String get name => 'native_assets';
 
   @override
-  List<Source> get outputs => <Source>[];
+  List<Source> get outputs => const <Source>[
+        Source.pattern('{BUILD_DIR}/native_assets.yaml'),
+        // Source.pattern('{OUTPUT_DIR}/native_assets.yaml'),
+      ];
 }

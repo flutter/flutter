@@ -117,6 +117,7 @@ Future<Uri?> buildNativeAssetsMacOS({
   bool flutterTester = false,
   String? codesignIdentity,
   bool writeYamlFile = true,
+  Uri? writeYamlFileTo,
   required FileSystem fileSystem,
 }) async {
   if (await hasNoPackageConfig(buildRunner)) {
@@ -158,7 +159,7 @@ Future<Uri?> buildNativeAssetsMacOS({
       buildMode, fileSystem);
   if (writeYamlFile) {
     final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-        assetTargetLocations.values, buildUri_, fileSystem);
+        assetTargetLocations.values, writeYamlFileTo ?? buildUri_, fileSystem);
     return nativeAssetsUri;
   }
   return null;
@@ -388,14 +389,15 @@ Future<Uri> writeNativeAssetsYaml(Iterable<Asset> nativeAssetsMappingUsed,
   globals.logger.printTrace('Writing native_assets.yaml.');
   final String nativeAssetsDartContents =
       nativeAssetsMappingUsed.toNativeAssetsFile();
-  final Directory nativeAssetsDirectory = fileSystem.directory(buildUri);
-  await nativeAssetsDirectory.create(recursive: true);
-  final Uri nativeAssetsUri = buildUri.resolve('native_assets.yaml');
+  final Directory parentDirectory = fileSystem.directory(buildUri);
+  if (!await parentDirectory.exists()) {
+    await parentDirectory.create(recursive: true);
+  }
   final File nativeAssetsFile =
-      fileSystem.file(buildUri.resolve('native_assets.yaml'));
+      parentDirectory.childFile('native_assets.yaml');
   await nativeAssetsFile.writeAsString(nativeAssetsDartContents);
   globals.logger.printTrace('Writing ${nativeAssetsFile.path} done.');
-  return nativeAssetsUri;
+  return nativeAssetsFile.uri;
 }
 
 /// Extract the [Target] from a [DarwinArch].

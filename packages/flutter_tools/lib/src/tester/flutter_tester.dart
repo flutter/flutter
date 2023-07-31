@@ -166,7 +166,7 @@ class FlutterTesterDevice extends Device {
         projectUri: projectUri,
         flutterTester: true,
         fileSystem: _fileSystem,
-          buildRunner: buildRunner
+        buildRunner: buildRunner,
       );
     } else {
       await ensureNoNativeAssetsOrOsIsSupported(
@@ -183,7 +183,7 @@ class FlutterTesterDevice extends Device {
       buildInfo: buildInfo,
       mainPath: mainPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      platform: getTargetPlatformForName(getNameForHostPlatform(_operatingSystemUtils.hostPlatform)),
+      platform: TargetPlatform.tester,
       assetDirPath: assetDirectory.path,
       nativeAssets: nativeAssetsYaml,
     );
