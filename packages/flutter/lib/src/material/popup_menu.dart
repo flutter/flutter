@@ -475,6 +475,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
     super.enabled,
     super.padding,
     super.height,
+    super.labelTextStyle,
     super.mouseCursor,
     super.child,
   });
@@ -529,9 +530,19 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
 
   @override
   Widget buildChild() {
+    final ThemeData theme = Theme.of(context);
+    final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
+    final PopupMenuThemeData defaults = theme.useMaterial3 ? _PopupMenuDefaultsM3(context) : _PopupMenuDefaultsM2(context);
+    final Set<MaterialState> states = <MaterialState>{
+      if (widget.checked) MaterialState.selected,
+    };
+    final MaterialStateProperty<TextStyle?>? effectiveLabelTextStyle = widget.labelTextStyle
+      ?? popupMenuTheme.labelTextStyle
+      ?? defaults.labelTextStyle;
     return IgnorePointer(
       child: ListTile(
         enabled: widget.enabled,
+        titleTextStyle: effectiveLabelTextStyle?.resolve(states),
         leading: FadeTransition(
           opacity: _opacity,
           child: Icon(_controller.isDismissed ? null : Icons.done),
