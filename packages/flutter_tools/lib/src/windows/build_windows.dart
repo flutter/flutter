@@ -190,7 +190,16 @@ Future<void> _runBuild(
 
   // MSBuild sends all output to stdout, including build errors. This surfaces
   // known error patterns.
-  final RegExp errorMatcher = RegExp(r':\s*(?:warning|(?:fatal )?error).*?:');
+  final RegExp errorMatcher = RegExp(
+    <String>[
+      // Known error messages
+      r'(:\s*(?:warning|(?:fatal )?error).*?:)',
+      r'Error detected in pubspec\.yaml:',
+
+      // Known secondary error lines for pubspec.yaml
+      r'No file or variants found for asset:',
+    ].join('|'),
+  );
 
   int result;
   try {
