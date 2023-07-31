@@ -312,7 +312,7 @@ void main() {
     });
 
     final TextEditingController controller = TextEditingController(
-      text: 'Test',
+      text: 'Test ',
     );
     await tester.pumpWidget(
       MaterialApp(
