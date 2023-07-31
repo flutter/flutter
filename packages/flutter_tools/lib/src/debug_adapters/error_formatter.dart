@@ -9,7 +9,7 @@ typedef _OutputSender = void Function(String category, String message, {bool? pa
 /// A formatter for improving the display of Flutter structured errors over DAP.
 ///
 /// The formatter deserializes a `Flutter.Error` event and produces output
-/// similar to the `renderedErrorText` field, but may include ansi colour codes
+/// similar to the `renderedErrorText` field, but may include ansi color codes
 /// to provide improved formatting (such as making stack frames from non-user
 /// code faint) if the client indicated support.
 ///
