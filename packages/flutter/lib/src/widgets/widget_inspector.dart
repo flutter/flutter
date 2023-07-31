@@ -2103,24 +2103,33 @@ mixin WidgetInspectorService {
         summaryTree: true,
         subtreeDepth: subtreeDepth,
         service: this,
-        addAdditionalPropertiesCallback: (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+        addAdditionalPropertiesCallback:
+            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
           final Object? value = node.value;
-          final RenderObject? renderObject = value is Element ? value.renderObject : null;
-          if (renderObject == null || delegate.subtreeDepth <= 0) {
+          final RenderObject? renderObject =
+              value is Element ? value.renderObject : null;
+          if (renderObject == null) {
             return const <String, Object>{};
           }
 
-          final DiagnosticsSerializationDelegate renderObjectSerializationDelegate = delegate.copyWith(
+          final DiagnosticsSerializationDelegate
+              renderObjectSerializationDelegate = delegate.copyWith(
             subtreeDepth: 0,
             includeProperties: true,
             expandPropertyValues: false,
           );
           final Map<String, Object> additionalJson = <String, Object>{
-            'renderObject': renderObject.toDiagnosticsNode().toJsonMap(renderObjectSerializationDelegate),
+            // Doesn't make sense to add another renderObject to a renderObject
+            if (value is! RenderObject && delegate.expandPropertyValues)
+              'renderObject': renderObject
+                  .toDiagnosticsNode()
+                  .toJsonMap(renderObjectSerializationDelegate),
           };
 
           final RenderObject? renderParent = renderObject.parent;
-          if (renderParent is RenderObject && subtreeDepth > 0) {
+          if (renderParent is RenderObject &&
+              delegate.subtreeDepth > 0 &&
+              delegate.expandPropertyValues) {
             final Object? parentCreator = renderParent.debugCreator;
             if (parentCreator is DebugCreator) {
               additionalJson['parentRenderElement'] =
@@ -2141,7 +2150,7 @@ mixin WidgetInspectorService {
             if (!renderObject.debugNeedsLayout) {
               // ignore: invalid_use_of_protected_member
               final Constraints constraints = renderObject.constraints;
-              final Map<String, Object>constraintsProperty = <String, Object>{
+              final Map<String, Object> constraintsProperty = <String, Object>{
                 'type': constraints.runtimeType.toString(),
                 'description': constraints.toString(),
               };
