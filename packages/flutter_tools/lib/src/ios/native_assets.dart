@@ -105,7 +105,7 @@ Future<Uri?> buildNativeAssetsiOS({
   await copyNativeAssets(
       buildUri_, fatAssetTargetLocations, codesignIdentity,
       buildMode, fileSystem);
-  
+
   final Map<Asset, Asset> assetTargetLocations =
       _assetTargetLocations(nativeAssets);
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(

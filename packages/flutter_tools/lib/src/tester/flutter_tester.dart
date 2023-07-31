@@ -11,7 +11,6 @@ import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -54,13 +53,11 @@ class FlutterTesterDevice extends Device {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
-    required OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _flutterVersion = flutterVersion,
        _logger = logger,
        _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _operatingSystemUtils = operatingSystemUtils,
+        _artifacts = artifacts,
        super(
         platformType: null,
         category: null,
@@ -72,7 +69,6 @@ class FlutterTesterDevice extends Device {
   final Logger _logger;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
-  final OperatingSystemUtils _operatingSystemUtils;
 
   Process? _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -285,15 +281,13 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     required ProcessManager processManager,
     required Logger logger,
     required FlutterVersion flutterVersion,
-    required OperatingSystemUtils operatingSystemUtils,
   }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
         fileSystem: fileSystem,
         artifacts: artifacts,
         processManager: processManager,
         logger: logger,
-        flutterVersion: flutterVersion,
-        operatingSystemUtils: operatingSystemUtils,
+          flutterVersion: flutterVersion,
       ),
        super('Flutter tester');
 
