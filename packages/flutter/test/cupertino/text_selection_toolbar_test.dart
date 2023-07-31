@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 // These constants are copied from cupertino/text_selection_toolbar.dart.
