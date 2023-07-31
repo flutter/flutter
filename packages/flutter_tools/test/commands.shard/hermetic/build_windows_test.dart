@@ -962,6 +962,41 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
+
+  // Tests the case where stdout contains the error about pubspec.yaml
+  // And tests the case where stdout contains the error about missing assets
+  testUsingContext('Windows build extracts errors related to pubspec.yaml from stdout', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
+
+    const String stdout = r'''
+Error detected in pubspec.yaml:
+No file or variants found for asset: images/a_dot_burr.jpeg.
+''';
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release',
+        stdout: stdout,
+      ),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub']
+    );
+    // Just the warnings and errors should be surfaced.
+    expect(testLogger.errorText, r'''
+Error detected in pubspec.yaml:
+No file or variants found for asset: images/a_dot_burr.jpeg.
+''');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => windowsPlatform,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
 }
 
 class FakeVisualStudio extends Fake implements VisualStudio {
