@@ -17,9 +17,12 @@
 namespace flutter {
 
 AndroidSurfaceVulkanImpeller::AndroidSurfaceVulkanImpeller(
-    const std::shared_ptr<AndroidContextVulkanImpeller>& android_context)
-    : android_context_(android_context) {
-  is_valid_ = android_context_->IsValid();
+    const std::shared_ptr<AndroidContextVulkanImpeller>& android_context) {
+  is_valid_ = android_context->IsValid();
+
+  auto& context_vk =
+      impeller::ContextVK::Cast(*android_context->GetImpellerContext());
+  surface_context_vk_ = context_vk.CreateSurfaceContext();
 }
 
 AndroidSurfaceVulkanImpeller::~AndroidSurfaceVulkanImpeller() = default;
@@ -43,8 +46,7 @@ std::unique_ptr<Surface> AndroidSurfaceVulkanImpeller::CreateGPUSurface(
   }
 
   std::unique_ptr<GPUSurfaceVulkanImpeller> gpu_surface =
-      std::make_unique<GPUSurfaceVulkanImpeller>(
-          android_context_->GetImpellerContext());
+      std::make_unique<GPUSurfaceVulkanImpeller>(surface_context_vk_);
 
   if (!gpu_surface->IsValid()) {
     return nullptr;
@@ -70,16 +72,15 @@ bool AndroidSurfaceVulkanImpeller::SetNativeWindow(
   native_window_ = std::move(window);
   bool success = native_window_ && native_window_->IsValid();
   if (success) {
-    auto& context_vk =
-        impeller::ContextVK::Cast(*android_context_->GetImpellerContext());
-    auto surface = context_vk.CreateAndroidSurface(native_window_->handle());
+    auto surface =
+        surface_context_vk_->CreateAndroidSurface(native_window_->handle());
 
     if (!surface) {
       FML_LOG(ERROR) << "Could not create a vulkan surface.";
       return false;
     }
 
-    return context_vk.SetWindowSurface(std::move(surface));
+    return surface_context_vk_->SetWindowSurface(std::move(surface));
   }
 
   native_window_ = nullptr;
@@ -88,7 +89,7 @@ bool AndroidSurfaceVulkanImpeller::SetNativeWindow(
 
 std::shared_ptr<impeller::Context>
 AndroidSurfaceVulkanImpeller::GetImpellerContext() {
-  return android_context_->GetImpellerContext();
+  return surface_context_vk_;
 }
 
 }  // namespace flutter
