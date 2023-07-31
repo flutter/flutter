@@ -21,3 +21,21 @@ export MTL_SHADER_VALIDATION=1
 
 These environment variable are good defaults but there are more validation
 related knobs and dials to turn. See `man MetalValidation`.
+
+# Enable Metal Profiling HUD without Xcode
+
+Applications can optionally display a HUD that displays real-time information
+about Metal related performance.
+
+![Profiling HUD](assets/metal_validation/performance_hud.png)
+
+More documentation about the specific elements of the HUD is present on the
+[Apple developer site](https://developer.apple.com/documentation/xcode/monitoring-your-metal-apps-graphics-performance).
+
+The Profiling HUD is separate from Metal Validation and can be enabled for apps
+that are launched from the command like (like Impeller Playgrounds) using
+environment variables. Add the following to your `.rc` file.
+
+```sh
+export MTL_HUD_ENABLED=1
+```
