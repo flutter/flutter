@@ -11,12 +11,13 @@ void main() {
       const example.DataTableExampleApp(),
     );
 
-    expect(find.text('Row 0').hitTestable(), findsOneWidget);
-    expect(find.text('Row 19').hitTestable(), findsNothing);
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
 
-    await tester.ensureVisible(find.text('Row 19'));
+    expect(tester.getTopLeft(find.text('Row 5')), const Offset(66.0, 366.0));
 
-    expect(find.text('Row 0').hitTestable(), findsNothing);
-    expect(find.text('Row 19').hitTestable(), findsOneWidget);
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -200.0));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('Row 5')), const Offset(66.0, 186.0));
   });
 }
