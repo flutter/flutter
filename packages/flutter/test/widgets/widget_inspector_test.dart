@@ -4105,7 +4105,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('ext.flutter.inspector.show', (WidgetTester tester) async {
       final Iterable<Map<Object, Object?>> extensionChangedEvents = service.getServiceExtensionStateChangedEvents('ext.flutter.inspector.show');
       Map<Object, Object?> extensionChangedEvent;
+      int debugShowChangeCounter = 0;
 
+      void debugShowWidgetInspectorOverrideCallback(){
+        debugShowChangeCounter ++;
+      }
+      WidgetsApp.debugShowWidgetInspectorOverride.value = false;
+      WidgetsApp.debugShowWidgetInspectorOverride.addListener(debugShowWidgetInspectorOverrideCallback);
       service.rebuildCount = 0;
       expect(extensionChangedEvents, isEmpty);
       expect(
@@ -4119,7 +4125,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       extensionChangedEvent = extensionChangedEvents.last;
       expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
       expect(extensionChangedEvent['value'], isTrue);
-      expect(service.rebuildCount, equals(1));
+      expect(debugShowChangeCounter, equals(1));
       expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.show.name,
@@ -4127,7 +4133,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
         equals('true'),
       );
-      expect(WidgetsApp.debugShowWidgetInspectorOverride, isTrue);
+      expect(WidgetsApp.debugShowWidgetInspectorOverride.value, isTrue);
       expect(extensionChangedEvents.length, equals(1));
       expect(
         await service.testBoolExtension(
@@ -4140,7 +4146,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       extensionChangedEvent = extensionChangedEvents.last;
       expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
       expect(extensionChangedEvent['value'], isTrue);
-      expect(service.rebuildCount, equals(1));
+      expect(debugShowChangeCounter, equals(1));
       expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.show.name,
@@ -4152,6 +4158,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       extensionChangedEvent = extensionChangedEvents.last;
       expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
       expect(extensionChangedEvent['value'], isFalse);
+      expect(debugShowChangeCounter, equals(2));
       expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.show.name,
@@ -4160,8 +4167,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         equals('false'),
       );
       expect(extensionChangedEvents.length, equals(3));
-      expect(service.rebuildCount, equals(2));
-      expect(WidgetsApp.debugShowWidgetInspectorOverride, isFalse);
+      expect(debugShowChangeCounter, equals(2));
+      expect(WidgetsApp.debugShowWidgetInspectorOverride.value, isFalse);
     });
 
     testWidgets('ext.flutter.inspector.screenshot', (WidgetTester tester) async {

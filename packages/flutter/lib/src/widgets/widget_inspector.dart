@@ -1064,13 +1064,13 @@ mixin WidgetInspectorService {
 
     _registerBoolServiceExtension(
       name: WidgetInspectorServiceExtensions.show.name,
-      getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
+      getter: () async => WidgetsApp.debugShowWidgetInspectorOverride.value,
       setter: (bool value) {
-        if (WidgetsApp.debugShowWidgetInspectorOverride == value) {
+        if (WidgetsApp.debugShowWidgetInspectorOverride.value == value) {
           return Future<void>.value();
         }
-        WidgetsApp.debugShowWidgetInspectorOverride = value;
-        return forceRebuild();
+        WidgetsApp.debugShowWidgetInspectorOverride.value = value;
+        return Future<void>.value();
       },
       registerExtension: registerExtension,
     );
