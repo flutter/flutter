@@ -154,7 +154,6 @@
 /dev/devicelab/bin/tasks/channels_integration_test_ios.dart @cyanglaz @flutter/engine
 /dev/devicelab/bin/tasks/codegen_integration_mac.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/color_filter_and_fade_perf_ios__e2e_summary.dart @cyanglaz @flutter/engine
-/dev/devicelab/bin/tasks/complex_layout_ios__compile.dart @cyanglaz @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_ios__start_up.dart @cyanglaz @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_bad_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_ios__timeline_summary.dart @cyanglaz @flutter/engine
