@@ -1,4 +1,4 @@
-Signature: 8225bc6c9eb7892e1251f3210971d226
+Signature: b9ed8fd8aa26ecbc2a7763adc0187ed9
 
 ====================================================================================================
 LIBRARY: etc1
@@ -7125,7 +7125,6 @@ ORIGIN: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrStrokeTessellation
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrStrokeTessellationShader.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrTessellationShader.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLAnalysis.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/SkSLModifiersPool.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLConstructor.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/clear_swizzle.cpp
@@ -7139,7 +7138,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrStrokeTessellationSh
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrStrokeTessellationShader.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/GrTessellationShader.h
 FILE: ../../../third_party/skia/src/sksl/SkSLAnalysis.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLModifiersPool.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLConstructor.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google LLC.
