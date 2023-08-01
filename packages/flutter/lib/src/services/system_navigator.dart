@@ -8,7 +8,7 @@ import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
 abstract final class SystemNavigator {
-  /// Inform the platform of whether or not the Flutter framework will handle
+  /// Informs the platform of whether or not the Flutter framework will handle
   /// back events.
   ///
   /// Currently, this is used only on Android to inform its use of the
