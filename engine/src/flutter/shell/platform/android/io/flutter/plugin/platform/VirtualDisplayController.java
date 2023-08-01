@@ -17,7 +17,6 @@ import android.view.View.OnFocusChangeListener;
 import android.view.ViewTreeObserver;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
-import io.flutter.view.TextureRegistry;
 
 @TargetApi(20)
 class VirtualDisplayController {
@@ -27,7 +26,7 @@ class VirtualDisplayController {
       Context context,
       AccessibilityEventsDelegate accessibilityEventsDelegate,
       PlatformView view,
-      TextureRegistry.SurfaceTextureEntry textureEntry,
+      PlatformViewRenderTarget renderTarget,
       int width,
       int height,
       int viewId,
@@ -40,9 +39,6 @@ class VirtualDisplayController {
     DisplayManager displayManager =
         (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
     final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-    final PlatformViewRenderTarget renderTarget =
-        new SurfaceTexturePlatformViewRenderTarget(textureEntry);
-
     // Virtual Display crashes for some PlatformViews if the width or height is bigger
     // than the physical screen size. We have tried to clamp or scale down the size to prevent
     // the crash, but both solutions lead to unwanted behavior because the
@@ -73,7 +69,6 @@ class VirtualDisplayController {
             virtualDisplay,
             view,
             renderTarget,
-            textureEntry,
             focusChangeListener,
             viewId,
             createParams);
@@ -86,7 +81,6 @@ class VirtualDisplayController {
   private final AccessibilityEventsDelegate accessibilityEventsDelegate;
   private final int densityDpi;
   private final int viewId;
-  private final TextureRegistry.SurfaceTextureEntry textureEntry;
   private final PlatformViewRenderTarget renderTarget;
   private final OnFocusChangeListener focusChangeListener;
 
@@ -98,14 +92,12 @@ class VirtualDisplayController {
       VirtualDisplay virtualDisplay,
       PlatformView view,
       PlatformViewRenderTarget renderTarget,
-      TextureRegistry.SurfaceTextureEntry textureEntry,
       OnFocusChangeListener focusChangeListener,
       int viewId,
       Object createParams) {
     this.context = context;
     this.accessibilityEventsDelegate = accessibilityEventsDelegate;
     this.renderTarget = renderTarget;
-    this.textureEntry = textureEntry;
     this.focusChangeListener = focusChangeListener;
     this.viewId = viewId;
     this.virtualDisplay = virtualDisplay;
@@ -204,7 +196,7 @@ class VirtualDisplayController {
     presentation.cancel();
     presentation.detachState();
     virtualDisplay.release();
-    textureEntry.release();
+    renderTarget.release();
   }
 
   /** See {@link PlatformView#onFlutterViewAttached(View)} */
