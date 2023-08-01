@@ -22,5 +22,6 @@
   "tabSemanticsLabel": "แท็บที่ $tabIndex จาก $tabCount",
   "modalBarrierDismissLabel": "ปิด",
   "searchTextFieldPlaceholderLabel": "ค้นหา",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu"
 }

@@ -964,7 +964,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     boxToBaseline[prefixIcon] = _layoutLineBox(prefixIcon, containerConstraints);
     boxToBaseline[suffixIcon] = _layoutLineBox(suffixIcon, containerConstraints);
     final BoxConstraints contentConstraints = containerConstraints.copyWith(
-      maxWidth: containerConstraints.maxWidth - contentPadding.horizontal,
+      maxWidth: math.max(0.0, containerConstraints.maxWidth - contentPadding.horizontal),
     );
     boxToBaseline[prefix] = _layoutLineBox(prefix, contentConstraints);
     boxToBaseline[suffix] = _layoutLineBox(suffix, contentConstraints);
@@ -1093,7 +1093,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double minContainerHeight = decoration.isDense! || decoration.isCollapsed || expands
       ? 0.0
       : kMinInteractiveDimension;
-    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
+    final double maxContainerHeight = math.max(0.0, boxConstraints.maxHeight - bottomHeight);
     final double containerHeight = expands
       ? maxContainerHeight
       : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);
@@ -2406,7 +2406,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = (4.0 + 0.75 * labelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
+      floatingLabelHeight = (4.0 + 0.75 * labelStyle.fontSize!) * MediaQuery.textScalerOf(context).textScaleFactor;
       if (decoration.filled ?? false) {
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)

@@ -2,15 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show ParagraphBuilder;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 
 
 void main() {
-  testWidgets('Large Badge defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Large Badge defaults', (WidgetTester tester) async {
     late final ThemeData theme;
 
     await tester.pumpWidget(
@@ -50,13 +53,13 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+    final RRect rrect = ui.ParagraphBuilder.shouldDisableRoundingHack
       ? RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8))
       : RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8));
     expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
   });
 
-  testWidgets('Large Badge defaults with RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Large Badge defaults with RTL', (WidgetTester tester) async {
     late final ThemeData theme;
 
     await tester.pumpWidget(
@@ -92,14 +95,14 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), const Offset(0, -4));
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+    final RRect rrect = ui.ParagraphBuilder.shouldDisableRoundingHack
       ? RRect.fromLTRBR(-4, -4, 15.5, 12, const Radius.circular(8))
       : RRect.fromLTRBR(-4, -4, 16, 12, const Radius.circular(8));
     expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
   });
 
   // Essentially the same as 'Large Badge defaults'
-  testWidgets('Badge.count', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Badge.count', (WidgetTester tester) async {
     late final ThemeData theme;
 
     Widget buildFrame(int count) {
@@ -149,7 +152,7 @@ void main() {
     // T = alignment.top
     // R = L + '0'.width + padding.width
     // B = T + largeSize, R = largeSize/2
-    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+    final RRect rrect = ui.ParagraphBuilder.shouldDisableRoundingHack
       ? RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8))
       : RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8));
     expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
@@ -158,7 +161,7 @@ void main() {
     expect(find.text('999+'), findsOneWidget);
   });
 
-  testWidgets('Small Badge defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Small Badge defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData.light(useMaterial3: true);
 
     await tester.pumpWidget(
@@ -189,7 +192,7 @@ void main() {
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(18, 0, 24, 6, const Radius.circular(3)), color: theme.colorScheme.error));
   });
 
-  testWidgets('Small Badge RTL defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Small Badge RTL defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData.light(useMaterial3: true);
 
     await tester.pumpWidget(
@@ -222,7 +225,7 @@ void main() {
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 0, 6, 6, const Radius.circular(3)), color: theme.colorScheme.error));
   });
 
-  testWidgets('Large Badge textStyle and colors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Large Badge textStyle and colors', (WidgetTester tester) async {
     final ThemeData theme = ThemeData.light(useMaterial3: true);
     const Color green = Color(0xff00ff00);
     const Color black = Color(0xff000000);
@@ -249,7 +252,7 @@ void main() {
     expect(tester.renderObject(find.byType(Badge)), paints..rrect(color: black));
   });
 
-  testWidgets('isLabelVisible', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('isLabelVisible', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light(useMaterial3: true),
@@ -273,7 +276,7 @@ void main() {
     expect(box, isNot(paints..rrect()));
   });
 
-  testWidgets('Large Badge alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Large Badge alignment', (WidgetTester tester) async {
     const Radius badgeRadius = Radius.circular(8);
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
@@ -348,7 +351,7 @@ void main() {
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 200 - 16, 200, 200, badgeRadius).shift(offset)));
   });
 
-  testWidgets('Small Badge alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Small Badge alignment', (WidgetTester tester) async {
     const Radius badgeRadius = Radius.circular(3);
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {

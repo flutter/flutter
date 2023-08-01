@@ -22,5 +22,6 @@
   "tabSemanticsLabel": "$tabCount का टैब $tabIndex",
   "modalBarrierDismissLabel": "खारिज करें",
   "searchTextFieldPlaceholderLabel": "खोजें",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu"
 }

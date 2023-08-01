@@ -22,5 +22,6 @@
   "tabSemanticsLabel": "Onglet $tabIndex sur $tabCount",
   "modalBarrierDismissLabel": "Ignorer",
   "searchTextFieldPlaceholderLabel": "Rechercher",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu"
 }
