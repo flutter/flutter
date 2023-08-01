@@ -1665,17 +1665,32 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: SelectionArea(
-          child: Center(child: Text('Flutter')),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 300,
+              height: 300,
+              child: Text('Flutter', style: TextStyle(fontSize: 50)),
+            ),
+          ),
         ),
       ),
     );
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
 
+    expect(tester.getRect(find.byType(Text)), const Rect.fromLTWH(0, 0, 300, 300));
+
+    // Mouse hovering over selectable text.
+    await gesture.addPointer(location: const Offset(10, 10));
     await tester.pump();
-
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Mouse is still inside the `Text` widget, but not the actual rendered text.
+    await gesture.moveTo(const Offset(100, 100));
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
   });
 
   testWidgets('Mouse hovering over selectable Text uses default selection style mouse cursor', (WidgetTester tester) async {
