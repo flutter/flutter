@@ -277,6 +277,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       packagePath: topLevelResults[FlutterGlobalOptions.kPackagesOption] as String?,
     );
     if (engineBuildPaths != null) {
+      print('overriding engine artifacts');
       contextOverrides.addAll(<Type, Object?>{
         Artifacts: Artifacts.getLocalEngine(engineBuildPaths),
       });

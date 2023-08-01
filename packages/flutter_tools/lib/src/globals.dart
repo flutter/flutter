@@ -49,7 +49,12 @@ import 'runner/flutter_command.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 
-Artifacts? get artifacts => context.get<Artifacts>();
+Artifacts? get artifacts {
+  print(StackTrace.current);
+  final artifacts = context.get<Artifacts>(); // TODO make one-liner
+  print(artifacts?.getArtifactPath(Artifact.linuxDesktopPath));
+  return artifacts;
+}
 BuildSystem get buildSystem => context.get<BuildSystem>()!;
 Cache get cache => context.get<Cache>()!;
 CocoaPodsValidator? get cocoapodsValidator => context.get<CocoaPodsValidator>();

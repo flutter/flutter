@@ -23,6 +23,7 @@ import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
+import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -65,7 +66,7 @@ class AttachCommand extends FlutterCommand {
   AttachCommand({
     bool verboseHelp = false,
     HotRunnerFactory? hotRunnerFactory,
-    required Artifacts? artifacts,
+    //required Artifacts? artifacts,
     required Stdio stdio,
     required Logger logger,
     required Terminal terminal,
@@ -73,7 +74,7 @@ class AttachCommand extends FlutterCommand {
     required Platform platform,
     required ProcessInfo processInfo,
     required FileSystem fileSystem,
-  }): _artifacts = artifacts,
+  }): /*_artifacts = artifacts,*/
       _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
       _stdio = stdio,
       _logger = logger,
@@ -145,7 +146,7 @@ class AttachCommand extends FlutterCommand {
   }
 
   final HotRunnerFactory _hotRunnerFactory;
-  final Artifacts? _artifacts;
+  Artifacts? get _artifacts => globals.artifacts;
   final Stdio _stdio;
   final Logger _logger;
   final Terminal _terminal;

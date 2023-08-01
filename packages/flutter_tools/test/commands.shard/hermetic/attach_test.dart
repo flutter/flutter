@@ -849,6 +849,51 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
+      testUsingContext('foo bar', () async {
+        const String localEngineRoot = '/path/to/flutter/engine/src';
+        const String engineTargetName = 'host_debug_unopt';
+        testFileSystem.directory('$localEngineRoot/out/$engineTargetName').createSync(recursive: true);
+        testDeviceManager.devices = <Device>[device];
+
+        final Completer<void> completer = Completer<void>();
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
+            // Wait until resident_runner.dart tries to connect.
+            // There's nothing to connect _to_, so that's as far as we care to go.
+            completer.complete();
+          }
+        });
+        final Future<void> task = createTestCommandRunner(AttachCommand(
+          artifacts: artifacts,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        )).run(<String>[
+          'attach',
+          '--debug-port',
+          devicePort.toString(),
+          '--ipv6',
+          '--local-engine-src-path=$localEngineRoot',
+          '--local-engine=$engineTargetName',
+        ]);
+        await completer.future;
+
+        expect(portForwarder.devicePort, devicePort);
+        expect(portForwarder.hostPort, hostPort);
+
+        await expectLoggerInterruptEndsTask(task, logger);
+        await loggerSubscription.cancel();
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.empty(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      });
+
       testUsingContext('skips in ipv4 mode with a provided VM Service port', () async {
         testDeviceManager.devices = <Device>[device];
 
