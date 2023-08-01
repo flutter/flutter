@@ -4,15 +4,11 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'asset_bundle.dart';
-import 'message_codecs.dart';
-
 import '_load_asset_manifest_io.dart'
   if (dart.library.js_util) '_load_asset_manifest_web.dart';
 
-// We use .bin as the extension since it is well-known to represent
-// data in some arbitrary binary format.
-const String _kAssetManifestFilename = 'AssetManifest.bin';
+import 'asset_bundle.dart';
+import 'message_codecs.dart';
 
 /// Contains details about available assets and their variants.
 ///
