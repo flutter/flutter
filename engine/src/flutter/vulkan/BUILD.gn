@@ -4,17 +4,6 @@
 
 import("//build/fuchsia/sdk.gni")
 
-config("vulkan_config") {
-  include_dirs = [ "//third_party/vulkan_memory_allocator/include" ]
-  defines = [ "VULKAN_HPP_NO_EXCEPTIONS=1" ]
-  if (is_fuchsia) {
-    include_dirs += [ "//third_party/fuchsia-vulkan/include" ]
-    defines += [ "VK_USE_PLATFORM_FUCHSIA=1" ]
-  } else {
-    include_dirs += [ "//third_party/vulkan-deps/vulkan-headers/src/include" ]
-  }
-}
-
 source_set("vulkan") {
   sources = [
     "vulkan_application.cc",
@@ -59,10 +48,7 @@ source_set("vulkan") {
     "//third_party/skia",
   ]
 
-  public_configs = [
-    ":vulkan_config",
-    "//flutter:config",
-  ]
+  public_configs = [ "//flutter:config" ]
 
   public_deps =
       [ "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers" ]

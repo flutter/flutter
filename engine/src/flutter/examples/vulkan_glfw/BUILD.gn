@@ -7,8 +7,6 @@ executable("vulkan_glfw") {
 
   sources = [ "src/main.cc" ]
 
-  configs += [ "//flutter/vulkan:vulkan_config" ]
-
   deps = [
     "//flutter/shell/platform/embedder:embedder",
     "//third_party/glfw",

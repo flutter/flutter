@@ -10,7 +10,6 @@
 #include <utility>
 #include <vector>
 
-#include "flutter/flutter_vma/flutter_skia_vma.h"
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/macros.h"
 #include "flutter/vulkan/procs/vulkan_proc_table.h"

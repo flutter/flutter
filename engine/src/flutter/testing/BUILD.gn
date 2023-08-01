@@ -239,7 +239,6 @@ if (use_swiftshader) {
 
     configs -= [ "//build/config/clang:extra_warnings" ]
     configs += [
-      "//flutter/vulkan:vulkan_config",  # for swiftshader
       "//third_party/angle:gl_prototypes",
       "//third_party/swiftshader:swiftshader_config",
     ]
