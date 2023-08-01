@@ -29,7 +29,7 @@ void main() {
     timeDilation = 1.0;
   });
 
-  test('Adding a persistent frame callback during a persisten frame callback', () {
+  test('Adding a persistent frame callback during a persistent frame callback', () {
     bool calledBack = false;
     SchedulerBinding.instance.addPersistentFrameCallback((Duration timeStamp) {
       if (!calledBack) {
