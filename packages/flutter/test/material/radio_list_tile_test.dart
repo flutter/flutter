@@ -406,15 +406,26 @@ void main() {
             TestSemantics(
               id: 1,
               flags: <SemanticsFlag>[
-                SemanticsFlag.hasCheckedState,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
               actions: <SemanticsAction>[SemanticsAction.tap],
               label: 'Title',
               textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.hasCheckedState,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    SemanticsFlag.isFocusable,
+                  ]
+                )
+              ]
             ),
           ],
         ),
@@ -442,16 +453,27 @@ void main() {
             TestSemantics(
               id: 1,
               flags: <SemanticsFlag>[
-                SemanticsFlag.hasCheckedState,
-                SemanticsFlag.isChecked,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
               actions: <SemanticsAction>[SemanticsAction.tap],
               label: 'Title',
               textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.hasCheckedState,
+                    SemanticsFlag.isChecked,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    SemanticsFlag.isFocusable
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                )
+              ]
             ),
           ],
         ),
@@ -479,13 +501,22 @@ void main() {
             TestSemantics(
               id: 1,
               flags: <SemanticsFlag>[
-                SemanticsFlag.hasCheckedState,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
               label: 'Title',
               textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.hasCheckedState,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    SemanticsFlag.isFocusable
+                  ],
+                ),
+              ],
             ),
           ],
         ),
@@ -514,13 +545,20 @@ void main() {
             TestSemantics(
               id: 1,
               flags: <SemanticsFlag>[
-                SemanticsFlag.hasCheckedState,
-                SemanticsFlag.isChecked,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
               ],
               label: 'Title',
               textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.hasCheckedState,
+                    SemanticsFlag.isChecked,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isInMutuallyExclusiveGroup],
+                ),
+              ],
             ),
           ],
         ),

@@ -502,7 +502,8 @@ class RadioListTile<T> extends StatelessWidget {
     final Color effectiveActiveColor = activeColor
       ?? radioThemeData.fillColor?.resolve(states)
       ?? theme.colorScheme.secondary;
-    return MergeSemantics(
+    return Semantics(
+      container: true,
       child: ListTile(
         selectedColor: effectiveActiveColor,
         leading: leading,
