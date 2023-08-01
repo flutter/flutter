@@ -2439,4 +2439,29 @@ void main() {
 
     semanticsHandle.dispose();
   });
+
+  testWidgetsWithLeakTracking('Custom ExpansionPanel icon test', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList(
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              canTapOnHeader: true,
+              body: const SizedBox.shrink(),
+              icon: Icons.abc,
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const SizedBox.shrink();
+              },
+            )
+          ],
+        ),
+      ),
+    ));
+
+    final ExpansionPanelList expansionPanelList =
+        tester.widget(find.byType(ExpansionPanelList));
+    for (final ExpansionPanel element in expansionPanelList.children) {
+      expect(element.icon, Icons.abc);
+    }
+  });
 }
