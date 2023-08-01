@@ -10,9 +10,18 @@ RenderPass::RenderPass(std::weak_ptr<const Context> context,
                        const RenderTarget& target)
     : context_(std::move(context)),
       render_target_(target),
-      transients_buffer_(HostBuffer::Create()) {}
+      transients_buffer_() {
+  auto strong_context = context_.lock();
+  FML_DCHECK(strong_context);
+  transients_buffer_ = strong_context->GetHostBufferPool().Grab();
+}
 
-RenderPass::~RenderPass() = default;
+RenderPass::~RenderPass() {
+  auto strong_context = context_.lock();
+  if (strong_context) {
+    strong_context->GetHostBufferPool().Recycle(transients_buffer_);
+  }
+}
 
 const RenderTarget& RenderPass::GetRenderTarget() const {
   return render_target_;
