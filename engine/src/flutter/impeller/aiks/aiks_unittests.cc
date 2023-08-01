@@ -2179,6 +2179,23 @@ TEST_P(AiksTest, CollapsedDrawPaintInSubpass) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CollapsedDrawPaintInSubpassBackdropFilter) {
+  // Bug: https://github.com/flutter/flutter/issues/131576
+  Canvas canvas;
+  canvas.DrawPaint(
+      {.color = Color::Yellow(), .blend_mode = BlendMode::kSource});
+  canvas.SaveLayer({}, {},
+                   [](const FilterInput::Ref& input,
+                      const Matrix& effect_transform, bool is_subpass) {
+                     return FilterContents::MakeGaussianBlur(input, Sigma(20.0),
+                                                             Sigma(20.0));
+                   });
+  canvas.DrawPaint(
+      {.color = Color::CornflowerBlue(), .blend_mode = BlendMode::kSourceOver});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, ForegroundBlendSubpassCollapseOptimization) {
   Canvas canvas;
 
