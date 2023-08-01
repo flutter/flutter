@@ -2,47 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_api_samples/widgets/pop_scope/pop_scope.0.dart' as example;
+import 'package:flutter_api_samples/widgets/pop_scope/pop_scope.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../navigator_utils.dart';
 
 void main() {
-  testWidgets('Can go back with system back gesture', (WidgetTester tester) async {
+  testWidgets("System back gesture operates on current tab's nested Navigator", (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.PopScopeApp(),
     );
 
-    expect(find.text('Nested Navigators Example'), findsOneWidget);
-    expect(find.text('Nested Navigators Page One'), findsNothing);
-    expect(find.text('Nested Navigators Page Two'), findsNothing);
+    expect(find.text('Bottom nav - tab Home Tab - route _TabPage.home'), findsOneWidget);
 
-    await tester.tap(find.text('Nested Navigator route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Nested Navigators Example'), findsNothing);
-    expect(find.text('Nested Navigators Page One'), findsOneWidget);
-    expect(find.text('Nested Navigators Page Two'), findsNothing);
-
+    // Go to the next route in this tab.
     await tester.tap(find.text('Go to another route in this nested Navigator'));
     await tester.pumpAndSettle();
+    expect(find.text('Bottom nav - tab Home Tab - route _TabPage.one'), findsOneWidget);
 
-    expect(find.text('Nested Navigators Example'), findsNothing);
-    expect(find.text('Nested Navigators Page One'), findsNothing);
-    expect(find.text('Nested Navigators Page Two'), findsOneWidget);
+    // Go to another tab.
+    await tester.tap(find.text('Go to One'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bottom nav - tab Tab One - route _TabPage.home'), findsOneWidget);
 
+    // Return to the home tab. The navigation state is preserved.
+    await tester.tap(find.text('Go to Home'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bottom nav - tab Home Tab - route _TabPage.one'), findsOneWidget);
+
+    // A back pops the navigation stack of the current tab's nested Navigator.
     await simulateSystemBack();
     await tester.pumpAndSettle();
-
-    expect(find.text('Nested Navigators Example'), findsNothing);
-    expect(find.text('Nested Navigators Page One'), findsOneWidget);
-    expect(find.text('Nested Navigators Page Two'), findsNothing);
-
-    await simulateSystemBack();
-    await tester.pumpAndSettle();
-
-    expect(find.text('Nested Navigators Example'), findsOneWidget);
-    expect(find.text('Nested Navigators Page One'), findsNothing);
-    expect(find.text('Nested Navigators Page Two'), findsNothing);
+    expect(find.text('Bottom nav - tab Home Tab - route _TabPage.home'), findsOneWidget);
   });
 }
