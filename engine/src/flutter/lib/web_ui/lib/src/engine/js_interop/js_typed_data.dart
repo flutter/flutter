@@ -15,7 +15,7 @@ extension TypedArrayExtension on JSTypedArray {
 // the dart sdk yet
 @JS('Uint8Array')
 @staticInterop
-class JSUint8Array1 extends JSTypedArray {
+class JSUint8Array1 {
   external factory JSUint8Array1._create1(JSAny bufferOrLength);
   external factory JSUint8Array1._create3(
     JSArrayBuffer buffer,
