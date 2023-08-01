@@ -301,30 +301,15 @@ typedef struct MouseState {
                  name:@(flutter::kOverlayStyleUpdateNotificationName)
                object:nil];
 
-  [center addObserver:self
-             selector:@selector(applicationBecameActive:)
-                 name:UIApplicationDidBecomeActiveNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(applicationWillResignActive:)
-                 name:UIApplicationWillResignActiveNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(applicationWillTerminate:)
-                 name:UIApplicationWillTerminateNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(applicationDidEnterBackground:)
-                 name:UIApplicationDidEnterBackgroundNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(applicationWillEnterForeground:)
-                 name:UIApplicationWillEnterForegroundNotification
-               object:nil];
+#if APPLICATION_EXTENSION_API_ONLY
+  if (@available(iOS 13.0, *)) {
+    [self setUpSceneLifecycleNotifications:center];
+  } else {
+    [self setUpApplicationLifecycleNotifications:center];
+  }
+#else
+  [self setUpApplicationLifecycleNotifications:center];
+#endif
 
   [center addObserver:self
              selector:@selector(keyboardWillChangeFrame:)
@@ -396,6 +381,60 @@ typedef struct MouseState {
   [center addObserver:self
              selector:@selector(onShowHomeIndicatorNotification:)
                  name:FlutterViewControllerShowHomeIndicator
+               object:nil];
+}
+
+- (void)setUpSceneLifecycleNotifications:(NSNotificationCenter*)center API_AVAILABLE(ios(13.0)) {
+  [center addObserver:self
+             selector:@selector(sceneBecameActive:)
+                 name:UISceneDidActivateNotification
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(sceneWillResignActive:)
+                 name:UISceneWillDeactivateNotification
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(sceneWillDisconnect:)
+                 name:UISceneDidDisconnectNotification
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(sceneDidEnterBackground:)
+                 name:UISceneDidEnterBackgroundNotification
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(sceneWillEnterForeground:)
+                 name:UISceneWillEnterForegroundNotification
+               object:nil];
+}
+
+- (void)setUpApplicationLifecycleNotifications:(NSNotificationCenter*)center {
+  [center addObserver:self
+             selector:@selector(applicationBecameActive:)
+                 name:UIApplicationDidBecomeActiveNotification
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(applicationWillResignActive:)
+                 name:UIApplicationWillResignActiveNotification
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(applicationWillTerminate:)
+                 name:UIApplicationWillTerminateNotification
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(applicationDidEnterBackground:)
+                 name:UIApplicationDidEnterBackgroundNotification
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(applicationWillEnterForeground:)
+                 name:UIApplicationWillEnterForegroundNotification
                object:nil];
 }
 
@@ -827,7 +866,16 @@ static void SendFakeTouchEvent(UIScreen* screen,
   if ([_engine.get() viewController] == self) {
     [self onUserSettingsChanged:nil];
     [self onAccessibilityStatusChanged:nil];
-    if (UIApplication.sharedApplication.applicationState == UIApplicationStateActive) {
+    BOOL stateIsActive = YES;
+#if APPLICATION_EXTENSION_API_ONLY
+    if (@available(iOS 13.0, *)) {
+      stateIsActive =
+          self.windowSceneIfViewLoaded.activationState == UISceneActivationStateForegroundActive;
+    }
+#else
+    stateIsActive = UIApplication.sharedApplication.applicationState == UIApplicationStateActive;
+#endif
+    if (stateIsActive) {
       [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.resumed"];
     }
   }
@@ -950,6 +998,57 @@ static void SendFakeTouchEvent(UIScreen* screen,
 
 - (void)applicationBecameActive:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationBecameActive");
+  [self appOrSceneBecameActive];
+}
+
+- (void)applicationWillResignActive:(NSNotification*)notification {
+  TRACE_EVENT0("flutter", "applicationWillResignActive");
+  [self appOrSceneWillResignActive];
+}
+
+- (void)applicationWillTerminate:(NSNotification*)notification {
+  [self appOrSceneWillTerminate];
+}
+
+- (void)applicationDidEnterBackground:(NSNotification*)notification {
+  TRACE_EVENT0("flutter", "applicationDidEnterBackground");
+  [self appOrSceneDidEnterBackground];
+}
+
+- (void)applicationWillEnterForeground:(NSNotification*)notification {
+  TRACE_EVENT0("flutter", "applicationWillEnterForeground");
+  [self appOrSceneWillEnterForeground];
+}
+
+#pragma mark - Scene lifecycle notifications
+
+- (void)sceneBecameActive:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  TRACE_EVENT0("flutter", "sceneBecameActive");
+  [self appOrSceneBecameActive];
+}
+
+- (void)sceneWillResignActive:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  TRACE_EVENT0("flutter", "sceneWillResignActive");
+  [self appOrSceneWillResignActive];
+}
+
+- (void)sceneWillDisconnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  [self appOrSceneWillTerminate];
+}
+
+- (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  TRACE_EVENT0("flutter", "sceneDidEnterBackground");
+  [self appOrSceneDidEnterBackground];
+}
+
+- (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  TRACE_EVENT0("flutter", "sceneWillEnterForeground");
+  [self appOrSceneWillEnterForeground];
+}
+
+#pragma mark - Lifecycle shared
+
+- (void)appOrSceneBecameActive {
   self.isKeyboardInOrTransitioningFromBackground = NO;
   if (_viewportMetrics.physical_width) {
     [self surfaceUpdated:YES];
@@ -957,25 +1056,22 @@ static void SendFakeTouchEvent(UIScreen* screen,
   [self goToApplicationLifecycle:@"AppLifecycleState.resumed"];
 }
 
-- (void)applicationWillResignActive:(NSNotification*)notification {
-  TRACE_EVENT0("flutter", "applicationWillResignActive");
+- (void)appOrSceneWillResignActive {
   [self goToApplicationLifecycle:@"AppLifecycleState.inactive"];
 }
 
-- (void)applicationWillTerminate:(NSNotification*)notification {
+- (void)appOrSceneWillTerminate {
   [self goToApplicationLifecycle:@"AppLifecycleState.detached"];
   [self.engine destroyContext];
 }
 
-- (void)applicationDidEnterBackground:(NSNotification*)notification {
-  TRACE_EVENT0("flutter", "applicationDidEnterBackground");
+- (void)appOrSceneDidEnterBackground {
   self.isKeyboardInOrTransitioningFromBackground = YES;
   [self surfaceUpdated:NO];
   [self goToApplicationLifecycle:@"AppLifecycleState.paused"];
 }
 
-- (void)applicationWillEnterForeground:(NSNotification*)notification {
-  TRACE_EVENT0("flutter", "applicationWillEnterForeground");
+- (void)appOrSceneWillEnterForeground {
   [self goToApplicationLifecycle:@"AppLifecycleState.inactive"];
 }
 
@@ -1298,15 +1394,23 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self setViewportMetricsPaddings];
   [self updateViewportMetricsIfNeeded];
 
-  // There is no guarantee that UIKit will layout subviews when the application is active. Creating
-  // the surface when inactive will cause GPU accesses from the background. Only wait for the first
-  // frame to render when the application is actually active.
-  bool applicationIsActive =
+  // There is no guarantee that UIKit will layout subviews when the application/scene is active.
+  // Creating the surface when inactive will cause GPU accesses from the background. Only wait for
+  // the first frame to render when the application/scene is actually active.
+  bool applicationOrSceneIsActive = YES;
+#if APPLICATION_EXTENSION_API_ONLY
+  if (@available(iOS 13.0, *)) {
+    applicationOrSceneIsActive =
+        self.windowSceneIfViewLoaded.activationState == UISceneActivationStateForegroundActive;
+  }
+#else
+  applicationOrSceneIsActive =
       [UIApplication sharedApplication].applicationState == UIApplicationStateActive;
+#endif
 
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
   // the viewport metrics update tasks.
-  if (firstViewBoundsUpdate && applicationIsActive && _engine) {
+  if (firstViewBoundsUpdate && applicationOrSceneIsActive && _engine) {
     [self surfaceUpdated:YES];
 
     flutter::Shell& shell = [_engine.get() shell];
@@ -1847,28 +1951,39 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   });
 }
 
+- (void)requestGeometryUpdateForWindowScenes:(NSSet<UIScene*>*)windowScenes
+    API_AVAILABLE(ios(16.0)) {
+  for (UIScene* windowScene in windowScenes) {
+    FML_DCHECK([windowScene isKindOfClass:[UIWindowScene class]]);
+    UIWindowSceneGeometryPreferencesIOS* preference = [[[UIWindowSceneGeometryPreferencesIOS alloc]
+        initWithInterfaceOrientations:_orientationPreferences] autorelease];
+    [(UIWindowScene*)windowScene
+        requestGeometryUpdateWithPreferences:preference
+                                errorHandler:^(NSError* error) {
+                                  os_log_error(OS_LOG_DEFAULT,
+                                               "Failed to change device orientation: %@", error);
+                                }];
+    [self setNeedsUpdateOfSupportedInterfaceOrientations];
+  }
+}
+
 - (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences {
   if (new_preferences != _orientationPreferences) {
     _orientationPreferences = new_preferences;
 
     if (@available(iOS 16.0, *)) {
-      for (UIScene* scene in UIApplication.sharedApplication.connectedScenes) {
-        if (![scene isKindOfClass:[UIWindowScene class]]) {
-          continue;
-        }
-        UIWindowScene* windowScene = (UIWindowScene*)scene;
-        UIWindowSceneGeometryPreferencesIOS* preference =
-            [[[UIWindowSceneGeometryPreferencesIOS alloc]
-                initWithInterfaceOrientations:_orientationPreferences] autorelease];
-        [windowScene
-            requestGeometryUpdateWithPreferences:preference
-                                    errorHandler:^(NSError* error) {
-                                      os_log_error(OS_LOG_DEFAULT,
-                                                   "Failed to change device orientation: %@",
-                                                   error);
-                                    }];
-        [self setNeedsUpdateOfSupportedInterfaceOrientations];
-      }
+      NSSet<UIScene*>* scenes =
+#if APPLICATION_EXTENSION_API_ONLY
+          self.windowSceneIfViewLoaded ? [NSSet setWithObject:self.windowSceneIfViewLoaded]
+                                       : [NSSet set];
+#else
+          [UIApplication.sharedApplication.connectedScenes
+              filteredSetUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(
+                                                         id scene, NSDictionary* bindings) {
+                return [scene isKindOfClass:[UIWindowScene class]];
+              }]];
+#endif
+      [self requestGeometryUpdateForWindowScenes:scenes];
     } else {
       UIInterfaceOrientationMask currentInterfaceOrientation;
       if (@available(iOS 13.0, *)) {

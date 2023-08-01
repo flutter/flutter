@@ -35,4 +35,9 @@ class ThreadHost;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
                performAction:(FlutterTextInputAction)action
                   withClient:(int)client;
+- (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
+- (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
+- (void)applicationWillEnterForeground:(NSNotification*)notification;
+- (void)applicationDidEnterBackground:(NSNotification*)notification;
+
 @end

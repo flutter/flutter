@@ -37,9 +37,8 @@
   XCTestExpectation* presentExpectation =
       [self expectationWithDescription:@"Look Up view controller presented"];
 
-  FlutterViewController* engineViewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                      nibName:nil
-                                                                                       bundle:nil];
+  FlutterViewController* engineViewController =
+      [[[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil] autorelease];
   FlutterViewController* mockEngineViewController = OCMPartialMock(engineViewController);
 
   FlutterPlatformPlugin* plugin =
