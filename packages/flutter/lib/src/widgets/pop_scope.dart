@@ -26,23 +26,16 @@ import 'routes.dart';
 /// [PopScope], in which case it will be `false`.
 ///
 /// {@tool dartpad}
-/// This sample demonstrates how to use this widget to properly handle system
-/// back gestures when using nested [Navigator]s.
-///
-/// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.0.dart **
-/// {@end-tool}
-///
-/// {@tool dartpad}
 /// This sample demonstrates how to use this widget to handle nested navigation
 /// in a bottom navigation bar.
 ///
-/// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.1.dart **
+/// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [NavigatorPopHandler], which is a less verbose way to handle system back
-///    gestures in the case of nested [Navigator]s.
+///    gestures in simple cases of nested [Navigator]s.
 ///  * [Form.canPop] and [Form.onPopInvoked], which can be used to handle system
 ///    back gestures in the case of a form with unsaved data.
 ///  * [ModalRoute.registerPopEntry] and [ModalRoute.unregisterPopEntry],
