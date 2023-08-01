@@ -1516,12 +1516,7 @@ class TextPainter {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
-   // print('${cachedLayout.contentWidth}, ${cachedLayout.paintOffset}, ${cachedLayout.paragraph.width}');
-
-    //print('${cachedLayout.paragraph.getPositionForOffset(offset - cachedLayout.paintOffset)}');
-    TextPosition position=cachedLayout.paragraph.getPositionForOffset(offset - cachedLayout.paintOffset);
-    //print('${cachedLayout.paragraph.getBoxesForRange(position.offset-1,position.offset+1)}');
-    return position;
+    return cachedLayout.paragraph.getPositionForOffset(offset - cachedLayout.paintOffset);
   }
 
   /// {@template flutter.painting.TextPainter.getWordBoundary}

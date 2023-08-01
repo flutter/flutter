@@ -650,17 +650,9 @@ class Text extends StatelessWidget {
         style: effectiveTextStyle,
         text: data,
         children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-        mouseCursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
+        mouseCursor: registrar != null ? DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text : null,
       ),
     );
-    if (registrar != null) {
-      // result = MouseRegion(
-      //   cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
-      //   child:
-
-      //   result,
-      // );
-    }
     if (semanticsLabel != null) {
       result = Semantics(
         textDirection: textDirection,

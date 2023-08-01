@@ -736,7 +736,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   }
 
   bool _positionIsWithinText({required Offset position, required TextPosition textPosition}){
-    if(textPosition.offset <=0) {
+    if(textPosition.offset <= 0) {
       return false;
     }
     final List<ui.TextBox> boxes = _textPainter.getBoxesForRange(
