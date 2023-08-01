@@ -16,6 +16,7 @@ import '../window.dart';
 import 'canvas.dart';
 import 'embedded_views_diff.dart';
 import 'path.dart';
+import 'picture.dart';
 import 'picture_recorder.dart';
 import 'renderer.dart';
 import 'surface.dart';
@@ -139,7 +140,6 @@ class HtmlViewEmbedder {
     if (needNewOverlay && hasAvailableOverlay) {
       final CkPictureRecorder pictureRecorder = CkPictureRecorder();
       pictureRecorder.beginRecording(ui.Offset.zero & _frameSize);
-      pictureRecorder.recordingCanvas!.clear(const ui.Color(0x00000000));
       _context.pictureRecordersCreatedDuringPreroll.add(pictureRecorder);
     }
 
@@ -422,9 +422,10 @@ class HtmlViewEmbedder {
       if (_overlays[viewId] != null) {
         final SurfaceFrame frame = _overlays[viewId]!.acquireFrame(_frameSize);
         final CkCanvas canvas = frame.skiaCanvas;
-        canvas.drawPicture(
-          _context.pictureRecorders[pictureRecorderIndex].endRecording(),
-        );
+        final CkPicture ckPicture =
+            _context.pictureRecorders[pictureRecorderIndex].endRecording();
+        canvas.clear(const ui.Color(0x00000000));
+        canvas.drawPicture(ckPicture);
         pictureRecorderIndex++;
         frame.submit();
       }
