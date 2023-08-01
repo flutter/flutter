@@ -49,6 +49,8 @@ class LinearGradientContents final : public ColorSourceContents {
 
   void SetTileMode(Entity::TileMode tile_mode);
 
+  void SetDither(bool dither);
+
  private:
   bool RenderTexture(const ContentContext& renderer,
                      const Entity& entity,
@@ -64,6 +66,7 @@ class LinearGradientContents final : public ColorSourceContents {
   std::vector<Scalar> stops_;
   Entity::TileMode tile_mode_;
   Color decal_border_color_ = Color::BlackTransparent();
+  bool dither_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(LinearGradientContents);
 };

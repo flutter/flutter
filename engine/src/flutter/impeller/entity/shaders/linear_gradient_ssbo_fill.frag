@@ -5,6 +5,7 @@
 precision mediump float;
 
 #include <impeller/color.glsl>
+#include <impeller/dithering.glsl>
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
@@ -25,6 +26,7 @@ uniform FragInfo {
   float tile_mode;
   vec4 decal_border_color;
   int colors_length;
+  bool dither;
 }
 frag_info;
 
@@ -59,4 +61,8 @@ void main() {
     }
   }
   frag_color = IPPremultiply(frag_color) * frag_info.alpha;
+
+  if (frag_info.dither) {
+    frag_color = IPOrderedDither8x8(frag_color, v_position);
+  }
 }
