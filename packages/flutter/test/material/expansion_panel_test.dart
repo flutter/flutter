@@ -2444,6 +2444,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: SingleChildScrollView(
         child: ExpansionPanelList(
+          expandIconColor: Colors.amber,
           children: <ExpansionPanel>[
             ExpansionPanel(
               canTapOnHeader: true,
@@ -2462,6 +2463,8 @@ void main() {
         tester.widget(find.byType(ExpansionPanelList));
     for (final ExpansionPanel element in expansionPanelList.children) {
       expect(element.icon, Icons.abc);
+      final ExpandIcon icon = tester.widget(find.byType(ExpandIcon));
+      expect(icon.color, Colors.amber);
     }
   });
 }
