@@ -583,7 +583,8 @@ class SwitchListTile extends StatelessWidget {
     final Color effectiveActiveColor = activeColor
       ?? switchTheme.thumbColor?.resolve(states)
       ?? theme.colorScheme.secondary;
-    return MergeSemantics(
+    return Semantics(
+      container: true,
       child: ListTile(
         selectedColor: effectiveActiveColor,
         leading: leading,
