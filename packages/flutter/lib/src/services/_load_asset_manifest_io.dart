@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart';
+import 'asset_bundle.dart';
+import 'asset_manifest.dart';
 
 /// Loads the contents of the asset manifest generated at build time.
 Future<AssetManifest> loadAssetManifest(AssetBundle bundle) {

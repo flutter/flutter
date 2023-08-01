@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:js_interop';
+import 'dart:typed_data';
 
-import 'package:flutter/services.dart';
+import 'asset_bundle.dart';
+import 'asset_manifest.dart';
 
 @JS('_flutter_assetManifestBytes')
 @staticInterop
