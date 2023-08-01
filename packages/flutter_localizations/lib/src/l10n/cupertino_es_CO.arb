@@ -1,4 +1,5 @@
 {
+  "menuDismissLabel": "Descartar menú",
   "noSpellCheckReplacementsLabel": "No se encontraron reemplazos",
   "searchTextFieldPlaceholderLabel": "Buscar",
   "tabSemanticsLabel": "Pestaña $tabIndex de $tabCount",

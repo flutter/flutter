@@ -1,4 +1,5 @@
 {
+  "menuDismissLabel": "Odbacite meni",
   "noSpellCheckReplacementsLabel": "Nisu pronađene zamene",
   "searchTextFieldPlaceholderLabel": "Pretražite",
   "tabSemanticsLabel": "$tabIndex. kartica od $tabCount",

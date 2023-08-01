@@ -142,5 +142,5 @@
   "expansionTileCollapsedTapHint": "Desplega per obtenir més informació",
   "expandedHint": "S'ha replegat",
   "collapsedHint": "S'ha desplegat",
-  "menuDismissLabel": "Dismiss menu"
+  "menuDismissLabel": "Ignora el menú"
 }

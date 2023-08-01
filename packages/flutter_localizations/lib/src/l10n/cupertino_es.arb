@@ -18,10 +18,10 @@
   "cutButtonLabel": "Cortar",
   "copyButtonLabel": "Copiar",
   "pasteButtonLabel": "Pegar",
-  "selectAllButtonLabel": "Seleccionar todos",
+  "selectAllButtonLabel": "Seleccionar todo",
   "tabSemanticsLabel": "Pestaña $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Cerrar",
   "searchTextFieldPlaceholderLabel": "Buscar",
   "noSpellCheckReplacementsLabel": "No se ha encontrado ninguna sustitución",
-  "menuDismissLabel": "Dismiss menu"
+  "menuDismissLabel": "Cerrar menú"
 }

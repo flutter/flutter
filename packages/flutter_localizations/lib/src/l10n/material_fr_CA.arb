@@ -1,4 +1,5 @@
 {
+  "menuDismissLabel": "Ignorer le menu",
   "scanTextButtonLabel": "Balayer un texte",
   "expansionTileExpandedHint": "toucher deux fois pour réduire",
   "expansionTileCollapsedHint": "toucher deux fois pour développer",

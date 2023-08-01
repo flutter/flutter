@@ -1,4 +1,5 @@
 {
+  "menuDismissLabel": "Dismiss menu",
   "scanTextButtonLabel": "Scan text",
   "expansionTileExpandedHint": "double-tap to collapse",
   "expansionTileCollapsedHint": "double-tap to expand",
