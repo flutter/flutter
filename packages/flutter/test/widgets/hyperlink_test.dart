@@ -22,6 +22,8 @@ void main() {
 
     const Key textKey = Key('text');
 
+    //TextStyle style =TextStyle(fontSize: 10);
+
     await tester.pumpWidget(
       Center(
         child: RichText(
@@ -45,6 +47,9 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byKey(textKey));
+
+
+    expect(box.size, Size(300, 10));
 
     expect(didTapLeft, isFalse);
     expect(didTapRight, isFalse);
