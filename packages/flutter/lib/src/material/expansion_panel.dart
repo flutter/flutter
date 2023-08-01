@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/src/material/icons.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -91,6 +92,7 @@ class ExpansionPanel {
     this.isExpanded = false,
     this.canTapOnHeader = false,
     this.backgroundColor,
+    this.icon = Icons.expand_more,
     this.expandIconBuilder,
   });
 
@@ -116,6 +118,11 @@ class ExpansionPanel {
   ///
   /// Defaults to [ThemeData.cardColor].
   final Color? backgroundColor;
+
+  /// Defines the trailing icon of the panel.
+  ///
+  /// Defaults to [Icons.expand_more].
+  final IconData icon;
 
   /// A callback which builds the expansion panel indicator to show
   /// whether the panel is expanded or not.
@@ -649,6 +656,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           color: widget.expandIconColor,
           isExpanded: _isChildExpanded(index),
           padding: _kExpandIconPadding,
+          icon: child.icon,
           onPressed: !child.canTapOnHeader
               ? (bool isExpanded) => _handlePressed(isExpanded, index)
               : null,
