@@ -111,9 +111,12 @@ class _PopScopeState extends State<PopScope> implements PopEntry {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _route?.unregisterPopEntry(this);
-    _route = ModalRoute.of(context);
-    _route?.registerPopEntry(this);
+    final ModalRoute<dynamic>? nextRoute = ModalRoute.of(context);
+    if (nextRoute != _route) {
+      _route?.unregisterPopEntry(this);
+      _route = nextRoute;
+      _route?.registerPopEntry(this);
+    }
   }
 
   @override
