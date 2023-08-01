@@ -26,18 +26,16 @@ class AllocatorVK final : public Allocator {
  private:
   friend class ContextVK;
 
-  static constexpr size_t kPoolCount = 3;
-
   fml::RefPtr<vulkan::VulkanProcTable> vk_;
   UniqueAllocatorVMA allocator_;
-  std::array<UniquePoolVMA, kPoolCount> staging_buffer_pools_;
+  UniquePoolVMA staging_buffer_pool_;
   std::weak_ptr<Context> context_;
   std::weak_ptr<DeviceHolder> device_holder_;
   ISize max_texture_size_;
   bool is_valid_ = false;
   bool supports_memoryless_textures_ = false;
   // TODO(jonahwilliams): figure out why CI can't create these buffer pools.
-  bool created_buffer_pools_ = true;
+  bool created_buffer_pool_ = true;
   uint32_t frame_count_ = 0;
   std::thread::id raster_thread_id_;
 

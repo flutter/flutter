@@ -73,8 +73,7 @@ static PoolVMA CreateBufferPool(VmaAllocator allocator) {
 
   VmaPoolCreateInfo pool_create_info = {};
   pool_create_info.memoryTypeIndex = memTypeIndex;
-  pool_create_info.flags = VMA_POOL_CREATE_IGNORE_BUFFER_IMAGE_GRANULARITY_BIT |
-                           VMA_POOL_CREATE_LINEAR_ALGORITHM_BIT;
+  pool_create_info.flags = VMA_POOL_CREATE_IGNORE_BUFFER_IMAGE_GRANULARITY_BIT;
 
   VmaPool pool = {};
   result = vk::Result{::vmaCreatePool(allocator, &pool_create_info, &pool)};
@@ -161,10 +160,8 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
     VALIDATION_LOG << "Could not create memory allocator";
     return;
   }
-  for (size_t i = 0u; i < staging_buffer_pools_.size(); i++) {
-    staging_buffer_pools_[i].reset(CreateBufferPool(allocator));
-    created_buffer_pools_ &= staging_buffer_pools_[i].is_valid();
-  }
+  staging_buffer_pool_.reset(CreateBufferPool(allocator));
+  created_buffer_pool_ &= staging_buffer_pool_.is_valid();
   allocator_.reset(allocator);
   supports_memoryless_textures_ = capabilities.SupportsMemorylessTextures();
   is_valid_ = true;
@@ -460,12 +457,9 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
   allocation_info.preferredFlags = static_cast<VkMemoryPropertyFlags>(
       ToVKBufferMemoryPropertyFlags(desc.storage_mode));
   allocation_info.flags = ToVmaAllocationBufferCreateFlags(desc.storage_mode);
-  if (created_buffer_pools_ && desc.storage_mode == StorageMode::kHostVisible &&
+  if (created_buffer_pool_ && desc.storage_mode == StorageMode::kHostVisible &&
       raster_thread_id_ == std::this_thread::get_id()) {
-    allocation_info.pool =
-        staging_buffer_pools_[frame_count_ % staging_buffer_pools_.size()]
-            .get()
-            .pool;
+    allocation_info.pool = staging_buffer_pool_.get().pool;
   }
 
   VkBuffer buffer = {};
