@@ -225,15 +225,15 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                  name:UIApplicationDidReceiveMemoryWarningNotification
                object:nil];
 
-  [center addObserver:self
-             selector:@selector(applicationWillEnterForeground:)
-                 name:UIApplicationWillEnterForegroundNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(applicationDidEnterBackground:)
-                 name:UIApplicationDidEnterBackgroundNotification
-               object:nil];
+#if APPLICATION_EXTENSION_API_ONLY
+  if (@available(iOS 13.0, *)) {
+    [self setUpSceneLifecycleNotifications:center];
+  } else {
+    [self setUpApplicationLifecycleNotifications:center];
+  }
+#else
+  [self setUpApplicationLifecycleNotifications:center];
+#endif
 
   [center addObserver:self
              selector:@selector(onLocaleUpdated:)
@@ -241,6 +241,28 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                object:nil];
 
   return self;
+}
+
+- (void)setUpSceneLifecycleNotifications:(NSNotificationCenter*)center API_AVAILABLE(ios(13.0)) {
+  [center addObserver:self
+             selector:@selector(sceneWillEnterForeground:)
+                 name:UISceneWillEnterForegroundNotification
+               object:nil];
+  [center addObserver:self
+             selector:@selector(sceneDidEnterBackground:)
+                 name:UISceneDidEnterBackgroundNotification
+               object:nil];
+}
+
+- (void)setUpApplicationLifecycleNotifications:(NSNotificationCenter*)center {
+  [center addObserver:self
+             selector:@selector(applicationWillEnterForeground:)
+                 name:UIApplicationWillEnterForegroundNotification
+               object:nil];
+  [center addObserver:self
+             selector:@selector(applicationDidEnterBackground:)
+                 name:UIApplicationDidEnterBackgroundNotification
+               object:nil];
 }
 
 - (void)recreatePlatformViewController {
@@ -856,8 +878,20 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                     _threadHost->io_thread->GetTaskRunner()          // io
   );
 
+#if APPLICATION_EXTENSION_API_ONLY
+  if (@available(iOS 13.0, *)) {
+    _isGpuDisabled = self.viewController.windowSceneIfViewLoaded.activationState ==
+                     UISceneActivationStateBackground;
+  } else {
+    // [UIApplication sharedApplication API is not available for app extension.
+    // We intialize the shell assuming the GPU is required.
+    _isGpuDisabled = NO;
+  }
+#else
   _isGpuDisabled =
       [UIApplication sharedApplication].applicationState == UIApplicationStateBackground;
+#endif
+
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
       /*platform_data=*/platformData,
@@ -1302,11 +1336,29 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 #pragma mark - Notifications
 
+#if APPLICATION_EXTENSION_API_ONLY
+- (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  [self flutterWillEnterForeground:notification];
+}
+
+- (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  [self flutterDidEnterBackground:notification];
+}
+#else
 - (void)applicationWillEnterForeground:(NSNotification*)notification {
-  [self setIsGpuDisabled:NO];
+  [self flutterWillEnterForeground:notification];
 }
 
 - (void)applicationDidEnterBackground:(NSNotification*)notification {
+  [self flutterDidEnterBackground:notification];
+}
+#endif
+
+- (void)flutterWillEnterForeground:(NSNotification*)notification {
+  [self setIsGpuDisabled:NO];
+}
+
+- (void)flutterDidEnterBackground:(NSNotification*)notification {
   [self setIsGpuDisabled:YES];
   [self notifyLowMemory];
 }

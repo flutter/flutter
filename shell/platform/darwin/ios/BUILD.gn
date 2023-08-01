@@ -44,6 +44,9 @@ source_set("flutter_framework_source_arc") {
   cflags_objcc = flutter_cflags_objcc_arc
 
   defines = [ "FLUTTER_FRAMEWORK=1" ]
+  if (darwin_extension_safe) {
+    defines += [ "APPLICATION_EXTENSION_API_ONLY=1" ]
+  }
   allow_circular_includes_from = [ ":flutter_framework_source" ]
   deps = [
     ":flutter_framework_source",
@@ -153,6 +156,9 @@ source_set("flutter_framework_source") {
   sources += _flutter_framework_headers
 
   defines = [ "FLUTTER_FRAMEWORK=1" ]
+  if (darwin_extension_safe) {
+    defines += [ "APPLICATION_EXTENSION_API_ONLY=1" ]
+  }
 
   if (shell_enable_metal) {
     sources += [
@@ -249,6 +255,10 @@ source_set("ios_test_flutter_mrc") {
   if (shell_enable_vulkan) {
     deps += [ "//flutter/vulkan" ]
   }
+
+  if (darwin_extension_safe) {
+    defines = [ "APPLICATION_EXTENSION_API_ONLY=1" ]
+  }
 }
 
 shared_library("ios_test_flutter") {
@@ -312,6 +322,10 @@ shared_library("ios_test_flutter") {
     ":ios_gpu_configuration_config",
     "//flutter:config",
   ]
+
+  if (darwin_extension_safe) {
+    defines = [ "APPLICATION_EXTENSION_API_ONLY=1" ]
+  }
 }
 
 shared_library("create_flutter_framework_dylib") {
