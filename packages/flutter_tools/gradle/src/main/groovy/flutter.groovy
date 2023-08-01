@@ -49,13 +49,18 @@ class FlutterExtension {
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     static int minSdkVersion = 19
 
-    /** Sets the targetSdkVersion used by default in Flutter app projects. */
+    /**
+     * Sets the targetSdkVersion used by default in Flutter app projects.
+     * Should always be the latest available version.
+     *
+     * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
+     */
     static int targetSdkVersion = 33
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
      * Chosen as default version of the AGP version below as found in
-     * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp
+     * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
     static String ndkVersion = "23.1.7779620"
 
