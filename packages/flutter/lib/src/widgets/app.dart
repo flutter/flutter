@@ -5,7 +5,6 @@
 import 'dart:collection' show HashMap;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -31,6 +30,7 @@ import 'shortcuts.dart';
 import 'tap_region.dart';
 import 'text.dart';
 import 'title.dart';
+import 'value_listenable_builder.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
