@@ -62,7 +62,7 @@ bool Allocation::ReserveNPOT(size_t reserved) {
 }
 
 bool Allocation::Reserve(size_t reserved) {
-  if (reserved == reserved_) {
+  if (reserved <= reserved_) {
     return true;
   }
 

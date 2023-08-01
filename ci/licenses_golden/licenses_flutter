@@ -1600,6 +1600,7 @@ ORIGIN: ../../../flutter/impeller/renderer/pipeline_descriptor.cc + ../../../flu
 ORIGIN: ../../../flutter/impeller/renderer/pipeline_descriptor.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/pipeline_library.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/pipeline_library.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/pool.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/prefix_sum_test.comp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/render_pass.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/render_pass.h + ../../../flutter/LICENSE
@@ -4294,6 +4295,7 @@ FILE: ../../../flutter/impeller/renderer/pipeline_descriptor.cc
 FILE: ../../../flutter/impeller/renderer/pipeline_descriptor.h
 FILE: ../../../flutter/impeller/renderer/pipeline_library.cc
 FILE: ../../../flutter/impeller/renderer/pipeline_library.h
+FILE: ../../../flutter/impeller/renderer/pool.h
 FILE: ../../../flutter/impeller/renderer/prefix_sum_test.comp
 FILE: ../../../flutter/impeller/renderer/render_pass.cc
 FILE: ../../../flutter/impeller/renderer/render_pass.h

@@ -73,6 +73,7 @@ impeller_component("renderer") {
     "pipeline_descriptor.h",
     "pipeline_library.cc",
     "pipeline_library.h",
+    "pool.h",
     "render_pass.cc",
     "render_pass.h",
     "render_target.cc",
@@ -125,6 +126,7 @@ impeller_component("renderer_unittests") {
     "device_buffer_unittests.cc",
     "host_buffer_unittests.cc",
     "pipeline_descriptor_unittests.cc",
+    "pool_unittests.cc",
     "renderer_unittests.cc",
   ]
 

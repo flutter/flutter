@@ -87,4 +87,15 @@ std::shared_ptr<const DeviceBuffer> HostBuffer::GetDeviceBuffer(
   return device_buffer_;
 }
 
+void HostBuffer::Reset() {
+  generation_ += 1;
+  device_buffer_ = nullptr;
+  bool did_truncate = Truncate(0);
+  FML_CHECK(did_truncate);
+}
+
+size_t HostBuffer::GetSize() const {
+  return GetReservedLength();
+}
+
 }  // namespace impeller
