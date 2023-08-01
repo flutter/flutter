@@ -33,6 +33,7 @@ class Rasterizer {
           SurfaceFactory.instance.baseSurface.acquireFrame(layerTree.frameSize);
       HtmlViewEmbedder.instance.frameSize = layerTree.frameSize;
       final CkCanvas canvas = frame.skiaCanvas;
+      canvas.clear(const ui.Color(0x00000000));
       final Frame compositorFrame =
           context.acquireFrame(canvas, HtmlViewEmbedder.instance);
 
