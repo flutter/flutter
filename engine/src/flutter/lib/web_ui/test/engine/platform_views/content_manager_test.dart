@@ -109,7 +109,8 @@ void testMain() {
       test('rendered markup contains required attributes', () async {
         final DomElement content =
             contentManager.renderContent(viewType, viewId, null);
-        expect(content.getAttribute('slot'), contains('$viewId'));
+        expect(content.getAttribute('slot'), getPlatformViewSlotName(viewId));
+        expect(content.getAttribute('id'), getPlatformViewDomId(viewId));
 
         final DomElement userContent = content.querySelector('div')!;
         expect(userContent.style.height, '100%');

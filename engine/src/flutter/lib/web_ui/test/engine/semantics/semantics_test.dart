@@ -2277,6 +2277,38 @@ void _testLiveRegion() {
 }
 
 void _testPlatformView() {
+  test('sets and updates aria-owns', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    // Set.
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        platformViewId: 5,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      semantics().updateSemantics(builder.build());
+      expectSemanticsTree('<sem aria-owns="flt-pv-5" style="$rootSemanticStyle"></sem>');
+    }
+
+    // Update.
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        platformViewId: 42,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      semantics().updateSemantics(builder.build());
+      expectSemanticsTree('<sem aria-owns="flt-pv-42" style="$rootSemanticStyle"></sem>');
+    }
+
+    semantics().semanticsEnabled = false;
+  });
+
   test('is transparent w.r.t. hit testing', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -2290,7 +2322,7 @@ void _testPlatformView() {
     );
     semantics().updateSemantics(builder.build());
 
-    expectSemanticsTree('<sem style="$rootSemanticStyle"></sem>');
+    expectSemanticsTree('<sem aria-owns="flt-pv-5" style="$rootSemanticStyle"></sem>');
     final DomElement element = appHostNode.querySelector('flt-semantics')!;
     expect(element.style.pointerEvents, 'none');
 
@@ -2375,7 +2407,7 @@ void _testPlatformView() {
 <sem style="$rootSemanticStyle">
   <sem-c>
     <sem style="z-index: 3"></sem>
-    <sem style="z-index: 2"></sem>
+    <sem style="z-index: 2" aria-owns="flt-pv-0"></sem>
     <sem style="z-index: 1"></sem>
   </sem-c>
 </sem>''');

@@ -301,7 +301,7 @@ class SemanticsTester {
       currentValueLength: currentValueLength ?? 0,
       textSelectionBase: textSelectionBase ?? 0,
       textSelectionExtent: textSelectionExtent ?? 0,
-      platformViewId: platformViewId ?? 0,
+      platformViewId: platformViewId ?? -1,
       scrollChildren: scrollChildren ?? 0,
       scrollIndex: scrollIndex ?? 0,
       scrollPosition: scrollPosition ?? 0,

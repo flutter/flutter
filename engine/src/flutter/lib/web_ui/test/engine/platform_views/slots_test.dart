@@ -35,4 +35,12 @@ void testMain() {
       });
     });
   });
+
+  test('getPlatformViewSlotName', () {
+    expect(getPlatformViewSlotName(42), 'flt-pv-slot-42');
+  });
+
+  test('getPlatformViewDomId', () {
+    expect(getPlatformViewDomId(42), 'flt-pv-42');
+  });
 }

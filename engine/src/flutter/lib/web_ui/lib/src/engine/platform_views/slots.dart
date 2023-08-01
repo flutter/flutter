@@ -13,6 +13,12 @@ String getPlatformViewSlotName(int viewId) {
   return 'flt-pv-slot-$viewId';
 }
 
+/// Returns the value of the HTML "id" attribute set on the wrapper element that
+/// hosts the platform view content.
+String getPlatformViewDomId(int viewId) {
+  return 'flt-pv-$viewId';
+}
+
 /// Creates the HTML markup for the `slot` of a Platform View.
 ///
 /// The resulting DOM for a `slot` looks like this:
