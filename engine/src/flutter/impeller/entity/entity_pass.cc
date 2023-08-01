@@ -748,18 +748,19 @@ bool EntityPass::OnRender(
     render_element(backdrop_entity);
   }
 
-  bool is_collapsing_clear_colors = true;
+  bool is_collapsing_clear_colors = !collapsed_parent_pass &&
+                                    // Backdrop filters act as a entity before
+                                    // everything and disrupt the optimization.
+                                    !backdrop_filter_proc_;
   for (const auto& element : elements_) {
     // Skip elements that are incorporated into the clear color.
-    if (!collapsed_parent_pass) {
-      if (is_collapsing_clear_colors) {
-        auto [entity_color, _] =
-            ElementAsBackgroundColor(element, root_pass_size);
-        if (entity_color.has_value()) {
-          continue;
-        }
-        is_collapsing_clear_colors = false;
+    if (is_collapsing_clear_colors) {
+      auto [entity_color, _] =
+          ElementAsBackgroundColor(element, root_pass_size);
+      if (entity_color.has_value()) {
+        continue;
       }
+      is_collapsing_clear_colors = false;
     }
 
     EntityResult result =
