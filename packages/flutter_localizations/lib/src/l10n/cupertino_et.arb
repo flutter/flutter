@@ -22,5 +22,6 @@
   "tabSemanticsLabel": "$tabIndex. vaheleht $tabCount-st",
   "modalBarrierDismissLabel": "Loobu",
   "searchTextFieldPlaceholderLabel": "Otsige",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu"
 }

@@ -1354,6 +1354,7 @@ class ElasticInOutCurve extends Curve {
 ///
 ///  * [Curve], the interface implemented by the constants available from the
 ///    [Curves] class.
+///  * [Easing], for the Material animation curves.
 abstract final class Curves {
   /// A linear animation curve.
   ///
@@ -1741,7 +1742,7 @@ abstract final class Curves {
   ///
   /// See also:
   ///
-  ///  * [standardEasing], the name for this curve in the Material specification.
+  ///  * [Easing.legacy], the name for this curve in the Material specification.
   static const Cubic fastOutSlowIn = Cubic(0.4, 0.0, 0.2, 1.0);
 
   /// A cubic animation curve that starts quickly, slows down, and then ends

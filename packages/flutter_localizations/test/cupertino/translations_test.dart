@@ -194,4 +194,13 @@ void main() {
       expect(file.readAsStringSync(), encodedArbFile);
     }
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/110451.
+  testWidgets('Finnish translation for tab label', (WidgetTester tester) async {
+    const Locale locale = Locale('fi');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+    expect(localizations, isA<CupertinoLocalizationFi>());
+    expect(localizations.tabSemanticsLabel(tabIndex: 1, tabCount: 2), 'Välilehti 1 kautta 2');
+  });
 }

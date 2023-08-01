@@ -99,7 +99,7 @@ Future<void> _withFlutterLeakTracking(
 ) async {
   // Leak tracker does not work for web platform.
   if (kIsWeb) {
-    final bool shouldPrintWarning = !_webWarningPrinted && LeakTrackingTestConfig.warnForNonSupportedPlatforms;
+    final bool shouldPrintWarning = !_webWarningPrinted && LeakTrackerGlobalSettings.warnForNonSupportedPlatforms;
     if (shouldPrintWarning) {
       _webWarningPrinted = true;
       debugPrint('Leak tracking is not supported on web platform.\nTo turn off this message, set `LeakTrackingTestConfig.warnForNonSupportedPlatforms` to false.');
@@ -169,6 +169,18 @@ class LeakCleaner {
 
   /// Returns true if [leak] should be reported as failure.
   bool _shouldReportLeak(LeakType leakType, LeakReport leak, Map<(String, LeakType), int> countByClassAndType) {
+    switch (leakType) {
+      case LeakType.notDisposed:
+        if (config.allowAllNotDisposed) {
+          return false;
+        }
+      case LeakType.notGCed:
+      case LeakType.gcedLate:
+        if (config.allowAllNotGCed) {
+          return false;
+        }
+    }
+
     final String leakingClass = leak.type;
     final (String, LeakType) classAndType = (leakingClass, leakType);
 
