@@ -108,7 +108,7 @@ class PlatformViewManager {
   /// The resulting DOM for the `contents` of a Platform View looks like this:
   ///
   /// ```html
-  /// <flt-platform-view slot="...">
+  /// <flt-platform-view id="flt-pv-VIEW_ID" slot="...">
   ///   <arbitrary-html-elements />
   /// </flt-platform-view-slot>
   /// ```
@@ -134,6 +134,7 @@ class PlatformViewManager {
     return _contents.putIfAbsent(viewId, () {
       final DomElement wrapper = domDocument
           .createElement('flt-platform-view')
+            ..id = getPlatformViewDomId(viewId)
             ..setAttribute('slot', slotName);
 
       final Function factoryFunction = _factories[viewType]!;
