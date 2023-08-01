@@ -25,6 +25,7 @@ import 'image.dart';
 import 'incrementable.dart';
 import 'label_and_value.dart';
 import 'live_region.dart';
+import 'platform_view.dart';
 import 'scrollable.dart';
 import 'semantics_helper.dart';
 import 'tappable.dart';
@@ -332,12 +333,6 @@ class SemanticsNodeUpdate {
 /// Each value corresponds to the most specific role a semantics node plays in
 /// the semantics tree.
 enum PrimaryRole {
-  /// A role used when a more specific role cannot be assigend to
-  /// a [SemanticsObject].
-  ///
-  /// Provides a label or a value.
-  generic,
-
   /// Supports incrementing and/or decrementing its value.
   incrementable,
 
@@ -378,6 +373,15 @@ enum PrimaryRole {
   ///   children. For example, a modal barrier has `scopesRoute` set but marking
   ///   it as a dialog would be wrong.
   dialog,
+
+  /// The node's primary role is to host a platform view.
+  platformView,
+
+  /// A role used when a more specific role cannot be assigend to
+  /// a [SemanticsObject].
+  ///
+  /// Provides a label or a value.
+  generic,
 }
 
 /// Identifies one of the secondary [RoleManager]s of a [PrimaryRoleManager].
@@ -964,6 +968,9 @@ class SemanticsObject {
 
   static const int _platformViewIdIndex = 1 << 23;
 
+  /// Whether the [platformViewId] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isPlatformViewIdDirty => _isDirty(_platformViewIdIndex);
   void _markPlatformViewIdDirty() {
     _dirtyFields |= _platformViewIdIndex;
   }
@@ -1462,7 +1469,9 @@ class SemanticsObject {
 
   PrimaryRole _getPrimaryRoleIdentifier() {
     // The most specific role should take precedence.
-    if (isTextField) {
+    if (isPlatformView) {
+      return PrimaryRole.platformView;
+    } else if (isTextField) {
       return PrimaryRole.textField;
     } else if (isIncrementable) {
       return PrimaryRole.incrementable;
@@ -1490,6 +1499,7 @@ class SemanticsObject {
       PrimaryRole.checkable => Checkable(this),
       PrimaryRole.dialog => Dialog(this),
       PrimaryRole.image => ImageRoleManager(this),
+      PrimaryRole.platformView => PlatformViewRoleManager(this),
       PrimaryRole.generic => GenericRole(this),
     };
   }
