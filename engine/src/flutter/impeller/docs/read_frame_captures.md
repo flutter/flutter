@@ -317,6 +317,41 @@ of the draw call (potentially thousands of times depending on the side of the
 triangle rendered). So, when you want to debug a shader, you must first find one
 specific invocation of either the vertex or fragment shader to debug.
 
+### iOS & macOS: Tell Xcode the Location of your Shaders
+
+When using the Metal backend, instead of packaging shader sources as strings,
+Impeller compiles and packages them into a single shader library. This library
+is stripped of debugging information to minimize the size overhead. This
+debugging information is not tossed away however. In the `out/<variant>/shaders`
+directory, you will find a series of files with the `.metallibsym` extension.
+
+When you try to debug a shader for the first time as described in the sections
+below, Xcode you prompt you with a dialog that says it can't find the sources
+for shader along with a button to show it where to find the relevant
+`.metallibsym` files. Click that button and a dialog will pop up showing the
+Metal libraries whose `.metallibsym` files could not be resolved.
+
+![No Sources](assets/read_frame_captures/no_sources.png)
+
+In the "External Source Search Paths" section, click the tiny `+` button at the
+bottom. In the file chooser dialog box that appears next, select all the
+`metallibsym` files in the `out/<variant>/shaders` directory.
+
+You will only have to do this once per engine variant. The search paths will
+remain the same as you rebuild the engine and the `.metallibsym` files contain
+the UUID of the shader library. So Xcode won't attempt to resolve shaders
+sources in an outdated `.metallibsym` file.
+
+You may however also run into Xcode complaining about "Invalid UUID" errors.
+This is instead of the "No Source" errors as shown in the dialog above.
+
+![Invalid UUID](assets/read_frame_captures/invalid_uuid.png)
+
+The team has been unable to to find documentation for this type of error. But
+through trial-and-error, we have determined that the way to fix this is to set
+the deployment target of the application to the current OS version during the
+instrumentation run (either on macOS or iOS). To information about this line of
+troubleshooting can be found [here](https://github.com/flutter/engine/pull/39532).
 
 ### Debugging a Fragment Shader
 
