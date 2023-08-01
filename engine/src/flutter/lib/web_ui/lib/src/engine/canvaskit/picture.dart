@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
+import '../scene_painting.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
@@ -14,18 +15,20 @@ import 'surface.dart';
 import 'surface_factory.dart';
 
 /// Implements [ui.Picture] on top of [SkPicture].
-class CkPicture implements ui.Picture {
-  CkPicture(SkPicture skPicture, this.cullRect) {
+class CkPicture implements ScenePicture {
+  CkPicture(SkPicture skPicture) {
     _ref = UniqueRef<SkPicture>(this, skPicture, 'Picture');
   }
 
   late final UniqueRef<SkPicture> _ref;
-  final ui.Rect? cullRect;
 
   SkPicture get skiaObject => _ref.nativeObject;
 
   @override
-  int get approximateBytesUsed => 0;
+  ui.Rect get cullRect => fromSkRect(skiaObject.cullRect());
+
+  @override
+  int get approximateBytesUsed => skiaObject.approximateBytesUsed();
 
   @override
   bool get debugDisposed {
@@ -39,7 +42,8 @@ class CkPicture implements ui.Picture {
       return result!;
     }
 
-    throw StateError('Picture.debugDisposed is only available when asserts are enabled.');
+    throw StateError(
+        'Picture.debugDisposed is only available when asserts are enabled.');
   }
 
   /// This is set to true when [dispose] is called and is never reset back to
@@ -96,8 +100,8 @@ class CkPicture implements ui.Picture {
     assert(debugCheckNotDisposed('Cannot convert picture to image.'));
 
     final Surface surface = SurfaceFactory.instance.pictureToImageSurface;
-    final CkSurface ckSurface =
-      surface.createOrUpdateSurface(ui.Size(width.toDouble(), height.toDouble()));
+    final CkSurface ckSurface = surface
+        .createOrUpdateSurface(ui.Size(width.toDouble(), height.toDouble()));
     final CkCanvas ckCanvas = ckSurface.getCanvas();
     ckCanvas.clear(const ui.Color(0x00000000));
     ckCanvas.drawPicture(this);
@@ -110,7 +114,8 @@ class CkPicture implements ui.Picture {
       height: height.toDouble(),
     );
     final Uint8List pixels = skImage.readPixels(0, 0, imageInfo);
-    final SkImage? rasterImage = canvasKit.MakeImage(imageInfo, pixels, (4 * width).toDouble());
+    final SkImage? rasterImage =
+        canvasKit.MakeImage(imageInfo, pixels, (4 * width).toDouble());
     if (rasterImage == null) {
       throw StateError('Unable to convert image pixels into SkImage.');
     }

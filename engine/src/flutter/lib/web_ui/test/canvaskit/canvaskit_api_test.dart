@@ -51,6 +51,7 @@ void testMain() {
     _matrix4x4CompositionTests();
     _toSkRectTests();
     _skVerticesTests();
+    _pictureTests();
     group('SkParagraph', () {
       _paragraphTests();
     });
@@ -1049,6 +1050,26 @@ void _skVerticesTests() {
   });
 }
 
+void _pictureTests() {
+  late SkPicture picture;
+
+  setUp(() {
+    final SkPictureRecorder recorder = SkPictureRecorder();
+    final SkCanvas canvas = recorder.beginRecording(toSkRect(ui.Rect.largest));
+    canvas.drawRect(toSkRect(const ui.Rect.fromLTRB(20, 30, 40, 50)),
+        SkPaint()..setColorInt(0xffff00ff));
+    picture = recorder.finishRecordingAsPicture();
+  });
+  test('cullRect', () {
+    expect(
+        fromSkRect(picture.cullRect()), const ui.Rect.fromLTRB(20, 30, 40, 50));
+  });
+
+  test('approximateBytesUsed', () {
+    expect(picture.approximateBytesUsed() > 0, isTrue);
+  });
+}
+
 void _canvasTests() {
   late SkPictureRecorder recorder;
   late SkCanvas canvas;
@@ -1445,7 +1466,7 @@ void _canvasTests() {
       SkPaint()..setColorInt(0xAAFFFFFF),
     );
     final CkPicture picture =
-        CkPicture(otherRecorder.finishRecordingAsPicture(), null);
+        CkPicture(otherRecorder.finishRecordingAsPicture());
     final CkImage image = await picture.toImage(1, 1) as CkImage;
     final ByteData rawData =
         await image.toByteData();
