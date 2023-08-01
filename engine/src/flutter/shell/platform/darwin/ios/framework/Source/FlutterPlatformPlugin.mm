@@ -269,13 +269,23 @@ using namespace flutter;
   // It's also possible in an Add2App scenario that the FlutterViewController was presented
   // outside the context of a UINavigationController, and still wants to be popped.
 
-  UIViewController* engineViewController = [_engine.get() viewController];
+  FlutterViewController* engineViewController = [_engine.get() viewController];
   UINavigationController* navigationController = [engineViewController navigationController];
   if (navigationController) {
     [navigationController popViewControllerAnimated:isAnimated];
   } else {
-    UIViewController* rootViewController =
-        [UIApplication sharedApplication].keyWindow.rootViewController;
+    UIViewController* rootViewController = nil;
+#if APPLICATION_EXTENSION_API_ONLY
+    if (@available(iOS 15.0, *)) {
+      rootViewController =
+          [engineViewController windowSceneIfViewLoaded].keyWindow.rootViewController;
+    } else {
+      FML_LOG(WARNING)
+          << "rootViewController is not available in application extension prior to iOS 15.0.";
+    }
+#else
+    rootViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
+#endif
     if (engineViewController != rootViewController) {
       [engineViewController dismissViewControllerAnimated:isAnimated completion:nil];
     }
