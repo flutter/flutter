@@ -1665,7 +1665,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: SelectionArea(
-          child: Text('Flutter'),
+          child: Center(child: Text('Flutter')),
         ),
       ),
     );
@@ -1684,7 +1684,7 @@ void main() {
         home: SelectionArea(
           child: DefaultSelectionStyle.merge(
             mouseCursor: SystemMouseCursors.click,
-            child: const Text('Flutter'),
+            child: const Center(child: Text('Flutter')),
           ),
         ),
       ),
