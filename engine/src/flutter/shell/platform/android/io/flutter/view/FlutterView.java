@@ -900,6 +900,12 @@ public class FlutterView extends SurfaceView
 
   @Override
   @NonNull
+  public ImageTextureEntry createImageTexture() {
+    throw new UnsupportedOperationException("Image textures are not supported in this mode.");
+  }
+
+  @Override
+  @NonNull
   public TextureRegistry.SurfaceTextureEntry registerSurfaceTexture(
       @NonNull SurfaceTexture surfaceTexture) {
     surfaceTexture.detachFromGLContext();
