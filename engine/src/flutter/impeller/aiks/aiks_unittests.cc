@@ -420,6 +420,36 @@ TEST_P(AiksTest, CanRenderLinearGradientDecalWithColorFilter) {
 }
 
 namespace {
+void CanRenderLinearGradientWithDithering(AiksTest* aiks_test,
+                                          bool use_dithering) {
+  Canvas canvas;
+  Paint paint;
+  canvas.Translate({100.0, 100.0, 0});
+
+  // 0xffcccccc --> 0xff333333, taken from
+  // https://github.com/flutter/flutter/issues/118073#issue-1521699748
+  std::vector<Color> colors = {Color{0.8, 0.8, 0.8, 1.0},
+                               Color{0.2, 0.2, 0.2, 1.0}};
+  std::vector<Scalar> stops = {0.0, 1.0};
+
+  paint.color_source = ColorSource::MakeLinearGradient(
+      {0, 0}, {800, 500}, std::move(colors), std::move(stops),
+      Entity::TileMode::kClamp, {});
+  paint.dither = use_dithering;
+  canvas.DrawRect({0, 0, 800, 500}, paint);
+  ASSERT_TRUE(aiks_test->OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+}  // namespace
+
+TEST_P(AiksTest, CanRenderLinearGradientWithDitheringDisabled) {
+  CanRenderLinearGradientWithDithering(this, false);
+}
+
+TEST_P(AiksTest, CanRenderLinearGradientWithDitheringEnabled) {
+  CanRenderLinearGradientWithDithering(this, true);
+}  // namespace
+
+namespace {
 void CanRenderLinearGradientWithOverlappingStops(AiksTest* aiks_test,
                                                  Entity::TileMode tile_mode) {
   Canvas canvas;

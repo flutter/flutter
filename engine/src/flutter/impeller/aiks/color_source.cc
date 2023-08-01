@@ -55,6 +55,7 @@ ColorSource ColorSource::MakeLinearGradient(Point start_point,
     contents->SetStops(stops);
     contents->SetEndPoints(start_point, end_point);
     contents->SetTileMode(tile_mode);
+    contents->SetDither(paint.dither);
     contents->SetEffectTransform(effect_transform);
 
     std::vector<Point> bounds{start_point, end_point};

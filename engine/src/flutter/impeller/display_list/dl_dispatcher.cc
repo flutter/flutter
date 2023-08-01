@@ -186,7 +186,12 @@ void DlDispatcher::setAntiAlias(bool aa) {
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcher::setDither(bool dither) {}
+void DlDispatcher::setDither(bool dither) {
+  // TODO(https://github.com/flutter/flutter/issues/131450): Implement dither.
+  //
+  // This is intentionally left blank because we don't want to ship enabling
+  // dithering from the framework yet (it's only used in Impeller-only tests).
+}
 
 static Paint::Style ToStyle(flutter::DlDrawStyle style) {
   switch (style) {
