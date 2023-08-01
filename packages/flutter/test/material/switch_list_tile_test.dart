@@ -150,6 +150,54 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('SwitchListTile can have other focusable nodes inside', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SwitchListTile(
+          value: false,
+          onChanged: (bool? value) {},
+          title: Text.rich(TextSpan(
+              children: <InlineSpan>[
+                const TextSpan(text:'before'),
+                WidgetSpan(child: TextButton(child: const Text('link'), onPressed: (){}, )),
+                const TextSpan(text:'after'),
+              ]
+          )),
+        ),
+      ),
+    ));
+debugDumpSemanticsTree();
+    expect(tester.getSemantics(find.byType(SwitchListTile)), matchesSemantics(
+      hasEnabledState: true,
+      isEnabled: true,
+      isFocusable: true,
+      textDirection: TextDirection.ltr,
+      hasTapAction: true,
+      label: 'before\nafter',
+      children: <Matcher>[
+        matchesSemantics(
+          label: 'link',
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          isFocusable: true,
+          hasTapAction: true,
+          textDirection: TextDirection.ltr,
+        ),
+        matchesSemantics(
+          hasToggledState: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          isFocusable: true,
+          hasTapAction: true,
+        )
+      ]
+    ));
+
+    handle.dispose();
+  });
+
   testWidgetsWithLeakTracking('Material2 - SwitchListTile has the right colors', (WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(

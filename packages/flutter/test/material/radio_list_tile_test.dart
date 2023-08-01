@@ -571,6 +571,50 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('RadioListTile can have other focusable nodes inside', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: RadioListTile<int>(
+          value: 1,
+          groupValue: 2,
+          onChanged: null,
+          title: Text.rich(TextSpan(
+              children: <InlineSpan>[
+                const TextSpan(text:'before'),
+                WidgetSpan(child: TextButton(child: const Text('link'), onPressed: (){}, )),
+                const TextSpan(text:'after'),
+              ]
+          )),
+        ),
+      ),
+    ));
+
+    expect(tester.getSemantics(find.byType(RadioListTile<int>)), matchesSemantics(
+      hasEnabledState: true,
+      textDirection: TextDirection.ltr,
+      label: 'before\nafter',
+      children: <Matcher>[
+        matchesSemantics(
+          hasCheckedState: true,
+          hasEnabledState: true,
+          isInMutuallyExclusiveGroup: true,
+        ),
+        matchesSemantics(
+          label: 'link',
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          isFocusable: true,
+          hasTapAction: true,
+          textDirection: TextDirection.ltr,
+        ),
+      ]
+    ));
+
+    handle.dispose();
+  });
+
   testWidgets('RadioListTile has semantic events', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();

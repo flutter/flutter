@@ -1191,6 +1191,54 @@ void main() {
 
     handle.dispose();
   });
+
+  testWidgets('CheckboxListTile can have other focusable nodes inside', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: CheckboxListTile(
+          value: false,
+          onChanged: (bool? value) {},
+          title: Text.rich(TextSpan(
+            children: <InlineSpan>[
+              const TextSpan(text:'before'),
+              WidgetSpan(child: TextButton(child: const Text('link'), onPressed: (){}, )),
+              const TextSpan(text:'after'),
+            ]
+          )),
+        ),
+      ),
+    ));
+
+    expect(tester.getSemantics(find.byType(CheckboxListTile)), matchesSemantics(
+      hasEnabledState: true,
+      isEnabled: true,
+      isFocusable: true,
+      textDirection: TextDirection.ltr,
+      hasTapAction: true,
+      label: 'before\nafter',
+      children: <Matcher>[
+        matchesSemantics(
+          label: 'link',
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          isFocusable: true,
+          hasTapAction: true,
+          textDirection: TextDirection.ltr,
+        ),
+        matchesSemantics(
+          hasCheckedState: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          isFocusable: true,
+          hasTapAction: true,
+        )
+      ]
+    ));
+
+    handle.dispose();
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
