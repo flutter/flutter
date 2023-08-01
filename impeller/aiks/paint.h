@@ -51,6 +51,7 @@ struct Paint {
 
   Color color = Color::Black();
   ColorSource color_source;
+  bool dither = false;
 
   Scalar stroke_width = 0.0;
   Cap stroke_cap = Cap::kButt;
