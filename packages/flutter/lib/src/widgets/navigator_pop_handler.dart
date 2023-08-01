@@ -32,7 +32,7 @@ class NavigatorPopHandler extends StatefulWidget {
   const NavigatorPopHandler({
     super.key,
     this.onPop,
-    this.canPop,
+    this.enabled = true,
     required this.child,
   });
 
@@ -42,10 +42,17 @@ class NavigatorPopHandler extends StatefulWidget {
   /// called.
   final Widget child;
 
-  /// An override value to control whether or not to allow system back gestures.
+  /// Whether this widget's ability to handle system back gestures is enabled or
+  /// disabled.
   ///
-  /// When null, this will be decided automatically based on navigation state.
-  final bool? canPop;
+  /// When false, there will be no effect on system back gestures. If provided,
+  /// [onPop] will still be called.
+  ///
+  /// This can be used, for example, when the nested [Navigator] is no longer
+  /// active but remains in the widget tree, such as in an inactive tab.
+  ///
+  /// Defaults to true.
+  final bool enabled;
 
   /// Called when a handleable pop event happens.
   ///
@@ -69,7 +76,7 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
     // When the widget subtree indicates it can handle a pop, disable popping
     // here, so that it can be manually handled in canPop.
     return PopScope(
-      canPop: widget.canPop ?? _canPop,
+      canPop: !widget.enabled || _canPop,
       onPopInvoked: (bool didPop) {
         if (didPop) {
           return;

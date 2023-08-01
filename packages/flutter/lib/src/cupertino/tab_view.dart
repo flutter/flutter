@@ -186,7 +186,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
 
     // Handle system back gestures only if the tab is currently active.
     return NavigatorPopHandler(
-      canPop: _isActive ? null : true,
+      enabled: _isActive,
       onPop: () {
         if (!_isActive) {
           return;
