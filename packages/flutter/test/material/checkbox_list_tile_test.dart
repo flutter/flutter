@@ -1170,13 +1170,23 @@ void main() {
     ));
 
     expect(tester.getSemantics(find.byType(CheckboxListTile)), matchesSemantics(
-      hasCheckedState: true,
-      isChecked: true,
       hasEnabledState: true,
       isEnabled: true,
-      hasTapAction: true,
       isFocusable: true,
-      label: 'Hello\nthere',
+      textDirection: TextDirection.ltr,
+      hasTapAction: true,
+      label: 'Hello',
+      children: <Matcher>[
+        matchesSemantics(
+          label: 'there',
+          hasCheckedState: true,
+          isChecked: true,
+          hasTapAction: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          isFocusable: true,
+        )
+      ]
     ));
 
     handle.dispose();
