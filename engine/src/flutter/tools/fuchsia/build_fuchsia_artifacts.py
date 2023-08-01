@@ -83,7 +83,7 @@ def RunGN(variant_dir, flags):
 def BuildNinjaTargets(variant_dir, targets):
   assert os.path.exists(os.path.join(_out_dir, variant_dir))
 
-  print('Running autoninja for targets: %s', targets)
+  print('Running autoninja for targets: %s' % targets)
   RunExecutable(['autoninja', '-C',
                  os.path.join(_out_dir, variant_dir)] + targets)
 

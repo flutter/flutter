@@ -84,22 +84,19 @@ source_set("flow") {
   ]
 
   public_configs = [ "//flutter:config" ]
-  if (shell_enable_vulkan) {
-    public_configs += [ "//flutter/vulkan:vulkan_config" ]
-  }
 
-  deps = [
+  public_deps = [
     "//flutter/common",
     "//flutter/common/graphics",
+    "//flutter/display_list",
     "//flutter/fml",
-    "//third_party/skia",
   ]
+
+  deps = [ "//third_party/skia" ]
 
   if (impeller_supports_rendering) {
     deps += [ "//flutter/impeller" ]
   }
-
-  public_deps = [ "//flutter/display_list" ]
 }
 
 if (enable_unittests) {

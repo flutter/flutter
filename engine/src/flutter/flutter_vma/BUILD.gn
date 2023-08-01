@@ -14,7 +14,7 @@ source_set("flutter_vma") {
     defines = [ "VMA_USE_STL_SHARED_MUTEX=0" ]
   }
 
-  deps = [
+  public_deps = [
     "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
     "//third_party/vulkan_memory_allocator",
   ]
@@ -28,13 +28,10 @@ source_set("flutter_skia_vma") {
     "flutter_skia_vma.h",
   ]
 
-  public_deps = [ ":flutter_vma" ]
-
-  deps = [
+  public_deps = [
+    ":flutter_vma",
     "//flutter/fml",
     "//flutter/vulkan/procs",
     "//third_party/skia",
-    "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
-    "//third_party/vulkan_memory_allocator",
   ]
 }

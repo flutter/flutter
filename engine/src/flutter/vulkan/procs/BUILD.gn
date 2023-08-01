@@ -12,10 +12,10 @@ source_set("procs") {
     "vulkan_proc_table.h",
   ]
 
-  deps = [ "//flutter/fml" ]
+  public_configs = [ "//flutter:config" ]
 
-  public_configs = [
-    "//flutter/vulkan:vulkan_config",
-    "//flutter:config",
+  public_deps = [
+    "//flutter/fml",
+    "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
   ]
 }
