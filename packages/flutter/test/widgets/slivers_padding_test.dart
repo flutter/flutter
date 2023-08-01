@@ -18,7 +18,7 @@ class _MockRenderSliver extends RenderSliver {
 
 }
 
-Future<void> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding, AxisDirection axisDirection, TextDirection textDirection) {
+Future<void> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding, AxisDirection axisDirection, TextDirection textDirection, {TextStyle textStyle = const TextStyle(fontSize: 400),}) {
   return tester.pumpWidget(
     Directionality(
       textDirection: textDirection,
@@ -26,12 +26,12 @@ Future<void> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding
         offset: ViewportOffset.fixed(offset),
         axisDirection: axisDirection,
         slivers: <Widget>[
-          const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('before'))),
+          SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('before', style: textStyle))),
           SliverPadding(
             padding: padding,
-            sliver: const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('padded'))),
+            sliver: SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('padded', style: textStyle))),
           ),
-          const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('after'))),
+          SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('after',  style: textStyle))),
         ],
       ),
     ),
