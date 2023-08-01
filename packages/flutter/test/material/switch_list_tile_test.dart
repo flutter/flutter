@@ -167,7 +167,7 @@ void main() {
         ),
       ),
     ));
-debugDumpSemanticsTree();
+
     expect(tester.getSemantics(find.byType(SwitchListTile)), matchesSemantics(
       hasEnabledState: true,
       isEnabled: true,
