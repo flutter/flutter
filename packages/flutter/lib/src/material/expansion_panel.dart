@@ -29,9 +29,9 @@ class _SaltedKey<S, V> extends LocalKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _SaltedKey<S, V> &&
-        other.salt == salt &&
-        other.value == value;
+    return other is _SaltedKey<S, V>
+        && other.salt == salt
+        && other.value == value;
   }
 
   @override
@@ -54,8 +54,7 @@ typedef ExpansionPanelCallback = void Function(int panelIndex, bool isExpanded);
 
 /// Signature for the callback that's called when the header of the
 /// [ExpansionPanel] needs to rebuild.
-typedef ExpansionPanelHeaderBuilder = Widget Function(
-    BuildContext context, bool isExpanded);
+typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool isExpanded);
 
 /// Signature for the callback that's called when the expansion indicator of the
 /// [ExpansionPanel] needs to rebuild.
