@@ -164,7 +164,7 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
   }
 
   public void release() {
-    // Don't release the texture.
+    // Don't release the texture, let the GC finalize it.
     surfaceTexture = null;
     if (surface != null) {
       surface.release();
