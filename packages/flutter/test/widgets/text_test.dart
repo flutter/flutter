@@ -1662,11 +1662,13 @@ void main() {
   });
 
   testWidgets('Mouse hovering over selectable Text uses SystemMouseCursor.text', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: SelectionArea(
-        child: Text('Flutter'),
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SelectionArea(
+          child: Text('Flutter'),
+        ),
       ),
-    ));
+    );
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
@@ -1677,14 +1679,16 @@ void main() {
   });
 
   testWidgets('Mouse hovering over selectable Text uses default selection style mouse cursor', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: SelectionArea(
-        child: DefaultSelectionStyle.merge(
-          mouseCursor: SystemMouseCursors.click,
-          child: const Text('Flutter'),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectionArea(
+          child: DefaultSelectionStyle.merge(
+            mouseCursor: SystemMouseCursors.click,
+            child: const Text('Flutter'),
+          ),
         ),
       ),
-    ));
+    );
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
