@@ -2857,6 +2857,7 @@
 ../../../third_party/skia/third_party/freetype2
 ../../../third_party/skia/third_party/harfbuzz/README
 ../../../third_party/skia/third_party/icu
+../../../third_party/skia/third_party/libgrapheme/generate_headers.py
 ../../../third_party/skia/third_party/libjpeg-turbo
 ../../../third_party/skia/third_party/libpng
 ../../../third_party/skia/third_party/lua
