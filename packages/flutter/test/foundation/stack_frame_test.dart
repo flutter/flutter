@@ -105,7 +105,6 @@ void main() {
   });
 }
 
-
 const String stackString = '''
 #0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
 #1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:38:5)
