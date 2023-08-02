@@ -726,9 +726,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     final TextPosition textPosition = _textPainter.getPositionForOffset(position);
     if (_positionIsWithinText(position: position, textPosition: textPosition)) {
-      final Object? span = _textPainter.text!.getSpanForPosition(textPosition);
+      final InlineSpan? span = _textPainter.text!.getSpanForPosition(textPosition);
       if (span is HitTestTarget) {
-        result.add(HitTestEntry(span));
+        result.add(HitTestEntry(span! as HitTestTarget));
         return true;
       }
     }
