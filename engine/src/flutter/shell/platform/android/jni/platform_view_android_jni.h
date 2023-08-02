@@ -110,6 +110,27 @@ class PlatformViewAndroidJNI {
       JavaLocalRef surface_texture) = 0;
 
   //----------------------------------------------------------------------------
+  /// @brief      Acquire the latest image available.
+  ///
+  virtual JavaLocalRef ImageTextureEntryAcquireLatestImage(
+      JavaLocalRef image_texture_entry) = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Grab the HardwareBuffer from image.
+  ///
+  virtual JavaLocalRef ImageGetHardwareBuffer(JavaLocalRef image) = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Call close on image.
+  ///
+  virtual void ImageClose(JavaLocalRef image) = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Call close on hardware_buffer.
+  ///
+  virtual void HardwareBufferClose(JavaLocalRef hardware_buffer) = 0;
+
+  //----------------------------------------------------------------------------
   /// @brief      Positions and sizes a platform view if using hybrid
   ///             composition.
   ///

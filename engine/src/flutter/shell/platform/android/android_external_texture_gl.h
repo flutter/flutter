@@ -43,13 +43,13 @@ class AndroidExternalTextureGL : public flutter::Texture {
 
   void UpdateTransform();
 
-  enum class AttachmentState { uninitialized, attached, detached };
+  enum class AttachmentState { kUninitialized, kAttached, kDetached };
 
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
 
   fml::jni::ScopedJavaGlobalRef<jobject> surface_texture_;
 
-  AttachmentState state_ = AttachmentState::uninitialized;
+  AttachmentState state_ = AttachmentState::kUninitialized;
 
   bool new_frame_ready_ = false;
 
