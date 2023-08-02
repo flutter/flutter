@@ -97,13 +97,27 @@ class StackFrame {
     final RegExp parser = hasPackage
         ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$')
         : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
-    Match? match = parser.firstMatch(line);
-    assert(match != null, 'Expected $line to match $parser.');
-    match = match!;
+
+    final Match? match = parser.firstMatch(line);
+
+    if (match == null) {
+      return StackFrame(
+        number: -1,
+        packageScheme: '<unknown>',
+        package: '<unknown>',
+        packagePath: '<unknown>',
+        line: 0,
+        column: 0,
+        className: 'Class is not detected, because error did not match $parser.',
+        method: '<unknown>',
+        source: line,
+      );
+    }
 
     String package = '<unknown>';
     String packageScheme = '<unknown>';
     String packagePath = '<unknown>';
+
     if (hasPackage) {
       packageScheme = 'package';
       final Uri packageUri = Uri.parse(match.group(1)!);
