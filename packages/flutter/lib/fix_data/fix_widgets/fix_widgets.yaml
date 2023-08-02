@@ -49,7 +49,7 @@ transforms:
   - title: "Migrate to 'decorationClipBehavior'"
     date: 2023-03-13
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       field: 'debugShowWidgetInspectorOverride'
       inClass: 'WidgetsApp'
     changes:
