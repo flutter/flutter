@@ -3,16 +3,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
+import 'asset.dart';
 import 'base/common.dart';
 import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/user_messages.dart';
 import 'base/utils.dart';
+import 'globals.dart' as globals;
 import 'plugins.dart';
 
 /// Whether or not Impeller Scene 3D model import is enabled.
@@ -105,7 +107,7 @@ class FlutterManifest {
       version = Version.parse(verStr);
     } on Exception {
       if (!_hasShowInvalidVersionMsg) {
-        _logger.printStatus(userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
+        _logger.printStatus(globals.userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
         _hasShowInvalidVersionMsg = true;
       }
     }
@@ -332,57 +334,78 @@ class FlutterManifest {
         _logger.printError('Asset manifest contains invalid uri: $asset.');
       }
     }
+
+    // for (final entry in transformedAssets.entries) {
+    //   final String path = entry.key.path.replaceFirst('/Users/andrewkolos/Desktop/asset_transformers_test/', '');
+    //   results.remove()
+    // }
     return results;
   }
 
-  late final Map<Uri, AssetTransformer> transformedAssets = _computeTransformedAssets();
+  late final Map<Uri, List<AssetTransformer>> transformedAssets = _computeTransformedAssets();
 
-  Map<Uri, AssetTransformer> _computeTransformedAssets() {
-    String extractPackageNameFromKey(String packageKey) {
-      final Match? match = RegExp('package:(.*)').matchAsPrefix(packageKey);
-      if (match == null) {
-        // TODO make message more useful.
-        throwToolExit('Invalid package key $packageKey');
-      }
-      return match[1]!;
+  Map<Uri, List<AssetTransformer>> _computeTransformedAssets() {
+
+    final Map<Uri, List<AssetTransformer>>  result = <Uri, List<AssetTransformer>>{};
+
+    const String assetTransformersKey = 'asset-transformers';
+
+    if (!_flutterDescriptor.containsKey(assetTransformersKey)) {
+      return <Uri, List<AssetTransformer>>{};
     }
 
-    final Map<Uri, AssetTransformer>  result = <Uri, AssetTransformer>{};
+    final List<YamlMap> transformers = (_flutterDescriptor[assetTransformersKey]! as YamlList).value.cast();
 
-    final Iterable<String> packageKeys = _flutterDescriptor
-      .keys
-      .where((String key) => key.startsWith('package:'));
-    for (final String packageKey in packageKeys) {
-      final Map<String, Object?> descriptor =
-        (_flutterDescriptor[packageKey]! as YamlMap)
-        .cast<String, Object?>();
 
+    for (final YamlMap transformerEntry in transformers) {
       final AssetTransformer transformer = AssetTransformer(
-          package: extractPackageNameFromKey(packageKey),
-          executable: descriptor['executable']! as String,
-          args: (descriptor['args'] as String?) ?? '',
+          package: transformerEntry['package']! as String,
+          executable: transformerEntry['executable'] as String?,
+          args: transformerEntry['args'] as String?,
         );
 
       final List<Uri> assetUris =
-        _parseAssetMap(descriptor['assets']! as List<Object?>);
+        _parseAssetMap(transformerEntry['assets']! as List<Object?>, allowGlobs: true);
       for (final Uri assetUri in assetUris) {
-        result[assetUri] = transformer;
+        // todo fix hack
+        final Uri hackedUri = Uri(path: assetUri.path.replaceFirst('/Users/andrewkolos/Desktop/asset_transformers_test/', ''));
+        final List<AssetTransformer> transformerList = result[hackedUri] ??= <AssetTransformer>[];
+        transformerList.add(transformer);
       }
     }
     return result;
   }
 
-  List<Uri> _parseAssetMap(List<Object?> assetsEntry) {
+  List<Uri> _parseAssetMap(List<Object?> assetsEntry, {
+    bool allowGlobs = false,
+  }) {
     final List<Uri> results = <Uri>[];
+
     for (final Object? asset in assetsEntry) {
       if (asset is! String || asset == '') {
-        _logger.printError('Asset manifest contains a null or empty uri.');
+        _logger.printError('Asset manifest contains a null or empty entry.');
         continue;
       }
-      try {
-        results.add(Uri(pathSegments: asset.split('/')));
-      } on FormatException {
-        _logger.printError('Asset manifest contains invalid uri: $asset.');
+      if (allowGlobs) {
+        try {
+          final Glob glob = Glob('/Users/andrewkolos/Desktop/asset_transformers_test/$asset');
+          for (final FileSystemEntity entity in glob.listFileSystemSync(globals.fs)) { // todo replace global reference
+            final List<Uri> uris = switch (entity) {
+              File(uri: final Uri uri) => <Uri>[uri],
+              Directory(uri: final Uri uri) => <Uri>[uri],
+              _ => throw ToolExit('hi') // todo
+            };
+            results.addAll(uris);
+          }
+        } on Exception catch (e) {
+          _logger.printError('Unable to process entry in asset manifest: $asset.\n$e');
+        }
+      } else {
+        try {
+          results.add(Uri(pathSegments: asset.split('/')));
+        } on FormatException {
+          _logger.printError('Asset manifest contains invalid uri: $asset.');
+        }
       }
     }
     return results;
@@ -517,18 +540,6 @@ class FontAsset {
 
   @override
   String toString() => '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
-}
-
-class AssetTransformer {
-  AssetTransformer({
-    required this.package,
-    required this.executable,
-    required this.args,
-  });
-
-  final String package;
-  final String executable;
-  final String args;
 }
 
 bool _validate(Object? manifest, Logger logger) {
@@ -671,6 +682,8 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         break;
       case 'deferred-components':
         _validateDeferredComponents(kvp, errors);
+      case 'asset-transformers':
+        break; // todo
       default:
         errors.add('Unexpected child "$yamlKey" found under "flutter".');
         break;

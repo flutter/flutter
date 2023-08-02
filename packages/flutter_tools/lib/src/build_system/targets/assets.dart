@@ -13,7 +13,6 @@ import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
-import '../../flutter_manifest.dart';
 import '../../globals.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -131,6 +130,7 @@ Future<Depfile> copyAssets(
               break;
             case AssetKind.transformed:
               doCopy = false;
+              //print(entry.key);
               await _transformAsset(
                 content.file.path,
                 file.path,
@@ -138,7 +138,6 @@ Future<Depfile> copyAssets(
                 fileSystem: environment.fileSystem,
                 logger: environment.logger,
               );
-              break;
             case AssetKind.font:
               doCopy = !await iconTreeShaker.subsetFont(
                 input: content.file as File,
@@ -349,26 +348,45 @@ class CopyAssets extends Target {
 Future<void> _transformAsset(
   String asset,
   String output,
-  AssetTransformer transformer, {
+  List<AssetTransformer> transformers, {
   required FileSystem fileSystem,
   required Logger logger,
 }) async {
   final String dartBinary = artifacts!.getArtifactPath(Artifact.engineDartBinary);
-  final List<String> transformerArguments = <String>[
-    ...transformer.args.split(r'\w+'),
-    '--input=$asset',
-    '--output=$output',
-  ];
-  final ProcessResult result = await Process.run(
-    dartBinary,
-    <String>[
-      'run',
-      '${transformer.package}:${transformer.executable}', // TODO should executable be required?
-      ...transformerArguments,
-    ],
-  );
-  if (!await fileSystem.file(output).exists()) {
-    // TODO improve message
-    throwToolExit('Transformer ${transformer.package} did not produce an output.');
+
+  for (int i = 0; i < transformers.length; i++) {
+    final AssetTransformer transformer = transformers[i];
+
+    final List<String> transformerArguments = <String>[
+      ...(transformer.args ?? '').split(r'\w+'),
+      if (i == 0)
+        '--input=$asset'
+      else
+        '--input=$output',
+      '--output=$output',
+    ];
+    print('$dartBinary ${
+      <String>[
+        'run',
+        '${transformer.package}', // TODO should executable be required?
+        ...transformerArguments,
+      ].join(' ')}');
+    final ProcessResult result = await Process.run(
+      dartBinary,
+      <String>[
+        'run',
+        '${transformer.package}', // TODO should executable be required?
+        ...transformerArguments,
+      ],
+      workingDirectory: '/Users/andrewkolos/Desktop/asset_transformers_test/'
+    );
+    if (result.exitCode != 0) {
+      throwToolExit(result.stderr as String);
+    }
+    if (!await fileSystem.file(output).exists()) {
+        throwToolExit('Transformer ${transformer.package} did not produce an output.\n'
+        'Input: $asset\n'
+        'Expected output: $output');
+    }
   }
 }

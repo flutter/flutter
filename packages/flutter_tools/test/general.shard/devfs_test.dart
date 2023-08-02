@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
@@ -737,7 +736,7 @@ class FakeBundle extends AssetBundle {
   final Map<String, AssetKind> entryKinds = <String, AssetKind>{};
 
   @override
-  final Map<String, AssetTransformer> transformers = <String, AssetTransformer>{};
+  final Map<String, List<AssetTransformer>> transformers = <String, List<AssetTransformer>>{};
 
   @override
   List<File> get inputFiles => <File>[];

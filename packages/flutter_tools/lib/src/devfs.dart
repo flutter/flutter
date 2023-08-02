@@ -8,6 +8,7 @@ import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'asset.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
@@ -696,6 +697,8 @@ class DevFS {
             if (!bundleFirstUpload) {
               assetPathsToEvict.add(archivePath);
             }
+            case AssetKind.transformed:
+              throwToolExit('hi'); //todo
         }
       });
 

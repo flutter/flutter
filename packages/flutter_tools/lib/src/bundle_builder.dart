@@ -194,6 +194,8 @@ Future<void> writeBundle(
                 input: input,
                 outputPath: file.path,
               );
+            case AssetKind.transformed:
+              // TODO: Handle this case.
           }
           if (doCopy) {
             input.copySync(file.path);
@@ -206,3 +208,4 @@ Future<void> writeBundle(
       }
     }));
 }
+

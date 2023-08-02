@@ -82,7 +82,7 @@ abstract class AssetBundle {
 
   Map<String, AssetKind> get entryKinds;
 
-  Map<String, AssetTransformer> get transformers;
+  Map<String, List<AssetTransformer>> get transformers;
 
   /// The files that were specified under the deferred components assets sections
   /// in pubspec.
@@ -156,7 +156,7 @@ class ManifestAssetBundle implements AssetBundle {
   final Map<String, AssetKind> entryKinds = <String, AssetKind>{};
 
   @override
-  final Map<String, AssetTransformer> transformers = <String, AssetTransformer>{};
+  final Map<String, List<AssetTransformer>> transformers = <String, List<AssetTransformer>>{};
 
   @override
   final Map<String, Map<String, DevFSContent>> deferredComponentsEntries = <String, Map<String, DevFSContent>>{};
@@ -388,8 +388,8 @@ class ManifestAssetBundle implements AssetBundle {
         assert(variantFile.existsSync());
         entries[variant.entryUri.path] ??= DevFSFileContent(variantFile);
         entryKinds[variant.entryUri.path] ??= variant.assetKind;
-        if (variant.transformer != null) {
-          transformers[variant.entryUri.path] = variant.transformer!;
+        if (variant.transformers != null) {
+          transformers[variant.entryUri.path] = variant.transformers!;
         }
       }
     }
@@ -559,7 +559,7 @@ class ManifestAssetBundle implements AssetBundle {
           entryUri: entryUri,
           package: null,
           assetKind: AssetKind.font,
-          transformer: null,
+          transformers: null,
         ));
       }
     }
@@ -588,7 +588,7 @@ class ManifestAssetBundle implements AssetBundle {
         entryUri: entryUri,
         package: null,
         assetKind: AssetKind.shader,
-        transformer: null,
+        transformers: null,
       ));
     }
 
@@ -807,14 +807,13 @@ class ManifestAssetBundle implements AssetBundle {
 
     final List<Uri> assets = <Uri>[
       ...flutterManifest.assets,
-      ...flutterManifest.transformedAssets.keys,
     ];
 
     for (final Uri assetUri in assets) {
       // TODO is this O(1)?
       final AssetKind assetKind = flutterManifest.transformedAssets.containsKey(assetUri) ? // TODO is this O(1) or O(n)
             AssetKind.transformed : AssetKind.regular;
-      final AssetTransformer? transformer = flutterManifest.transformedAssets[assetUri];
+      final List<AssetTransformer>? transformers = flutterManifest.transformedAssets[assetUri];
 
       if (assetUri.path.endsWith('/')) {
         wildcardDirectories.add(assetUri);
@@ -828,7 +827,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
           attributedPackage: attributedPackage,
           assetKind: assetKind,
-          transformer: transformer,
+          transformers: transformers,
         );
       } else {
         _parseAssetFromFile(
@@ -841,7 +840,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
           attributedPackage: attributedPackage,
           assetKind: assetKind,
-          transformer: transformer,
+          transformers: transformers,
         );
       }
     }
@@ -906,7 +905,7 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage,
     AssetKind assetKind = AssetKind.regular,
-    AssetTransformer? transformer,
+    List<AssetTransformer>? transformers,
   }) {
     final String directoryPath = _fileSystem.path.join(
         assetBase, assetUri.toFilePath(windows: _platform.isWindows));
@@ -932,7 +931,7 @@ class ManifestAssetBundle implements AssetBundle {
         uri,
         packageName: packageName,
         attributedPackage: attributedPackage,
-        transformer: transformer,
+        transformers: transformers,
       );
     }
   }
@@ -948,7 +947,7 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage,
     AssetKind assetKind = AssetKind.regular,
-    AssetTransformer? transformer,
+    List<AssetTransformer>? transformers,
   }) {
     final _Asset asset = _resolveAsset(
       packageConfig,
@@ -974,7 +973,7 @@ class ManifestAssetBundle implements AssetBundle {
             relativeUri: relativeUri,
             package: attributedPackage,
             assetKind: assetKind,
-            transformer: transformer,
+            transformers: transformers,
           ),
         );
       }
@@ -990,7 +989,7 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage, {
     AssetKind assetKind = AssetKind.regular,
-    AssetTransformer? transformer,
+    List<AssetTransformer>? transformers,
   }) {
     final String assetPath = _fileSystem.path.fromUri(assetUri);
     if (assetUri.pathSegments.first == 'packages'
@@ -1016,7 +1015,7 @@ class ManifestAssetBundle implements AssetBundle {
       relativeUri: assetUri,
       package: attributedPackage,
       assetKind: assetKind,
-      transformer: transformer,
+      transformers: transformers,
     );
   }
 
@@ -1025,7 +1024,7 @@ class ManifestAssetBundle implements AssetBundle {
     PackageConfig packageConfig,
     Package? attributedPackage, {
     AssetKind assetKind = AssetKind.regular,
-    AssetTransformer? transformer,
+    List<AssetTransformer>? transformers,
   }) {
     assert(assetUri.pathSegments.first == 'packages');
     if (assetUri.pathSegments.length > 1) {
@@ -1039,7 +1038,7 @@ class ManifestAssetBundle implements AssetBundle {
           relativeUri: Uri(pathSegments: assetUri.pathSegments.sublist(2)),
           package: attributedPackage,
           assetKind: assetKind,
-          transformer: transformer,
+          transformers: transformers,
         );
       }
     }
@@ -1059,7 +1058,7 @@ class _Asset {
     required this.relativeUri,
     required this.entryUri,
     required this.package,
-    required this.transformer,
+    required this.transformers,
     this.assetKind = AssetKind.regular,
   });
 
@@ -1077,7 +1076,7 @@ class _Asset {
   final AssetKind assetKind;
 
   // TODO document
-  final AssetTransformer? transformer;
+  final List<AssetTransformer>? transformers;
 
   File lookupAssetFile(FileSystem fileSystem) {
     return fileSystem.file(
@@ -1167,4 +1166,44 @@ class _AssetDirectoryCache {
         .map((File file) => file.path),
     ];
   }
+}
+
+class AssetTransformer {
+  AssetTransformer({
+    required this.package,
+    this.executable,
+    this.args,
+  });
+
+  final String package;
+  final String? executable;
+  final String? args;
+
+  // Future<void> transformAsset(
+  //   String asset,
+  //   String output, {
+  //   required FileSystem fileSystem,
+  //   required Logger logger,
+  // }) async {
+  //   final String dartBinary = artifacts!.getArtifactPath(Artifact.engineDartBinary);
+  //   final List<String> transformerArguments = <String>[
+  //     ...(args ?? '').split(r'\w+'),
+  //     '--input=$asset',
+  //     '--output=$output',
+  //   ];
+  //   final ProcessResult result = await Process.run(
+  //     dartBinary,
+  //     <String>[
+  //       'run',
+  //       '$package:$executable', // TODO should executable be required?
+  //       ...transformerArguments,
+  //     ],
+  //   );
+  //   if (!await fileSystem.file(output).exists()) {
+  //     // TODO improve message
+  //     throwToolExit('Transformer $package did not produce an output.\n'
+  //     'Input: $asset\n'
+  //     'Expected output: $output');
+  //   }
+  // }
 }
