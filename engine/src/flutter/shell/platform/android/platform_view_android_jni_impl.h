@@ -52,15 +52,6 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   void SurfaceTextureDetachFromGLContext(JavaLocalRef surface_texture) override;
 
-  JavaLocalRef ImageTextureEntryAcquireLatestImage(
-      JavaLocalRef image_texture_entry) override;
-
-  JavaLocalRef ImageGetHardwareBuffer(JavaLocalRef image) override;
-
-  void ImageClose(JavaLocalRef image) override;
-
-  void HardwareBufferClose(JavaLocalRef hardware_buffer) override;
-
   void FlutterViewOnDisplayPlatformView(int view_id,
                                         int x,
                                         int y,
