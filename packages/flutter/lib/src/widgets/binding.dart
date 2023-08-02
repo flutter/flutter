@@ -628,7 +628,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///     if (kDebugMode) {
   ///       WidgetsBinding.instance.debugRegisterHotRestartCallback(
   ///           () => _destroyContext(_context),
-  ///           debugLabel: 'NativeResourceService');
+  ///           debugLabel: 'NativeResourceService',
+  ///       );
   ///     }
   ///   }
   ///
