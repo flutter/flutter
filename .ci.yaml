@@ -3735,6 +3735,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: ios_app_with_extensions_test
@@ -3745,6 +3749,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
       task_name: ios_app_with_extensions_test
@@ -4111,7 +4119,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows build_tests_1_4
+  - name: Windows build_tests_1_5
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4125,11 +4134,12 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "1_4"
+      subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_2_4
+  - name: Windows build_tests_2_5
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4143,11 +4153,12 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "2_4"
+      subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_3_4
+  - name: Windows build_tests_3_5
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4161,11 +4172,12 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "3_4"
+      subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_4_4
+  - name: Windows build_tests_4_5
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4179,7 +4191,26 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "4_4"
+      subshard: "4_5"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+
+  - name: Windows build_tests_5_5
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:115.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: build_tests
+      subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
