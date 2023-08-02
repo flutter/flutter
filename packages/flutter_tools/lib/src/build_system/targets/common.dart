@@ -8,7 +8,6 @@ import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
-import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
@@ -145,7 +144,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Target> get dependencies => <Target>[
-    if (const LocalPlatform().isMacOS) const NativeAssets(),
+    const NativeAssets(),
     const GenerateLocalizationsTarget(),
     const DartPluginRegistrantTarget(),
   ];
@@ -190,6 +189,7 @@ class KernelSnapshot extends Target {
           'Embedding native assets mapping $nativeAssets in kernel.');
     }
     {
+      // TODO(dacoharkes): Remove the threading of the native_assets from frontend to backend via xcconfig.
       String? nativeAssets = environment.defines[kNativeAssets];
       nativeAssets = nativeAssets?.isEmpty ?? true ? null : nativeAssets;
       environment.logger

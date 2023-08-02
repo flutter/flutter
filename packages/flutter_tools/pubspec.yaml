@@ -49,7 +49,13 @@ dependencies:
   convert: 3.1.1
   async: 2.11.0
   unified_analytics: 3.0.0
-  native_assets_builder: 0.1.0
+  # native_assets_builder: 0.1.0
+  native_assets_builder:
+    git:
+      url: https://github.com/dart-lang/native.git
+      ref: e485a9484018b1a562ec041c94e8d277bb3d8af1
+      path: pkgs/native_assets_builder/
+     
   native_assets_cli: 0.1.0
 
   # We depend on very specific internal implementation details of the

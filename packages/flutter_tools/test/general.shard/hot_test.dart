@@ -589,14 +589,16 @@ void main() {
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],
-        dryRunResult: <Asset>[
-          Asset(
-            name: 'package:bar/bar.dart',
-            linkMode: LinkMode.dynamic,
-            target: native_assets_cli.Target.macOSArm64,
-            path: AssetAbsolutePath(Uri.file('bar.dylib')),
-          ),
-        ],
+        dryRunResult: FakeNativeAssetsBuilderResult(
+          assets: <Asset>[
+            Asset(
+              name: 'package:bar/bar.dart',
+              linkMode: LinkMode.dynamic,
+              target: native_assets_cli.Target.macOSArm64,
+              path: AssetAbsolutePath(Uri.file('bar.dylib')),
+            ),
+          ],
+        ),
       );
 
       final HotRunner hotRunner = HotRunner(

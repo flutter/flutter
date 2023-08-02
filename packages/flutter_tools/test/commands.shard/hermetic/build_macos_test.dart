@@ -620,7 +620,8 @@ STDERR STUFF
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
-        dryRunResult: <Asset>[
+        dryRunResult: FakeNativeAssetsBuilderResult(
+          assets: <Asset>[
           Asset(
             name: 'package:bar/bar.dart',
             linkMode: LinkMode.dynamic,
@@ -628,6 +629,7 @@ STDERR STUFF
             path: AssetAbsolutePath(Uri.file('bar.dylib')),
           ),
         ],
+        ),
       ),
     );
     createMinimalMockProjectFiles();

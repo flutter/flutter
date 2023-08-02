@@ -2892,14 +2892,16 @@ flutter:
               packagesWithNativeAssetsResult: <Package>[
                 Package('bar', projectUri),
               ],
-              dryRunResult: <Asset>[
-                Asset(
-                  name: 'package:bar/bar.dart',
-                  linkMode: LinkMode.dynamic,
-                  target: native_assets_cli.Target.macOSArm64,
-                  path: AssetAbsolutePath(Uri.file('bar.dylib')),
-                ),
-              ],
+              dryRunResult: FakeNativeAssetsBuilderResult(
+                assets: <Asset>[
+                  Asset(
+                    name: 'package:bar/bar.dart',
+                    linkMode: LinkMode.dynamic,
+                    target: native_assets_cli.Target.macOSArm64,
+                    path: AssetAbsolutePath(Uri.file('bar.dylib')),
+                  ),
+                ],
+              ),
             );
             residentRunner = HotRunner(
               <FlutterDevice>[

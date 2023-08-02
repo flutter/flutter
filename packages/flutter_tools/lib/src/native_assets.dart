@@ -24,7 +24,7 @@ abstract class NativeAssetsBuildRunner {
   Future<List<Package>> packagesWithNativeAssets();
 
   /// Runs all [packagesWithNativeAssets] `build.dart` in dry run.
-  Future<List<Asset>> dryRun({
+  Future<native_assets_builder.DryRunResult> dryRun({
     required bool includeParentEnvironment,
     required LinkModePreference linkModePreference,
     required OS targetOs,
@@ -32,7 +32,7 @@ abstract class NativeAssetsBuildRunner {
   });
 
   /// Runs all [packagesWithNativeAssets] `build.dart`.
-  Future<List<Asset>> build({
+  Future<native_assets_builder.BuildResult> build({
     required bool includeParentEnvironment,
     required BuildMode buildMode,
     required LinkModePreference linkModePreference,
@@ -69,9 +69,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   late final Uri _dartExecutable =
       fileSystem.directory(Cache.flutterRoot).uri.resolve('bin/dart');
 
-  // TODO(dacoharkes): Reuse once we can.
-  // https://github.com/dart-lang/native/issues/102
-  native_assets_builder.NativeAssetsBuildRunner _buildRunner() =>
+  late final native_assets_builder.NativeAssetsBuildRunner _buildRunner =
       native_assets_builder.NativeAssetsBuildRunner(
           logger: _logger, dartExecutable: _dartExecutable);
 
@@ -94,13 +92,13 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   }
 
   @override
-  Future<List<Asset>> dryRun({
+  Future<native_assets_builder.DryRunResult> dryRun({
     required bool includeParentEnvironment,
     required LinkModePreference linkModePreference,
     required OS targetOs,
     required Uri workingDirectory,
   }) {
-    return _buildRunner().dryRun(
+    return _buildRunner.dryRun(
       includeParentEnvironment: includeParentEnvironment,
       linkModePreference: linkModePreference,
       targetOs: targetOs,
@@ -109,7 +107,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   }
 
   @override
-  Future<List<Asset>> build({
+  Future<native_assets_builder.BuildResult> build({
     required bool includeParentEnvironment,
     required BuildMode buildMode,
     required LinkModePreference linkModePreference,
@@ -119,7 +117,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     int? targetAndroidNdkApi,
     IOSSdk? targetIOSSdk,
   }) {
-    return _buildRunner().build(
+    return _buildRunner.build(
       buildMode: buildMode,
       cCompilerConfig: cCompilerConfig,
       includeParentEnvironment: includeParentEnvironment,
@@ -138,12 +136,12 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
   FakeNativeAssetsBuildRunner({
     this.hasPackageConfigResult = true,
     this.packagesWithNativeAssetsResult = const <Package>[],
-    this.dryRunResult = const <Asset>[],
-    this.buildResult = const <Asset>[],
+    this.dryRunResult = const FakeNativeAssetsBuilderResult(),
+    this.buildResult = const FakeNativeAssetsBuilderResult(),
   });
 
-  final List<Asset> buildResult;
-  final List<Asset> dryRunResult;
+  final native_assets_builder.BuildResult buildResult;
+  final native_assets_builder.DryRunResult dryRunResult;
   final bool hasPackageConfigResult;
   final List<Package> packagesWithNativeAssetsResult;
 
@@ -153,7 +151,7 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
   int packagesWithNativeAssetsInvocations = 0;
 
   @override
-  Future<List<Asset>> build({
+  Future<native_assets_builder.BuildResult> build({
     required bool includeParentEnvironment,
     required BuildMode buildMode,
     required LinkModePreference linkModePreference,
@@ -168,7 +166,7 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
   }
 
   @override
-  Future<List<Asset>> dryRun({
+  Future<native_assets_builder.DryRunResult> dryRun({
     required bool includeParentEnvironment,
     required LinkModePreference linkModePreference,
     required OS targetOs,
@@ -189,4 +187,22 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     packagesWithNativeAssetsInvocations++;
     return packagesWithNativeAssetsResult;
   }
+}
+
+final class FakeNativeAssetsBuilderResult
+    implements native_assets_builder.BuildResult {
+  const FakeNativeAssetsBuilderResult({
+    this.assets = const <Asset>[],
+    this.dependencies = const <Uri>[],
+    this.success = true,
+  });
+
+  @override
+  final List<Asset> assets;
+
+  @override
+  final List<Uri> dependencies;
+  
+  @override
+  final bool success;
 }

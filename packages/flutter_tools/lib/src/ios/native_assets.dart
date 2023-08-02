@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// import 'package:native_assets_builder/native_assets_builder.dart';
+import 'package:native_assets_builder/native_assets_builder.dart'
+    show BuildResult;
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 
@@ -44,14 +45,14 @@ Future<Iterable<Asset>> dryRunNativeAssetsIosInternal(
   NativeAssetsBuildRunner buildRunner,
 ) async {
   const OS targetOs = OS.iOS;
-  globals.logger.printTrace(
-      'Dry running native assets for $targetOs.');
-  final List<Asset> nativeAssets = await buildRunner.dryRun(
+  globals.logger.printTrace('Dry running native assets for $targetOs.');
+  final List<Asset> nativeAssets = (await buildRunner.dryRun(
     linkModePreference: LinkModePreference.dynamic,
     targetOs: targetOs,
     workingDirectory: projectUri,
     includeParentEnvironment: true,
-  );
+  ))
+      .assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOs done.');
   final Iterable<Asset> assetTargetLocations =
@@ -60,7 +61,7 @@ Future<Iterable<Asset>> dryRunNativeAssetsIosInternal(
 }
 
 /// Builds native assets.
-Future<Uri?> buildNativeAssetsiOS({
+Future<List<Uri>> buildNativeAssetsiOS({
   required NativeAssetsBuildRunner buildRunner,
   required List<DarwinArch> darwinArchs,
   required EnvironmentType environmentType,
@@ -70,11 +71,10 @@ Future<Uri?> buildNativeAssetsiOS({
   required FileSystem fileSystem,
   required Uri writeYamlFileTo,
 }) async {
-  if (await hasNoPackageConfig(buildRunner)) {
-    return null;
-  }
-  if (await isDisabledAndNoNativeAssets(buildRunner)) {
-    return null;
+  if (await hasNoPackageConfig(buildRunner) ||
+      await isDisabledAndNoNativeAssets(buildRunner)) {
+    await writeNativeAssetsYaml(<Asset>[], writeYamlFileTo, fileSystem);
+    return <Uri>[];
   }
 
   final List<Target> targets = darwinArchs.map(_getNativeTarget).toList();
@@ -84,33 +84,36 @@ Future<Uri?> buildNativeAssetsiOS({
   final Uri buildUri_ = buildUri(projectUri, targetOs);
   final IOSSdk iosSdk = _getIosSdk(environmentType);
 
-  globals.logger.printTrace(
-      'Building native assets for $targets $buildModeCli.');
-  final List<Asset> nativeAssets = <Asset>[
-    for (final Target target in targets)
-      ...await buildRunner.build(
-        linkModePreference: LinkModePreference.dynamic,
-        target: target,
-        targetIOSSdk: iosSdk,
-        buildMode: buildModeCli,
-        workingDirectory: projectUri,
-        includeParentEnvironment: true,
-        cCompilerConfig: await cCompilerConfig,
-      ),
-  ];
+  globals.logger
+      .printTrace('Building native assets for $targets $buildModeCli.');
+
+  final List<Asset> nativeAssets = <Asset>[];
+  final Set<Uri> dependencies = <Uri>{};
+  for (final Target target in targets) {
+    final BuildResult result = await buildRunner.build(
+      linkModePreference: LinkModePreference.dynamic,
+      target: target,
+      targetIOSSdk: iosSdk,
+      buildMode: buildModeCli,
+      workingDirectory: projectUri,
+      includeParentEnvironment: true,
+      cCompilerConfig: await cCompilerConfig,
+    );
+    nativeAssets.addAll(result.assets);
+    dependencies.addAll(result.dependencies);
+  }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
   final Map<AssetPath, List<Asset>> fatAssetTargetLocations =
       _fatAssetTargetLocations(nativeAssets);
-  await copyNativeAssets(
-      buildUri_, fatAssetTargetLocations, codesignIdentity,
+  await copyNativeAssets(buildUri_, fatAssetTargetLocations, codesignIdentity,
       buildMode, fileSystem);
 
   final Map<Asset, Asset> assetTargetLocations =
       _assetTargetLocations(nativeAssets);
-  final Uri nativeAssetsUri = await writeNativeAssetsYaml(
+  await writeNativeAssetsYaml(
       assetTargetLocations.values, writeYamlFileTo, fileSystem);
-  return nativeAssetsUri;
+  return dependencies.toList();
 }
 
 IOSSdk _getIosSdk(EnvironmentType environmentType) {

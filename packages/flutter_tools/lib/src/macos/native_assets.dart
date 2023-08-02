@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:logging/logging.dart' as logging;
-// import 'package:native_assets_builder/native_assets_builder.dart';
+import 'package:native_assets_builder/native_assets_builder.dart'
+    show BuildResult;
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 import 'package:package_config/package_config.dart';
@@ -86,13 +87,15 @@ Future<Iterable<Asset>> dryRunNativeAssetsMacosInternal(
   const OS targetOs = OS.macOS;
   final Uri buildUri_ = buildUri(projectUri, targetOs);
 
-  globals.logger.printTrace('Dry running native assets for $targetOs.');
-  final List<Asset> nativeAssets = await buildRunner.dryRun(
+  globals.logger
+      .printTrace('Dry running native assets for $targetOs.');
+  final List<Asset> nativeAssets = (await buildRunner.dryRun(
     linkModePreference: LinkModePreference.dynamic,
     targetOs: targetOs,
     workingDirectory: projectUri,
     includeParentEnvironment: true,
-  );
+  ))
+      .assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOs done.');
   final Uri? absolutePath = flutterTester ? buildUri_ : null;
@@ -109,22 +112,19 @@ Future<Iterable<Asset>> dryRunNativeAssetsMacosInternal(
 /// If [flutterTester] is true, absolute paths are emitted in the native
 /// assets mapping. This can be used for JIT mode without sandbox on the host.
 /// This is used in `flutter test` and `flutter run -d flutter-tester`.
-Future<Uri?> buildNativeAssetsMacOS({
+Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
   required NativeAssetsBuildRunner buildRunner,
   List<DarwinArch>? darwinArchs,
   required Uri projectUri,
   required BuildMode buildMode,
   bool flutterTester = false,
   String? codesignIdentity,
-  bool writeYamlFile = true,
   Uri? writeYamlFileTo,
   required FileSystem fileSystem,
 }) async {
-  if (await hasNoPackageConfig(buildRunner)) {
-    return null;
-  }
-  if (await isDisabledAndNoNativeAssets(buildRunner)) {
-    return null;
+  if (await hasNoPackageConfig(buildRunner) ||
+      await isDisabledAndNoNativeAssets(buildRunner)) {
+    return (null, <Uri>[]);
   }
 
   final List<Target> targets = darwinArchs != null
@@ -137,17 +137,20 @@ Future<Uri?> buildNativeAssetsMacOS({
 
   globals.logger
       .printTrace('Building native assets for $targets $buildModeCli.');
-  final List<Asset> nativeAssets = <Asset>[
-    for (final Target target in targets)
-      ...await buildRunner.build(
-        linkModePreference: LinkModePreference.dynamic,
-        target: target,
-        buildMode: buildModeCli,
-        workingDirectory: projectUri,
-        includeParentEnvironment: true,
-        cCompilerConfig: await cCompilerConfig,
-      ),
-  ];
+  final List<Asset> nativeAssets = <Asset>[];
+  final Set<Uri> dependencies = <Uri>{};
+  for (final Target target in targets) {
+    final BuildResult result = await buildRunner.build(
+      linkModePreference: LinkModePreference.dynamic,
+      target: target,
+      buildMode: buildModeCli,
+      workingDirectory: projectUri,
+      includeParentEnvironment: true,
+      cCompilerConfig: await cCompilerConfig,
+    );
+    nativeAssets.addAll(result.assets);
+    dependencies.addAll(result.dependencies);
+  }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
   final Uri? absolutePath = flutterTester ? buildUri_ : null;
@@ -157,12 +160,9 @@ Future<Uri?> buildNativeAssetsMacOS({
       _fatAssetTargetLocations(nativeAssets, absolutePath);
   await copyNativeAssets(buildUri_, fatAssetTargetLocations, codesignIdentity,
       buildMode, fileSystem);
-  if (writeYamlFile) {
-    final Uri nativeAssetsUri = await writeNativeAssetsYaml(
+  final Uri nativeAssetsUri = await writeNativeAssetsYaml(
         assetTargetLocations.values, writeYamlFileTo ?? buildUri_, fileSystem);
-    return nativeAssetsUri;
-  }
-  return null;
+  return (nativeAssetsUri, dependencies.toList());
 }
 
 /// Checks whether this project does not yet have a package config file.
@@ -384,11 +384,14 @@ Future<void> codesignDylib(
   globals.logger.printTrace(codesignResult.stderr as String);
 }
 
-Future<Uri> writeNativeAssetsYaml(Iterable<Asset> nativeAssetsMappingUsed,
-    Uri buildUri, FileSystem fileSystem) async {
+Future<Uri> writeNativeAssetsYaml(
+  Iterable<Asset> assets,
+  Uri buildUri,
+  FileSystem fileSystem,
+) async {
   globals.logger.printTrace('Writing native_assets.yaml.');
   final String nativeAssetsDartContents =
-      nativeAssetsMappingUsed.toNativeAssetsFile();
+      assets.toNativeAssetsFile();
   final Directory parentDirectory = fileSystem.directory(buildUri);
   if (!await parentDirectory.exists()) {
     await parentDirectory.create(recursive: true);

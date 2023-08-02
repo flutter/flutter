@@ -65,6 +65,9 @@ void main() {
   testUsingContext('NativeAssets no throw if all info is supplied', () async {
     // Won't build any native assets as there aren't any in the test project dir.
     await const NativeAssets().build(iosEnvironment);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
   });
 
   // TODO(dacoharkes): Use dependency injection to use FakeNativeAssetsBuildRunner

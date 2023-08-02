@@ -1103,7 +1103,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
-        dryRunResult: <Asset>[
+        dryRunResult: FakeNativeAssetsBuilderResult(
+          assets: <Asset>[
           Asset(
             name: 'package:bar/bar.dart',
             linkMode: LinkMode.dynamic,
@@ -1111,6 +1112,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
             path: AssetAbsolutePath(Uri.file('bar.dylib')),
           ),
         ],
+        ),
       ),
     );
     createMinimalMockProjectFiles();

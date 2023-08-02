@@ -157,7 +157,7 @@ class FlutterTesterDevice extends Device {
     final NativeAssetsBuildRunner buildRunner =
         NativeAssetsBuildRunnerImpl(projectUri, _fileSystem);
     if (globals.platform.isMacOS) {
-      nativeAssetsYaml = await buildNativeAssetsMacOS(
+      (nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
         buildMode: BuildMode.debug,
         projectUri: projectUri,
         flutterTester: true,

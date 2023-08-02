@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:native_assets_cli/native_assets_cli.dart' show Asset;
+
 import '../../base/file_system.dart';
 import '../../base/platform.dart';
 import '../../build_info.dart';
@@ -11,6 +13,7 @@ import '../../macos/native_assets.dart';
 import '../../macos/xcode.dart';
 import '../../native_assets.dart';
 import '../build_system.dart';
+import '../depfile.dart';
 import '../exceptions.dart';
 import 'common.dart';
 
@@ -54,6 +57,7 @@ class NativeAssets extends Target {
     globals.logger.printTrace(
         'Potentially writing native_assets.yaml to: ${environment.buildDir.path}');
 
+    List<Uri> dependencies = <Uri>[];
     switch (targetPlatform) {
       case TargetPlatform.ios:
         final String? iosArchsEnvironment = environment.defines[kIosArchs];
@@ -76,7 +80,7 @@ class NativeAssets extends Target {
         }
         final EnvironmentType environmentType =
             environmentTypeFromSdkroot(sdkRoot, environment.fileSystem)!;
-        await buildNativeAssetsiOS(
+        dependencies = await buildNativeAssetsiOS(
           environmentType: environmentType,
           darwinArchs: iosArchs,
           buildMode: buildMode,
@@ -101,7 +105,7 @@ class NativeAssets extends Target {
           throw MissingDefineException(kBuildMode, name);
         }
         final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
-        await buildNativeAssetsMacOS(
+        (_, dependencies) = await buildNativeAssetsMacOS(
           darwinArchs: darwinArchs,
           buildMode: buildMode,
           projectUri: projectUri,
@@ -112,7 +116,7 @@ class NativeAssets extends Target {
         );
       case TargetPlatform.tester:
         if (const LocalPlatform().isMacOS) {
-          await buildNativeAssetsMacOS(
+          (_, dependencies) = await buildNativeAssetsMacOS(
             buildMode: BuildMode.debug,
             projectUri: projectUri,
             codesignIdentity: environment.defines[kCodesignIdentity],
@@ -123,6 +127,9 @@ class NativeAssets extends Target {
           );
         } else {
           // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
+          // Write the file we claim to have in the [outputs].
+          await writeNativeAssetsYaml(
+              <Asset>[], environment.buildDir.uri, fileSystem);
         }
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -135,15 +142,43 @@ class NativeAssets extends Target {
       case TargetPlatform.linux_x64:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
-      // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
+        // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
+        // Write the file we claim to have in the [outputs].
+        await writeNativeAssetsYaml(
+            <Asset>[], environment.buildDir.uri, fileSystem);
     }
+
+    final Depfile depfile = Depfile(
+      <File>[
+        for (final Uri dependency in dependencies) fileSystem.file(dependency),
+      ],
+      <File>[
+        environment.buildDir.childFile('native_assets.yaml'),
+      ],
+    );
+    final File outputDepfile =
+        environment.buildDir.childFile('native_assets.d');
+    if (!outputDepfile.parent.existsSync()) {
+      outputDepfile.parent.createSync(recursive: true);
+    }
+    environment.depFileService.writeToFile(depfile, outputDepfile);
   }
+
+  @override
+  List<String> get depfiles => <String>[
+        'native_assets.d',
+      ];
 
   @override
   List<Target> get dependencies => <Target>[];
 
   @override
-  List<Source> get inputs => <Source>[];
+  List<Source> get inputs => const <Source>[
+        Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart'),
+        // If different packages are resolved, different native assets might need to be built.
+        Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
+      ];
 
   @override
   String get name => 'native_assets';
@@ -151,6 +186,5 @@ class NativeAssets extends Target {
   @override
   List<Source> get outputs => const <Source>[
         Source.pattern('{BUILD_DIR}/native_assets.yaml'),
-        // Source.pattern('{OUTPUT_DIR}/native_assets.yaml'),
       ];
 }
