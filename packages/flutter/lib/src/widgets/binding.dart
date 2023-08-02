@@ -602,6 +602,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// resources acquired through platform channels or `dart:ffi`. Future returning
   /// callbacks will be awaited, allowing for async tear downs.
   ///
+  /// {@tool snippet}
   /// The following sample code shows how to use debugRegisterHotRestartCallback to handle
   /// tearing down a native resource acquired through `dart:ffi`. In this example, if
   /// the `context` pointer is not passed through to the `_destroyContext` function before
@@ -636,6 +637,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///   late final Pointer<NativeType> _context = _createContext();
   /// }
   /// ```
+  /// {@end-tool}
   void debugRegisterHotRestartCallback(DebugPreHotRestartCallback callback, {String debugLabel = 'unknown'}) {
     assert(kDebugMode, '''debugRegisterHotRestartCallback can only be called in debug mode. '''
                        '''Use kDebugMode or wrap the call in an assert.''');
