@@ -11,7 +11,7 @@ void main() {
   final String replacementChar =
       String.fromCharCode(example.ChipsInputState.kObjectReplacementChar);
 
-  testWidgets('', (WidgetTester tester) async {
+  testWidgets('Test EditableChipFieldApp', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.EditableChipFieldApp(),
     );
@@ -23,7 +23,7 @@ void main() {
 
     example.ChipsInputState<String> state =
         tester.state(find.byType(example.ChipsInput<String>));
-    expect(state.text, '');
+    expect(state.text.isEmpty, true);
 
     await tester.tap(find.byType(example.ChipsInput<String>));
     await tester.pumpAndSettle();
@@ -40,7 +40,7 @@ void main() {
     // add new InputChip by sending "done" action
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
-    expect(state.text, '');
+    expect(state.text.isEmpty, true);
 
     expect(find.byType(InputChip), findsNWidgets(2));
 
