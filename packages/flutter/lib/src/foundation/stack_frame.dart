@@ -85,11 +85,11 @@ class StackFrame {
   /// Parses a single [StackFrame] from a line of a [StackTrace].
   ///
   /// Returns null if format is not as expected.
-  static StackFrame? _treyParseWebFrame(String line) {
+  static StackFrame? _tryParseWebFrame(String line) {
     if (kDebugMode) {
       return _tryParseWebDebugFrame(line);
     } else {
-      return _parseWebNonDebugFrame(line);
+      return _tryParseWebNonDebugFrame(line);
     }
   }
 
@@ -142,7 +142,7 @@ class StackFrame {
 
   // Parses `line` as a stack frame in profile and release Web builds. If not
   // recognized as a stack frame, returns null.
-  static StackFrame? _parseWebNonDebugFrame(String line) {
+  static StackFrame? _tryParseWebNonDebugFrame(String line) {
     final Match? match = _webNonDebugFramePattern.firstMatch(line);
     if (match == null) {
       // On the Web in non-debug builds the stack trace includes the exception
@@ -197,7 +197,7 @@ class StackFrame {
 
     // Web frames.
     if (!line.startsWith('#')) {
-      return _treyParseWebFrame(line);
+      return _tryParseWebFrame(line);
     }
 
     final RegExp parser = RegExp(r'^#(\d+) +(.+) \((.+?):?(\d+){0,1}:?(\d+){0,1}\)$');
