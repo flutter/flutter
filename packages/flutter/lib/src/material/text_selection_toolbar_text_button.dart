@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'constants.dart';
 import 'text_button.dart';
 import 'theme.dart';
@@ -132,14 +131,11 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(hansmuller): Should be colorScheme.onSurface
     final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.colorScheme.brightness == Brightness.dark;
-    final Color foregroundColor = isDark ? Colors.white : Colors.black87;
 
     return TextButton(
       style: TextButton.styleFrom(
-        foregroundColor: foregroundColor,
+        foregroundColor: theme.colorScheme.onSurface,
         shape: const RoundedRectangleBorder(),
         minimumSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
         padding: padding,
