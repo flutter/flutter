@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "છોડી દો",
   "searchTextFieldPlaceholderLabel": "શોધો",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up"
 }

@@ -168,6 +168,7 @@ void main() {
           onPaste: () {},
           onSelectAll: () {},
           onLiveTextInput: () {},
+          onLookUp: () {},
         ),
       ),
     ));
@@ -180,16 +181,16 @@ void main() {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
       case TargetPlatform.fuchsia:
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
       case TargetPlatform.iOS:
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
         expect(findLiveTextButton(), findsOneWidget);
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(6));
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.

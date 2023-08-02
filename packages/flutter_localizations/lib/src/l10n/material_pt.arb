@@ -144,5 +144,6 @@
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
   "collapsedHint": "Expanded",
-  "menuDismissLabel": "Dismiss menu"
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up"
 }

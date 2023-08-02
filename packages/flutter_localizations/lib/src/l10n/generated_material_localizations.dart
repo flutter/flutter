@@ -330,6 +330,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisensies';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Kieslysbalkkieslys';
 
   @override
@@ -809,6 +812,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'ፈቃዶች';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'የምናሌ አሞሌ ምናሌ';
@@ -1292,6 +1298,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'التراخيص';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'قائمة شريط القوائم';
 
   @override
@@ -1771,6 +1780,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'অনুজ্ঞাপত্ৰসমূহ';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'মেনু বাৰ মেনু';
@@ -2254,6 +2266,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenziyalar';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menyu paneli menyusu';
 
   @override
@@ -2733,6 +2748,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Ліцэнзіі';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Меню "Панэль меню"';
@@ -3216,6 +3234,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лицензи';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Меню на лентата с менюта';
 
   @override
@@ -3695,6 +3716,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'লাইসেন্স';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'মেনু বার মেনু';
@@ -4178,6 +4202,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Meni trake menija';
 
   @override
@@ -4657,6 +4684,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Llicències';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menú de la barra de menú';
@@ -5140,6 +5170,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Nabídka na liště s nabídkou';
 
   @override
@@ -5619,6 +5652,9 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Trwyddedau';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Dewislen bar dewislen';
@@ -6102,6 +6138,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenser';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menuen for menulinjen';
 
   @override
@@ -6581,6 +6620,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lizenzen';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menü in der Menüleiste';
@@ -7128,6 +7170,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Άδειες';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Μενού γραμμής μενού';
 
   @override
@@ -7607,6 +7652,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenses';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menu bar menu';
@@ -8822,6 +8870,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licencias';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menú de la barra de menú';
@@ -12688,6 +12739,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Litsentsid';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menüüriba menüü';
 
   @override
@@ -13167,6 +13221,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lizentziak';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menu-barraren menua';
@@ -13650,6 +13707,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'مجوزها';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'منوی نوار منو';
 
   @override
@@ -14129,6 +14189,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lisenssit';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Valikkopalkki';
@@ -14612,6 +14675,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Mga Lisensya';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu sa menu bar';
 
   @override
@@ -15091,6 +15157,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menu de la barre de menu';
@@ -15716,6 +15785,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenzas';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menú da barra de menú';
 
   @override
@@ -16195,6 +16267,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lizenzen';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menü in der Menüleiste';
@@ -16678,6 +16753,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'લાઇસન્સ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'મેનૂ બાર મેનૂ';
 
   @override
@@ -17157,6 +17235,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'רישיונות';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'תפריט בסרגל התפריטים';
@@ -17640,6 +17721,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'लाइसेंस';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'मेन्यू बार का मेन्यू';
 
   @override
@@ -18119,6 +18203,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licence';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Izbornik trake izbornika';
@@ -18602,6 +18689,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencek';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menüsor menüje';
 
   @override
@@ -19081,6 +19171,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Արտոնագրեր';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Ընտրացանկի գոտու ընտրացանկ';
@@ -19564,6 +19657,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisensi';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu panel menu';
 
   @override
@@ -20043,6 +20139,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Leyfi';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Valmyndarstika';
@@ -20526,6 +20625,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenze';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu barra dei menu';
 
   @override
@@ -21005,6 +21107,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'ライセンス';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'メニューバーのメニュー';
@@ -21488,6 +21593,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ლიცენზიები';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'მენიუს ზოლის მენიუ';
 
   @override
@@ -21967,6 +22075,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Лицензиялар';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Мәзір жолағының мәзірі';
@@ -22450,6 +22561,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'អាជ្ញាបណ្ណ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'ម៉ឺនុយរបារម៉ឺនុយ';
 
   @override
@@ -22929,6 +23043,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{cac}\u{cbe}\u{cb0}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
@@ -23412,6 +23529,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => '라이선스';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => '메뉴 바 메뉴';
 
   @override
@@ -23891,6 +24011,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Уруксаттамалар';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Меню тилкеси менюсу';
@@ -24374,6 +24497,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ໃບອະນຸຍາດ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'ເມນູແຖບເມນູ';
 
   @override
@@ -24853,6 +24979,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licencijos';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Meniu juostos meniu';
@@ -25336,6 +25465,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Izvēļņu joslas izvēlne';
 
   @override
@@ -25815,6 +25947,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Лиценци';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Мени на лентата со мени';
@@ -26298,6 +26433,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ലൈസൻസുകൾ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'മെനു ബാർ മെനു';
 
   @override
@@ -26777,6 +26915,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Лиценз';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Цэсний талбарын цэс';
@@ -27260,6 +27401,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'परवाने';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'मेनू बार मेनू';
 
   @override
@@ -27739,6 +27883,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lesen';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menu bar menu';
@@ -28222,6 +28369,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'လိုင်စင်များ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'မီနူးဘား မီနူး';
 
   @override
@@ -28701,6 +28851,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lisenser';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Meny med menylinje';
@@ -29184,6 +29337,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'इजाजतपत्रहरू';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => '"मेनु बार" मेनु';
 
   @override
@@ -29663,6 +29819,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenties';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menu van menubalk';
@@ -30146,6 +30305,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenser';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Meny med menylinje';
 
   @override
@@ -30625,6 +30787,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'ଲାଇସେନ୍ସଗୁଡ଼କ';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'ମେନୁ ବାର ମେନୁ';
@@ -31108,6 +31273,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ਲਾਇਸੰਸ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'ਮੀਨੂ ਬਾਰ ਮੀਨੂ';
 
   @override
@@ -31587,6 +31755,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licencje';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Pasek menu';
@@ -32070,6 +32241,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'جوازونه';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu bar menu';
 
   @override
@@ -32549,6 +32723,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenças';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menu da barra de menus';
@@ -33183,6 +33360,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licențe';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Bară de meniu';
 
   @override
@@ -33662,6 +33842,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Лицензии';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Строка меню';
@@ -34145,6 +34328,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'බලපත්‍ර';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'මෙනු තීරු මෙනුව';
 
   @override
@@ -34624,6 +34810,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licencie';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Ponuka panela s ponukami';
@@ -35107,6 +35296,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Meni menijske vrstice';
 
   @override
@@ -35588,6 +35780,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencat';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menyja e shiritit të menysë';
 
   @override
@@ -36067,6 +36262,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Лиценце';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Мени трака менија';
@@ -36864,6 +37062,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenser';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menyrad';
 
   @override
@@ -37343,6 +37544,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Leseni';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menyu ya upau wa menyu';
@@ -37826,6 +38030,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'உரிமங்கள்';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'மெனு பட்டியின் மெனு';
 
   @override
@@ -38305,6 +38512,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'లైసెన్స్‌లు';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'మెనూ బార్ మెనూ';
@@ -38788,6 +38998,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ใบอนุญาต';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'เมนูในแถบเมนู';
 
   @override
@@ -39267,6 +39480,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Mga Lisensya';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menu sa menu bar';
@@ -39750,6 +39966,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisanslar';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menü çubuğu menüsü';
 
   @override
@@ -40229,6 +40448,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Ліцензії';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Панель меню';
@@ -40712,6 +40934,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'لائسنسز';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'مینیو بار کا مینیو';
 
   @override
@@ -41191,6 +41416,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Litsenziyalar';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Menyu paneli';
@@ -41674,6 +41902,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Giấy phép';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Trình đơn của thanh trình đơn';
 
   @override
@@ -42153,6 +42384,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => '许可';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => '菜单栏的菜单';
@@ -43127,6 +43361,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Amalayisense';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuBarMenuLabel => 'Imenyu yebha yemenyu';
