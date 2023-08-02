@@ -1632,10 +1632,21 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
   if (_scribbleInteractionStatus == FlutterScribbleInteractionStatusNone &&
       _scribbleFocusStatus == FlutterScribbleFocusStatusUnfocused) {
-    [self.textInputDelegate flutterTextInputView:self
-            showAutocorrectionPromptRectForStart:start
-                                             end:end
-                                      withClient:_textInputClient];
+    if (@available(iOS 17.0, *)) {
+      // Disable auto-correction highlight feature for iOS 17+.
+      // In iOS 17+, whenever a character is inserted or deleted, the system will always query
+      // the rect for every single character of the current word.
+      // GitHub Issue: https://github.com/flutter/flutter/issues/128406
+    } else {
+      // This tells the framework to show the highlight for incorrectly spelled word that is
+      // about to be auto-corrected.
+      // There is no other UITextInput API that informs about the auto-correction highlight.
+      // So we simply add the call here as a workaround.
+      [self.textInputDelegate flutterTextInputView:self
+              showAutocorrectionPromptRectForStart:start
+                                               end:end
+                                        withClient:_textInputClient];
+    }
   }
 
   NSUInteger first = start;
