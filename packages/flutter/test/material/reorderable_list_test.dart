@@ -729,13 +729,21 @@ void main() {
             return false;
           });
           expect(child, matchesSemantics(
-            hasToggledState: true,
-            isToggled: true,
             isEnabled: true,
             isFocusable: true,
             hasEnabledState: true,
             label: 'Switch tile',
             hasTapAction: true,
+            children: <Matcher>[
+              matchesSemantics(
+                hasToggledState: true,
+                isToggled: true,
+                isFocusable: true,
+                hasEnabledState: true,
+                isEnabled: true,
+                hasTapAction: true,
+              )
+            ]
           ));
           handle.dispose();
         });
