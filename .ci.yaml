@@ -3769,6 +3769,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: ios_app_with_extensions_test
@@ -3779,6 +3783,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
       task_name: ios_app_with_extensions_test
