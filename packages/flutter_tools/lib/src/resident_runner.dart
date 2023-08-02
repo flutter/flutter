@@ -1549,7 +1549,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         // or in a frequently called method) or an exception. Instead, all
         // breakpoints are first disabled and exception pause mode set to
         // None, and then the isolate resumed.
-        // These settings to not need restoring as Hot Restart results in
+        // These settings do not need restoring as Hot Restart results in
         // new isolates, which will be configured by the editor as they are
         // started.
         final List<Future<void>> breakpointAndExceptionRemoval = <Future<void>>[
