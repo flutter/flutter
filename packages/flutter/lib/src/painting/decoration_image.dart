@@ -815,10 +815,10 @@ class _BlendedDecorationImagePainter implements DecorationImagePainter {
 
   @override
   void paint(Canvas canvas, Rect rect, Path? clipPath, ImageConfiguration configuration, { double blend = 1.0, BlendMode blendMode = BlendMode.srcOver }) {
-  //  canvas.saveLayer(null, Paint());
+    canvas.saveLayer(null, Paint());
     a?.paint(canvas, rect, clipPath, configuration, blend: blend * (1.0 - t), blendMode: blendMode);
     b?.paint(canvas, rect, clipPath, configuration, blend: blend * t, blendMode: a != null ? BlendMode.plus : blendMode);
-  //  canvas.restore();
+    canvas.restore();
   }
 
   @override
