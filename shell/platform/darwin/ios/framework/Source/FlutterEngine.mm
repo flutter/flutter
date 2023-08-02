@@ -1217,9 +1217,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 // remove this.
 - (void)setBinaryMessenger:(FlutterBinaryMessengerRelay*)binaryMessenger {
   // Discard the previous messenger and keep the new one.
-  _binaryMessenger.parent = nil;
-  [_binaryMessenger release];
-  _binaryMessenger = [binaryMessenger retain];
+  if (binaryMessenger != _binaryMessenger) {
+    _binaryMessenger.parent = nil;
+    [_binaryMessenger release];
+    _binaryMessenger = [binaryMessenger retain];
+  }
 }
 
 #pragma mark - FlutterBinaryMessenger
