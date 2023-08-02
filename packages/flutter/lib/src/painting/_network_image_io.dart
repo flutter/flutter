@@ -185,5 +185,5 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   int get hashCode => Object.hash(url, scale);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)})';
 }
