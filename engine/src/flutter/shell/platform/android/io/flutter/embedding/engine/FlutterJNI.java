@@ -33,7 +33,6 @@ import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.util.Preconditions;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.FlutterCallbackInformation;
-import io.flutter.view.TextureRegistry;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
@@ -901,27 +900,6 @@ public class FlutterJNI {
       long nativeShellHolderId,
       long textureId,
       @NonNull WeakReference<SurfaceTextureWrapper> textureWrapper);
-
-  /**
-   * Registers a ImageTexture with the given id.
-   *
-   * <p>REQUIRED: Callers should eventually unregisterTexture with the same id.
-   */
-  @UiThread
-  public void registerImageTexture(
-      long textureId, @NonNull TextureRegistry.ImageTextureEntry imageTextureEntry) {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeRegisterImageTexture(
-        nativeShellHolderId,
-        textureId,
-        new WeakReference<TextureRegistry.ImageTextureEntry>(imageTextureEntry));
-  }
-
-  private native void nativeRegisterImageTexture(
-      long nativeShellHolderId,
-      long textureId,
-      @NonNull WeakReference<TextureRegistry.ImageTextureEntry> imageTextureEntry);
 
   /**
    * Call this method to inform Flutter that a texture previously registered with {@link
