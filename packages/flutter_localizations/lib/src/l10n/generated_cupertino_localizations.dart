@@ -92,7 +92,7 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Maak kieslys toe';
 
   @override
   String get modalBarrierDismissLabel => 'Maak toe';
@@ -245,7 +245,7 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'ምናሌን አሰናብት';
 
   @override
   String get modalBarrierDismissLabel => 'አሰናብት';
@@ -398,13 +398,13 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => r'$minute دقيقة​';
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'إغلاق القائمة';
 
   @override
   String get modalBarrierDismissLabel => 'رفض';
 
   @override
-  String get noSpellCheckReplacementsLabel => 'لم يتم العثور على بدائل.';
+  String get noSpellCheckReplacementsLabel => 'لم يتم العثور على بدائل';
 
   @override
   String get pasteButtonLabel => 'لصق';
@@ -551,7 +551,7 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'অগ্ৰাহ্য কৰাৰ মেনু';
 
   @override
   String get modalBarrierDismissLabel => 'অগ্ৰাহ্য কৰক';
@@ -704,7 +704,7 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Menyunu qapadın';
 
   @override
   String get modalBarrierDismissLabel => 'İmtina edin';
@@ -857,7 +857,7 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Закрыць меню';
 
   @override
   String get modalBarrierDismissLabel => 'Адхіліць';
@@ -1010,7 +1010,7 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Отхвърляне на менюто';
 
   @override
   String get modalBarrierDismissLabel => 'Отхвърляне';
@@ -1163,7 +1163,7 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'বাতিল করার মেনু';
 
   @override
   String get modalBarrierDismissLabel => 'খারিজ করুন';
@@ -1316,7 +1316,7 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Odbacivanje menija';
 
   @override
   String get modalBarrierDismissLabel => 'Odbaci';
@@ -1469,7 +1469,7 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Ignora el menú';
 
   @override
   String get modalBarrierDismissLabel => 'Ignora';
@@ -1622,7 +1622,7 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Zavřít nabídku';
 
   @override
   String get modalBarrierDismissLabel => 'Zavřít';
@@ -1775,7 +1775,7 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => r'$minute munud';
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => "Diystyru'r ddewislen";
 
   @override
   String get modalBarrierDismissLabel => 'Diystyru';
@@ -1928,7 +1928,7 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Luk menu';
 
   @override
   String get modalBarrierDismissLabel => 'Afvis';
@@ -2081,7 +2081,7 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Menü schließen';
 
   @override
   String get modalBarrierDismissLabel => 'Schließen';
@@ -2255,7 +2255,7 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Παράβλεψη μενού';
 
   @override
   String get modalBarrierDismissLabel => 'Παράβλεψη';
@@ -2774,7 +2774,7 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Cerrar menú';
 
   @override
   String get modalBarrierDismissLabel => 'Cerrar';
@@ -2792,7 +2792,7 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Buscar';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => 'Seleccionar todo';
 
   @override
   String get tabSemanticsLabelRaw => r'Pestaña $tabIndex de $tabCount';
@@ -2873,6 +2873,9 @@ class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -2886,6 +2889,9 @@ class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -2909,6 +2915,9 @@ class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -2922,6 +2931,9 @@ class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -2945,6 +2957,9 @@ class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -2958,6 +2973,9 @@ class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -2981,6 +2999,9 @@ class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -2994,6 +3015,9 @@ class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3017,6 +3041,9 @@ class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3030,6 +3057,9 @@ class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3053,6 +3083,9 @@ class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3066,6 +3099,9 @@ class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3089,6 +3125,9 @@ class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3102,6 +3141,9 @@ class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3125,6 +3167,9 @@ class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3138,6 +3183,9 @@ class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3161,6 +3209,9 @@ class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3174,6 +3225,9 @@ class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3197,6 +3251,9 @@ class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3210,6 +3267,9 @@ class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3233,6 +3293,9 @@ class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3246,6 +3309,9 @@ class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3269,6 +3335,9 @@ class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3282,6 +3351,9 @@ class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3305,6 +3377,9 @@ class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3318,6 +3393,9 @@ class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3341,6 +3419,9 @@ class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3354,6 +3435,9 @@ class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3377,6 +3461,9 @@ class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3390,6 +3477,9 @@ class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3413,6 +3503,9 @@ class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3426,6 +3519,9 @@ class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3449,6 +3545,9 @@ class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3462,6 +3561,9 @@ class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3485,6 +3587,9 @@ class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3498,6 +3603,9 @@ class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3521,6 +3629,9 @@ class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3534,6 +3645,9 @@ class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3557,6 +3671,9 @@ class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
   });
 
   @override
+  String get menuDismissLabel => 'Descartar menú';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'No se encontraron reemplazos';
 
   @override
@@ -3570,6 +3687,9 @@ class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
+
+  @override
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -3647,7 +3767,7 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Sulge menüü';
 
   @override
   String get modalBarrierDismissLabel => 'Loobu';
@@ -3800,7 +3920,7 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Baztertu menua';
 
   @override
   String get modalBarrierDismissLabel => 'Baztertu';
@@ -3953,7 +4073,7 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'بستن منو';
 
   @override
   String get modalBarrierDismissLabel => 'نپذیرفتن';
@@ -4106,7 +4226,7 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Hylkää valikko';
 
   @override
   String get modalBarrierDismissLabel => 'Ohita';
@@ -4259,7 +4379,7 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'I-dismiss ang menu';
 
   @override
   String get modalBarrierDismissLabel => 'I-dismiss';
@@ -4412,7 +4532,7 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Fermer le menu';
 
   @override
   String get modalBarrierDismissLabel => 'Ignorer';
@@ -4511,6 +4631,9 @@ class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
   });
 
   @override
+  String get menuDismissLabel => 'Ignorer le menu';
+
+  @override
   String? get datePickerHourSemanticsLabelOne => r'$hour heure';
 
   @override
@@ -4607,7 +4730,7 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Pechar menú';
 
   @override
   String get modalBarrierDismissLabel => 'Ignorar';
@@ -4760,7 +4883,7 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Menü schließen';
 
   @override
   String get modalBarrierDismissLabel => 'Schließen';
@@ -4913,7 +5036,7 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'મેનૂ છોડી દો';
 
   @override
   String get modalBarrierDismissLabel => 'છોડી દો';
@@ -5066,7 +5189,7 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'סגירת התפריט';
 
   @override
   String get modalBarrierDismissLabel => 'סגירה';
@@ -5219,7 +5342,7 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'मेन्यू खारिज करें';
 
   @override
   String get modalBarrierDismissLabel => 'खारिज करें';
@@ -5372,7 +5495,7 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Odbacivanje izbornika';
 
   @override
   String get modalBarrierDismissLabel => 'Odbaci';
@@ -5525,7 +5648,7 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Menü bezárása';
 
   @override
   String get modalBarrierDismissLabel => 'Elvetés';
@@ -5678,7 +5801,7 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Փակել ընտրացանկը';
 
   @override
   String get modalBarrierDismissLabel => 'Փակել';
@@ -5831,7 +5954,7 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Tutup menu';
 
   @override
   String get modalBarrierDismissLabel => 'Tutup';
@@ -5984,7 +6107,7 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Loka valmynd';
 
   @override
   String get modalBarrierDismissLabel => 'Hunsa';
@@ -6137,7 +6260,7 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Ignora menu';
 
   @override
   String get modalBarrierDismissLabel => 'Ignora';
@@ -6290,7 +6413,7 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'メニューを閉じる';
 
   @override
   String get modalBarrierDismissLabel => '閉じる';
@@ -6443,7 +6566,7 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'მენიუს უარყოფა';
 
   @override
   String get modalBarrierDismissLabel => 'დახურვა';
@@ -6596,7 +6719,7 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Мәзірді жабу';
 
   @override
   String get modalBarrierDismissLabel => 'Жабу';
@@ -6749,7 +6872,7 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'ច្រានចោល​ម៉ឺនុយ';
 
   @override
   String get modalBarrierDismissLabel => 'ច្រាន​ចោល';
@@ -6902,7 +7025,7 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cc6}\u{cc2}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get modalBarrierDismissLabel => '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
@@ -7055,7 +7178,7 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => '메뉴 닫기';
 
   @override
   String get modalBarrierDismissLabel => '닫기';
@@ -7208,7 +7331,7 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Менюну жабуу';
 
   @override
   String get modalBarrierDismissLabel => 'Жабуу';
@@ -7361,7 +7484,7 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'ປິດເມນູ';
 
   @override
   String get modalBarrierDismissLabel => 'ປິດໄວ້';
@@ -7514,7 +7637,7 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Atsisakyti meniu';
 
   @override
   String get modalBarrierDismissLabel => 'Atsisakyti';
@@ -7667,7 +7790,7 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => r'$minute minūtes';
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Nerādīt izvēlni';
 
   @override
   String get modalBarrierDismissLabel => 'Nerādīt';
@@ -7820,7 +7943,7 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Отфрлете го менито';
 
   @override
   String get modalBarrierDismissLabel => 'Отфрли';
@@ -7973,7 +8096,7 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'മെനു ഡിസ്മിസ് ചെയ്യുക';
 
   @override
   String get modalBarrierDismissLabel => 'നിരസിക്കുക';
@@ -8126,7 +8249,7 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Цэсийг хаах';
 
   @override
   String get modalBarrierDismissLabel => 'Үл хэрэгсэх';
@@ -8279,7 +8402,7 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'मेनू डिसमिस करा';
 
   @override
   String get modalBarrierDismissLabel => 'डिसमिस करा';
@@ -8432,7 +8555,7 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Ketepikan menu';
 
   @override
   String get modalBarrierDismissLabel => 'Tolak';
@@ -8585,7 +8708,7 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'မီနူးကိုပယ်ပါ';
 
   @override
   String get modalBarrierDismissLabel => 'ပယ်ရန်';
@@ -8738,7 +8861,7 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Lukk menyen';
 
   @override
   String get modalBarrierDismissLabel => 'Avvis';
@@ -8891,7 +9014,7 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'मेनु खारेज गर्नुहोस्';
 
   @override
   String get modalBarrierDismissLabel => 'खारेज गर्नुहोस्';
@@ -9044,7 +9167,7 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Menu sluiten';
 
   @override
   String get modalBarrierDismissLabel => 'Sluiten';
@@ -9197,7 +9320,7 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Lukk menyen';
 
   @override
   String get modalBarrierDismissLabel => 'Avvis';
@@ -9350,7 +9473,7 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'ମେନୁ ଖାରଜ କରନ୍ତୁ';
 
   @override
   String get modalBarrierDismissLabel => 'ଖାରଜ କରନ୍ତୁ';
@@ -9503,7 +9626,7 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'ਮੀਨੂ ਖਾਰਜ ਕਰੋ';
 
   @override
   String get modalBarrierDismissLabel => 'ਖਾਰਜ ਕਰੋ';
@@ -9656,7 +9779,7 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Zamknij menu';
 
   @override
   String get modalBarrierDismissLabel => 'Zamknij';
@@ -9809,7 +9932,7 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Dispensar menu';
 
   @override
   String get modalBarrierDismissLabel => 'Dispensar';
@@ -9908,6 +10031,9 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
   });
 
   @override
+  String get menuDismissLabel => 'Ignorar menu';
+
+  @override
   String get noSpellCheckReplacementsLabel => 'Não foram encontradas substituições';
 
   @override
@@ -10004,7 +10130,7 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Respingeți meniul';
 
   @override
   String get modalBarrierDismissLabel => 'Închideți';
@@ -10157,7 +10283,7 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Закрыть меню';
 
   @override
   String get modalBarrierDismissLabel => 'Закрыть';
@@ -10310,7 +10436,7 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'මෙනුව අස් කරන්න';
 
   @override
   String get modalBarrierDismissLabel => 'ඉවත ලන්න';
@@ -10463,7 +10589,7 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Zavrieť ponuku';
 
   @override
   String get modalBarrierDismissLabel => 'Odmietnuť';
@@ -10616,7 +10742,7 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Opusti meni';
 
   @override
   String get modalBarrierDismissLabel => 'Opusti';
@@ -10769,7 +10895,7 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Hiqe menynë';
 
   @override
   String get modalBarrierDismissLabel => 'Hiq';
@@ -10922,7 +11048,7 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Одбаците мени';
 
   @override
   String get modalBarrierDismissLabel => 'Одбаци';
@@ -11069,6 +11195,9 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuta';
 
   @override
+  String get menuDismissLabel => 'Odbacite meni';
+
+  @override
   String get modalBarrierDismissLabel => 'Odbaci';
 
   @override
@@ -11192,7 +11321,7 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Stäng menyn';
 
   @override
   String get modalBarrierDismissLabel => 'Stäng';
@@ -11345,7 +11474,7 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Ondoa menyu';
 
   @override
   String get modalBarrierDismissLabel => 'Ondoa';
@@ -11498,7 +11627,7 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'மெனுவை மூடும்';
 
   @override
   String get modalBarrierDismissLabel => 'நிராகரிக்கும்';
@@ -11651,7 +11780,7 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'మెనూను తీసివేయండి';
 
   @override
   String get modalBarrierDismissLabel => 'విస్మరించు';
@@ -11804,7 +11933,7 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'ปิดเมนู';
 
   @override
   String get modalBarrierDismissLabel => 'ปิด';
@@ -11957,7 +12086,7 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'I-dismiss ang menu';
 
   @override
   String get modalBarrierDismissLabel => 'I-dismiss';
@@ -12110,7 +12239,7 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Menüyü kapat';
 
   @override
   String get modalBarrierDismissLabel => 'Kapat';
@@ -12263,7 +12392,7 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Закрити меню';
 
   @override
   String get modalBarrierDismissLabel => 'Закрити';
@@ -12416,7 +12545,7 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'مینو برخاست کریں';
 
   @override
   String get modalBarrierDismissLabel => 'برخاست کریں';
@@ -12569,7 +12698,7 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Menyuni yopish';
 
   @override
   String get modalBarrierDismissLabel => 'Yopish';
@@ -12722,7 +12851,7 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Đóng trình đơn';
 
   @override
   String get modalBarrierDismissLabel => 'Bỏ qua';
@@ -12875,7 +13004,7 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => '关闭菜单';
 
   @override
   String get modalBarrierDismissLabel => '关闭';
@@ -13016,6 +13145,9 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   String get datePickerMinuteSemanticsLabelOther => r'$minute 分鐘';
 
   @override
+  String get menuDismissLabel => '閂選單';
+
+  @override
   String get modalBarrierDismissLabel => '拒絕';
 
   @override
@@ -13080,6 +13212,9 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
+
+  @override
+  String get menuDismissLabel => '關閉選單';
 
   @override
   String get noSpellCheckReplacementsLabel => '找不到替代文字';
@@ -13181,7 +13316,7 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get menuDismissLabel => 'Dismiss menu';
+  String get menuDismissLabel => 'Chitha imenyu';
 
   @override
   String get modalBarrierDismissLabel => 'Cashisa';
