@@ -1152,6 +1152,20 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///
 /// Initializes the binding using [WidgetsFlutterBinding] if necessary.
 ///
+/// ## Application shutdown
+///
+/// This widget tree is not torn down when the application shuts down, because
+/// there is no way to predict when that will happen. For example, a user could
+/// physically remove power from their device, or the application could crash
+/// unexpectedly, or the malware on the device could forcibly terminate the
+/// process.
+///
+/// Applications are responsible for ensuring that they are well-behaved
+/// even in the face of a rapid unscheduled termination.
+///
+/// To artificially cause the entire widget tree to be disposed, consider
+/// calling [runApp] with a widget such as [SizedBox.shrink].
+///
 /// See also:
 ///
 ///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
