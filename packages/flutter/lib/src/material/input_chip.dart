@@ -42,9 +42,6 @@ import 'theme_data.dart';
 /// ** See code in examples/api/lib/material/input_chip/input_chip.0.dart **
 /// {@end-tool}
 ///
-/// Material design guidelines suggest that is possible to generate input chips
-/// from text input and vice versa. This is a common pattern in modern application
-/// and has many advantages like input verification and simplified field editing.
 ///
 ///
 /// {@tool dartpad}
