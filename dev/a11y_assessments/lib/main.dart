@@ -16,8 +16,8 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final Map<String, WidgetBuilder> routes = Map.fromEntries(
-      useCases.map((UseCase useCase) => MapEntry(useCase.route, useCase.build)),
+    final Map<String, WidgetBuilder> routes = Map<String, WidgetBuilder>.fromEntries(
+      useCases.map((UseCase useCase) => MapEntry<String, WidgetBuilder>(useCase.route, useCase.build)),
     );
     return MaterialApp(
       title: 'Accessibility Assessments',
