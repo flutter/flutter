@@ -242,15 +242,15 @@ void main() {
     expect(
       dial,
       paints
-        ..circle(color: defaultTheme.colorScheme.surfaceVariant.withOpacity(0.08)) // Dial background color.
+        ..circle(color: defaultTheme.colorScheme.surfaceVariant) // Dial background color.
         ..circle(color: Color(defaultTheme.colorScheme.primary.value)), // Dial hand color.
     );
 
     final RenderParagraph hourText = _textRenderParagraph(tester, '7');
     expect(
       hourText.text.style,
-      Typography.material2021().englishLike.displayLarge!
-        .merge(Typography.material2021().black.displayLarge)
+      Typography.material2021().englishLike.displayMedium!
+        .merge(Typography.material2021().black.displayMedium)
         .copyWith(
           color: defaultTheme.colorScheme.onPrimaryContainer,
           decorationColor: defaultTheme.colorScheme.onSurface
@@ -260,8 +260,8 @@ void main() {
     final RenderParagraph minuteText = _textRenderParagraph(tester, '15');
     expect(
       minuteText.text.style,
-      Typography.material2021().englishLike.displayLarge!
-        .merge(Typography.material2021().black.displayLarge)
+      Typography.material2021().englishLike.displayMedium!
+        .merge(Typography.material2021().black.displayMedium)
         .copyWith(
           color: defaultTheme.colorScheme.onSurface,
           decorationColor: defaultTheme.colorScheme.onSurface
@@ -275,7 +275,7 @@ void main() {
         .merge(Typography.material2021().black.titleMedium)
         .copyWith(
           color: defaultTheme.colorScheme.onTertiaryContainer,
-          decorationColor: defaultTheme.colorScheme.onSurface
+          decorationColor: defaultTheme.colorScheme.onSurface,
         ),
     );
 
@@ -285,8 +285,8 @@ void main() {
       Typography.material2021().englishLike.titleMedium!
         .merge(Typography.material2021().black.titleMedium)
         .copyWith(
-          color: defaultTheme.colorScheme.onTertiaryContainer,
-          decorationColor: defaultTheme.colorScheme.onSurface
+          color: defaultTheme.colorScheme.onSurfaceVariant,
+          decorationColor: defaultTheme.colorScheme.onSurface,
         )
     );
 
@@ -297,7 +297,7 @@ void main() {
         .merge(Typography.material2021().black.bodyMedium)
         .copyWith(
           color: defaultTheme.colorScheme.onSurface,
-          decorationColor: defaultTheme.colorScheme.onSurface
+          decorationColor: defaultTheme.colorScheme.onSurface,
         ),
     );
 
@@ -312,7 +312,7 @@ void main() {
         .merge(Typography.material2021().black.bodyLarge)
         .copyWith(
           color: defaultTheme.colorScheme.onSurface,
-          decorationColor: defaultTheme.colorScheme.onSurface
+          decorationColor: defaultTheme.colorScheme.onSurface,
         ),
     );
     // ignore: avoid_dynamic_calls
