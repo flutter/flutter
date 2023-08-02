@@ -22,6 +22,22 @@ FLUTTER_ASSERT_ARC
 
 @end
 
+/// FlutterBinaryMessengerRelay used for testing that setting FlutterEngine.binaryMessenger to
+/// the current instance doesn't trigger a use-after-free bug.
+///
+/// See: testSetBinaryMessengerToSameBinaryMessenger
+@interface FakeBinaryMessengerRelay : FlutterBinaryMessengerRelay
+@property(nonatomic, assign) BOOL failOnDealloc;
+@end
+
+@implementation FakeBinaryMessengerRelay
+- (void)dealloc {
+  if (_failOnDealloc) {
+    XCTFail("FakeBinaryMessageRelay should not be deallocated");
+  }
+}
+@end
+
 @interface FlutterEngineTest : XCTestCase
 @end
 
@@ -146,6 +162,20 @@ FLUTTER_ASSERT_ARC
     engine = nil;
   }
   OCMVerify([plugin detachFromEngineForRegistrar:[OCMArg any]]);
+}
+
+- (void)testSetBinaryMessengerToSameBinaryMessenger {
+  FakeBinaryMessengerRelay* fakeBinaryMessenger = [[FakeBinaryMessengerRelay alloc] init];
+
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine setBinaryMessenger:fakeBinaryMessenger];
+
+  // Verify that the setter doesn't free the old messenger before setting the new messenger.
+  fakeBinaryMessenger.failOnDealloc = YES;
+  [engine setBinaryMessenger:fakeBinaryMessenger];
+
+  // Don't fail when ARC releases the binary messenger.
+  fakeBinaryMessenger.failOnDealloc = NO;
 }
 
 - (void)testRunningInitialRouteSendsNavigationMessage {
