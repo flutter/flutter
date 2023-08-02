@@ -386,7 +386,8 @@ RasterStatus Rasterizer::DoDraw(
     std::unique_ptr<flutter::LayerTree> layer_tree,
     float device_pixel_ratio) {
   TRACE_EVENT_WITH_FRAME_NUMBER(frame_timings_recorder, "flutter",
-                                "Rasterizer::DoDraw");
+                                "Rasterizer::DoDraw", /*flow_id_count=*/0,
+                                /*flow_ids=*/nullptr);
   FML_DCHECK(delegate_.GetTaskRunners()
                  .GetRasterTaskRunner()
                  ->RunsTasksOnCurrentThread());

@@ -113,17 +113,17 @@ void DartVMInitializer::Initialize(Dart_InitializeParams* params,
 void DartVMInitializer::Cleanup() {
   FML_DCHECK(gDartInitialized);
 
-  // Dart_TimelineEvent is unsafe during a concurrent call to Dart_Cleanup
+  // Dart_RecordTimelineEvent is unsafe during a concurrent call to Dart_Cleanup
   // because Dart_Cleanup will destroy the timeline recorder.  Clear the
   // initialized flag so that future calls to LogDartTimelineEvent will not
-  // call Dart_TimelineEvent.
+  // call Dart_RecordTimelineEvent.
   //
   // Note that this is inherently racy.  If a thread sees that gDartInitialized
-  // is set and proceeds to call Dart_TimelineEvent shortly before another
-  // thread calls Dart_Cleanup, then the Dart_TimelineEvent call may crash
-  // if Dart_Cleanup deletes the timeline before Dart_TimelineEvent completes.
-  // In practice this is unlikely because Dart_Cleanup does significant other
-  // work before deleting the timeline.
+  // is set and proceeds to call Dart_RecordTimelineEvent shortly before another
+  // thread calls Dart_Cleanup, then the Dart_RecordTimelineEvent call may crash
+  // if Dart_Cleanup deletes the timeline before Dart_RecordTimelineEvent
+  // completes. In practice this is unlikely because Dart_Cleanup does
+  // significant other work before deleting the timeline.
   //
   // The engine can not safely guard Dart_Cleanup and LogDartTimelineEvent with
   // a lock due to the risk of deadlocks.  Dart_Cleanup waits for various
@@ -142,12 +142,15 @@ void DartVMInitializer::Cleanup() {
 void DartVMInitializer::LogDartTimelineEvent(const char* label,
                                              int64_t timestamp0,
                                              int64_t timestamp1_or_async_id,
+                                             intptr_t flow_id_count,
+                                             const int64_t* flow_ids,
                                              Dart_Timeline_Event_Type type,
                                              intptr_t argument_count,
                                              const char** argument_names,
                                              const char** argument_values) {
   if (gDartInitialized) {
-    Dart_TimelineEvent(label, timestamp0, timestamp1_or_async_id, type,
-                       argument_count, argument_names, argument_values);
+    Dart_RecordTimelineEvent(label, timestamp0, timestamp1_or_async_id,
+                             flow_id_count, flow_ids, type, argument_count,
+                             argument_names, argument_values);
   }
 }

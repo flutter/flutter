@@ -19,6 +19,8 @@ class DartVMInitializer {
   static void LogDartTimelineEvent(const char* label,
                                    int64_t timestamp0,
                                    int64_t timestamp1_or_async_id,
+                                   intptr_t flow_id_count,
+                                   const int64_t* flow_ids,
                                    Dart_Timeline_Event_Type type,
                                    intptr_t argument_count,
                                    const char** argument_names,

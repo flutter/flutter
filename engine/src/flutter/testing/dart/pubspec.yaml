@@ -22,6 +22,7 @@ dependencies:
   sky_engine: any
   vector_math: any
   vm_service: any
+  vm_service_protos: any
 
 dependency_overrides:
   async_helper:
@@ -48,3 +49,5 @@ dependency_overrides:
     path: ../../../third_party/pkg/vector_math
   vm_service:
     path: ../../../third_party/dart/pkg/vm_service
+  vm_service_protos:
+    path: ../../../third_party/dart/pkg/vm_service_protos

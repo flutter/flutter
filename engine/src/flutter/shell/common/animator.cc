@@ -66,8 +66,17 @@ void Animator::BeginFrame(
   frame_timings_recorder_ = std::move(frame_timings_recorder);
   frame_timings_recorder_->RecordBuildStart(fml::TimePoint::Now());
 
+  size_t flow_id_count = trace_flow_ids_.size();
+  std::unique_ptr<uint64_t[]> flow_ids =
+      std::make_unique<uint64_t[]>(flow_id_count);
+  for (size_t i = 0; i < flow_id_count; ++i) {
+    flow_ids.get()[i] = trace_flow_ids_.at(i);
+  }
+
   TRACE_EVENT_WITH_FRAME_NUMBER(frame_timings_recorder_, "flutter",
-                                "Animator::BeginFrame");
+                                "Animator::BeginFrame", flow_id_count,
+                                flow_ids.get());
+
   while (!trace_flow_ids_.empty()) {
     uint64_t trace_flow_id = trace_flow_ids_.front();
     TRACE_FLOW_END("flutter", "PointerEvent", trace_flow_id);
@@ -142,7 +151,8 @@ void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree,
   }
 
   TRACE_EVENT_WITH_FRAME_NUMBER(frame_timings_recorder_, "flutter",
-                                "Animator::Render");
+                                "Animator::Render", /*flow_id_count=*/0,
+                                /*flow_ids=*/nullptr);
   frame_timings_recorder_->RecordBuildEnd(fml::TimePoint::Now());
 
   delegate_.OnAnimatorUpdateLatestFrameTargetTime(
@@ -259,8 +269,17 @@ void Animator::ScheduleMaybeClearTraceFlowIds() {
           return;
         }
         if (!self->frame_scheduled_ && !self->trace_flow_ids_.empty()) {
-          TRACE_EVENT0("flutter",
-                       "Animator::ScheduleMaybeClearTraceFlowIds - callback");
+          size_t flow_id_count = self->trace_flow_ids_.size();
+          std::unique_ptr<uint64_t[]> flow_ids =
+              std::make_unique<uint64_t[]>(flow_id_count);
+          for (size_t i = 0; i < flow_id_count; ++i) {
+            flow_ids.get()[i] = self->trace_flow_ids_.at(i);
+          }
+
+          TRACE_EVENT0_WITH_FLOW_IDS(
+              "flutter", "Animator::ScheduleMaybeClearTraceFlowIds - callback",
+              flow_id_count, flow_ids.get());
+
           while (!self->trace_flow_ids_.empty()) {
             auto flow_id = self->trace_flow_ids_.front();
             TRACE_FLOW_END("flutter", "PointerEvent", flow_id);
