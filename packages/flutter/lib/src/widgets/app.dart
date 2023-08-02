@@ -1188,8 +1188,9 @@ class WidgetsApp extends StatefulWidget {
   /// and view what widgets and render objects associated with it. An outline of
   /// the selected widget and some summary information is shown on device and
   /// more detailed information is shown in the IDE or DevTools.
-  static ValueNotifier<bool> debugShowWidgetInspectorOverride =
-      ValueNotifier<bool>(false);
+  @Deprecated('Use debugShowWidgetInspectorOverrideNotifier.value instead');
+  static bool debugShowWidgetInspectorOverride = false;
+  static ValueNotifier<bool> debugShowWidgetInspectorOverrideNotifier = ValueNotifier<bool>(false);
 
   /// If false, prevents the debug banner from being visible.
   ///

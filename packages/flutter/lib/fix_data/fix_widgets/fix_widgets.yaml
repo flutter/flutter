@@ -49,6 +49,17 @@ transforms:
   - title: "Migrate to 'decorationClipBehavior'"
     date: 2023-03-13
     element:
+      uris: [ 'material.dart' ]
+      field: 'debugShowWidgetInspectorOverride'
+      inClass: 'WidgetsApp'
+    changes:
+      - kind: 'rename'
+        newName: debugShowWidgetInspectorOverrideNotifier # HERE
+
+  # Changes made in https://github.com/flutter/flutter/pull/122555
+  - title: "Migrate to 'decorationClipBehavior'"
+    date: 2023-03-13
+    element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       constructor: ''
       inClass: 'ScrollableDetails'
