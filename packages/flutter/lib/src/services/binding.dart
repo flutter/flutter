@@ -237,7 +237,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
               FlutterErrorDetails(
                 exception: error,
                 stack: stack,
-                context: ErrorSummary('Failed to invoke preHotRestartCallback "$label"'),
+                context: ErrorSummary('while invoking the "$label" preHotRestartCallback'),
               )
             );
           } finally {
