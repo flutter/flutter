@@ -133,6 +133,15 @@ class FilterContents : public Contents {
 
   Matrix GetTransform(const Matrix& parent_transform) const;
 
+  /// @brief  Returns `true` if this filter does not have any `FilterInput`
+  ///         children.
+  bool IsLeaf() const;
+
+  /// @brief  Replaces the leaf of all leaf `FilterContents` with a new set
+  ///         of `inputs`.
+  /// @see    `FilterContents::IsLeaf`
+  void SetLeafInputs(const FilterInput::Vector& inputs);
+
  private:
   virtual std::optional<Rect> GetFilterCoverage(
       const FilterInput::Vector& inputs,

@@ -175,6 +175,8 @@ impeller_component("entity") {
     "contents/filters/inputs/filter_contents_filter_input.h",
     "contents/filters/inputs/filter_input.cc",
     "contents/filters/inputs/filter_input.h",
+    "contents/filters/inputs/placeholder_filter_input.cc",
+    "contents/filters/inputs/placeholder_filter_input.h",
     "contents/filters/inputs/texture_filter_input.cc",
     "contents/filters/inputs/texture_filter_input.h",
     "contents/filters/linear_to_srgb_filter_contents.cc",
