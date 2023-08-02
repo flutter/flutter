@@ -1201,9 +1201,9 @@ void main() {
           onChanged: (bool? value) {},
           title: Text.rich(TextSpan(
             children: <InlineSpan>[
-              const TextSpan(text:'before'),
-              WidgetSpan(child: TextButton(child: const Text('link'), onPressed: (){}, )),
-              const TextSpan(text:'after'),
+              const TextSpan(text: 'before'),
+              WidgetSpan(child: TextButton(child: const Text('link'), onPressed: (){},)),
+              const TextSpan(text: 'after'),
             ]
           )),
         ),
