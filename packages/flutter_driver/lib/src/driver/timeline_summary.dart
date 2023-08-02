@@ -82,6 +82,20 @@ class TimelineSummary {
     return _averageInMillis(_extractGpuRasterizerDrawDurations());
   }
 
+  /// Standard deviation amount of time spent per frame in the engine rasterizer.
+  ///
+  /// Throws a [StateError] if this summary contains no timeline events.
+  double computeStandardDeviationFrameRasterizerTimeMillis() {
+    final List<Duration> durations = _extractGpuRasterizerDrawDurations();
+    final double average = _averageInMillis(durations);
+    double tally = 0.0;
+    for (final Duration duration in durations) {
+      final double time = duration.inMicroseconds.toDouble() / 1000.0;
+      tally += (average - time).abs();
+    }
+    return tally / durations.length;
+  }
+
   /// The longest frame rasterization time in milliseconds.
   ///
   /// Throws a [StateError] if this summary contains no timeline events.
@@ -146,6 +160,9 @@ class TimelineSummary {
   /// * "average_frame_rasterizer_time_millis": Average amount of time spent
   ///   per frame in the engine rasterizer.
   ///   See [computeAverageFrameRasterizerTimeMillis].
+  /// * "stddev_frame_rasterizer_time_millis": Standard deviation of the amount
+  ///   of time spent per frame in the engine rasterizer.
+  ///   See [computeStandardDeviationFrameRasterizerTimeMillis].
   /// * "90th_percentile_frame_rasterizer_time_millis" and
   ///   "99th_percentile_frame_rasterizer_time_millis": The 90/99-th percentile
   ///   frame rasterization time in milliseconds.
@@ -240,6 +257,7 @@ class TimelineSummary {
       'worst_frame_build_time_millis': computeWorstFrameBuildTimeMillis(),
       'missed_frame_build_budget_count': computeMissedFrameBuildBudgetCount(),
       'average_frame_rasterizer_time_millis': computeAverageFrameRasterizerTimeMillis(),
+      'stddev_frame_rasterizer_time_millis': computeStandardDeviationFrameRasterizerTimeMillis(),
       '90th_percentile_frame_rasterizer_time_millis': computePercentileFrameRasterizerTimeMillis(90.0),
       '99th_percentile_frame_rasterizer_time_millis': computePercentileFrameRasterizerTimeMillis(99.0),
       'worst_frame_rasterizer_time_millis': computeWorstFrameRasterizerTimeMillis(),
