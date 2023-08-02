@@ -277,4 +277,23 @@ Matrix FilterContents::GetTransform(const Matrix& parent_transform) const {
   return parent_transform * GetLocalTransform(parent_transform);
 }
 
+bool FilterContents::IsLeaf() const {
+  for (auto& input : inputs_) {
+    if (!input->IsLeaf()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void FilterContents::SetLeafInputs(const FilterInput::Vector& inputs) {
+  if (IsLeaf()) {
+    inputs_ = inputs;
+    return;
+  }
+  for (auto& input : inputs_) {
+    input->SetLeafInputs(inputs);
+  }
+}
+
 }  // namespace impeller

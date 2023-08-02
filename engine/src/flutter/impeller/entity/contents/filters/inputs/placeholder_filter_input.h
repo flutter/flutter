@@ -8,9 +8,11 @@
 
 namespace impeller {
 
-class FilterContentsFilterInput final : public FilterInput {
+class PlaceholderFilterInput final : public FilterInput {
  public:
-  ~FilterContentsFilterInput() override;
+  explicit PlaceholderFilterInput(Rect coverage);
+
+  ~PlaceholderFilterInput() override;
 
   // |FilterInput|
   Variant GetInput() const override;
@@ -26,27 +28,12 @@ class FilterContentsFilterInput final : public FilterInput {
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |FilterInput|
-  Matrix GetLocalTransform(const Entity& entity) const override;
-
-  // |FilterInput|
-  Matrix GetTransform(const Entity& entity) const override;
-
-  // |FilterInput|
   void PopulateGlyphAtlas(
       const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
       Scalar scale) override;
 
-  // |FilterInput|
-  bool IsLeaf() const override;
-
-  // |FilterInput|
-  void SetLeafInputs(const FilterInput::Vector& inputs) override;
-
  private:
-  explicit FilterContentsFilterInput(std::shared_ptr<FilterContents> filter);
-
-  std::shared_ptr<FilterContents> filter_;
-  mutable std::optional<Snapshot> snapshot_;
+  Rect coverage_rect_;
 
   friend FilterInput;
 };
