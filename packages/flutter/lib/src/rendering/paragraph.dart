@@ -723,7 +723,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   bool hitTestSelf(Offset position) => true;
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     final TextPosition textPosition = _textPainter.getPositionForOffset(position);
     if (_positionIsWithinText(position: position, textPosition: textPosition)) {
       final Object? span = _textPainter.text!.getSpanForPosition(textPosition);
@@ -735,7 +735,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return hitTestInlineChildren(result, position);
   }
 
-  bool _positionIsWithinText({required Offset position, required TextPosition textPosition}){
+  bool _positionIsWithinText({ required Offset position, required TextPosition textPosition }){
     final List<ui.TextBox> boxes = _textPainter.getBoxesForRange(
       textPosition.offset == 0 ? 0 : textPosition.offset - 1,
       textPosition.offset == _textPainter.plainText.length ? textPosition.offset : textPosition.offset + 1 ,
