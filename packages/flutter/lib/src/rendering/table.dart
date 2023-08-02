@@ -263,12 +263,11 @@ class MaxColumnWidth extends TableColumnWidth {
   @override
   double? flex(Iterable<RenderBox> cells) {
     final double? aFlex = a.flex(cells);
-    if (aFlex == null) {
-      return b.flex(cells);
-    }
     final double? bFlex = b.flex(cells);
-    if (bFlex == null) {
-      return null;
+    if (aFlex == null) {
+      return bFlex;
+    } else if (bFlex == null) {
+      return aFlex;
     }
     return math.max(aFlex, bFlex);
   }
@@ -316,12 +315,11 @@ class MinColumnWidth extends TableColumnWidth {
   @override
   double? flex(Iterable<RenderBox> cells) {
     final double? aFlex = a.flex(cells);
-    if (aFlex == null) {
-      return b.flex(cells);
-    }
     final double? bFlex = b.flex(cells);
-    if (bFlex == null) {
-      return null;
+    if (aFlex == null) {
+      return bFlex;
+    } else if (bFlex == null) {
+      return aFlex;
     }
     return math.min(aFlex, bFlex);
   }
