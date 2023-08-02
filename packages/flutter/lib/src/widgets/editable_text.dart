@@ -869,7 +869,6 @@ class EditableText extends StatefulWidget {
              ]
            : inputFormatters,
        showCursor = showCursor ?? !readOnly{
-       // print("HELLO");
        }
 
   /// Controls the text being edited.

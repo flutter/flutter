@@ -39,7 +39,8 @@ enum ScrollViewKeyboardDismissBehavior {
   /// `onDrag` means that the [ScrollView] will dismiss an on-screen keyboard
   /// when a drag begins.
   onDrag,
-
+  /// `interactive` means that the [ScrollView] will move the on-screen keyboard
+  /// relative to the pointer when a drag begins
   interactive,
 }
 
