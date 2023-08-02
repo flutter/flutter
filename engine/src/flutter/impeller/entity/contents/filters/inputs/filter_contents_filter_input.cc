@@ -58,4 +58,13 @@ void FilterContentsFilterInput::PopulateGlyphAtlas(
   filter_->PopulateGlyphAtlas(lazy_glyph_atlas, scale);
 }
 
+bool FilterContentsFilterInput::IsLeaf() const {
+  return false;
+}
+
+void FilterContentsFilterInput::SetLeafInputs(
+    const FilterInput::Vector& inputs) {
+  filter_->SetLeafInputs(inputs);
+}
+
 }  // namespace impeller
