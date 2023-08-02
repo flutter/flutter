@@ -66,7 +66,6 @@ class AttachCommand extends FlutterCommand {
   AttachCommand({
     bool verboseHelp = false,
     HotRunnerFactory? hotRunnerFactory,
-    //required Artifacts? artifacts,
     required Stdio stdio,
     required Logger logger,
     required Terminal terminal,
@@ -74,15 +73,14 @@ class AttachCommand extends FlutterCommand {
     required Platform platform,
     required ProcessInfo processInfo,
     required FileSystem fileSystem,
-  }): /*_artifacts = artifacts,*/
-      _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
-      _stdio = stdio,
-      _logger = logger,
-      _terminal = terminal,
-      _signals = signals,
-      _platform = platform,
-      _processInfo = processInfo,
-      _fileSystem = fileSystem {
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
+       _stdio = stdio,
+       _logger = logger,
+       _terminal = terminal,
+       _signals = signals,
+       _platform = platform,
+       _processInfo = processInfo,
+       _fileSystem = fileSystem {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -146,7 +144,7 @@ class AttachCommand extends FlutterCommand {
   }
 
   final HotRunnerFactory _hotRunnerFactory;
-  Artifacts? get _artifacts => globals.artifacts;
+  late final Artifacts? _artifacts = globals.artifacts;
   final Stdio _stdio;
   final Logger _logger;
   final Terminal _terminal;
