@@ -343,10 +343,10 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
   /// Get the next image index.
   ///
   auto [acq_result, index] = context.GetDevice().acquireNextImageKHR(
-      *swapchain_,                           // swapchain
-      std::numeric_limits<uint64_t>::max(),  // timeout (nanoseconds)
-      *sync->render_ready,                   // signal semaphore
-      nullptr                                // fence
+      *swapchain_,          // swapchain
+      1'000'000'000,        // timeout (ns) 1000ms
+      *sync->render_ready,  // signal semaphore
+      nullptr               // fence
   );
 
   if (acq_result == vk::Result::eSuboptimalKHR) {
