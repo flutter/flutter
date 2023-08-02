@@ -17,6 +17,7 @@
 
 @interface FlutterPlatformPlugin ()
 - (BOOL)isLiveTextInputAvailable;
+- (void)searchWeb:(NSString*)searchTerm;
 - (void)showLookUpViewController:(NSString*)term;
 @end
 
@@ -27,6 +28,30 @@
 @end
 
 @implementation FlutterPlatformPluginTest
+- (void)testSearchWebInvoked {
+  FlutterEngine* engine = [[[FlutterEngine alloc] initWithName:@"test" project:nil] autorelease];
+  std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(engine);
+  [engine runWithEntrypoint:nil];
+
+  XCTestExpectation* invokeExpectation =
+      [self expectationWithDescription:@"Web search launched with search term"];
+
+  FlutterPlatformPlugin* plugin =
+      [[[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()] autorelease];
+  FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
+
+  FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"SearchWeb.invoke"
+                                                                    arguments:@"Test"];
+
+  FlutterResult result = ^(id result) {
+    OCMVerify([mockPlugin searchWeb:@"Test"]);
+    [invokeExpectation fulfill];
+  };
+
+  [mockPlugin handleMethodCall:methodCall result:result];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
+}
 
 - (void)testLookUpCallInitiated {
   FlutterEngine* engine = [[[FlutterEngine alloc] initWithName:@"test" project:nil] autorelease];
