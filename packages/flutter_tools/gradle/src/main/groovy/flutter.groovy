@@ -731,8 +731,10 @@ class FlutterPlugin implements Plugin<Project> {
     // BuildVariant: debug
     // BuildVariant: release
     // BuildVariant: profile
+    //
+    // Format of the output of this task is used by `AndroidProject.getBuildVariants`.
     private static void addTaskForPrintBuildVariants(Project project) {
-        // Warning: The name of this task is used by AndroidBuilder.getBuildVariants
+        // Warning: The name of this task is used by `AndroidProject.getBuildVariants`.
         project.tasks.register("printBuildVariants") {
             description "Prints out all build variants for this Android project"
             doLast {
@@ -758,6 +760,8 @@ class FlutterPlugin implements Plugin<Project> {
     //     {"scheme":"https","host":"example.com","path":".*"}
     //   ]
     // }
+    //
+    // The output file is parsed and used by devtool.
     private static void addTasksForDumpAppLinkSettings(Project project) {
         project.android.applicationVariants.all { variant ->
             // Warning: The name of this task is used by AndroidBuilder.dumpsAppLinkSettings
