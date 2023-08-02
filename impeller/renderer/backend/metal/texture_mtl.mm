@@ -44,6 +44,7 @@ std::shared_ptr<TextureMTL> TextureMTL::Wrapper(
         new TextureMTL(desc, texture, true),
         [deletion_proc = std::move(deletion_proc)](TextureMTL* t) {
           deletion_proc();
+          delete t;
         });
   }
   return std::shared_ptr<TextureMTL>(new TextureMTL(desc, texture, true));
