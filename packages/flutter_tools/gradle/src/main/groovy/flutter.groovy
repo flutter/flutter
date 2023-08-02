@@ -51,7 +51,7 @@ class FlutterExtension {
 
     /**
      * Sets the targetSdkVersion used by default in Flutter app projects.
-     * Should always be the latest available version.
+     * targetSdkVersion should always be the latest available stable version.
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
