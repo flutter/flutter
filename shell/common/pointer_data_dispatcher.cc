@@ -18,7 +18,9 @@ SmoothPointerDataDispatcher::~SmoothPointerDataDispatcher() = default;
 void DefaultPointerDataDispatcher::DispatchPacket(
     std::unique_ptr<PointerDataPacket> packet,
     uint64_t trace_flow_id) {
-  TRACE_EVENT0("flutter", "DefaultPointerDataDispatcher::DispatchPacket");
+  TRACE_EVENT0_WITH_FLOW_IDS("flutter",
+                             "DefaultPointerDataDispatcher::DispatchPacket",
+                             /*flow_id_count=*/1, &trace_flow_id);
   TRACE_FLOW_STEP("flutter", "PointerEvent", trace_flow_id);
   delegate_.DoDispatchPacket(std::move(packet), trace_flow_id);
 }
@@ -26,7 +28,9 @@ void DefaultPointerDataDispatcher::DispatchPacket(
 void SmoothPointerDataDispatcher::DispatchPacket(
     std::unique_ptr<PointerDataPacket> packet,
     uint64_t trace_flow_id) {
-  TRACE_EVENT0("flutter", "SmoothPointerDataDispatcher::DispatchPacket");
+  TRACE_EVENT0_WITH_FLOW_IDS("flutter",
+                             "SmoothPointerDataDispatcher::DispatchPacket",
+                             /*flow_id_count=*/1, &trace_flow_id);
   TRACE_FLOW_STEP("flutter", "PointerEvent", trace_flow_id);
 
   if (is_pointer_data_in_progress_) {

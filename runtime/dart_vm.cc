@@ -472,13 +472,15 @@ DartVM::DartVM(const std::shared_ptr<const DartVMData>& vm_data,
     // As this call is immediately after initialization of the Dart VM,
     // we are interested in only one timestamp.
     int64_t micros = Dart_TimelineGetMicros();
-    Dart_TimelineEvent("FlutterEngineMainEnter",     // label
-                       micros,                       // timestamp0
-                       micros,                       // timestamp1_or_async_id
-                       Dart_Timeline_Event_Instant,  // event type
-                       0,                            // argument_count
-                       nullptr,                      // argument_names
-                       nullptr                       // argument_values
+    Dart_RecordTimelineEvent("FlutterEngineMainEnter",  // label
+                             micros,                    // timestamp0
+                             micros,   // timestamp1_or_async_id
+                             0,        // flow_id_count
+                             nullptr,  // flow_ids
+                             Dart_Timeline_Event_Instant,  // event type
+                             0,                            // argument_count
+                             nullptr,                      // argument_names
+                             nullptr                       // argument_values
     );
   }
 
