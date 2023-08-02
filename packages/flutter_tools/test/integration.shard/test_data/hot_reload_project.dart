@@ -38,7 +38,7 @@ class HotReloadProject extends Project {
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
     await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     if ($preHotRestartHook) {
-      WidgetsBinding.instance!.debugRegisterHotRestartCallback(() {
+      ServicesBinding.instance.debugRegisterHotRestartCallback(() {
         print('INVOKE PRE HOT RESTART CALLBACK');
       });
     }
