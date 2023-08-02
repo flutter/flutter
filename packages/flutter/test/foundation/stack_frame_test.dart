@@ -99,7 +99,12 @@ void main() {
       ),
     );
   });
+
+  test('Parses to null for wrong format.', () {
+    expect(StackFrame.fromStackTraceLine('wrong stack trace format'), null);
+  });
 }
+
 
 const String stackString = '''
 #0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)

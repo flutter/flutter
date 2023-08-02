@@ -82,15 +82,21 @@ class StackFrame {
         .toList();
   }
 
-  static StackFrame? _parseWebFrame(String line) {
+  /// Parses a single [StackFrame] from a line of a [StackTrace].
+  ///
+  /// Returns null if format is not as expected.
+  static StackFrame? _treyParseWebFrame(String line) {
     if (kDebugMode) {
-      return _parseWebDebugFrame(line);
+      return _tryParseWebDebugFrame(line);
     } else {
       return _parseWebNonDebugFrame(line);
     }
   }
 
-  static StackFrame _parseWebDebugFrame(String line) {
+  /// Parses a single [StackFrame] from a line of a [StackTrace].
+  ///
+  /// Returns null if format is not as expected.
+  static StackFrame? _tryParseWebDebugFrame(String line) {
     // This RegExp is only partially correct for flutter run/test differences.
     // https://github.com/flutter/flutter/issues/52685
     final bool hasPackage = line.startsWith('package');
@@ -101,17 +107,7 @@ class StackFrame {
     final Match? match = parser.firstMatch(line);
 
     if (match == null) {
-      return StackFrame(
-        number: -1,
-        packageScheme: '<unknown>',
-        package: '<unknown>',
-        packagePath: '<unknown>',
-        line: 0,
-        column: 0,
-        className: 'Class is not detected, because error did not match $parser.',
-        method: '<unknown>',
-        source: line,
-      );
+      return null;
     }
 
     String package = '<unknown>';
@@ -183,6 +179,8 @@ class StackFrame {
   }
 
   /// Parses a single [StackFrame] from a single line of a [StackTrace].
+  ///
+  /// Returns null if format is not as expected.
   static StackFrame? fromStackTraceLine(String line) {
     if (line == '<asynchronous suspension>') {
       return asynchronousSuspension;
@@ -199,7 +197,7 @@ class StackFrame {
 
     // Web frames.
     if (!line.startsWith('#')) {
-      return _parseWebFrame(line);
+      return _treyParseWebFrame(line);
     }
 
     final RegExp parser = RegExp(r'^#(\d+) +(.+) \((.+?):?(\d+){0,1}:?(\d+){0,1}\)$');
