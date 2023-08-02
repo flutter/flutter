@@ -959,7 +959,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
         );
       } else {
         throw FlutterError(
-          'It called $methodName with a paint that did have a mask filter, '
+          'It called $methodName with a paint that had a mask filter, '
           'despite not expecting one.'
         );
       }
@@ -1198,14 +1198,14 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
       if (x != null && pointArgument.dx != x) {
         throw FlutterError(
           'It called $methodName with a center coordinate, $pointArgument, '
-          'whose x-coordinate not exactly the expected coordinate '
+          'whose x-coordinate was not exactly the expected coordinate '
           '(${x!.toStringAsFixed(1)}).'
         );
       }
       if (y != null && pointArgument.dy != y) {
         throw FlutterError(
           'It called $methodName with a center coordinate, $pointArgument, '
-          'whose y-coordinate not exactly the expected coordinate '
+          'whose y-coordinate was not exactly the expected coordinate '
           '(${y!.toStringAsFixed(1)}).'
         );
       }
@@ -1515,14 +1515,14 @@ class _DrawImagePaintPredicate extends _DrawCommandPaintPredicate {
       if (x != null && pointArgument.dx != x) {
         throw FlutterError(
           'It called $methodName with an offset coordinate, $pointArgument, '
-          'whose x-coordinate not exactly the expected coordinate '
+          'whose x-coordinate was not exactly the expected coordinate '
           '(${x!.toStringAsFixed(1)}).'
         );
       }
       if (y != null && pointArgument.dy != y) {
         throw FlutterError(
           'It called $methodName with an offset coordinate, $pointArgument, '
-          'whose y-coordinate not exactly the expected coordinate '
+          'whose y-coordinate was not exactly the expected coordinate '
           '(${y!.toStringAsFixed(1)}).'
         );
       }
