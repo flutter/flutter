@@ -6,10 +6,13 @@ import static groovy.io.FileType.FILES
 
 import com.android.build.OutputFile
 import groovy.json.JsonSlurper
+import groovy.json.JsonGenerator
+import groovy.xml.QName
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import java.util.Set
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -728,10 +731,8 @@ class FlutterPlugin implements Plugin<Project> {
     // BuildVariant: debug
     // BuildVariant: release
     // BuildVariant: profile
-    //
-    // Format of the output of this task is used by `AndroidProject.getBuildVariants`.
     private static void addTaskForPrintBuildVariants(Project project) {
-        // Warning: The name of this task is used by `AndroidProject.getBuildVariants`.
+        // Warning: The name of this task is used by AndroidBuilder.getBuildVariants
         project.tasks.register("printBuildVariants") {
             description "Prints out all build variants for this Android project"
             doLast {
@@ -742,80 +743,88 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    // Add a task that can be called on Flutter projects that prints application id of a build
-    // variant.
+    // Add a task that can be called on Flutter projects that dumps app link related project
+    // settings into a json file.
     //
-    // This task prints the application id in this format:
+    // See https://developer.android.com/training/app-links/ for more information about app link.
     //
-    // ApplicationId: com.example.my_id
+    // The json will be stored in <project>/build/app/app-link-settings-<variant>.json
     //
-    // Format of the output of this task is used by `AndroidProject.getApplicationIdForVariant`.
-    private static void addTasksForPrintApplicationId(Project project) {
+    // An example json:
+    // {
+    //   applicationId: "com.example.app",
+    //   deeplinks: [
+    //     {"scheme":"http", "host":"example.com", "path":".*"},
+    //     {"scheme":"https","host":"example.com","path":".*"}
+    //   ]
+    // }
+    private static void addTasksForDumpAppLinkSettings(Project project) {
         project.android.applicationVariants.all { variant ->
-            // Warning: The name of this task is used by `AndroidProject.getApplicationIdForVariant`.
-            project.tasks.register("print${variant.name.capitalize()}ApplicationId") {
-                description "Prints out application id for the given build variant of this Android project"
-                doLast {
-                    println "ApplicationId: ${variant.applicationId}";
-                }
-            }
-        }
-    }
-
-    // Add a task that can be called on Flutter projects that prints app link domains of a build
-    // variant.
-    //
-    // The app link domains refer to the host attributes of data tags in the apps' intent filters
-    // that support http/https schemes. See
-    // https://developer.android.com/guide/topics/manifest/intent-filter-element.
-    //
-    // This task prints app link domains in this format:
-    //
-    // Domain: domain.com
-    // Domain: another-domain.dev
-    //
-    // Format of the output of this task is used by `AndroidProject.getAppLinkDomainsForVariant`.
-    private static void addTasksForPrintAppLinkDomains(Project project) {
-        project.android.applicationVariants.all { variant ->
-            // Warning: The name of this task is used by `AndroidProject.getAppLinkDomainsForVariant`.
-            project.tasks.register("print${variant.name.capitalize()}AppLinkDomains") {
-                description "Prints out app links domain for the given build variant of this Android project"
+            // Warning: The name of this task is used by AndroidBuilder.dumpsAppLinkSettings
+            project.tasks.register("dump${variant.name.capitalize()}AppLinkSettings") {
+                description "stores app links settings for the given build variant of this Android project into a json file."
                 variant.outputs.all { output ->
+                    // Deeplinks are defined in AndroidManifest.xml and is only available after
+                    // `processResourcesProvider`.
                     def processResources = output.hasProperty("processResourcesProvider") ?
                             output.processResourcesProvider.get() : output.processResources
                     dependsOn processResources.name
                 }
                 doLast {
+                    def appLinkSettings = new AppLinkSettings()
+                    appLinkSettings.applicationId = variant.applicationId
+                    appLinkSettings.deeplinks = [] as Set<Deeplink>
                     variant.outputs.all { output ->
                         def processResources = output.hasProperty("processResourcesProvider") ?
                                 output.processResourcesProvider.get() : output.processResources
                         def manifest = new XmlParser().parse(processResources.manifestFile)
                         manifest.application.activity.each { activity ->
-                            // Find intent filters that have autoVerify = true and support http/https
-                            // scheme.
-                            activity.'intent-filter'.findAll { filter ->
-                                def hasAutoVerify = filter.attributes().any { entry ->
-                                    return entry.key.getLocalPart() == "autoVerify" && entry.value
-                                }
-                                def hasHttpOrHttps = filter.data.any { data ->
-                                    data.attributes().any { entry ->
-                                        return entry.key.getLocalPart() == "scheme" &&
-                                               (entry.value == "http" || entry.value == "https")
-                                    }
-                                }
-                                return hasAutoVerify && hasHttpOrHttps
-                            }.each { appLinkIntent ->
+                            activity.'intent-filter'.each { appLinkIntent ->
                                 // Print out the host attributes in data tags.
+                                def schemes = [] as Set<String>
+                                def hosts = [] as Set<String>
+                                def paths = [] as Set<String>
                                 appLinkIntent.data.each { data ->
                                     data.attributes().each { entry ->
-                                        if (entry.key.getLocalPart() == "host") {
-                                            println "Domain: ${entry.value}"
+                                        if (entry.key instanceof QName) {
+                                            switch (entry.key.getLocalPart()) {
+                                                case "scheme":
+                                                    schemes.add(entry.value)
+                                                    break
+                                                case "host":
+                                                    hosts.add(entry.value)
+                                                    break
+                                                case "pathAdvancedPattern":
+                                                case "pathPattern":
+                                                case "path":
+                                                    paths.add(entry.value)
+                                                    break
+                                                case "pathPrefix":
+                                                    paths.add("${entry.value}.*")
+                                                    break
+                                                case "pathSuffix":
+                                                    paths.add(".*${entry.value}")
+                                                    break
+                                            }
+                                        }
+                                    }
+                                }
+                                schemes.each {scheme ->
+                                    hosts.each { host ->
+                                        if (!paths) {
+                                            appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: ".*"))
+                                        } else {
+                                            paths.each { path ->
+                                                appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path))
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
+                    def generator = new JsonGenerator.Options().build()
+                    new File(project.buildDir, "app-link-settings-${variant.name}.json").write(generator.toJson(appLinkSettings))
                 }
             }
         }
@@ -996,8 +1005,7 @@ class FlutterPlugin implements Plugin<Project> {
         addTaskForJavaVersion(project)
         if(isFlutterAppProject()) {
             addTaskForPrintBuildVariants(project)
-            addTasksForPrintApplicationId(project)
-            addTasksForPrintAppLinkDomains(project)
+            addTasksForDumpAppLinkSettings(project)
         }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
@@ -1222,6 +1230,24 @@ class FlutterPlugin implements Plugin<Project> {
         }
         configurePlugins()
         detectLowCompileSdkVersionOrNdkVersion()
+    }
+}
+
+class AppLinkSettings {
+    String applicationId
+    Set<Deeplink> deeplinks
+}
+
+class Deeplink {
+    String scheme, host, path
+    boolean equals(o) {
+        if (o == null)
+            throw new NullPointerException()
+        if (o.getClass() != getClass())
+            return false
+        return scheme == o.scheme &&
+               host == o.host &&
+               path == o.path
     }
 }
 

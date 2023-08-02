@@ -96,17 +96,6 @@ void main() {
     expect(mockVMService.services, containsPair(kFlutterGetIOSBuildOptionsServiceName, kFlutterToolAlias));
   });
 
-  testWithoutContext('VmService registers flutterGetAndroidBuildVariants service', () async {
-    final MockVMService mockVMService = MockVMService();
-    final FlutterProject mockedFlutterProject = MockFlutterProject();
-    await setUpVmService(
-      flutterProject: mockedFlutterProject,
-      vmService: mockVMService,
-    );
-
-    expect(mockVMService.services, containsPair(kFlutterGetAndroidBuildVariantsServiceName, kFlutterToolAlias));
-  });
-
   testWithoutContext('VM Service registers flutterGetSkSL service', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
@@ -311,24 +300,6 @@ void main() {
     expect(result['targets'], expectedProjectInfo.targets);
     expect(result['buildConfigurations'], expectedProjectInfo.buildConfigurations);
     expect(result['schemes'], expectedProjectInfo.schemes);
-  });
-
-  testWithoutContext('VmService forward flutterGetAndroidBuildVariants request and response correctly', () async {
-    final MockVMService vmService = MockVMService();
-    final List<String> expectedOptions = <String>['debug', 'release', 'profile'];
-    final FlutterProject mockedFlutterProject = MockFlutterProject(
-      mockedAndroid: MockAndroidProject(mockedOptions: expectedOptions),
-    );
-    await setUpVmService(
-        flutterProject: mockedFlutterProject,
-        vmService: vmService
-    );
-    final vm_service.ServiceCallback cb = vmService.serviceCallBacks[kFlutterGetAndroidBuildVariantsServiceName]!;
-
-    final Map<String, dynamic> response = await cb(<String, dynamic>{});
-    final Map<String, dynamic> result = response['result']! as Map<String, dynamic>;
-    expect(result[kResultType], kResultTypeSuccess);
-    expect(result['variants'], expectedOptions);
   });
 
   testWithoutContext('VmService forward flutterGetIOSBuildOptions request and response correctly when no iOS project', () async {
@@ -940,15 +911,10 @@ void main() {
 class MockFlutterProject extends Fake implements FlutterProject {
   MockFlutterProject({
     IosProject? mockedIos,
-    AndroidProject? mockedAndroid,
-  }) : ios = mockedIos ?? MockIosProject(),
-       android = mockedAndroid ?? MockAndroidProject();
+  }) : ios = mockedIos ?? MockIosProject();
 
   @override
   final IosProject ios;
-
-  @override
-  final AndroidProject android;
 }
 
 class MockIosProject extends Fake implements IosProject {
@@ -958,15 +924,6 @@ class MockIosProject extends Fake implements IosProject {
 
   @override
   Future<XcodeProjectInfo?> projectInfo() async => mockedInfo;
-}
-
-class MockAndroidProject extends Fake implements AndroidProject {
-  MockAndroidProject({this.mockedOptions = const <String>[]});
-
-  final List<String> mockedOptions;
-
-  @override
-  Future<List<String>> getBuildVariants() async => mockedOptions;
 }
 
 class MockLogger extends Fake implements Logger { }
