@@ -74,10 +74,12 @@ class WebDriverService extends DriverService {
         DebuggingOptions.disabled(
           buildInfo,
           port: debuggingOptions.port,
+          hostname: debuggingOptions.hostname,
         )
         : DebuggingOptions.enabled(
           buildInfo,
           port: debuggingOptions.port,
+          hostname: debuggingOptions.hostname,
           disablePortPublication: debuggingOptions.disablePortPublication,
         ),
       stayResident: true,
@@ -116,11 +118,11 @@ class WebDriverService extends DriverService {
       throw ToolExit('Failed to start application');
     }
 
-    _webUri = _residentRunner.uri;
-
-    if (_webUri == null) {
+    if (_residentRunner.uri == null) {
       throw ToolExit('Unable to connect to the app. URL not available.');
     }
+
+    _webUri = Uri.tryParse(debuggingOptions.webLaunchUrl ?? '') ?? _residentRunner.uri;
   }
 
   @override
