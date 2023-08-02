@@ -125,7 +125,7 @@ class WebDriverService extends DriverService {
       throw ToolExit('Unable to connect to the app. URL not available.');
     }
 
-    if(debuggingOptions.webLaunchUrl != null){
+    if (debuggingOptions.webLaunchUrl != null) {
       // It should thow an error if the provided url is invalid so no tryParse
       _webUri = Uri.parse(debuggingOptions.webLaunchUrl!);
     } else {
