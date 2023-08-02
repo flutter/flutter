@@ -53,7 +53,9 @@ void main() {
     expect(find.byType(InputChip), findsNWidgets(1));
 
     await tester.tap(find.descendant(
-        of: find.byType(InputChip), matching: find.byType(InkWell).last));
+      of: find.byType(InputChip),
+      matching: find.byType(InkWell).last,
+    ));
     await tester.pumpAndSettle();
     expect(find.byType(InputChip), findsNWidgets(0));
   });
