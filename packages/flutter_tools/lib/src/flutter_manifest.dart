@@ -3,13 +3,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
-import 'asset.dart';
-import 'base/common.dart';
 import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -342,43 +339,33 @@ class FlutterManifest {
     return results;
   }
 
-  late final Map<Uri, List<AssetTransformer>> transformedAssets = _computeTransformedAssets();
+  late final List<AssetTransformerEntry> assetTransformers = _parseAssetTransformers();
 
-  Map<Uri, List<AssetTransformer>> _computeTransformedAssets() {
-
-    final Map<Uri, List<AssetTransformer>>  result = <Uri, List<AssetTransformer>>{};
-
+  List<AssetTransformerEntry> _parseAssetTransformers() {
     const String assetTransformersKey = 'asset-transformers';
 
     if (!_flutterDescriptor.containsKey(assetTransformersKey)) {
-      return <Uri, List<AssetTransformer>>{};
+      return <AssetTransformerEntry>[];
     }
 
     final List<YamlMap> transformers = (_flutterDescriptor[assetTransformersKey]! as YamlList).value.cast();
 
+    return transformers.map((YamlMap transformerEntry) {
+      final List<Uri> assetUris =
+        _parseAssetMap(transformerEntry['assets']! as List<Object?> );
 
-    for (final YamlMap transformerEntry in transformers) {
-      final AssetTransformer transformer = AssetTransformer(
+      final AssetTransformerEntry transformer = AssetTransformerEntry(
+          assets: assetUris,
           package: transformerEntry['package']! as String,
           executable: transformerEntry['executable'] as String?,
           args: transformerEntry['args'] as String?,
-        );
+      );
 
-      final List<Uri> assetUris =
-        _parseAssetMap(transformerEntry['assets']! as List<Object?>, allowGlobs: true);
-      for (final Uri assetUri in assetUris) {
-        // todo fix hack
-        final Uri hackedUri = Uri(path: assetUri.path.replaceFirst('/Users/andrewkolos/Desktop/asset_transformers_test/', ''));
-        final List<AssetTransformer> transformerList = result[hackedUri] ??= <AssetTransformer>[];
-        transformerList.add(transformer);
-      }
-    }
-    return result;
+      return transformer;
+    }).toList();
   }
 
-  List<Uri> _parseAssetMap(List<Object?> assetsEntry, {
-    bool allowGlobs = false,
-  }) {
+  List<Uri> _parseAssetMap(List<Object?> assetsEntry) {
     final List<Uri> results = <Uri>[];
 
     for (final Object? asset in assetsEntry) {
@@ -386,26 +373,10 @@ class FlutterManifest {
         _logger.printError('Asset manifest contains a null or empty entry.');
         continue;
       }
-      if (allowGlobs) {
-        try {
-          final Glob glob = Glob('/Users/andrewkolos/Desktop/asset_transformers_test/$asset');
-          for (final FileSystemEntity entity in glob.listFileSystemSync(globals.fs)) { // todo replace global reference
-            final List<Uri> uris = switch (entity) {
-              File(uri: final Uri uri) => <Uri>[uri],
-              Directory(uri: final Uri uri) => <Uri>[uri],
-              _ => throw ToolExit('hi') // todo
-            };
-            results.addAll(uris);
-          }
-        } on Exception catch (e) {
-          _logger.printError('Unable to process entry in asset manifest: $asset.\n$e');
-        }
-      } else {
-        try {
-          results.add(Uri(pathSegments: asset.split('/')));
-        } on FormatException {
-          _logger.printError('Asset manifest contains invalid uri: $asset.');
-        }
+      try {
+        results.add(Uri(pathSegments: asset.split('/')));
+      } on FormatException {
+        _logger.printError('Asset manifest contains invalid uri: $asset.');
       }
     }
     return results;
@@ -540,6 +511,20 @@ class FontAsset {
 
   @override
   String toString() => '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
+}
+
+class AssetTransformerEntry {
+  AssetTransformerEntry({
+    required this.assets,
+    required this.package,
+    this.executable,
+    this.args,
+  });
+
+  final List<Uri> assets;
+  final String package;
+  final String? executable;
+  final String? args;
 }
 
 bool _validate(Object? manifest, Logger logger) {

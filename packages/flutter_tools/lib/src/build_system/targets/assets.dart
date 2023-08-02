@@ -13,6 +13,7 @@ import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
+import '../../flutter_manifest.dart';
 import '../../globals.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -127,11 +128,12 @@ Future<Depfile> copyAssets(
           bool doCopy = true;
           switch (assetKind) {
             case AssetKind.regular:
-              break;
-            case AssetKind.transformed:
+              final List<AssetTransformerEntry>? transformers = assetBundle.transformers[entry.key];
+              if (transformers == null || transformers.isEmpty) {
+                break;
+              }
               doCopy = false;
-              //print(entry.key);
-              await _transformAsset(
+              await _transformAsset( // todo should this return a boolean that we set doCopy to?
                 content.file.path,
                 file.path,
                 assetBundle.transformers[entry.key]!,
@@ -348,14 +350,14 @@ class CopyAssets extends Target {
 Future<void> _transformAsset(
   String asset,
   String output,
-  List<AssetTransformer> transformers, {
+  List<AssetTransformerEntry> transformers, {
   required FileSystem fileSystem,
   required Logger logger,
 }) async {
   final String dartBinary = artifacts!.getArtifactPath(Artifact.engineDartBinary);
 
   for (int i = 0; i < transformers.length; i++) {
-    final AssetTransformer transformer = transformers[i];
+    final AssetTransformerEntry transformer = transformers[i];
 
     final List<String> transformerArguments = <String>[
       ...(transformer.args ?? '').split(r'\w+'),
@@ -365,17 +367,11 @@ Future<void> _transformAsset(
         '--input=$output',
       '--output=$output',
     ];
-    print('$dartBinary ${
-      <String>[
-        'run',
-        '${transformer.package}', // TODO should executable be required?
-        ...transformerArguments,
-      ].join(' ')}');
     final ProcessResult result = await Process.run(
       dartBinary,
       <String>[
         'run',
-        '${transformer.package}', // TODO should executable be required?
+        transformer.package,
         ...transformerArguments,
       ],
       workingDirectory: '/Users/andrewkolos/Desktop/asset_transformers_test/'
@@ -383,6 +379,7 @@ Future<void> _transformAsset(
     if (result.exitCode != 0) {
       throwToolExit(result.stderr as String);
     }
+    // todo this won't work for subsequent transformations
     if (!await fileSystem.file(output).exists()) {
         throwToolExit('Transformer ${transformer.package} did not produce an output.\n'
         'Input: $asset\n'

@@ -179,6 +179,7 @@ Future<void> writeBundle(
           bool doCopy = true;
           switch (assetKind) {
             case AssetKind.regular:
+              // todo may need to handle asset transformation here
               break;
             case AssetKind.font:
               break;
@@ -194,8 +195,6 @@ Future<void> writeBundle(
                 input: input,
                 outputPath: file.path,
               );
-            case AssetKind.transformed:
-              // TODO: Handle this case.
           }
           if (doCopy) {
             input.copySync(file.path);

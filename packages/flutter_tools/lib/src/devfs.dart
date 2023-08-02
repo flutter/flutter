@@ -690,6 +690,7 @@ class DevFS {
               }
             });
           case AssetKind.regular:
+            // todo do we need to handle transforms here
           case AssetKind.font:
           case null:
             dirtyEntries[deviceUri] = content;
@@ -697,8 +698,6 @@ class DevFS {
             if (!bundleFirstUpload) {
               assetPathsToEvict.add(archivePath);
             }
-            case AssetKind.transformed:
-              throwToolExit('hi'); //todo
         }
       });
 
