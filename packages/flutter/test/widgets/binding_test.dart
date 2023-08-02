@@ -53,7 +53,10 @@ class RentrantObserver implements WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
   }
 
+  bool active = true;
+
   int removeSelf() {
+    active = false;
     int count = 0;
     while (WidgetsBinding.instance.removeObserver(this)) {
       count += 1;
@@ -63,59 +66,70 @@ class RentrantObserver implements WidgetsBindingObserver {
 
   @override
   void didChangeAccessibilityFeatures() {
+    assert(active);
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    assert(active);
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void didChangeLocales(List<Locale>? locales) {
+    assert(active);
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void didChangeMetrics() {
+    assert(active);
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void didChangePlatformBrightness() {
+    assert(active);
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void didChangeTextScaleFactor() {
+    assert(active);
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void didHaveMemoryPressure() {
+    assert(active);
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   Future<bool> didPopRoute() {
+    assert(active);
     WidgetsBinding.instance.addObserver(this);
     return Future<bool>.value(true);
   }
 
   @override
   Future<bool> didPushRoute(String route) {
+    assert(active);
     WidgetsBinding.instance.addObserver(this);
     return Future<bool>.value(true);
   }
 
   @override
   Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
+    assert(active);
     WidgetsBinding.instance.addObserver(this);
     return Future<bool>.value(true);
   }
 
   @override
   Future<AppExitResponse> didRequestAppExit() {
+    assert(active);
     WidgetsBinding.instance.addObserver(this);
     return Future<AppExitResponse>.value(AppExitResponse.exit);
   }
@@ -141,7 +155,9 @@ void main() {
     WidgetsBinding.instance.handlePopRoute();
     WidgetsBinding.instance.handlePushRoute('/');
     WidgetsBinding.instance.handleRequestAppExit();
-    expect(observer.removeSelf(), greaterThan(11));
+    await tester.idle();
+    expect(observer.removeSelf(), greaterThan(1));
+    expect(observer.removeSelf(), 0);
   });
 
   testWidgets('didHaveMemoryPressure callback', (WidgetTester tester) async {
@@ -209,6 +225,7 @@ void main() {
 
     observer.accumulatedStates.clear();
     await expectLater(() async => setAppLifeCycleState(AppLifecycleState.detached), throwsAssertionError);
+    WidgetsBinding.instance.removeObserver(observer);
   });
 
   testWidgets('didPushRoute callback', (WidgetTester tester) async {
