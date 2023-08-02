@@ -737,6 +737,18 @@ void _addOpenGLESToManifest(String testDirectory) {
   file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
 }
 
+Future<void> _resetManifest(String testDirectory) async {
+  final String manifestPath = path.join(
+      testDirectory, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
+  final File file = File(manifestPath);
+
+  if (!file.existsSync()) {
+    throw Exception('AndroidManifest.xml not found at $manifestPath');
+  }
+
+  await exec('git', <String>['checkout', file.path]);
+}
+
 /// Measure application startup performance.
 class StartupTest {
   const StartupTest(this.testDirectory, { this.reportMetrics = true, this.target = 'lib/main.dart' });
@@ -1130,45 +1142,55 @@ class PerfTest {
       final String? localEngine = localEngineFromEnv;
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
+      Future<void> Function()? manifestReset;
       if (forceOpenGLES ?? false) {
         assert(enableImpeller!);
         _addOpenGLESToManifest(testDirectory);
+        manifestReset = () => _resetManifest(testDirectory);
       }
 
-      final List<String> options = <String>[
-        if (localEngine != null)
-          ...<String>['--local-engine', localEngine],
-        if (localEngineSrcPath != null)
-          ...<String>['--local-engine-src-path', localEngineSrcPath],
-        '--no-dds',
-        '--no-android-gradle-daemon',
-        '-v',
-        '--verbose-system-logs',
-        '--profile',
-        if (timeoutSeconds != null)
-          ...<String>[
+      try {
+        final List<String> options = <String>[
+          if (localEngine != null) ...<String>['--local-engine', localEngine],
+          if (localEngineSrcPath != null) ...<String>[
+            '--local-engine-src-path',
+            localEngineSrcPath
+          ],
+          '--no-dds',
+          '--no-android-gradle-daemon',
+          '-v',
+          '--verbose-system-logs',
+          '--profile',
+          if (timeoutSeconds != null) ...<String>[
             '--timeout',
             timeoutSeconds.toString(),
           ],
-        if (needsFullTimeline)
-          '--trace-startup', // Enables "endless" timeline event buffering.
-        '-t', testTarget,
-        if (testDriver != null)
-          ...<String>['--driver', testDriver!],
-        if (existingApp != null)
-          ...<String>['--use-existing-app', existingApp],
-        if (dartDefine.isNotEmpty)
-          ...<String>['--dart-define', dartDefine],
-        if (enableImpeller != null && enableImpeller!) '--enable-impeller',
-        if (enableImpeller != null && !enableImpeller!) '--no-enable-impeller',
-        '-d',
-        deviceId,
-      ];
-      if (flutterDriveCallback != null) {
-        flutterDriveCallback!(options);
-      } else {
-        await flutter('drive', options: options);
+          if (needsFullTimeline)
+            '--trace-startup', // Enables "endless" timeline event buffering.
+          '-t', testTarget,
+          if (testDriver != null) ...<String>['--driver', testDriver!],
+          if (existingApp != null) ...<String>[
+            '--use-existing-app',
+            existingApp
+          ],
+          if (dartDefine.isNotEmpty) ...<String>['--dart-define', dartDefine],
+          if (enableImpeller != null && enableImpeller!) '--enable-impeller',
+          if (enableImpeller != null && !enableImpeller!)
+            '--no-enable-impeller',
+          '-d',
+          deviceId,
+        ];
+        if (flutterDriveCallback != null) {
+          flutterDriveCallback!(options);
+        } else {
+          await flutter('drive', options: options);
+        }
+      } finally {
+        if (manifestReset != null) {
+          await manifestReset();
+        }
       }
+
       final Map<String, dynamic> data = json.decode(
         file('${_testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
