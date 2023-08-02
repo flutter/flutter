@@ -164,6 +164,71 @@ void main() {
         ),
       });
 
+      testUsingContext('restores terminal to singleCharMode == false on command exit', () async {
+        final FakeIOSDevice device = FakeIOSDevice(
+          portForwarder: portForwarder,
+          majorSdkVersion: 12,
+          onGetLogReader: () {
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
+          },
+        );
+        testDeviceManager.devices = <Device>[device];
+        final Completer<void> completer = Completer<void>();
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
+            completer.complete();
+          }
+        });
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async {
+          appStartedCompleter?.complete();
+          return 0;
+        };
+        hotRunner.exited = false;
+        hotRunner.isWaitingForVmService = false;
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+          ..hotRunner = hotRunner;
+
+        await createTestCommandRunner(AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          artifacts: artifacts,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        )).run(<String>['attach']);
+        await Future.wait<void>(<Future<void>>[
+          completer.future,
+          fakeLogReader.dispose(),
+          loggerSubscription.cancel(),
+        ]);
+
+        expect(terminal.singleCharMode, isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          logger: logger,
+          flutterUsage: TestUsage(),
+        ),
+        Signals: () => FakeSignals(),
+      });
+
       testUsingContext('succeeds with iOS device with mDNS', () async {
         final FakeIOSDevice device = FakeIOSDevice(
           portForwarder: portForwarder,
@@ -1053,6 +1118,15 @@ class FakeHotRunner extends Fake implements HotRunner {
   }) {
     return onAttach(connectionInfoCompleter, appStartedCompleter, allowExistingDdsInstance, enableDevTools);
   }
+
+  @override
+  bool supportsServiceProtocol = false;
+
+  @override
+  bool stayResident = true;
+
+  @override
+  void printHelp({required bool details}) {}
 }
 
 class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
@@ -1479,4 +1553,10 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 
   @override
   bool usesTerminalUi = false;
+
+  @override
+  bool singleCharMode = false;
+
+  @override
+  Stream<String> get keystrokes => StreamController<String>().stream;
 }
