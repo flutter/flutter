@@ -22,8 +22,6 @@ void main() {
 
     const Key textKey = Key('text');
 
-    //TextStyle style =TextStyle(fontSize: 10);
-
     await tester.pumpWidget(
       Center(
         child: RichText(
