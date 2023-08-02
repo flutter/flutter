@@ -180,6 +180,7 @@ class _BottomNavTabState extends State<_BottomNavTab> {
           return;
         }
 
+        // Otherwise, remove the topmost page.
         assert(widget.pages.isNotEmpty);
         widget.onChangedPages(<_TabPage>[
           ...widget.pages,
@@ -273,39 +274,6 @@ class _LinksPage extends StatelessWidget {
           children: <Widget>[
             Text(title),
             ...buttons,
-            TextButton(
-              onPressed: () {
-                showDialog<void>(
-                  // This causes the nested Navigator to be used to handle the
-                  // dialog's route.
-                  useRootNavigator: false,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Basic dialog title'),
-                      content: const Text(
-                        'A dialog is a type of modal window that\n'
-                        'appears in front of app content to\n'
-                        'provide critical information, or prompt\n'
-                        'for a decision to be made.',
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            textStyle: Theme.of(context).textTheme.labelLarge,
-                          ),
-                          child: const Text('Close'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              child: const Text('Show dialog'),
-            ),
           ],
         ),
       ),
