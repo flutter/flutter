@@ -5,6 +5,7 @@
 // This sample demonstrates nested navigation in a bottom navigation bar.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 // There are three possible tabs.
 enum _Tab {
@@ -82,7 +83,7 @@ class _BottomNavPageState extends State<_BottomNavPage> {
         return _BottomNavTab(
           key: _tabHomeKey,
           title: 'Home Tab',
-          color: Colors.brown,
+          color: Colors.grey,
           pages: _tabHomePages,
           onChangedPages: (List<_TabPage> pages) {
             setState(() {
@@ -94,7 +95,7 @@ class _BottomNavPageState extends State<_BottomNavPage> {
         return _BottomNavTab(
           key: _tabOneKey,
           title: 'Tab One',
-          color: Colors.deepPurple,
+          color: Colors.amber,
           pages: _tabOnePages,
           onChangedPages: (List<_TabPage> pages) {
             setState(() {
@@ -139,7 +140,7 @@ class _BottomNavPageState extends State<_BottomNavPage> {
   }
 }
 
-class _BottomNavTab extends StatelessWidget {
+class _BottomNavTab extends StatefulWidget {
   const _BottomNavTab({
     super.key,
     required this.color,
@@ -153,7 +154,15 @@ class _BottomNavTab extends StatelessWidget {
   final List<_TabPage> pages;
   final String title;
 
-  bool get _canPop => pages.length <= 1;
+  @override
+  State<_BottomNavTab> createState() => _BottomNavTabState();
+}
+
+class _BottomNavTabState extends State<_BottomNavTab> {
+  bool _navigatorCanHandlePop = false;
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
+  bool get _canPop => widget.pages.length <= 1 && !_navigatorCanHandlePop;
 
   @override
   Widget build(BuildContext context) {
@@ -163,59 +172,81 @@ class _BottomNavTab extends StatelessWidget {
         if (didPop) {
           return;
         }
-        onChangedPages(<_TabPage>[
-          ...pages,
+
+        // The Navigator may be able to pop if a dialog is shown, for example.
+        final NavigatorState navigatorState = _navigatorKey.currentState!;
+        if (navigatorState.canPop()) {
+          navigatorState.pop();
+          return;
+        }
+
+        assert(widget.pages.isNotEmpty);
+        widget.onChangedPages(<_TabPage>[
+          ...widget.pages,
         ]..removeLast());
       },
-      child: Navigator(
-        onPopPage: (Route<void> route, void result) {
-          if (!route.didPop(null)) {
-            return false;
+      child: NotificationListener<NavigationNotification>(
+        onNotification: (NavigationNotification notification) {
+          if (mounted) {
+            SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+              setState(() {
+                _navigatorCanHandlePop = notification.canHandlePop;
+              });
+            });
           }
-          onChangedPages(<_TabPage>[
-            ...pages,
-          ]..removeLast());
-          return true;
+          return false;
         },
-        pages: pages.map((_TabPage page) {
-          switch (page) {
-            case _TabPage.home:
-              return MaterialPage<void>(
-                child: _LinksPage(
-                  title: 'Bottom nav - tab $title - route $page',
-                  backgroundColor: color,
-                  buttons: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        onChangedPages(<_TabPage>[
-                          ...pages,
-                          _TabPage.one,
-                        ]);
-                      },
-                      child: const Text('Go to another route in this nested Navigator'),
-                    ),
-                  ],
-                ),
-              );
-            case _TabPage.one:
-              return MaterialPage<void>(
-                child: _LinksPage(
-                  backgroundColor: color,
-                  title: 'Bottom nav - tab $title - route $page',
-                  buttons: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        onChangedPages(<_TabPage>[
-                          ...pages,
-                        ]..removeLast());
-                      },
-                      child: const Text('Go back'),
-                    ),
-                  ],
-                ),
-              );
-          }
-        }).toList(),
+        child: Navigator(
+          key: _navigatorKey,
+          onPopPage: (Route<void> route, void result) {
+            if (!route.didPop(null)) {
+              return false;
+            }
+            widget.onChangedPages(<_TabPage>[
+              ...widget.pages,
+            ]..removeLast());
+            return true;
+          },
+          pages: widget.pages.map((_TabPage page) {
+            switch (page) {
+              case _TabPage.home:
+                return MaterialPage<void>(
+                  child: _LinksPage(
+                    title: 'Bottom nav - tab ${widget.title} - route $page',
+                    backgroundColor: widget.color,
+                    buttons: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          widget.onChangedPages(<_TabPage>[
+                            ...widget.pages,
+                            _TabPage.one,
+                          ]);
+                        },
+                        child: const Text('Go to another route in this nested Navigator'),
+                      ),
+                    ],
+                  ),
+                );
+              case _TabPage.one:
+                return MaterialPage<void>(
+                  child: _LinksPage(
+                    backgroundColor: widget.color,
+                    title: 'Bottom nav - tab ${widget.title} - route $page',
+                    buttons: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          widget.onChangedPages(<_TabPage>[
+                            ...widget.pages,
+                          ]..removeLast());
+                        },
+                        child: const Text('Go back'),
+                      ),
+                    ],
+                  ),
+                );
+            }
+          }).toList(),
+        ),
       ),
     );
   }
@@ -242,6 +273,39 @@ class _LinksPage extends StatelessWidget {
           children: <Widget>[
             Text(title),
             ...buttons,
+            TextButton(
+              onPressed: () {
+                showDialog<void>(
+                  // This causes the nested Navigator to be used to handle the
+                  // dialog's route.
+                  useRootNavigator: false,
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Basic dialog title'),
+                      content: const Text(
+                        'A dialog is a type of modal window that\n'
+                        'appears in front of app content to\n'
+                        'provide critical information, or prompt\n'
+                        'for a decision to be made.',
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            textStyle: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          child: const Text('Close'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: const Text('Show dialog'),
+            ),
           ],
         ),
       ),
