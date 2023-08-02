@@ -5,6 +5,8 @@
 #pragma once
 
 #include <EGL/egl.h>
+#define EGL_EGLEXT_PROTOTYPES
+#include <EGL/eglext.h>
 
 #include <functional>
 

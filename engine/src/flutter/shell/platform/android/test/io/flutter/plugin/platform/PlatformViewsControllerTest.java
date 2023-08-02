@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.MutableContextWrapper;
 import android.content.res.AssetManager;
 import android.graphics.SurfaceTexture;
+import android.media.Image;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -1564,6 +1565,27 @@ public class PlatformViewsControllerTest {
 
               @Override
               public void release() {}
+            };
+          }
+
+          @Override
+          public ImageTextureEntry createImageTexture() {
+            return new ImageTextureEntry() {
+              @Override
+              public long id() {
+                return 0;
+              }
+
+              @Override
+              public void release() {}
+
+              @Override
+              public void pushImage(Image image) {}
+
+              @Override
+              public Image acquireLatestImage() {
+                return null;
+              }
             };
           }
         };
