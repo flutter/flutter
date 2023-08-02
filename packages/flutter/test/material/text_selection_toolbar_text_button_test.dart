@@ -62,4 +62,64 @@ void main() {
     expect(onlySize.width, greaterThan(firstSize.width));
     expect(onlySize.width, greaterThan(lastSize.width));
   });
+
+  for (final ColorScheme colorScheme in <ColorScheme>[ThemeData.light().colorScheme, ThemeData.dark().colorScheme]) {
+    testWidgetsWithLeakTracking('theme color by default', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: colorScheme,
+          ),
+          home: Scaffold(
+            body: Center(
+              child: TextSelectionToolbarTextButton(
+                padding: TextSelectionToolbarTextButton.getPadding(0, 1),
+                child: const Text('button'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(TextButton), findsOneWidget);
+
+      final TextButton textButton = tester.widget(find.byType(TextButton));
+      expect(
+        textButton.style!.foregroundColor!.resolve(<MaterialState>{}),
+        colorScheme.onSurface,
+      );
+    });
+  }
+
+  for (final ColorScheme colorScheme in <ColorScheme>[ThemeData.light().colorScheme, ThemeData.dark().colorScheme]) {
+    testWidgetsWithLeakTracking('custom theme foreground color', (WidgetTester tester) async {
+      const Color foregroundColor = Colors.red;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: colorScheme.copyWith(
+              onSurface: foregroundColor,
+            ),
+          ),
+          home: Scaffold(
+            body: Center(
+              child: TextSelectionToolbarTextButton(
+                padding: TextSelectionToolbarTextButton.getPadding(0, 1),
+                child: const Text('button'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(TextButton), findsOneWidget);
+
+      final TextButton textButton = tester.widget(find.byType(TextButton));
+      expect(
+        textButton.style!.foregroundColor!.resolve(<MaterialState>{}),
+        foregroundColor,
+      );
+    });
+  }
 }
