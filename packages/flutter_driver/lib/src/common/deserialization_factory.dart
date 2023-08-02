@@ -15,6 +15,7 @@ import 'render_tree.dart';
 import 'request_data.dart';
 import 'semantics.dart';
 import 'text.dart';
+import 'text_input_action.dart';
 import 'wait.dart';
 
 /// A factory for deserializing [Finder]s.
@@ -46,6 +47,7 @@ mixin DeserializeCommandFactory {
       case 'get_layer_tree': return GetLayerTree.deserialize(params);
       case 'get_render_tree': return GetRenderTree.deserialize(params);
       case 'enter_text': return EnterText.deserialize(params);
+      case 'send_text_input_action': return SendTextInputAction.deserialize(params);
       case 'get_text': return GetText.deserialize(params, finderFactory);
       case 'request_data': return RequestData.deserialize(params);
       case 'scroll': return Scroll.deserialize(params, finderFactory);
