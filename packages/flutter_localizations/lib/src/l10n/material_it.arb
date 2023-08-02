@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "espandere e visualizzare altri dettagli",
   "expandedHint": "Compresso",
   "collapsedHint": "Espanso",
-  "menuDismissLabel": "Ignora menu"
+  "menuDismissLabel": "Ignora menu",
+  "lookUpButtonLabel": "Look Up"
 }

@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "Luaskan untuk mengetahui detail selengkapnya",
   "expandedHint": "Diciutkan",
   "collapsedHint": "Diluaskan",
-  "menuDismissLabel": "Tutup menu"
+  "menuDismissLabel": "Tutup menu",
+  "lookUpButtonLabel": "Look Up"
 }

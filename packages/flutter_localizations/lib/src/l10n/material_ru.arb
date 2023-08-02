@@ -149,5 +149,6 @@
   "expansionTileCollapsedTapHint": "Развернуть дополнительные сведения",
   "expandedHint": "Свернуто",
   "collapsedHint": "Развернуто",
-  "menuDismissLabel": "Закрыть меню"
+  "menuDismissLabel": "Закрыть меню",
+  "lookUpButtonLabel": "Look Up"
 }

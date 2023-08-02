@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "खारेज गर्नुहोस्",
   "searchTextFieldPlaceholderLabel": "खोज्नुहोस्",
   "noSpellCheckReplacementsLabel": "बदल्नु पर्ने कुनै पनि कुरा भेटिएन",
-  "menuDismissLabel": "मेनु खारेज गर्नुहोस्"
+  "menuDismissLabel": "मेनु खारेज गर्नुहोस्",
+  "lookUpButtonLabel": "Look Up"
 }

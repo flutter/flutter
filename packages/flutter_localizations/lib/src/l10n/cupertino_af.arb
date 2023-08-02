@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Maak toe",
   "searchTextFieldPlaceholderLabel": "Soek",
   "noSpellCheckReplacementsLabel": "Geen plaasvervangers gevind nie",
-  "menuDismissLabel": "Maak kieslys toe"
+  "menuDismissLabel": "Maak kieslys toe",
+  "lookUpButtonLabel": "Look Up"
 }

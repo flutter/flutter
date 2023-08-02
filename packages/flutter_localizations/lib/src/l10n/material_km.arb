@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "ពង្រីក​ដើម្បីទទួលបាន​ព័ត៌មានលម្អិត​បន្ថែម",
   "expandedHint": "បាន​បង្រួម",
   "collapsedHint": "បាន​ពង្រីក",
-  "menuDismissLabel": "ច្រានចោល​ម៉ឺនុយ"
+  "menuDismissLabel": "ច្រានចោល​ម៉ឺនុយ",
+  "lookUpButtonLabel": "Look Up"
 }

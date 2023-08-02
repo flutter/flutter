@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "ඉවත ලන්න",
   "searchTextFieldPlaceholderLabel": "සෙවීම",
   "noSpellCheckReplacementsLabel": "ප්‍රතිස්ථාපන හමු නොවිණි",
-  "menuDismissLabel": "මෙනුව අස් කරන්න"
+  "menuDismissLabel": "මෙනුව අස් කරන්න",
+  "lookUpButtonLabel": "Look Up"
 }

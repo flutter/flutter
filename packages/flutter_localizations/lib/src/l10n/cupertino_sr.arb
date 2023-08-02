@@ -28,5 +28,6 @@
   "modalBarrierDismissLabel": "Одбаци",
   "searchTextFieldPlaceholderLabel": "Претражите",
   "noSpellCheckReplacementsLabel": "Нису пронађене замене",
-  "menuDismissLabel": "Одбаците мени"
+  "menuDismissLabel": "Одбаците мени",
+  "lookUpButtonLabel": "Look Up"
 }

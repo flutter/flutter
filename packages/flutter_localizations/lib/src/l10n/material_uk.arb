@@ -148,5 +148,6 @@
   "expansionTileCollapsedTapHint": "Розгорнути й дізнатися більше",
   "expandedHint": "Згорнуто",
   "collapsedHint": "Розгорнуто",
-  "menuDismissLabel": "Закрити меню"
+  "menuDismissLabel": "Закрити меню",
+  "lookUpButtonLabel": "Look Up"
 }

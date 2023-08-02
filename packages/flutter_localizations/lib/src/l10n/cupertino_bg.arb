@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Отхвърляне",
   "searchTextFieldPlaceholderLabel": "Търсене",
   "noSpellCheckReplacementsLabel": "Не бяха намерени замествания",
-  "menuDismissLabel": "Отхвърляне на менюто"
+  "menuDismissLabel": "Отхвърляне на менюто",
+  "lookUpButtonLabel": "Look Up"
 }

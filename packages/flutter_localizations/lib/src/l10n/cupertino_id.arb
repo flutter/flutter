@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Tutup",
   "searchTextFieldPlaceholderLabel": "Telusuri",
   "noSpellCheckReplacementsLabel": "Penggantian Tidak Ditemukan",
-  "menuDismissLabel": "Tutup menu"
+  "menuDismissLabel": "Tutup menu",
+  "lookUpButtonLabel": "Look Up"
 }

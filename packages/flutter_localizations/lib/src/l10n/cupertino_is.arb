@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Hunsa",
   "searchTextFieldPlaceholderLabel": "Leit",
   "noSpellCheckReplacementsLabel": "Engir staðgenglar fundust",
-  "menuDismissLabel": "Loka valmynd"
+  "menuDismissLabel": "Loka valmynd",
+  "lookUpButtonLabel": "Look Up"
 }

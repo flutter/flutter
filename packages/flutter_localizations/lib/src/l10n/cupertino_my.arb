@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "ပယ်ရန်",
   "searchTextFieldPlaceholderLabel": "ရှာရန်",
   "noSpellCheckReplacementsLabel": "အစားထိုးမှုများ မတွေ့ပါ",
-  "menuDismissLabel": "မီနူးကိုပယ်ပါ"
+  "menuDismissLabel": "မီနူးကိုပယ်ပါ",
+  "lookUpButtonLabel": "Look Up"
 }

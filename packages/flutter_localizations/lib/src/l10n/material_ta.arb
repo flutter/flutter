@@ -143,5 +143,6 @@
   "expansionTileCollapsedTapHint": "கூடுதல் விவரங்களுக்கு விரிவாக்கலாம்",
   "expandedHint": "சுருக்கப்பட்டது",
   "collapsedHint": "விரிவாக்கப்பட்டது",
-  "menuDismissLabel": "மெனுவை மூடும்"
+  "menuDismissLabel": "மெனுவை மூடும்",
+  "lookUpButtonLabel": "Look Up"
 }

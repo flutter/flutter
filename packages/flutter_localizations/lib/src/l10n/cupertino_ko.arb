@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "닫기",
   "searchTextFieldPlaceholderLabel": "검색",
   "noSpellCheckReplacementsLabel": "수정사항 없음",
-  "menuDismissLabel": "메뉴 닫기"
+  "menuDismissLabel": "메뉴 닫기",
+  "lookUpButtonLabel": "Look Up"
 }

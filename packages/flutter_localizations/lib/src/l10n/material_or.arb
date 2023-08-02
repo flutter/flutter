@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "ଅଧିକ ବିବରଣୀ ପାଇଁ ବିସ୍ତାର କରନ୍ତୁ",
   "expandedHint": "ସଙ୍କୁଚିତ କରାଯାଇଛି",
   "collapsedHint": "ବିସ୍ତାର କରାଯାଇଛି",
-  "menuDismissLabel": "ମେନୁ ଖାରଜ କରନ୍ତୁ"
+  "menuDismissLabel": "ମେନୁ ଖାରଜ କରନ୍ତୁ",
+  "lookUpButtonLabel": "Look Up"
 }

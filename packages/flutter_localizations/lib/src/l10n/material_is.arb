@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "Stækka til að sjá frekari upplýsingar",
   "expandedHint": "Minnkað",
   "collapsedHint": "Stækkað",
-  "menuDismissLabel": "Loka valmynd"
+  "menuDismissLabel": "Loka valmynd",
+  "lookUpButtonLabel": "Look Up"
 }

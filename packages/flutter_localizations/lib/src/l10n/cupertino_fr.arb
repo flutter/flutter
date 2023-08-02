@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Ignorer",
   "searchTextFieldPlaceholderLabel": "Rechercher",
   "noSpellCheckReplacementsLabel": "Aucun remplacement trouvé",
-  "menuDismissLabel": "Fermer le menu"
+  "menuDismissLabel": "Fermer le menu",
+  "lookUpButtonLabel": "Look Up"
 }

@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "ለተጨማሪ ዝርዝሮች ይዘርጉ",
   "expandedHint": "ተሰብስቧል",
   "collapsedHint": "ተዘርግቷል",
-  "menuDismissLabel": "ምናሌን አሰናብት"
+  "menuDismissLabel": "ምናሌን አሰናብት",
+  "lookUpButtonLabel": "Look Up"
 }

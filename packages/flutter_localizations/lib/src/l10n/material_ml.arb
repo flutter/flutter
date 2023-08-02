@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "കൂടുതൽ വിശദാംശങ്ങൾക്ക് വികസിപ്പിക്കുക",
   "expandedHint": "ചുരുക്കി",
   "collapsedHint": "വികസിപ്പിച്ചു",
-  "menuDismissLabel": "മെനു ഡിസ്മിസ് ചെയ്യുക"
+  "menuDismissLabel": "മെനു ഡിസ്മിസ് ചെയ്യുക",
+  "lookUpButtonLabel": "Look Up"
 }

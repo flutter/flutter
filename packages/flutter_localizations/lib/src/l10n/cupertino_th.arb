@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "ปิด",
   "searchTextFieldPlaceholderLabel": "ค้นหา",
   "noSpellCheckReplacementsLabel": "ไม่พบรายการแทนที่",
-  "menuDismissLabel": "ปิดเมนู"
+  "menuDismissLabel": "ปิดเมนู",
+  "lookUpButtonLabel": "Look Up"
 }

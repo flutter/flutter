@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "Laiendage lisateabe nägemiseks",
   "expandedHint": "Ahendatud",
   "collapsedHint": "Laiendatud",
-  "menuDismissLabel": "Sulge menüü"
+  "menuDismissLabel": "Sulge menüü",
+  "lookUpButtonLabel": "Look Up"
 }

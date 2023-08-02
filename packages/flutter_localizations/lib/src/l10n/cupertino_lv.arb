@@ -28,5 +28,6 @@
   "modalBarrierDismissLabel": "Nerādīt",
   "searchTextFieldPlaceholderLabel": "Meklēšana",
   "noSpellCheckReplacementsLabel": "Netika atrasts neviens vārds aizstāšanai",
-  "menuDismissLabel": "Nerādīt izvēlni"
+  "menuDismissLabel": "Nerādīt izvēlni",
+  "lookUpButtonLabel": "Look Up"
 }

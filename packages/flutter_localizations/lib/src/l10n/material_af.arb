@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "Vou uit vir meer besonderhede",
   "expandedHint": "Ingevou",
   "collapsedHint": "Uitgevou",
-  "menuDismissLabel": "Maak kieslys toe"
+  "menuDismissLabel": "Maak kieslys toe",
+  "lookUpButtonLabel": "Look Up"
 }

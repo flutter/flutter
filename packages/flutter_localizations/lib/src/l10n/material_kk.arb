@@ -143,5 +143,6 @@
   "expansionTileCollapsedTapHint": "Толық мәлімет алу үшін жайыңыз.",
   "expandedHint": "Жиылды",
   "collapsedHint": "Жайылды",
-  "menuDismissLabel": "Мәзірді жабу"
+  "menuDismissLabel": "Мәзірді жабу",
+  "lookUpButtonLabel": "Look Up"
 }

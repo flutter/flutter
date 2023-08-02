@@ -148,5 +148,6 @@
   "expansionTileCollapsedTapHint": "ניתן להרחיב להצגת פרטים נוספים",
   "expandedHint": "מכווץ",
   "collapsedHint": "מורחב",
-  "menuDismissLabel": "סגירת התפריט"
+  "menuDismissLabel": "סגירת התפריט",
+  "lookUpButtonLabel": "Look Up"
 }

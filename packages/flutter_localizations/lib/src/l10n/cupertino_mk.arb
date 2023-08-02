@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Отфрли",
   "searchTextFieldPlaceholderLabel": "Пребарувајте",
   "noSpellCheckReplacementsLabel": "Не се најдени заменски зборови",
-  "menuDismissLabel": "Отфрлете го менито"
+  "menuDismissLabel": "Отфрлете го менито",
+  "lookUpButtonLabel": "Look Up"
 }

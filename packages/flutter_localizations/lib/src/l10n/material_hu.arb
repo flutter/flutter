@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "Bontsa ki a további részletek megtekintéséhez",
   "expandedHint": "Összecsukva",
   "collapsedHint": "Kibontva",
-  "menuDismissLabel": "Menü bezárása"
+  "menuDismissLabel": "Menü bezárása",
+  "lookUpButtonLabel": "Look Up"
 }

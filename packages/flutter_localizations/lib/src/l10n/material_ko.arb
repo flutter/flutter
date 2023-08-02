@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "자세히 알아보려면 펼치기",
   "expandedHint": "접힘",
   "collapsedHint": "펼침",
-  "menuDismissLabel": "메뉴 닫기"
+  "menuDismissLabel": "메뉴 닫기",
+  "lookUpButtonLabel": "Look Up"
 }

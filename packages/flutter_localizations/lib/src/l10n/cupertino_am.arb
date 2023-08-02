@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "አሰናብት",
   "searchTextFieldPlaceholderLabel": "ፍለጋ",
   "noSpellCheckReplacementsLabel": "ምንም ተተኪዎች አልተገኙም",
-  "menuDismissLabel": "ምናሌን አሰናብት"
+  "menuDismissLabel": "ምናሌን አሰናብት",
+  "lookUpButtonLabel": "Look Up"
 }

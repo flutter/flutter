@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "Udvid for at få flere oplysninger",
   "expandedHint": "Skjult",
   "collapsedHint": "Udvidet",
-  "menuDismissLabel": "Luk menu"
+  "menuDismissLabel": "Luk menu",
+  "lookUpButtonLabel": "Look Up"
 }

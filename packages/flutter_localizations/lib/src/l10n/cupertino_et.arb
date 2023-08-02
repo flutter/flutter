@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Loobu",
   "searchTextFieldPlaceholderLabel": "Otsige",
   "noSpellCheckReplacementsLabel": "Asendusi ei leitud",
-  "menuDismissLabel": "Sulge menüü"
+  "menuDismissLabel": "Sulge menüü",
+  "lookUpButtonLabel": "Look Up"
 }

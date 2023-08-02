@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Sluiten",
   "searchTextFieldPlaceholderLabel": "Zoeken",
   "noSpellCheckReplacementsLabel": "Geen vervangingen gevonden",
-  "menuDismissLabel": "Menu sluiten"
+  "menuDismissLabel": "Menu sluiten",
+  "lookUpButtonLabel": "Look Up"
 }

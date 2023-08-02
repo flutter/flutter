@@ -33,5 +33,6 @@
   "modalBarrierDismissLabel": "Закрыть",
   "searchTextFieldPlaceholderLabel": "Поиск",
   "noSpellCheckReplacementsLabel": "Варианты замены не найдены",
-  "menuDismissLabel": "Закрыть меню"
+  "menuDismissLabel": "Закрыть меню",
+  "lookUpButtonLabel": "Look Up"
 }

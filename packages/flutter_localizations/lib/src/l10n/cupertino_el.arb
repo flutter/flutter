@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Παράβλεψη",
   "searchTextFieldPlaceholderLabel": "Αναζήτηση",
   "noSpellCheckReplacementsLabel": "Δεν βρέθηκαν αντικαταστάσεις",
-  "menuDismissLabel": "Παράβλεψη μενού"
+  "menuDismissLabel": "Παράβλεψη μενού",
+  "lookUpButtonLabel": "Look Up"
 }

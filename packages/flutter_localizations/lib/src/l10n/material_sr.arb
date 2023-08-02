@@ -145,5 +145,6 @@
   "expansionTileCollapsedTapHint": "Проширите за још детаља",
   "expandedHint": "Скупљено је",
   "collapsedHint": "Проширено је",
-  "menuDismissLabel": "Одбаците мени"
+  "menuDismissLabel": "Одбаците мени",
+  "lookUpButtonLabel": "Look Up"
 }

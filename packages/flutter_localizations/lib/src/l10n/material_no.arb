@@ -140,5 +140,6 @@
   "expansionTileCollapsedTapHint": "Vis for å se mer informasjon",
   "expandedHint": "Skjules",
   "collapsedHint": "Vises",
-  "menuDismissLabel": "Lukk menyen"
+  "menuDismissLabel": "Lukk menyen",
+  "lookUpButtonLabel": "Look Up"
 }

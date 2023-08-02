@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "Uitvouwen voor meer informatie",
   "expandedHint": "Samengevouwen",
   "collapsedHint": "Uitgevouwen",
-  "menuDismissLabel": "Menu sluiten"
+  "menuDismissLabel": "Menu sluiten",
+  "lookUpButtonLabel": "Look Up"
 }

@@ -143,5 +143,6 @@
   "expansionTileCollapsedTapHint": "Panua ili upate maelezo zaidi",
   "expandedHint": "Imekunjwa",
   "collapsedHint": "Imepanuliwa",
-  "menuDismissLabel": "Ondoa menyu"
+  "menuDismissLabel": "Ondoa menyu",
+  "lookUpButtonLabel": "Look Up"
 }

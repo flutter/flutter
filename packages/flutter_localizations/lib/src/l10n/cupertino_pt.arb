@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Dispensar",
   "searchTextFieldPlaceholderLabel": "Pesquisar",
   "noSpellCheckReplacementsLabel": "Nenhuma alternativa encontrada",
-  "menuDismissLabel": "Dispensar menu"
+  "menuDismissLabel": "Dispensar menu",
+  "lookUpButtonLabel": "Look Up"
 }

@@ -144,5 +144,6 @@
   "expansionTileCollapsedTapHint": "Abra para mostrar mais detalhes",
   "expandedHint": "Fechado.",
   "collapsedHint": "Aberto.",
-  "menuDismissLabel": "Dispensar menu"
+  "menuDismissLabel": "Dispensar menu",
+  "lookUpButtonLabel": "Look Up"
 }

@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "ขยายเพื่อดูรายละเอียดเพิ่มเติม",
   "expandedHint": "ยุบ",
   "collapsedHint": "ขยาย",
-  "menuDismissLabel": "ปิดเมนู"
+  "menuDismissLabel": "ปิดเมนู",
+  "lookUpButtonLabel": "Look Up"
 }

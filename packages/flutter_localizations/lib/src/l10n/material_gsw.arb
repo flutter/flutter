@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "Für weitere Details maximieren",
   "expandedHint": "Minimiert",
   "collapsedHint": "Maximiert",
-  "menuDismissLabel": "Menü schließen"
+  "menuDismissLabel": "Menü schließen",
+  "lookUpButtonLabel": "Look Up"
 }

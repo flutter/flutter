@@ -33,5 +33,6 @@
   "modalBarrierDismissLabel": "Адхіліць",
   "searchTextFieldPlaceholderLabel": "Пошук",
   "noSpellCheckReplacementsLabel": "Замен не знойдзена",
-  "menuDismissLabel": "Закрыць меню"
+  "menuDismissLabel": "Закрыць меню",
+  "lookUpButtonLabel": "Look Up"
 }

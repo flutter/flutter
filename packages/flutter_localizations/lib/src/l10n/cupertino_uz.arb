@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Yopish",
   "searchTextFieldPlaceholderLabel": "Qidiruv",
   "noSpellCheckReplacementsLabel": "Almashtirish uchun soʻz topilmadi",
-  "menuDismissLabel": "Menyuni yopish"
+  "menuDismissLabel": "Menyuni yopish",
+  "lookUpButtonLabel": "Look Up"
 }

@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "Daha çox detallar üçün genişləndirin",
   "expandedHint": "Yığcamlaşdırıldı",
   "collapsedHint": "Genişləndirildi",
-  "menuDismissLabel": "Menyunu qapadın"
+  "menuDismissLabel": "Menyunu qapadın",
+  "lookUpButtonLabel": "Look Up"
 }

@@ -33,5 +33,6 @@
   "modalBarrierDismissLabel": "Odmietnuť",
   "searchTextFieldPlaceholderLabel": "Hľadať",
   "noSpellCheckReplacementsLabel": "Nenašli sa žiadne náhrady",
-  "menuDismissLabel": "Zavrieť ponuku"
+  "menuDismissLabel": "Zavrieť ponuku",
+  "lookUpButtonLabel": "Look Up"
 }

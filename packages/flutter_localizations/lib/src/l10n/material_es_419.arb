@@ -1,6 +1,6 @@
 {
-  "menuDismissLabel": "Descartar menú",
   "scanTextButtonLabel": "Analizar texto",
+  "menuDismissLabel": "Descartar menú",
   "expansionTileExpandedHint": "presiona dos veces para contraer",
   "expansionTileCollapsedHint": "presiona dos veces para expandir",
   "expansionTileExpandedTapHint": "Contraer",

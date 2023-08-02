@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Baztertu",
   "searchTextFieldPlaceholderLabel": "Bilatu",
   "noSpellCheckReplacementsLabel": "Ez da aurkitu ordezteko hitzik",
-  "menuDismissLabel": "Baztertu menua"
+  "menuDismissLabel": "Baztertu menua",
+  "lookUpButtonLabel": "Look Up"
 }

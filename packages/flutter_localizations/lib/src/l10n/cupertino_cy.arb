@@ -43,5 +43,6 @@
   "searchTextFieldPlaceholderLabel": "Chwilio",
   "modalBarrierDismissLabel": "Diystyru",
   "noSpellCheckReplacementsLabel": "Dim Ailosodiadau wedi'u Canfod",
-  "menuDismissLabel": "Diystyru'r ddewislen"
+  "menuDismissLabel": "Diystyru'r ddewislen",
+  "lookUpButtonLabel": "Look Up"
 }

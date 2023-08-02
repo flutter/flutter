@@ -33,5 +33,6 @@
   "modalBarrierDismissLabel": "Atsisakyti",
   "searchTextFieldPlaceholderLabel": "Paieška",
   "noSpellCheckReplacementsLabel": "Nerasta jokių pakeitimų",
-  "menuDismissLabel": "Atsisakyti meniu"
+  "menuDismissLabel": "Atsisakyti meniu",
+  "lookUpButtonLabel": "Look Up"
 }

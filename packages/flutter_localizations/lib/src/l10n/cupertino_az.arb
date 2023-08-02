@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "İmtina edin",
   "searchTextFieldPlaceholderLabel": "Axtarın",
   "noSpellCheckReplacementsLabel": "Əvəzləmə Tapılmadı",
-  "menuDismissLabel": "Menyunu qapadın"
+  "menuDismissLabel": "Menyunu qapadın",
+  "lookUpButtonLabel": "Look Up"
 }

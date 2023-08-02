@@ -28,5 +28,6 @@
   "modalBarrierDismissLabel": "Odbaci",
   "searchTextFieldPlaceholderLabel": "Pretraživanje",
   "noSpellCheckReplacementsLabel": "Nema pronađenih zamjena",
-  "menuDismissLabel": "Odbacivanje izbornika"
+  "menuDismissLabel": "Odbacivanje izbornika",
+  "lookUpButtonLabel": "Look Up"
 }

@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Жабу",
   "searchTextFieldPlaceholderLabel": "Іздеу",
   "noSpellCheckReplacementsLabel": "Ауыстыратын ешнәрсе табылмады.",
-  "menuDismissLabel": "Мәзірді жабу"
+  "menuDismissLabel": "Мәзірді жабу",
+  "lookUpButtonLabel": "Look Up"
 }

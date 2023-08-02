@@ -143,5 +143,6 @@
   "expansionTileCollapsedTapHint": "Izvērst, lai iegūtu plašāku informāciju",
   "expandedHint": "Sakļauts",
   "collapsedHint": "Izvērsts",
-  "menuDismissLabel": "Nerādīt izvēlni"
+  "menuDismissLabel": "Nerādīt izvēlni",
+  "lookUpButtonLabel": "Look Up"
 }

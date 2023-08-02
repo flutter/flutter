@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Elvetés",
   "searchTextFieldPlaceholderLabel": "Keresés",
   "noSpellCheckReplacementsLabel": "Nem található javítás",
-  "menuDismissLabel": "Menü bezárása"
+  "menuDismissLabel": "Menü bezárása",
+  "lookUpButtonLabel": "Look Up"
 }

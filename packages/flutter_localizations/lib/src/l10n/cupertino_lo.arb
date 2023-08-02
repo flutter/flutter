@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "ປິດໄວ້",
   "searchTextFieldPlaceholderLabel": "ຊອກຫາ",
   "noSpellCheckReplacementsLabel": "ບໍ່ພົບການແທນທີ່",
-  "menuDismissLabel": "ປິດເມນູ"
+  "menuDismissLabel": "ປິດເມນູ",
+  "lookUpButtonLabel": "Look Up"
 }

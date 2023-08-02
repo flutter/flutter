@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Үл хэрэгсэх",
   "searchTextFieldPlaceholderLabel": "Хайх",
   "noSpellCheckReplacementsLabel": "Ямар ч орлуулалт олдсонгүй",
-  "menuDismissLabel": "Цэсийг хаах"
+  "menuDismissLabel": "Цэсийг хаах",
+  "lookUpButtonLabel": "Look Up"
 }

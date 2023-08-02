@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "વધુ વિગતો માટે મોટી કરો",
   "expandedHint": "નાની કરી",
   "collapsedHint": "મોટી કરી",
-  "menuDismissLabel": "મેનૂ છોડી દો"
+  "menuDismissLabel": "મેનૂ છોડી દો",
+  "lookUpButtonLabel": "Look Up"
 }

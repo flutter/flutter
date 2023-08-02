@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "Прошири за повеќе детали",
   "expandedHint": "Собрано",
   "collapsedHint": "Проширено",
-  "menuDismissLabel": "Отфрлете го менито"
+  "menuDismissLabel": "Отфрлете го менито",
+  "lookUpButtonLabel": "Look Up"
 }

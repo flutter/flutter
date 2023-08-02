@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "Katso lisätietoja laajentamalla",
   "expandedHint": "Tiivistetty",
   "collapsedHint": "Laajennettu",
-  "menuDismissLabel": "Hylkää valikko"
+  "menuDismissLabel": "Hylkää valikko",
+  "lookUpButtonLabel": "Look Up"
 }

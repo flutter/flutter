@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "მეტი დეტალებისთვის გააფართოეთ",
   "expandedHint": "ჩაკეცილია",
   "collapsedHint": "გაფართოებულია",
-  "menuDismissLabel": "მენიუს უარყოფა"
+  "menuDismissLabel": "მენიუს უარყოფა",
+  "lookUpButtonLabel": "Look Up"
 }

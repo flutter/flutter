@@ -143,5 +143,6 @@
   "expansionTileCollapsedTapHint": "Desplegar para ver más detalles",
   "expandedHint": "Contraído",
   "collapsedHint": "Desplegado",
-  "menuDismissLabel": "Cerrar menú"
+  "menuDismissLabel": "Cerrar menú",
+  "lookUpButtonLabel": "Look Up"
 }

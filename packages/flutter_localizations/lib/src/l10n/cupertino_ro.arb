@@ -28,5 +28,6 @@
   "modalBarrierDismissLabel": "Închideți",
   "searchTextFieldPlaceholderLabel": "Căutați",
   "noSpellCheckReplacementsLabel": "Nu s-au găsit înlocuiri",
-  "menuDismissLabel": "Respingeți meniul"
+  "menuDismissLabel": "Respingeți meniul",
+  "lookUpButtonLabel": "Look Up"
 }

@@ -152,5 +152,6 @@
   "expansionTileCollapsedTapHint": "وسِّع المربّع لعرض مزيد من التفاصيل.",
   "expandedHint": "مصغَّر",
   "collapsedHint": "موسَّع",
-  "menuDismissLabel": "إغلاق القائمة"
+  "menuDismissLabel": "إغلاق القائمة",
+  "lookUpButtonLabel": "Look Up"
 }

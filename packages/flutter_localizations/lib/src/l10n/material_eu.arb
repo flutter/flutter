@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "Zabaldu hau xehetasun gehiago lortzeko",
   "expandedHint": "Tolestuta",
   "collapsedHint": "Zabalduta",
-  "menuDismissLabel": "Baztertu menua"
+  "menuDismissLabel": "Baztertu menua",
+  "lookUpButtonLabel": "Look Up"
 }

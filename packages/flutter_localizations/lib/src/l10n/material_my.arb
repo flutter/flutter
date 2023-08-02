@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "အသေးစိတ်အတွက် ဖြန့်ရန်",
   "expandedHint": "ခေါက်ထားသည်",
   "collapsedHint": "ဖြန့်ထားသည်",
-  "menuDismissLabel": "မီနူးကိုပယ်ပါ"
+  "menuDismissLabel": "မီနူးကိုပယ်ပါ",
+  "lookUpButtonLabel": "Look Up"
 }

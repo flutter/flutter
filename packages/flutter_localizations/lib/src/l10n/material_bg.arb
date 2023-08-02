@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "Разгъване за още подробности",
   "expandedHint": "Свито",
   "collapsedHint": "Разгънато",
-  "menuDismissLabel": "Отхвърляне на менюто"
+  "menuDismissLabel": "Отхвърляне на менюто",
+  "lookUpButtonLabel": "Look Up"
 }

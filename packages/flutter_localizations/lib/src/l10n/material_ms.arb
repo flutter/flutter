@@ -143,5 +143,6 @@
   "expansionTileCollapsedTapHint": "Kembangkan untuk mendapatkan butiran lanjut",
   "expandedHint": "Dikuncupkan",
   "collapsedHint": "Dikembangkan",
-  "menuDismissLabel": "Ketepikan menu"
+  "menuDismissLabel": "Ketepikan menu",
+  "lookUpButtonLabel": "Look Up"
 }

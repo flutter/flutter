@@ -143,5 +143,6 @@
   "expansionTileCollapsedTapHint": "आणखी तपशिलांसाठी विस्तार करा",
   "expandedHint": "कोलॅप्स केले",
   "collapsedHint": "विस्तार केले",
-  "menuDismissLabel": "मेनू डिसमिस करा"
+  "menuDismissLabel": "मेनू डिसमिस करा",
+  "lookUpButtonLabel": "Look Up"
 }

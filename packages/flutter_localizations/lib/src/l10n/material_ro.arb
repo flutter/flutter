@@ -146,5 +146,6 @@
   "expansionTileCollapsedTapHint": "Extindeți pentru mai multe detalii",
   "expandedHint": "Restrâns",
   "collapsedHint": "Extins",
-  "menuDismissLabel": "Respingeți meniul"
+  "menuDismissLabel": "Respingeți meniul",
+  "lookUpButtonLabel": "Look Up"
 }

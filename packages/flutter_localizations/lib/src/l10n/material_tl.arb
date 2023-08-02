@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "I-expand para sa higit pang detalye",
   "expandedHint": "Naka-collapse",
   "collapsedHint": "Naka-expand",
-  "menuDismissLabel": "I-dismiss ang menu"
+  "menuDismissLabel": "I-dismiss ang menu",
+  "lookUpButtonLabel": "Look Up"
 }

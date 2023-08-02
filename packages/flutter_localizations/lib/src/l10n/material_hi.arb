@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "ज़्यादा जानकारी के लिए बड़ा करें",
   "expandedHint": "छोटा किया गया",
   "collapsedHint": "बड़ा किया गया",
-  "menuDismissLabel": "मेन्यू खारिज करें"
+  "menuDismissLabel": "मेन्यू खारिज करें",
+  "lookUpButtonLabel": "Look Up"
 }

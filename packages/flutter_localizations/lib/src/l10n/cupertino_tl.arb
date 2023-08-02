@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "I-dismiss",
   "searchTextFieldPlaceholderLabel": "Hanapin",
   "noSpellCheckReplacementsLabel": "Walang Nahanap na Kapalit",
-  "menuDismissLabel": "I-dismiss ang menu"
+  "menuDismissLabel": "I-dismiss ang menu",
+  "lookUpButtonLabel": "Look Up"
 }

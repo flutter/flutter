@@ -143,5 +143,6 @@
   "expansionTileCollapsedTapHint": "Илүү дэлгэрэнгүй авах бол дэлгэнэ үү",
   "expandedHint": "Хураасан",
   "collapsedHint": "Дэлгэсэн",
-  "menuDismissLabel": "Цэсийг хаах"
+  "menuDismissLabel": "Цэсийг хаах",
+  "lookUpButtonLabel": "Look Up"
 }

@@ -33,5 +33,6 @@
   "modalBarrierDismissLabel": "Zavřít",
   "searchTextFieldPlaceholderLabel": "Hledat",
   "noSpellCheckReplacementsLabel": "Žádná nahrazení nenalezena",
-  "menuDismissLabel": "Zavřít nabídku"
+  "menuDismissLabel": "Zavřít nabídku",
+  "lookUpButtonLabel": "Look Up"
 }

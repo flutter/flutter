@@ -43,5 +43,6 @@
   "modalBarrierDismissLabel": "رفض",
   "searchTextFieldPlaceholderLabel": "بحث",
   "noSpellCheckReplacementsLabel": "لم يتم العثور على بدائل",
-  "menuDismissLabel": "إغلاق القائمة"
+  "menuDismissLabel": "إغلاق القائمة",
+  "lookUpButtonLabel": "Look Up"
 }

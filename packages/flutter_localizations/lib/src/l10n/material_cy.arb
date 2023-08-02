@@ -152,5 +152,6 @@
   "expandedHint": "Wedi'i grebachu",
   "collapsedHint": "Wedi'i ehangu",
   "scanTextButtonLabel": "Sganio testun",
-  "menuDismissLabel": "Diystyru'r ddewislen"
+  "menuDismissLabel": "Diystyru'r ddewislen",
+  "lookUpButtonLabel": "Look Up"
 }

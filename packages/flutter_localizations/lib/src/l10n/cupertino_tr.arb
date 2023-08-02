@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Kapat",
   "searchTextFieldPlaceholderLabel": "Ara",
   "noSpellCheckReplacementsLabel": "Yerine Kelime Bulunamadı",
-  "menuDismissLabel": "Menüyü kapat"
+  "menuDismissLabel": "Menüyü kapat",
+  "lookUpButtonLabel": "Look Up"
 }

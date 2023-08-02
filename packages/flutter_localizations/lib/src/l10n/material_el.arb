@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "Ανάπτυξη για περισσότερες λεπτομέρειες",
   "expandedHint": "Συμπτύχθηκε",
   "collapsedHint": "Αναπτύχθηκε",
-  "menuDismissLabel": "Παράβλεψη μενού"
+  "menuDismissLabel": "Παράβλεψη μενού",
+  "lookUpButtonLabel": "Look Up"
 }

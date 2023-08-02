@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "برخاست کریں",
   "searchTextFieldPlaceholderLabel": "تلاش کریں",
   "noSpellCheckReplacementsLabel": "کوئی تبدیلیاں نہیں ملیں",
-  "menuDismissLabel": "مینو برخاست کریں"
+  "menuDismissLabel": "مینو برخاست کریں",
+  "lookUpButtonLabel": "Look Up"
 }

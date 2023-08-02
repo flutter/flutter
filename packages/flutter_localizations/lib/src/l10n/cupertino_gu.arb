@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "છોડી દો",
   "searchTextFieldPlaceholderLabel": "શોધો",
   "noSpellCheckReplacementsLabel": "બદલવા માટે કોઈ શબ્દ મળ્યો નથી",
-  "menuDismissLabel": "મેનૂ છોડી દો"
+  "menuDismissLabel": "મેનૂ છોડી દો",
+  "lookUpButtonLabel": "Look Up"
 }

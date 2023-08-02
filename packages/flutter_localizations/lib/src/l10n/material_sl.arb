@@ -148,5 +148,6 @@
   "expansionTileCollapsedTapHint": "Razširitev za več podrobnosti",
   "expandedHint": "Strnjeno",
   "collapsedHint": "Razširjeno",
-  "menuDismissLabel": "Opusti meni"
+  "menuDismissLabel": "Opusti meni",
+  "lookUpButtonLabel": "Look Up"
 }

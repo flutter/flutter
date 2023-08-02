@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Փակել",
   "searchTextFieldPlaceholderLabel": "Որոնում",
   "noSpellCheckReplacementsLabel": "Փոխարինումներ չեն գտնվել",
-  "menuDismissLabel": "Փակել ընտրացանկը"
+  "menuDismissLabel": "Փակել ընտրացանկը",
+  "lookUpButtonLabel": "Look Up"
 }

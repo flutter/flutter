@@ -33,5 +33,6 @@
   "modalBarrierDismissLabel": "Opusti",
   "searchTextFieldPlaceholderLabel": "Iskanje",
   "noSpellCheckReplacementsLabel": "Ni zamenjav",
-  "menuDismissLabel": "Opusti meni"
+  "menuDismissLabel": "Opusti meni",
+  "lookUpButtonLabel": "Look Up"
 }

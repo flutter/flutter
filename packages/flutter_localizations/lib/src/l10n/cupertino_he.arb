@@ -33,5 +33,6 @@
   "modalBarrierDismissLabel": "סגירה",
   "searchTextFieldPlaceholderLabel": "חיפוש",
   "noSpellCheckReplacementsLabel": "לא נמצאו חלופות",
-  "menuDismissLabel": "סגירת התפריט"
+  "menuDismissLabel": "סגירת התפריט",
+  "lookUpButtonLabel": "Look Up"
 }

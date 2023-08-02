@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Tolak",
   "searchTextFieldPlaceholderLabel": "Cari",
   "noSpellCheckReplacementsLabel": "Tiada Penggantian Ditemukan",
-  "menuDismissLabel": "Ketepikan menu"
+  "menuDismissLabel": "Ketepikan menu",
+  "lookUpButtonLabel": "Look Up"
 }

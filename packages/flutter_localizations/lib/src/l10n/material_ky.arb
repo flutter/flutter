@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "Толук маалымат алуу үчүн жайып көрүңүз",
   "expandedHint": "Жыйыштырылды",
   "collapsedHint": "Жайылып көрсөтүлдү",
-  "menuDismissLabel": "Менюну жабуу"
+  "menuDismissLabel": "Менюну жабуу",
+  "lookUpButtonLabel": "Look Up"
 }

@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Жабуу",
   "searchTextFieldPlaceholderLabel": "Издөө",
   "noSpellCheckReplacementsLabel": "Алмаштыруу үчүн сөз табылган жок",
-  "menuDismissLabel": "Менюну жабуу"
+  "menuDismissLabel": "Менюну жабуу",
+  "lookUpButtonLabel": "Look Up"
 }

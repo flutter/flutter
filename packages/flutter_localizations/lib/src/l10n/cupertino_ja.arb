@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "閉じる",
   "searchTextFieldPlaceholderLabel": "検索",
   "noSpellCheckReplacementsLabel": "置き換えるものがありません",
-  "menuDismissLabel": "メニューを閉じる"
+  "menuDismissLabel": "メニューを閉じる",
+  "lookUpButtonLabel": "Look Up"
 }

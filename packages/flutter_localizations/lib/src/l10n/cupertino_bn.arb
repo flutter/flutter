@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "খারিজ করুন",
   "searchTextFieldPlaceholderLabel": "সার্চ করুন",
   "noSpellCheckReplacementsLabel": "কোনও বিকল্প বানান দেখানো হয়নি",
-  "menuDismissLabel": "বাতিল করার মেনু"
+  "menuDismissLabel": "বাতিল করার মেনু",
+  "lookUpButtonLabel": "Look Up"
 }

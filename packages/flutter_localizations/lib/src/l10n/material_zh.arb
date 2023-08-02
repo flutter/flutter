@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "展开查看更多详情",
   "expandedHint": "已收起",
   "collapsedHint": "已展开",
-  "menuDismissLabel": "关闭菜单"
+  "menuDismissLabel": "关闭菜单",
+  "lookUpButtonLabel": "Look Up"
 }

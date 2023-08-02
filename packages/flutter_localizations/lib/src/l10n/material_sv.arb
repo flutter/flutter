@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "Utöka för mer information",
   "expandedHint": "Komprimerades",
   "collapsedHint": "Utökades",
-  "menuDismissLabel": "Stäng menyn"
+  "menuDismissLabel": "Stäng menyn",
+  "lookUpButtonLabel": "Look Up"
 }

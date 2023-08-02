@@ -147,5 +147,6 @@
   "expansionTileCollapsedTapHint": "ծավալեք՝ մանրամասները տեսնելու համար",
   "expandedHint": "Ծալված է",
   "collapsedHint": "Ծավալված է",
-  "menuDismissLabel": "Փակել ընտրացանկը"
+  "menuDismissLabel": "Փակել ընտրացանկը",
+  "lookUpButtonLabel": "Look Up"
 }

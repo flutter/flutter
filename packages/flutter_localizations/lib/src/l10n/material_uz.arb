@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "Batafsil koʻrish uchun yoying",
   "expandedHint": "Yigʻilgan",
   "collapsedHint": "Yoyilgan",
-  "menuDismissLabel": "Menyuni yopish"
+  "menuDismissLabel": "Menyuni yopish",
+  "lookUpButtonLabel": "Look Up"
 }

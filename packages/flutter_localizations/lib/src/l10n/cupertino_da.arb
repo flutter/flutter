@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "Afvis",
   "searchTextFieldPlaceholderLabel": "Søg",
   "noSpellCheckReplacementsLabel": "Der blev ikke fundet nogen erstatninger",
-  "menuDismissLabel": "Luk menu"
+  "menuDismissLabel": "Luk menu",
+  "lookUpButtonLabel": "Look Up"
 }

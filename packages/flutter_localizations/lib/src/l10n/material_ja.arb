@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "開いて詳細を表示",
   "expandedHint": "閉じました",
   "collapsedHint": "開きました",
-  "menuDismissLabel": "メニューを閉じる"
+  "menuDismissLabel": "メニューを閉じる",
+  "lookUpButtonLabel": "Look Up"
 }

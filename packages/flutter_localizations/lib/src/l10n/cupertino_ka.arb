@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "დახურვა",
   "searchTextFieldPlaceholderLabel": "ძიება",
   "noSpellCheckReplacementsLabel": "ჩანაცვლება არ მოიძებნა",
-  "menuDismissLabel": "მენიუს უარყოფა"
+  "menuDismissLabel": "მენიუს უარყოფა",
+  "lookUpButtonLabel": "Look Up"
 }

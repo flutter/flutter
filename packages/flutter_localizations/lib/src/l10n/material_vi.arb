@@ -142,5 +142,6 @@
   "expansionTileCollapsedTapHint": "Mở rộng để xem thêm chi tiết",
   "expandedHint": "Đã thu gọn",
   "collapsedHint": "Đã mở rộng",
-  "menuDismissLabel": "Đóng trình đơn"
+  "menuDismissLabel": "Đóng trình đơn",
+  "lookUpButtonLabel": "Look Up"
 }

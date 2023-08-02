@@ -141,5 +141,6 @@
   "expansionTileCollapsedTapHint": "Nweba ukuze uthole imininingwane eyengeziwe",
   "expandedHint": "Kugoqiwe",
   "collapsedHint": "Kunwetshiwe",
-  "menuDismissLabel": "Chitha imenyu"
+  "menuDismissLabel": "Chitha imenyu",
+  "lookUpButtonLabel": "Look Up"
 }

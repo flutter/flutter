@@ -23,5 +23,6 @@
   "modalBarrierDismissLabel": "نپذیرفتن",
   "searchTextFieldPlaceholderLabel": "جستجو",
   "noSpellCheckReplacementsLabel": "جایگزینی پیدا نشد",
-  "menuDismissLabel": "بستن منو"
+  "menuDismissLabel": "بستن منو",
+  "lookUpButtonLabel": "Look Up"
 }
