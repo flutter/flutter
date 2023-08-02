@@ -30,6 +30,8 @@ std::atomic<TimelineMicrosSource> gTimelineMicrosSource = DefaultMicrosSource;
 inline void FlutterTimelineEvent(const char* label,
                                  int64_t timestamp0,
                                  int64_t timestamp1_or_async_id,
+                                 intptr_t flow_id_count,
+                                 const int64_t* flow_ids,
                                  Dart_Timeline_Event_Type type,
                                  intptr_t argument_count,
                                  const char** argument_names,
@@ -37,8 +39,8 @@ inline void FlutterTimelineEvent(const char* label,
   TimelineEventHandler handler =
       gTimelineEventHandler.load(std::memory_order_relaxed);
   if (handler && gAllowlist.Query(label)) {
-    handler(label, timestamp0, timestamp1_or_async_id, type, argument_count,
-            argument_names, argument_values);
+    handler(label, timestamp0, timestamp1_or_async_id, flow_id_count, flow_ids,
+            type, argument_count, argument_names, argument_values);
   }
 }
 }  // namespace
@@ -73,6 +75,8 @@ void TraceTimelineEvent(TraceArg category_group,
                         TraceArg name,
                         int64_t timestamp_micros,
                         TraceIDArg identifier,
+                        size_t flow_id_count,
+                        const uint64_t* flow_ids,
                         Dart_Timeline_Event_Type type,
                         const std::vector<const char*>& c_names,
                         const std::vector<std::string>& values) {
@@ -86,19 +90,23 @@ void TraceTimelineEvent(TraceArg category_group,
   }
 
   FlutterTimelineEvent(
-      name,                                      // label
-      timestamp_micros,                          // timestamp0
-      identifier,                                // timestamp1_or_async_id
-      type,                                      // event type
-      argument_count,                            // argument_count
-      const_cast<const char**>(c_names.data()),  // argument_names
-      c_values.data()                            // argument_values
+      name,                                        // label
+      timestamp_micros,                            // timestamp0
+      identifier,                                  // timestamp1_or_async_id
+      flow_id_count,                               // flow_id_count
+      reinterpret_cast<const int64_t*>(flow_ids),  // flow_ids
+      type,                                        // event type
+      argument_count,                              // argument_count
+      const_cast<const char**>(c_names.data()),    // argument_names
+      c_values.data()                              // argument_values
   );
 }
 
 void TraceTimelineEvent(TraceArg category_group,
                         TraceArg name,
                         TraceIDArg identifier,
+                        size_t flow_id_count,
+                        const uint64_t* flow_ids,
                         Dart_Timeline_Event_Type type,
                         const std::vector<const char*>& c_names,
                         const std::vector<std::string>& values) {
@@ -106,16 +114,23 @@ void TraceTimelineEvent(TraceArg category_group,
                      name,                            // name
                      gTimelineMicrosSource.load()(),  // timestamp_micros
                      identifier,                      // identifier
+                     flow_id_count,                   // flow_id_count
+                     flow_ids,                        // flow_ids
                      type,                            // type
                      c_names,                         // names
                      values                           // values
   );
 }
 
-void TraceEvent0(TraceArg category_group, TraceArg name) {
+void TraceEvent0(TraceArg category_group,
+                 TraceArg name,
+                 size_t flow_id_count,
+                 const uint64_t* flow_ids) {
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
-                       0,                          // timestamp1_or_async_id
+                       0,              // timestamp1_or_async_id
+                       flow_id_count,  // flow_id_count
+                       reinterpret_cast<const int64_t*>(flow_ids),  // flow_ids
                        Dart_Timeline_Event_Begin,  // event type
                        0,                          // argument_count
                        nullptr,                    // argument_names
@@ -125,13 +140,17 @@ void TraceEvent0(TraceArg category_group, TraceArg name) {
 
 void TraceEvent1(TraceArg category_group,
                  TraceArg name,
+                 size_t flow_id_count,
+                 const uint64_t* flow_ids,
                  TraceArg arg1_name,
                  TraceArg arg1_val) {
   const char* arg_names[] = {arg1_name};
   const char* arg_values[] = {arg1_val};
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
-                       0,                          // timestamp1_or_async_id
+                       0,              // timestamp1_or_async_id
+                       flow_id_count,  // flow_id_count
+                       reinterpret_cast<const int64_t*>(flow_ids),  // flow_ids
                        Dart_Timeline_Event_Begin,  // event type
                        1,                          // argument_count
                        arg_names,                  // argument_names
@@ -141,6 +160,8 @@ void TraceEvent1(TraceArg category_group,
 
 void TraceEvent2(TraceArg category_group,
                  TraceArg name,
+                 size_t flow_id_count,
+                 const uint64_t* flow_ids,
                  TraceArg arg1_name,
                  TraceArg arg1_val,
                  TraceArg arg2_name,
@@ -149,7 +170,9 @@ void TraceEvent2(TraceArg category_group,
   const char* arg_values[] = {arg1_val, arg2_val};
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
-                       0,                          // timestamp1_or_async_id
+                       0,              // timestamp1_or_async_id
+                       flow_id_count,  // flow_id_count
+                       reinterpret_cast<const int64_t*>(flow_ids),  // flow_ids
                        Dart_Timeline_Event_Begin,  // event type
                        2,                          // argument_count
                        arg_names,                  // argument_names
@@ -161,6 +184,8 @@ void TraceEventEnd(TraceArg name) {
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
                        0,                        // timestamp1_or_async_id
+                       0,                        // flow_id_count
+                       nullptr,                  // flow_ids
                        Dart_Timeline_Event_End,  // event type
                        0,                        // argument_count
                        nullptr,                  // argument_names
@@ -170,10 +195,14 @@ void TraceEventEnd(TraceArg name) {
 
 void TraceEventAsyncBegin0(TraceArg category_group,
                            TraceArg name,
-                           TraceIDArg id) {
+                           TraceIDArg id,
+                           size_t flow_id_count,
+                           const uint64_t* flow_ids) {
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
-                       id,  // timestamp1_or_async_id
+                       id,             // timestamp1_or_async_id
+                       flow_id_count,  // flow_id_count
+                       reinterpret_cast<const int64_t*>(flow_ids),  // flow_ids
                        Dart_Timeline_Event_Async_Begin,  // event type
                        0,                                // argument_count
                        nullptr,                          // argument_names
@@ -187,6 +216,8 @@ void TraceEventAsyncEnd0(TraceArg category_group,
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
                        id,                             // timestamp1_or_async_id
+                       0,                              // flow_id_count
+                       nullptr,                        // flow_ids
                        Dart_Timeline_Event_Async_End,  // event type
                        0,                              // argument_count
                        nullptr,                        // argument_names
@@ -197,13 +228,17 @@ void TraceEventAsyncEnd0(TraceArg category_group,
 void TraceEventAsyncBegin1(TraceArg category_group,
                            TraceArg name,
                            TraceIDArg id,
+                           size_t flow_id_count,
+                           const uint64_t* flow_ids,
                            TraceArg arg1_name,
                            TraceArg arg1_val) {
   const char* arg_names[] = {arg1_name};
   const char* arg_values[] = {arg1_val};
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
-                       id,  // timestamp1_or_async_id
+                       id,             // timestamp1_or_async_id
+                       flow_id_count,  // flow_id_count
+                       reinterpret_cast<const int64_t*>(flow_ids),  // flow_ids
                        Dart_Timeline_Event_Async_Begin,  // event type
                        1,                                // argument_count
                        arg_names,                        // argument_names
@@ -221,6 +256,8 @@ void TraceEventAsyncEnd1(TraceArg category_group,
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
                        id,                             // timestamp1_or_async_id
+                       0,                              // flow_id_count
+                       nullptr,                        // flow_ids
                        Dart_Timeline_Event_Async_End,  // event type
                        1,                              // argument_count
                        arg_names,                      // argument_names
@@ -228,10 +265,15 @@ void TraceEventAsyncEnd1(TraceArg category_group,
   );
 }
 
-void TraceEventInstant0(TraceArg category_group, TraceArg name) {
+void TraceEventInstant0(TraceArg category_group,
+                        TraceArg name,
+                        size_t flow_id_count,
+                        const uint64_t* flow_ids) {
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
-                       0,                            // timestamp1_or_async_id
+                       0,              // timestamp1_or_async_id
+                       flow_id_count,  // flow_id_count
+                       reinterpret_cast<const int64_t*>(flow_ids),  // flow_ids
                        Dart_Timeline_Event_Instant,  // event type
                        0,                            // argument_count
                        nullptr,                      // argument_names
@@ -241,13 +283,17 @@ void TraceEventInstant0(TraceArg category_group, TraceArg name) {
 
 void TraceEventInstant1(TraceArg category_group,
                         TraceArg name,
+                        size_t flow_id_count,
+                        const uint64_t* flow_ids,
                         TraceArg arg1_name,
                         TraceArg arg1_val) {
   const char* arg_names[] = {arg1_name};
   const char* arg_values[] = {arg1_val};
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
-                       0,                            // timestamp1_or_async_id
+                       0,              // timestamp1_or_async_id
+                       flow_id_count,  // flow_id_count
+                       reinterpret_cast<const int64_t*>(flow_ids),  // flow_ids
                        Dart_Timeline_Event_Instant,  // event type
                        1,                            // argument_count
                        arg_names,                    // argument_names
@@ -257,6 +303,8 @@ void TraceEventInstant1(TraceArg category_group,
 
 void TraceEventInstant2(TraceArg category_group,
                         TraceArg name,
+                        size_t flow_id_count,
+                        const uint64_t* flow_ids,
                         TraceArg arg1_name,
                         TraceArg arg1_val,
                         TraceArg arg2_name,
@@ -265,7 +313,9 @@ void TraceEventInstant2(TraceArg category_group,
   const char* arg_values[] = {arg1_val, arg2_val};
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
-                       0,                            // timestamp1_or_async_id
+                       0,              // timestamp1_or_async_id
+                       flow_id_count,  // flow_id_count
+                       reinterpret_cast<const int64_t*>(flow_ids),  // flow_ids
                        Dart_Timeline_Event_Instant,  // event type
                        2,                            // argument_count
                        arg_names,                    // argument_names
@@ -278,7 +328,9 @@ void TraceEventFlowBegin0(TraceArg category_group,
                           TraceIDArg id) {
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
-                       id,  // timestamp1_or_async_id
+                       id,       // timestamp1_or_async_id
+                       0,        // flow_id_count
+                       nullptr,  // flow_ids
                        Dart_Timeline_Event_Flow_Begin,  // event type
                        0,                               // argument_count
                        nullptr,                         // argument_names
@@ -292,6 +344,8 @@ void TraceEventFlowStep0(TraceArg category_group,
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
                        id,                             // timestamp1_or_async_id
+                       0,                              // flow_id_count
+                       nullptr,                        // flow_ids
                        Dart_Timeline_Event_Flow_Step,  // event type
                        0,                              // argument_count
                        nullptr,                        // argument_names
@@ -303,6 +357,8 @@ void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
   FlutterTimelineEvent(name,                            // label
                        gTimelineMicrosSource.load()(),  // timestamp0
                        id,                            // timestamp1_or_async_id
+                       0,                             // flow_id_count
+                       nullptr,                       // flow_ids
                        Dart_Timeline_Event_Flow_End,  // event type
                        0,                             // argument_count
                        nullptr,                       // argument_names
@@ -334,6 +390,8 @@ void TraceTimelineEvent(TraceArg category_group,
                         TraceArg name,
                         int64_t timestamp_micros,
                         TraceIDArg identifier,
+                        size_t flow_id_count,
+                        const uint64_t* flow_ids,
                         Dart_Timeline_Event_Type type,
                         const std::vector<const char*>& c_names,
                         const std::vector<std::string>& values) {}
@@ -341,19 +399,28 @@ void TraceTimelineEvent(TraceArg category_group,
 void TraceTimelineEvent(TraceArg category_group,
                         TraceArg name,
                         TraceIDArg identifier,
+                        size_t flow_id_count,
+                        const uint64_t* flow_ids,
                         Dart_Timeline_Event_Type type,
                         const std::vector<const char*>& c_names,
                         const std::vector<std::string>& values) {}
 
-void TraceEvent0(TraceArg category_group, TraceArg name) {}
+void TraceEvent0(TraceArg category_group,
+                 TraceArg name,
+                 size_t flow_id_count,
+                 const uint64_t* flow_ids) {}
 
 void TraceEvent1(TraceArg category_group,
                  TraceArg name,
+                 size_t flow_id_count,
+                 const uint64_t* flow_ids,
                  TraceArg arg1_name,
                  TraceArg arg1_val) {}
 
 void TraceEvent2(TraceArg category_group,
                  TraceArg name,
+                 size_t flow_id_count,
+                 const uint64_t* flow_ids,
                  TraceArg arg1_name,
                  TraceArg arg1_val,
                  TraceArg arg2_name,
@@ -368,7 +435,9 @@ void TraceEventAsyncComplete(TraceArg category_group,
 
 void TraceEventAsyncBegin0(TraceArg category_group,
                            TraceArg name,
-                           TraceIDArg id) {}
+                           TraceIDArg id,
+                           size_t flow_id_count,
+                           const uint64_t* flow_ids) {}
 
 void TraceEventAsyncEnd0(TraceArg category_group,
                          TraceArg name,
@@ -377,6 +446,8 @@ void TraceEventAsyncEnd0(TraceArg category_group,
 void TraceEventAsyncBegin1(TraceArg category_group,
                            TraceArg name,
                            TraceIDArg id,
+                           size_t flow_id_count,
+                           const uint64_t* flow_ids,
                            TraceArg arg1_name,
                            TraceArg arg1_val) {}
 
@@ -386,15 +457,22 @@ void TraceEventAsyncEnd1(TraceArg category_group,
                          TraceArg arg1_name,
                          TraceArg arg1_val) {}
 
-void TraceEventInstant0(TraceArg category_group, TraceArg name) {}
+void TraceEventInstant0(TraceArg category_group,
+                        TraceArg name,
+                        size_t flow_id_count,
+                        const uint64_t* flow_ids) {}
 
 void TraceEventInstant1(TraceArg category_group,
                         TraceArg name,
+                        size_t flow_id_count,
+                        const uint64_t* flow_ids,
                         TraceArg arg1_name,
                         TraceArg arg1_val) {}
 
 void TraceEventInstant2(TraceArg category_group,
                         TraceArg name,
+                        size_t flow_id_count,
+                        const uint64_t* flow_ids,
                         TraceArg arg1_name,
                         TraceArg arg1_val,
                         TraceArg arg2_name,

@@ -399,6 +399,8 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
 
+  settings.leak_vm = false;
+
   if (settings.icu_data_path.empty()) {
     settings.icu_data_path = "icudtl.dat";
   }

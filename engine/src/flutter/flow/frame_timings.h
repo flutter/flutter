@@ -14,9 +14,11 @@
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 
-#define TRACE_EVENT_WITH_FRAME_NUMBER(recorder, category_group, name) \
-  TRACE_EVENT1(category_group, name, "frame_number",                  \
-               recorder->GetFrameNumberTraceArg())
+#define TRACE_EVENT_WITH_FRAME_NUMBER(recorder, category_group, name,       \
+                                      flow_id_count, flow_ids)              \
+  TRACE_EVENT1_WITH_FLOW_IDS(category_group, name, flow_id_count, flow_ids, \
+                             "frame_number",                                \
+                             recorder->GetFrameNumberTraceArg())
 
 namespace flutter {
 

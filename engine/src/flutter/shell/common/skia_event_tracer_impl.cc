@@ -220,10 +220,12 @@ class FlutterEventTracer : public SkEventTracer {
       case TRACE_EVENT_PHASE_BEGIN:
       case TRACE_EVENT_PHASE_COMPLETE:
         if (devtoolsTag) {
-          fml::tracing::TraceEvent1(kSkiaTag, name, kDevtoolsTagArg,
+          fml::tracing::TraceEvent1(kSkiaTag, name, /*flow_id_count=*/0,
+                                    /*flow_ids=*/nullptr, kDevtoolsTagArg,
                                     devtoolsTag);
         } else {
-          fml::tracing::TraceEvent0(kSkiaTag, name);
+          fml::tracing::TraceEvent0(kSkiaTag, name, /*flow_id_count=*/0,
+                                    /*flow_ids=*/nullptr);
         }
         break;
       case TRACE_EVENT_PHASE_END:
@@ -231,18 +233,26 @@ class FlutterEventTracer : public SkEventTracer {
         break;
       case TRACE_EVENT_PHASE_INSTANT:
         if (devtoolsTag) {
-          fml::tracing::TraceEventInstant1(kSkiaTag, name, kDevtoolsTagArg,
-                                           devtoolsTag);
+          fml::tracing::TraceEventInstant1(kSkiaTag, name,
+                                           /*flow_id_count=*/0,
+                                           /*flow_ids=*/nullptr,
+                                           kDevtoolsTagArg, devtoolsTag);
         } else {
-          fml::tracing::TraceEventInstant0(kSkiaTag, name);
+          fml::tracing::TraceEventInstant0(kSkiaTag, name,
+                                           /*flow_id_count=*/0,
+                                           /*flow_ids=*/nullptr);
         }
         break;
       case TRACE_EVENT_PHASE_ASYNC_BEGIN:
         if (devtoolsTag) {
           fml::tracing::TraceEventAsyncBegin1(kSkiaTag, name, id,
+                                              /*flow_id_count=*/0,
+                                              /*flow_ids=*/nullptr,
                                               kDevtoolsTagArg, devtoolsTag);
         } else {
-          fml::tracing::TraceEventAsyncBegin0(kSkiaTag, name, id);
+          fml::tracing::TraceEventAsyncBegin0(kSkiaTag, name, id,
+                                              /*flow_id_count=*/0,
+                                              /*flow_ids=*/nullptr);
         }
         break;
       case TRACE_EVENT_PHASE_ASYNC_END:
