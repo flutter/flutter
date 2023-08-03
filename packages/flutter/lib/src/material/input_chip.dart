@@ -43,7 +43,6 @@ import 'theme_data.dart';
 /// {@end-tool}
 ///
 ///
-///
 /// {@tool dartpad}
 /// The following example showcases how to generate [InputChip]s from
 /// user text input. When the user enters a pizza topping in the text field,
