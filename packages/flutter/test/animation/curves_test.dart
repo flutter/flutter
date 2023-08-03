@@ -305,6 +305,28 @@ void main() {
     expect(() {
       CatmullRomSpline(const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero], tension: 2.0);
     }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(
+        const <Offset>[Offset(double.infinity, 0.0), Offset.zero, Offset.zero, Offset.zero],
+      ).generateSamples();
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(
+        const <Offset>[Offset(0.0, double.infinity), Offset.zero, Offset.zero, Offset.zero],
+      ).generateSamples();
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(
+        startHandle: const Offset(0.0, double.infinity),
+        const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero],
+      ).generateSamples();
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(
+        endHandle: const Offset(0.0, double.infinity),
+        const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero],
+      ).generateSamples();
+    }, throwsAssertionError);
   });
 
   test('CatmullRomSpline interpolates values properly when precomputed', () {
@@ -352,6 +374,24 @@ void main() {
     }, throwsAssertionError);
     expect(() {
       CatmullRomSpline.precompute(const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero], tension: 2.0);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline.precompute(const <Offset>[Offset(double.infinity, 0.0), Offset.zero, Offset.zero, Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline.precompute(const <Offset>[Offset(0.0, double.infinity), Offset.zero, Offset.zero, Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline.precompute(
+        startHandle: const Offset(0.0, double.infinity),
+        const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero],
+      );
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline.precompute(
+        endHandle: const Offset(0.0, double.infinity),
+        const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero],
+      );
     }, throwsAssertionError);
   });
 
