@@ -19,7 +19,7 @@ void main() {
 
     expect(find.byType(example.EditableChipFieldApp), findsNWidgets(1));
     expect(find.byType(example.ChipsInput<String>), findsNWidgets(1));
-    expect(find.byType(InputChip), findsNWidgets(1));
+    expect(find.byType(InputChip), findsOneWidget);
 
     example.ChipsInputState<String> state =
         tester.state(find.byType(example.ChipsInput<String>));
