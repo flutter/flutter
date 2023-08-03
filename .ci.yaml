@@ -2600,6 +2600,28 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: animated_blur_backdrop_filter_perf__timeline_summary
 
+  - name: Linux_samsung_s10 animated_blur_backdrop_filter_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "s10"]
+      task_name: animated_blur_backdrop_filter_perf__timeline_summary
+
+  - name: Linux_samsung_s10 animated_blur_backdrop_filter_perf_opengles__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "s10"]
+      task_name: animated_blur_backdrop_filter_perf_opengles__timeline_summary
+
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
