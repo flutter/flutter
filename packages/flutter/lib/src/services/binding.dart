@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -25,9 +24,6 @@ export 'dart:ui' show ChannelBuffers, RootIsolateToken;
 export 'binary_messenger.dart' show BinaryMessenger;
 export 'hardware_keyboard.dart' show HardwareKeyboard, KeyEventManager;
 export 'restoration.dart' show RestorationManager;
-
-/// A callback that can be registered with [ServicesBinding.debugRegisterHotRestartCallback].
-typedef DebugPreHotRestartCallback = FutureOr<void> Function();
 
 /// Listens for platform messages and directs them to the [defaultBinaryMessenger].
 ///
@@ -226,31 +222,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
           evict(value);
         },
       );
-
-      registerServiceExtension(name: 'invokePreHotRestartCallbacks', callback: (Map<String, Object> params) async {
-        Future<void> invokeAndWait(DebugPreHotRestartCallback callback, String label) async {
-          developer.postEvent('preHotRestartCallback', <String, Object>{'label': label, 'finished': false});
-          try {
-            await Future<Object?>.value(callback());
-          } catch (error, stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                context: ErrorSummary('while invoking the "$label" preHotRestartCallback'),
-              )
-            );
-          } finally {
-            developer.postEvent('preHotRestartCallback', <String, Object>{'label': label, 'finished': true});
-          }
-        }
-
-        await Future.wait(<Future<void>>[
-          for (final MapEntry<DebugPreHotRestartCallback, String> entry in _hotRestartCallbacks.entries)
-            invokeAndWait(entry.key, entry.value),
-        ]);
-        return <String, Object>{};
-      });
       return true;
     }());
   }
@@ -521,61 +492,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
-  }
-
-  final Map<DebugPreHotRestartCallback, String> _hotRestartCallbacks = <DebugPreHotRestartCallback, String>{};
-
-  /// Register a callback that will be invoked before a hot restart is called.
-  ///
-  /// In non-debug modes this method is a no-op. This can be used to release native
-  /// resources acquired through platform channels or `dart:ffi`. Future returning
-  /// callbacks will be awaited, allowing for async tear downs.
-  ///
-  /// {@tool snippet}
-  /// The following sample code shows how to use debugRegisterHotRestartCallback to handle
-  /// tearing down a native resource acquired through `dart:ffi`. In this example, if
-  /// the `context` pointer is not passed through to the `_destroyContext` function before
-  /// a hot restart, the application will crash after a hot restart.
-  ///
-  /// ```dart
-  /// import 'dart:ffi';
-  /// import 'package:flutter/foundation.dart';
-  /// import 'package:flutter/widgets.dart';
-  ///
-  /// final DynamicLibrary _lib = DynamicLibrary.open('some_native_lib.dll');
-  ///
-  /// final Pointer<NativeType> Function() _createContext = _lib.lookupFunction<
-  ///     Pointer<NativeType> Function(),
-  ///     Pointer<NativeType> Function()>('Native_create');
-  ///
-  /// final void Function(Pointer<NativeType>) _destroyContext = _lib.lookupFunction<
-  ///     Void Function(Pointer<NativeType>),
-  ///     void Function(Pointer<NativeType>)>('Native_destroy');
-  ///
-  /// class NativeResourceService {
-  ///   NativeResourceService() {
-  ///     if (kDebugMode) {
-  ///       ServicesBinding.instance.debugRegisterHotRestartCallback(
-  ///           () => _destroyContext(_context),
-  ///           debugLabel: 'NativeResourceService',
-  ///       );
-  ///     }
-  ///   }
-  ///
-  ///   /// Acquire native resources that must be released before they can
-  ///   /// be re-acquired.
-  ///   late final Pointer<NativeType> _context = _createContext();
-  /// }
-  /// ```
-  /// {@end-tool}
-  void debugRegisterHotRestartCallback(DebugPreHotRestartCallback callback, {String debugLabel = 'unknown'}) {
-    assert(kDebugMode, '''debugRegisterHotRestartCallback can only be called in debug mode. '''
-                       '''Use kDebugMode or wrap the call in an assert.''');
-    if (!kDebugMode) {
-      throw StateError('debugRegisterHotRestartCallback can only be called in debug mode. '
-                       'Use kDebugMode or wrap the call in an assert.');
-    }
-    _hotRestartCallbacks[callback] = debugLabel;
   }
 
   /// Alert the engine that the binding is registered. This instructs the engine to
