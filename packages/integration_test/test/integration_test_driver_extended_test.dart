@@ -2,118 +2,49 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_driver/flutter_driver.dart';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test_driver_extended.dart';
-import 'package:webdriver/sync_io.dart';
+import 'package:path/path.dart' as path;
+
+final String bat = Platform.isWindows ? '.bat' : '';
+final String _flutterBin =
+    path.join(Directory.current.parent.parent.path, 'bin', 'flutter$bat');
 
 void main() {
   group('integrationDriver', () {
-    late FakeFlutterWebConnection fakeConnection;
-    late WebFlutterDriver driver;
-    late bool called;
-    late int exitCode;
-
-    setUpAll(() {
-      fakeConnection = FakeFlutterWebConnection();
-      driver = WebFlutterDriver.connectedTo(fakeConnection);
-      exitFn = (int code) => exitCode = code;
-    });
-
-    setUp(() {
-      called = false;
-      exitCode = -1;
-    });
-
     test('write response data when all test pass', () async {
-      fakeConnection.fakeResponse = r'''
-{
-  "isError": false,
-  "response": {
-    "message": "{\"result\": \"true\", \"data\": {\"reports\": \"passed\"}}"
-  }
-}
-''';
-
-      await integrationDriver(
-        driver: driver,
-        responseDataCallback: (_) {
-          called = true;
-        },
-      );
-      expect(called, true);
-      expect(exitCode, 0);
+      final ProcessResult process = await Process.run(_flutterBin, <String>[
+        'test',
+        '--machine',
+        path.join('test', 'data', 'integration_test_driver_extended',
+            'pass_test_script.dart')
+      ]);
+      expect(process.stdout, contains('responseDataCallback called'));
     });
 
     test(
         'write response data when test fail and writeResponseOnFailure is true',
         () async {
-      fakeConnection.fakeResponse = r'''
-{
-  "isError": false,
-  "response": {
-    "message": "{\"result\": \"false\", \"failureDetails\": [],\"data\": {\"reports\": \"failed\"}}"
-  }
-}
-''';
-
-      await integrationDriver(
-        driver: driver,
-        responseDataCallback: (_) {
-          called = true;
-        },
-        writeResponseOnFailure: true,
-      );
-      expect(called, true);
-      expect(exitCode, 1);
+      final ProcessResult process = await Process.run(_flutterBin, <String>[
+        'test',
+        '--machine',
+        path.join('test', 'data', 'integration_test_driver_extended',
+            'fail_test_write_response_script.dart')
+      ]);
+      expect(process.stdout, contains('responseDataCallback called'));
     });
 
     test(
-        'do not write response data when test fail and writeResponseOnFailure is false',
+        'write response data when test fail and writeResponseOnFailure is false',
         () async {
-      fakeConnection.fakeResponse = r'''
-{
-  "isError": false,
-  "response": {
-    "message": "{\"result\": \"false\", \"failureDetails\": [],\"data\": {\"reports\": \"failed\"}}"
-  }
-}
-''';
-
-      await integrationDriver(
-          driver: driver,
-          responseDataCallback: (_) {
-            called = true;
-          });
-      expect(called, false);
-      expect(exitCode, 1);
+      final ProcessResult process = await Process.run(_flutterBin, <String>[
+        'test',
+        '--machine',
+        path.join('test', 'data', 'integration_test_driver_extended',
+            'fail_test_not_write_response_script.dart')
+      ]);
+      expect(process.stdout, isNot(contains('responseDataCallback called')));
     });
   });
-}
-
-class FakeFlutterWebConnection implements FlutterWebConnection {
-  @override
-  bool supportsTimelineAction = false;
-
-  @override
-  Future<void> close() async {}
-
-  @override
-  Stream<LogEntry> get logs => throw UnimplementedError();
-
-  @override
-  Future<List<int>> screenshot() {
-    throw UnimplementedError();
-  }
-
-  Object? fakeResponse;
-  Error? communicationError;
-
-  @override
-  Future<Object?> sendCommand(String script, Duration? duration) async {
-    if (communicationError != null) {
-      throw communicationError!;
-    }
-    return fakeResponse;
-  }
 }
