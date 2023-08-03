@@ -68,6 +68,8 @@ extern const intptr_t kPlatformStrongDillSize;
 // embedder/BUILD.gn variable impeller_supports_rendering is disabled.
 #ifdef SHELL_ENABLE_GL
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 #ifdef IMPELLER_SUPPORTS_RENDERING
 #include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"  // nogncheck
 #include "flutter/shell/platform/embedder/embedder_surface_gl_impeller.h"  // nogncheck
@@ -742,10 +744,10 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
   texture_info.fID = texture->name;
   texture_info.fFormat = texture->format;
 
-  GrBackendTexture backend_texture(config.size.width,   //
-                                   config.size.height,  //
-                                   GrMipMapped::kNo,    //
-                                   texture_info         //
+  auto backend_texture = GrBackendTextures::MakeGL(config.size.width,      //
+                                                   config.size.height,     //
+                                                   skgpu::Mipmapped::kNo,  //
+                                                   texture_info            //
   );
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
@@ -783,13 +785,13 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
   framebuffer_info.fFormat = framebuffer->target;
   framebuffer_info.fFBOID = framebuffer->name;
 
-  GrBackendRenderTarget backend_render_target(
-      config.size.width,   // width
-      config.size.height,  // height
-      1,                   // sample count
-      0,                   // stencil bits
-      framebuffer_info     // framebuffer info
-  );
+  auto backend_render_target =
+      GrBackendRenderTargets::MakeGL(config.size.width,   // width
+                                     config.size.height,  // height
+                                     1,                   // sample count
+                                     0,                   // stencil bits
+                                     framebuffer_info     // framebuffer info
+      );
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 

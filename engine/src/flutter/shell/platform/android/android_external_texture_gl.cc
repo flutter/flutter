@@ -16,6 +16,8 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 
 namespace flutter {
 
@@ -60,7 +62,8 @@ void AndroidExternalTextureGL::Paint(PaintContext& context,
   }
   GrGLTextureInfo textureInfo = {GL_TEXTURE_EXTERNAL_OES, texture_name_,
                                  GL_RGBA8_OES};
-  GrBackendTexture backendTexture(1, 1, GrMipMapped::kNo, textureInfo);
+  auto backendTexture =
+      GrBackendTextures::MakeGL(1, 1, skgpu::Mipmapped::kNo, textureInfo);
   sk_sp<SkImage> image = SkImages::BorrowTextureFrom(
       context.gr_context, backendTexture, kTopLeft_GrSurfaceOrigin,
       kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr);

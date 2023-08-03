@@ -19,9 +19,11 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 
 // These are common defines present on all OpenGL headers. However, we don't
-// want to perform GL header reasolution on each platform we support. So just
+// want to perform GL header resolution on each platform we support. So just
 // define these upfront. It is unlikely we will need more. But, if we do, we can
 // add the same here.
 #define GPU_GL_RGBA8 0x8058
@@ -138,12 +140,13 @@ static sk_sp<SkSurface> WrapOnscreenSurface(GrDirectContext* context,
   framebuffer_info.fFBOID = static_cast<GrGLuint>(fbo);
   framebuffer_info.fFormat = format;
 
-  GrBackendRenderTarget render_target(size.width(),     // width
-                                      size.height(),    // height
-                                      0,                // sample count
-                                      0,                // stencil bits
-                                      framebuffer_info  // framebuffer info
-  );
+  auto render_target =
+      GrBackendRenderTargets::MakeGL(size.width(),     // width
+                                     size.height(),    // height
+                                     0,                // sample count
+                                     0,                // stencil bits
+                                     framebuffer_info  // framebuffer info
+      );
 
   sk_sp<SkColorSpace> colorspace = SkColorSpace::MakeSRGB();
   SkSurfaceProps surface_props(0, kUnknown_SkPixelGeometry);
