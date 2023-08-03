@@ -4110,8 +4110,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       void debugShowWidgetInspectorOverrideCallback(){
         debugShowChangeCounter ++;
       }
-      WidgetsApp.debugShowWidgetInspectorOverride.value = false;
-      WidgetsApp.debugShowWidgetInspectorOverride.addListener(debugShowWidgetInspectorOverrideCallback);
+      WidgetsApp.debugShowWidgetInspectorOverrideNotifier.value = false;
+      WidgetsApp.debugShowWidgetInspectorOverrideNotifier.addListener(debugShowWidgetInspectorOverrideCallback);
       service.rebuildCount = 0;
       expect(extensionChangedEvents, isEmpty);
       expect(
@@ -4133,8 +4133,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
         equals('true'),
       );
-      expect(WidgetsApp.debugShowWidgetInspectorOverride.value, isTrue);
+      expect(WidgetsApp.debugShowWidgetInspectorOverrideNotifier.value, isTrue);
       expect(extensionChangedEvents.length, equals(1));
+      expect(debugShowChangeCounter, equals(1));
       expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.show.name,
@@ -4168,7 +4169,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
       expect(extensionChangedEvents.length, equals(3));
       expect(debugShowChangeCounter, equals(2));
-      expect(WidgetsApp.debugShowWidgetInspectorOverride.value, isFalse);
+      expect(WidgetsApp.debugShowWidgetInspectorOverrideNotifier.value, isFalse);
     });
 
     testWidgets('ext.flutter.inspector.screenshot', (WidgetTester tester) async {

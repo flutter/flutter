@@ -45,16 +45,21 @@ transforms:
       - kind: 'rename'
         newName: 'decorationClipBehavior'
 
-  # Changes made in https://github.com/flutter/flutter/pull/122555
-  - title: "Migrate to 'decorationClipBehavior'"
+  # Changes made in https://github.com/flutter/flutter/pull/131634
+  - title: "Migrate to 'debugShowWidgetInspectorOverrideNotifier.value'"
     date: 2023-03-13
     element:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       field: 'debugShowWidgetInspectorOverride'
       inClass: 'WidgetsApp'
+      static: true
     changes:
-      - kind: 'rename'
-        newName: debugShowWidgetInspectorOverrideNotifier # HERE
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+          field: 'debugShowWidgetInspectorOverrideNotifier.value'
+          inClass: 'WidgetsApp'
+          static: true
 
   # Changes made in https://github.com/flutter/flutter/pull/122555
   - title: "Migrate to 'decorationClipBehavior'"
