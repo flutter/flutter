@@ -840,7 +840,7 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
     Device device, {
     bool usesIpv6 = false,
     int? hostVmservicePort,
-    required int deviceVmservicePort,
+    int? deviceVmservicePort,
     bool useDeviceIPAsHost = false,
     Duration timeout = Duration.zero,
   }) async {

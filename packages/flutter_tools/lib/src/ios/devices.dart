@@ -479,6 +479,15 @@ class IOSDevice extends Device {
         debuggingOptions.disablePortPublication) {
       throwToolExit('Cannot start app on wirelessly tethered iOS device. Try running again with the --publish-port flag');
     }
+
+    // Used in CI to test XcodeDebug workflow from older versions of iOS and Xcode.
+    bool forceXcodeDebugWorkflow = false;
+    if (debuggingOptions.usingCISystem &&
+        debuggingOptions.debuggingEnabled &&
+        _platform.environment['FORCE_XCODE_DEBUG']?.toLowerCase() == 'true') {
+      forceXcodeDebugWorkflow = true;
+    }
+
     if (!prebuiltApplication) {
       _logger.printTrace('Building ${package.name} for $id');
 
@@ -489,7 +498,7 @@ class IOSDevice extends Device {
           targetOverride: mainPath,
           activeArch: cpuArchitecture,
           deviceID: id,
-          isCoreDevice: isCoreDevice,
+          isCoreDevice: isCoreDevice || forceXcodeDebugWorkflow,
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
@@ -557,7 +566,7 @@ class IOSDevice extends Device {
         );
       }
 
-      if (isCoreDevice) {
+      if (isCoreDevice || forceXcodeDebugWorkflow) {
         installationResult = await _startAppOnCoreDevice(
           debuggingOptions: debuggingOptions,
           package: package,
@@ -593,10 +602,10 @@ class IOSDevice extends Device {
       _logger.printTrace('Application launched on the device. Waiting for Dart VM Service url.');
 
       final int defaultTimeout;
-      if (isCoreDevice && debuggingOptions.debuggingEnabled) {
+      if ((isCoreDevice || forceXcodeDebugWorkflow) && debuggingOptions.debuggingEnabled) {
         // Core devices with debugging enabled takes longer because this
         // includes time to install the app on the device.
-        defaultTimeout = isWirelesslyConnected ? 60 : 45;
+        defaultTimeout = isWirelesslyConnected ? 75 : 60;
       } else if (isWirelesslyConnected) {
         defaultTimeout = 45;
       } else {
@@ -623,35 +632,44 @@ class IOSDevice extends Device {
 
       Uri? localUri;
       if (isWirelesslyConnected) {
-        // Wait for Dart VM Service to start up.
-        final Uri? serviceURL = await vmServiceDiscovery?.uri;
-        if (serviceURL == null) {
-          await iosDeployDebugger?.stopAndDumpBacktrace();
-          await dispose();
-          return LaunchResult.failed();
-        }
-
-        // If Dart VM Service URL with the device IP is not found within 5 seconds,
-        // change the status message to prompt users to click Allow. Wait 5 seconds because it
-        // should only show this message if they have not already approved the permissions.
-        // MDnsVmServiceDiscovery usually takes less than 5 seconds to find it.
-        final Timer mDNSLookupTimer = Timer(const Duration(seconds: 5), () {
-          startAppStatus.stop();
-          startAppStatus = _logger.startProgress(
-            'Waiting for approval of local network permissions...',
+        if (isCoreDevice) {
+          localUri = await MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
+            packageId,
+            this,
+            usesIpv6: ipv6,
+            useDeviceIPAsHost: true,
           );
-        });
+        } else {
+          // Wait for Dart VM Service to start up.
+          final Uri? serviceURL = await vmServiceDiscovery?.uri;
+          if (serviceURL == null) {
+            await iosDeployDebugger?.stopAndDumpBacktrace();
+            await dispose();
+            return LaunchResult.failed();
+          }
 
-        // Get Dart VM Service URL with the device IP as the host.
-        localUri = await MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
-          packageId,
-          this,
-          usesIpv6: ipv6,
-          deviceVmservicePort: serviceURL.port,
-          useDeviceIPAsHost: true,
-        );
+          // If Dart VM Service URL with the device IP is not found within 5 seconds,
+          // change the status message to prompt users to click Allow. Wait 5 seconds because it
+          // should only show this message if they have not already approved the permissions.
+          // MDnsVmServiceDiscovery usually takes less than 5 seconds to find it.
+          final Timer mDNSLookupTimer = Timer(const Duration(seconds: 5), () {
+            startAppStatus.stop();
+            startAppStatus = _logger.startProgress(
+              'Waiting for approval of local network permissions...',
+            );
+          });
 
-        mDNSLookupTimer.cancel();
+          // Get Dart VM Service URL with the device IP as the host.
+          localUri = await MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
+            packageId,
+            this,
+            usesIpv6: ipv6,
+            deviceVmservicePort: serviceURL.port,
+            useDeviceIPAsHost: true,
+          );
+
+          mDNSLookupTimer.cancel();
+        }
       } else {
         localUri = await vmServiceDiscovery?.uri;
       }
@@ -693,7 +711,7 @@ class IOSDevice extends Device {
 
       return launchSuccess;
     } else {
-      final int launchTimeout = isWirelesslyConnected ? 75 : 60;
+      final int launchTimeout = isWirelesslyConnected ? 45 : 30;
       final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
         _logger.printError('Xcode is taking longer than expected to start debugging the app. Ensure the project is opened in Xcode.');
       });
