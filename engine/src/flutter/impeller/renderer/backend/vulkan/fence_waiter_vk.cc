@@ -9,6 +9,7 @@
 
 #include "flutter/fml/thread.h"
 #include "flutter/fml/trace_event.h"
+#include "impeller/base/validation.h"
 
 namespace impeller {
 

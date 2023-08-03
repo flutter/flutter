@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include "flutter/fml/mapping.h"
+#include "impeller/base/validation.h"
 
 namespace impeller {
 
