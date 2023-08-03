@@ -4,9 +4,11 @@
 
 package io.flutter.embedding.engine.renderer;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.media.Image;
 import android.os.Build;
 import android.os.Handler;
 import android.view.Surface;
@@ -15,7 +17,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.renderer.FlutterRenderer.ImageTextureRegistryEntry;
 import io.flutter.view.TextureRegistry;
+import io.flutter.view.TextureRegistry.ImageTextureEntry;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -159,6 +163,15 @@ public class FlutterRenderer implements TextureRegistry {
   }
 
   @Override
+  public ImageTextureEntry createImageTexture() {
+    final ImageTextureRegistryEntry entry =
+        new ImageTextureRegistryEntry(nextTextureId.getAndIncrement());
+    Log.v(TAG, "New ImageTextureEntry ID: " + entry.id());
+    registerImageTexture(entry.id(), entry);
+    return entry;
+  }
+
+  @Override
   public void onTrimMemory(int level) {
     final Iterator<WeakReference<OnTrimMemoryListener>> iterator = onTrimMemoryListeners.iterator();
     while (iterator.hasNext()) {
@@ -270,7 +283,7 @@ public class FlutterRenderer implements TextureRegistry {
           return;
         }
 
-        handler.post(new SurfaceTextureFinalizerRunnable(id, flutterJNI));
+        handler.post(new TextureFinalizerRunnable(id, flutterJNI));
       } finally {
         super.finalize();
       }
@@ -287,11 +300,11 @@ public class FlutterRenderer implements TextureRegistry {
     }
   }
 
-  static final class SurfaceTextureFinalizerRunnable implements Runnable {
+  static final class TextureFinalizerRunnable implements Runnable {
     private final long id;
     private final FlutterJNI flutterJNI;
 
-    SurfaceTextureFinalizerRunnable(long id, @NonNull FlutterJNI flutterJNI) {
+    TextureFinalizerRunnable(long id, @NonNull FlutterJNI flutterJNI) {
       this.id = id;
       this.flutterJNI = flutterJNI;
     }
@@ -301,8 +314,71 @@ public class FlutterRenderer implements TextureRegistry {
       if (!flutterJNI.isAttached()) {
         return;
       }
-      Log.v(TAG, "Releasing a SurfaceTexture (" + id + ").");
+      Log.v(TAG, "Releasing a Texture (" + id + ").");
       flutterJNI.unregisterTexture(id);
+    }
+  }
+
+  final class ImageTextureRegistryEntry implements TextureRegistry.ImageTextureEntry {
+    private final long id;
+    private boolean released;
+    private Image image;
+
+    ImageTextureRegistryEntry(long id) {
+      this.id = id;
+    }
+
+    @Override
+    public long id() {
+      return id;
+    }
+
+    @Override
+    public void release() {
+      if (released) {
+        return;
+      }
+      released = true;
+      unregisterTexture(id);
+    }
+
+    @Override
+    @TargetApi(19)
+    public void pushImage(Image image) {
+      Image toClose;
+      synchronized (this) {
+        toClose = this.image;
+        this.image = image;
+      }
+      // Close the previously pushed buffer.
+      if (toClose != null) {
+        toClose.close();
+      }
+      // Mark that we have a new frame available.
+      markTextureFrameAvailable(id);
+    }
+
+    @Override
+    public Image acquireLatestImage() {
+      Image r;
+      synchronized (this) {
+        r = this.image;
+        this.image = null;
+      }
+      return r;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+      try {
+        if (released) {
+          return;
+        }
+
+        handler.post(new TextureFinalizerRunnable(id, flutterJNI));
+      } finally {
+        super.finalize();
+      }
     }
   }
   // ------ END TextureRegistry IMPLEMENTATION ----
@@ -487,6 +563,11 @@ public class FlutterRenderer implements TextureRegistry {
   // TODO(mattcarroll): describe the native behavior that this invokes
   private void registerTexture(long textureId, @NonNull SurfaceTextureWrapper textureWrapper) {
     flutterJNI.registerTexture(textureId, textureWrapper);
+  }
+
+  private void registerImageTexture(
+      long textureId, @NonNull TextureRegistry.ImageTextureEntry textureEntry) {
+    flutterJNI.registerImageTexture(textureId, textureEntry);
   }
 
   // TODO(mattcarroll): describe the native behavior that this invokes

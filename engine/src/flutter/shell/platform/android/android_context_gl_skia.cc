@@ -205,6 +205,14 @@ bool AndroidContextGLSkia::ClearCurrent() const {
   return true;
 }
 
+EGLContext AndroidContextGLSkia::GetEGLContext() const {
+  return context_;
+}
+
+EGLDisplay AndroidContextGLSkia::GetEGLDisplay() const {
+  return environment_->Display();
+}
+
 EGLContext AndroidContextGLSkia::CreateNewContext() const {
   bool success;
   EGLContext context;

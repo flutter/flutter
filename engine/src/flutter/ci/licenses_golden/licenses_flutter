@@ -1688,8 +1688,11 @@ ORIGIN: ../../../flutter/impeller/toolkit/egl/display.cc + ../../../flutter/LICE
 ORIGIN: ../../../flutter/impeller/toolkit/egl/display.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/toolkit/egl/egl.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/toolkit/egl/egl.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/toolkit/egl/image.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/toolkit/egl/surface.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/toolkit/egl/surface.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/toolkit/gles/gles.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/toolkit/gles/texture.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/backends/skia/text_frame_skia.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/backends/skia/text_frame_skia.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/backends/skia/text_render_context_skia.cc + ../../../flutter/LICENSE
@@ -2327,6 +2330,8 @@ ORIGIN: ../../../flutter/shell/platform/android/external_view_embedder/surface_p
 ORIGIN: ../../../flutter/shell/platform/android/external_view_embedder/surface_pool.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/flutter_main.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/flutter_main.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/android/hardware_buffer_external_texture_gl.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/android/hardware_buffer_external_texture_gl.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/FlutterInjector.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/Log.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivity.java + ../../../flutter/LICENSE
@@ -2468,6 +2473,8 @@ ORIGIN: ../../../flutter/shell/platform/android/jni/jni_mock.h + ../../../flutte
 ORIGIN: ../../../flutter/shell/platform/android/jni/platform_view_android_jni.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/jni/platform_view_android_jni.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/library_loader.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/android/ndk_helpers.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/android/ndk_helpers.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/platform_message_handler_android.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/platform_message_response_android.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/platform_message_response_android.h + ../../../flutter/LICENSE
@@ -4389,8 +4396,13 @@ FILE: ../../../flutter/impeller/toolkit/egl/display.cc
 FILE: ../../../flutter/impeller/toolkit/egl/display.h
 FILE: ../../../flutter/impeller/toolkit/egl/egl.cc
 FILE: ../../../flutter/impeller/toolkit/egl/egl.h
+FILE: ../../../flutter/impeller/toolkit/egl/image.cc
+FILE: ../../../flutter/impeller/toolkit/egl/image.h
 FILE: ../../../flutter/impeller/toolkit/egl/surface.cc
 FILE: ../../../flutter/impeller/toolkit/egl/surface.h
+FILE: ../../../flutter/impeller/toolkit/gles/gles.h
+FILE: ../../../flutter/impeller/toolkit/gles/texture.cc
+FILE: ../../../flutter/impeller/toolkit/gles/texture.h
 FILE: ../../../flutter/impeller/tools/malioc.json
 FILE: ../../../flutter/impeller/typographer/backends/skia/text_frame_skia.cc
 FILE: ../../../flutter/impeller/typographer/backends/skia/text_frame_skia.h
@@ -5030,6 +5042,8 @@ FILE: ../../../flutter/shell/platform/android/external_view_embedder/surface_poo
 FILE: ../../../flutter/shell/platform/android/external_view_embedder/surface_pool.h
 FILE: ../../../flutter/shell/platform/android/flutter_main.cc
 FILE: ../../../flutter/shell/platform/android/flutter_main.h
+FILE: ../../../flutter/shell/platform/android/hardware_buffer_external_texture_gl.cc
+FILE: ../../../flutter/shell/platform/android/hardware_buffer_external_texture_gl.h
 FILE: ../../../flutter/shell/platform/android/io/flutter/FlutterInjector.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/Log.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivity.java
@@ -5147,6 +5161,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextInpu
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/localization/LocalizationPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/mouse/MouseCursorPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/AccessibilityEventsDelegate.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/ImageReaderPlatformViewRenderTarget.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformOverlayView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformView.java
@@ -5179,6 +5194,8 @@ FILE: ../../../flutter/shell/platform/android/jni/jni_mock.h
 FILE: ../../../flutter/shell/platform/android/jni/platform_view_android_jni.cc
 FILE: ../../../flutter/shell/platform/android/jni/platform_view_android_jni.h
 FILE: ../../../flutter/shell/platform/android/library_loader.cc
+FILE: ../../../flutter/shell/platform/android/ndk_helpers.cc
+FILE: ../../../flutter/shell/platform/android/ndk_helpers.h
 FILE: ../../../flutter/shell/platform/android/platform_message_handler_android.cc
 FILE: ../../../flutter/shell/platform/android/platform_message_handler_android.h
 FILE: ../../../flutter/shell/platform/android/platform_message_response_android.cc

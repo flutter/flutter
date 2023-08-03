@@ -4,20 +4,11 @@
 
 import("../../tools/impeller.gni")
 
-impeller_component("egl") {
+impeller_component("gles") {
   sources = [
-    "config.cc",
-    "config.h",
-    "context.cc",
-    "context.h",
-    "display.cc",
-    "display.h",
-    "egl.cc",
-    "egl.h",
-    "image.cc",
-    "image.h",
-    "surface.cc",
-    "surface.h",
+    "gles.h",
+    "texture.cc",
+    "texture.h",
   ]
 
   deps = [
@@ -26,7 +17,4 @@ impeller_component("egl") {
   ]
 
   libs = []
-  if (is_android) {
-    libs = [ "EGL" ]
-  }
 }
