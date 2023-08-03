@@ -7,9 +7,7 @@ import 'dart:async';
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
-import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -23,7 +21,6 @@ import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
-import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -144,7 +141,6 @@ class AttachCommand extends FlutterCommand {
   }
 
   final HotRunnerFactory _hotRunnerFactory;
-  late final Artifacts? _artifacts = globals.artifacts;
   final Stdio _stdio;
   final Logger _logger;
   final Terminal _terminal;
