@@ -1188,7 +1188,10 @@ class WidgetsApp extends StatefulWidget {
   /// and view what widgets and render objects associated with it. An outline of
   /// the selected widget and some summary information is shown on device and
   /// more detailed information is shown in the IDE or DevTools.
-  @Deprecated('Use debugShowWidgetInspectorOverrideNotifier.value instead')
+  @Deprecated(
+    'Use debugShowWidgetInspectorOverrideNotifier.value instead. '
+    'This feature was deprecated after 3.13.0-17.0.pre.38.'
+  )
   static bool debugShowWidgetInspectorOverride = false;
 
   /// If [debugShowWidgetInspectorOverrideNotifier.value] is true,
@@ -1720,8 +1723,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(() {
       result = ValueListenableBuilder<bool>(
         valueListenable: WidgetsApp.debugShowWidgetInspectorOverrideNotifier,
-        builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
-          if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
+        builder: (BuildContext context, bool debugShowWidgetInspectorOverride,
+            Widget? child) {
+          if (widget.debugShowWidgetInspector ||
+              debugShowWidgetInspectorOverride) {
             return WidgetInspector(
               selectButtonBuilder: widget.inspectorSelectButtonBuilder,
               child: child!,
