@@ -266,13 +266,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       throwToolExit('Did not find any valid target devices.');
     }
 
-    final Artifacts? overrideArtifacts = device.artifactOverrides ?? _artifacts;
-    await context.run<void>(
-      body: () => _attachToDevice(device),
-      overrides: <Type, Generator>{
-        Artifacts: () => overrideArtifacts,
-      },
-    );
+    await _attachToDevice(device);
 
     return FlutterCommandResult.success();
   }
