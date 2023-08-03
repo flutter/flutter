@@ -2672,6 +2672,9 @@ ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/KeyCodeMap_I
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObjectTest.mm + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.mm + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/VsyncWaiterIosTest.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.mm + ../../../flutter/LICENSE
@@ -5395,6 +5398,9 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/KeyCodeMap_Int
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObjectTest.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/VsyncWaiterIosTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.mm
