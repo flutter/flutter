@@ -29,13 +29,13 @@ AndroidExternalTextureGL::AndroidExternalTextureGL(
       transform(SkMatrix::I()) {}
 
 AndroidExternalTextureGL::~AndroidExternalTextureGL() {
-  if (state_ == AttachmentState::kAttached) {
+  if (state_ == AttachmentState::attached) {
     glDeleteTextures(1, &texture_name_);
   }
 }
 
 void AndroidExternalTextureGL::OnGrContextCreated() {
-  state_ = AttachmentState::kUninitialized;
+  state_ = AttachmentState::uninitialized;
 }
 
 void AndroidExternalTextureGL::MarkNewFrameAvailable() {
@@ -46,13 +46,13 @@ void AndroidExternalTextureGL::Paint(PaintContext& context,
                                      const SkRect& bounds,
                                      bool freeze,
                                      const DlImageSampling sampling) {
-  if (state_ == AttachmentState::kDetached) {
+  if (state_ == AttachmentState::detached) {
     return;
   }
-  if (state_ == AttachmentState::kUninitialized) {
+  if (state_ == AttachmentState::uninitialized) {
     glGenTextures(1, &texture_name_);
     Attach(static_cast<jint>(texture_name_));
-    state_ = AttachmentState::kAttached;
+    state_ = AttachmentState::attached;
   }
   if (!freeze && new_frame_ready_) {
     Update();
@@ -108,11 +108,11 @@ void AndroidExternalTextureGL::UpdateTransform() {
 }
 
 void AndroidExternalTextureGL::OnGrContextDestroyed() {
-  if (state_ == AttachmentState::kAttached) {
+  if (state_ == AttachmentState::attached) {
     Detach();
     glDeleteTextures(1, &texture_name_);
   }
-  state_ = AttachmentState::kDetached;
+  state_ = AttachmentState::detached;
 }
 
 void AndroidExternalTextureGL::Attach(jint textureName) {

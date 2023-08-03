@@ -10,7 +10,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <android/hardware_buffer_jni.h>
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/lib/ui/window/platform_message.h"
@@ -91,10 +90,6 @@ class PlatformViewAndroid final : public PlatformView {
   void RegisterExternalTexture(
       int64_t texture_id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture);
-
-  void RegisterImageTexture(
-      int64_t texture_id,
-      const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry);
 
   // |PlatformView|
   void LoadDartDeferredLibrary(
