@@ -705,6 +705,27 @@ class CatmullRomSpline extends Curve2D {
     Offset? startHandle,
     Offset? endHandle,
   }) {
+    assert(
+      startHandle == null || startHandle.isFinite,
+      'The provided startHandle of CatmullRomSpline must be finite. The '
+      'startHandle given was $startHandle.'
+    );
+    assert(
+      endHandle == null || endHandle.isFinite,
+      'The provided endHandle of CatmullRomSpline must be finite. The endHandle '
+      'given was $endHandle.'
+    );
+    assert(() {
+      for (int index = 0; index < controlPoints.length; index++) {
+        if (!controlPoints[index].isFinite) {
+          throw FlutterError(
+            'The provided CatmullRomSpline control point at index $index is not '
+            'finite. The control point given was ${controlPoints[index]}.'
+          );
+        }
+      }
+      return true;
+    }());
     // If not specified, select the first and last control points (which are
     // handles: they are not intersected by the resulting curve) so that they
     // extend the first and last segments, respectively.
