@@ -12,6 +12,7 @@ import android.media.Image;
 import android.os.Build;
 import android.os.Handler;
 import android.view.Surface;
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -319,6 +320,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
   }
 
+  @Keep
   final class ImageTextureRegistryEntry implements TextureRegistry.ImageTextureEntry {
     private final long id;
     private boolean released;
