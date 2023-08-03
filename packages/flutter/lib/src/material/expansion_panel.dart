@@ -3,7 +3,16 @@
 // found in the LICENSE file.
 
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
+import 'constants.dart';
+import 'expand_icon.dart';
+import 'icons.dart';
+import 'ink_well.dart';
+import 'material_localizations.dart';
+import 'mergeable_material.dart';
+import 'shadows.dart';
+import 'theme.dart';
 
 const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
