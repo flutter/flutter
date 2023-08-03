@@ -90,6 +90,7 @@ source_set("runtime") {
   }
 
   public_deps = [
+    "//flutter/lib/gpu",
     "//flutter/lib/ui",
     "//third_party/rapidjson",
   ]

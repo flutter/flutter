@@ -17,6 +17,7 @@ tests = [
   "fragment_shader_test.dart",
   "geometry_test.dart",
   "gesture_settings_test.dart",
+  "gpu_test.dart",
   "gradient_test.dart",
   "http_allow_http_connections_test.dart",
   "http_disallow_http_connections_test.dart",

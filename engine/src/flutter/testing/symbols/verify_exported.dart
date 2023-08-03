@@ -94,9 +94,12 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
       continue;
     }
     final Iterable<NmEntry> unexpectedEntries = NmEntry.parse(nmResult.stdout as String).where((NmEntry entry) {
-      return !(((entry.type == '(__DATA,__common)' || entry.type == '(__DATA,__const)') && entry.name.startsWith('_Flutter'))
-          || (entry.type == '(__DATA,__objc_data)'
-              && (entry.name.startsWith(r'_OBJC_METACLASS_$_Flutter') || entry.name.startsWith(r'_OBJC_CLASS_$_Flutter'))));
+      final bool cSymbol = (entry.type == '(__DATA,__common)' || entry.type == '(__DATA,__const)')
+          && entry.name.startsWith('_Flutter');
+      final bool cInternalSymbol = entry.type == '(__TEXT,__text)' && entry.name.startsWith('_InternalFlutter');
+      final bool objcSymbol = entry.type == '(__DATA,__objc_data)'
+          && (entry.name.startsWith(r'_OBJC_METACLASS_$_Flutter') || entry.name.startsWith(r'_OBJC_CLASS_$_Flutter'));
+      return !(cSymbol || cInternalSymbol || objcSymbol);
     });
     if (unexpectedEntries.isNotEmpty) {
       print('ERROR: $libFlutter exports unexpected symbols:');
@@ -275,7 +278,9 @@ int _checkLinux(String outPath, String nmPath, Iterable<String> builds) {
       }
       if (!(entry.name.startsWith('Flutter')
             || entry.name.startsWith('__Flutter')
-            || entry.name.startsWith('kFlutter'))) {
+            || entry.name.startsWith('kFlutter')
+            || entry.name.startsWith('InternalFlutter')
+            || entry.name.startsWith('kInternalFlutter'))) {
         print('ERROR: $libFlutter exports an unexpected symbol name: ($entry)');
         print(' Library has $entries.');
         failures++;
