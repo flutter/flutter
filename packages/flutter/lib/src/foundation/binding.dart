@@ -1055,9 +1055,8 @@ abstract class BindingBase {
   /// ```
   /// {@end-tool}
   void debugRegisterHotRestartCallback(DebugPreHotRestartCallback callback, {String debugLabel = 'unknown'}) {
-    assert(kDebugMode, '''debugRegisterHotRestartCallback can only be called in debug mode. '''
-                      '''Use kDebugMode or wrap the call in an assert.''');
     if (!kDebugMode) {
+      // No-op in non-debug modes.
       return;
     }
     _hotRestartCallbacks[callback] = debugLabel;
