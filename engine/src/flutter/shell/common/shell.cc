@@ -419,6 +419,8 @@ Shell::Shell(DartVMRef vm,
       volatile_path_tracker_(std::move(volatile_path_tracker)),
       weak_factory_gpu_(nullptr),
       weak_factory_(this) {
+  FML_CHECK(!settings.enable_software_rendering || !settings.enable_impeller)
+      << "Software rendering is incompatible with Impeller.";
   FML_CHECK(vm_) << "Must have access to VM to create a shell.";
   FML_DCHECK(task_runners_.IsValid());
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
