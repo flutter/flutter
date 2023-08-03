@@ -95,6 +95,11 @@ class TestBindingBase implements BindingBase {
 
   @override
   ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();
+  
+  @override
+  void debugRegisterHotRestartCallback(DebugPreHotRestartCallback callback, {String debugLabel = 'unknown'}) {
+    throw UnimplementedError();
+  }
 }
 
 class TestPaintingBinding extends TestBindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {
