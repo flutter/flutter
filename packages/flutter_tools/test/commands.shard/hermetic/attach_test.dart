@@ -135,7 +135,6 @@ void main() {
           ..hotRunner = hotRunner;
 
         await createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           hotRunnerFactory: hotRunnerFactory,
           stdio: stdio,
           logger: logger,
@@ -269,7 +268,6 @@ void main() {
           };
 
         await createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           hotRunnerFactory: hotRunnerFactory,
           stdio: stdio,
           logger: logger,
@@ -323,7 +321,6 @@ void main() {
           ..hotRunner = hotRunner;
 
         await createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           hotRunnerFactory: hotRunnerFactory,
           stdio: stdio,
           logger: logger,
@@ -388,7 +385,6 @@ void main() {
           ..hotRunner = hotRunner;
 
         await createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           hotRunnerFactory: hotRunnerFactory,
           stdio: stdio,
           logger: logger,
@@ -459,7 +455,6 @@ void main() {
           ..hotRunner = hotRunner;
 
         await createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           hotRunnerFactory: hotRunnerFactory,
           stdio: stdio,
           logger: logger,
@@ -534,7 +529,6 @@ void main() {
           ..hotRunner = hotRunner;
 
         await createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           hotRunnerFactory: hotRunnerFactory,
           stdio: stdio,
           logger: logger,
@@ -604,7 +598,6 @@ void main() {
           }
         });
         final Future<void> task = createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -637,7 +630,6 @@ void main() {
         };
         testDeviceManager.devices = <Device>[device];
         expect(() => createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -680,7 +672,6 @@ void main() {
           ..hotRunner = hotRunner;
 
         final AttachCommand command = AttachCommand(
-          artifacts: artifacts,
           hotRunnerFactory: hotRunnerFactory,
           stdio: stdio,
           logger: logger,
@@ -725,7 +716,6 @@ void main() {
         testDeviceManager.devices = <Device>[device];
 
         final AttachCommand command = AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -778,7 +768,6 @@ void main() {
           ..hotRunner = hotRunner;
 
         await createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           hotRunnerFactory: hotRunnerFactory,
           stdio: stdio,
           logger: logger,
@@ -811,7 +800,6 @@ void main() {
         testDeviceManager.devices = <Device>[device];
 
         final AttachCommand command = AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -860,7 +848,6 @@ void main() {
           }
         });
         final Future<void> task = createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -895,7 +882,6 @@ void main() {
           }
         });
         final Future<void> task = createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -931,7 +917,6 @@ void main() {
           }
         });
         final Future<void> task = createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -976,7 +961,6 @@ void main() {
           }
         });
         final Future<void> task = createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -1013,7 +997,6 @@ void main() {
 
     testUsingContext('exits when no device connected', () async {
       final AttachCommand command = AttachCommand(
-          artifacts: artifacts,
         stdio: stdio,
         logger: logger,
         terminal: terminal,
@@ -1037,7 +1020,6 @@ void main() {
       final FakeIOSDevice device = FakeIOSDevice();
       testDeviceManager.devices = <Device>[device];
       expect(createTestCommandRunner(AttachCommand(
-        artifacts: artifacts,
         stdio: stdio,
         logger: logger,
         terminal: terminal,
@@ -1058,7 +1040,6 @@ void main() {
 
     testUsingContext('exits when multiple devices connected', () async {
       final AttachCommand command = AttachCommand(
-          artifacts: artifacts,
         stdio: stdio,
         logger: logger,
         terminal: terminal,
@@ -1107,7 +1088,6 @@ void main() {
       testFileSystem.file('lib/main.dart').createSync();
 
       final AttachCommand command = AttachCommand(
-          artifacts: artifacts,
         hotRunnerFactory: hotRunnerFactory,
         stdio: stdio,
         logger: logger,
@@ -1148,7 +1128,6 @@ void main() {
       testFileSystem.file('lib/main.dart').createSync();
 
       final AttachCommand command = AttachCommand(
-          artifacts: artifacts,
         hotRunnerFactory: hotRunnerFactory,
         stdio: stdio,
         logger: logger,
