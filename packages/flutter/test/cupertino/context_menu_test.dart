@@ -812,12 +812,13 @@ void main() {
     });
   });
 
-  testWidgets('Is gesture conflicts of ctx_menu resolved',
-      (WidgetTester tester) async {
+  testWidgets('Conflicting gesture detectors', (WidgetTester tester) async {
     int? onPointerDownTime;
     int? onPointerUpTime;
     bool insideTapTriggered = false;
-    // 500ms < duration < 900ms
+    // The required duration of the route to be pushed in is [500, 900]ms.
+    // 500ms is calculated from kPressTimeout+_previewLongPressTimeout/2.
+    // 900ms is calculated from kPressTimeout+_previewLongPressTimeout.
     const Duration pressDuration = Duration(milliseconds: 501);
 
     int now() => clock.now().millisecondsSinceEpoch;
@@ -850,31 +851,33 @@ void main() {
     // Start a press on the child.
     final TestGesture gesture = await tester.createGesture();
     await gesture.down(tester.getCenter(find.byKey(const Key('container'))));
-    await tester.pump();
-    // simulate a press with specified duration
+    // Simulate the actual situation:
+    // the user keeps pressing and requesting frames.
+    // If there is only one frame,
+    // the animation is mutant and cannot drive the value of the animation controller.
     for (int i = 0; i < 100; i++) {
-      // simulate 100 frames
       await tester.pump(pressDuration ~/ 100);
     }
     await gesture.up();
-    // await pushing route
+    // Await pushing route.
     await tester.pumpAndSettle();
 
-    // judge whether _ContextMenuRouteStatic present on the screen
+    // Judge whether _ContextMenuRouteStatic present on the screen.
     final Finder routeStatic = find.byWidgetPredicate(
           (Widget w) => '${w.runtimeType}' == '_ContextMenuRouteStatic',
     );
-    // can't present together
+
+    // The insideTap and the route should not be triggered at the same time.
     if (insideTapTriggered) {
-      // calculate the actual duration
+      // Calculate the actual duration.
       final int actualDuration = onPointerUpTime! - onPointerDownTime!;
 
       expect(routeStatic, findsNothing,
-          reason:
-          'When actualDuration($actualDuration) is in the range of 500ms~900ms, '
+          reason: 'When actualDuration($actualDuration) is in the range of 500ms~900ms, '
               'which means the route is pushed, '
-              'insideTap should not be triggered.');
+              'but insideTap should not be triggered at the same time.');
     } else {
+      // The route should be pushed when the insideTap is not triggered.
       expect(routeStatic, findsOneWidget);
     }
   });
