@@ -3307,6 +3307,117 @@ void main() {
     final Finder modalBottomSheet = find.text('ModalBottomSheet');
     expect(modalBottomSheet, findsOneWidget);
   });
+
+  testWidgets('Material3 - CheckedPopupMenuItem.labelTextStyle uses correct text style', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    ThemeData theme = ThemeData(useMaterial3: true);
+
+    Widget buildMenu() {
+      return  MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          appBar: AppBar(
+            actions: <Widget>[
+              PopupMenuButton<void>(
+                key: popupMenuButtonKey,
+                itemBuilder: (BuildContext context) => <PopupMenuItem<void>>[
+                  const CheckedPopupMenuItem<void>(
+                    child: Text('Item 1'),
+                  ),
+                  const CheckedPopupMenuItem<int>(
+                    checked: true,
+                    child: Text('Item 2'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildMenu());
+
+    // Show the menu
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    // Test default text style.
+    expect(_labelStyle(tester, 'Item 1')!.fontSize, 14.0);
+    expect(_labelStyle(tester, 'Item 1')!.color, theme.colorScheme.onSurface);
+
+    // Close the menu.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pumpAndSettle();
+
+    // Test custom text theme text style.
+    theme = theme.copyWith(
+      textTheme: theme.textTheme.copyWith(
+        labelLarge: const TextStyle(
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
+        )
+      ),
+    );
+    await tester.pumpWidget(buildMenu());
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(_labelStyle(tester, 'Item 1')!.fontSize, 20.0);
+    expect(_labelStyle(tester, 'Item 1')!.fontWeight, FontWeight.bold);
+  });
+
+  testWidgets('CheckedPopupMenuItem.labelTextStyle resolve material states', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    final MaterialStateProperty<TextStyle?> labelTextStyle = MaterialStateProperty.resolveWith(
+     (Set<MaterialState> states) {
+       if (states.contains(MaterialState.selected)) {
+        return const TextStyle(color: Colors.red, fontSize: 24.0);
+       }
+
+      return const TextStyle(color: Colors.amber, fontSize: 20.0);
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            actions: <Widget>[
+              PopupMenuButton<void>(
+                key: popupMenuButtonKey,
+                itemBuilder: (BuildContext context) => <PopupMenuItem<void>>[
+                  CheckedPopupMenuItem<void>(
+                    labelTextStyle: labelTextStyle,
+                    child: const Text('Item 1'),
+                  ),
+                  CheckedPopupMenuItem<int>(
+                    checked: true,
+                    labelTextStyle: labelTextStyle,
+                    child: const Text('Item 2'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(
+      _labelStyle(tester, 'Item 1'),
+      labelTextStyle.resolve(<MaterialState>{})
+    );
+    expect(
+      _labelStyle(tester, 'Item 2'),
+      labelTextStyle.resolve(<MaterialState>{MaterialState.selected})
+    );
+  });
 }
 
 class TestApp extends StatelessWidget {
@@ -3376,4 +3487,11 @@ class _ClosureNavigatorObserver extends NavigatorObserver {
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => onDidChange(newRoute!);
+}
+
+TextStyle? _labelStyle(WidgetTester tester, String label) {
+  return tester.widget<RichText>(find.descendant(
+    of: find.text(label),
+    matching: find.byType(RichText),
+  )).text.style;
 }
