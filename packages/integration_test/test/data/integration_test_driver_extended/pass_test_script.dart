@@ -32,7 +32,7 @@ void main() {
       await integrationDriver(
         driver: driver,
         responseDataCallback: (_) {
-          // We use this print to communicate with ../integration_test_driver_extended_test.dart
+          // We use this print to communicate with ../../integration_test_driver_extended_test.dart
           // ignore: avoid_print
           print('responseDataCallback called');
           called = true;
