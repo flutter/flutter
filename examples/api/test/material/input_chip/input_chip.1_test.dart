@@ -17,7 +17,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(example.EditableChipFieldApp), findsNWidgets(1));
+    expect(find.byType(example.EditableChipFieldApp), findsOneWidget);
     expect(find.byType(example.ChipsInput<String>), findsOneWidget);
     expect(find.byType(InputChip), findsOneWidget);
 
@@ -31,7 +31,7 @@ void main() {
     // Simulating text typing on the input field.
     tester.testTextInput.enterText('${replacementChar}ham');
     await tester.pumpAndSettle();
-    expect(find.byType(InputChip), findsNWidgets(1));
+    expect(find.byType(InputChip), findsOneWidget);
 
     state = tester.state(find.byType(example.ChipsInput<String>));
     await tester.pumpAndSettle();
@@ -50,7 +50,7 @@ void main() {
       matching: find.byType(InkWell).last,
     ));
     await tester.pumpAndSettle();
-    expect(find.byType(InputChip), findsNWidgets(1));
+    expect(find.byType(InputChip), findsOneWidget);
 
     await tester.tap(find.descendant(
       of: find.byType(InputChip),
