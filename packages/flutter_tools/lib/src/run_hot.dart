@@ -613,6 +613,8 @@ class HotRunner extends ResidentRunner {
         final String isolateId = view.uiIsolate!.id!;
         uiIsolatesIds.add(isolateId);
         // Reload the isolate.
+        // This does not remove breakpoints set by the user, as those breakpoints are restored
+        // by the editor/IDE in the new spawned isolate.
         operations.add(unpauseIsolateAndRemoveBreakpoints(device.vmService!, isolateId));
       }
 

@@ -1523,6 +1523,8 @@ abstract class ResidentRunner extends ResidentHandlers {
         // Make sure that we are able to run the preHotRestart callbacks,
         // by unpausing the isolate and removing breakpoints, otherwise we will be
         // infinitely waiting for the callbacks to run.
+        // This does not remove breakpoints set by the user, as those breakpoints are restored
+        // by the editor/IDE in the new spawned isolate.
         await unpauseIsolateAndRemoveBreakpoints(vmService, isolateId);
 
         preHotRestartFutures.add(vmService.flutterInvokePreHotRestartCallbacks(
@@ -1534,6 +1536,10 @@ abstract class ResidentRunner extends ResidentHandlers {
     slowCallbackTimer.cancel();
   }
 
+  /// Unpauses an isolate and removes all its breakpoints.
+  /// This method is useful when hot restarting, as we need to resume the isolate if it is paused in a breakpoint, otherwise
+  /// the restart would be waiting indefinitely for the user to continue. When called during a hot restart, the breakpoints
+  /// set by the user are not lost, as they are restored by the editor/IDE in the new spawned isolate.
   @protected
   Future<void> unpauseIsolateAndRemoveBreakpoints(FlutterVmService vmService, String isolateId) async {
     final Future<vm_service.Isolate?> reloadIsolate = vmService
