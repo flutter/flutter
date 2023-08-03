@@ -11,7 +11,7 @@ void main() {
   final String replacementChar =
       String.fromCharCode(example.ChipsInputState.kObjectReplacementChar);
 
-  testWidgets('Test EditableChipFieldApp', (WidgetTester tester) async {
+  testWidgets('User input generates InputChips', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.EditableChipFieldApp(),
     );
