@@ -202,7 +202,7 @@ final class FakeNativeAssetsBuilderResult
 
   @override
   final List<Uri> dependencies;
-  
+
   @override
   final bool success;
 }
