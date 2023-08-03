@@ -1159,6 +1159,7 @@ class DebuggingOptions {
     Map<String, Object?> platformArgs, {
     bool ipv6 = false,
     DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
+    bool isCoreDevice = false,
   }) {
     final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
@@ -1172,7 +1173,7 @@ class DebuggingOptions {
       if (environmentType == EnvironmentType.simulator && dartVmFlags.isNotEmpty)
         '--dart-flags=$dartVmFlags',
       if (useTestFonts) '--use-test-fonts',
-      if (debuggingEnabled) ...<String>[
+      if (debuggingEnabled && !isCoreDevice) ...<String>[
         '--enable-checked-mode',
         '--verify-entry-points',
       ],
