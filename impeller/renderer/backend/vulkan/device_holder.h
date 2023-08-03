@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "impeller/renderer/backend/vulkan/vk.h"
+#include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
 
 namespace impeller {
 
