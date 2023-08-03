@@ -799,7 +799,7 @@ void main() {
       'bundle',
       '--no-pub',
       '--dart-define-from-file=config',
-    ]), throwsToolExit(message: 'Json config define file "--dart-define-from-file=config" is not a file, please fix first!'));
+    ]), throwsToolExit(message: 'Did not find the file passed to "--dart-define-from-file". Path: config'));
   }, overrides: <Type, Generator>{
     FileSystem: fsFactory,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
