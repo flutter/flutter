@@ -126,7 +126,7 @@ class SearchAnchor extends StatefulWidget {
     this.headerHintStyle,
     this.dividerColor,
     this.viewConstraints,
-    this.textCapitalization = TextCapitalization.none,
+    this.textCapitalization,
     required this.builder,
     required this.suggestionsBuilder,
   });
@@ -289,7 +289,7 @@ class SearchAnchor extends StatefulWidget {
   final BoxConstraints? viewConstraints;
 
   /// {@macro flutter.widgets.editableText.textCapitalization}
-  final TextCapitalization textCapitalization;
+  final TextCapitalization? textCapitalization;
 
   /// Called to create a widget which can open a search view route when it is tapped.
   ///
@@ -432,7 +432,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.viewHeaderHintStyle,
     this.dividerColor,
     this.viewConstraints,
-    required this.textCapitalization,
+    this.textCapitalization,
     required this.showFullScreenView,
     required this.anchorKey,
     required this.searchController,
@@ -454,7 +454,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
   final BoxConstraints? viewConstraints;
-  final TextCapitalization textCapitalization;
+  final TextCapitalization? textCapitalization;
   final bool showFullScreenView;
   final GlobalKey anchorKey;
   final SearchController searchController;
@@ -629,7 +629,7 @@ class _ViewContent extends StatefulWidget {
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
-    required this.textCapitalization,
+    this.textCapitalization,
     required this.showFullScreenView,
     required this.topPadding,
     required this.animation,
@@ -654,7 +654,7 @@ class _ViewContent extends StatefulWidget {
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
-  final TextCapitalization textCapitalization;
+  final TextCapitalization? textCapitalization;
   final bool showFullScreenView;
   final double topPadding;
   final Animation<double> animation;
