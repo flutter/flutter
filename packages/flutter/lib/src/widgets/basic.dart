@@ -290,6 +290,22 @@ class Directionality extends _UbiquitousInheritedWidget {
 /// Drawing content into the offscreen buffer may also trigger render target
 /// switches and such switching is particularly slow in older GPUs.
 ///
+/// ## Hit testing
+///
+/// Setting the [opacity] to zero does not prevent hit testing from being applied
+/// to the descendants of the [Opacity] widget. This can be confusing for the
+/// user, who may not see anything, and may believe the area of the interface
+/// where the [Opacity] is hiding a widget to be non-interactive.
+///
+/// With certain widgets, such as [Flow], that compute their positions only when
+/// they are painted, this can actually lead to bugs (from unexpected geometry
+/// to exceptions), because those widgets are not painted by the [Opacity]
+/// widget at all when the [opacity] is zero.
+///
+/// To avoid such problems, it is generally a good idea to use an
+/// [IgnorePointer] widget when setting the [opacity] to zero. This prevents
+/// interactions with any children in the subtree.
+///
 /// See also:
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
@@ -1249,6 +1265,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
     properties.add(ColorProperty('shadowColor', shadowColor));
   }
 }
+
 
 // POSITIONING AND SIZING NODES
 
@@ -3532,8 +3549,6 @@ class IntrinsicHeight extends SingleChildRenderObjectWidget {
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Baseline extends SingleChildRenderObjectWidget {
   /// Creates a widget that positions its child according to the child's baseline.
-  ///
-  /// The [baseline] and [baselineType] arguments must not be null.
   const Baseline({
     super.key,
     required this.baseline,
@@ -3558,6 +3573,25 @@ class Baseline extends SingleChildRenderObjectWidget {
     renderObject
       ..baseline = baseline
       ..baselineType = baselineType;
+  }
+}
+
+/// A widget that causes the parent to ignore the [child] for the purposes
+/// of baseline alignment.
+///
+/// See also:
+///
+///  * [Baseline], a widget that positions a child relative to a baseline.
+class IgnoreBaseline extends SingleChildRenderObjectWidget {
+  /// Creates a widget that ignores the child for baseline alignment purposes.
+  const IgnoreBaseline({
+    super.key,
+    super.child,
+  });
+
+  @override
+  RenderIgnoreBaseline createRenderObject(BuildContext context) {
+    return RenderIgnoreBaseline();
   }
 }
 
@@ -5574,19 +5608,6 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// this animation and repaint whenever the animation ticks, avoiding both the
 /// build and layout phases of the pipeline.
 ///
-/// See also:
-///
-///  * [Wrap], which provides the layout model that some other frameworks call
-///    "flow", and is otherwise unrelated to [Flow].
-///  * [FlowDelegate], which controls the visual presentation of the children.
-///  * [Stack], which arranges children relative to the edges of the container.
-///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
-///    a single child.
-///  * [CustomMultiChildLayout], which uses a delegate to position multiple
-///    children.
-///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-///
-///
 /// {@tool dartpad}
 /// This example uses the [Flow] widget to create a menu that opens and closes
 /// as it is interacted with, shown above. The color of the button in the menu
@@ -5595,6 +5616,38 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/flow.0.dart **
 /// {@end-tool}
 ///
+/// ## Hit testing and hidden [Flow] widgets
+///
+/// The [Flow] widget recomputers its children's positions (as used by hit
+/// testing) during the _paint_ phase rather than during the _layout_ phase.
+///
+/// Widgets like [Opacity] avoid painting their children when those children
+/// would be invisible due to their opacity being zero.
+///
+/// Unfortunately, this means that hiding a [Flow] widget using an [Opacity]
+/// widget will cause bugs when the user attempts to interact with the hidden
+/// region, for example, by tapping it or clicking it.
+///
+/// Such bugs will manifest either as out-of-date geometry (taps going to
+/// different widgets than might be expected by the currently-specified
+/// [FlowDelegate]s), or exceptions (e.g. if the last time the [Flow] was
+/// painted, a different set of children was specified).
+///
+/// To avoid this, when hiding a [Flow] widget with an [Opacity] widget (or
+/// [AnimatedOpacity] or similar), it is wise to also disable hit testing on the
+/// widget by using [IgnorePointer]. This is generally good advice anyway as
+/// hit-testing invisible widgets is often confusing for the user.
+///
+/// See also:
+///
+///  * [Wrap], which provides the layout model that some other frameworks call
+///    "flow", and is otherwise unrelated to [Flow].
+///  * [Stack], which arranges children relative to the edges of the container.
+///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///    a single child.
+///  * [CustomMultiChildLayout], which uses a delegate to position multiple
+///    children.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flow extends MultiChildRenderObjectWidget {
   /// Creates a flow layout.
   ///
@@ -7085,6 +7138,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? hidden,
     bool? image,
     bool? liveRegion,
+    bool? expanded,
     int? maxValueLength,
     int? currentValueLength,
     String? label,
@@ -7133,6 +7187,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       enabled: enabled,
       checked: checked,
       mixed: mixed,
+      expanded: expanded,
       toggled: toggled,
       selected: selected,
       button: button,
