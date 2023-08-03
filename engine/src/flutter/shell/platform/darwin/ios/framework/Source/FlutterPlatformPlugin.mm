@@ -11,6 +11,7 @@
 
 #include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 
 namespace {
 
@@ -293,7 +294,7 @@ using namespace flutter;
 #if APPLICATION_EXTENSION_API_ONLY
     if (@available(iOS 15.0, *)) {
       rootViewController =
-          [engineViewController windowSceneIfViewLoaded].keyWindow.rootViewController;
+          [engineViewController flutterWindowSceneIfViewLoaded].keyWindow.rootViewController;
     } else {
       FML_LOG(WARNING)
           << "rootViewController is not available in application extension prior to iOS 15.0.";

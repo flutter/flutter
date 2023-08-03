@@ -26,6 +26,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
@@ -516,25 +517,6 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   return pointer_data;
 }
 
-- (UIWindowScene*)windowSceneIfViewLoaded {
-  if (self.viewIfLoaded == nil) {
-    FML_LOG(WARNING) << "Trying to access the window scene before the view is loaded.";
-    return nil;
-  }
-  return self.viewIfLoaded.window.windowScene;
-}
-
-- (UIScreen*)screenIfViewLoaded {
-  if (@available(iOS 13.0, *)) {
-    if (self.viewIfLoaded == nil) {
-      FML_LOG(WARNING) << "Trying to access the screen before the view is loaded.";
-      return nil;
-    }
-    return [self windowSceneIfViewLoaded].screen;
-  }
-  return UIScreen.mainScreen;
-}
-
 static void SendFakeTouchEvent(UIScreen* screen,
                                FlutterEngine* engine,
                                CGPoint location,
@@ -554,7 +536,7 @@ static void SendFakeTouchEvent(UIScreen* screen,
     return NO;
   }
   CGPoint statusBarPoint = CGPointZero;
-  UIScreen* screen = [self screenIfViewLoaded];
+  UIScreen* screen = [self flutterScreenIfViewLoaded];
   if (screen) {
     SendFakeTouchEvent(screen, _engine.get(), statusBarPoint, flutter::PointerData::Change::kDown);
     SendFakeTouchEvent(screen, _engine.get(), statusBarPoint, flutter::PointerData::Change::kUp);
@@ -869,8 +851,8 @@ static void SendFakeTouchEvent(UIScreen* screen,
     BOOL stateIsActive = YES;
 #if APPLICATION_EXTENSION_API_ONLY
     if (@available(iOS 13.0, *)) {
-      stateIsActive =
-          self.windowSceneIfViewLoaded.activationState == UISceneActivationStateForegroundActive;
+      stateIsActive = self.flutterWindowSceneIfViewLoaded.activationState ==
+                      UISceneActivationStateForegroundActive;
     }
 #else
     stateIsActive = UIApplication.sharedApplication.applicationState == UIApplicationStateActive;
@@ -1166,7 +1148,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   // Activate or pause the correction of delivery frame rate of touch events.
   [self triggerTouchRateCorrectionIfNeeded:touches];
 
-  const CGFloat scale = [self screenIfViewLoaded].scale;
+  const CGFloat scale = [self flutterScreenIfViewLoaded].scale;
   auto packet =
       std::make_unique<flutter::PointerDataPacket>(touches.count + touches_to_remove_count);
 
@@ -1381,7 +1363,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (void)viewDidLayoutSubviews {
   CGRect viewBounds = self.view.bounds;
-  CGFloat scale = [self screenIfViewLoaded].scale;
+  CGFloat scale = [self flutterScreenIfViewLoaded].scale;
 
   // Purposefully place this not visible.
   _scrollView.get().frame = CGRectMake(0.0, 0.0, viewBounds.size.width, 0.0);
@@ -1400,8 +1382,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   bool applicationOrSceneIsActive = YES;
 #if APPLICATION_EXTENSION_API_ONLY
   if (@available(iOS 13.0, *)) {
-    applicationOrSceneIsActive =
-        self.windowSceneIfViewLoaded.activationState == UISceneActivationStateForegroundActive;
+    applicationOrSceneIsActive = self.flutterWindowSceneIfViewLoaded.activationState ==
+                                 UISceneActivationStateForegroundActive;
   }
 #else
   applicationOrSceneIsActive =
@@ -1436,7 +1418,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 // Set _viewportMetrics physical size.
 - (void)setViewportMetricsSize {
-  UIScreen* screen = [self screenIfViewLoaded];
+  UIScreen* screen = [self flutterScreenIfViewLoaded];
   if (!screen) {
     return;
   }
@@ -1450,7 +1432,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 //
 // Viewport paddings represent the iOS safe area insets.
 - (void)setViewportMetricsPaddings {
-  UIScreen* screen = [self screenIfViewLoaded];
+  UIScreen* screen = [self flutterScreenIfViewLoaded];
   if (!screen) {
     return;
   }
@@ -1616,7 +1598,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return FlutterKeyboardModeHidden;
   }
 
-  CGRect screenRect = [self screenIfViewLoaded].bounds;
+  CGRect screenRect = [self flutterScreenIfViewLoaded].bounds;
   CGRect adjustedKeyboardFrame = keyboardFrame;
   adjustedKeyboardFrame.origin.y += [self calculateMultitaskingAdjustment:screenRect
                                                             keyboardFrame:keyboardFrame];
@@ -1656,7 +1638,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     }
     CGRect viewRectRelativeToScreen =
         [self.viewIfLoaded convertRect:self.viewIfLoaded.frame
-                     toCoordinateSpace:[self screenIfViewLoaded].coordinateSpace];
+                     toCoordinateSpace:[self flutterScreenIfViewLoaded].coordinateSpace];
     CGFloat viewBottom = CGRectGetMaxY(viewRectRelativeToScreen);
     CGFloat offset = screenHeight - viewBottom;
     if (offset > 0) {
@@ -1672,14 +1654,14 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     // Calculate how much of the keyboard intersects with the view.
     CGRect viewRectRelativeToScreen =
         [self.viewIfLoaded convertRect:self.viewIfLoaded.frame
-                     toCoordinateSpace:[self screenIfViewLoaded].coordinateSpace];
+                     toCoordinateSpace:[self flutterScreenIfViewLoaded].coordinateSpace];
     CGRect intersection = CGRectIntersection(keyboardFrame, viewRectRelativeToScreen);
     CGFloat portionOfKeyboardInView = CGRectGetHeight(intersection);
 
     // The keyboard is treated as an inset since we want to effectively reduce the window size by
     // the keyboard height. The Dart side will compute a value accounting for the keyboard-consuming
     // bottom padding.
-    CGFloat scale = [self screenIfViewLoaded].scale;
+    CGFloat scale = [self flutterScreenIfViewLoaded].scale;
     return portionOfKeyboardInView * scale;
   }
   return 0;
@@ -1974,8 +1956,9 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     if (@available(iOS 16.0, *)) {
       NSSet<UIScene*>* scenes =
 #if APPLICATION_EXTENSION_API_ONLY
-          self.windowSceneIfViewLoaded ? [NSSet setWithObject:self.windowSceneIfViewLoaded]
-                                       : [NSSet set];
+          self.flutterWindowSceneIfViewLoaded
+              ? [NSSet setWithObject:self.flutterWindowSceneIfViewLoaded]
+              : [NSSet set];
 #else
           [UIApplication.sharedApplication.connectedScenes
               filteredSetUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(
@@ -1987,7 +1970,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     } else {
       UIInterfaceOrientationMask currentInterfaceOrientation;
       if (@available(iOS 13.0, *)) {
-        UIWindowScene* windowScene = [self windowSceneIfViewLoaded];
+        UIWindowScene* windowScene = [self flutterWindowSceneIfViewLoaded];
         if (!windowScene) {
           FML_LOG(WARNING)
               << "Accessing the interface orientation when the window scene is unavailable.";
@@ -2410,7 +2393,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (void)hoverEvent:(UIPanGestureRecognizer*)recognizer API_AVAILABLE(ios(13.4)) {
   CGPoint location = [recognizer locationInView:self.view];
-  CGFloat scale = [self screenIfViewLoaded].scale;
+  CGFloat scale = [self flutterScreenIfViewLoaded].scale;
   CGPoint oldLocation = _mouseState.location;
   _mouseState.location = {location.x * scale, location.y * scale};
 
@@ -2467,7 +2450,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (void)discreteScrollEvent:(UIPanGestureRecognizer*)recognizer API_AVAILABLE(ios(13.4)) {
   CGPoint translation = [recognizer translationInView:self.view];
-  const CGFloat scale = [self screenIfViewLoaded].scale;
+  const CGFloat scale = [self flutterScreenIfViewLoaded].scale;
 
   translation.x *= scale;
   translation.y *= scale;
@@ -2496,7 +2479,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (void)continuousScrollEvent:(UIPanGestureRecognizer*)recognizer API_AVAILABLE(ios(13.4)) {
   CGPoint translation = [recognizer translationInView:self.view];
-  const CGFloat scale = [self screenIfViewLoaded].scale;
+  const CGFloat scale = [self flutterScreenIfViewLoaded].scale;
 
   flutter::PointerData pointer_data = [self generatePointerDataAtLastMouseLocation];
   pointer_data.device = reinterpret_cast<int64_t>(recognizer);
