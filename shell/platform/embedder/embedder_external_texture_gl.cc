@@ -15,6 +15,8 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 
 namespace flutter {
 
@@ -77,8 +79,8 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTexture(
     height = texture->height;
   }
 
-  GrBackendTexture gr_backend_texture(width, height, GrMipMapped::kNo,
-                                      gr_texture_info);
+  auto gr_backend_texture = GrBackendTextures::MakeGL(
+      width, height, skgpu::Mipmapped::kNo, gr_texture_info);
   SkImages::TextureReleaseProc release_proc = texture->destruction_callback;
   auto image =
       SkImages::BorrowTextureFrom(context,                   // context
