@@ -628,7 +628,6 @@ abstract class BindingBase {
 
       registerServiceExtension(name: 'invokePreHotRestartCallbacks', callback: (Map<String, Object> params) async {
         Future<void> invokeAndWait(DebugPreHotRestartCallback callback, String label) async {
-          developer.postEvent('preHotRestartCallback', <String, Object>{'label': label, 'finished': false});
           try {
             await Future<Object?>.value(callback());
           } catch (error, stack) {
@@ -639,8 +638,6 @@ abstract class BindingBase {
                 context: ErrorSummary('Failed to invoke preHotRestartCallback "$label"'),
               )
             );
-          } finally {
-            developer.postEvent('preHotRestartCallback', <String, Object>{'label': label, 'finished': true});
           }
         }
 
