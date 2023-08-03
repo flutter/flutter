@@ -77,6 +77,20 @@ class AndroidContextGLSkia : public AndroidContext {
   bool ClearCurrent() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Returns the EGLContext.
+  ///
+  /// @return     EGLContext.
+  ///
+  EGLContext GetEGLContext() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Returns the EGLDisplay.
+  ///
+  /// @return     EGLDisplay.
+  ///
+  EGLDisplay GetEGLDisplay() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Create a new EGLContext using the same EGLConfig.
   ///
   /// @return     The EGLContext.

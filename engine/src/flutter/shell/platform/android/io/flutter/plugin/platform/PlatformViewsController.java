@@ -550,7 +550,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
     Log.i(TAG, "Hosting view in a virtual display for platform view: " + request.viewId);
 
-    final TextureRegistry.SurfaceTextureEntry textureEntry = textureRegistry.createSurfaceTexture();
+    final PlatformViewRenderTarget renderTarget = makePlatformViewRenderTarget(textureRegistry);
     final int physicalWidth = toPhysicalPixels(request.logicalWidth);
     final int physicalHeight = toPhysicalPixels(request.logicalHeight);
     final VirtualDisplayController vdController =
@@ -558,7 +558,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             context,
             accessibilityEventsDelegate,
             platformView,
-            textureEntry,
+            renderTarget,
             physicalWidth,
             physicalHeight,
             request.viewId,
@@ -584,7 +584,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     final View embeddedView = platformView.getView();
     contextToEmbeddedView.put(embeddedView.getContext(), embeddedView);
 
-    return textureEntry.id();
+    return renderTarget.getId();
   }
 
   // Configures the view for Texture Layer Hybrid Composition mode, returning the associated
@@ -610,10 +610,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       viewWrapper = new PlatformViewWrapper(context);
       textureId = -1;
     } else {
-      final TextureRegistry.SurfaceTextureEntry textureEntry =
-          textureRegistry.createSurfaceTexture();
-      viewWrapper = new PlatformViewWrapper(context, textureEntry);
-      textureId = textureEntry.id();
+      final PlatformViewRenderTarget renderTarget = makePlatformViewRenderTarget(textureRegistry);
+      viewWrapper = new PlatformViewWrapper(context, renderTarget);
+      textureId = renderTarget.getId();
     }
     viewWrapper.setTouchProcessor(androidTouchProcessor);
     viewWrapper.resizeRenderTarget(physicalWidth, physicalHeight);
@@ -966,6 +965,17 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
     textInputPlugin.unlockPlatformViewInputConnection();
     controller.onInputConnectionUnlocked();
+  }
+
+  private static PlatformViewRenderTarget makePlatformViewRenderTarget(
+      TextureRegistry textureRegistry) {
+    // TODO(johnmccutchan): Enable ImageReaderPlatformViewRenderTarget for public use.
+    if (false) {
+      final TextureRegistry.ImageTextureEntry textureEntry = textureRegistry.createImageTexture();
+      return new ImageReaderPlatformViewRenderTarget(textureEntry);
+    }
+    final TextureRegistry.SurfaceTextureEntry textureEntry = textureRegistry.createSurfaceTexture();
+    return new SurfaceTexturePlatformViewRenderTarget(textureEntry);
   }
 
   private static boolean validateDirection(int direction) {

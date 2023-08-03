@@ -24,7 +24,6 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.util.ViewUtils;
-import io.flutter.view.TextureRegistry;
 
 /**
  * Wraps a platform view to intercept gestures and project this view onto a {@link
@@ -53,12 +52,6 @@ public class PlatformViewWrapper extends FrameLayout {
   public PlatformViewWrapper(@NonNull Context context) {
     super(context);
     setWillNotDraw(false);
-  }
-
-  public PlatformViewWrapper(
-      @NonNull Context context, @NonNull TextureRegistry.SurfaceTextureEntry textureEntry) {
-    this(context);
-    this.renderTarget = new SurfaceTexturePlatformViewRenderTarget(textureEntry);
   }
 
   public PlatformViewWrapper(
