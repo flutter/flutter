@@ -92,8 +92,15 @@ bool CommandPoolVK::IsValid() const {
 
 void CommandPoolVK::Reset() {
   Lock lock(buffers_to_collect_mutex_);
-  GarbageCollectBuffersIfAble();
   graphics_pool_.reset();
+
+  // When the command pool is destroyed, all of its command buffers are freed.
+  // Handles allocated from that pool are now invalid and must be discarded.
+  for (vk::UniqueCommandBuffer& buffer : buffers_to_collect_) {
+    buffer.release();
+  }
+  buffers_to_collect_.clear();
+
   is_valid_ = false;
 }
 
@@ -133,7 +140,7 @@ void CommandPoolVK::CollectGraphicsCommandBuffer(
     // have been freed and are now invalid.
     buffer.release();
   }
-  buffers_to_collect_.insert(MakeSharedVK(std::move(buffer)));
+  buffers_to_collect_.emplace_back(std::move(buffer));
   GarbageCollectBuffersIfAble();
 }
 
