@@ -4342,6 +4342,24 @@ TEST_F(ShellTest, PrintsErrorWhenPlatformMessageSentFromWrongThread) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
+TEST_F(ShellTest, DiesIfSoftwareRenderingAndImpellerAreEnabledDeathTest) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP() << "Fuchsia";
+#endif  // OS_FUCHSIA
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  Settings settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  settings.enable_software_rendering = true;
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::Platform);
+  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+  EXPECT_DEATH_IF_SUPPORTED(
+      CreateShell(settings, task_runners),
+      "Software rendering is incompatible with Impeller.");
+}
+
 }  // namespace testing
 }  // namespace flutter
 
