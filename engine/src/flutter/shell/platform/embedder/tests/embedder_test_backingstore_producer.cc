@@ -13,6 +13,8 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 
 #include <cstdlib>
 #include <memory>
@@ -111,7 +113,8 @@ bool EmbedderTestBackingStoreProducer::CreateFramebuffer(
   }
 
   GrGLFramebufferInfo framebuffer_info = {};
-  if (!render_target.getGLFramebufferInfo(&framebuffer_info)) {
+  if (!GrBackendRenderTargets::GetGLFramebufferInfo(render_target,
+                                                    &framebuffer_info)) {
     FML_LOG(ERROR) << "Could not access backend framebuffer info.";
     return false;
   }
@@ -164,7 +167,7 @@ bool EmbedderTestBackingStoreProducer::CreateTexture(
   }
 
   GrGLTextureInfo texture_info = {};
-  if (!render_texture.getGLTextureInfo(&texture_info)) {
+  if (!GrBackendTextures::GetGLTextureInfo(render_texture, &texture_info)) {
     FML_LOG(ERROR) << "Could not access backend texture info.";
     return false;
   }
