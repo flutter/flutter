@@ -6,6 +6,7 @@ package io.flutter.view;
 
 import android.graphics.SurfaceTexture;
 import android.media.Image;
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -75,6 +76,7 @@ public interface TextureRegistry {
     default void setOnTrimMemoryListener(@Nullable OnTrimMemoryListener listener) {}
   }
 
+  @Keep
   interface ImageTextureEntry extends TextureEntry {
     /** @return the identity of this ImageTextureEntry */
     long id();
