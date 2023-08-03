@@ -361,6 +361,19 @@ class Template {
           context['androidIdentifier'] = _escapeKotlinKeywords(androidIdentifier);
         }
 
+        final bool web = (context['web'] as bool?) ?? false;
+
+        // Sanitize any parts of the context for the index.html output file.
+        if (web && finalDestinationFile.path.endsWith('index.html')) {
+          final String? description = context['description'] as String?;
+
+          // The description meta value should not be quoted,
+          // as quotes are included in the template.
+          if (description != null && description.isNotEmpty) {
+            context['description'] = description.replaceAll('"', '');
+          }
+        }
+
         final String renderedContents = _templateRenderer.renderString(templateContents, context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
