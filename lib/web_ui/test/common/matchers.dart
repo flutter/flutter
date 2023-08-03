@@ -293,17 +293,23 @@ String canonicalizeHtml(
         html_package.Element.tag(replacementTag);
 
     if (mode != HtmlComparisonMode.noAttributes) {
-      original.attributes.forEach((dynamic name, String value) {
-        if (name is! String) {
-          throw ArgumentError('"$name" should be String but was ${name.runtimeType}.');
-        }
+      // Sort the attributes so tests are not sensitive to their order, which
+      // does not matter in terms of functionality.
+      final List<String> attributeNames = original.attributes.keys.cast<String>().toList();
+      attributeNames.sort();
+      for (final String name in attributeNames) {
+        final String value = original.attributes[name]!;
         if (name == 'style') {
-          return;
+          // The style attribute is handled separately because it contains substructure.
+          continue;
         }
-        if (name.startsWith('aria-')) {
+
+        // These are the only attributes we're interested in testing. This list
+        // can change over time.
+        if (name.startsWith('aria-') || name.startsWith('flt-') || name == 'role') {
           replacement.attributes[name] = value;
         }
-      });
+      }
 
       if (original.attributes.containsKey('style')) {
         final String styleValue = original.attributes['style']!;
