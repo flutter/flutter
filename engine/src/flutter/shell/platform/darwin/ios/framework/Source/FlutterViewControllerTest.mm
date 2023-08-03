@@ -16,6 +16,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 #import "flutter/third_party/spring_animation/spring_animation.h"
 
@@ -129,7 +130,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)onUserSettingsChanged:(NSNotification*)notification;
 - (void)applicationWillTerminate:(NSNotification*)notification;
 - (void)goToApplicationLifecycle:(nonnull NSString*)state;
-- (UIScreen*)screenIfViewLoaded;
 - (void)handleKeyboardNotification:(NSNotification*)notification;
 - (CGFloat)calculateKeyboardInset:(CGRect)keyboardFrame keyboardMode:(int)keyboardMode;
 - (BOOL)shouldIgnoreKeyboardNotification:(NSNotification*)notification;
@@ -199,7 +199,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
              screen:(UIScreen*)screen
           viewFrame:(CGRect)viewFrame
      convertedFrame:(CGRect)convertedFrame {
-  OCMStub([viewControllerMock screenIfViewLoaded]).andReturn(screen);
+  OCMStub([viewControllerMock flutterScreenIfViewLoaded]).andReturn(screen);
   id mockView = OCMClassMock([UIView class]);
   OCMStub([mockView frame]).andReturn(viewFrame);
   OCMStub([mockView convertRect:viewFrame toCoordinateSpace:[OCMArg any]])
@@ -680,7 +680,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
   UIScreen* screen = [self setUpMockScreen];
-  OCMStub([viewControllerMock screenIfViewLoaded]).andReturn(screen);
+  OCMStub([viewControllerMock flutterScreenIfViewLoaded]).andReturn(screen);
 
   CGFloat screenWidth = screen.bounds.size.width;
   CGFloat screenHeight = screen.bounds.size.height;
@@ -943,7 +943,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
   UIScreen* screen = [self setUpMockScreen];
-  OCMStub([viewControllerMock screenIfViewLoaded]).andReturn(screen);
+  OCMStub([viewControllerMock flutterScreenIfViewLoaded]).andReturn(screen);
   mockEngine.viewController = viewController;
 
   id mockCoordinator = OCMProtocolMock(@protocol(UIViewControllerTransitionCoordinator));
@@ -965,7 +965,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
   UIScreen* screen = [self setUpMockScreen];
-  OCMStub([viewControllerMock screenIfViewLoaded]).andReturn(screen);
+  OCMStub([viewControllerMock flutterScreenIfViewLoaded]).andReturn(screen);
   mockEngine.viewController = viewController;
 
   // Mimic the device rotation with non-zero transition duration.
@@ -999,7 +999,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
   UIScreen* screen = [self setUpMockScreen];
-  OCMStub([viewControllerMock screenIfViewLoaded]).andReturn(screen);
+  OCMStub([viewControllerMock flutterScreenIfViewLoaded]).andReturn(screen);
   mockEngine.viewController = viewController;
 
   // Mimic the device rotation with zero transition duration.
@@ -1512,7 +1512,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
     if (@available(iOS 16.0, *)) {
       mockWindowScene = OCMClassMock([UIWindowScene class]);
       mockVC = OCMPartialMock(realVC);
-      OCMStub([mockVC windowSceneIfViewLoaded]).andReturn(mockWindowScene);
+      OCMStub([mockVC flutterWindowSceneIfViewLoaded]).andReturn(mockWindowScene);
       if (realVC.supportedInterfaceOrientations == mask) {
         OCMReject([mockWindowScene requestGeometryUpdateWithPreferences:[OCMArg any]
                                                            errorHandler:[OCMArg any]]);
@@ -1540,7 +1540,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
       if (@available(iOS 13.0, *)) {
         mockWindowScene = OCMClassMock([UIWindowScene class]);
         mockVC = OCMPartialMock(realVC);
-        OCMStub([mockVC windowSceneIfViewLoaded]).andReturn(mockWindowScene);
+        OCMStub([mockVC flutterWindowSceneIfViewLoaded]).andReturn(mockWindowScene);
         OCMStub(((UIWindowScene*)mockWindowScene).interfaceOrientation)
             .andReturn(currentOrientation);
       } else {

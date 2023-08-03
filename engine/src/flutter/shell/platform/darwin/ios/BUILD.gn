@@ -123,6 +123,8 @@ source_set("flutter_framework_source") {
     "framework/Source/KeyCodeMap_Internal.h",
     "framework/Source/SemanticsObject.h",
     "framework/Source/SemanticsObject.mm",
+    "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h",
+    "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.mm",
     "framework/Source/accessibility_bridge.h",
     "framework/Source/accessibility_bridge.mm",
     "framework/Source/accessibility_text_entry.h",
@@ -298,6 +300,7 @@ shared_library("ios_test_flutter") {
     "framework/Source/FlutterUndoManagerPluginTest.mm",
     "framework/Source/FlutterViewControllerTest.mm",
     "framework/Source/SemanticsObjectTest.mm",
+    "framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm",
     "framework/Source/connection_collection_test.mm",
   ]
   deps = [
