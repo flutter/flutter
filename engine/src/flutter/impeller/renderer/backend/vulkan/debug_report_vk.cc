@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/debug_report_vk.h"
 
+#include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
 
 namespace impeller {

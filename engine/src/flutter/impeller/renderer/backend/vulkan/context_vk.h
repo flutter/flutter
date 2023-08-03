@@ -17,11 +17,8 @@
 #include "impeller/renderer/backend/vulkan/queue_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_library_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_library_vk.h"
-#include "impeller/renderer/backend/vulkan/swapchain_vk.h"
-#include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/context.h"
-#include "impeller/renderer/surface.h"
 
 namespace impeller {
 

@@ -6,6 +6,7 @@
 
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/allocation.h"
+#include "impeller/base/validation.h"
 
 namespace impeller {
 
