@@ -485,7 +485,10 @@ class FlutterPlugin implements Plugin<Project> {
             getPluginList().each { plugin ->
                 Project pluginProject = project.rootProject.findProject(plugin.key)
                 pluginProject.afterEvaluate {
-                    int pluginCompileSdkVersion = pluginProject.android.compileSdkVersion.substring(8) as int
+                    int pluginCompileSdkVersion = Integer.MIN_VALUE; // Default to int min if using a preview version to skip the sdk check.
+                    if (pluginProject.android.compileSdkVersion.substring(8).isInteger()) { // Stable versions use ints, legacy preview uses string.
+                        pluginCompileSdkVersion = pluginProject.android.compileSdkVersion.substring(8) as int;
+                    }
                     maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
                     String pluginNdkVersion = pluginProject.android.ndkVersion ?: ndkVersionIfUnspecified
                     maxPluginNdkVersion = mostRecentSemanticVersion(pluginNdkVersion, maxPluginNdkVersion)
