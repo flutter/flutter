@@ -1190,7 +1190,7 @@ class WidgetsApp extends StatefulWidget {
   /// more detailed information is shown in the IDE or DevTools.
   @Deprecated(
     'Use debugShowWidgetInspectorOverrideNotifier.value instead. '
-    'This feature was deprecated after 3.13.0-17.0.pre.38.'
+    'This feature was deprecated after 3.13.0-17.0.pre.'
   )
   static bool debugShowWidgetInspectorOverride = false;
 
