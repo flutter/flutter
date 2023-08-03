@@ -23,7 +23,7 @@ source_set("graphics") {
     "//flutter/display_list",
     "//flutter/fml",
     "//flutter/shell/common",
-    "//flutter/shell/platform/darwin/common:framework_shared",
+    "//flutter/shell/platform/darwin/common:framework_common",
   ]
 
   if (impeller_supports_rendering) {

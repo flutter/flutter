@@ -5,7 +5,6 @@
 assert(is_mac || is_ios)
 
 import("//flutter/shell/platform/config.gni")
-import("//flutter/testing/testing.gni")
 
 group("darwin") {
   if (is_ios) {
@@ -17,71 +16,4 @@ group("darwin") {
       deps += [ "macos" ]
     }
   }
-}
-
-source_set("flutter_channels") {
-  cflags_objc = flutter_cflags_objc
-  cflags_objcc = flutter_cflags_objcc
-
-  sources = [
-    "common/buffer_conversions.h",
-    "common/buffer_conversions.mm",
-  ]
-
-  deps = [ "//flutter/fml" ]
-
-  public_deps = [ ":flutter_channels_arc" ]
-
-  public_configs = [ "//flutter:config" ]
-}
-
-source_set("flutter_channels_arc") {
-  cflags_objc = flutter_cflags_objc_arc
-  cflags_objcc = flutter_cflags_objcc_arc
-
-  sources = [
-    "common/framework/Headers/FlutterBinaryMessenger.h",
-    "common/framework/Headers/FlutterChannels.h",
-    "common/framework/Headers/FlutterCodecs.h",
-    "common/framework/Headers/FlutterMacros.h",
-    "common/framework/Source/FlutterChannels.mm",
-    "common/framework/Source/FlutterCodecs.mm",
-    "common/framework/Source/FlutterStandardCodec.mm",
-    "common/framework/Source/FlutterStandardCodecHelper.cc",
-    "common/framework/Source/FlutterStandardCodec_Internal.h",
-  ]
-
-  public = [
-    "common/framework/Headers/FlutterBinaryMessenger.h",
-    "common/framework/Headers/FlutterChannels.h",
-    "common/framework/Headers/FlutterCodecs.h",
-    "common/framework/Headers/FlutterMacros.h",
-    "common/framework/Source/FlutterStandardCodec_Internal.h",
-  ]
-
-  public_configs = [ "//flutter:config" ]
-
-  deps = [ "//flutter/fml" ]
-}
-
-test_fixtures("flutter_channels_fixtures") {
-  fixtures = []
-}
-
-executable("flutter_channels_unittests") {
-  testonly = true
-
-  sources = [
-    "common/framework/Source/flutter_codecs_unittest.mm",
-    "common/framework/Source/flutter_standard_codec_unittest.mm",
-  ]
-
-  deps = [
-    ":flutter_channels",
-    ":flutter_channels_fixtures",
-    "//flutter/testing",
-    "//third_party/dart/runtime:libdart_jit",
-  ]
-
-  public_configs = [ "//flutter:config" ]
 }

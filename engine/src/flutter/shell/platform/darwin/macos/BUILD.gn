@@ -7,7 +7,7 @@ assert(is_mac)
 import("//build/config/mac/mac_sdk.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/gpu/gpu.gni")
-import("//flutter/shell/platform/darwin/common/framework_shared.gni")
+import("//flutter/shell/platform/darwin/common/framework_common.gni")
 import("//flutter/shell/platform/glfw/config.gni")
 import("//flutter/testing/testing.gni")
 
@@ -121,7 +121,7 @@ source_set("flutter_framework_source") {
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/common:common_cpp_switches",
-    "//flutter/shell/platform/darwin/common:framework_shared",
+    "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/darwin/graphics:graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//third_party/skia",
@@ -204,7 +204,7 @@ executable("flutter_desktop_darwin_unittests") {
     ":flutter_framework_source",
     "//flutter/shell/platform/common:common_cpp_accessibility",
     "//flutter/shell/platform/common:common_cpp_enums",
-    "//flutter/shell/platform/darwin/common:framework_shared",
+    "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
@@ -241,7 +241,7 @@ action("copy_framework_headers") {
   script = "//flutter/sky/tools/install_framework_headers.py"
   visibility = [ ":*" ]
   sources = get_path_info(_flutter_framework_headers, "abspath") +
-            framework_shared_headers
+            framework_common_headers
   outputs = []
   foreach(header, sources) {
     header_basename = get_path_info(header, "file")

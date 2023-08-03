@@ -2,8 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+assert(is_mac || is_ios)
+
 import("//flutter/common/config.gni")
-import("framework_shared.gni")
+import("//flutter/testing/testing.gni")
+import("framework_common.gni")
 
 source_set("common") {
   cflags_objc = flutter_cflags_objc
@@ -29,7 +32,7 @@ config("framework_relative_headers") {
 }
 
 # Framework code shared between iOS and macOS.
-source_set("framework_shared") {
+source_set("framework_common") {
   cflags_objc = flutter_cflags_objc_arc
   cflags_objcc = flutter_cflags_objcc_arc
 
@@ -43,7 +46,7 @@ source_set("framework_shared") {
     "framework/Source/FlutterStandardCodec_Internal.h",
   ]
 
-  public = framework_shared_headers
+  public = framework_common_headers
 
   public += [ "framework/Source/FlutterNSBundleUtils.h" ]
 
@@ -55,4 +58,27 @@ source_set("framework_shared") {
   ]
 
   deps = [ "//flutter/fml" ]
+}
+
+test_fixtures("framework_common_fixtures") {
+  fixtures = []
+}
+
+# Unit tests for channels.
+executable("framework_common_unittests") {
+  testonly = true
+
+  sources = [
+    "framework/Source/flutter_codecs_unittest.mm",
+    "framework/Source/flutter_standard_codec_unittest.mm",
+  ]
+
+  deps = [
+    ":framework_common",
+    ":framework_common_fixtures",
+    "//flutter/testing",
+    "//third_party/dart/runtime:libdart_jit",
+  ]
+
+  public_configs = [ "//flutter:config" ]
 }
