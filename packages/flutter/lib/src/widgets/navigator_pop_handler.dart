@@ -71,15 +71,6 @@ class NavigatorPopHandler extends StatefulWidget {
 class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
   bool _canPop = true;
 
-  void _updateCanPop(bool nextCanPop) {
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _canPop = nextCanPop;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     // When the widget subtree indicates it can handle a pop, disable popping
@@ -99,16 +90,23 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
           // that our PopScope will allow the Navigator higher in the tree to
           // handle the pop instead.
           final bool nextCanPop = !notification.canHandlePop;
-          if (nextCanPop != _canPop) {
+          if (nextCanPop != _canPop || true) {
             switch (SchedulerBinding.instance.schedulerPhase) {
-              case SchedulerPhase.postFrameCallbacks:
               case SchedulerPhase.idle:
-                _updateCanPop(nextCanPop);
+              case SchedulerPhase.postFrameCallbacks:
+                setState(() {
+                  _canPop = nextCanPop;
+                });
               case SchedulerPhase.midFrameMicrotasks:
               case SchedulerPhase.persistentCallbacks:
               case SchedulerPhase.transientCallbacks:
                 SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-                  _updateCanPop(nextCanPop);
+                  if (!mounted) {
+                    return;
+                  }
+                  setState(() {
+                    _canPop = nextCanPop;
+                  });
                 });
             }
           }
