@@ -3479,7 +3479,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     final NavigationNotification notification = NavigationNotification(
       canHandlePop: navigatorCanPop || routeBlocksPop,
     );
-    notification.dispatch(context);
+    // Avoid dispatching a notification in the middle of a build.
+    switch (SchedulerBinding.instance.schedulerPhase) {
+      case SchedulerPhase.postFrameCallbacks:
+        notification.dispatch(context);
+      case SchedulerPhase.idle:
+      case SchedulerPhase.midFrameMicrotasks:
+      case SchedulerPhase.persistentCallbacks:
+      case SchedulerPhase.transientCallbacks:
+        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+          if (!mounted) {
+            return;
+          }
+          notification.dispatch(context);
+        });
+    }
   }
 
   @override

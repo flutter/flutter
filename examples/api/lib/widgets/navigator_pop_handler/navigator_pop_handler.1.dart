@@ -5,7 +5,6 @@
 // This sample demonstrates nested navigation in a bottom navigation bar.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
 // There are three possible tabs.
 enum _Tab {
@@ -22,10 +21,10 @@ enum _TabPage {
 
 typedef _TabPageCallback = void Function(List<_TabPage> pages);
 
-void main() => runApp(const PopScopeApp());
+void main() => runApp(const NavigatorPopHandlerApp());
 
-class PopScopeApp extends StatelessWidget {
-  const PopScopeApp({super.key});
+class NavigatorPopHandlerApp extends StatelessWidget {
+  const NavigatorPopHandlerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -159,95 +158,64 @@ class _BottomNavTab extends StatefulWidget {
 }
 
 class _BottomNavTabState extends State<_BottomNavTab> {
-  bool _navigatorCanHandlePop = false;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
-
-  bool get _canPop => widget.pages.length <= 1 && !_navigatorCanHandlePop;
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: _canPop,
-      onPopInvoked: (bool didPop) {
-        if (didPop) {
-          return;
-        }
-
-        // The Navigator may be able to pop if a dialog is shown, for example.
-        final NavigatorState navigatorState = _navigatorKey.currentState!;
-        if (navigatorState.canPop()) {
-          navigatorState.pop();
-          return;
-        }
-
-        // Otherwise, remove the topmost page.
-        assert(widget.pages.isNotEmpty);
-        widget.onChangedPages(<_TabPage>[
-          ...widget.pages,
-        ]..removeLast());
+    return NavigatorPopHandler(
+      onPop: () {
+        _navigatorKey.currentState?.pop();
       },
-      child: NotificationListener<NavigationNotification>(
-        onNotification: (NavigationNotification notification) {
-          if (mounted) {
-            SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-              setState(() {
-                _navigatorCanHandlePop = notification.canHandlePop;
-              });
-            });
+      child: Navigator(
+        key: _navigatorKey,
+        onPopPage: (Route<void> route, void result) {
+          if (!route.didPop(null)) {
+            return false;
           }
-          return false;
+          widget.onChangedPages(<_TabPage>[
+            ...widget.pages,
+          ]..removeLast());
+          return true;
         },
-        child: Navigator(
-          key: _navigatorKey,
-          onPopPage: (Route<void> route, void result) {
-            if (!route.didPop(null)) {
-              return false;
-            }
-            widget.onChangedPages(<_TabPage>[
-              ...widget.pages,
-            ]..removeLast());
-            return true;
-          },
-          pages: widget.pages.map((_TabPage page) {
-            switch (page) {
-              case _TabPage.home:
-                return MaterialPage<void>(
-                  child: _LinksPage(
-                    title: 'Bottom nav - tab ${widget.title} - route $page',
-                    backgroundColor: widget.color,
-                    buttons: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          widget.onChangedPages(<_TabPage>[
-                            ...widget.pages,
-                            _TabPage.one,
-                          ]);
-                        },
-                        child: const Text('Go to another route in this nested Navigator'),
-                      ),
-                    ],
-                  ),
-                );
-              case _TabPage.one:
-                return MaterialPage<void>(
-                  child: _LinksPage(
-                    backgroundColor: widget.color,
-                    title: 'Bottom nav - tab ${widget.title} - route $page',
-                    buttons: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          widget.onChangedPages(<_TabPage>[
-                            ...widget.pages,
-                          ]..removeLast());
-                        },
-                        child: const Text('Go back'),
-                      ),
-                    ],
-                  ),
-                );
-            }
-          }).toList(),
-        ),
+        pages: widget.pages.map((_TabPage page) {
+          switch (page) {
+            case _TabPage.home:
+              return MaterialPage<void>(
+                child: _LinksPage(
+                  title: 'Bottom nav - tab ${widget.title} - route $page',
+                  backgroundColor: widget.color,
+                  buttons: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        widget.onChangedPages(<_TabPage>[
+                          ...widget.pages,
+                          _TabPage.one,
+                        ]);
+                      },
+                      child: const Text('Go to another route in this nested Navigator'),
+                    ),
+                  ],
+                ),
+              );
+            case _TabPage.one:
+              return MaterialPage<void>(
+                child: _LinksPage(
+                  backgroundColor: widget.color,
+                  title: 'Bottom nav - tab ${widget.title} - route $page',
+                  buttons: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        widget.onChangedPages(<_TabPage>[
+                          ...widget.pages,
+                        ]..removeLast());
+                      },
+                      child: const Text('Go back'),
+                    ),
+                  ],
+                ),
+              );
+          }
+        }).toList(),
       ),
     );
   }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_api_samples/widgets/pop_scope/pop_scope.0.dart' as example;
+import 'package:flutter_api_samples/widgets/navigator_pop_handler/navigator_pop_handler.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../navigator_utils.dart';
@@ -10,7 +10,7 @@ import '../navigator_utils.dart';
 void main() {
   testWidgets("System back gesture operates on current tab's nested Navigator", (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.PopScopeApp(),
+      const example.NavigatorPopHandlerApp(),
     );
 
     expect(find.text('Bottom nav - tab Home Tab - route _TabPage.home'), findsOneWidget);

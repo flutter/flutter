@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/scheduler.dart';
-
 import 'framework.dart';
 import 'navigator.dart';
 import 'notification_listener.dart';
@@ -19,6 +17,14 @@ import 'pop_scope.dart';
 /// back gestures when using nested [Navigator]s.
 ///
 /// ** See code in examples/api/lib/widgets/navigator_pop_handler/navigator_pop_handler.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to use this widget to properly handle system
+/// back gestures with a bottom navigation bar whose tabs each have their own
+/// nested [Navigator]s.
+///
+/// ** See code in examples/api/lib/widgets/navigator_pop_handler/navigator_pop_handler.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -90,25 +96,10 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
           // that our PopScope will allow the Navigator higher in the tree to
           // handle the pop instead.
           final bool nextCanPop = !notification.canHandlePop;
-          if (nextCanPop != _canPop || true) {
-            switch (SchedulerBinding.instance.schedulerPhase) {
-              case SchedulerPhase.idle:
-              case SchedulerPhase.postFrameCallbacks:
-                setState(() {
-                  _canPop = nextCanPop;
-                });
-              case SchedulerPhase.midFrameMicrotasks:
-              case SchedulerPhase.persistentCallbacks:
-              case SchedulerPhase.transientCallbacks:
-                SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-                  if (!mounted) {
-                    return;
-                  }
-                  setState(() {
-                    _canPop = nextCanPop;
-                  });
-                });
-            }
+          if (nextCanPop != _canPop) {
+            setState(() {
+              _canPop = nextCanPop;
+            });
           }
           return false;
         },
