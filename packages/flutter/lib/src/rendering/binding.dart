@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show SemanticsUpdate;
+import 'dart:ui' as ui show FlutterView, Scene, SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -592,8 +592,23 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     rootPipelineOwner.flushCompositingBits();
     rootPipelineOwner.flushPaint();
     if (sendFramesToEngine) {
-      for (final RenderView renderView in renderViews) {
-        renderView.compositeFrame(); // this sends the bits to the GPU
+      if (!kReleaseMode) {
+        FlutterTimeline.startSync('COMPOSITING');
+      }
+      final Map<ui.FlutterView, ui.Scene> tasks = <ui.FlutterView, ui.Scene>{};
+      try {
+        for (final RenderView renderView in renderViews) {
+          tasks[renderView.flutterView] = renderView.compositeFrame();
+        }
+        // this sends the bits to the GPU
+        PlatformDispatcher.instance.renderView(tasks);
+      } finally {
+        for (final ui.Scene scene in tasks.values) {
+          scene.dispose();
+        }
+        if (!kReleaseMode) {
+          FlutterTimeline.finishSync();
+        }
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;

@@ -243,29 +243,19 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Uploads the composited layer tree to the engine.
   ///
   /// Actually causes the output of the rendering pipeline to appear on screen.
-  void compositeFrame() {
-    if (!kReleaseMode) {
-      FlutterTimeline.startSync('COMPOSITING');
+  ui.Scene compositeFrame() {
+    final ui.SceneBuilder builder = ui.SceneBuilder();
+    final ui.Scene scene = layer!.buildScene(builder);
+    if (automaticSystemUiAdjustment) {
+      _updateSystemChrome();
     }
-    try {
-      final ui.SceneBuilder builder = ui.SceneBuilder();
-      final ui.Scene scene = layer!.buildScene(builder);
-      if (automaticSystemUiAdjustment) {
-        _updateSystemChrome();
+    assert(() {
+      if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
+        debugCurrentRepaintColor = debugCurrentRepaintColor.withHue((debugCurrentRepaintColor.hue + 2.0) % 360.0);
       }
-      _view.render(scene);
-      scene.dispose();
-      assert(() {
-        if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
-          debugCurrentRepaintColor = debugCurrentRepaintColor.withHue((debugCurrentRepaintColor.hue + 2.0) % 360.0);
-        }
-        return true;
-      }());
-    } finally {
-      if (!kReleaseMode) {
-        FlutterTimeline.finishSync();
-      }
-    }
+      return true;
+    }());
+    return scene;
   }
 
   /// Sends the provided [SemanticsUpdate] to the [FlutterView] associated with
