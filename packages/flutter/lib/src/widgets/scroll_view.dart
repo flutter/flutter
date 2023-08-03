@@ -502,14 +502,14 @@ abstract class ScrollView extends StatelessWidget {
           double ypos = details.position.dy;
 
           SystemChannels.textInput.invokeMethod<void>(
-          'TextInput.onPointerMove',
+          'TextInput.onPointerMoveForInteractiveKeyboard',
           <String, dynamic>{'pointerY': ypos});
         },
         onPointerUp: (PointerUpEvent details) {
           double ypos = details.position.dy;
 
           SystemChannels.textInput.invokeMethod<void>(
-          'TextInput.onPointerUp',
+          'TextInput.onPointerUpForInteractiveKeyboard',
           <String, dynamic>{'pointerY': ypos});
         }
       );

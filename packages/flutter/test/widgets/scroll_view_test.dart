@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+//import 'dart:ffi';
+
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show LogicalKeyboardKey;
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'states.dart';
@@ -916,6 +918,98 @@ void main() {
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
     expect(textField.focusNode!.hasFocus, isFalse);
+  });
+
+  testWidgets('Interactive Test ListView sends y coordinate on mouse move', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.interactive,
+        children: focusNodes.map((FocusNode focusNode) {
+          return Container(
+            height: 50,
+            color: Colors.green,
+            child: TextField(
+              focusNode: focusNode,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    ));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    bool isPointerMoveCalled = false;
+    double point = -1;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+      if(methodCall.method == 'TextInput.onPointerMoveForInteractiveKeyboard'){
+        point = methodCall.arguments["pointerY"] as double;
+        isPointerMoveCalled = true;
+      }
+      return null;
+    });
+
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    await gesture.moveBy(const Offset(0.0, -100.0));
+
+    expect(isPointerMoveCalled, isTrue);
+    expect(point, 0.0);
+
+  });
+
+    testWidgets('Interactive Test ListView sends y coordinate on mouse up', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.interactive,
+        children: focusNodes.map((FocusNode focusNode) {
+          return Container(
+            height: 50,
+            color: Colors.green,
+            child: TextField(
+              focusNode: focusNode,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    ));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    bool isPointerMoveCalled = false;
+    double point = -1;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+      if(methodCall.method == 'TextInput.onPointerUpForInteractiveKeyboard'){
+        point = methodCall.arguments["pointerY"] as double;
+        isPointerMoveCalled = true;
+      }
+      return null;
+    });
+
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    await gesture.up();
+
+    expect(isPointerMoveCalled, isTrue);
+    expect(point, 100.0);
+
   });
 
   testWidgets('Can jumpTo during drag', (WidgetTester tester) async {
