@@ -138,6 +138,7 @@ class SearchBarThemeData with Diagnosticable {
       textStyle: MaterialStateProperty.lerp<TextStyle?>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
       hintStyle: MaterialStateProperty.lerp<TextStyle?>(a?.hintStyle, b?.hintStyle, t, TextStyle.lerp),
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
+      textCapitalization: t < 0.5 ? a?.textCapitalization : b?.textCapitalization,
     );
   }
 
