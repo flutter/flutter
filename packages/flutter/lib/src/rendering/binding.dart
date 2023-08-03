@@ -601,7 +601,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           tasks[renderView.flutterView] = renderView.compositeFrame();
         }
         // this sends the bits to the GPU
-        PlatformDispatcher.instance.renderView(tasks);
+        PlatformDispatcher.instance.render(tasks);
       } finally {
         for (final ui.Scene scene in tasks.values) {
           scene.dispose();
