@@ -57,6 +57,6 @@ void main() {
       matching: find.byType(InkWell).last,
     ));
     await tester.pumpAndSettle();
-    expect(find.byType(InputChip), findsNWidgets(0));
+    expect(find.byType(InputChip), findsNothing);
   });
 }
