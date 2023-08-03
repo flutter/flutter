@@ -37,7 +37,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(state.text, 'ham');
 
-    // add new InputChip by sending "done" action
+    // Add new InputChip by sending the "done" action.
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     expect(state.text.isEmpty, true);
