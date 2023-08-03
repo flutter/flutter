@@ -1,23 +1,27 @@
 # Android Vulkan Validation Layers
 
-This is a quick guide to get Vulkan validation layers support for a Flutter application. This guide assumes that you've created the application with `flutter create`, otherwise the locations might vary.
+If you want to run Vulkan Validation Layers with a custom engine build you need
+to add the `--enable-vulkan-validation-layers` to the `gn` invocation to make
+sure the layers are built and injected into the Flutter jar.
 
-1. Download the validation layers from this [GitHub](https://github.com/KhronosGroup/Vulkan-ValidationLayers/releases) releases. Typically named `android-binaries-1.3.231.1.zip`.
-2. When you unzip the file, you will see: `arm64-v8a  armeabi-v7a  x86  x86_64`
-3. Copy these directories to `${FLUTTER_APP}/android/app/src/main/vklibs`. The layout should look similar to:
+Example:
 
+```sh
+flutter/tools/gn \
+  --runtime-mode=debug \
+  --enable-impeller-vulkan \
+  --enable-vulkan-validation-layers \
+  --no-lto \
+  --unoptimized \
+  --android \
+  --android-cpu=arm64
 ```
-src/main/vklibs/
-  arm64-v8a/
-    libVkLayer_khronos_validation.so
-  armeabi-v7a/
-    libVkLayer_khronos_validation.so
-  x86/
-    libVkLayer_khronos_validation.so
-  x86-64/
-    libVkLayer_khronos_validation.so
+
+Then adding the following field to the
+`android/app/src/main/AndroidManifest.xml` will turn them on:
+
+```xml
+<meta-data
+    android:name="io.flutter.embedding.android.EnableVulkanValidation"
+    android:value="true" />
 ```
-
-4. Add the following line to `${FLUTTER_APP}/android/app/build.gradle`, `android > sourceSets` section: `main.jniLibs.srcDirs += 'src/main/vklibs'`.
-
-5. This should enable Vulkan validation layers on your Android application.
