@@ -1211,7 +1211,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   g_hardware_buffer_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
       env, env->FindClass("android/hardware/HardwareBuffer"));
 
-  if (g_hardware_buffer_class != nullptr) {
+  if (!g_hardware_buffer_class->is_null()) {
     g_hardware_buffer_close_method =
         env->GetMethodID(g_hardware_buffer_class->obj(), "close", "()V");
   } else {
