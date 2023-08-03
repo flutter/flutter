@@ -1455,9 +1455,6 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   }
 
   @override
-  OverrideArtifacts? get artifactOverrides => null;
-
-  @override
   final PlatformType platformType = PlatformType.android;
 
   @override
@@ -1510,9 +1507,6 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     }
     return onGetLogReader!();
   }
-
-  @override
-  OverrideArtifacts? get artifactOverrides => null;
 
   @override
   final String name = 'name';
