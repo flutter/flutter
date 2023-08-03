@@ -4,7 +4,6 @@
 
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
 
-#include <android/hardware_buffer_jni.h>
 #include <android/native_window_jni.h>
 #include <dlfcn.h>
 #include <jni.h>
@@ -12,8 +11,6 @@
 #include <sstream>
 #include <utility>
 
-#include "include/android/SkImageAndroid.h"
-#include "shell/platform/android/ndk_helpers.h"
 #include "unicode/uchar.h"
 
 #include "flutter/assets/directory_asset_bundle.h"
@@ -32,7 +29,6 @@
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/flutter_main.h"
-#include "flutter/shell/platform/android/hardware_buffer_external_texture_gl.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 
@@ -52,13 +48,6 @@ static fml::jni::ScopedJavaGlobalRef<jclass>* g_java_weak_reference_class =
     nullptr;
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_texture_wrapper_class = nullptr;
-
-static fml::jni::ScopedJavaGlobalRef<jclass>* g_image_texture_entry_class =
-    nullptr;
-
-static fml::jni::ScopedJavaGlobalRef<jclass>* g_image_class = nullptr;
-
-static fml::jni::ScopedJavaGlobalRef<jclass>* g_hardware_buffer_class = nullptr;
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_java_long_class = nullptr;
 
@@ -116,14 +105,6 @@ static jmethodID g_update_tex_image_method = nullptr;
 static jmethodID g_get_transform_matrix_method = nullptr;
 
 static jmethodID g_detach_from_gl_context_method = nullptr;
-
-static jmethodID g_acquire_latest_image_method = nullptr;
-
-static jmethodID g_image_get_hardware_buffer_method = nullptr;
-
-static jmethodID g_image_close_method = nullptr;
-
-static jmethodID g_hardware_buffer_close_method = nullptr;
 
 static jmethodID g_compute_platform_resolved_locale_method = nullptr;
 
@@ -494,15 +475,12 @@ static void RegisterTexture(JNIEnv* env,
   );
 }
 
-static void RegisterImageTexture(JNIEnv* env,
-                                 jobject jcaller,
-                                 jlong shell_holder,
-                                 jlong texture_id,
-                                 jobject image_texture_entry) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterImageTexture(
-      static_cast<int64_t>(texture_id),                                 //
-      fml::jni::ScopedJavaGlobalRef<jobject>(env, image_texture_entry)  //
-  );
+static void MarkTextureFrameAvailable(JNIEnv* env,
+                                      jobject jcaller,
+                                      jlong shell_holder,
+                                      jlong texture_id) {
+  ANDROID_SHELL_HOLDER->GetPlatformView()->MarkTextureFrameAvailable(
+      static_cast<int64_t>(texture_id));
 }
 
 static void UnregisterTexture(JNIEnv* env,
@@ -510,14 +488,6 @@ static void UnregisterTexture(JNIEnv* env,
                               jlong shell_holder,
                               jlong texture_id) {
   ANDROID_SHELL_HOLDER->GetPlatformView()->UnregisterTexture(
-      static_cast<int64_t>(texture_id));
-}
-
-static void MarkTextureFrameAvailable(JNIEnv* env,
-                                      jobject jcaller,
-                                      jlong shell_holder,
-                                      jlong texture_id) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->MarkTextureFrameAvailable(
       static_cast<int64_t>(texture_id));
 }
 
@@ -771,12 +741,6 @@ bool RegisterApi(JNIEnv* env) {
           .signature = "(JJLjava/lang/ref/"
                        "WeakReference;)V",
           .fnPtr = reinterpret_cast<void*>(&RegisterTexture),
-      },
-      {
-          .name = "nativeRegisterImageTexture",
-          .signature = "(JJLjava/lang/ref/"
-                       "WeakReference;)V",
-          .fnPtr = reinterpret_cast<void*>(&RegisterImageTexture),
       },
       {
           .name = "nativeMarkTextureFrameAvailable",
@@ -1162,64 +1126,6 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     FML_LOG(ERROR) << "Could not locate detachFromGlContext method";
     return false;
   }
-  g_image_texture_entry_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
-      env, env->FindClass("io/flutter/view/TextureRegistry$ImageTextureEntry"));
-  if (g_image_texture_entry_class->is_null()) {
-    FML_LOG(ERROR) << "Could not locate ImageTextureEntry class";
-    return false;
-  }
-
-  g_acquire_latest_image_method =
-      env->GetMethodID(g_image_texture_entry_class->obj(), "acquireLatestImage",
-                       "()Landroid/media/Image;");
-  if (g_acquire_latest_image_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate acquireLatestImage on "
-                      "ImageTextureEntry class";
-    return false;
-  }
-
-  g_image_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
-      env, env->FindClass("android/media/Image"));
-  if (g_image_texture_entry_class->is_null()) {
-    FML_LOG(ERROR) << "Could not locate Image class";
-    return false;
-  }
-
-  // Ensure we don't have any pending exceptions.
-  FML_CHECK(fml::jni::CheckException(env));
-
-  g_image_get_hardware_buffer_method =
-      env->GetMethodID(g_image_class->obj(), "getHardwareBuffer",
-                       "()Landroid/hardware/HardwareBuffer;");
-
-  if (g_image_get_hardware_buffer_method == nullptr) {
-    FML_LOG(WARNING) << "Could not locate getHardwareBuffer on "
-                        "android.media.Image";
-    // Continue on as this method may not exist at API <= 29.
-    fml::jni::ClearException(env);
-  }
-
-  g_image_close_method = env->GetMethodID(g_image_class->obj(), "close", "()V");
-
-  if (g_image_close_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate close on Image class";
-    return false;
-  }
-
-  // Ensure we don't have any pending exceptions.
-  FML_CHECK(fml::jni::CheckException(env));
-  g_hardware_buffer_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
-      env, env->FindClass("android/hardware/HardwareBuffer"));
-
-  if (!g_hardware_buffer_class->is_null()) {
-    g_hardware_buffer_close_method =
-        env->GetMethodID(g_hardware_buffer_class->obj(), "close", "()V");
-  } else {
-    FML_LOG(WARNING)
-        << "Could not locate android.hardware.HardwareBuffer class";
-    // Continue on as this class may not exist at API <= 26.
-    fml::jni::ClearException(env);
-  }
 
   g_compute_platform_resolved_locale_method = env->GetMethodID(
       g_flutter_jni_class->obj(), "computePlatformResolvedLocale",
@@ -1511,68 +1417,6 @@ void PlatformViewAndroidJNIImpl::SurfaceTextureDetachFromGLContext(
   env->CallVoidMethod(surface_texture_local_ref.obj(),
                       g_detach_from_gl_context_method);
 
-  FML_CHECK(fml::jni::CheckException(env));
-}
-
-JavaLocalRef PlatformViewAndroidJNIImpl::ImageTextureEntryAcquireLatestImage(
-    JavaLocalRef image_texture_entry) {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-
-  if (image_texture_entry.is_null()) {
-    // Return null.
-    return JavaLocalRef();
-  }
-
-  // Convert the weak reference to ImageTextureEntry into a strong local
-  // reference.
-  fml::jni::ScopedJavaLocalRef<jobject> image_texture_entry_local_ref(
-      env, env->CallObjectMethod(image_texture_entry.obj(),
-                                 g_java_weak_reference_get_method));
-
-  if (image_texture_entry_local_ref.is_null()) {
-    // Return null.
-    return JavaLocalRef();
-  }
-
-  JavaLocalRef r = JavaLocalRef(
-      env, env->CallObjectMethod(image_texture_entry_local_ref.obj(),
-                                 g_acquire_latest_image_method));
-  FML_CHECK(fml::jni::CheckException(env));
-  return r;
-}
-
-JavaLocalRef PlatformViewAndroidJNIImpl::ImageGetHardwareBuffer(
-    JavaLocalRef image) {
-  FML_CHECK(g_image_get_hardware_buffer_method != nullptr);
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (image.is_null()) {
-    // Return null.
-    return JavaLocalRef();
-  }
-  JavaLocalRef r = JavaLocalRef(
-      env,
-      env->CallObjectMethod(image.obj(), g_image_get_hardware_buffer_method));
-  FML_CHECK(fml::jni::CheckException(env));
-  return r;
-}
-
-void PlatformViewAndroidJNIImpl::ImageClose(JavaLocalRef image) {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (image.is_null()) {
-    return;
-  }
-  env->CallVoidMethod(image.obj(), g_image_close_method);
-  FML_CHECK(fml::jni::CheckException(env));
-}
-
-void PlatformViewAndroidJNIImpl::HardwareBufferClose(
-    JavaLocalRef hardware_buffer) {
-  FML_CHECK(g_hardware_buffer_close_method != nullptr);
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (hardware_buffer.is_null()) {
-    return;
-  }
-  env->CallVoidMethod(hardware_buffer.obj(), g_hardware_buffer_close_method);
   FML_CHECK(fml::jni::CheckException(env));
 }
 
