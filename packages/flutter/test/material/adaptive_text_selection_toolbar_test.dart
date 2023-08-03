@@ -186,6 +186,7 @@ void main() {
               onPaste: () {},
               onSelectAll: () {},
               onLiveTextInput: () {},
+              onLookUp: () {},
             ),
           ),
         ),
@@ -201,18 +202,18 @@ void main() {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         expect(find.text('Select all'), findsOneWidget);
-        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(5));
+        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(6));
       case TargetPlatform.iOS:
         expect(find.text('Select All'), findsOneWidget);
         expect(findLiveTextButton(), findsOneWidget);
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.text('Select all'), findsOneWidget);
-        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(6));
       case TargetPlatform.macOS:
         expect(find.text('Select All'), findsOneWidget);
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(6));
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.

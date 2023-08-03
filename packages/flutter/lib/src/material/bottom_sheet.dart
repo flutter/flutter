@@ -123,6 +123,10 @@ class BottomSheet extends StatefulWidget {
   /// because the drag handle is always draggable.
   ///
   /// Default is true.
+  ///
+  /// If this is true, the [animationController] must not be null.
+  /// Use [BottomSheet.createAnimationController] to create one, or provide
+  /// another AnimationController.
   final bool enableDrag;
 
   /// Specifies whether a drag handle is shown.
@@ -134,6 +138,10 @@ class BottomSheet extends StatefulWidget {
   ///
   /// If null, then the value of  [BottomSheetThemeData.showDragHandle] is used. If
   /// that is also null, defaults to false.
+  ///
+  /// If this is true, the [animationController] must not be null.
+  /// Use [BottomSheet.createAnimationController] to create one, or provide
+  /// another AnimationController.
   final bool? showDragHandle;
 
   /// The bottom sheet drag handle's color.
