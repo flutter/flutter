@@ -37,6 +37,7 @@ import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
 import 'src/sliders.dart';
 import 'src/stack_size.dart';
+import 'src/static_path_tessellation.dart';
 import 'src/text.dart';
 
 const String kMacrobenchmarks = 'Macrobenchmarks';
@@ -63,6 +64,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
         kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
         kTextRouteName: (BuildContext context) => const TextPage(),
+        kStaticPathTessellationRouteName: (BuildContext context) => const StaticPathTessellationPage(),
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
         kClipperCacheRouteName: (BuildContext context) => const ClipperCachePage(),
@@ -160,6 +162,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Large Images'),
             onPressed: () {
               Navigator.pushNamed(context, kLargeImagesRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kStaticPathTessellationRouteName),
+            child: const Text('Static Path Tessellation'),
+            onPressed: () {
+              Navigator.pushNamed(context, kStaticPathTessellationRouteName);
             },
           ),
           ElevatedButton(
