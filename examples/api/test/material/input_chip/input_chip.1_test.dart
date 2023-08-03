@@ -28,7 +28,7 @@ void main() {
     await tester.tap(find.byType(example.ChipsInput<String>));
     await tester.pumpAndSettle();
     expect(tester.testTextInput.isVisible, true);
-    // simulating text typing on input field
+    // Simulating text typing on the input field.
     tester.testTextInput.enterText('${replacementChar}ham');
     await tester.pumpAndSettle();
     expect(find.byType(InputChip), findsNWidgets(1));
