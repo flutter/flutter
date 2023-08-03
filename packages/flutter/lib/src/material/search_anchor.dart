@@ -1036,7 +1036,7 @@ class SearchBar extends StatefulWidget {
     this.padding,
     this.textStyle,
     this.hintStyle,
-    this.textCapitalization = TextCapitalization.none,
+    this.textCapitalization,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1156,7 +1156,7 @@ class SearchBar extends StatefulWidget {
   final MaterialStateProperty<TextStyle?>? hintStyle;
 
   /// {@macro flutter.widgets.editableText.textCapitalization}
-  final TextCapitalization textCapitalization;
+  final TextCapitalization? textCapitalization;
 
   @override
   State<SearchBar> createState() => _SearchBarState();
@@ -1208,6 +1208,7 @@ class _SearchBarState extends State<SearchBar> {
     final BorderSide? effectiveSide = resolve<BorderSide?>(widget.side, searchBarTheme.side, defaults.side);
     final EdgeInsetsGeometry? effectivePadding = resolve<EdgeInsetsGeometry?>(widget.padding, searchBarTheme.padding, defaults.padding);
     final MaterialStateProperty<Color?>? effectiveOverlayColor = widget.overlayColor ?? searchBarTheme.overlayColor ?? defaults.overlayColor;
+    final TextCapitalization effectiveTextCapitalization = widget.textCapitalization ?? searchBarTheme.textCapitalization ?? defaults.textCapitalization!;
 
     final Set<MaterialState> states = _internalStatesController.value;
     final TextStyle? effectiveHintStyle = widget.hintStyle?.resolve(states)
@@ -1291,7 +1292,7 @@ class _SearchBarState extends State<SearchBar> {
                           // smaller than 48.0
                           isDense: true,
                         )),
-                        textCapitalization: widget.textCapitalization,
+                        textCapitalization: effectiveTextCapitalization,
                       ),
                     ),
                   )
@@ -1372,6 +1373,9 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
   @override
   BoxConstraints get constraints =>
     const BoxConstraints(minWidth: 360.0, maxWidth: 800.0, minHeight: 56.0);
+
+  @override
+  TextCapitalization get textCapitalization => TextCapitalization.none;
 }
 
 // END GENERATED TOKEN PROPERTIES - SearchBar
