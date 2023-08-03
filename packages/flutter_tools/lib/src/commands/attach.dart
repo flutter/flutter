@@ -73,7 +73,9 @@ class AttachCommand extends FlutterCommand {
     required Platform platform,
     required ProcessInfo processInfo,
     required FileSystem fileSystem,
+    required Artifacts artifacts,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
+       _artifacts = artifacts,
        _stdio = stdio,
        _logger = logger,
        _terminal = terminal,
@@ -144,7 +146,7 @@ class AttachCommand extends FlutterCommand {
   }
 
   final HotRunnerFactory _hotRunnerFactory;
-  late final Artifacts? _artifacts = globals.artifacts;
+  late final Artifacts? _artifacts/* = globals.artifacts*/;
   final Stdio _stdio;
   final Logger _logger;
   final Terminal _terminal;
@@ -266,7 +268,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       throwToolExit('Did not find any valid target devices.');
     }
 
-    await _attachToDevice(device);
+    await context.run(
+      body: () async => _attachToDevice(device),
+      overrides: <Type, Generator>{
+        Artifacts: () => _artifacts,
+      },
+    );
 
     return FlutterCommandResult.success();
   }
