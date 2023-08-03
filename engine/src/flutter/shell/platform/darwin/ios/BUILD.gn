@@ -9,7 +9,7 @@ import("//build/toolchain/clang.gni")
 import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
-import("//flutter/shell/platform/darwin/common/framework_shared.gni")
+import("//flutter/shell/platform/darwin/common/framework_common.gni")
 import("//flutter/testing/testing.gni")
 
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
@@ -52,7 +52,7 @@ source_set("flutter_framework_source_arc") {
     ":flutter_framework_source",
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_input",
-    "//flutter/shell/platform/darwin/common:framework_shared",
+    "//flutter/shell/platform/darwin/common:framework_common",
     "//third_party/icu",
   ]
   public_configs = [ "//flutter:config" ]
@@ -191,7 +191,7 @@ source_set("flutter_framework_source") {
     "//flutter/shell/common",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/darwin/common",
-    "//flutter/shell/platform/darwin/common:framework_shared",
+    "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/profiling:profiling",
     "//flutter/third_party/spring_animation",
@@ -245,7 +245,7 @@ source_set("ios_test_flutter_mrc") {
     "//flutter/common:common",
     "//flutter/lib/ui:ui",
     "//flutter/shell/common:common",
-    "//flutter/shell/platform/darwin/common:framework_shared",
+    "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",
@@ -311,7 +311,7 @@ shared_library("ios_test_flutter") {
     ":ios_test_flutter_mrc",
     "//flutter/common:common",
     "//flutter/lib/ui:ui",
-    "//flutter/shell/platform/darwin/common:framework_shared",
+    "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/third_party/spring_animation",
@@ -400,7 +400,7 @@ action("copy_framework_headers") {
   script = "//flutter/sky/tools/install_framework_headers.py"
   visibility = [ ":*" ]
   sources = get_path_info(_flutter_framework_headers, "abspath") +
-            framework_shared_headers
+            framework_common_headers
   outputs = []
   foreach(header, sources) {
     header_basename = get_path_info(header, "file")
