@@ -2112,8 +2112,8 @@ void main() {
         const TextSelection(baseOffset: 24, extentOffset: 35),
       );
 
-      // Selected text shows 3 toolbar buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
+      // Selected text shows 5 toolbar buttons.
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(5));
 
       // Tap the selected word to hide the toolbar and retain the selection.
       await tester.tapAt(vPos);
@@ -2131,7 +2131,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 24, extentOffset: 35),
       );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(5));
 
       // Tap past the selected word to move the cursor and hide the toolbar.
       await tester.tapAt(ePos);
@@ -2187,7 +2187,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
 
-      // Selected text shows 3 toolbar buttons.
+      // Selected text shows 4 toolbar buttons.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
 
       // Tap somewhere else to move the cursor.
@@ -2250,7 +2250,7 @@ void main() {
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            expect(find.byType(CupertinoButton), findsNWidgets(4));
+            expect(find.byType(CupertinoButton), findsNWidgets(5));
         }
       }
     },
@@ -2462,7 +2462,7 @@ void main() {
       );
 
       // Selected text shows 3 toolbar buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3)));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -3507,7 +3507,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       // Shows toolbar.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3)));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -3541,7 +3541,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(5));
 
       // Double tap selecting the same word somewhere else is fine.
       await tester.tapAt(textFieldStart + const Offset(100.0, 5.0));
@@ -3561,7 +3561,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3)));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
 
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -3577,7 +3577,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3)));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   group('Triple tap/click', () {
@@ -3830,7 +3830,7 @@ void main() {
           controller.selection,
           const TextSelection(baseOffset: 0, extentOffset: 7),
         );
-        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
+        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(5));
 
         await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
         await tester.pumpAndSettle(kDoubleTapTimeout);
@@ -3856,7 +3856,7 @@ void main() {
           controller.selection,
           const TextSelection(baseOffset: 0, extentOffset: 7),
         );
-        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3)));
+        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
 
         // Third tap shows the toolbar and selects the paragraph.
         await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
@@ -3865,7 +3865,7 @@ void main() {
           controller.selection,
           const TextSelection(baseOffset: 0, extentOffset: 36),
         );
-        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3)));
+        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
 
         await tester.tapAt(textfieldStart + const Offset(150.0, 25.0));
         await tester.pump(const Duration(milliseconds: 50));
@@ -3883,7 +3883,7 @@ void main() {
           controller.selection,
           const TextSelection(baseOffset: 44, extentOffset: 50),
         );
-        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3)));
+        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
 
         // Third tap selects the paragraph and shows the toolbar.
         await tester.tapAt(textfieldStart + const Offset(150.0, 25.0));
@@ -3892,7 +3892,7 @@ void main() {
           controller.selection,
           const TextSelection(baseOffset: 36, extentOffset: 66),
         );
-        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(3)));
+        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
