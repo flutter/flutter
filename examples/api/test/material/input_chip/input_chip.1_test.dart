@@ -18,7 +18,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(example.EditableChipFieldApp), findsNWidgets(1));
-    expect(find.byType(example.ChipsInput<String>), findsNWidgets(1));
+    expect(find.byType(example.ChipsInput<String>), findsOneWidget);
     expect(find.byType(InputChip), findsOneWidget);
 
     example.ChipsInputState<String> state =
