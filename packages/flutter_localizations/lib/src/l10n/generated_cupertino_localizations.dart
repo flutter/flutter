@@ -92,6 +92,9 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -243,6 +246,9 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -398,6 +404,9 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => r'$minute دقيقة​';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -549,6 +558,9 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -704,6 +716,9 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -855,6 +870,9 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -1010,6 +1028,9 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -1161,6 +1182,9 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -1316,6 +1340,9 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -1467,6 +1494,9 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -1622,6 +1652,9 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -1773,6 +1806,9 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => r'$minute munud';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -1928,6 +1964,9 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -2079,6 +2118,9 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -2255,6 +2297,9 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -2406,6 +2451,9 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -2751,6 +2799,9 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -3566,6 +3617,9 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -3717,6 +3771,9 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -3872,6 +3929,9 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -4023,6 +4083,9 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -4178,6 +4241,9 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -4329,6 +4395,9 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -4526,6 +4595,9 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -4677,6 +4749,9 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -4832,6 +4907,9 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -4983,6 +5061,9 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -5138,6 +5219,9 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -5289,6 +5373,9 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -5444,6 +5531,9 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -5595,6 +5685,9 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -5750,6 +5843,9 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -5901,6 +5997,9 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -6056,6 +6155,9 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -6207,6 +6309,9 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -6362,6 +6467,9 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -6513,6 +6621,9 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -6668,6 +6779,9 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -6819,6 +6933,9 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -6974,6 +7091,9 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -7125,6 +7245,9 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -7280,6 +7403,9 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -7431,6 +7557,9 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -7586,6 +7715,9 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => r'$minute minūtes';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -7737,6 +7869,9 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -7892,6 +8027,9 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -8043,6 +8181,9 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -8198,6 +8339,9 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -8349,6 +8493,9 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -8504,6 +8651,9 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -8655,6 +8805,9 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -8810,6 +8963,9 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -8961,6 +9117,9 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -9116,6 +9275,9 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -9267,6 +9429,9 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -9422,6 +9587,9 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -9575,6 +9743,9 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -9726,6 +9897,9 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -9917,6 +10091,9 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -10068,6 +10245,9 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -10223,6 +10403,9 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -10374,6 +10557,9 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -10529,6 +10715,9 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -10682,6 +10871,9 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -10833,6 +11025,9 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -11102,6 +11297,9 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -11253,6 +11451,9 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -11408,6 +11609,9 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -11559,6 +11763,9 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -11714,6 +11921,9 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -11865,6 +12075,9 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -12020,6 +12233,9 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -12171,6 +12387,9 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -12326,6 +12545,9 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -12477,6 +12699,9 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -12632,6 +12857,9 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuDismissLabel => 'Dismiss menu';
 
   @override
@@ -12783,6 +13011,9 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
@@ -13083,6 +13314,9 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
 
   @override
   String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
   String get menuDismissLabel => 'Dismiss menu';
