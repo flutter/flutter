@@ -3087,6 +3087,385 @@ void testMain() {
       packets.clear();
     },
   );
+
+  group('ClickDebouncer', () {
+    _testClickDebouncer();
+  });
+}
+
+typedef CapturedSemanticsEvent = ({
+  ui.SemanticsAction type,
+  int nodeId,
+});
+
+void _testClickDebouncer() {
+  final DateTime testTime = DateTime(2018, 12, 17);
+  late List<ui.PointerChange> pointerPackets;
+  late List<CapturedSemanticsEvent> semanticsActions;
+  late _PointerEventContext context;
+  late PointerBinding binding;
+
+  void testWithSemantics(
+    String description,
+    Future<void> Function() body,
+  ) {
+    test(
+      description,
+      () async {
+        EngineSemanticsOwner.instance
+          ..debugOverrideTimestampFunction(() => testTime)
+          ..semanticsEnabled = true;
+        await body();
+        EngineSemanticsOwner.instance.semanticsEnabled = false;
+      },
+    );
+  }
+
+  setUp(() {
+    context = _PointerEventContext();
+    pointerPackets = <ui.PointerChange>[];
+    semanticsActions = <CapturedSemanticsEvent>[];
+    ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      for (final ui.PointerData data in packet.data) {
+        pointerPackets.add(data.change);
+      }
+    };
+    EnginePlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
+      semanticsActions.add((type: event.type, nodeId: event.nodeId));
+    };
+    binding = PointerBinding.instance!;
+    binding.debugOverrideDetector(context);
+    binding.clickDebouncer.reset();
+  });
+
+  tearDown(() {
+    binding.clickDebouncer.reset();
+  });
+
+  test('Forwards to framework when semantics is off', () {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, false);
+    expect(binding.clickDebouncer.isDebouncing, false);
+    flutterViewEmbedder.flutterViewElement.dispatchEvent(context.primaryDown());
+    expect(pointerPackets, <ui.PointerChange>[
+      ui.PointerChange.add,
+      ui.PointerChange.down,
+    ]);
+    expect(binding.clickDebouncer.isDebouncing, false);
+    expect(semanticsActions, isEmpty);
+  });
+
+  testWithSemantics('Forwards to framework when not debouncing', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(binding.clickDebouncer.isDebouncing, false);
+
+    // This test DOM element is missing the `flt-tappable` attribute on purpose
+    // so that the debouncer does not debounce events and simply lets
+    // everything through.
+    final DomElement testElement = createDomElement('flt-semantics');
+    flutterViewEmbedder.semanticsHostElement!.appendChild(testElement);
+
+    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(context.primaryUp());
+    expect(binding.clickDebouncer.isDebouncing, false);
+
+    expect(pointerPackets, <ui.PointerChange>[
+      ui.PointerChange.add,
+      ui.PointerChange.down,
+      ui.PointerChange.up,
+    ]);
+    expect(semanticsActions, isEmpty);
+  });
+
+  testWithSemantics('Accumulates pointer events starting from pointerdown', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(binding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    flutterViewEmbedder.semanticsHostElement!.appendChild(testElement);
+
+    testElement.dispatchEvent(context.primaryDown());
+    expect(
+      reason: 'Should start debouncing at first pointerdown',
+      binding.clickDebouncer.isDebouncing,
+      true,
+    );
+
+    testElement.dispatchEvent(context.primaryUp());
+    expect(
+      reason: 'Should still be debouncing after pointerup',
+      binding.clickDebouncer.isDebouncing,
+      true,
+    );
+
+    expect(
+      reason: 'Events are withheld from the framework while debouncing',
+      pointerPackets,
+      <ui.PointerChange>[],
+    );
+    expect(
+      binding.clickDebouncer.debugState!.target,
+      testElement,
+    );
+    expect(
+      binding.clickDebouncer.debugState!.timer.isActive,
+      isTrue,
+    );
+    expect(
+      binding.clickDebouncer.debugState!.queue.map<String>((QueuedEvent e) => e.event.type),
+      <String>['pointerdown', 'pointerup'],
+    );
+
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+    expect(
+      reason: 'Should stop debouncing after timer expires.',
+      binding.clickDebouncer.isDebouncing,
+      false,
+    );
+    expect(
+      reason: 'Queued up events should be flushed to the framework.',
+      pointerPackets,
+      <ui.PointerChange>[
+        ui.PointerChange.add,
+        ui.PointerChange.down,
+        ui.PointerChange.up,
+      ],
+    );
+    expect(semanticsActions, isEmpty);
+  });
+
+  testWithSemantics('Flushes events to framework when target changes', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(binding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    flutterViewEmbedder.semanticsHostElement!.appendChild(testElement);
+
+    testElement.dispatchEvent(context.primaryDown());
+    expect(
+      reason: 'Should start debouncing at first pointerdown',
+      binding.clickDebouncer.isDebouncing,
+      true,
+    );
+
+    final DomElement newTarget = createDomElement('flt-semantics');
+    newTarget.setAttribute('flt-tappable', '');
+    flutterViewEmbedder.semanticsHostElement!.appendChild(newTarget);
+    newTarget.dispatchEvent(context.primaryUp());
+
+    expect(
+      reason: 'Should stop debouncing when target changes.',
+      binding.clickDebouncer.isDebouncing,
+      false,
+    );
+    expect(
+      reason: 'The state should be cleaned up after stopping debouncing.',
+      binding.clickDebouncer.debugState,
+      isNull,
+    );
+    expect(
+      reason: 'Queued up events should be flushed to the framework.',
+      pointerPackets,
+      <ui.PointerChange>[
+        ui.PointerChange.add,
+        ui.PointerChange.down,
+        ui.PointerChange.up,
+      ],
+    );
+    expect(semanticsActions, isEmpty);
+  });
+
+  testWithSemantics('Forwards click to framework when not debouncing but listening', () async {
+    expect(binding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    flutterViewEmbedder.semanticsHostElement!.appendChild(testElement);
+
+    final DomEvent click = createDomMouseEvent(
+      'click',
+      <Object?, Object?>{
+        'clientX': testElement.getBoundingClientRect().x,
+        'clientY': testElement.getBoundingClientRect().y,
+      }
+    );
+
+    binding.clickDebouncer.onClick(click, 42, true);
+    expect(binding.clickDebouncer.isDebouncing, false);
+    expect(pointerPackets, isEmpty);
+    expect(semanticsActions, <CapturedSemanticsEvent>[
+      (type: ui.SemanticsAction.tap, nodeId: 42)
+    ]);
+  });
+
+  testWithSemantics('Forwards click to framework when debouncing and listening', () async {
+    expect(binding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    flutterViewEmbedder.semanticsHostElement!.appendChild(testElement);
+    testElement.dispatchEvent(context.primaryDown());
+    expect(binding.clickDebouncer.isDebouncing, true);
+
+    final DomEvent click = createDomMouseEvent(
+      'click',
+      <Object?, Object?>{
+        'clientX': testElement.getBoundingClientRect().x,
+        'clientY': testElement.getBoundingClientRect().y,
+      }
+    );
+
+    binding.clickDebouncer.onClick(click, 42, true);
+    expect(pointerPackets, isEmpty);
+    expect(semanticsActions, <CapturedSemanticsEvent>[
+      (type: ui.SemanticsAction.tap, nodeId: 42)
+    ]);
+  });
+
+  testWithSemantics('Dedupes click if debouncing but not listening', () async {
+    expect(binding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    flutterViewEmbedder.semanticsHostElement!.appendChild(testElement);
+    testElement.dispatchEvent(context.primaryDown());
+    expect(binding.clickDebouncer.isDebouncing, true);
+
+    final DomEvent click = createDomMouseEvent(
+      'click',
+      <Object?, Object?>{
+        'clientX': testElement.getBoundingClientRect().x,
+        'clientY': testElement.getBoundingClientRect().y,
+      }
+    );
+
+    binding.clickDebouncer.onClick(click, 42, false);
+    expect(
+      reason: 'When tappable declares that it is not listening to click events '
+              'the debouncer flushes the pointer events to the framework and '
+              'lets it sort it out.',
+      pointerPackets,
+      <ui.PointerChange>[
+        ui.PointerChange.add,
+        ui.PointerChange.down,
+      ],
+    );
+    expect(semanticsActions, isEmpty);
+  });
+
+  testWithSemantics('Dedupes click if pointer down/up flushed recently', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(binding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    flutterViewEmbedder.semanticsHostElement!.appendChild(testElement);
+
+    testElement.dispatchEvent(context.primaryDown());
+
+    // Simulate the user holding the pointer down for some time before releasing,
+    // such that the pointerup event happens close to timer expiration. This
+    // will create the situation that the click event arrives just after the
+    // pointerup is flushed. Forwarding the click to the framework would look
+    // like a double-click, so the click event is deduped.
+    await Future<void>.delayed(const Duration(milliseconds: 190));
+
+    testElement.dispatchEvent(context.primaryUp());
+    expect(binding.clickDebouncer.isDebouncing, true);
+    expect(
+      reason: 'Timer has not expired yet',
+      pointerPackets, isEmpty,
+    );
+
+    // Wait for the timer to expire to make sure pointer events are flushed.
+    await Future<void>.delayed(const Duration(milliseconds: 11));
+
+    expect(
+      reason: 'Queued up events should be flushed to the framework because the '
+              'time expired before the click event arrived.',
+      pointerPackets,
+      <ui.PointerChange>[
+        ui.PointerChange.add,
+        ui.PointerChange.down,
+        ui.PointerChange.up,
+      ],
+    );
+
+    final DomEvent click = createDomMouseEvent(
+      'click',
+      <Object?, Object?>{
+        'clientX': testElement.getBoundingClientRect().x,
+        'clientY': testElement.getBoundingClientRect().y,
+      }
+    );
+    binding.clickDebouncer.onClick(click, 42, true);
+
+    expect(
+      reason: 'Because the DOM click event was deduped.',
+      semanticsActions,
+      isEmpty,
+    );
+  });
+
+
+  testWithSemantics('Forwards click if enough time passed after the last flushed pointerup', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(binding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    flutterViewEmbedder.semanticsHostElement!.appendChild(testElement);
+
+    testElement.dispatchEvent(context.primaryDown());
+
+    // Simulate the user holding the pointer down for some time before releasing,
+    // such that the pointerup event happens close to timer expiration. This
+    // makes it possible for the click to arrive early. However, this test in
+    // particular will delay the click to check that the delay is checked
+    // correctly. The inverse situation was already tested in the previous test.
+    await Future<void>.delayed(const Duration(milliseconds: 190));
+
+    testElement.dispatchEvent(context.primaryUp());
+    expect(binding.clickDebouncer.isDebouncing, true);
+    expect(
+      reason: 'Timer has not expired yet',
+      pointerPackets, isEmpty,
+    );
+
+    // Wait for the timer to expire to make sure pointer events are flushed.
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+
+    expect(
+      reason: 'Queued up events should be flushed to the framework because the '
+              'time expired before the click event arrived.',
+      pointerPackets,
+      <ui.PointerChange>[
+        ui.PointerChange.add,
+        ui.PointerChange.down,
+        ui.PointerChange.up,
+      ],
+    );
+
+    final DomEvent click = createDomMouseEvent(
+      'click',
+      <Object?, Object?>{
+        'clientX': testElement.getBoundingClientRect().x,
+        'clientY': testElement.getBoundingClientRect().y,
+      }
+    );
+    binding.clickDebouncer.onClick(click, 42, true);
+
+    expect(
+      reason: 'The DOM click should still be sent to the framework because it '
+              'happened far enough from the last pointerup that it is unlikely '
+              'to be a duplicate.',
+      semanticsActions,
+      <CapturedSemanticsEvent>[
+        (type: ui.SemanticsAction.tap, nodeId: 42)
+      ],
+    );
+  });
 }
 
 class MockSafariPointerEventWorkaround implements SafariPointerEventWorkaround {
