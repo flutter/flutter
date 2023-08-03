@@ -80,6 +80,7 @@ class StackFrame {
         // return null in that case. We will skip it here.
         // TODO(polina-c): if one of lines was parsed to null, the entire stack trace
         // is in unexpected format and should be returned as is, without partial parsing.
+        // https://github.com/flutter/flutter/issues/131877
         .whereType<StackFrame>()
         .toList();
   }
