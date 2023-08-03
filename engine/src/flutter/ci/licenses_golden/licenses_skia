@@ -1,4 +1,4 @@
-Signature: 4f2b529715e7639ee2251e50d6e68a0b
+Signature: bf2663629ecd7367fc56a9221b72117e
 
 ====================================================================================================
 LIBRARY: etc1
@@ -388,6 +388,7 @@ FILE: ../../../third_party/skia/relnotes/asyncyuva420.md
 FILE: ../../../third_party/skia/relnotes/canvas_flush.md
 FILE: ../../../third_party/skia/relnotes/const_context.md
 FILE: ../../../third_party/skia/relnotes/mesh_ganesh.md
+FILE: ../../../third_party/skia/relnotes/path_715M.md
 FILE: ../../../third_party/skia/relnotes/runtimeeffect_const.md
 FILE: ../../../third_party/skia/relnotes/runtimeeffect_image.md
 FILE: ../../../third_party/skia/relnotes/skgl_backend_surface.md
