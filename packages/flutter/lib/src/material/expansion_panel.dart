@@ -2,16 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/src/material/icons.dart';
-import 'package:flutter/widgets.dart';
 
-import 'constants.dart';
-import 'expand_icon.dart';
-import 'ink_well.dart';
-import 'material_localizations.dart';
-import 'mergeable_material.dart';
-import 'shadows.dart';
-import 'theme.dart';
+import 'package:flutter/material.dart';
 
 const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
