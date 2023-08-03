@@ -363,14 +363,15 @@ class Template {
 
         final bool web = (context['web'] as bool?) ?? false;
 
-        // Sanitize any parts of the context for the index.html output file.
-        if (web && finalDestinationFile.path.endsWith('index.html')) {
-          final String? description = context['description'] as String?;
+        if (web) {
+          // The index.html and manifest.json outputs already have quotes in the template,
+          // so extra quotes are not needed.
+          if (finalDestinationFile.basename == 'index.html' || finalDestinationFile.basename =='manifest.json') {
+            final String? description = context['description'] as String?;
 
-          // The description meta value should not be quoted,
-          // as quotes are included in the template.
-          if (description != null && description.isNotEmpty) {
-            context['description'] = description.replaceAll('"', '');
+            if (description != null && description.isNotEmpty) {
+              context['description'] = description.replaceAll('"', '');
+            }
           }
         }
 
