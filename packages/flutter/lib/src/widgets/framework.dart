@@ -1238,6 +1238,20 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// Implementations of this method should end with a call to the inherited
   /// method, as in `super.dispose()`.
   ///
+  /// ## Application shutdown
+  ///
+  /// This method is _not_ invoked when the application shuts down, because
+  /// there is no way to predict when that will happen. For example, a user's
+  /// battery could catch fire, or the user could drop the device into a
+  /// swimming pool, or the operating system could unilaterally terminate the
+  /// application process due to memory pressure.
+  ///
+  /// Applications are responsible for ensuring that they are well-behaved
+  /// even in the face of a rapid unscheduled termination.
+  ///
+  /// To artificially cause the entire widget tree to be disposed, consider
+  /// calling [runApp] with a widget such as [SizedBox.shrink].
+  ///
   /// See also:
   ///
   ///  * [deactivate], which is called prior to [dispose].
