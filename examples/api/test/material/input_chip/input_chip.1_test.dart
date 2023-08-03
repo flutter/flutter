@@ -44,7 +44,7 @@ void main() {
 
     expect(find.byType(InputChip), findsNWidgets(2));
 
-    //simulate item deletion
+    // Simulate item deletion.
     await tester.tap(find.descendant(
       of: find.byType(InputChip),
       matching: find.byType(InkWell).last,
