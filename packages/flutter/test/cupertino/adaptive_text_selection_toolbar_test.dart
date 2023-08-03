@@ -34,10 +34,6 @@ void main() {
   widget is CustomPaint &&
       '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
   );
-  Finder findOverflowBackButton() => find.byWidgetPredicate((Widget widget) =>
-  widget is CustomPaint &&
-      '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
-  );
 
   testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
     const String buttonText = 'Click me';
