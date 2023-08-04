@@ -646,7 +646,8 @@ abstract class FlutterCommand extends Command<void> {
       help:
           'The path of a .json or .env file containing key-value pairs that will be available as environment variables.\n'
           'These can be accessed using the String.fromEnvironment, bool.fromEnvironment, and int.fromEnvironment constructors.\n'
-          'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefineFromFileOption}" multiple times.',
+          'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefineFromFileOption}" multiple times.\n'
+          'Entries from "--${FlutterOptions.kDartDefinesOption}" with identical keys take precedence over entries from these files.',
       valueHelp: 'use-define-config.json|.env',
       splitCommas: false,
     );
@@ -1351,13 +1352,13 @@ abstract class FlutterCommand extends Command<void> {
   List<String> extractDartDefines({required Map<String, Object?> defineConfigJsonMap}) {
     final List<String> dartDefines = <String>[];
 
-    if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
-      dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
-    }
-
     defineConfigJsonMap.forEach((String key, Object? value) {
       dartDefines.add('$key=$value');
     });
+
+    if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
+      dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
+    }
 
     return dartDefines;
   }
@@ -1372,9 +1373,8 @@ abstract class FlutterCommand extends Command<void> {
 
       for (final String path in configFilePaths) {
         if (!globals.fs.isFileSync(path)) {
-          throwToolExit('Json config define file "--${FlutterOptions
-              .kDartDefineFromFileOption}=$path" is not a file, '
-              'please fix first!');
+          throwToolExit('Did not find the file passed to "--${FlutterOptions
+              .kDartDefineFromFileOption}". Path: $path');
         }
 
         final String configRaw = globals.fs.file(path).readAsStringSync();
