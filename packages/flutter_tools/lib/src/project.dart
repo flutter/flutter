@@ -485,15 +485,15 @@ class AndroidProject extends FlutterProjectPlatform {
     return androidBuilder!.getBuildVariants(project: parent);
   }
 
-  /// Dumps app link related settings into a json file.
+  /// Outputs app link related settings into a json file.
   ///
   /// The file is stored in
   /// `<project>/build/app/app-link-settings-<variant>.json`.
-  Future<void> dumpsAppLinkSettings({required String variant}) async {
+  Future<void> outputsAppLinkSettings({required String variant}) async {
     if (!existsSync() || androidBuilder == null) {
       return;
     }
-    await androidBuilder!.dumpsAppLinkSettings(variant, project: parent);
+    await androidBuilder!.outputsAppLinkSettings(variant, project: parent);
   }
 
   bool _computeSupportedVersion() {

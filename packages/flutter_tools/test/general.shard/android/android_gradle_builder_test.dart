@@ -885,10 +885,10 @@ Gradle Crashed
         command: <String>[
           'gradlew',
           '-q',
-          'dumpFreeDebugAppLinkSettings',
+          'outputsFreeDebugAppLinkSettings',
         ],
       ));
-      await builder.dumpsAppLinkSettings(
+      await builder.outputsAppLinkSettings(
         'freeDebug',
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       );

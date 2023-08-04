@@ -52,8 +52,8 @@ final RegExp _kBuildVariantRegex = RegExp('^BuildVariant: (?<$_kBuildVariantRege
 const String _kBuildVariantRegexGroupName = 'variant';
 const String _kBuildVariantTaskName = 'printBuildVariants';
 
-String _getDumpAppLinkSettingsTaskFor(String buildVariant) {
-  return _taskForBuildVariant('dump', buildVariant, 'AppLinkSettings');
+String _getOutputAppLinkSettingsTaskFor(String buildVariant) {
+  return _taskForBuildVariant('output', buildVariant, 'AppLinkSettings');
 }
 
 /// The directory where the APK artifact is generated.
@@ -792,11 +792,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
   }
 
   @override
-  Future<void> dumpsAppLinkSettings(
+  Future<void> outputsAppLinkSettings(
     String buildVariant, {
     required FlutterProject project,
   }) async {
-    final String taskName = _getDumpAppLinkSettingsTaskFor(buildVariant);
+    final String taskName = _getOutputAppLinkSettingsTaskFor(buildVariant);
     final Stopwatch sw = Stopwatch()
       ..start();
     final RunResult result = await _runGradleTask(
@@ -804,7 +804,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       options: const <String>['-q'],
       project: project,
     );
-    _usage.sendTiming('dumps', 'app link settings', sw.elapsed);
+    _usage.sendTiming('outputs', 'app link settings', sw.elapsed);
 
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);

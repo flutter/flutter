@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+apply from: "app_link_settings.groovy"
+
 import static groovy.io.FileType.FILES
 
 import com.android.build.OutputFile
@@ -745,7 +747,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    // Add a task that can be called on Flutter projects that dumps app link related project
+    // Add a task that can be called on Flutter projects that outputs app link related project
     // settings into a json file.
     //
     // See https://developer.android.com/training/app-links/ for more information about app link.
@@ -762,10 +764,10 @@ class FlutterPlugin implements Plugin<Project> {
     // }
     //
     // The output file is parsed and used by devtool.
-    private static void addTasksForDumpAppLinkSettings(Project project) {
+    private static void addTasksForOutputsAppLinkSettings(Project project) {
         project.android.applicationVariants.all { variant ->
-            // Warning: The name of this task is used by AndroidBuilder.dumpsAppLinkSettings
-            project.tasks.register("dump${variant.name.capitalize()}AppLinkSettings") {
+            // Warning: The name of this task is used by AndroidBuilder.outputsAppLinkSettings
+            project.tasks.register("output${variant.name.capitalize()}AppLinkSettings") {
                 description "stores app links settings for the given build variant of this Android project into a json file."
                 variant.outputs.all { output ->
                     // Deeplinks are defined in AndroidManifest.xml and is only available after
@@ -1009,7 +1011,7 @@ class FlutterPlugin implements Plugin<Project> {
         addTaskForJavaVersion(project)
         if(isFlutterAppProject()) {
             addTaskForPrintBuildVariants(project)
-            addTasksForDumpAppLinkSettings(project)
+            addTasksForOutputsAppLinkSettings(project)
         }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
@@ -1234,24 +1236,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
         configurePlugins()
         detectLowCompileSdkVersionOrNdkVersion()
-    }
-}
-
-class AppLinkSettings {
-    String applicationId
-    Set<Deeplink> deeplinks
-}
-
-class Deeplink {
-    String scheme, host, path
-    boolean equals(o) {
-        if (o == null)
-            throw new NullPointerException()
-        if (o.getClass() != getClass())
-            return false
-        return scheme == o.scheme &&
-               host == o.host &&
-               path == o.path
     }
 }
 
