@@ -8,7 +8,6 @@ import 'dart:io' hide Directory, File;
 import 'package:dwds/dwds.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -1080,20 +1079,10 @@ void main() {
       'asset_test',
     );
 
-    final AssetBundle asset = AssetBundleFactory.instance.createBundle();
-    final String manifestPath =
-        globals.fs.path.join(dataPath, 'main', 'pubspec.yaml');
-    final String packagesPath =
-        globals.fs.path.join(dataPath, 'main', '.packages');
-    await asset.build(
-      manifestPath: manifestPath,
-      packagesPath: packagesPath,
-    );
-
     final String dummyCertPath =
-        globals.fs.path.join(dataPath, 'tls_cert', 'dummy-cert.pem');
+        globals.fs.path.join(dataPath, 'main', 'dummy-cert.pem');
     final String dummyCertKeyPath =
-        globals.fs.path.join(dataPath, 'tls_cert', 'dummy-key.pem');
+        globals.fs.path.join(dataPath, 'main', 'dummy-key.pem');
 
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',

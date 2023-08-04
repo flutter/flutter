@@ -7,7 +7,9 @@ environment:
 dependencies:
   font:
     path: ../font
-  tls_cert:
-    path: ../tls_cert
 
+flutter:
+  assets:
+    - dummy-cert.pem
+    - dummy-key.pem
 # PUBSPEC CHECKSUM: 0000
