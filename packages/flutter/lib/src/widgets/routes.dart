@@ -1654,7 +1654,21 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       // false. Hence the seemingly backward logic here.
       canHandlePop: popDisposition == RoutePopDisposition.doNotPop,
     );
-    notification.dispatch(subtreeContext);
+    // Avoid dispatching a notification in the middle of a build.
+    switch (SchedulerBinding.instance.schedulerPhase) {
+      case SchedulerPhase.postFrameCallbacks:
+        notification.dispatch(subtreeContext);
+      case SchedulerPhase.idle:
+      case SchedulerPhase.midFrameMicrotasks:
+      case SchedulerPhase.persistentCallbacks:
+      case SchedulerPhase.transientCallbacks:
+        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+          if (!(subtreeContext?.mounted ?? false)) {
+            return;
+          }
+          notification.dispatch(subtreeContext);
+        });
+    }
   }
 
   /// True if one or more [WillPopCallback] callbacks exist.
