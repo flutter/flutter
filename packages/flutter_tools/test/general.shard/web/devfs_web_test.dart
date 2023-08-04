@@ -1080,9 +1080,9 @@ void main() {
     );
 
     final String dummyCertPath =
-        globals.fs.path.join(dataPath, 'main', 'dummy-cert.pem');
+        globals.fs.path.join(dataPath, 'tls_cert', 'dummy-cert.pem');
     final String dummyCertKeyPath =
-        globals.fs.path.join(dataPath, 'main', 'dummy-key.pem');
+        globals.fs.path.join(dataPath, 'tls_cert', 'dummy-key.pem');
 
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',

@@ -1,5 +1,5 @@
 name: main
-description: A test project that has font and dummy certificates packages as dependencies.
+description: A test project that has a package with a font as a dependency.
 
 environment:
   sdk: '>=3.0.0-0 <4.0.0'
@@ -8,8 +8,4 @@ dependencies:
   font:
     path: ../font
 
-flutter:
-  assets:
-    - dummy-cert.pem
-    - dummy-key.pem
 # PUBSPEC CHECKSUM: 0000
