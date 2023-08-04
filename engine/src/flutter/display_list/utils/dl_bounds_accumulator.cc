@@ -125,10 +125,11 @@ SkRect RTreeBoundsAccumulator::bounds() const {
   return accumulator.bounds();
 }
 
-sk_sp<DlRTree> RTreeBoundsAccumulator::rtree() const {
+std::shared_ptr<DlRTree> RTreeBoundsAccumulator::rtree() const {
   FML_DCHECK(saved_offsets_.empty());
-  return sk_make_sp<DlRTree>(rects_.data(), rects_.size(), rect_indices_.data(),
-                             [](int id) { return id >= 0; });
+  return std::make_shared<DlRTree>(rects_.data(), rects_.size(),
+                                   rect_indices_.data(),
+                                   [](int id) { return id >= 0; });
 }
 
 }  // namespace flutter

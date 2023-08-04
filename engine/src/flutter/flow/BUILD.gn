@@ -22,6 +22,8 @@ source_set("flow") {
     "instrumentation.h",
     "layer_snapshot_store.cc",
     "layer_snapshot_store.h",
+    "layers/aiks_layer.cc",
+    "layers/aiks_layer.h",
     "layers/backdrop_filter_layer.cc",
     "layers/backdrop_filter_layer.h",
     "layers/cacheable_layer.cc",

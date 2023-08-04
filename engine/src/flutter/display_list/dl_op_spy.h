@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_DL_OP_SPY_H_
-#define FLUTTER_DISPLAY_LIST_DL_OP_SPY_H_
+#pragma once
 
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/display_list/utils/dl_receiver_utils.h"
@@ -105,5 +104,3 @@ class DlOpSpy final : public virtual DlOpReceiver,
 };
 
 }  // namespace flutter
-
-#endif  // FLUTTER_DISPLAY_LIST_DL_OP_SPY_H_
