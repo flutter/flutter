@@ -32,7 +32,8 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
       const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-      const TaskRunners& task_runners);
+      const TaskRunners& task_runners,
+      bool enable_impeller);
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
@@ -122,6 +123,8 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // The number of platform views in the previous frame.
   int64_t previous_frame_view_count_;
+
+  bool enable_impeller_ = false;
 
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for

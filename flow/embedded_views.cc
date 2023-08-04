@@ -3,8 +3,44 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/embedded_views.h"
+#include "flutter/display_list/dl_op_spy.h"
 
 namespace flutter {
+
+#if IMPELLER_SUPPORTS_RENDERING
+ImpellerEmbedderViewSlice::ImpellerEmbedderViewSlice(SkRect view_bounds) {
+  canvas_ = std::make_unique<impeller::DlAiksCanvas>(
+      /*bounds=*/view_bounds);
+}
+
+DlCanvas* ImpellerEmbedderViewSlice::canvas() {
+  return canvas_ ? canvas_.get() : nullptr;
+}
+
+void ImpellerEmbedderViewSlice::end_recording() {
+  picture_ =
+      std::make_shared<impeller::Picture>(canvas_->EndRecordingAsPicture());
+  canvas_.reset();
+}
+
+std::list<SkRect> ImpellerEmbedderViewSlice::searchNonOverlappingDrawnRects(
+    const SkRect& query) const {
+  FML_DCHECK(picture_);
+  return picture_->rtree->searchAndConsolidateRects(query);
+}
+
+void ImpellerEmbedderViewSlice::render_into(DlCanvas* canvas) {
+  canvas->DrawImpellerPicture(picture_);
+}
+
+bool ImpellerEmbedderViewSlice::recording_ended() {
+  return canvas_ == nullptr;
+}
+
+bool ImpellerEmbedderViewSlice::renders_anything() {
+  return !picture_->rtree->bounds().isEmpty();
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 DisplayListEmbedderViewSlice::DisplayListEmbedderViewSlice(SkRect view_bounds) {
   builder_ = std::make_unique<DisplayListBuilder>(
@@ -30,16 +66,18 @@ void DisplayListEmbedderViewSlice::render_into(DlCanvas* canvas) {
   canvas->DrawDisplayList(display_list_);
 }
 
-void DisplayListEmbedderViewSlice::dispatch(DlOpReceiver& receiver) {
-  display_list_->Dispatch(receiver);
-}
-
 bool DisplayListEmbedderViewSlice::is_empty() {
   return display_list_->bounds().isEmpty();
 }
 
 bool DisplayListEmbedderViewSlice::recording_ended() {
   return builder_ == nullptr;
+}
+
+bool DisplayListEmbedderViewSlice::renders_anything() {
+  DlOpSpy dl_op_spy;
+  display_list_->Dispatch(dl_op_spy);
+  return dl_op_spy.did_draw() && !is_empty();
 }
 
 void ExternalViewEmbedder::SubmitFrame(

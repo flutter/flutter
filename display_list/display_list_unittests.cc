@@ -2130,7 +2130,7 @@ TEST_F(DisplayListTest, FlatDrawPointsProducesBounds) {
   }
 }
 
-static void test_rtree(const sk_sp<const DlRTree>& rtree,
+static void test_rtree(const std::shared_ptr<const DlRTree>& rtree,
                        const SkRect& query,
                        std::vector<SkRect> expected_rects,
                        const std::vector<int>& expected_indices) {

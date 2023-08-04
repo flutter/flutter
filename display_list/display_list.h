@@ -254,7 +254,7 @@ class DisplayList : public SkRefCnt {
   const SkRect& bounds() const { return bounds_; }
 
   bool has_rtree() const { return rtree_ != nullptr; }
-  sk_sp<const DlRTree> rtree() const { return rtree_; }
+  std::shared_ptr<const DlRTree> rtree() const { return rtree_; }
 
   bool Equals(const DisplayList* other) const;
   bool Equals(const DisplayList& other) const { return Equals(&other); }
@@ -288,7 +288,7 @@ class DisplayList : public SkRefCnt {
               bool can_apply_group_opacity,
               bool is_ui_thread_safe,
               bool modifies_transparent_black,
-              sk_sp<const DlRTree> rtree);
+              std::shared_ptr<const DlRTree> rtree);
 
   static uint32_t next_unique_id();
 
@@ -308,7 +308,7 @@ class DisplayList : public SkRefCnt {
   const bool is_ui_thread_safe_;
   const bool modifies_transparent_black_;
 
-  const sk_sp<const DlRTree> rtree_;
+  const std::shared_ptr<const DlRTree> rtree_;
 
   void Dispatch(DlOpReceiver& ctx,
                 uint8_t* ptr,
