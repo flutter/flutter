@@ -2837,7 +2837,6 @@
 ../../../third_party/skia/src/sksl/README.md
 ../../../third_party/skia/src/sksl/analysis/BUILD.bazel
 ../../../third_party/skia/src/sksl/codegen/BUILD.bazel
-../../../third_party/skia/src/sksl/dsl/BUILD.bazel
 ../../../third_party/skia/src/sksl/ir/BUILD.bazel
 ../../../third_party/skia/src/sksl/lex/BUILD.bazel
 ../../../third_party/skia/src/sksl/tracing/BUILD.bazel
