@@ -19,7 +19,7 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/variable_refresh_rate_display.h"
 #import "flutter/shell/platform/darwin/common/command_line.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartVMServicePublisher.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
