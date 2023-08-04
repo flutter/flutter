@@ -64,7 +64,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     } else {
       double offset = 0.0;
       for (int i = 0; i < index; i++) {
-        offset += itemExtentCallback!(i, _currentLayoutDimensions!);
+        offset += itemExtentCallback!(i, _currentLayoutDimensions);
       }
       return offset;
     }
@@ -174,7 +174,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     } else {
       double offset = 0.0;
       for (int i = 0; i < childManager.childCount; i++) {
-        offset += itemExtentCallback!(i, _currentLayoutDimensions!);
+        offset += itemExtentCallback!(i, _currentLayoutDimensions);
       }
       return offset;
     }
@@ -210,7 +210,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       if (position >= scrollOffset) {
         break;
       }
-      position += callback(index, _currentLayoutDimensions!);
+      position += callback(index, _currentLayoutDimensions);
       ++index;
     }
     return index - 1;
@@ -221,7 +221,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     if (itemExtentCallback == null) {
       extent = itemExtent;
     } else {
-      extent = itemExtentCallback!(index, _currentLayoutDimensions!);
+      extent = itemExtentCallback!(index, _currentLayoutDimensions);
     }
     return constraints.asBoxConstraints(
       minExtent: extent,
@@ -229,7 +229,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     );
   }
 
-  SliverLayoutDimensions? _currentLayoutDimensions;
+  late SliverLayoutDimensions _currentLayoutDimensions;
 
   @override
   void performLayout() {

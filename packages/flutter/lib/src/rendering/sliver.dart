@@ -266,10 +266,10 @@ class SliverConstraints extends Constraints {
   /// {@template flutter.rendering.SliverConstraints.scrollOffset}
   /// The scroll offset, in this sliver's coordinate system, that corresponds to
   /// the earliest visible part of this sliver in the [AxisDirection] if
-  /// [growthDirection] is [GrowthDirection.forward] or in the opposite
-  /// [AxisDirection] direction if [growthDirection] is [GrowthDirection.reverse].
+  /// [SliverConstraints.growthDirection] is [GrowthDirection.forward] or in the opposite
+  /// [AxisDirection] direction if [SliverConstraints.growthDirection] is [GrowthDirection.reverse].
   ///
-  /// For example, if [AxisDirection] is [AxisDirection.down] and [growthDirection]
+  /// For example, if [AxisDirection] is [AxisDirection.down] and [SliverConstraints.growthDirection]
   /// is [GrowthDirection.forward], then scroll offset is the amount the top of
   /// the sliver has been scrolled past the top of the viewport.
   ///
@@ -280,7 +280,7 @@ class SliverConstraints extends Constraints {
   ///
   /// For slivers whose top is not past the top of the viewport, the
   /// [scrollOffset] is `0` when [AxisDirection] is [AxisDirection.down] and
-  /// [growthDirection] is [GrowthDirection.forward]. The set of slivers with
+  /// [SliverConstraints.growthDirection] is [GrowthDirection.forward]. The set of slivers with
   /// [scrollOffset] `0` includes all the slivers that are below the bottom of the
   /// viewport.
   ///
@@ -289,7 +289,7 @@ class SliverConstraints extends Constraints {
   /// partially 'protrude in' from the bottom of the viewport.
   ///
   /// Whether this corresponds to the beginning or the end of the sliver's
-  /// contents depends on the [growthDirection].
+  /// contents depends on the [SliverConstraints.growthDirection].
   /// {@endtemplate}
   final double scrollOffset;
 
