@@ -1506,7 +1506,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   List<FakeIOSCoreDevice> devices = <FakeIOSCoreDevice>[];
 
   @override
-  Future<List<IOSCoreDevice>> getCoreDevices({Duration timeout = const Duration()}) async {
+  Future<List<IOSCoreDevice>> getCoreDevices({Duration timeout = Duration.zero}) async {
     return devices;
   }
 }

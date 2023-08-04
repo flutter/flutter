@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
-import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
@@ -36,7 +36,6 @@ class XcodeDebug {
         _userMessage = userMessages,
         _flutterRoot = flutterRoot ?? Cache.flutterRoot!;
 
-
   final ProcessUtils _processUtils;
   final Logger _logger;
   final Xcode _xcode;
@@ -44,16 +43,15 @@ class XcodeDebug {
   final UserMessages _userMessage;
   final String _flutterRoot;
 
-  /// Process to start a debug session. The process will exit once the debug
-  /// session has been started.
+  /// Process to start Xcode's debug action.
   @visibleForTesting
-  Process? startDebugSessionProcess;
+  Process? startDebugActionProcess;
 
-  /// Information about the project that is currently being debugged. Will
-  /// become null once the debug session is stopped.
+  /// Information about the project that is currently being debugged.
   @visibleForTesting
   XcodeDebugProject? currentDebuggingProject;
 
+  /// Whether the debug action has been started.
   bool get debugStarted => currentDebuggingProject != null;
 
   String get pathToXcodeApp {
@@ -80,12 +78,13 @@ class XcodeDebug {
     return '$flutterToolsAbsolutePath/bin/xcode_debug.js';
   }
 
-  /// Install, start a debug session, and launch app through Xcode interface,
+  /// Install, launch, and start a debug session for app through Xcode interface,
   /// automated by OSA scripting. First checks if the project is opened in
   /// Xcode. If it isn't, open it with the `open` command.
   ///
-  /// The OSA script waits until the project is opened and the debug session
-  /// has started. It does not wait for the app to install or launch.
+  /// The OSA script waits until the project is opened and the debug action
+  /// has started. It does not wait for the app to install, launch, or start
+  /// the debug session.
   Future<bool> debugApp({
     required XcodeDebugProject project,
     required String deviceId,
@@ -101,87 +100,91 @@ class XcodeDebug {
     }
 
     currentDebuggingProject = project;
-    startDebugSessionProcess = await _processUtils.start(
-      <String>[
-        ..._xcode.xcrunCommand(),
-        'osascript',
-        '-l',
-        'JavaScript',
-        pathToXcodeAutomationScript,
-        'debug',
-        '--xcode-path',
-        pathToXcodeApp,
-        '--project-path',
-        project.xcodeProject.path,
-        '--workspace-path',
-        project.xcodeWorkspace.path,
-        '--device-id',
-        deviceId,
-        '--scheme',
-        project.scheme,
-        '--skip-building',
-        '--launch-args',
-        json.encode(launchArguments),
-        if (project.verboseLogging) '--verbose',
-      ],
-    );
-
-    String stdout = '';
-
-    final StreamSubscription<String> stdoutSubscription = startDebugSessionProcess!.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          _logger.printTrace(line);
-          stdout += line;
-    });
-
-    // console.log from the script are found in the stderr
-    String stderr = '';
-    final StreamSubscription<String> stderrSubscription = startDebugSessionProcess!.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          _logger.printTrace('stderr: $line');
-          stderr += line;
-    });
-
-    final int exitCode = await startDebugSessionProcess!.exitCode.whenComplete(() async {
-      await stdoutSubscription.cancel();
-      await stderrSubscription.cancel();
-      startDebugSessionProcess = null;
-    });
-
-    if (exitCode != 0) {
-      _logger.printError('Error executing osascript: $exitCode\n$stderr');
-      return false;
-    }
-
-    final XcodeAutomationScriptResponse? response = parseScriptResponse(stdout);
-    if (response == null) {
-      return false;
-    }
-    if (response.status == false) {
-      _logger.printError('Error starting debug session in Xcode: ${response.errorMessage}');
-      return false;
-    }
-    if (response.debugResult == null) {
-      _logger.printError('Unable to get debug results from response: $stdout');
-      return false;
-    }
-    if (response.debugResult?.status != 'running') {
-      _logger.printError(
-        'Unexpected debug results: \n'
-        '  Status: ${response.debugResult?.status}\n'
-        '  Completed: ${response.debugResult?.completed}\n'
-        '  Error Message: ${response.debugResult?.errorMessage}\n'
+    StreamSubscription<String>? stdoutSubscription;
+    StreamSubscription<String>? stderrSubscription;
+    try {
+      startDebugActionProcess = await _processUtils.start(
+        <String>[
+          ..._xcode.xcrunCommand(),
+          'osascript',
+          '-l',
+          'JavaScript',
+          pathToXcodeAutomationScript,
+          'debug',
+          '--xcode-path',
+          pathToXcodeApp,
+          '--project-path',
+          project.xcodeProject.path,
+          '--workspace-path',
+          project.xcodeWorkspace.path,
+          '--device-id',
+          deviceId,
+          '--scheme',
+          project.scheme,
+          '--skip-building',
+          '--launch-args',
+          json.encode(launchArguments),
+          if (project.verboseLogging) '--verbose',
+        ],
       );
+
+      String stdout = '';
+
+      stdoutSubscription = startDebugActionProcess!.stdout
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+            _logger.printTrace(line);
+            stdout += line;
+      });
+
+      // console.log from the script are found in the stderr
+      stderrSubscription = startDebugActionProcess!.stderr
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+            _logger.printTrace('stderr: $line');
+      });
+
+      await startDebugActionProcess!.exitCode.whenComplete(() async {
+        await stdoutSubscription?.cancel();
+        await stderrSubscription?.cancel();
+        startDebugActionProcess = null;
+      });
+
+      final XcodeAutomationScriptResponse? response = parseScriptResponse(stdout);
+      if (response == null) {
+        return false;
+      }
+      if (response.status == false) {
+        _logger.printError('Error starting debug session in Xcode: ${response.errorMessage}');
+        return false;
+      }
+      if (response.debugResult == null) {
+        _logger.printError('Unable to get debug results from response: $stdout');
+        return false;
+      }
+      if (response.debugResult?.status != 'running') {
+        _logger.printError(
+          'Unexpected debug results: \n'
+          '  Status: ${response.debugResult?.status}\n'
+          '  Completed: ${response.debugResult?.completed}\n'
+          '  Error Message: ${response.debugResult?.errorMessage}\n'
+        );
+        return false;
+      }
+      return true;
+    } on ProcessException catch (exception) {
+      _logger.printError('Error executing osascript: $exitCode\n$exception');
+      await stdoutSubscription?.cancel();
+      await stderrSubscription?.cancel();
+      startDebugActionProcess = null;
+
       return false;
     }
-    return true;
   }
 
-  /// Kills start debug process if it's still running. If [force] is true, it
+  /// Kills [startDebugActionProcess] if it's still running. If [force] is true, it
   /// will kill all Xcode app processes. Otherwise, it will stop the debug
   /// session in Xcode. If the project is temporary, it will close the Xcode
   /// window of the project and then delete the project.
@@ -190,11 +193,17 @@ class XcodeDebug {
     @visibleForTesting
     bool skipDelay = false,
   }) async {
-    final bool success = (startDebugSessionProcess == null) || startDebugSessionProcess!.kill();
+    final bool success = (startDebugActionProcess == null) || startDebugActionProcess!.kill();
 
     if (force) {
-      currentDebuggingProject = null;
-      return _forceExitXcode();
+      await _forceExitXcode();
+      if (currentDebuggingProject != null) {
+        final XcodeDebugProject project = currentDebuggingProject!;
+        if (project.isTemporaryProject) {
+          project.xcodeProject.parent.deleteSync(recursive: true);
+        }
+        currentDebuggingProject = null;
+      }
     }
 
     if (currentDebuggingProject != null) {
@@ -261,7 +270,6 @@ class XcodeDebug {
         project.xcodeWorkspace.path,
         if (project.verboseLogging) '--verbose',
       ],
-      throwOnError: true,
     );
 
     if (result.exitCode != 0) {
@@ -286,6 +294,7 @@ class XcodeDebug {
       final Object decodeResult = json.decode(results) as Object;
       if (decodeResult is Map<String, Object?>) {
         final XcodeAutomationScriptResponse response = XcodeAutomationScriptResponse.fromJson(decodeResult);
+        // Status should always be found
         if (response.status != null) {
           return response;
         }
@@ -348,7 +357,6 @@ class XcodeDebug {
         if (promptToSaveOnClose) '--prompt-to-save',
         if (project.verboseLogging) '--verbose',
       ],
-      throwOnError: true,
     );
 
     if (result.exitCode != 0) {
@@ -447,9 +455,21 @@ class XcodeAutomationScriptDebugResult {
     );
   }
 
-  final bool? completed; // Whether this scheme action has completed (sucessfully or otherwise) or not. Will be false if still running
-  final String? status; // (not yet started/‌running/‌cancelled/‌failed/‌error occurred/‌succeeded) : Indicates the status of the scheme action.
-  final String? errorMessage; //If the result's status is "error occurred", this will be the error message; otherwise, this will be "missing value".
+  /// Whether this scheme action has completed (sucessfully or otherwise) or not. Will be false if still running
+  final bool? completed;
+
+  /// The status of the debug action. Potential statuses include:
+  /// `not yet started`, `‌running`, `‌cancelled`, `‌failed`, `‌error occurred`,
+  /// and `‌succeeded`.
+  ///
+  /// Only the status of `‌running` indicates the debug action has started successfully.
+  /// For example, `‌succeeded` often does not indicate success as if the action fails,
+  /// it will sometimes return `‌succeeded`.
+  final String? status;
+
+  /// When [status] is `‌error occurred`, an error message is provided.
+  /// Otherwise, this will be null.
+  final String? errorMessage;
 }
 
 class XcodeDebugProject {
@@ -467,6 +487,6 @@ class XcodeDebugProject {
   final bool isTemporaryProject;
 
   /// When [verboseLogging] is true, the xcode_debug.js script will log
-  /// additional information.
+  /// additional information via console.log, which is sent to stderr.
   final bool verboseLogging;
 }

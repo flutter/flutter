@@ -864,7 +864,8 @@ class StartupTest {
               '--use-application-binary=$applicationBinaryPath',
           ],
           environment: runEnvironment,
-          canFail: true);
+          canFail: true,
+        );
         timer.cancel();
         if (result == 0) {
           final Map<String, dynamic> data = json.decode(

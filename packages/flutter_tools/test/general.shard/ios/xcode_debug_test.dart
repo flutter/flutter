@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:io' as io;
 
 import 'package:file/memory.dart';
@@ -6,7 +10,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -74,18 +77,20 @@ void main() {
           flutterRoot: flutterRoot,
         );
 
-        expect(() => xcodeDebug.pathToXcodeApp, throwsToolExit(message: userMessages.xcodeMissing));
+        expect(
+          () => xcodeDebug.pathToXcodeApp,
+          throwsToolExit(message: userMessages.xcodeMissing),
+        );
       });
 
       testWithoutContext('throws error with unexpected outcome', () {
         fakeProcessManager.addCommand(const FakeCommand(
           command: <String>[
             '/usr/bin/xcode-select',
-            '--print-path'
+            '--print-path',
           ],
-          stdout: '/Library/Developer/CommandLineTools'
+          stdout: '/Library/Developer/CommandLineTools',
         ));
-
 
         final Xcode xcode = Xcode.test(
           processManager: fakeProcessManager,
@@ -101,7 +106,10 @@ void main() {
           flutterRoot: flutterRoot,
         );
 
-        expect(() => xcodeDebug.pathToXcodeApp, throwsToolExit(message: userMessages.xcodeMissing));
+        expect(
+          () => xcodeDebug.pathToXcodeApp,
+          throwsToolExit(message: userMessages.xcodeMissing),
+        );
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
     });
@@ -118,7 +126,10 @@ void main() {
         flutterRoot: flutterRoot,
       );
 
-      expect(xcodeDebug.pathToXcodeAutomationScript, '$flutterRoot/packages/flutter_tools/bin/xcode_debug.js');
+      expect(
+        xcodeDebug.pathToXcodeAutomationScript,
+        '$flutterRoot/packages/flutter_tools/bin/xcode_debug.js',
+      );
     });
 
     group('debugApp', () {
@@ -223,13 +234,16 @@ void main() {
         final bool status = await xcodeDebug.debugApp(
           project: project,
           deviceId: deviceId,
-          launchArguments: <String>['--enable-dart-profiling', '--trace-allowlist="foo,bar"'],
+          launchArguments: <String>[
+            '--enable-dart-profiling',
+            '--trace-allowlist="foo,bar"'
+          ],
         );
 
         expect(logger.errorText, isEmpty);
         expect(logger.traceText, contains('Error checking if project opened in Xcode'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(xcodeDebug.startDebugSessionProcess, isNull);
+        expect(xcodeDebug.startDebugActionProcess, isNull);
         expect(status, true);
       });
 
@@ -310,7 +324,7 @@ void main() {
         expect(logger.errorText, isEmpty);
         expect(logger.traceText, contains('Error checking if project opened in Xcode'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(xcodeDebug.startDebugSessionProcess, isNull);
+        expect(xcodeDebug.startDebugActionProcess, isNull);
         expect(status, true);
       });
 
@@ -327,7 +341,7 @@ void main() {
               '--xcode-path',
               pathToXcodeApp,
               '--project-path',
-              project. xcodeProject.path,
+              project.xcodeProject.path,
               '--workspace-path',
               project.xcodeWorkspace.path,
             ],
@@ -346,12 +360,17 @@ void main() {
             ],
             exception: ProcessException(
               'open',
-              <String>['-a', '/non_existant_path', '-g', '-j', xcworkspace.path],
+              <String>[
+                '-a',
+                '/non_existant_path',
+                '-g',
+                '-j',
+                xcworkspace.path,
+              ],
               'The application /non_existant_path cannot be opened for an unexpected reason',
-            )
+            ),
           ),
         ]);
-
 
         final XcodeDebug xcodeDebug = XcodeDebug(
           logger: logger,
@@ -365,10 +384,16 @@ void main() {
         final bool status = await xcodeDebug.debugApp(
           project: project,
           deviceId: deviceId,
-          launchArguments: <String>['--enable-dart-profiling', '--trace-allowlist="foo,bar"'],
+          launchArguments: <String>[
+            '--enable-dart-profiling',
+            '--trace-allowlist="foo,bar"',
+          ],
         );
 
-        expect(logger.errorText, contains('The application /non_existant_path cannot be opened for an unexpected reason'));
+        expect(
+          logger.errorText,
+          contains('The application /non_existant_path cannot be opened for an unexpected reason'),
+        );
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(status, false);
       });
@@ -386,7 +411,7 @@ void main() {
               '--xcode-path',
               pathToXcodeApp,
               '--project-path',
-              project. xcodeProject.path,
+              project.xcodeProject.path,
               '--workspace-path',
               project.xcodeWorkspace.path,
             ],
@@ -417,11 +442,9 @@ void main() {
               r'["--enable-dart-profiling","--trace-allowlist=\"foo,bar\""]'
             ],
             exitCode: 1,
-            stderr: "/flutter/packages/flutter_tools/bin/xcode_debug.js: execution error: Error: ReferenceError: Can't find variable: y (-2700)"
+            stderr: "/flutter/packages/flutter_tools/bin/xcode_debug.js: execution error: Error: ReferenceError: Can't find variable: y (-2700)",
           ),
-
         ]);
-
 
         final XcodeDebug xcodeDebug = XcodeDebug(
           logger: logger,
@@ -435,7 +458,10 @@ void main() {
         final bool status = await xcodeDebug.debugApp(
           project: project,
           deviceId: deviceId,
-          launchArguments: <String>['--enable-dart-profiling', '--trace-allowlist="foo,bar"'],
+          launchArguments: <String>[
+            '--enable-dart-profiling',
+            '--trace-allowlist="foo,bar"',
+          ],
         );
 
         expect(logger.errorText, contains('Error executing osascript'));
@@ -456,7 +482,7 @@ void main() {
               '--xcode-path',
               pathToXcodeApp,
               '--project-path',
-              project. xcodeProject.path,
+              project.xcodeProject.path,
               '--workspace-path',
               project.xcodeWorkspace.path,
             ],
@@ -504,10 +530,16 @@ void main() {
         final bool status = await xcodeDebug.debugApp(
           project: project,
           deviceId: deviceId,
-          launchArguments: <String>['--enable-dart-profiling', '--trace-allowlist="foo,bar"'],
+          launchArguments: <String>[
+            '--enable-dart-profiling',
+            '--trace-allowlist="foo,bar"',
+          ],
         );
 
-        expect(logger.errorText, contains('Error starting debug session in Xcode'));
+        expect(
+          logger.errorText,
+          contains('Error starting debug session in Xcode'),
+        );
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(status, false);
       });
@@ -525,7 +557,7 @@ void main() {
               '--xcode-path',
               pathToXcodeApp,
               '--project-path',
-              project. xcodeProject.path,
+              project.xcodeProject.path,
               '--workspace-path',
               project.xcodeWorkspace.path,
             ],
@@ -573,10 +605,16 @@ void main() {
         final bool status = await xcodeDebug.debugApp(
           project: project,
           deviceId: deviceId,
-          launchArguments: <String>['--enable-dart-profiling', '--trace-allowlist="foo,bar"'],
+          launchArguments: <String>[
+            '--enable-dart-profiling',
+            '--trace-allowlist="foo,bar"'
+          ],
         );
 
-        expect(logger.errorText, contains('Unable to get debug results from response'));
+        expect(
+          logger.errorText,
+          contains('Unable to get debug results from response'),
+        );
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(status, false);
       });
@@ -594,7 +632,7 @@ void main() {
               '--xcode-path',
               pathToXcodeApp,
               '--project-path',
-              project. xcodeProject.path,
+              project.xcodeProject.path,
               '--workspace-path',
               project.xcodeWorkspace.path,
             ],
@@ -642,14 +680,16 @@ void main() {
         final bool status = await xcodeDebug.debugApp(
           project: project,
           deviceId: deviceId,
-          launchArguments: <String>['--enable-dart-profiling', '--trace-allowlist="foo,bar"'],
+          launchArguments: <String>[
+            '--enable-dart-profiling',
+            '--trace-allowlist="foo,bar"',
+          ],
         );
 
         expect(logger.errorText, contains('Unexpected debug results'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(status, false);
       });
-
     });
 
     group('parse script response', () {
@@ -666,7 +706,10 @@ void main() {
 
         final XcodeAutomationScriptResponse? response = xcodeDebug.parseScriptResponse('not json');
 
-        expect(logger.errorText, contains('osascript returned non-JSON response'));
+        expect(
+          logger.errorText,
+          contains('osascript returned non-JSON response'),
+        );
         expect(response, isNull);
       });
 
@@ -683,7 +726,10 @@ void main() {
 
         final XcodeAutomationScriptResponse? response = xcodeDebug.parseScriptResponse('[]');
 
-        expect(logger.errorText, contains('osascript returned unexpected JSON response'));
+        expect(
+          logger.errorText,
+          contains('osascript returned unexpected JSON response'),
+        );
         expect(response, isNull);
       });
 
@@ -700,12 +746,15 @@ void main() {
 
         final XcodeAutomationScriptResponse? response = xcodeDebug.parseScriptResponse('{}');
 
-        expect(logger.errorText, contains('osascript returned unexpected JSON response'));
+        expect(
+          logger.errorText,
+          contains('osascript returned unexpected JSON response'),
+        );
         expect(response, isNull);
       });
     });
 
-    group('exit', (){
+    group('exit', () {
       const String pathToXcodeApp = '/Applications/Xcode.app';
 
       late String pathToXcodeAutomationScript;
@@ -718,7 +767,6 @@ void main() {
         projectDirectory = fileSystem.directory('FlutterApp');
         xcodeproj = projectDirectory.childDirectory('Runner.xcodeproj');
         xcworkspace = projectDirectory.childDirectory('Runner.xcworkspace');
-
       });
 
       testWithoutContext('exits when waiting for debug session to start', () async {
@@ -758,15 +806,15 @@ void main() {
           ),
         ]);
 
-        xcodeDebug.startDebugSessionProcess = FakeProcess();
+        xcodeDebug.startDebugActionProcess = FakeProcess();
         xcodeDebug.currentDebuggingProject = project;
 
-        expect(xcodeDebug.startDebugSessionProcess, isNotNull);
+        expect(xcodeDebug.startDebugActionProcess, isNotNull);
         expect(xcodeDebug.currentDebuggingProject, isNotNull);
 
         final bool exitStatus = await xcodeDebug.exit();
 
-        expect((xcodeDebug.startDebugSessionProcess! as FakeProcess).killed, isTrue);
+        expect((xcodeDebug.startDebugActionProcess! as FakeProcess).killed, isTrue);
         expect(xcodeDebug.currentDebuggingProject, isNull);
         expect(logger.errorText, isEmpty);
         expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -816,10 +864,10 @@ void main() {
           ),
         ]);
 
-        xcodeDebug.startDebugSessionProcess = FakeProcess();
+        xcodeDebug.startDebugActionProcess = FakeProcess();
         xcodeDebug.currentDebuggingProject = project;
 
-        expect(xcodeDebug.startDebugSessionProcess, isNotNull);
+        expect(xcodeDebug.startDebugActionProcess, isNotNull);
         expect(xcodeDebug.currentDebuggingProject, isNotNull);
         expect(projectDirectory.existsSync(), isTrue);
         expect(xcodeproj.existsSync(), isTrue);
@@ -827,7 +875,7 @@ void main() {
 
         final bool status = await xcodeDebug.exit(skipDelay: true);
 
-        expect((xcodeDebug.startDebugSessionProcess! as FakeProcess).killed, isTrue);
+        expect((xcodeDebug.startDebugActionProcess! as FakeProcess).killed, isTrue);
         expect(xcodeDebug.currentDebuggingProject, isNull);
         expect(projectDirectory.existsSync(), isFalse);
         expect(xcodeproj.existsSync(), isFalse);
@@ -838,7 +886,10 @@ void main() {
       });
 
       testWithoutContext('kill Xcode when force exit', () async {
-        final Xcode xcode = setupXcode(fakeProcessManager: fakeProcessManager, xcodeSelect: false);
+        final Xcode xcode = setupXcode(
+          fakeProcessManager: fakeProcessManager,
+          xcodeSelect: false,
+        );
         final XcodeDebugProject project = XcodeDebugProject(
           scheme: 'Runner',
           xcodeProject: xcodeproj,
@@ -862,15 +913,15 @@ void main() {
           ),
         ]);
 
-        xcodeDebug.startDebugSessionProcess = FakeProcess();
+        xcodeDebug.startDebugActionProcess = FakeProcess();
         xcodeDebug.currentDebuggingProject = project;
 
-        expect(xcodeDebug.startDebugSessionProcess, isNotNull);
+        expect(xcodeDebug.startDebugActionProcess, isNotNull);
         expect(xcodeDebug.currentDebuggingProject, isNotNull);
 
         final bool exitStatus = await xcodeDebug.exit(force: true);
 
-        expect((xcodeDebug.startDebugSessionProcess! as FakeProcess).killed, isTrue);
+        expect((xcodeDebug.startDebugActionProcess! as FakeProcess).killed, isTrue);
         expect(xcodeDebug.currentDebuggingProject, isNull);
         expect(logger.errorText, isEmpty);
         expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -1009,7 +1060,6 @@ void main() {
         xcode: xcode,
         fileSystem: globals.fs,
         userMessages: userMessages,
-        flutterRoot: Cache.flutterRoot!,
       );
 
       final Directory projectDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_empty_xcode.');
@@ -1036,7 +1086,7 @@ void main() {
         expect(schemeFile.existsSync(), isTrue);
         expect(schemeFile.readAsStringSync(), contains('FilePath = "/path/to/bundle"'));
 
-      } catch(err) { // ignore: avoid_catches_without_on_clauses
+      } catch (err) { // ignore: avoid_catches_without_on_clauses
         fail(err.toString());
       } finally {
         projectDirectory.deleteSync(recursive: true);
@@ -1051,11 +1101,8 @@ Xcode setupXcode({
 }) {
   if (xcodeSelect) {
     fakeProcessManager.addCommand(const FakeCommand(
-      command: <String>[
-        '/usr/bin/xcode-select',
-        '--print-path'
-      ],
-      stdout: '/Applications/Xcode.app/Contents/Developer'
+      command: <String>['/usr/bin/xcode-select', '--print-path'],
+      stdout: '/Applications/Xcode.app/Contents/Developer',
     ));
   }
 

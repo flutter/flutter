@@ -604,7 +604,7 @@ class IOSDevice extends Device {
       final int defaultTimeout;
       if ((isCoreDevice || forceXcodeDebugWorkflow) && debuggingOptions.debuggingEnabled) {
         // Core devices with debugging enabled takes longer because this
-        // includes time to install the app on the device.
+        // includes time to install and launch the app on the device.
         defaultTimeout = isWirelesslyConnected ? 75 : 60;
       } else if (isWirelesslyConnected) {
         defaultTimeout = 45;
@@ -701,19 +701,29 @@ class IOSDevice extends Device {
       // Release mode
 
       // Install app to device
-      final bool installSuccess = await _coreDeviceControl.installApp(deviceId: id, bundlePath: package.deviceBundlePath);
+      final bool installSuccess = await _coreDeviceControl.installApp(
+        deviceId: id,
+        bundlePath: package.deviceBundlePath,
+      );
       if (!installSuccess) {
         return installSuccess;
       }
 
       // Launch app to device
-      final bool launchSuccess = await _coreDeviceControl.launchApp(deviceId: id, bundleId: package.id, launchArguments: launchArguments);
+      final bool launchSuccess = await _coreDeviceControl.launchApp(
+        deviceId: id,
+        bundleId: package.id,
+        launchArguments: launchArguments,
+      );
 
       return launchSuccess;
     } else {
       final int launchTimeout = isWirelesslyConnected ? 45 : 30;
       final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
-        _logger.printError('Xcode is taking longer than expected to start debugging the app. Ensure the project is opened in Xcode.');
+        _logger.printError(
+          'Xcode is taking longer than expected to start debugging the app. '
+          'Ensure the project is opened in Xcode.',
+        );
       });
 
       XcodeDebugProject debugProject;
@@ -828,7 +838,12 @@ class IOSDevice extends Device {
   void clearLogs() { }
 
   @override
-  bool get supportsScreenshot => _iMobileDevice.isInstalled;
+  bool get supportsScreenshot {
+    if (isCoreDevice) {
+      return false;
+    }
+    return _iMobileDevice.isInstalled;
+  }
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
@@ -1012,14 +1027,9 @@ class IOSDeviceLogReader extends DeviceLogReader {
   /// is true.
   final List<String> _streamFlutterMessages = <String>[];
 
-  /// When using both `idevicesyslog` and `ios-deploy`, exclude logs with the
-  /// "flutter:" prefix if they have already been added to the stream. This is
-  /// to prevent duplicates from being printed.
-  ///
-  /// If a message does not have the prefix, exclude it if the message's
-  /// source is `idevicesyslog`. This is done because `ios-deploy` and
-  /// `idevicesyslog` often have different prefixes on non-flutter messages
-  /// and are often not critical for CI tests.
+  /// When using multiple logging sources, exclude logs with a `flutter:` prefix
+  /// if they have already been added to the stream. This is to prevent duplicates
+  /// from being printed.
   bool _excludeLog(String message, IOSDeviceLogSource source) {
     if (!usingMultipleLoggingSources) {
       return false;
@@ -1030,6 +1040,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
       }
       _streamFlutterMessages.add(message);
     } else if (useIOSDeployLogging && source == IOSDeviceLogSource.idevicesyslog) {
+      // If using both ios-deploy and `idevicesyslog`, exclude it if the message's
+      // source is `idevicesyslog`. This is done because `ios-deploy` and
+      // `idevicesyslog` often have different prefixes on non-flutter messages
+      // and are not critical for CI tests.
       return true;
     }
     return false;
@@ -1136,7 +1150,6 @@ class IOSDeviceLogReader extends DeviceLogReader {
   /// CoreDevice and has iOS 13 or greater.
   @visibleForTesting
   bool get useIOSDeployLogging {
-    // use for 13+ and less than 17
     if (_majorSdkVersion < minimumUniversalLoggingSdkVersion || _isCoreDevice) {
       return false;
     }

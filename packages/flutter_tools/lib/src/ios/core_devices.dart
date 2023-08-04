@@ -180,7 +180,7 @@ class IOSCoreDeviceControl {
   @visibleForTesting
   Future<List<IOSCoreDeviceInstalledApp>> getInstalledApps({
     required String deviceId,
-    required String bundleId,
+    String? bundleId,
   }) async {
     final List<IOSCoreDeviceInstalledApp> apps = <IOSCoreDeviceInstalledApp>[];
 
@@ -574,7 +574,6 @@ class _IOSCoreDeviceConnectionProperties {
   final List<String>? localHostnames;
   final String? pairingState;
   final List<String>? potentialHostnames;
-  /// When [transportType] is not null, values may be `wired` or `localNetwork`.
   final String? transportType;
   final String? tunnelIPAddress;
   final String? tunnelState;
