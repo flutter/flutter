@@ -1,4 +1,4 @@
-Signature: 16b2c54be96578037934a7f89c22ad3a
+Signature: 25eec393e4785b732c9a38a5d83745f6
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -3529,7 +3529,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/realm.
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/realm_builder.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/realm_builder_types.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/scoped_child.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/fuchsia_syslog.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/cpp/fuchsia_syslog.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/include/lib/syslog/structured_backend/cpp/fuchsia_syslog.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/include/lib/syslog/structured_backend/fuchsia_syslog.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/status_string.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -3677,7 +3677,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/realm.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/realm_builder.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/realm_builder_types.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/scoped_child.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/fuchsia_syslog.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/cpp/fuchsia_syslog.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/include/lib/syslog/structured_backend/cpp/fuchsia_syslog.h
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/include/lib/syslog/structured_backend/fuchsia_syslog.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/status_string.cc
