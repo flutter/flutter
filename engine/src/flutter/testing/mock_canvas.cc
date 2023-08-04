@@ -193,6 +193,14 @@ void MockCanvas::DrawImage(const sk_sp<DlImage>& image,
   }
 }
 
+void MockCanvas::DrawImpellerPicture(
+    const std::shared_ptr<const impeller::Picture>& picture,
+    SkScalar opacity) {
+  draw_calls_.emplace_back(
+      DrawCall{.layer = current_layer_,
+               .data = DrawImpellerPictureData{picture, opacity}});
+}
+
 void MockCanvas::DrawDisplayList(const sk_sp<DisplayList> display_list,
                                  SkScalar opacity) {
   draw_calls_.emplace_back(
@@ -460,6 +468,16 @@ std::ostream& operator<<(std::ostream& os,
                          const MockCanvas::DrawImageDataNoPaint& data) {
   return os << data.image << " " << data.x << " " << data.y << " "
             << data.options;
+}
+
+bool operator==(const MockCanvas::DrawImpellerPictureData& a,
+                const MockCanvas::DrawImpellerPictureData& b) {
+  return a.picture == b.picture && a.opacity == b.opacity;
+}
+
+std::ostream& operator<<(std::ostream& os,
+                         const MockCanvas::DrawImpellerPictureData& data) {
+  return os << "[Impeller picture] " << data.opacity;
 }
 
 bool operator==(const MockCanvas::DrawDisplayListData& a,

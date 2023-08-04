@@ -11,7 +11,6 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/impeller/display_list/dl_dispatcher.h"
 #include "flutter/impeller/renderer/backend/metal/surface_mtl.h"
 
 static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
@@ -113,12 +112,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
           return false;
         }
 
-        auto display_list = surface_frame.BuildDisplayList();
-        if (!display_list) {
-          FML_LOG(ERROR) << "Could not build display list for surface frame.";
-          return false;
-        }
-
         if (!disable_partial_repaint_) {
           uintptr_t texture = reinterpret_cast<uintptr_t>(last_texture);
 
@@ -148,17 +141,13 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
           return surface->Present();
         }
 
-        impeller::IRect cull_rect = surface->coverage();
-        SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.size.width, cull_rect.size.height);
-        impeller::DlDispatcher impeller_dispatcher(cull_rect);
-        display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
-        auto picture = impeller_dispatcher.EndRecordingAsPicture();
+        auto picture = surface_frame.GetImpellerPicture();
 
         return renderer->Render(
             std::move(surface),
             fml::MakeCopyable([aiks_context, picture = std::move(picture)](
                                   impeller::RenderTarget& render_target) -> bool {
-              return aiks_context->Render(picture, render_target);
+              return aiks_context->Render(*picture, render_target);
             }));
       });
 
@@ -211,12 +200,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
           return false;
         }
 
-        auto display_list = surface_frame.BuildDisplayList();
-        if (!display_list) {
-          FML_LOG(ERROR) << "Could not build display list for surface frame.";
-          return false;
-        }
-
         if (!disable_partial_repaint_) {
           uintptr_t texture_ptr = reinterpret_cast<uintptr_t>(mtl_texture);
 
@@ -246,17 +229,13 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
           return surface->Present();
         }
 
-        impeller::IRect cull_rect = surface->coverage();
-        SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.size.width, cull_rect.size.height);
-        impeller::DlDispatcher impeller_dispatcher(cull_rect);
-        display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
-        auto picture = impeller_dispatcher.EndRecordingAsPicture();
+        auto picture = surface_frame.GetImpellerPicture();
 
         return renderer->Render(
             std::move(surface),
             fml::MakeCopyable([aiks_context, picture = std::move(picture)](
                                   impeller::RenderTarget& render_target) -> bool {
-              return aiks_context->Render(picture, render_target);
+              return aiks_context->Render(*picture, render_target);
             }));
 
         delegate->PresentTexture(texture_info);

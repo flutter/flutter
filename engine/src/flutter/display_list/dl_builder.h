@@ -216,6 +216,12 @@ class DisplayListBuilder final : public virtual DlCanvas,
                  DlImageSampling sampling,
                  const SkRect* cullRect,
                  const DlPaint* paint = nullptr) override;
+
+  // |DlCanvas|
+  void DrawImpellerPicture(
+      const std::shared_ptr<const impeller::Picture>& picture,
+      SkScalar opacity = SK_Scalar1) override;
+
   // |DlCanvas|
   void DrawDisplayList(const sk_sp<DisplayList> display_list,
                        SkScalar opacity = SK_Scalar1) override;
@@ -701,7 +707,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
     return accumulator_->bounds();
   }
 
-  sk_sp<DlRTree> rtree() {
+  std::shared_ptr<DlRTree> rtree() {
     FML_DCHECK(layer_stack_.size() == 1);
     if (is_unbounded()) {
       FML_LOG(INFO) << "returning partial rtree for unbounded DisplayList";

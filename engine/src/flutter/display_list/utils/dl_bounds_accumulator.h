@@ -84,7 +84,7 @@ class BoundsAccumulator {
 
   virtual SkRect bounds() const = 0;
 
-  virtual sk_sp<DlRTree> rtree() const = 0;
+  virtual std::shared_ptr<DlRTree> rtree() const = 0;
 
   virtual BoundsAccumulatorType type() const = 0;
 };
@@ -112,7 +112,7 @@ class RectBoundsAccumulator final : public virtual BoundsAccumulator {
     return BoundsAccumulatorType::kRect;
   }
 
-  sk_sp<DlRTree> rtree() const override { return nullptr; }
+  std::shared_ptr<DlRTree> rtree() const override { return nullptr; }
 
  private:
   class AccumulationRect {
@@ -151,7 +151,7 @@ class RTreeBoundsAccumulator final : public virtual BoundsAccumulator {
 
   SkRect bounds() const override;
 
-  sk_sp<DlRTree> rtree() const override;
+  std::shared_ptr<DlRTree> rtree() const override;
 
   BoundsAccumulatorType type() const override {
     return BoundsAccumulatorType::kRTree;

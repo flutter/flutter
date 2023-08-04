@@ -34,7 +34,7 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
                          bool can_apply_group_opacity,
                          bool is_ui_thread_safe,
                          bool modifies_transparent_black,
-                         sk_sp<const DlRTree> rtree)
+                         std::shared_ptr<const DlRTree> rtree)
     : storage_(std::move(storage)),
       byte_count_(byte_count),
       op_count_(op_count),

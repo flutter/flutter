@@ -1309,7 +1309,7 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
 
   return {std::make_unique<flutter::EmbedderExternalViewEmbedder>(
               avoid_backing_store_cache, create_render_target_callback,
-              present_callback),
+              present_callback, enable_impeller),
           false};
 }
 

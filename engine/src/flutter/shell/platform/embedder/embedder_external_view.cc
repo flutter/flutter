@@ -4,13 +4,8 @@
 
 #include "flutter/shell/platform/embedder/embedder_external_view.h"
 
-#include "flutter/display_list/dl_builder.h"
+#include "flow/embedded_views.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/common/dl_op_spy.h"
-
-#ifdef IMPELLER_SUPPORTS_RENDERING
-#include "impeller/display_list/dl_dispatcher.h"  // nogncheck
-#endif                                            // IMPELLER_SUPPORTS_RENDERING
 
 namespace flutter {
 
@@ -23,21 +18,37 @@ static SkISize TransformedSurfaceSize(const SkISize& size,
 
 EmbedderExternalView::EmbedderExternalView(
     const SkISize& frame_size,
-    const SkMatrix& surface_transformation)
-    : EmbedderExternalView(frame_size, surface_transformation, {}, nullptr) {}
+    const SkMatrix& surface_transformation,
+    bool enable_impeller)
+    : EmbedderExternalView(frame_size,
+                           surface_transformation,
+                           {},
+                           nullptr,
+                           enable_impeller) {}
 
 EmbedderExternalView::EmbedderExternalView(
     const SkISize& frame_size,
     const SkMatrix& surface_transformation,
     ViewIdentifier view_identifier,
-    std::unique_ptr<EmbeddedViewParams> params)
+    std::unique_ptr<EmbeddedViewParams> params,
+    bool enable_impeller)
     : render_surface_size_(
           TransformedSurfaceSize(frame_size, surface_transformation)),
       surface_transformation_(surface_transformation),
       view_identifier_(view_identifier),
-      embedded_view_params_(std::move(params)),
-      slice_(std::make_unique<DisplayListEmbedderViewSlice>(
-          SkRect::Make(frame_size))) {}
+      embedded_view_params_(std::move(params)) {
+#if IMPELLER_SUPPORTS_RENDERING
+  if (enable_impeller) {
+    slice_ =
+        std::make_unique<ImpellerEmbedderViewSlice>(SkRect::Make(frame_size));
+  } else {
+#endif  // IMPELLER_SUPPORTS_RENDERING
+    slice_ = std::make_unique<DisplayListEmbedderViewSlice>(
+        SkRect::Make(frame_size));
+#if IMPELLER_SUPPORTS_RENDERING
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
 
 EmbedderExternalView::~EmbedderExternalView() = default;
 
@@ -67,9 +78,7 @@ bool EmbedderExternalView::HasEngineRenderedContents() {
     return has_engine_rendered_contents_.value();
   }
   TryEndRecording();
-  DlOpSpy dl_op_spy;
-  slice_->dispatch(dl_op_spy);
-  has_engine_rendered_contents_ = dl_op_spy.did_draw() && !slice_->is_empty();
+  has_engine_rendered_contents_ = slice_->renders_anything();
   return has_engine_rendered_contents_.value();
 }
 
@@ -94,13 +103,12 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target) {
   if (impeller_target) {
     auto aiks_context = render_target.GetAiksContext();
 
-    auto dl_builder = DisplayListBuilder();
-    dl_builder.SetTransform(&surface_transformation_);
-    slice_->render_into(&dl_builder);
+    impeller::DlAiksCanvas dl_canvas(
+        SkRect::Make(render_target.GetRenderTargetSize()));
+    dl_canvas.SetTransform(&surface_transformation_);
+    slice_->render_into(&dl_canvas);
 
-    auto dispatcher = impeller::DlDispatcher();
-    dispatcher.drawDisplayList(dl_builder.Build(), 1);
-    return aiks_context->Render(dispatcher.EndRecordingAsPicture(),
+    return aiks_context->Render(dl_canvas.EndRecordingAsPicture(),
                                 *impeller_target);
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING

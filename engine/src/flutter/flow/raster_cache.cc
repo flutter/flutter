@@ -27,7 +27,7 @@ namespace flutter {
 RasterCacheResult::RasterCacheResult(sk_sp<DlImage> image,
                                      const SkRect& logical_rect,
                                      const char* type,
-                                     sk_sp<const DlRTree> rtree)
+                                     std::shared_ptr<const DlRTree> rtree)
     : image_(std::move(image)),
       logical_rect_(logical_rect),
       flow_(type),
@@ -77,7 +77,7 @@ RasterCache::RasterCache(size_t access_threshold,
 /// @note Procedure doesn't copy all closures.
 std::unique_ptr<RasterCacheResult> RasterCache::Rasterize(
     const RasterCache::Context& context,
-    sk_sp<const DlRTree> rtree,
+    std::shared_ptr<const DlRTree> rtree,
     const std::function<void(DlCanvas*)>& draw_function,
     const std::function<void(DlCanvas*, const SkRect& rect)>& draw_checkerboard)
     const {
@@ -119,7 +119,7 @@ bool RasterCache::UpdateCacheEntry(
     const RasterCacheKeyID& id,
     const Context& raster_cache_context,
     const std::function<void(DlCanvas*)>& render_function,
-    sk_sp<const DlRTree> rtree) const {
+    std::shared_ptr<const DlRTree> rtree) const {
   RasterCacheKey key = RasterCacheKey(id, raster_cache_context.matrix);
   Entry& entry = cache_[key];
   if (!entry.image) {
