@@ -94,6 +94,12 @@ class IconRow extends StatelessWidget {
             painter: _ConversationIconPainter(),
           ),
         ),
+        SizedBox.square(
+          dimension: iconSize,
+          child: CustomPaint(
+            painter: _GeometryIconPainter(),
+          ),
+        ),
       ],
     );
   }
@@ -257,6 +263,38 @@ class _ConversationIconPainter extends CustomPainter {
       'M14.4141 8.33333C14.4141 11.555 11.8024 14.1667 8.58073 14.1667C7.64487 14.1667 6.76047 13.9463 5.97663 13.5546L2.65625 14.4661L3.70864 11.5424C3.10106 10.6218 2.7474 9.51887 2.7474 8.33333C2.7474 5.11167 5.35907 2.5 8.58073 2.5C11.8024 2.5 14.4141 5.11167 14.4141 8.33333Z';
   static const String _path2 =
       'M8.5382 1.81665C4.84709 1.81665 1.85486 4.80888 1.85486 8.49998C1.85486 9.65241 2.1471 10.7384 2.66182 11.686L1.89645 13.6887C1.5494 14.5968 2.38481 15.5128 3.32097 15.2506L5.74289 14.5723C6.59409 14.9647 7.54146 15.1833 8.5382 15.1833C12.2293 15.1833 15.2215 12.1911 15.2215 8.49998C15.2215 4.80888 12.2293 1.81665 8.5382 1.81665ZM3.22153 8.49998C3.22153 5.56367 5.60188 3.18332 8.5382 3.18332C11.4745 3.18332 13.8549 5.56367 13.8549 8.49998C13.8549 11.4363 11.4745 13.8167 8.5382 13.8167C7.66578 13.8167 6.84431 13.607 6.11952 13.2361L5.88143 13.1142L3.30309 13.8364L4.17436 11.5565L3.99903 11.2698C3.5059 10.4636 3.22153 9.51607 3.22153 8.49998ZM16.5636 7.07206L16.1464 6.61586L16.2475 7.22577C16.317 7.64558 16.3533 8.07677 16.3533 8.51656C16.3533 8.69251 16.3475 8.86707 16.3361 9.04007L16.3328 9.08869L16.3542 9.13249C16.6951 9.83163 16.8175 10.5975 16.8175 11.5C16.8175 12.5161 16.5332 13.4636 16.04 14.2698L15.8647 14.5565L16.736 16.8363L14.1576 16.1142L13.9195 16.2361C13.1948 16.607 12.3733 16.8166 11.5009 16.8166C10.5879 16.8166 9.87033 16.6947 9.19041 16.3496L9.14498 16.3266L9.09417 16.3303C8.90419 16.3441 8.71231 16.3511 8.51875 16.3511C8.10958 16.3511 7.70785 16.3197 7.31582 16.2593L6.72389 16.1681L7.16334 16.575C8.31731 17.6436 9.75888 18.1833 11.5009 18.1833C12.4976 18.1833 13.445 17.9647 14.2962 17.5723L16.7181 18.2506C17.6543 18.5128 18.4897 17.5968 18.1426 16.6887L17.3772 14.6859C17.892 13.7384 18.1842 12.6524 18.1842 11.5C18.1842 9.75761 17.6387 8.24759 16.5636 7.07206Z';
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
+class _GeometryIconPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size canvasSize) {
+    const Size size = Size(20, 20);
+    canvas.scale(
+        canvasSize.width / size.width, canvasSize.height / size.height);
+
+    final Paint paint = Paint()..color = const Color(0xFFF84F39);
+    final Rect frame = Offset.zero & size;
+    canvas.drawDRRect(
+        RRect.fromRectAndRadius(frame, const Radius.elliptical(5, 4)),
+        RRect.fromRectAndRadius(
+            frame.deflate(1), const Radius.elliptical(4, 3)),
+        paint);
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(
+            const Rect.fromLTWH(3, 3, 6, 6), const Radius.elliptical(2, 1)),
+        paint);
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(
+            const Rect.fromLTWH(11, 11, 6, 6), const Radius.elliptical(2, 1)),
+        paint);
+    canvas.drawCircle(const Offset(14, 6), 3, paint);
+    canvas.drawCircle(const Offset(6, 14), 3, paint);
+  }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {

@@ -9,7 +9,7 @@ import 'util.dart';
 
 void main() {
   macroPerfTest(
-    'tesselation_perf',
+    'tessellation_perf',
     kStaticPathTessellationRouteName,
     pageDelay: const Duration(seconds: 1),
     driverOps: (FlutterDriver driver) async {
