@@ -192,3 +192,4 @@ To your `AndroidManifest.xml` file, add under the `<application>` tag:
 * [Guidance for writing efficient shaders](docs/shader_optimization.md)
 * [How color blending works in Impeller](docs/blending.md)
 * [Enabling Vulkan Validation Layers on Android](docs/android_validation_layers.md)
+* [Important Benchmarks](docs/benchmarks.md)
