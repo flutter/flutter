@@ -26,7 +26,7 @@ Future<void> runDriverTestForRoute(String routeName, DriverTestCallBack body) as
   // -320 comes from the logical pixels for a full screen scroll for the
   // smallest reference device, iPhone 4, whose physical screen dimensions are
   // 960px × 640px.
-  final double dyScroll = -320.0;
+  const double dyScroll = -320.0;
   await driver.scrollUntilVisible(scrollable, button, dyScroll: dyScroll);
   await driver.tap(button);
 
