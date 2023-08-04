@@ -98,12 +98,12 @@ void main() {
     'build succeeds when both example app and plugin target compileSdkPreview',
         () async {
       final File appBuildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
-      // write a build.gradle with compileSdkPreview as `Tiramisu` which is a string preview version
+      // write a build.gradle with compileSdkPreview as `UpsideDownCake` which is a string preview version
       appBuildGradleFile.writeAsStringSync(
           appBuildGradleFile.readAsStringSync().replaceFirst('compileSdkVersion flutter.compileSdkVersion', 'compileSdkPreview "UpsideDownCake"'),
           flush: true
       );
-      expect(appBuildGradleFile.readAsStringSync(), contains('compileSdkPreview "Tiramisu"'));
+      expect(appBuildGradleFile.readAsStringSync(), contains('compileSdkPreview "UpsideDownCake"'));
 
       final File pluginBuildGradleFile = pluginDir.childDirectory('android').childFile('build.gradle');
       // change the plugin build.gradle to use a preview compile sdk version
