@@ -2,35 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 
 #import <OCMock/OCMock.h>
-#import <XCTest/XCTest.h>
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterTestUtils.h"
+#import "flutter/testing/testing.h"
+#include "gtest/gtest.h"
 
 FLUTTER_ASSERT_ARC
 
 @protocol FlutterTaskQueue <NSObject>
 @end
 
-@interface FlutterBinaryMessengerRelayTest : XCTestCase
+@interface FlutterBinaryMessengerRelayTest : NSObject
 @end
 
 @implementation FlutterBinaryMessengerRelayTest
-
-- (void)setUp {
-}
-
-- (void)tearDown {
-}
 
 - (void)testCreate {
   id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   FlutterBinaryMessengerRelay* relay =
       [[FlutterBinaryMessengerRelay alloc] initWithParent:messenger];
-  XCTAssertNotNil(relay);
-  XCTAssertEqual(messenger, relay.parent);
+  EXPECT_NE(relay, nil);
+  EXPECT_EQ(messenger, relay.parent);
 }
 
 - (void)testPassesCallOn {
@@ -78,3 +74,33 @@ FLUTTER_ASSERT_ARC
 }
 
 @end
+
+TEST(FlutterBinaryMessengerRelayTest, Create) {
+  ASSERT_FALSE(FLTThrowsObjcException(^{
+    [[FlutterBinaryMessengerRelayTest alloc] testCreate];
+  }));
+}
+
+TEST(FlutterBinaryMessengerRelayTest, PassesCallOn) {
+  ASSERT_FALSE(FLTThrowsObjcException(^{
+    [[FlutterBinaryMessengerRelayTest alloc] testPassesCallOn];
+  }));
+}
+
+TEST(FlutterBinaryMessengerRelayTest, DoesntPassCallOn) {
+  ASSERT_FALSE(FLTThrowsObjcException(^{
+    [[FlutterBinaryMessengerRelayTest alloc] testDoesntPassCallOn];
+  }));
+}
+
+TEST(FlutterBinaryMessengerRelayTest, SetMessageHandlerWithTaskQueue) {
+  ASSERT_FALSE(FLTThrowsObjcException(^{
+    [[FlutterBinaryMessengerRelayTest alloc] testSetMessageHandlerWithTaskQueue];
+  }));
+}
+
+TEST(FlutterBinaryMessengerRelayTest, SetMakeBackgroundTaskQueue) {
+  ASSERT_FALSE(FLTThrowsObjcException(^{
+    [[FlutterBinaryMessengerRelayTest alloc] testMakeBackgroundTaskQueue];
+  }));
+}

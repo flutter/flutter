@@ -75,7 +75,6 @@ source_set("flutter_framework_source") {
 
   sources = [
     "framework/Source/FlutterAppDelegate.mm",
-    "framework/Source/FlutterBinaryMessengerRelay.mm",
     "framework/Source/FlutterCallbackCache.mm",
     "framework/Source/FlutterCallbackCache_Internal.h",
     "framework/Source/FlutterChannelKeyResponder.h",
@@ -283,7 +282,6 @@ shared_library("ios_test_flutter") {
   ]
   sources = [
     "framework/Source/FlutterAppDelegateTest.mm",
-    "framework/Source/FlutterBinaryMessengerRelayTest.mm",
     "framework/Source/FlutterChannelKeyResponderTest.mm",
     "framework/Source/FlutterDartProjectTest.mm",
     "framework/Source/FlutterEmbedderKeyResponderTest.mm",
