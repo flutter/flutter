@@ -82,14 +82,13 @@ TaskFunction createAndroidSemanticsIntegrationTest() {
   ).call;
 }
 
-TaskFunction createIOSPlatformViewTests({Map<String, String>? environment}) {
+TaskFunction createIOSPlatformViewTests() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests',
     'lib/main.dart',
     extraOptions: <String>[
       '--dart-define=ENABLE_DRIVER_EXTENSION=true',
     ],
-    environment: environment,
   ).call;
 }
 
@@ -107,10 +106,11 @@ TaskFunction createEndToEndFrameNumberTest() {
   ).call;
 }
 
-TaskFunction createEndToEndDriverTest() {
+TaskFunction createEndToEndDriverTest({Map<String, String>? environment}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/driver.dart',
+    environment: environment,
   ).call;
 }
 

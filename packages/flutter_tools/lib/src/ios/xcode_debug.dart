@@ -129,7 +129,6 @@ class XcodeDebug {
       );
 
       String stdout = '';
-
       stdoutSubscription = startDebugActionProcess!.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
@@ -138,19 +137,26 @@ class XcodeDebug {
             stdout += line;
       });
 
+      String stderr = '';
       // console.log from the script are found in the stderr
       stderrSubscription = startDebugActionProcess!.stderr
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
             _logger.printTrace('stderr: $line');
+            stderr += line;
       });
 
-      await startDebugActionProcess!.exitCode.whenComplete(() async {
+      final int exitCode = await startDebugActionProcess!.exitCode.whenComplete(() async {
         await stdoutSubscription?.cancel();
         await stderrSubscription?.cancel();
         startDebugActionProcess = null;
       });
+
+      if (exitCode != 0) {
+        _logger.printError('Error executing osascript: $exitCode\n$stderr');
+        return false;
+      }
 
       final XcodeAutomationScriptResponse? response = parseScriptResponse(stdout);
       if (response == null) {

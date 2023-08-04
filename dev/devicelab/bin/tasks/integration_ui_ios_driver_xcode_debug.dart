@@ -8,7 +8,7 @@ import 'package:flutter_devicelab/tasks/integration_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createIOSPlatformViewTests(
+  await task(createEndToEndDriverTest(
     environment: <String, String>{
       'FORCE_XCODE_DEBUG': 'true',
     },
