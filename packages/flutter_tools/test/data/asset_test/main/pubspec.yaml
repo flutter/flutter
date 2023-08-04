@@ -8,8 +8,4 @@ dependencies:
   font:
     path: ../font
 
-flutter:
-  assets:
-    - dummy-cert.pem
-    - dummy-key.pem
 # PUBSPEC CHECKSUM: 0000
