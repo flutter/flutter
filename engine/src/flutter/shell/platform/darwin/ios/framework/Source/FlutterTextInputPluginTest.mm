@@ -60,6 +60,9 @@ FLUTTER_ASSERT_ARC
 
 @interface FlutterTextInputPlugin ()
 @property(nonatomic, assign) FlutterTextInputView* activeView;
+@property(nonatomic, readonly) UIView* keyboardViewContainer;
+@property(nonatomic, readonly) UIView* keyboardView;
+@property(nonatomic, readonly) CGRect keyboardRect;
 @property(nonatomic, readonly)
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;
 
@@ -2423,6 +2426,221 @@ FLUTTER_ASSERT_ARC
                            result:^(id _Nullable result){
                            }];
   XCTAssertNil(activeView.superview, @"activeView must be removed from view hierarchy.");
+}
+
+- (void)testInteractiveKeyboardAfterUserScrollWillResignFirstResponder {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+
+  [inputView setTextInputClient:123];
+  [inputView reloadInputViews];
+  [inputView becomeFirstResponder];
+  XCTAssert(inputView.isFirstResponder);
+
+  CGRect keyboardFrame = CGRectMake(0, 500, 500, 500);
+  [NSNotificationCenter.defaultCenter
+      postNotificationName:UIKeyboardWillShowNotification
+                    object:nil
+                  userInfo:@{UIKeyboardFrameEndUserInfoKey : @(keyboardFrame)}];
+  FlutterMethodCall* onPointerMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(500)}];
+  [textInputPlugin handleMethodCall:onPointerMoveCall
+                             result:^(id _Nullable result){
+                             }];
+  XCTAssertFalse(inputView.isFirstResponder);
+}
+
+- (void)testInteractiveKeyboardAfterUserScrollToTopOfKeyboardWillTakeScreenshot {
+  NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
+  XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
+  UIScene* scene = scenes.anyObject;
+  XCTAssert([scene isKindOfClass:[UIWindowScene class]], @"Must be a window scene for test");
+  UIWindowScene* windowScene = (UIWindowScene*)scene;
+  XCTAssert(windowScene.windows.count > 0, @"There must be at least 1 window for test");
+  UIWindow* window = windowScene.windows[0];
+  [window addSubview:viewController.view];
+
+  [viewController loadView];
+
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+
+  [inputView setTextInputClient:123];
+  [inputView reloadInputViews];
+  [inputView becomeFirstResponder];
+
+  if (textInputPlugin.keyboardView.superview != nil) {
+    for (UIView* subView in textInputPlugin.keyboardViewContainer.subviews) {
+      [subView removeFromSuperview];
+    }
+  }
+  XCTAssert(textInputPlugin.keyboardView.superview == nil);
+  CGRect keyboardFrame = CGRectMake(0, 500, 500, 500);
+  [NSNotificationCenter.defaultCenter
+      postNotificationName:UIKeyboardWillShowNotification
+                    object:nil
+                  userInfo:@{UIKeyboardFrameEndUserInfoKey : @(keyboardFrame)}];
+  FlutterMethodCall* onPointerMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(510)}];
+  [textInputPlugin handleMethodCall:onPointerMoveCall
+                             result:^(id _Nullable result){
+                             }];
+  XCTAssertFalse(textInputPlugin.keyboardView.superview == nil);
+  for (UIView* subView in textInputPlugin.keyboardViewContainer.subviews) {
+    [subView removeFromSuperview];
+  }
+}
+
+- (void)testInteractiveKeyboardScreenshotWillBeMovedDownAfterUserScroll {
+  NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
+  XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
+  UIScene* scene = scenes.anyObject;
+  XCTAssert([scene isKindOfClass:[UIWindowScene class]], @"Must be a window scene for test");
+  UIWindowScene* windowScene = (UIWindowScene*)scene;
+  XCTAssert(windowScene.windows.count > 0, @"There must be at least 1 window for test");
+  UIWindow* window = windowScene.windows[0];
+  [window addSubview:viewController.view];
+
+  [viewController loadView];
+
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+
+  [inputView setTextInputClient:123];
+  [inputView reloadInputViews];
+  [inputView becomeFirstResponder];
+
+  CGRect keyboardFrame = CGRectMake(0, 500, 500, 500);
+  [NSNotificationCenter.defaultCenter
+      postNotificationName:UIKeyboardWillShowNotification
+                    object:nil
+                  userInfo:@{UIKeyboardFrameEndUserInfoKey : @(keyboardFrame)}];
+  FlutterMethodCall* onPointerMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(510)}];
+  [textInputPlugin handleMethodCall:onPointerMoveCall
+                             result:^(id _Nullable result){
+                             }];
+  XCTAssert(textInputPlugin.keyboardView.superview != nil);
+
+  XCTAssertEqual(textInputPlugin.keyboardViewContainer.frame.origin.y, keyboardFrame.origin.y);
+
+  FlutterMethodCall* onPointerMoveCallMove =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(600)}];
+  [textInputPlugin handleMethodCall:onPointerMoveCallMove
+                             result:^(id _Nullable result){
+                             }];
+  XCTAssert(textInputPlugin.keyboardView.superview != nil);
+
+  XCTAssertEqual(textInputPlugin.keyboardViewContainer.frame.origin.y, 600.0);
+
+  for (UIView* subView in textInputPlugin.keyboardViewContainer.subviews) {
+    [subView removeFromSuperview];
+  }
+}
+
+- (void)testInteractiveKeyboardScreenshotWillBeMovedToOrginalPositionAfterUserScroll {
+  NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
+  XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
+  UIScene* scene = scenes.anyObject;
+  XCTAssert([scene isKindOfClass:[UIWindowScene class]], @"Must be a window scene for test");
+  UIWindowScene* windowScene = (UIWindowScene*)scene;
+  XCTAssert(windowScene.windows.count > 0, @"There must be at least 1 window for test");
+  UIWindow* window = windowScene.windows[0];
+  [window addSubview:viewController.view];
+
+  [viewController loadView];
+
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+
+  [inputView setTextInputClient:123];
+  [inputView reloadInputViews];
+  [inputView becomeFirstResponder];
+
+  CGRect keyboardFrame = CGRectMake(0, 500, 500, 500);
+  [NSNotificationCenter.defaultCenter
+      postNotificationName:UIKeyboardWillShowNotification
+                    object:nil
+                  userInfo:@{UIKeyboardFrameEndUserInfoKey : @(keyboardFrame)}];
+  FlutterMethodCall* onPointerMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(500)}];
+  [textInputPlugin handleMethodCall:onPointerMoveCall
+                             result:^(id _Nullable result){
+                             }];
+  XCTAssert(textInputPlugin.keyboardView.superview != nil);
+  XCTAssertEqual(textInputPlugin.keyboardViewContainer.frame.origin.y, keyboardFrame.origin.y);
+
+  FlutterMethodCall* onPointerMoveCallMove =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(600)}];
+  [textInputPlugin handleMethodCall:onPointerMoveCallMove
+                             result:^(id _Nullable result){
+                             }];
+  XCTAssert(textInputPlugin.keyboardView.superview != nil);
+  XCTAssertEqual(textInputPlugin.keyboardViewContainer.frame.origin.y, 600.0);
+
+  FlutterMethodCall* onPointerMoveCallBackUp =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(10)}];
+  [textInputPlugin handleMethodCall:onPointerMoveCallBackUp
+                             result:^(id _Nullable result){
+                             }];
+  XCTAssert(textInputPlugin.keyboardView.superview != nil);
+  XCTAssertEqual(textInputPlugin.keyboardViewContainer.frame.origin.y, keyboardFrame.origin.y);
+  for (UIView* subView in textInputPlugin.keyboardViewContainer.subviews) {
+    [subView removeFromSuperview];
+  }
+}
+
+- (void)testInteractiveKeyboardFindFirstResponderRecursive {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:123];
+  [inputView reloadInputViews];
+  [inputView becomeFirstResponder];
+
+  UIView* firstResponder = UIApplication.sharedApplication.keyWindow.flutterFirstResponder;
+  XCTAssertEqualObjects(inputView, firstResponder);
+}
+
+- (void)testInteractiveKeyboardFindFirstResponderRecursiveInMultipleSubviews {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  FlutterTextInputView* subInputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  FlutterTextInputView* otherSubInputView =
+      [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  FlutterTextInputView* subFirstResponderInputView =
+      [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [subInputView addSubview:subFirstResponderInputView];
+  [inputView addSubview:subInputView];
+  [inputView addSubview:otherSubInputView];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:123];
+  [inputView reloadInputViews];
+  [subInputView setTextInputClient:123];
+  [subInputView reloadInputViews];
+  [otherSubInputView setTextInputClient:123];
+  [otherSubInputView reloadInputViews];
+  [subFirstResponderInputView setTextInputClient:123];
+  [subFirstResponderInputView reloadInputViews];
+  [subFirstResponderInputView becomeFirstResponder];
+
+  UIView* firstResponder = UIApplication.sharedApplication.keyWindow.flutterFirstResponder;
+  XCTAssertEqualObjects(subFirstResponderInputView, firstResponder);
+}
+
+- (void)testInteractiveKeyboardFindFirstResponderIsNilRecursive {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:123];
+  [inputView reloadInputViews];
+
+  UIView* firstResponder = UIApplication.sharedApplication.keyWindow.flutterFirstResponder;
+  XCTAssertNil(firstResponder);
 }
 
 @end
