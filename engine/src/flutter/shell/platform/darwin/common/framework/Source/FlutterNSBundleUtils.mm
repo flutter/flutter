@@ -4,6 +4,10 @@
 
 #include <Foundation/Foundation.h>
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+
+FLUTTER_ASSERT_ARC
+
 NSBundle* FLTFrameworkBundleInternal(NSString* bundleID, NSURL* searchURL) {
   NSDirectoryEnumerator<NSURL*>* frameworkEnumerator = [NSFileManager.defaultManager
                  enumeratorAtURL:searchURL
