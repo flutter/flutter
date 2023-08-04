@@ -1194,8 +1194,7 @@ class WidgetsApp extends StatefulWidget {
   )
   static bool debugShowWidgetInspectorOverride = false;
 
-  /// If [debugShowWidgetInspectorOverrideNotifier.value] is true,
-  /// the WidgetInspector is added to the tree and made visible.
+  /// If true, the WidgetInspector is added to the tree and made visible.
   ///
   /// Used by the `debugShowWidgetInspector` debugging extension.
   ///
