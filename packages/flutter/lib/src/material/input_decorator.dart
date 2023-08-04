@@ -2906,14 +2906,9 @@ class InputDecoration {
   /// {@template flutter.material.inputDecoration.floatingLabelGap}
   /// Defines the vertical gap between the inline elements and the floating label.
   ///
-<<<<<<< HEAD
   /// Default is 4.0.
   /// {@endtemplate}
   final double? floatingLabelGap;
-=======
-  /// Default is 4.0
-  final double floatingLabelGap;
->>>>>>> master
 
   /// {@template flutter.material.inputDecoration.floatingLabelBehavior}
   /// Defines **how** the floating label should behave.
