@@ -19,6 +19,7 @@ import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
 import 'navigator.dart';
+import 'notification_listener.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
 import 'restoration.dart';
@@ -313,6 +314,7 @@ class WidgetsApp extends StatefulWidget {
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
+    this.onNavigationNotification = defaultOnNavigationNotification,
     List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
     this.initialRoute,
     this.pageRouteBuilder,
@@ -420,6 +422,7 @@ class WidgetsApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
+    this.onNavigationNotification = defaultOnNavigationNotification,
     this.textStyle,
     required this.color,
     this.locale,
@@ -700,6 +703,17 @@ class WidgetsApp extends StatefulWidget {
   /// [builder] must not be null.
   /// {@endtemplate}
   final RouteFactory? onUnknownRoute;
+
+  /// {@template flutter.widgets.widgetsApp.onNavigationNotification}
+  /// The callback to use when receiving a [NavigationNotification].
+  ///
+  /// By default set to [WidgetsApp.defaultOnNavigationNotification], which
+  /// updates the engine with the navigation status.
+  ///
+  /// If null, [NavigationNotification] is not listened for at all, and so will
+  /// continue to propagate.
+  /// {@endtemplate}
+  final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
 
   /// {@template flutter.widgets.widgetsApp.initialRoute}
   /// The name of the first route to show, if a [Navigator] is built.
@@ -1314,6 +1328,15 @@ class WidgetsApp extends StatefulWidget {
     VoidCallbackIntent: VoidCallbackAction(),
   };
 
+  /// The default value for [onNavigationNotification].
+  ///
+  /// Updates the platform with [NavigationNotification.canHandlePop] and stops
+  /// bubbling.
+  static bool defaultOnNavigationNotification(NavigationNotification notification) {
+    SystemNavigator.setFrameworkHandlesBack(notification.canHandlePop);
+    return true;
+  }
+
   @override
   State<WidgetsApp> createState() => _WidgetsAppState();
 }
@@ -1748,35 +1771,44 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
 
-    return RootRestorationScope(
-      restorationId: widget.restorationScopeId,
-      child: SharedAppData(
-        child: Shortcuts(
-          debugLabel: '<Default WidgetsApp Shortcuts>',
-          shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
-          // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
-          // fall through to the defaultShortcuts.
-          child: DefaultTextEditingShortcuts(
-            child: Actions(
-              actions: widget.actions ?? <Type, Action<Intent>>{
-                ...WidgetsApp.defaultActions,
-                ScrollIntent: Action<ScrollIntent>.overridable(context: context, defaultAction: ScrollAction()),
-              },
-              child: FocusTraversalGroup(
-                policy: ReadingOrderTraversalPolicy(),
-                child: TapRegionSurface(
-                  child: ShortcutRegistrar(
-                    child: Localizations(
-                      locale: appLocale,
-                      delegates: _localizationsDelegates.toList(),
-                      child: title,
-                    ),
-                  ),
+    Widget child = Shortcuts(
+      debugLabel: '<Default WidgetsApp Shortcuts>',
+      shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+      // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
+      // fall through to the defaultShortcuts.
+      child: DefaultTextEditingShortcuts(
+        child: Actions(
+          actions: widget.actions ?? <Type, Action<Intent>>{
+            ...WidgetsApp.defaultActions,
+            ScrollIntent: Action<ScrollIntent>.overridable(context: context, defaultAction: ScrollAction()),
+          },
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: TapRegionSurface(
+              child: ShortcutRegistrar(
+                child: Localizations(
+                  locale: appLocale,
+                  delegates: _localizationsDelegates.toList(),
+                  child: title,
                 ),
               ),
             ),
           ),
         ),
+      ),
+    );
+
+    if (widget.onNavigationNotification != null) {
+      child = NotificationListener<NavigationNotification>(
+        onNotification: widget.onNavigationNotification,
+        child: child,
+      );
+    }
+
+    return RootRestorationScope(
+      restorationId: widget.restorationScopeId,
+      child: SharedAppData(
+        child: child,
       ),
     );
   }
