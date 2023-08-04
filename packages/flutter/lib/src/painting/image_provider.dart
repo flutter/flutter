@@ -1618,7 +1618,7 @@ class FileImage extends ImageProvider<FileImage> {
   int get hashCode => Object.hash(file.path, scale);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'FileImage')}("${file.path}", scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'FileImage')}("${file.path}", scale: ${scale.toStringAsFixed(1)})';
 }
 
 /// Decodes the given [Uint8List] buffer as an image, associating it with the
@@ -1722,7 +1722,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   int get hashCode => Object.hash(bytes.hashCode, scale);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'MemoryImage')}(${describeIdentity(bytes)}, scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'MemoryImage')}(${describeIdentity(bytes)}, scale: ${scale.toStringAsFixed(1)})';
 }
 
 /// Fetches an image from an [AssetBundle], associating it with the given scale.
@@ -1863,7 +1863,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
   int get hashCode => Object.hash(keyName, scale, bundle);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'ExactAssetImage')}(name: "$keyName", scale: $scale, bundle: $bundle)';
+  String toString() => '${objectRuntimeType(this, 'ExactAssetImage')}(name: "$keyName", scale: ${scale.toStringAsFixed(1)}, bundle: $bundle)';
 }
 
 // A completer used when resolving an image fails sync.
