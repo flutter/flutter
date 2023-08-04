@@ -27,5 +27,7 @@
   "tabSemanticsLabel": "$tabIndex. cilne no $tabCount",
   "modalBarrierDismissLabel": "Nerādīt",
   "searchTextFieldPlaceholderLabel": "Meklēšana",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up"
 }

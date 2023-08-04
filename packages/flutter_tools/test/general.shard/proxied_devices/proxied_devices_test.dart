@@ -397,10 +397,7 @@ void main() {
       expect(devicesAdded[0].id, fakeDevice['id']);
       expect(devicesAdded[1].id, fakeDevice2['id']);
     });
-    // Explicit timeout is needed because the default timeout is 2s, but `startPolling` waits for
-    // 4s before making its first poll.
-    // TODO(chingjun): Remove the timeout.
-  }, timeout: const Timeout(Duration(seconds: 6)));
+  });
 
   group('ProxiedDartDevelopmentService', () {
     testWithoutContext('forwards start and shutdown to remote', () async {

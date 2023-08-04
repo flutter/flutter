@@ -1238,6 +1238,20 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// Implementations of this method should end with a call to the inherited
   /// method, as in `super.dispose()`.
   ///
+  /// ## Application shutdown
+  ///
+  /// This method is _not_ invoked when the application shuts down, because
+  /// there is no way to predict when that will happen. For example, a user's
+  /// battery could catch fire, or the user could drop the device into a
+  /// swimming pool, or the operating system could unilaterally terminate the
+  /// application process due to memory pressure.
+  ///
+  /// Applications are responsible for ensuring that they are well-behaved
+  /// even in the face of a rapid unscheduled termination.
+  ///
+  /// To artificially cause the entire widget tree to be disposed, consider
+  /// calling [runApp] with a widget such as [SizedBox.shrink].
+  ///
   /// See also:
   ///
   ///  * [deactivate], which is called prior to [dispose].
@@ -1514,7 +1528,20 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   /// that [applyParentData] will write to.
   ///
   /// This is only used in error messages to tell users what widget typically
-  /// wraps this ParentDataWidget.
+  /// wraps this [ParentDataWidget].
+  ///
+  /// ## Implementations
+  ///
+  /// The returned type should be a subclass of `RenderObjectWidget`.
+  ///
+  /// ```dart
+  ///   @override
+  ///   Type get debugTypicalAncestorWidgetClass => FrogJar;
+  /// ```
+  ///
+  /// If the "typical" parent is generic (`Foo<T>`), consider specifying either
+  /// a typical type argument (e.g. `Foo<int>` if `int` is typically how the
+  /// type is specialized), or specifying the upper bound (e.g. `Foo<Object?>`).
   Type get debugTypicalAncestorWidgetClass;
 
   Iterable<DiagnosticsNode> _debugDescribeIncorrectParentDataType({

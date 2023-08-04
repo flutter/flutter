@@ -880,6 +880,12 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    statesController.dispose();
+    super.dispose();
+  }
 }
 
 class _IconButtonM3 extends ButtonStyleButton {

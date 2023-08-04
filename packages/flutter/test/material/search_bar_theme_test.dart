@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('SearchBarThemeData copyWith, ==, hashCode basics', () {
     expect(const SearchBarThemeData(), const SearchBarThemeData().copyWith());
@@ -48,7 +50,7 @@ void main() {
     expect(theme.data.constraints, null);
   });
 
-  testWidgets('Default SearchBarThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default SearchBarThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchBarThemeData().debugFillProperties(builder);
 
@@ -60,7 +62,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('SearchBarThemeData implements debugFillProperties', (
+  testWidgetsWithLeakTracking('SearchBarThemeData implements debugFillProperties', (
       WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchBarThemeData(
@@ -233,19 +235,19 @@ void main() {
       expect(trailingRect.right, barRect.right - 16.0);
     }
 
-    testWidgets('SearchBar properties overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SearchBar properties overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(useSearchBarProperties: true));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkSearchBar(tester);
     });
 
-    testWidgets('SearchBar theme data overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SearchBar theme data overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(searchBarThemeData: searchBarTheme));
       await tester.pumpAndSettle();
       checkSearchBar(tester);
     });
 
-    testWidgets('Overall Theme SearchBar theme overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Overall Theme SearchBar theme overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchBarTheme));
       await tester.pumpAndSettle();
       checkSearchBar(tester);
@@ -253,7 +255,7 @@ void main() {
 
     // Same as the previous tests with empty SearchBarThemeData's instead of null.
 
-    testWidgets('SearchBar properties overrides defaults, empty theme and overall theme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SearchBar properties overrides defaults, empty theme and overall theme', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(useSearchBarProperties: true,
         searchBarThemeData: const SearchBarThemeData(),
         overallTheme: const SearchBarThemeData()));
@@ -261,14 +263,14 @@ void main() {
       checkSearchBar(tester);
     });
 
-    testWidgets('SearchBar theme overrides defaults and overall theme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SearchBar theme overrides defaults and overall theme', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(searchBarThemeData: searchBarTheme,
         overallTheme: const SearchBarThemeData()));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkSearchBar(tester);
     });
 
-    testWidgets('Overall Theme SearchBar theme overrides defaults and null theme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Overall Theme SearchBar theme overrides defaults and null theme', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchBarTheme));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkSearchBar(tester);

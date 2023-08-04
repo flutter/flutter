@@ -5,11 +5,13 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/services.dart' show HardwareKeyboard, LogicalKeyboardKey;
 
-import 'framework.dart';
-import 'gesture_detector.dart';
+import 'constants.dart';
+import 'events.dart';
+import 'monodrag.dart';
+import 'recognizer.dart';
+import 'scale.dart';
+import 'tap.dart';
 
 // Examples can assume:
 // void setState(VoidCallback fn) { }
@@ -75,14 +77,13 @@ typedef GestureTapDragDownCallback  = void Function(TapDragDownDetails details);
 class TapDragDownDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragDownCallback].
   ///
-  /// The [globalPosition], [localPosition], [consecutiveTapCount], and
-  /// [keysPressedOnDown] arguments must be provided and must not be null.
+  /// The [globalPosition], [localPosition], and [consecutiveTapCount]
+  /// arguments must be provided and must not be null.
   TapDragDownDetails({
     required this.globalPosition,
     required this.localPosition,
     this.kind,
     required this.consecutiveTapCount,
-    required this.keysPressedOnDown,
   });
 
   /// The global position at which the pointer contacted the screen.
@@ -98,9 +99,6 @@ class TapDragDownDetails with Diagnosticable {
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
-  /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
-  final Set<LogicalKeyboardKey> keysPressedOnDown;
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -108,7 +106,6 @@ class TapDragDownDetails with Diagnosticable {
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
     properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
   }
 }
 
@@ -134,14 +131,13 @@ typedef GestureTapDragUpCallback  = void Function(TapDragUpDetails details);
 class TapDragUpDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragUpCallback].
   ///
-  /// The [kind], [globalPosition], [localPosition], [consecutiveTapCount], and
-  /// [keysPressedOnDown] arguments must be provided and must not be null.
+  /// The [kind], [globalPosition], [localPosition], and [consecutiveTapCount]
+  /// arguments must be provided and must not be null.
   TapDragUpDetails({
     required this.kind,
     required this.globalPosition,
     required this.localPosition,
     required this.consecutiveTapCount,
-    required this.keysPressedOnDown,
   });
 
   /// The global position at which the pointer contacted the screen.
@@ -157,9 +153,6 @@ class TapDragUpDetails with Diagnosticable {
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
-  /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
-  final Set<LogicalKeyboardKey> keysPressedOnDown;
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -167,7 +160,6 @@ class TapDragUpDetails with Diagnosticable {
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
     properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
   }
 }
 
@@ -193,15 +185,14 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 class TapDragStartDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragStartCallback].
   ///
-  /// The [globalPosition], [localPosition], [consecutiveTapCount], and
-  /// [keysPressedOnDown] arguments must be provided and must not be null.
+  /// The [globalPosition], [localPosition], and [consecutiveTapCount]
+  /// arguments must be provided and must not be null.
   TapDragStartDetails({
     this.sourceTimeStamp,
     required this.globalPosition,
     required this.localPosition,
     this.kind,
     required this.consecutiveTapCount,
-    required this.keysPressedOnDown,
   });
 
   /// Recorded timestamp of the source pointer event that triggered the drag
@@ -229,9 +220,6 @@ class TapDragStartDetails with Diagnosticable {
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
-  /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
-  final Set<LogicalKeyboardKey> keysPressedOnDown;
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -240,7 +228,6 @@ class TapDragStartDetails with Diagnosticable {
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
     properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
   }
 }
 
@@ -272,8 +259,7 @@ class TapDragUpdateDetails with Diagnosticable {
   /// coordinates of [delta] and the other coordinate must be zero.
   ///
   /// The [globalPosition], [localPosition], [offsetFromOrigin], [localOffsetFromOrigin],
-  /// [consecutiveTapCount], and [keysPressedOnDown] arguments must be provided and must
-  /// not be null.
+  /// and [consecutiveTapCount] arguments must be provided and must not be null.
   TapDragUpdateDetails({
     this.sourceTimeStamp,
     this.delta = Offset.zero,
@@ -284,7 +270,6 @@ class TapDragUpdateDetails with Diagnosticable {
     required this.offsetFromOrigin,
     required this.localOffsetFromOrigin,
     required this.consecutiveTapCount,
-    required this.keysPressedOnDown,
   }) : assert(
          primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
@@ -357,9 +342,6 @@ class TapDragUpdateDetails with Diagnosticable {
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
-  /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
-  final Set<LogicalKeyboardKey> keysPressedOnDown;
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -372,7 +354,6 @@ class TapDragUpdateDetails with Diagnosticable {
     properties.add(DiagnosticsProperty<Offset>('offsetFromOrigin', offsetFromOrigin));
     properties.add(DiagnosticsProperty<Offset>('localOffsetFromOrigin', localOffsetFromOrigin));
     properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
   }
 }
 
@@ -400,13 +381,11 @@ class TapDragEndDetails with Diagnosticable {
   ///
   /// The [velocity] argument must not be null.
   ///
-  /// The [consecutiveTapCount], and [keysPressedOnDown] arguments must
-  /// be provided and must not be null.
+  /// The [consecutiveTapCount] argument must be provided and must not be null.
   TapDragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
     required this.consecutiveTapCount,
-    required this.keysPressedOnDown,
   }) : assert(
          primaryVelocity == null
            || primaryVelocity == velocity.pixelsPerSecond.dx
@@ -434,16 +413,12 @@ class TapDragEndDetails with Diagnosticable {
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
-  /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
-  final Set<LogicalKeyboardKey> keysPressedOnDown;
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
     properties.add(DiagnosticsProperty<double?>('primaryVelocity', primaryVelocity));
     properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
   }
 }
 
@@ -506,15 +481,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // this value will be set to `0`, and a new series will begin.
   int get consecutiveTapCount => _consecutiveTapCount;
 
-  // The set of [LogicalKeyboardKey]s pressed when the most recent [PointerDownEvent]
-  // was tracked in [addAllowedPointer].
-  //
-  // This value defaults to an empty set.
-  //
-  // When the timer between two taps elapses, the recognizer loses the arena, the gesture is cancelled
-  // or the recognizer is disposed of then this value is reset.
-  Set<LogicalKeyboardKey> get keysPressedOnDown => _keysPressedOnDown ?? <LogicalKeyboardKey>{};
-
   // The upper limit for the [consecutiveTapCount]. When this limit is reached
   // all tap related state is reset and a new tap series is tracked.
   //
@@ -525,7 +491,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   PointerDownEvent? _down;
   PointerUpEvent? _up;
   int _consecutiveTapCount = 0;
-  Set<LogicalKeyboardKey>? _keysPressedOnDown;
 
   OffsetPair? _originPosition;
   int? _previousButtons;
@@ -533,6 +498,21 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // For timing taps.
   Timer? _consecutiveTapTimer;
   Offset? _lastTapOffset;
+
+  /// {@template flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.onTapTrackStart}
+  /// Callback used to indicate that a tap tracking has started upon
+  /// a [PointerDownEvent].
+  /// {@endtemplate}
+  VoidCallback? onTapTrackStart;
+
+  /// {@template flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.onTapTrackReset}
+  /// Callback used to indicate that a tap tracking has been reset which
+  /// happens on the next [PointerDownEvent] after the timer between two taps
+  /// elapses, the recognizer loses the arena, the gesture is cancelled or
+  /// the recognizer is disposed of.
+  /// {@endtemplate}
+
+  VoidCallback? onTapTrackReset;
 
   // When tracking a tap, the [consecutiveTapCount] is incremented if the given tap
   // falls under the tolerance specifications and reset to 1 if not.
@@ -595,10 +575,10 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 
   void _trackTap(PointerDownEvent event) {
     _down = event;
-    _keysPressedOnDown = HardwareKeyboard.instance.logicalKeysPressed;
     _previousButtons = event.buttons;
     _lastTapOffset = event.position;
     _originPosition = OffsetPair(local: event.localPosition, global: event.position);
+    onTapTrackStart?.call();
   }
 
   bool _hasSameButton(int buttons) {
@@ -653,9 +633,9 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     _originPosition = null;
     _lastTapOffset = null;
     _consecutiveTapCount = 0;
-    _keysPressedOnDown = null;
     _down = null;
     _up = null;
+    onTapTrackReset?.call();
   }
 }
 
@@ -1204,7 +1184,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       localPosition: event.localPosition,
       kind: getKindForPointer(event.pointer),
       consecutiveTapCount: consecutiveTapCount,
-      keysPressedOnDown: keysPressedOnDown,
     );
 
     if (onTapDown != null) {
@@ -1224,7 +1203,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       globalPosition: event.position,
       localPosition: event.localPosition,
       consecutiveTapCount: consecutiveTapCount,
-      keysPressedOnDown: keysPressedOnDown,
     );
 
     if (onTapUp != null) {
@@ -1245,7 +1223,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
         localPosition: _initialPosition.local,
         kind: getKindForPointer(event.pointer),
         consecutiveTapCount: consecutiveTapCount,
-        keysPressedOnDown: keysPressedOnDown,
       );
 
       invokeCallback<void>('onDragStart', () => onDragStart!(details));
@@ -1267,7 +1244,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       offsetFromOrigin: globalPosition - _initialPosition.global,
       localOffsetFromOrigin: localPosition - _initialPosition.local,
       consecutiveTapCount: consecutiveTapCount,
-      keysPressedOnDown: keysPressedOnDown,
     );
 
     if (dragUpdateThrottleFrequency != null) {
@@ -1293,7 +1269,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       TapDragEndDetails(
         primaryVelocity: 0.0,
         consecutiveTapCount: consecutiveTapCount,
-        keysPressedOnDown: keysPressedOnDown,
       );
 
     if (onDragEnd != null) {
