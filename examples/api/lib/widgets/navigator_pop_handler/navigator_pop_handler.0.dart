@@ -67,7 +67,7 @@ class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
   Widget build(BuildContext context) {
     return NavigatorPopHandler(
       onPop: () {
-        _nestedNavigatorKey.currentState!.pop();
+        _nestedNavigatorKey.currentState!.maybePop();
       },
       child: Navigator(
         key: _nestedNavigatorKey,
@@ -108,7 +108,7 @@ class NestedNavigatorsPageOne extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.indigo,
+      backgroundColor: Colors.grey,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -143,7 +143,7 @@ class NestedNavigatorsPageTwo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.indigo.withBlue(255),
+      backgroundColor: Colors.grey.withBlue(180),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
