@@ -6,7 +6,7 @@
 
 #include "gtest/gtest.h"
 
-FLUTTER_ASSERT_NOT_ARC
+FLUTTER_ASSERT_ARC
 
 @interface Pair : NSObject
 @property(atomic, readonly, strong, nullable) NSObject* left;
@@ -18,16 +18,10 @@ FLUTTER_ASSERT_NOT_ARC
 - (instancetype)initWithLeft:(NSObject*)left right:(NSObject*)right {
   self = [super init];
   if (self) {
-    _left = [left retain];
-    _right = [right retain];
+    _left = left;
+    _right = right;
   }
   return self;
-}
-
-- (void)dealloc {
-  [_left release];
-  [_right release];
-  [super dealloc];
 }
 @end
 
@@ -71,7 +65,7 @@ static const UInt8 kPAIR = 129;
       return [NSDate dateWithTimeIntervalSince1970:time];
     }
     case kPAIR: {
-      return [[[Pair alloc] initWithLeft:[self readValue] right:[self readValue]] autorelease];
+      return [[Pair alloc] initWithLeft:[self readValue] right:[self readValue]];
     }
     default:
       return [super readValueOfType:type];
@@ -86,10 +80,10 @@ static const UInt8 kPAIR = 129;
 
 @implementation ExtendedReaderWriter
 - (FlutterStandardWriter*)writerWithData:(NSMutableData*)data {
-  return [[[ExtendedWriter alloc] initWithData:data] autorelease];
+  return [[ExtendedWriter alloc] initWithData:data];
 }
 - (FlutterStandardReader*)readerWithData:(NSData*)data {
-  return [[[ExtendedReader alloc] initWithData:data] autorelease];
+  return [[ExtendedReader alloc] initWithData:data];
 }
 @end
 
@@ -341,10 +335,10 @@ TEST(FlutterStandardCodec, HandlesErrorEnvelopes) {
 }
 
 TEST(FlutterStandardCodec, HandlesSubclasses) {
-  ExtendedReaderWriter* extendedReaderWriter = [[[ExtendedReaderWriter alloc] init] autorelease];
+  ExtendedReaderWriter* extendedReaderWriter = [[ExtendedReaderWriter alloc] init];
   FlutterStandardMessageCodec* codec =
       [FlutterStandardMessageCodec codecWithReaderWriter:extendedReaderWriter];
-  Pair* pair = [[[Pair alloc] initWithLeft:@1 right:@2] autorelease];
+  Pair* pair = [[Pair alloc] initWithLeft:@1 right:@2];
   NSData* encoded = [codec encode:pair];
   Pair* decoded = [codec decode:encoded];
   ASSERT_TRUE([pair.left isEqual:decoded.left]);

@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !__has_feature(objc_arc)
-#error ARC must be enabled!
-#endif
-
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
+
+FLUTTER_ASSERT_ARC
 
 @protocol FlutterTaskQueue <NSObject>
 @end

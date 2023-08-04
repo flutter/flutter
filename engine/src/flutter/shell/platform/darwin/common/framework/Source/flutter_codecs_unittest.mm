@@ -6,6 +6,8 @@
 
 #include "gtest/gtest.h"
 
+FLUTTER_ASSERT_ARC
+
 TEST(FlutterStringCodec, CanEncodeAndDecodeNil) {
   FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
   ASSERT_TRUE([codec encode:nil] == nil);
