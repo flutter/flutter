@@ -9,7 +9,7 @@ import 'scroll_delegate.dart';
 import 'sliver.dart';
 
 /// A sliver that places its box children in a linear array and constrains them
-/// to have the extent returned by itemExtentCallback.
+/// to have the extent returned by [itemExtentCallback].
 ///
 /// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///

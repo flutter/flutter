@@ -64,7 +64,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     } else {
       double offset = 0.0;
       for (int i = 0; i < index; i++) {
-        offset += itemExtentCallback!(i);
+        offset += itemExtentCallback!(i, _currentLayoutDimensions!);
       }
       return offset;
     }
@@ -174,7 +174,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     } else {
       double offset = 0.0;
       for (int i = 0; i < childManager.childCount; i++) {
-        offset += itemExtentCallback!(i);
+        offset += itemExtentCallback!(i, _currentLayoutDimensions!);
       }
       return offset;
     }
@@ -210,7 +210,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       if (position >= scrollOffset) {
         break;
       }
-      position += callback(index);
+      position += callback(index, _currentLayoutDimensions!);
       ++index;
     }
     return index - 1;
@@ -221,13 +221,15 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     if (itemExtentCallback == null) {
       extent = itemExtent;
     } else {
-      extent = itemExtentCallback!(index);
+      extent = itemExtentCallback!(index, _currentLayoutDimensions!);
     }
     return constraints.asBoxConstraints(
       minExtent: extent,
       maxExtent: extent,
     );
   }
+
+  SliverLayoutDimensions? _currentLayoutDimensions;
 
   @override
   void performLayout() {
@@ -242,10 +244,16 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     assert(remainingExtent >= 0.0);
     final double targetEndScrollOffset = scrollOffset + remainingExtent;
 
+    _currentLayoutDimensions = SliverLayoutDimensions(
+        scrollOffset: constraints.scrollOffset,
+        precedingScrollExtent: constraints.precedingScrollExtent,
+        viewportMainAxisExtent: constraints.viewportMainAxisExtent,
+        crossAxisExtent: constraints.crossAxisExtent
+    );
+
     final int firstIndex = getMinChildIndexForScrollOffset(scrollOffset, itemFixedExtent);
     final int? targetLastIndex = targetEndScrollOffset.isFinite ?
         getMaxChildIndexForScrollOffset(targetEndScrollOffset, itemFixedExtent) : null;
-
 
     if (firstChild != null) {
       final int leadingGarbage = _calculateLeadingGarbage(firstIndex);

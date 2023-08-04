@@ -20,6 +20,7 @@ import 'scroll_view.dart';
 import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'sliver.dart';
+import 'sliver_explicit_extent_list.dart';
 import 'sliver_prototype_extent_list.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -118,6 +119,7 @@ class ReorderableList extends StatefulWidget {
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
+    this.itemExtentCallback,
     this.prototypeItem,
     this.proxyDecorator,
     this.padding,
@@ -135,10 +137,12 @@ class ReorderableList extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.autoScrollerVelocityScalar,
   }) : assert(itemCount >= 0),
-       assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both',
-       );
+        assert(
+          (itemExtent == null && prototypeItem == null) ||
+          (itemExtent == null && itemExtentCallback == null) ||
+          (prototypeItem == null && itemExtentCallback == null),
+          'You can only pass one of itemExtent, prototypeItem and itemExtentCallback.',
+        );
 
   /// {@template flutter.widgets.reorderable_list.itemBuilder}
   /// Called, as needed, to build list item widgets.
@@ -252,6 +256,9 @@ class ReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.itemExtent}
   final double? itemExtent;
+
+  /// {@macro flutter.widgets.list_view.itemExtentCallback}
+  final ItemExtentGetter? itemExtentCallback;
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
@@ -450,14 +457,17 @@ class SliverReorderableList extends StatefulWidget {
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
+    this.itemExtentCallback,
     this.prototypeItem,
     this.proxyDecorator,
     double? autoScrollerVelocityScalar,
   }) : autoScrollerVelocityScalar = autoScrollerVelocityScalar ?? _kDefaultAutoScrollVelocityScalar,
        assert(itemCount >= 0),
        assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both',
+         (itemExtent == null && prototypeItem == null) ||
+         (itemExtent == null && itemExtentCallback == null) ||
+         (prototypeItem == null && itemExtentCallback == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentCallback.',
        );
 
   // An eyeballed value for a smooth scrolling experience.
@@ -486,6 +496,9 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.itemExtent}
   final double? itemExtent;
+
+  /// {@macro flutter.widgets.list_view.itemExtentCallback}
+  final ItemExtentGetter? itemExtentCallback;
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
@@ -1035,6 +1048,11 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       return SliverFixedExtentList(
         delegate: childrenDelegate,
         itemExtent: widget.itemExtent!,
+      );
+    } else if (widget.itemExtentCallback != null) {
+      return SliverExplicitExtentList(
+        delegate: childrenDelegate,
+        itemExtentCallback: widget.itemExtentCallback!,
       );
     } else if (widget.prototypeItem != null) {
       return SliverPrototypeExtentList(
