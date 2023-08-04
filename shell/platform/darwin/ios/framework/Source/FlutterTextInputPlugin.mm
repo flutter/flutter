@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
@@ -45,6 +46,8 @@ static NSString* const kDeprecatedSetSelectionRectsMethod = @"TextInput.setSelec
 static NSString* const kSetSelectionRectsMethod = @"Scribble.setSelectionRects";
 static NSString* const kStartLiveTextInputMethod = @"TextInput.startLiveTextInput";
 static NSString* const kUpdateConfigMethod = @"TextInput.updateConfig";
+static NSString* const kOnInteractiveKeyboardPointerMoveMethod =
+    @"TextInput.onPointerMoveForInteractiveKeyboard";
 
 #pragma mark - TextInputConfiguration Field Names
 static NSString* const kSecureTextEntry = @"obscureText";
@@ -761,6 +764,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 @property(nonatomic, assign) CGRect markedRect;
 @property(nonatomic) BOOL isVisibleToAutofill;
 @property(nonatomic, assign) BOOL accessibilityEnabled;
+@property(nonatomic, assign) int textInputClient;
 // The composed character that is temporarily removed by the keyboard API.
 // This is cleared at the start of each keyboard interaction. (Enter a character, delete a character
 // etc)
@@ -2214,6 +2218,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 @property(nonatomic, retain) FlutterTextInputView* activeView;
 @property(nonatomic, retain) FlutterTextInputViewAccessibilityHider* inputHider;
 @property(nonatomic, readonly, weak) id<FlutterViewResponder> viewResponder;
+
+@property(nonatomic, strong) UIView* keyboardViewContainer;
+@property(nonatomic, strong) UIView* keyboardView;
+@property(nonatomic, strong) UIView* cachedFirstResponder;
+@property(nonatomic, assign) CGRect keyboardRect;
 @end
 
 @implementation FlutterTextInputPlugin {
@@ -2222,16 +2231,27 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (instancetype)initWithDelegate:(id<FlutterTextInputDelegate>)textInputDelegate {
   self = [super init];
-
   if (self) {
     // `_textInputDelegate` is a weak reference because it should retain FlutterTextInputPlugin.
     _textInputDelegate = textInputDelegate;
     _autofillContext = [[NSMutableDictionary alloc] init];
     _inputHider = [[FlutterTextInputViewAccessibilityHider alloc] init];
     _scribbleElements = [[NSMutableDictionary alloc] init];
+    _keyboardViewContainer = [[UIView alloc] init];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleKeyboardWillShow:)
+                                                 name:UIKeyboardWillShowNotification
+                                               object:nil];
   }
 
   return self;
+}
+
+- (void)handleKeyboardWillShow:(NSNotification*)notification {
+  NSDictionary* keyboardInfo = [notification userInfo];
+  NSValue* keyboardFrameEnd = [keyboardInfo valueForKey:UIKeyboardFrameEndUserInfoKey];
+  _keyboardRect = [keyboardFrameEnd CGRectValue];
 }
 
 - (void)dealloc {
@@ -2295,9 +2315,65 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   } else if ([method isEqualToString:kUpdateConfigMethod]) {
     [self updateConfig:args];
     result(nil);
+  } else if ([method isEqualToString:kOnInteractiveKeyboardPointerMoveMethod]) {
+    CGFloat pointerY = (CGFloat)[args[@"pointerY"] doubleValue];
+    [self handlePointerMove:pointerY];
+    result(nil);
   } else {
     result(FlutterMethodNotImplemented);
   }
+}
+
+- (void)handlePointerMove:(CGFloat)pointerY {
+  // View must be loaded at this point.
+  UIScreen* screen = _viewController.flutterScreenIfViewLoaded;
+  double screenHeight = screen.bounds.size.height;
+  double keyboardHeight = _keyboardRect.size.height;
+  if (screenHeight - keyboardHeight <= pointerY) {
+    // If the pointer is within the bounds of the keyboard.
+    if (_keyboardView.superview == nil) {
+      // If no screenshot has been taken.
+      [self takeKeyboardScreenshotAndDisplay];
+      [self hideKeyboardWithoutAnimation];
+    } else {
+      [self setKeyboardContainerHeight:pointerY];
+    }
+  } else {
+    if (_keyboardView.superview != nil) {
+      // Keeps keyboard at proper height.
+      _keyboardViewContainer.frame = _keyboardRect;
+    }
+  }
+}
+
+- (void)setKeyboardContainerHeight:(CGFloat)pointerY {
+  CGRect frameRect = _keyboardRect;
+  frameRect.origin.y = pointerY;
+  _keyboardViewContainer.frame = frameRect;
+}
+
+- (void)hideKeyboardWithoutAnimation {
+  [UIView setAnimationsEnabled:NO];
+  _cachedFirstResponder = UIApplication.sharedApplication.keyWindow.flutterFirstResponder;
+  [_cachedFirstResponder resignFirstResponder];
+  [UIView setAnimationsEnabled:YES];
+}
+
+- (void)takeKeyboardScreenshotAndDisplay {
+  // View must be loaded at this point
+  UIScreen* screen = _viewController.flutterScreenIfViewLoaded;
+  UIView* keyboardSnap = [screen snapshotViewAfterScreenUpdates:YES];
+  keyboardSnap = [keyboardSnap resizableSnapshotViewFromRect:_keyboardRect
+                                          afterScreenUpdates:YES
+                                               withCapInsets:UIEdgeInsetsZero];
+  _keyboardView = keyboardSnap;
+  [_keyboardViewContainer addSubview:_keyboardView];
+  if (_keyboardViewContainer.superview == nil) {
+    [UIApplication.sharedApplication.delegate.window.rootViewController.view
+        addSubview:_keyboardViewContainer];
+  }
+  _keyboardViewContainer.layer.zPosition = NSIntegerMax;
+  _keyboardViewContainer.frame = _keyboardRect;
 }
 
 - (void)setEditableSizeAndTransform:(NSDictionary*)dictionary {
@@ -2762,5 +2838,23 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
  */
 - (BOOL)handlePress:(nonnull FlutterUIPressProxy*)press API_AVAILABLE(ios(13.4)) {
   return NO;
+}
+@end
+
+/**
+ * Recursively searches the UIView's subviews to locate the First Responder
+ */
+@implementation UIView (FindFirstResponder)
+- (id)flutterFirstResponder {
+  if (self.isFirstResponder) {
+    return self;
+  }
+  for (UIView* subView in self.subviews) {
+    UIView* firstResponder = subView.flutterFirstResponder;
+    if (firstResponder) {
+      return firstResponder;
+    }
+  }
+  return nil;
 }
 @end

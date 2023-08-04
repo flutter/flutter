@@ -165,4 +165,9 @@ FLUTTER_DARWIN_EXPORT
 - (instancetype)initWithOwner:(FlutterTextInputPlugin*)textInputPlugin NS_DESIGNATED_INITIALIZER;
 
 @end
+
+@interface UIView (FindFirstResponder)
+@property(nonatomic, readonly) id flutterFirstResponder;
+@end
+
 #endif  // SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTINPUTPLUGIN_H_
