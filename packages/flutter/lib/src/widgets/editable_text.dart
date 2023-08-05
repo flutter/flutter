@@ -4045,9 +4045,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.
-    final bool shouldShowCaret = widget.readOnly
-      ? _value.selection != value.selection
-      : _value != value;
+    final bool shouldShowCaret = (widget.readOnly
+        ? _value.selection != value.selection
+        : _value != value) && !value.selection.isCollapsed;
     if (shouldShowCaret) {
       _scheduleShowCaretOnScreen(withAnimation: true);
     }
